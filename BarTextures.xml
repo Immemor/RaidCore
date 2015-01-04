@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Sprites>
+    <Sprite Name="BarTextures_Fire" Cycle="1">
+        <Frame Texture="RaidCore\BarTextures\basic.tga" x0="0" x1="0" x2="50" x3="50" x4="50" x5="50" y0="0" y1="0" y2="50" y3="50" y4="50" y5="50" HotspotX="50" HotspotY="50" Duration="1.000" StartColor="ffffffff" EndColor="ffffffff"/>
+    </Sprite>
+    <Sprite Name="Minimalist" Cycle="1">
+        <Frame Texture="RaidCore\BarTextures\Minimalist.tga" x0="0" x1="0" x2="256" x3="256" x4="256" x5="256" y0="0" y1="32" y2="32" y3="32" y4="32" y5="32" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
+    </Sprite>
+</Sprites>

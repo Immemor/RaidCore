@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<Addon Author="daihenka" APIVersion="6" Name="GeminiGUI Demo Addon" Description="Demonstrates some controls and use of the GeminiGUI library">
+    <Script Name="GeminiGUI-1.0.lua"/>
+    <Script Name="DemoAddon.lua"/>
+</Addon>

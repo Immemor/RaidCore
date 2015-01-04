@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Addon Author="Ninjouz" APIVersion="9" Name="RaidCore" Description="Core Functions for Raid Warnings" Version="0.2.0">
+	<Script Name="Libs/GeminiAddon/GeminiAddon.lua" />
+	<Script Name="Libs/GeminiTimer/GeminiTimer-1.0.lua" />
+	<Script Name="Libs/GeminiGUI/GeminiGUI.lua"/>
+	<Script Name="ColorPicker.lua"/>
+	<Script Name="DisplayBar.lua"/>
+	<Script Name="DisplayMsg.lua"/>
+	<Script Name="DisplayBlock.lua"/>
+	<Script Name="DisplayLine.lua"/>
+	<Script Name="RaidCore.lua"/>
+	<Sprites Name="BarTextures.xml"/>
+	<Form Name="RaidCore.xml"/>
+	<Script Name="Modules/BossPrototype.lua" />
+	<!--<Script Name="Modules/Test.lua" />-->
+	<Script Name="Modules/Avatus.lua" />
+	<Script Name="Modules/ExperimentX89.lua" />
+	<Script Name="Modules/Kuralak.lua" />
+	<Script Name="Modules/Prototypes.lua" />
+	<Script Name="Modules/PhageMaw.lua" />
+	<Script Name="Modules/PhageCouncil.lua" />
+	<Script Name="Modules/Ohmna.lua" />
+	<Script Name="Modules/SystemDeamons.lua" />
+	<Script Name="Modules/DSFireWing.lua" />
+	<Script Name="Modules/DSFrostWing.lua" />
+	<Script Name="Modules/Gloomclaw.lua" />
+	<Script Name="Modules/DSLogicWing.lua" />
+	<Script Name="Modules/VolatilyLattice.lua" />
+	<Script Name="Modules/MaelstromAuthority.lua" />
+	<Script Name="Modules/EPFrostAir.lua" />
+	<Script Name="Modules/EPFrostFire.lua" />
+	<Script Name="Modules/EpEarthLogic.lua" />
+	<Script Name="Modules/EpEarthAir.lua" />
+	<Script Name="Modules/EpLifeFire.lua" />
+</Addon>
