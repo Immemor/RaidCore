@@ -16,6 +16,7 @@ mod:RegisterEnableMob("Hydroflux")
 local prev = 0
 local mooCount = 0
 local phase2 = false
+local myName
 
 
 --------------------------------------------------------------------------------
@@ -26,10 +27,12 @@ function mod:OnBossEnable()
 	Print(("Module %s loaded"):format(mod.ModuleName))
 	Apollo.RegisterEventHandler("UnitCreated", 			"OnUnitCreated", self)
 	--Apollo.RegisterEventHandler("UnitDestroyed", 		"OnUnitDestroyed", self)
-	Apollo.RegisterEventHandler("UnitEnteredCombat", 		"OnCombatStateChanged", self)
-	Apollo.RegisterEventHandler("SPELL_CAST_START", 		"OnSpellCastStart", self)
+	Apollo.RegisterEventHandler("UnitEnteredCombat", 	"OnCombatStateChanged", self)
+	Apollo.RegisterEventHandler("SPELL_CAST_START", 	"OnSpellCastStart", self)
+	Apollo.RegisterEventHandler("SPELL_CAST_END", 		"OnSpellCastEnd", self)
 	Apollo.RegisterEventHandler("CHAT_DATACHRON", 		"OnChatDC", self)
-	Apollo.RegisterEventHandler("BUFF_APPLIED", 		"OnBuffApplied", self)	
+	Apollo.RegisterEventHandler("BUFF_APPLIED", 		"OnBuffApplied", self)
+	Apollo.RegisterEventHandler("DEBUFF_APPLIED", 		"OnDebuffApplied", self)
 end
 
 
@@ -66,6 +69,12 @@ function mod:OnSpellCastStart(unitName, castName, unit)
 	end
 end
 
+function mod:OnSpellCastEnd(unitName, castName)
+	if unitName == "Hydroflux" and castName == "Tsunami" then
+		core:AddBar("MIDPHASE", "~Middle Phase", 88, true)
+	end
+	--Print(unitName .. " - " .. castName)
+end
 
 function mod:OnChatDC(message)
 	if message:find("Hydroflux evaporates") then
@@ -92,10 +101,22 @@ function mod:OnBuffApplied(unitName, splId, unit)
 	end
 end
 
+function mod:OnDebuffApplied(unitName, splId, unit)
+	local eventTime = GameLib.GetGameTime()
+	--Print(eventTime .. " debuff applied on unit: " .. unitName .. " - " .. splId)
+	if unitName == myName then
+		if splId == 70440 then -- Twirl
+			core:AddMsg("TWIRL", "TWIRL ON YOU!", 5, "Inferno")
+		end
+	end
+end
 
 function mod:OnCombatStateChanged(unit, bInCombat)
 	if unit:GetType() == "NonPlayer" and bInCombat then
 		local sName = unit:GetName()
+		local eventTime = GameLib.GetGameTime()
+		local playerUnit = GameLib.GetPlayerUnit()
+		myName = playerUnit:GetName()
 
 		if sName == "Hydroflux" then
 			core:AddUnit(unit)
@@ -107,8 +128,11 @@ function mod:OnCombatStateChanged(unit, bInCombat)
 			phase2 = false
 			core:AddUnit(unit)
 			core:UnitBuff(unit)
+			core:UnitDebuff(playerUnit)
 			core:StartScan()
-			self:Start()						
+			core:AddBar("MIDPHASE", "Middle Phase", 60, true)
+
+			--Print(eventTime .. " " .. sName .. " FIGHT STARTED ")
 		end
 	end
 end
