@@ -8,6 +8,7 @@ local mod = core:NewBoss("EpAirLife", 52)
 if not mod then return end
 
 mod:RegisterEnableMob("Aileron")
+mod:RegisterRestrictZone("Elemental Vortex Delta")
 
 --------------------------------------------------------------------------------
 -- Locals
@@ -28,16 +29,27 @@ function mod:OnBossEnable()
 	Apollo.RegisterEventHandler("UnitDestroyed", 		"OnUnitDestroyed", self)
 	Apollo.RegisterEventHandler("UnitEnteredCombat", 	"OnCombatStateChanged", self)
 	--Apollo.RegisterEventHandler("SPELL_CAST_START", 	"OnSpellCastStart", self)
-	--Apollo.RegisterEventHandler("SPELL_CAST_END", 		"OnSpellCastEnd", self)
-	--Apollo.RegisterEventHandler("CHAT_DATACHRON", 		"OnChatDC", self)
+	--Apollo.RegisterEventHandler("SPELL_CAST_END", 	"OnSpellCastEnd", self)
+	--Apollo.RegisterEventHandler("CHAT_DATACHRON", 	"OnChatDC", self)
 	--Apollo.RegisterEventHandler("BUFF_APPLIED", 		"OnBuffApplied", self)
 	Apollo.RegisterEventHandler("DEBUFF_APPLIED", 		"OnDebuffApplied", self)
+	Apollo.RegisterEventHandler("RAID_WIPE", 			"OnReset", self)
 end
 
 
 --------------------------------------------------------------------------------
 -- Event Handlers
 --
+
+function mod:OnReset()
+	last_thorns = 0
+	last_twirl = 0
+	midphase = false
+	core:StopBar("THORN")
+	core:StopBar("MIDEND")
+	core:StopBar("MIDPHASE")
+	core:StopBar("TWIRL")
+end
 
 function mod:OnUnitCreated(unit)
 	local sName = unit:GetName()
@@ -92,7 +104,6 @@ function mod:OnCombatStateChanged(unit, bInCombat)
 
 		if sName == "Aileron" then
 			core:AddUnit(unit)
-			core:WatchUnit(unit)
 		elseif sName == "Visceralus" then
 			self:Start()
 			core:AddUnit(unit)
@@ -106,7 +117,7 @@ function mod:OnCombatStateChanged(unit, bInCombat)
 
 			core:AddBar("MIDPHASE", "Middle Phase", 80, true)
 			core:AddBar("THORN", "Thorns", 20)
-			core:AddBar("Twirl", "Twirl", 22)
+			core:AddBar("TWIRL", "Twirl", 22)
 
 			--Print(eventTime .. " " .. sName .. " FIGHT STARTED ")
 		end
