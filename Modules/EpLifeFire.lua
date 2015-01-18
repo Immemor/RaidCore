@@ -26,6 +26,7 @@ function mod:OnBossEnable()
 	Print(("Module %s loaded"):format(mod.ModuleName))
 	Apollo.RegisterEventHandler("UnitEnteredCombat", 	"OnCombatStateChanged", self)
 	Apollo.RegisterEventHandler("DEBUFF_APPLIED", 		"OnDebuffApplied", self)
+	Apollo.RegisterEventHandler("DEBUFF_APPLIED_DOSE", 	"OnDebuffAppliedDose", self)
 	Apollo.RegisterEventHandler("RAID_WIPE", 			"OnReset", self)
 end
 
@@ -71,12 +72,13 @@ function mod:OnDebuffApplied(unitName, splId, unit)
 		else
 			Print("Unknown tSpell")
 	end--]]
-	if splId == 73179 then -- the root ability, Primal Entanglement
+
+	if splId == 73179 or splId == 73177 then -- the root ability, Primal Entanglement
 		--Print(unitName .. " has debuff: Primal Entanglement")
 		if unitName == strMyName then
 			core:AddMsg("ROOT", "You are rooted", 5, "Info")
 		end
-		core:MarkUnit(unit, nil, "Rooted")
+		core:MarkUnit(unit, nil, "ROOT")
 		core:AddUnit(unit)
 		rooted_units[unitName] = unit
 		if not CheckRootTimer then

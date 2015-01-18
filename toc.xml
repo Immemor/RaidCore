@@ -32,4 +32,5 @@
 	<Script Name="Modules/EpEarthLogic.lua" />
 	<Script Name="Modules/EpEarthAir.lua" />
 	<Script Name="Modules/EpLifeFire.lua" />
+	<Script Name="Modules/EpAirLife.lua" />
 </Addon>

@@ -109,6 +109,10 @@ function mod:OnDebuffApplied(unitName, splId, unit)
 			core:AddMsg("TWIRL", "TWIRL ON YOU!", 5, "Inferno")
 		end
 	end
+	-- TODO test if we can make a timer for twirl..
+	--[[if splId == 70440 then
+		Print(eventTime .. " TWIRL ON " .. unitName)
+	end--]]
 end
 
 function mod:OnCombatStateChanged(unit, bInCombat)
@@ -129,6 +133,7 @@ function mod:OnCombatStateChanged(unit, bInCombat)
 			core:AddUnit(unit)
 			core:UnitBuff(unit)
 			core:UnitDebuff(playerUnit)
+			core:RaidDebuff()
 			core:StartScan()
 			core:AddBar("MIDPHASE", "Middle Phase", 60, true)
 
