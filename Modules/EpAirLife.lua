@@ -30,7 +30,7 @@ function mod:OnBossEnable()
 	Apollo.RegisterEventHandler("UnitCreated", 			"OnUnitCreated", self)
 	Apollo.RegisterEventHandler("UnitDestroyed", 		"OnUnitDestroyed", self)
 	Apollo.RegisterEventHandler("UnitEnteredCombat", 	"OnCombatStateChanged", self)
-	--Apollo.RegisterEventHandler("SPELL_CAST_START", 	"OnSpellCastStart", self)
+	Apollo.RegisterEventHandler("SPELL_CAST_START", 	"OnSpellCastStart", self)
 	--Apollo.RegisterEventHandler("SPELL_CAST_END", 	"OnSpellCastEnd", self)
 	--Apollo.RegisterEventHandler("CHAT_DATACHRON", 	"OnChatDC", self)
 	--Apollo.RegisterEventHandler("BUFF_APPLIED", 		"OnBuffApplied", self)
@@ -42,6 +42,19 @@ end
 --------------------------------------------------------------------------------
 -- Event Handlers
 --
+
+local function dist2unit(unitSource, unitTarget)
+	if not unitSource or not unitTarget then return 999 end
+	local sPos = unitSource:GetPosition()
+	local tPos = unitTarget:GetPosition()
+
+	local sVec = Vector3.New(sPos.x, sPos.y, sPos.z)
+	local tVec = Vector3.New(tPos.x, tPos.y, tPos.z)
+
+	local dist = (tVec - sVec):Length()
+
+	return tonumber(dist)
+end
 
 function mod:OnReset()
 	last_thorns = 0
@@ -69,7 +82,7 @@ function mod:OnUnitCreated(unit)
 
 		--Print(eventTime .. " Midphase STARTED")
 	elseif sName == "Life Force" then
-		core:AddPixie(unit:GetId(), 2, unit, nil, "Green", 10, -40, 0)
+		core:AddPixie(unit:GetId(), 2, unit, nil, "Blue", 10, -40, 0)
 	end
 	--Print(eventTime .. " - " .. sName)
 end
@@ -101,6 +114,17 @@ function mod:OnDebuffApplied(unitName, splId, unit)
 		last_twirl = eventTime
 		core:AddBar("TWIRL", "Twirl", 15)
 	end
+end
+
+function mod:OnSpellCastStart(unitName, castName, unit)
+	local eventTime = GameLib.GetGameTime()
+	if unitName == "Visceralus" and castName == "Blinding Light" then
+		local playerUnit = GameLib.GetPlayerUnit()
+		if dist2unit(unit, playerUnit) < 33 then
+			core:AddMsg("BLIND", "Blinding Light", 5, "Beware")
+		end
+	end
+	--Print(eventTime .. " " .. unitName .. " is casting " .. castName)
 end
 
 function mod:OnCombatStateChanged(unit, bInCombat)
