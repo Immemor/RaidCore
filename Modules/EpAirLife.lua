@@ -10,6 +10,8 @@ if not mod then return end
 mod:RegisterEnableMob("Aileron")
 mod:RegisterRestrictZone("Elemental Vortex Delta")
 
+-- Tracking Blinding Light and Aileron knockback seems too random to display on timers.
+
 --------------------------------------------------------------------------------
 -- Locals
 --
@@ -62,8 +64,12 @@ function mod:OnUnitCreated(unit)
 		midphase = true
 		midphase_start = eventTime + 115
 		core:AddBar("MIDEND", "Midphase ending", 35)
+		core:AddBar("THORN", "Thorns", 35)
+		core:AddBar("TWIRL", "Twirl", 37)
 
 		--Print(eventTime .. " Midphase STARTED")
+	elseif sName == "Life Force" then
+		core:AddPixie(unit:GetId(), 2, unit, nil, "Green", 10, -40, 0)
 	end
 	--Print(eventTime .. " - " .. sName)
 end
@@ -76,7 +82,9 @@ function mod:OnUnitDestroyed(unit)
 		midphase = false
 		core:AddBar("MIDPHASE", "Middle Phase", 80, true)
 		--Print(eventTime .. " Midphase ENDED")
-	end
+	elseif sName == "Life Force" then
+		core:DropPixie(unit:GetId())
+	end	
 end
 
 function mod:OnDebuffApplied(unitName, splId, unit)
@@ -107,6 +115,7 @@ function mod:OnCombatStateChanged(unit, bInCombat)
 		elseif sName == "Visceralus" then
 			self:Start()
 			core:AddUnit(unit)
+			core:WatchUnit(unit)
 			core:RaidDebuff()
 			core:StartScan()
 
