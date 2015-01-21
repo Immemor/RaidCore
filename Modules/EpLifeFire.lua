@@ -25,6 +25,9 @@ local CheckRootTimer = nil
 function mod:OnBossEnable()
 	Print(("Module %s loaded"):format(mod.ModuleName))
 	Apollo.RegisterEventHandler("UnitEnteredCombat", 	"OnCombatStateChanged", self)
+	Apollo.RegisterEventHandler("SPELL_CAST_START", 	"OnSpellCastStart", self)
+	Apollo.RegisterEventHandler("UnitCreated", 			"OnUnitCreated", self)
+	Apollo.RegisterEventHandler("UnitDestroyed", 		"OnUnitDestroyed", self)
 	Apollo.RegisterEventHandler("DEBUFF_APPLIED", 		"OnDebuffApplied", self)
 	Apollo.RegisterEventHandler("DEBUFF_APPLIED_DOSE", 	"OnDebuffAppliedDose", self)
 	Apollo.RegisterEventHandler("RAID_WIPE", 			"OnReset", self)
@@ -34,6 +37,19 @@ end
 --------------------------------------------------------------------------------
 -- Event Handlers
 --
+
+local function dist2unit(unitSource, unitTarget)
+	if not unitSource or not unitTarget then return 999 end
+	local sPos = unitSource:GetPosition()
+	local tPos = unitTarget:GetPosition()
+
+	local sVec = Vector3.New(sPos.x, sPos.y, sPos.z)
+	local tVec = Vector3.New(tPos.x, tPos.y, tPos.z)
+
+	local dist = (tVec - sVec):Length()
+
+	return tonumber(dist)
+end
 
 function mod:OnReset()
 	if CheckRootTimer then
@@ -65,7 +81,9 @@ end
 
 function mod:OnDebuffApplied(unitName, splId, unit)
 	local eventTime = GameLib.GetGameTime()
-	--[[local tSpell = GameLib.GetSpell(splId)
+	local tSpell = GameLib.GetSpell(splId)
+	local strSpellName = tSpell:GetName()
+	--[[
 	local strSpellName
 		if tSpell then
 			strSpellName = tostring(tSpell:GetName())
@@ -84,8 +102,44 @@ function mod:OnDebuffApplied(unitName, splId, unit)
 		if not CheckRootTimer then
 			CheckRootTimer = self:ScheduleRepeatingTimer("CheckRootTracker", 1)
 		end
+	elseif strSpellName == "Life Force Shackle" and unitName == strMyName then
+		--Print("Debuff!")
+		core:AddMsg("NOHEAL", "No-Healing Debuff!", 5, "Alarm")
 	end
 	--Print(eventTime .. " " .. unitName .. "has debuff: " .. strSpellName .. " with splId: " .. splId)
+end
+
+function mod:OnUnitCreated(unit)
+	local sName = unit:GetName()
+	local eventTime = GameLib.GetGameTime()
+	
+	if sName == "Life Force" then
+		core:AddPixie(unit:GetId(), 2, unit, nil, "Blue", 10, -40, 0)
+	elseif sName == "Essence of Life" then
+		--Print("Life essence spawned")
+		--core:AddUnit(unit)
+	end
+	--Print(eventTime .. " - " .. sName)
+end
+
+function mod:OnUnitDestroyed(unit)
+	local sName = unit:GetName()
+	local eventTime = GameLib.GetGameTime()
+
+	if sName == "Life Force" then
+		core:DropPixie(unit:GetId())
+	end
+end
+
+function mod:OnSpellCastStart(unitName, castName, unit)
+	local eventTime = GameLib.GetGameTime()
+	if unitName == "Visceralus" and castName == "Blinding Light" then
+		local playerUnit = GameLib.GetPlayerUnit()
+		if dist2unit(unit, playerUnit) < 33 then
+			core:AddMsg("BLIND", "Blinding Light", 5, "Beware")
+		end
+	end
+	--Print(eventTime .. " " .. unitName .. " is casting " .. castName)
 end
 
 function mod:OnCombatStateChanged(unit, bInCombat)
@@ -94,6 +148,7 @@ function mod:OnCombatStateChanged(unit, bInCombat)
 
 		if sName == "Visceralus" then
 			core:AddUnit(unit)
+			core:WatchUnit(unit)
 		elseif sName == "Pyrobane" then
 			self:Start()
 			rooted_units = {}

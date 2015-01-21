@@ -8,7 +8,6 @@ local mod = core:NewBoss("EpAirLife", 52)
 if not mod then return end
 
 mod:RegisterEnableMob("Aileron")
-mod:RegisterRestrictZone("Elemental Vortex Delta")
 
 -- Tracking Blinding Light and Aileron knockback seems too random to display on timers.
 
