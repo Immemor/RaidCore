@@ -22,7 +22,7 @@ local monitoring = nil
 
 local trackMaster = Apollo.GetAddon("TrackMaster")
 local markCount = 0
-local AddonVersion = 15012101
+local AddonVersion = 15012201
 local VCReply, VCtimer = {}, nil
 local empCD, empTimer = 5, nil
 

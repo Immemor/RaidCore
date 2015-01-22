@@ -17,6 +17,8 @@ local prev = 0
 local mooCount = 0
 local phase2 = false
 local myName
+local CheckTwirlTimer = nil
+
 
 
 --------------------------------------------------------------------------------
@@ -33,6 +35,7 @@ function mod:OnBossEnable()
 	Apollo.RegisterEventHandler("CHAT_DATACHRON", 		"OnChatDC", self)
 	Apollo.RegisterEventHandler("BUFF_APPLIED", 		"OnBuffApplied", self)
 	Apollo.RegisterEventHandler("DEBUFF_APPLIED", 		"OnDebuffApplied", self)
+	Apollo.RegisterEventHandler("RAID_WIPE", 			"OnReset", self)
 end
 
 
@@ -40,6 +43,13 @@ end
 -- Event Handlers
 --
 
+function mod:OnReset()
+	if CheckTwirlTimer then
+		self:CancelTimer(CheckTwirlTimer)
+	end
+	core:ResetMarks()
+	twirl_units = {}
+end
 
 function mod:OnUnitCreated(unit)
 	local sName = unit:GetName()
@@ -104,15 +114,40 @@ end
 function mod:OnDebuffApplied(unitName, splId, unit)
 	local eventTime = GameLib.GetGameTime()
 	--Print(eventTime .. " debuff applied on unit: " .. unitName .. " - " .. splId)
-	if unitName == myName then
-		if splId == 70440 then -- Twirl
+	if splId == 70440 then -- Twirl ability
+		--Print(eventTime .. " debuff applied on unit: " .. unitName .. " - " .. splId)
+
+		if unitName == myName then
 			core:AddMsg("TWIRL", "TWIRL ON YOU!", 5, "Inferno")
 		end
+
+		core:MarkUnit(unit, nil, "TWIRL")
+		core:AddUnit(unit)
+		twirl_units[unitName] = unit
+		if not CheckTwirlTimer then
+			CheckTwirlTimer = self:ScheduleRepeatingTimer("CheckTwirlTimer", 1)
+		end
 	end
-	-- TODO test if we can make a timer for twirl..
-	--[[if splId == 70440 then
-		Print(eventTime .. " TWIRL ON " .. unitName)
-	end--]]
+end
+
+function mod:CheckTwirlTimer()
+	for unitName, unit in pairs(twirl_units) do
+		if unit and unit:GetBuffs() then
+			local bUnitHasTwirl = false
+			local debuffs = unit:GetBuffs().arHarmful
+			for _, debuff in pairs(debuffs) do
+				if debuff.splEffect:GetId() == 70440 then -- the Twirl ability
+					bUnitHasTwirl = true
+				end
+			end
+			if not bUnitHasTwirl then
+				-- else, if the debuff is no longer present, no need to track anymore.
+				core:DropMark(unit:GetId())
+				core:RemoveUnit(unit:GetId())
+				twirl_units[unitName] = nil
+			end
+		end
+	end
 end
 
 function mod:OnCombatStateChanged(unit, bInCombat)
@@ -130,6 +165,8 @@ function mod:OnCombatStateChanged(unit, bInCombat)
 			self:Start()
 			mooCount = 0
 			phase2 = false
+			twirl_units = {}
+			CheckTwirlTimer = nil
 			core:AddUnit(unit)
 			core:UnitBuff(unit)
 			core:UnitDebuff(playerUnit)
