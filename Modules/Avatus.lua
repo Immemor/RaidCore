@@ -9,6 +9,12 @@ mod:RegisterEnableMob("Avatus")
 local phase2warn, phase2 = false, false
 local phase_blueroom = false
 local encounter_started = false
+local gungrid_time = nil
+-- 40man: first after 46sec - 20m: first after 20sec, after that every 112 sec
+local gungrid_timer = 46
+-- 40man: first after 93sec, after that every 37 sec. - 20m: first after 69sec, after that every 37 sec
+local obliteration_beam_timer = 93
+local holo_hands = {}
 
 function mod:OnBossEnable()
 	Print(("Module %s loaded"):format(mod.ModuleName))
@@ -26,20 +32,39 @@ function mod:OnBossEnable()
 	--Apollo.RegisterEventHandler("BUFF_APPLIED", 		"OnBuffApplied", self) temp disabled since not finished, TODO re-enable when doing avatus.
 end
 
+local function dist2unit(unitSource, unitTarget)
+	if not unitSource or not unitTarget then return 999 end
+	local sPos = unitSource:GetPosition()
+	local tPos = unitTarget:GetPosition()
+
+	local sVec = Vector3.New(sPos.x, sPos.y, sPos.z)
+	local tVec = Vector3.New(tPos.x, tPos.y, tPos.z)
+
+	local dist = (tVec - sVec):Length()
+
+	return tonumber(dist)
+end
+
 function mod:OnReset()
 	encounter_started = false
+	holo_hands = {}
 end
 
 function mod:OnUnitCreated(unit)
+	local eventTime = GameLib.GetGameTime()
+
 	local sName = unit:GetName()
+	--Print(eventTime .. " " .. sName .. " spawned")
 	if sName == "Avatus" then
 		core:AddUnit(unit)
-	end
-	if sName == "Holo Hand" then
+	elseif sName == "Holo Hand" then
+		--Print(eventTime .. " Holo hand Spawned")
+		local unitId = unit:GetId()
 		core:AddUnit(unit)
+		core:WatchUnit(unit)
+		table.insert(holo_hands, unitId, {["unit"] = unit})
 		core:AddMsg("HHAND", "Holo Hand Spawned", 5, "Info")
-	end
-	if sName == "Mobius Physics Constructor" then
+	elseif sName == "Mobius Physics Constructor" then
 		core:AddUnit(unit)
 	end
 	--[[if sName == "Infinite Logic Loop" then
@@ -47,6 +72,17 @@ function mod:OnUnitCreated(unit)
 		core:UnitBuff(unit)
 		phase2_blueroom = true
 	end--]]
+
+end
+
+function mod:OnUnitDestroyed(unit)
+	local sName = unit:GetName()
+	local unitId = unit:GetId()
+
+	if sName == "Holo Hand" and holo_hands[unitId] then
+		holo_hands[unitId] = nil
+		--Print("Removed destroyed holo hand from holo_hands list")
+	end
 end
 
 function mod:OnBuffApplied(unitName, splId, unit)
@@ -69,12 +105,8 @@ function mod:OnBuffApplied(unitName, splId, unit)
 			Print(eventTime .. " " .. unitName .. " has the RED buff")
 		end		
 
-		Print(eventTime .. " " .. unitName .. " has a buff: " .. strSpellName .. " with SplId: " .. splId)
+		--Print(eventTime .. " " .. unitName .. " has a buff: " .. strSpellName .. " with SplId: " .. splId)
 	end
-end
-
-function mod:OnUnitDestroyed(unit)
-	local sName = unit:GetName()
 end
 
 function mod:OnHealthChanged(unitName, health)
@@ -84,64 +116,51 @@ function mod:OnHealthChanged(unitName, health)
 	end
 end
 
-local function dist2unit(unitSource, unitTarget)
-	if not unitSource or not unitTarget then return 999 end
-	local sPos = unitSource:GetPosition()
-	local tPos = unitTarget:GetPosition()
-
-	local sVec = Vector3.New(sPos.x, sPos.y, sPos.z)
-	local tVec = Vector3.New(tPos.x, tPos.y, tPos.z)
-
-	local dist = (tVec - sVec):Length()
-
-	return tonumber(dist)
-end
-
-function mod:OnChatNPCSay(message)
-	local eventTime = GameLib.GetGameTime()
-	--Print(eventTime .. "Message is: " .. message)
- 	-- Inconsistent messages for gungrid, no point warning for that.
-end
-
-function mod:OnSpellCastEnd(unitName, castName, unit)
-	local eventTime = GameLib.GetGameTime()
-	--Print(eventTime .. " " .. unitName .. " ended cast " .. castName)
-end
-
-
 function mod:OnSpellCastStart(unitName, castName, unit)
 	local eventTime = GameLib.GetGameTime()
 	if unitName == "Avatus" and castName == "Obliteration Beam" then
 		core:AddMsg("BEAMS", "GO TO SIDES !", 5, "RunAway")
 		core:StopBar("OBBEAM")
-		core:AddBar("OBBEAM", "Obliteration Beam", 37)
+		-- check if next ob beam in {obliteration_beam_timer} sec doesn't happen during a gungrid which takes 20 sec
+		if gungrid_time + gungrid_timer + 20 < eventTime + obliteration_beam_timer then
+			core:AddBar("OBBEAM", "Obliteration Beam", obliteration_beam_timer, true)
+		end
+	elseif unitName == "Holo Hand" and castName == "Crushing Blow" then
+		local playerUnit = GameLib.GetPlayerUnit()
+		for _, hand in pairs(holo_hands) do
+			local distance_to_hand = dist2unit(playerUnit, hand["unit"])
+			hand["distance"] = distance_to_hand
+		end
+
+		local closest_holo_hand = holo_hands[next(holo_hands)]
+		for _, hand in pairs(holo_hands) do
+			if hand["distance"] < closest_holo_hand["distance"] then
+				closest_holo_hand = hand
+			end
+		end
+		if closest_holo_hand["unit"]:GetCastName() == "Crushing Blow" then
+			core:AddMsg("CRBLOW", "INTERRUPT CRUSHING BLOW!", 5, "Inferno")
+		end
 	end
+
 	--Print(eventTime .. " " .. unitName .. " is casting " .. castName)
 end
-
-
-function mod:OnZoneChanged(zoneId, zoneName)
-	if zoneName == "Datascape" then
-		return
-	end
-end
-
 
 function mod:OnChatDC(message)
 	local eventTime = GameLib.GetGameTime()
 	--Print(eventTime .. " ChatDC Message: " .. message)
 	if message:find("Gun Grid Activated") then
-		core:StopBar("GGRID")
+		gungrid_time = eventTime
 		core:AddMsg("GGRIDMSG", "Gun Grid NOW!", 5, "Beware")
+		core:StopBar("GGRID")
+		core:AddBar("GGRID", "Gun Grid", gungrid_timer, true)
 	end
 	if message:find("Portals have opened!") then
 		phase2 = true
 		core:StopBar("GGRID")
 		core:StopBar("OBBEAM")
+		core:StopBar("HHAND")
 	end
-end
-
-function mod:OnSyncRcv(sync, parameter)
 end
 
 function mod:OnCombatStateChanged(unit, bInCombat)
@@ -149,17 +168,22 @@ function mod:OnCombatStateChanged(unit, bInCombat)
 		local sName = unit:GetName()
 
 		if sName == "Avatus" and not encounter_started then
+			local eventTime = GameLib.GetGameTime()
 			self:Start()
 			encounter_started = true
 			phase2warn, phase2 = false, false
 			phase2_blueroom = false
+			gungrid_time = eventTime + gungrid_timer
+			holo_hands = {}
 			core:AddUnit(unit)
 			core:WatchUnit(unit)
 			core:StartScan()
-			local eventTime = GameLib.GetGameTime()
 			--Print(eventTime .. " " .. sName .. " FIGHT STARTED ")
-			core:AddBar("OBBEAM", "Obliteration Beam", 93)
-			core:AddBar("GGRID", "Gun Grid", 46)
+			core:AddBar("OBBEAM", "Obliteration Beam", obliteration_beam_timer, true)
+			core:AddBar("GGRID", "Gun Grid", gungrid_timer, true)
+			core:AddBar("HHAND", "Holo Hands spawn", 43)
+			gungrid_timer = 112
+			obliteration_beam_timer = 37
 		end
 	end
 end
