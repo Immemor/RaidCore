@@ -24,6 +24,7 @@ local trackMaster = Apollo.GetAddon("TrackMaster")
 local markCount = 0
 local AddonVersion = 15012201
 local VCReply, VCtimer = {}, nil
+local CommChannelTimer = nil
 local empCD, empTimer = 5, nil
 
 local chatEvent = {
@@ -110,6 +111,7 @@ function RaidCore:OnEnable()
 		-- Register handlers for events, slash commands and timer, etc.
 		-- e.g. Apollo.RegisterEventHandler("KeyDown", "OnKeyDown", self)
 		Apollo.RegisterSlashCommand("raidc", "OnRaidCoreOn", self)
+		Apollo.RegisterEventHandler("Group_MemberFlagsChanged", "OnGroup_MemberFlagsChanged", self)
 
 		--self.timer = ApolloTimer.Create(0.100, true, "OnTimer", self)
 		--self.timer:Stop()
@@ -137,7 +139,9 @@ function RaidCore:OnEnable()
 		self.lines = {}
 
 		--self.uMyGuild = GameLib.GetPlayerUnit():GetGuildName()
-		self.chanCom = ICCommLib.JoinChannel("WL_RaidCore", "OnComMessage", self)
+		self.chanCom = nil
+		CommChannelTimer = ApolloTimer.Create(5, false, "UpdateCommChannel", self) -- make sure everything is loaded, so after 5sec
+		--self.chanCom = ICCommLib.JoinChannel("WL_RaidCore", "OnComMessage", self)
 
 		self:ScheduleTimer("OnWorldChanged", 5)
 
@@ -149,6 +153,23 @@ end
 -- RaidCore Functions
 -----------------------------------------------------------------------------------------------
 -- Define general functions here
+
+function RaidCore:OnGroup_MemberFlagsChanged(nMemberIdx, bFromPromotion, tChangedFlags)
+	if bFromPromotion then
+		CommChannelTimer = ApolloTimer.Create(5, false, "UpdateCommChannel", self) -- after 5 sec for slow API leader update
+	end
+end
+
+function RaidCore:UpdateCommChannel()
+	for i = 1, GroupLib.GetMemberCount() do
+		local tPlayer = GroupLib.GetGroupMember(i)
+		if tPlayer and tPlayer.bIsLeader then
+			local channel = "RaidCore_" .. tPlayer.strCharacterName
+			self.chanCom = ICCommLib.JoinChannel(channel, "OnComMessage", self)
+			return
+		end
+	end
+end
 
 function RaidCore:InitializeConfigForm()
 	local groupOptionsList = self.wndMain:FindChild("GroupOptionsList")
