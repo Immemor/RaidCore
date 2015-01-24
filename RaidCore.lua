@@ -904,7 +904,7 @@ function RaidCore:OnUnitDestroyed(unit)
 		end
 	end
 	for modName, bosses in pairs(enablepairs) do
-		bModNameBossActive = false
+		local bModNameBossActive = false
 		for bossName, activeState in pairs(bosses) do
 			if not bModNameBossActive and activeState then
 				bModNameBossActive = true
