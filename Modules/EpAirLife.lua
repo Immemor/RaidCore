@@ -7,7 +7,8 @@ local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local mod = core:NewBoss("EpAirLife", 52)
 if not mod then return end
 
-mod:RegisterEnableMob("Aileron")
+--mod:RegisterEnableMob("Aileron", "Test")
+mod:RegisterEnableBossPair("Aileron", "Visceralus")
 
 -- Tracking Blinding Light and Aileron knockback seems too random to display on timers.
 

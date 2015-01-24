@@ -7,7 +7,9 @@ local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local mod = core:NewBoss("EpEarthAir", 52)
 if not mod then return end
 
-mod:RegisterEnableMob("Megalith")
+--mod:RegisterEnableMob("Megalith")
+mod:RegisterEnableBossPair("Megalith", "Aileron")
+
 
 --------------------------------------------------------------------------------
 -- Locals

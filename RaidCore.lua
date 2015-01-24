@@ -16,7 +16,7 @@ local addon = RaidCore
 -----------------------------------------------------------------------------------------------
 -- Constants
 -----------------------------------------------------------------------------------------------
-local enablezones, enablemobs, restrictzone = {}, {}, {}
+local enablezones, enablemobs, enablepairs, restrictzone = {}, {}, {}, {}
 local monitoring = nil
 
 
@@ -487,6 +487,43 @@ function RaidCore:unitCheck(unit)
 					module:Enable()
 				end
 			end
+		else
+			-- Check if part of a boss combination pair
+			for modName, bosses in pairs(enablepairs) do
+				for bossName, activeState in pairs(bosses) do
+					if sName == bossName then
+						-- Set this boss to true if it is active
+						enablepairs[modName][bossName] = true
+					end
+				end
+			end
+			-- Loop again to check if there's any boss pair that has
+			-- all bosses that are required for it to activate active
+			for modName, bosses in pairs(enablepairs) do
+				local bModNameBossActive = true
+				for bossName, activeState in pairs(bosses) do
+					if bModNameBossActive and not activeState then
+						bModNameBossActive = false
+					end
+				end
+
+				-- At this point we know this boss pair should be enabled.
+				if bModNameBossActive then
+					-- Disable any other modules that are active
+					for name, mod in self:IterateBossModules() do
+						if name ~= modName and mod:IsEnabled() then
+							mod:Disable()
+						end
+					end
+					mod = self.bossCore:GetModule(modName)
+					if restrictzone[modName] and not restrictzone[modName][GetCurrentSubZoneName()] then return end
+					if mod:IsEnabled() then return end
+					Apollo.RegisterEventHandler("UnitDestroyed", "OnUnitDestroyed", self)
+					Print("Enabling Boss Module : " .. modName)
+					mod:Enable()
+					return
+				end
+			end
 		end
 	end
 end
@@ -561,8 +598,23 @@ do
 			end
 		end
 	end
+
+	local function addPair(moduleName, tbl, ...)
+		-- ... is holding our actual bosses that we want to have in a pair
+		-- we will store them in the tbl (enablepairs)
+		local units = {...}
+		local bosses = {}
+		for key, value in pairs(units) do
+			-- Defaults to false meaning the unit is not active/in-range
+			bosses[value] = false
+		end
+		tbl[moduleName] = bosses
+	end
+
 	function RaidCore:RegisterEnableMob(module, ...) add(module.ModuleName, enablemobs, ...) end
+	function RaidCore:RegisterEnableBossPair(module, ...) addPair(module.ModuleName, enablepairs, ...) end
 	function RaidCore:GetEnableMobs() return enablemobs end
+	function RaidCore:GetEnablePairs() return enablepairs end
 	function RaidCore:RegisterRestrictZone(module, zone) add(zone, restrictzone, module.ModuleName) end
 end
 
@@ -812,6 +864,7 @@ function RaidCore:DropLine(key)
 end
 
 function RaidCore:OnUnitDestroyed(unit)
+	local unitName = unit:GetName()
 	--Print("Removing 1".. unit:GetName())
 	local key = unit:GetId()
 	if self.watch[key] then
@@ -840,6 +893,31 @@ function RaidCore:OnUnitDestroyed(unit)
 	end
 	if self.buffs[key] then
 		self.buffs[key] = nil
+	end
+
+	-- Unload boss module if all units are destroyed within a module
+	for modName, bosses in pairs(enablepairs) do
+		for bossName, activeState in pairs(bosses) do
+			if activeState and bossName == unitName then
+				enablepairs[modName][bossName] = false
+			end
+		end
+	end
+	for modName, bosses in pairs(enablepairs) do
+		bModNameBossActive = false
+		for bossName, activeState in pairs(bosses) do
+			if not bModNameBossActive and activeState then
+				bModNameBossActive = true
+			end
+		end
+		if not bModNameBossActive then
+			-- Disable any other modules that are active
+			for name, mod in self:IterateBossModules() do
+				if name == modName and mod:IsEnabled() then
+					mod:Disable()
+				end
+			end
+		end
 	end
 end
 

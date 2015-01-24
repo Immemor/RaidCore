@@ -7,7 +7,8 @@ local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local mod = core:NewBoss("EpLifeFire", 52)
 if not mod then return end
 
-mod:RegisterEnableMob("Visceralus")
+--mod:RegisterEnableMob("Visceralus")
+mod:RegisterEnableBossPair("Visceralus", "Pyrobane")
 
 --------------------------------------------------------------------------------
 -- Locals

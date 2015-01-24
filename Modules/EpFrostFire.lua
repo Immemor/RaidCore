@@ -7,7 +7,8 @@ local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local mod = core:NewBoss("EpFrostFire", 52)
 if not mod then return end
 
-mod:RegisterEnableMob("Hydroflux")
+--mod:RegisterEnableMob("Hydroflux")
+mod:RegisterEnableBossPair("Hydroflux", "Pyrobane")
 
 --------------------------------------------------------------------------------
 -- Locals

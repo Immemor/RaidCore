@@ -61,6 +61,7 @@ function boss:Reboot(isWipe)
 end
 
 function boss:RegisterEnableMob(...) core:RegisterEnableMob(self, ...) end
+function boss:RegisterEnableBossPair(...) core:RegisterEnableBossPair(self, ...) end
 function boss:RegisterRestrictZone(...) core:RegisterRestrictZone(self, ...) end
 --function boss:RegisterEnableYell(...) core:RegisterEnableYell(self, ...) end
 
