@@ -46,7 +46,12 @@ local function dist2unit(unitSource, unitTarget)
 end
 
 function mod:OnReset()
+	phase2warn, phase2 = false, false
+	phase_blueroom = false
 	encounter_started = false
+	gungrid_timer = nil
+	gungrid_timer = 46
+	obliteration_beam_timer = 93
 	holo_hands = {}
 end
 
@@ -150,10 +155,13 @@ function mod:OnChatDC(message)
 	local eventTime = GameLib.GetGameTime()
 	--Print(eventTime .. " ChatDC Message: " .. message)
 	if message:find("Gun Grid Activated") then
+		--Print(eventTime .. " ChatDC Message: " .. message)
 		gungrid_time = eventTime
 		core:AddMsg("GGRIDMSG", "Gun Grid NOW!", 5, "Beware")
 		core:StopBar("GGRID")
+		core:StopBar("HHAND")
 		core:AddBar("GGRID", "Gun Grid", gungrid_timer, true)
+		core:AddBar("HHAND", "Holo Hands spawn", 22)
 	end
 	if message:find("Portals have opened!") then
 		phase2 = true
@@ -178,10 +186,11 @@ function mod:OnCombatStateChanged(unit, bInCombat)
 			core:AddUnit(unit)
 			core:WatchUnit(unit)
 			core:StartScan()
+
 			--Print(eventTime .. " " .. sName .. " FIGHT STARTED ")
+
 			core:AddBar("OBBEAM", "Obliteration Beam", obliteration_beam_timer, true)
 			core:AddBar("GGRID", "Gun Grid", gungrid_timer, true)
-			core:AddBar("HHAND", "Holo Hands spawn", 43)
 			gungrid_timer = 112
 			obliteration_beam_timer = 37
 		end

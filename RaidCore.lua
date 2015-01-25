@@ -22,7 +22,7 @@ local monitoring = nil
 
 local trackMaster = Apollo.GetAddon("TrackMaster")
 local markCount = 0
-local AddonVersion = 15012401
+local AddonVersion = 15012501
 local VCReply, VCtimer = {}, nil
 local CommChannelTimer = nil
 local empCD, empTimer = 5, nil
@@ -117,6 +117,7 @@ function RaidCore:OnEnable()
 		--self.timer:Stop()
 
 		Apollo.RegisterEventHandler("ChangeWorld", 		"OnWorldChangedTimer", self)
+		Apollo.RegisterEventHandler("UnitDestroyed", 	"OnUnitDestroyed", self)
 
 		-- Do additional Addon initialization here
 
@@ -518,7 +519,6 @@ function RaidCore:unitCheck(unit)
 					mod = self.bossCore:GetModule(modName)
 					if restrictzone[modName] and not restrictzone[modName][GetCurrentSubZoneName()] then return end
 					if mod:IsEnabled() then return end
-					Apollo.RegisterEventHandler("UnitDestroyed", "OnUnitDestroyed", self)
 					Print("Enabling Boss Module : " .. modName)
 					mod:Enable()
 					return
@@ -766,8 +766,6 @@ function RaidCore:WatchUnit(unit)
 	if unit and not unit:IsDead() and not self.watch[unit:GetId()] then
 		self.watch[unit:GetId()] = {}
 		self.watch[unit:GetId()]["unit"] = unit
-
-		Apollo.RegisterEventHandler("UnitDestroyed", 					"OnUnitDestroyed", self)
 	end
 end
 
@@ -776,8 +774,6 @@ function RaidCore:UnitBuff(unit)
 		self.buffs[unit:GetId()] = {}
 		self.buffs[unit:GetId()].unit = unit
 		self.buffs[unit:GetId()].aura = {}
-
-		Apollo.RegisterEventHandler("UnitDestroyed", 					"OnUnitDestroyed", self)
 	end
 end
 
@@ -786,8 +782,6 @@ function RaidCore:UnitDebuff(unit)
 		self.debuffs[unit:GetId()] = {}
 		self.debuffs[unit:GetId()].unit = unit
 		self.debuffs[unit:GetId()].aura = {}
-
-		Apollo.RegisterEventHandler("UnitDestroyed", 					"OnUnitDestroyed", self)
 	end
 end
 
@@ -821,8 +815,6 @@ function RaidCore:MarkUnit(unit, location, mark)
 
 			self.mark[key].frame = markFrame
 
-
-			Apollo.RegisterEventHandler("UnitDestroyed", 					"OnUnitDestroyed", self)
 			--Apollo.RegisterEventHandler("NextFrame",	 					"OnMarkUpdate", self)
 			--Apollo.RegisterEventHandler("VarChange_FrameCount",	 					"OnUpdate", self) 
 		elseif mark then
@@ -1181,7 +1173,6 @@ function RaidCore:ResetAll()
 	self:ResetDelayedMsg()
 	self:ResetSync()
 	self:ResetLines()
-	Apollo.RemoveEventHandler("UnitDestroyed", self)
 end
 
 function RaidCore:WipeCheck()
@@ -1213,7 +1204,6 @@ function RaidCore:WipeCheck()
 	self:ResetDelayedMsg()
 	self:ResetSync()
 	self:ResetLines()
-	Apollo.RemoveEventHandler("UnitDestroyed", self)
 	Apollo.RemoveEventHandler("ChatMessage",	 	self)
 	Apollo.RemoveEventHandler("UnitEnteredCombat",	self)
 	Apollo.RegisterEventHandler("UnitCreated", 			"unitCheck", self)
