@@ -7,8 +7,8 @@ local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local mod = core:NewBoss("SystemDeamons", 52)
 if not mod then return end
 
-mod:RegisterRestrictZone("SystemDeamons", "Halls of the Infinite Mind", "Infinite Generator Core")
 mod:RegisterEnableMob("Binary System Daemon","Null System Daemon")
+mod:RegisterRestrictZone("SystemDeamons", "Halls of the Infinite Mind", "Infinite Generator Core")
 
 --------------------------------------------------------------------------------
 -- Locals

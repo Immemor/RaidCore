@@ -9,6 +9,7 @@ if not mod then return end
 
 --mod:RegisterEnableMob("Hydroflux")
 mod:RegisterEnableBossPair("Hydroflux", "Pyrobane")
+mod:RegisterRestrictZone("EpFrostFire", "Elemental Vortex Alpha", "Elemental Vortex Beta", "Elemental Vortex Delta")
 
 --------------------------------------------------------------------------------
 -- Locals

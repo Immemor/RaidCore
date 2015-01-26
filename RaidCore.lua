@@ -22,7 +22,7 @@ local monitoring = nil
 
 local trackMaster = Apollo.GetAddon("TrackMaster")
 local markCount = 0
-local AddonVersion = 15012501
+local AddonVersion = 15012601
 local VCReply, VCtimer = {}, nil
 local CommChannelTimer = nil
 local empCD, empTimer = 5, nil
@@ -616,6 +616,7 @@ do
 	function RaidCore:GetEnableMobs() return enablemobs end
 	function RaidCore:GetEnablePairs() return enablepairs end
 	function RaidCore:RegisterRestrictZone(module, zone) add(zone, restrictzone, module.ModuleName) end
+	function RaidCore:GetRestrictZone() return restrictzone end
 end
 
 

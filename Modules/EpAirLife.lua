@@ -9,6 +9,7 @@ if not mod then return end
 
 --mod:RegisterEnableMob("Aileron", "Test")
 mod:RegisterEnableBossPair("Aileron", "Visceralus")
+mod:RegisterRestrictZone("EpAirLife", "Elemental Vortex Alpha", "Elemental Vortex Beta", "Elemental Vortex Delta")
 
 -- Tracking Blinding Light and Aileron knockback seems too random to display on timers.
 

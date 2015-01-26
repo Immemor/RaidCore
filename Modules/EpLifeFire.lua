@@ -9,6 +9,7 @@ if not mod then return end
 
 --mod:RegisterEnableMob("Visceralus")
 mod:RegisterEnableBossPair("Visceralus", "Pyrobane")
+mod:RegisterRestrictZone("EpLifeFire", "Elemental Vortex Alpha", "Elemental Vortex Beta", "Elemental Vortex Delta")
 
 --------------------------------------------------------------------------------
 -- Locals

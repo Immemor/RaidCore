@@ -9,6 +9,7 @@ if not mod then return end
 
 --mod:RegisterEnableMob("Megalith")
 mod:RegisterEnableBossPair("Megalith", "Mnemesis")
+mod:RegisterRestrictZone("EpEarthLogic", "Elemental Vortex Alpha", "Elemental Vortex Beta", "Elemental Vortex Delta")
 
 --------------------------------------------------------------------------------
 -- Locals

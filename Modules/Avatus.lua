@@ -29,7 +29,7 @@ function mod:OnBossEnable()
 	--Apollo.RegisterEventHandler("SubZoneChanged", 	"OnZoneChanged", self)
 	--Apollo.RegisterEventHandler("CHAT_NPCSAY", 		"OnChatNPCSay", self)
 	Apollo.RegisterEventHandler("RAID_WIPE", 			"OnReset", self)
-	--Apollo.RegisterEventHandler("BUFF_APPLIED", 		"OnBuffApplied", self) temp disabled since not finished, TODO re-enable when doing avatus.
+	Apollo.RegisterEventHandler("BUFF_APPLIED", 		"OnBuffApplied", self)
 end
 
 local function dist2unit(unitSource, unitTarget)
@@ -72,11 +72,13 @@ function mod:OnUnitCreated(unit)
 	elseif sName == "Mobius Physics Constructor" then
 		core:AddUnit(unit)
 	end
-	--[[if sName == "Infinite Logic Loop" then
+
+	-- TESTING BLUE ROOM:
+	if sName == "Infinite Logic Loop" then
 		core:AddUnit(unit)
 		core:UnitBuff(unit)
 		phase2_blueroom = true
-	end--]]
+	end
 
 end
 
@@ -102,15 +104,18 @@ function mod:OnBuffApplied(unitName, splId, unit)
 		end
 
 		-- Todo change to SplId instead of name to reduce API calls
-		if strSpellName == "Green Reconstruction Matrix" then
+		if strSpellName == "Green Reconstitution Matrix" then
 			Print(eventTime .. " " .. unitName .. " has the GREEN buff")
+			ChatSystemLib.Command('/p ' .. unitName .. " has GREEN buff")
 		elseif strSpellName == "Blue Disruption Matrix" then
 			Print(eventTime .. " " .. unitName .. " has the BLUE buff")
+			ChatSystemLib.Command('/p ' .. unitName .. " has BLUE buff")
 		elseif strSpellName == "Red Empowerment Matrix" then
 			Print(eventTime .. " " .. unitName .. " has the RED buff")
+			ChatSystemLib.Command('/p ' .. unitName .. " has RED buff")
 		end		
 
-		--Print(eventTime .. " " .. unitName .. " has a buff: " .. strSpellName .. " with SplId: " .. splId)
+		Print(eventTime .. " " .. unitName .. " has a buff: " .. strSpellName .. " with SplId: " .. splId)
 	end
 end
 
