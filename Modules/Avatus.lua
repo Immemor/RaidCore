@@ -94,7 +94,7 @@ end
 
 function mod:OnBuffApplied(unitName, splId, unit)
 	local eventTime = GameLib.GetGameTime()
-	if phase2_blueroom and unitName == "Infinite Logic Loop" then
+	--[[if phase2_blueroom and unitName == "Infinite Logic Loop" then
 		local tSpell = GameLib.GetSpell(splId)
 		local strSpellName
 		if tSpell then
@@ -116,7 +116,7 @@ function mod:OnBuffApplied(unitName, splId, unit)
 		end		
 
 		Print(eventTime .. " " .. unitName .. " has a buff: " .. strSpellName .. " with SplId: " .. splId)
-	end
+	end--]]
 end
 
 function mod:OnHealthChanged(unitName, health)
