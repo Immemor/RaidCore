@@ -29,6 +29,7 @@
 	<Script Name="Modules/MaelstromAuthority.lua" />
 	<Script Name="Modules/EPFrostAir.lua" />
 	<Script Name="Modules/EPFrostFire.lua" />
+	<Script Name="Modules/EPFrostLogic.lua" />
 	<Script Name="Modules/EpEarthLogic.lua" />
 	<Script Name="Modules/EpEarthAir.lua" />
 	<Script Name="Modules/EpLifeFire.lua" />
