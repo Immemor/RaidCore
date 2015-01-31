@@ -3,8 +3,8 @@ local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local mod = core:NewBoss("Avatus", 52)
 if not mod then return end
 
-mod:RegisterRestrictZone("Avatus", "The Oculus")
 mod:RegisterEnableMob("Avatus")
+mod:RegisterRestrictZone("Avatus", "The Oculus")
 
 local phase2warn, phase2 = false, false
 local phase_blueroom = false
@@ -34,8 +34,8 @@ function mod:OnBossEnable()
 	--Apollo.RegisterEventHandler("SubZoneChanged", 	"OnZoneChanged", self)
 	Apollo.RegisterEventHandler("CHAT_NPCSAY", 			"OnChatNPCSay", self)
 	Apollo.RegisterEventHandler("RAID_WIPE", 			"OnReset", self)
-	Apollo.RegisterEventHandler("BUFF_APPLIED", 		"OnBuffApplied", self)
-	Apollo.RegisterEventHandler("ChatMessage", 			"OnChatMessage", self)
+	--Apollo.RegisterEventHandler("BUFF_APPLIED", 		"OnBuffApplied", self) -- temp disabled. Not finished.
+	--Apollo.RegisterEventHandler("ChatMessage", 		"OnChatMessage", self) -- temp dissabled. Not finished
 end
 
 local function dist2unit(unitSource, unitTarget)
@@ -104,6 +104,8 @@ function mod:OnUnitCreated(unit)
 		core:AddMsg("HHAND", "Holo Hand Spawned", 5, "Info")
 	elseif sName == "Mobius Physics Constructor" then
 		core:AddUnit(unit)
+	elseif sName == "Holo Cannon" then
+		core:AddPixie(unit:GetId(), 2, unit, nil, "Blue", 5, 100, 0)
 	end
 
 	-- TESTING BLUE ROOM:
@@ -122,6 +124,8 @@ function mod:OnUnitDestroyed(unit)
 	if sName == "Holo Hand" and holo_hands[unitId] then
 		holo_hands[unitId] = nil
 		--Print("Removed destroyed holo hand from holo_hands list")
+	elseif sName == "Holo Cannon" then
+		core:DropPixie(unit:GetId())
 	end
 end
 
@@ -270,6 +274,7 @@ function mod:OnCombatStateChanged(unit, bInCombat)
 			gungrid_timer = 112
 			obliteration_beam_timer = 37
 		elseif sName == "Infinite Logic Loop" then
+			--[[
 			local strRedBuffs = "Red Buffs:"
 			local strGreenBuffs = "Green Buffs:"
 			local strBlueBuffs = "Blue Buffs:"
@@ -293,10 +298,8 @@ function mod:OnCombatStateChanged(unit, bInCombat)
 
 			ChatSystemLib.Command('/p ' .. strRedBuffs)
 			ChatSystemLib.Command('/p ' .. strGreenBuffs)
-			ChatSystemLib.Command('/p ' .. strBlueBuffs)
+			ChatSystemLib.Command('/p ' .. strBlueBuffs)--]]
 
-			local Rover = Apollo.GetAddon("Rover")
-			Rover:AddWatch("phase2rotation", phase2_blueroom_rotation, 0)
 		end
 	end
 end
