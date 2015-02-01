@@ -67,6 +67,12 @@ function RaidCore:OnInitialize()
     -- load our form file
 	self.xmlDoc = XmlDoc.CreateFromFile("RaidCore.xml")
 	self.xmlDoc:RegisterCallback("OnDocLoaded", self)
+	self.wndConfig = Apollo.LoadForm(self.xmlDoc, "ConfigForm", nil, self)
+	self.wndConfig:Show(false)
+
+	self.wndTargetFrame = self.wndConfig:FindChild("TargetFrame")
+
+	self.wndConfigGeneral = Apollo.LoadForm(self.xmlDoc, "ConfigFormGeneral", self.wndTargetFrame, self)
 end
 
 -----------------------------------------------------------------------------------------------
@@ -315,7 +321,9 @@ function RaidCore:OnRaidCoreOn(cmd, args)
 		table.insert(tAllParams, sOneParam)
 	end
 
-	if (tAllParams[1] == "bar") then
+	if (tAllParams[1] == "config") then
+		self:OnConfigOn()
+	elseif (tAllParams[1] == "bar") then
 		if tAllParams[2] ~= nil and tAllParams[3] ~= nil then
 			self:AddBar(tAllParams[2], tAllParams[2], tAllParams[3])
 		else
@@ -1373,7 +1381,21 @@ function RaidCore:OnMoveBars( wndHandler, wndControl, eMouseButton )
 	end
 end
 
+function RaidCore:OnConfigOn()
+	self.wndConfig:Show(true)
+end
 
+function RaidCore:OnConfigCloseButton()
+	self.wndConfig:Show(false)
+end
+
+function RaidCore:Button_SettingsGeneralCheck( wndHandler, wndControl, eMouseButton )
+	self.wndConfigGeneral:Show(true)
+end
+
+function RaidCore:Button_SettingsGeneralUncheck( wndHandler, wndControl, eMouseButton )
+	self.wndConfigGeneral:Show(false)
+end
 -----------------------------------------------------------------------------------------------
 -- RaidCore Instance
 -----------------------------------------------------------------------------------------------
