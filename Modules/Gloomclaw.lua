@@ -71,9 +71,9 @@ R5 : 4332.5, -568.95300292969, -17054.87109375
 
 function mod:OnBossEnable()
 	Print(("Module %s loaded"):format(mod.ModuleName))
-	--Apollo.RegisterEventHandler("UnitCreated", 			"OnUnitCreated", self)
-	Apollo.RegisterEventHandler("UnitEnteredCombat", 		"OnCombatStateChanged", self)
-	Apollo.RegisterEventHandler("SPELL_CAST_START", 		"OnSpellCastStart", self)
+	Apollo.RegisterEventHandler("UnitCreated", 			"OnUnitCreated", self)
+	Apollo.RegisterEventHandler("UnitEnteredCombat", 	"OnCombatStateChanged", self)
+	Apollo.RegisterEventHandler("SPELL_CAST_START", 	"OnSpellCastStart", self)
 	Apollo.RegisterEventHandler("CHAT_DATACHRON", 		"OnChatDC", self)
 end
 
@@ -82,6 +82,18 @@ end
 -- Event Handlers
 --
 
+local function dist2unit(unitSource, unitTarget)
+	if not unitSource or not unitTarget then return 999 end
+	local sPos = unitSource:GetPosition()
+	local tPos = unitTarget:GetPosition()
+
+	local sVec = Vector3.New(sPos.x, sPos.y, sPos.z)
+	local tVec = Vector3.New(tPos.x, tPos.y, tPos.z)
+
+	local dist = (tVec - sVec):Length()
+
+	return tonumber(dist)
+end
 
 function mod:OnWipe()
 	Apollo.RemoveEventHandler("CombatLogHeal", self)
@@ -89,18 +101,29 @@ end
 
 function mod:OnUnitCreated(unit)
 	local sName = unit:GetName()
-	--Print(sName)
+	--Print(sName .. " Created")
+	--[[
 	if sName == "Datascape Corruption Pool" then
 		core:MarkUnit(unit)
+	end--]]
+	if sName == "Corrupted Ravager" or sName == "Empowered Ravager" then
+		core:WatchUnit(unit)
 	end
 end
 
 function mod:OnSpellCastStart(unitName, castName, unit)
+	--Print(castName .. " by " .. unitName)
 	if unitName == "Gloomclaw" and castName == "Rupture" then
 		ruptCount = ruptCount + 1
 		core:AddMsg("RUPTURE", "INTERRUPT BOSS", 5, "Destruction")
 		if ruptCount == 1 then
 			core:AddBar("RUPTURE", "RUPTURE", 43, 1)			
+		end
+	elseif (unitName == "Corrupted Ravager" or unitName == "Empowered Ravager") and castName == "Corrupting Rays" then
+		local playerUnit = GameLib.GetPlayerUnit()
+		local distance_to_unit = dist2unit(playerUnit, unit)
+		if distance_to_unit < 35 then
+			core:AddMsg("RAYS", "INTERRUPT SPIDER", 5, "Inferno")
 		end
 	end
 end
