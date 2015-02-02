@@ -16,9 +16,9 @@ local blueBuffCount = 1
 local buffCountTimer = nil
 local gungrid_time = nil
 -- 40man: first after 46sec - 20m: first after 20sec, after that every 112 sec
-local gungrid_timer = 46
+local gungrid_timer = 20
 -- 40man: first after 93sec, after that every 37 sec. - 20m: first after 69sec, after that every 37 sec
-local obliteration_beam_timer = 93
+local obliteration_beam_timer = 69
 local holo_hands = {}
 
 function mod:OnBossEnable()
@@ -82,9 +82,9 @@ function mod:OnReset()
 	blueBuffCount = 1
 	buffCountTimer = nil
 	encounter_started = false
-	gungrid_timer = nil
-	gungrid_timer = 46
-	obliteration_beam_timer = 93
+	gungrid_time = nil
+	gungrid_timer = 20
+	obliteration_beam_timer = 69
 	holo_hands = {}
 end
 
@@ -209,7 +209,7 @@ function mod:OnChatDC(message)
 		core:AddMsg("GGRIDMSG", "Gun Grid NOW!", 5, "Beware")
 		core:StopBar("GGRID")
 		core:StopBar("HHAND")
-		core:AddBar("GGRID", "Gun Grid", gungrid_timer, true)
+		core:AddBar("GGRID", "~Gun Grid", gungrid_timer, true)
 		core:AddBar("HHAND", "Holo Hands spawn", 22)
 	end
 	if message:find("Portals have opened!") then
@@ -270,7 +270,7 @@ function mod:OnCombatStateChanged(unit, bInCombat)
 			--Print(eventTime .. " " .. sName .. " FIGHT STARTED ")
 
 			core:AddBar("OBBEAM", "Obliteration Beam", obliteration_beam_timer, true)
-			core:AddBar("GGRID", "Gun Grid", gungrid_timer, true)
+			core:AddBar("GGRID", "~Gun Grid", gungrid_timer, true)
 			gungrid_timer = 112
 			obliteration_beam_timer = 37
 		elseif sName == "Infinite Logic Loop" then
