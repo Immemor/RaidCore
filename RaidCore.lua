@@ -22,7 +22,7 @@ local monitoring = nil
 
 local trackMaster = Apollo.GetAddon("TrackMaster")
 local markCount = 0
-local AddonVersion = 15020201
+local AddonVersion = 15020301
 local VCReply, VCtimer = {}, nil
 local CommChannelTimer = nil
 local empCD, empTimer = 5, nil
@@ -418,6 +418,7 @@ function RaidCore:OnRaidCoreOn(cmd, args)
 		local mod = self:GetBossModule("SystemDeamons", 1)
 		if mod then
 			mod:NextWave()
+			mod:OnChatDC("COMMENCING ENHANCEMENT SEQUENCE")
 		else
 			Print("Module SystemDeamons not loaded")
 		end
