@@ -110,7 +110,7 @@ function mod:OnUnitCreated(unit)
 		if GetCurrentSubZoneName():find("Infinite Generator Core") then core:MarkUnit(unit, 1, 3) end
 	elseif sName == "Enhancement Module" then
 		--Print("Adding Lines for " .. unit:GetId())
-		core:MarkUnit(unit, 0)
+		--core:MarkUnit(unit, 0)
 		core:AddUnit(unit)
 		core:AddLine(unit:GetId().."_1", 2, unit, nil, 1, 25, 90)
 		core:AddLine(unit:GetId().."_2", 2, unit, nil, 2, 25, -90)
