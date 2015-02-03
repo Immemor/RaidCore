@@ -148,6 +148,7 @@ function RaidCore:OnEnable()
 		--self.uMyGuild = GameLib.GetPlayerUnit():GetGuildName()
 		self.chanCom = nil
 		CommChannelTimer = ApolloTimer.Create(5, false, "UpdateCommChannel", self) -- make sure everything is loaded, so after 5sec
+		CommChannelFallback = ApolloTimer.Create(10, true, "FallbackCommChannel", self) -- in case loading takes aaageees (or not in party when joining)
 		--self.chanCom = ICCommLib.JoinChannel("WL_RaidCore", "OnComMessage", self)
 
 		self:ScheduleTimer("OnWorldChanged", 5)
@@ -168,13 +169,21 @@ function RaidCore:OnGroup_MemberFlagsChanged(nMemberIdx, bFromPromotion, tChange
 end
 
 function RaidCore:UpdateCommChannel()
-	for i = 1, GroupLib.GetMemberCount() do
-		local tPlayer = GroupLib.GetGroupMember(i)
-		if tPlayer and tPlayer.bIsLeader then
-			local channel = "RaidCore_" .. tPlayer.strCharacterName
-			self.chanCom = ICCommLib.JoinChannel(channel, "OnComMessage", self)
-			return
+	if GroupLib.InGroup() then
+		for i = 1, GroupLib.GetMemberCount() do
+			local tPlayer = GroupLib.GetGroupMember(i)
+			if tPlayer and tPlayer.bIsLeader then
+				local channel = "RaidCore_" .. tPlayer.strCharacterName
+				self.chanCom = ICCommLib.JoinChannel(channel, "OnComMessage", self)
+				return
+			end
 		end
+	end
+end
+
+function RaidCore:FallbackCommChannel()
+	if not self.chanCom then
+		self:UpdateCommChannel()
 	end
 end
 

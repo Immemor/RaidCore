@@ -36,6 +36,7 @@ local phase2count = 0
 local intNorth, intSouth = nil, nil
 local prev = 0
 local nbKick = 2
+local playerName
 
 --------------------------------------------------------------------------------
 -- Initialization
@@ -205,6 +206,11 @@ function mod:OnDebuffApplied(unitName, splId, unit)
 	local strSpellName = tSpell:GetName()
 	if strSpellName == "Overload" then
 		core:MarkUnit(unit, nil, "DOT DMG")
+	elseif strSpellName == "Purge" then
+		core:MarkUnit(unit, nil, "PURGE")
+		if unitName == playerName then
+			core:AddMsg("PURGEDEBUFF", "PURGE ON YOU", 5, "Beware")
+		end
 	end
 end
 
@@ -213,6 +219,8 @@ function mod:OnDebuffRemoved(unitName, splId, unit)
 	local tSpell = GameLib.GetSpell(splId)
 	local strSpellName = tSpell:GetName()
 	if strSpellName == "Overload" then
+		core:DropMark(unit:GetId())
+	elseif strSpellName == "Purge" then
 		core:DropMark(unit:GetId())
 	end
 end
@@ -341,6 +349,7 @@ function mod:OnCombatStateChanged(unit, bInCombat)
 			phase2count = 0
 			sdSurgeCount[unit:GetId()] = 1
 			PurgeLast[unit:GetId()] = 0
+			playerName = GameLib.GetPlayerUnit():GetName()
 			core:MarkUnit(unit, 0, ("%s%s"):format(sName:find("Null") and "S" or "N", sdSurgeCount[unit:GetId()]))
 			core:AddUnit(unit)
 			core:WatchUnit(unit)
