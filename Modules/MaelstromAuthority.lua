@@ -26,8 +26,8 @@ function mod:OnBossEnable()
 	Print(("Module %s loaded"):format(mod.ModuleName))
 	Apollo.RegisterEventHandler("UnitCreated", 			"OnUnitCreated", self)
 	Apollo.RegisterEventHandler("UnitDestroyed", 		"OnUnitDestroyed", self)
-	Apollo.RegisterEventHandler("UnitEnteredCombat", 		"OnCombatStateChanged", self)
-	Apollo.RegisterEventHandler("SPELL_CAST_START", 		"OnSpellCastStart", self)
+	Apollo.RegisterEventHandler("UnitEnteredCombat", 	"OnCombatStateChanged", self)
+	Apollo.RegisterEventHandler("SPELL_CAST_START", 	"OnSpellCastStart", self)
 	Apollo.RegisterEventHandler("CHAT_DATACHRON", 		"OnChatDC", self)
 end
 
@@ -49,6 +49,13 @@ function mod:OnUnitCreated(unit)
 		core:AddPixie(unit:GetId().."_2", 2, unit, nil, "Green", 10, 20, 180)
 		--core:AddLine(unit:GetId().."_1", 2, unit, nil, 1, 20, 0)
 		--core:AddLine(unit:GetId().."_2", 2, unit, nil, 1, 20, 180)
+	elseif sName == "Weather Station" then
+		-- Todo see if we can concat position to display in unit monitor.
+		--local stationPos = unit:GetPosition()
+		--local posStr = (stationPos.z > bossPos.z) and "S" or "N", (stationPos.x > bossPos.x) and "E" or "W"
+		core:AddUnit(unit)
+		local playerUnit = GameLib.GetPlayerUnit()
+		core:AddPixie(unit:GetId(), 1, playerUnit, unit, "Blue", 5, 10, 10)
 	end
 end
 
@@ -60,7 +67,9 @@ function mod:OnUnitDestroyed(unit)
 		--core:DropLine(unit:GetId().."_2")
 		core:DropPixie(unit:GetId().."_1")
 		core:DropPixie(unit:GetId().."_2")
-	end	
+	elseif sName == "Weather Station" then
+		core:DropPixie(unit:GetId())
+	end
 end
 
 
@@ -95,16 +104,19 @@ function mod:OnCombatStateChanged(unit, bInCombat)
 			core:AddUnit(unit)
 			core:WatchUnit(unit)
 			core:StartScan()
+			core:AddPixie(unit:GetId(), 2, unit, nil, "Green", 10, 15, 0)
 		elseif sName == "Weather Station" then
 			stationCount = stationCount + 1
+			local station_name = "STATION" .. tostring(stationCount)
+
 			local posStr = ""
 			local stationPos = unit:GetPosition()
 			if stationPos and bossPos then
-				core:AddMsg("STATION", ("[%s] STATION : %s %s"):format(stationCount, (stationPos.z > bossPos.z) and "SOUTH" or "NORTH", (stationPos.x > bossPos.x) and "EAST" or "WEST"), 5, "Info", "Blue")
+				core:AddMsg(station_name, ("[%s] STATION : %s %s"):format(stationCount, (stationPos.z > bossPos.z) and "SOUTH" or "NORTH", (stationPos.x > bossPos.x) and "EAST" or "WEST"), 5, "Info", "Blue")
 			else
-				core:AddMsg("STATION", ("[%s] STATION"):format(stationCount), 5, "Info", "Blue")
-			end	
-			core:AddBar("STATION", ("[%s] STATION"):format(stationCount + 1), 10)				
+				core:AddMsg(station_name, ("[%s] STATION"):format(stationCount), 5, "Info", "Blue")
+			end
+			core:AddBar(station_name, ("[%s] STATION"):format(stationCount + 1), 10)				
 		end
 	end
 end
