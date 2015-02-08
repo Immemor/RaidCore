@@ -20,6 +20,7 @@ local groupCount = 0
 local uPlayer = nil
 local strMyName = ""
 local prev = 0
+local prevBomb = 0
 
 local splId_frostbomb = 75058
 local splId_firebomb = 75059
@@ -64,6 +65,7 @@ function mod:OnReset()
 	core:ResetMarks()
 	firebomb_players = {}
 	frostbomb_players = {}
+	prevBomb = 0
 end
 
 function mod:RemoveBombMarker(bomb_type, unit)
@@ -74,19 +76,21 @@ function mod:RemoveBombMarker(bomb_type, unit)
 	core:RemoveUnit(unitId)
 	if bomb_type == "fire" then
 		firebomb_players[unitName] = nil
+		core:DropPixie(unit:GetId() .. "_BOMB")
 	elseif bomb_type == "frost" then
 		frostbomb_players[unitName] = nil
+		core:DropPixie(unit:GetId() .. "_BOMB")
 	end
 end
 
 function mod:ApplyBombLines(bomb_type)
 	if bomb_type == "fire" then
 		for key, value in pairs(frostbomb_players) do
-			core:AddPixie(value:GetId(), 1, uPlayer, value, "Blue", 5, 10, 10)
+			core:AddPixie(value:GetId() .. "_BOMB", 1, uPlayer, value, "Blue", 5, 10, 10)
 		end
 	elseif bomb_type == "frost" then
 		for key, value in pairs(firebomb_players) do
-			core:AddPixie(value:GetId(), 1, uPlayer, value, "Yellow", 5, 10, 10)
+			core:AddPixie(value:GetId() .. "_BOMB", 1, uPlayer, value, "Red", 5, 10, 10)
 		end
 	end
 end
@@ -94,12 +98,10 @@ end
 function mod:OnDebuffRemoved(unitName, splId, unit)
 	if splId == splId_firebomb then
 		mod:RemoveBombMarker("fire", unit)
-		core:DropPixie(unit:GetId())
 	elseif splId == splId_frostbomb then
 		mod:RemoveBombMarker("frost", unit)
-		core:DropPixie(unit:GetId())
-	elseif splId == 74326 then
-		core:DropPixie(unit:GetId())
+	elseif splId == 74326 then -- Ice Tomb debuff
+		core:DropPixie(unit:GetId() .. "_TOMB")
 	end
 end
 
@@ -115,6 +117,7 @@ function mod:OnDebuffApplied(unitName, splId, unit)
 
 	if splId == splId_firebomb then
 		core:MarkUnit(unit, nil, "Fire\nBomb")
+		--core:AddPixie(unit:GetId() .. "_BOMB", 2, unit, nil, "Red", 7, 10, 0, 50)
 		core:AddUnit(unit)
 		firebomb_players[unitName] = unit
 		if unitName == strMyName then
@@ -124,6 +127,7 @@ function mod:OnDebuffApplied(unitName, splId, unit)
 		self:ScheduleTimer("RemoveBombMarker", 10, "fire", unit)
 	elseif splId == splId_frostbomb then
 		core:MarkUnit(unit, nil, "Frost\nBomb")
+		--core:AddPixie(unit:GetId() .. "_BOMB", 2, unit, nil, "Blue", 7, 10, 0, 50)
 		core:AddUnit(unit)
 		frostbomb_players[unitName] = unit
 		if unitName == strMyName then
@@ -131,8 +135,14 @@ function mod:OnDebuffApplied(unitName, splId, unit)
 			self:ScheduleTimer("ApplyBombLines", 1, "frost")
 		end
 		self:ScheduleTimer("RemoveBombMarker", 10, "frost", unit)
-	elseif splId == 74326 and dist2unit(uPlayer, unit) < 45 then
-		core:AddPixie(unit:GetId(), 1, uPlayer, unit, "Blue", 5, 10, 10)
+	elseif splId == 74326 and dist2unit(uPlayer, unit) < 45 then -- Ice Tomb Debuff
+		core:AddPixie(unit:GetId() .. "_TOMB", 1, uPlayer, unit, "Blue", 5, 10, 10)
+	end
+	if splId == splId_firebomb or splId == splId_frostbomb then
+		if eventTime - prevBomb > 10 then
+			prevBomb = eventTime
+			core:AddBar("BEXPLODE", "Bomb Explosion", 10, true)
+		end
 	end
 	--Print(eventTime .. " " .. unitName .. "has debuff: " .. strSpellName .. " with splId: " .. splId .. " - type: DebuffNormal")
 end
@@ -145,10 +155,10 @@ function mod:OnUnitCreated(unit)
 			prev = timeOfEvent
 			core:AddMsg("TOMB", "ICE TOMB", 5, "Alert", "Blue")
 			core:AddBar("TOMB", "ICE TOMB", 15)
-			core:AddUnit(unit)
 		end
+		core:AddUnit(unit)
 	elseif sName == "Flame Wave" then
-		core:AddPixie(unit:GetId(), 2, unit, nil, "Green", 20, 40, 0)	
+		core:AddPixie(unit:GetId(), 2, unit, nil, "Green", 10, 20, 0)	
 	end
 end
 
@@ -161,7 +171,10 @@ end
 
 function mod:OnDebuffAppliedDose(unitName, splId, stack)
 	if (splId == 52874 or splId == 52876) and ((self:Tank() and stack == 13) or (not self:Tank() and stack == 10)) then
-		core:AddMsg("STACK", "HIGH STACKS !", 5, "Beware")
+		if unitName == strMyName then
+			local msgString = stack .. " STACKS!"
+			core:AddMsg("STACK", msgString, 5, "Beware")
+		end
 	end
 end
 
@@ -181,14 +194,16 @@ function mod:OnCombatStateChanged(unit, bInCombat)
 
 		if sName == "Hydroflux" then
 			core:AddUnit(unit)
-			core:AddPixie(unit:GetId() .. "_1", 2, unit, nil, "Green", 10, 15, 0)
-			core:AddPixie(unit:GetId() .. "_2", 2, unit, nil, "Yellow", 10, 15, 180)
+			core:AddPixie(unit:GetId() .. "_1", 2, unit, nil, "Yellow", 3, 7, 0)
+			core:AddPixie(unit:GetId() .. "_2", 2, unit, nil, "Yellow", 3, 7, 180)
 		elseif sName == "Pyrobane" then
 			self:Start()
 			uPlayer = GameLib.GetPlayerUnit()
 			strMyName = uPlayer:GetName()
 			groupCount = 1
 			prev = 0
+			prevBomb = 0
+
 			core:AddUnit(unit)
 			core:RaidDebuff()
 			core:AddBar("BOMBS", "BOMBS", 30)

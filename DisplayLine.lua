@@ -39,6 +39,7 @@ local ColorStringToHex = {
   Blue = "FF0000ff",
   Green = "FF00ff00",
   Yellow = "FFff9933",
+  Red = "FFDC143C",
 }
 
 local DisplayLine = {} 
@@ -151,7 +152,7 @@ function addon:AddLine(key, type, uStart, uTarget, color, distance, rotation, nD
   end
 end
 
-function addon:AddPixie(key, type, uStart, uTarget, color, width, distance, rotation)
+function addon:AddPixie(key, type, uStart, uTarget, color, width, distance, rotation, heading)
   if not self.pixie[key] then
     --Print("adding " .. key)
       --if not self.wOverlay then
@@ -166,6 +167,7 @@ function addon:AddPixie(key, type, uStart, uTarget, color, width, distance, rota
       self.pixie[key].width = width or 5
       self.pixie[key].distance = distance
       self.pixie[key].rotation = rotation
+      self.pixie[key].heading = heading or 0
       self:StartDrawing()
   end
 end
@@ -316,7 +318,7 @@ function addon:OnUpdate()
             local pStart = v.uStart:GetPosition()
             local vectorStart = Vector3.New(pStart.x, pStart.y, pStart.z)
             local rotation = self:Heading(v.uStart) + v.rotation/180 * math.pi
-            local vectorEnd = vectorStart + Vector3.New(v.distance * math.cos(rotation), 0, v.distance * math.sin(rotation)) 
+            local vectorEnd = vectorStart + Vector3.New(v.distance * math.cos(rotation), v.heading, v.distance * math.sin(rotation)) 
             self:DrawPixie(vectorStart, vectorEnd, v.color, v.width)
           else
             self:DropPixie(k)
