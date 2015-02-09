@@ -148,6 +148,11 @@ function mod:OnCombatStateChanged(unit, bInCombat)
 		if sName == "Visceralus" then
 			core:AddUnit(unit)
 			core:WatchUnit(unit)
+			core:AddLine("Visc1", 2, unit, nil, 3, 25, 0, 10)
+			core:AddLine("Visc2", 2, unit, nil, 1, 25, 72)
+			core:AddLine("Visc3", 2, unit, nil, 1, 25, 144)
+			core:AddLine("Visc4", 2, unit, nil, 1, 25, 216)
+			core:AddLine("Visc5", 2, unit, nil, 1, 25, 288)
 		elseif sName == "Mnemesis" then
 			self:Start()
 			core:WatchUnit(unit)
