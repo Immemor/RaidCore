@@ -16,6 +16,13 @@ mod:RegisterRestrictZone("EpLifeLogic", "Elemental Vortex Alpha", "Elemental Vor
 
 local uPlayer = nil
 local strMyName = ""
+local midphase = false
+local midpos = {
+	["north"] = {x = 9741.53, y = -518, z = 17823.81},
+	["west"] = {x = 9691.53, y = -518, z = 17873.81},
+	["south"] = {x = 9741.53, y = -518, z = 17923.81},
+	["east"] = {x = 9791.53, y = -518, z = 17873.81},
+}
 
 --------------------------------------------------------------------------------
 -- Initialization
@@ -25,8 +32,8 @@ function mod:OnBossEnable()
 	Print(("Module %s loaded"):format(mod.ModuleName))
 	Apollo.RegisterEventHandler("UnitEnteredCombat", 	"OnCombatStateChanged", self)
 	Apollo.RegisterEventHandler("SPELL_CAST_START", 	"OnSpellCastStart", self)
-	--Apollo.RegisterEventHandler("UnitCreated", 		"OnUnitCreated", self)
-	--Apollo.RegisterEventHandler("UnitDestroyed", 		"OnUnitDestroyed", self)
+	Apollo.RegisterEventHandler("UnitCreated", 			"OnUnitCreated", self)
+	Apollo.RegisterEventHandler("UnitDestroyed", 		"OnUnitDestroyed", self)
 	Apollo.RegisterEventHandler("DEBUFF_APPLIED", 		"OnDebuffApplied", self)
 	Apollo.RegisterEventHandler("DEBUFF_REMOVED", 		"OnDebuffRemoved", self)
 	Apollo.RegisterEventHandler("RAID_WIPE", 			"OnReset", self)
@@ -52,6 +59,7 @@ end
 
 function mod:OnReset()
 	core:ResetMarks()
+	midphase = false
 end
 
 function mod:OnDebuffApplied(unitName, splId, unit)
@@ -91,12 +99,30 @@ end
 function mod:OnUnitCreated(unit)
 	local sName = unit:GetName()
 	local eventTime = GameLib.GetGameTime()
+	if sName == "Essence of Life" then
+		core:AddUnit(unit)
+		if not midphase then
+			midphase = true
+			core:SetWorldMarker(midpos["north"], "North")
+			core:SetWorldMarker(midpos["east"], "East")
+			core:SetWorldMarker(midpos["south"], "South")
+			core:SetWorldMarker(midpos["west"], "West")
+
+			core:StopBar("DEFRAG")
+		end
+	elseif sName == "Essence of Logic" then
+		core:AddUnit(unit)
+	end
 	--Print(eventTime .. " - " .. sName)
 end
 
 function mod:OnUnitDestroyed(unit)
 	local sName = unit:GetName()
 	local eventTime = GameLib.GetGameTime()
+	if sName == "Essence of Logic" then
+		midphase = false
+		core:ResetWorldMarkers()
+	end
 end
 
 function mod:OnSpellCastStart(unitName, castName, unit)
@@ -107,7 +133,8 @@ function mod:OnSpellCastStart(unitName, castName, unit)
 		end
 	elseif unitName == "Mnemesis" and castName == "Defragment" then
 		core:StopBar("DEFRAG")
-		--core:AddBar("DEFRAG", "~DEFRAG", 48, true) -- Maybe, test if correct, doesnt'seem to be after p2 at least.
+		core:AddBar("DEFRAG", "~DEFRAG CD", 40, true) -- Defrag is unreliable, but seems to take at least this long.
+		core:AddBar("DEFRAG1", "Defrag Explosion", 9, true)
 		core:AddMsg("DEFRAG", "DEFRAG", 5, "Beware")
 	end
 	--Print(eventTime .. " " .. unitName .. " Casting: " .. castName)
@@ -126,10 +153,11 @@ function mod:OnCombatStateChanged(unit, bInCombat)
 			core:WatchUnit(unit)
 			uPlayer = GameLib.GetPlayerUnit()
 			strMyName = uPlayer:GetName()
+			midphase = false
 			core:AddUnit(unit)
 			core:RaidDebuff()
 			core:StartScan()
-			core:AddBar("DEFRAG", "~DEFRAG", 21, true)
+			core:AddBar("DEFRAG", "~DEFRAG CD", 21, true)
 
 			--Print(eventTime .. " FIGHT STARTED")
 		end
