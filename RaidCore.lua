@@ -22,7 +22,7 @@ local monitoring = nil
 
 local trackMaster = Apollo.GetAddon("TrackMaster")
 local markCount = 0
-local AddonVersion = 15020901
+local AddonVersion = 15020902
 local VCReply, VCtimer = {}, nil
 local CommChannelTimer = nil
 local empCD, empTimer = 5, nil
@@ -148,7 +148,6 @@ function RaidCore:OnEnable()
 		--self.uMyGuild = GameLib.GetPlayerUnit():GetGuildName()
 		self.chanCom = nil
 		CommChannelTimer = ApolloTimer.Create(5, false, "UpdateCommChannel", self) -- make sure everything is loaded, so after 5sec
-		CommChannelFallback = ApolloTimer.Create(10, true, "FallbackCommChannel", self) -- in case loading takes aaageees (or not in party when joining)
 		--self.chanCom = ICCommLib.JoinChannel("WL_RaidCore", "OnComMessage", self)
 
 		self:ScheduleTimer("OnWorldChanged", 5)
@@ -175,15 +174,19 @@ function RaidCore:UpdateCommChannel()
 			if tPlayer and tPlayer.bIsLeader then
 				local channel = "RaidCore_" .. tPlayer.strCharacterName
 				self.chanCom = ICCommLib.JoinChannel(channel, "OnComMessage", self)
-				return
+				if self.chanCom then return true else return false end
 			end
 		end
 	end
+	return false
 end
 
-function RaidCore:FallbackCommChannel()
-	if not self.chanCom then
-		self:UpdateCommChannel()
+function RaidCore:SendMessage(msg)
+	if not self.chanCom and not self:UpdateCommChannel() then
+		Print("[RaidCore] Error sending Sync Message. Are you sure that you're in a party?")
+		return false
+	else
+		self.chanCom:SendMessage(msg)
 	end
 end
 
@@ -1254,7 +1257,7 @@ function RaidCore:OnComMessage(channel, tMessage)
 
 	if tMessage.action == "VersionCheckRequest" and IsPartyMemberByName(tMessage.sender) then
 		msg = {action = "VersionCheckReply", sender = GameLib.GetPlayerUnit():GetName(), version = AddonVersion}
-		self.chanCom:SendMessage(msg)
+		self:SendMessage(msg)
 	elseif tMessage.action == "VersionCheckReply" and tMessage.sender and tMessage.version and VCtimer then
 		VCReply[tMessage.sender] = tMessage.version
 	elseif tMessage.action == "NewestVersion" and tMessage.version then
@@ -1310,7 +1313,7 @@ function RaidCore:VersionCheckResults()
 		Print("Outdated : None ! Congrats")
 	end
 	local msg = {action = "NewestVersion", version = maxver}
-	self.chanCom:SendMessage(msg)
+	self:SendMessage(msg)
 	self:OnComMessage(nil, msg)
 end
 
@@ -1324,13 +1327,13 @@ function RaidCore:VersionCheck()
 	VCReply[GameLib.GetPlayerUnit():GetName()] = AddonVersion
 	local msg = {action = "VersionCheckRequest", sender = GameLib.GetPlayerUnit():GetName()}
 	VCtimer = ApolloTimer.Create(5, false, "VersionCheckResults", self)
-	self.chanCom:SendMessage(msg)
+	self:SendMessage(msg)
 end
 
 function RaidCore:LaunchPull(time)
 	if time and time > 5 then
 		local msg = {action = "LaunchPull", sender = GameLib.GetPlayerUnit():GetName(), cooldown = time}
-		self.chanCom:SendMessage(msg)
+		self:SendMessage(msg)
 		self:OnComMessage(nil, msg)
 	end	
 end
@@ -1338,7 +1341,7 @@ end
 function RaidCore:LaunchBreak(time)
 	if time and time > 5 then
 		local msg = {action = "LaunchBreak", sender = GameLib.GetPlayerUnit():GetName(), cooldown = time}
-		self.chanCom:SendMessage(msg)
+		self:SendMessage(msg)
 		self:OnComMessage(nil, msg)
 	end	
 end
@@ -1358,7 +1361,7 @@ function RaidCore:SendSync(syncName, param)
 		end
 	end
 	local msg = {action = "Sync", sender = GameLib.GetPlayerUnit():GetName(), sync = syncName, parameter = param}
-	self.chanCom:SendMessage(msg)	
+	self:SendMessage(msg)	
 end
 
 -----------------------------------------------------------------------------------------------
