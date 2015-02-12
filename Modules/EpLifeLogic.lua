@@ -163,6 +163,7 @@ function mod:OnCombatStateChanged(unit, bInCombat)
 			core:RaidDebuff()
 			core:StartScan()
 			core:AddBar("DEFRAG", "~DEFRAG CD", 21, true)
+			core:AddBar("ENRAGE", "ENRAGE", 480, true)
 
 			--Print(eventTime .. " FIGHT STARTED")
 		end
