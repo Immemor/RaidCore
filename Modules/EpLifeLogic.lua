@@ -80,6 +80,8 @@ function mod:OnDebuffApplied(unitName, splId, unit)
 		if unitName == strMyName then
 			core:AddMsg("NOHEAL", "No-Healing Debuff!", 5, "Alarm")
 		end
+	elseif strSpellName == "Thorns" then
+		core:MarkUnit(unit, nil, "THORNS\nDEBUFF")
 	end
 	--Print(eventTime .. " " .. unitName .. "has debuff: " .. strSpellName .. " with splId: " .. splId)
 end
@@ -92,6 +94,8 @@ function mod:OnDebuffRemoved(unitName, splId, unit)
 	if strSpellName == "Snake Snack" then
 		core:DropMark(unit:GetId())
 	elseif strSpellName == "Life Force Shackle" then
+		core:DropMark(unit:GetId())
+	elseif strSpellName == "Thorns" then
 		core:DropMark(unit:GetId())
 	end
 end
@@ -112,6 +116,13 @@ function mod:OnUnitCreated(unit)
 		end
 	elseif sName == "Essence of Logic" then
 		core:AddUnit(unit)
+	elseif sName == "Alphanumeric Hash" then
+		local unitId = unit:GetId()
+		if unitId then
+			core:AddPixie(unitId, 2, unit, nil, "Red", 10, 20, 0)	
+		end
+	elseif sName == "Life Force" then
+		core:AddPixie(unit:GetId(), 2, unit, nil, "Blue", 3, 15, 0)
 	end
 	--Print(eventTime .. " - " .. sName)
 end
@@ -122,6 +133,13 @@ function mod:OnUnitDestroyed(unit)
 	if sName == "Essence of Logic" then
 		midphase = false
 		core:ResetWorldMarkers()
+	elseif sName == "Alphanumeric Hash" then
+		local unitId = unit:GetId()
+		if unitId then
+			core:DropPixie(unitId)
+		end
+	elseif sName == "Life Force" then
+		core:DropPixie(unit:GetId())
 	end
 end
 
