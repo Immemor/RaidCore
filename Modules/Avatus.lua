@@ -10,9 +10,7 @@ local phase2warn, phase2 = false, false
 local phase_blueroom = false
 local phase2_blueroom_rotation = {}
 local encounter_started = false
-local redBuffCount = 1
-local greenBuffCount = 1
-local blueBuffCount = 1
+local redBuffCount, greenBuffCount, blueBuffCount = 1
 local buffCountTimer = nil
 local gungrid_time = nil
 -- 40man: first after 46sec - 20m: first after 20sec, after that every 112 sec
@@ -95,6 +93,7 @@ function mod:OnUnitCreated(unit)
 	--Print(eventTime .. " " .. sName .. " spawned")
 	if sName == "Avatus" then
 		core:AddUnit(unit)
+		core:AddPixie(unit:GetId(), 2, unit, nil, "Green", 10, 22, 0)
 	elseif sName == "Holo Hand" then
 		--Print(eventTime .. " Holo hand Spawned")
 		local unitId = unit:GetId()
@@ -102,6 +101,7 @@ function mod:OnUnitCreated(unit)
 		core:WatchUnit(unit)
 		table.insert(holo_hands, unitId, {["unit"] = unit})
 		core:AddMsg("HHAND", "Holo Hand Spawned", 5, "Info")
+		core:AddPixie(unitId, 2, unit, nil, "Blue", 7, 20, 0)
 	elseif sName == "Mobius Physics Constructor" then
 		core:AddUnit(unit)
 	elseif sName == "Holo Cannon" then
@@ -121,10 +121,15 @@ function mod:OnUnitDestroyed(unit)
 	local sName = unit:GetName()
 	local unitId = unit:GetId()
 
+	if sName == "Holo Hand" then
+		core:DropPixie(unit:GetId())
+	end
+	
 	if sName == "Holo Hand" and holo_hands[unitId] then
 		holo_hands[unitId] = nil
-		--Print("Removed destroyed holo hand from holo_hands list")
 	elseif sName == "Holo Cannon" then
+		core:DropPixie(unit:GetId())
+	elseif sName == "Avatus" then
 		core:DropPixie(unit:GetId())
 	end
 end
@@ -298,7 +303,8 @@ function mod:OnCombatStateChanged(unit, bInCombat)
 
 			ChatSystemLib.Command('/p ' .. strRedBuffs)
 			ChatSystemLib.Command('/p ' .. strGreenBuffs)
-			ChatSystemLib.Command('/p ' .. strBlueBuffs)--]]
+			ChatSystemLib.Command('/p ' .. strBlueBuffs)
+			--]]
 
 		end
 	end
