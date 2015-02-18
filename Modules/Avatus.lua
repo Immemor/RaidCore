@@ -19,6 +19,11 @@ local gungrid_timer = 20
 local obliteration_beam_timer = 69
 local holo_hands = {}
 
+local handpos = {
+	["hand1"] = {x = 608.70, y = -198.75, z = -191.62},
+	["hand2"] = {x = 607.67, y = -198.75, z = -157.00},
+}
+
 function mod:OnBossEnable()
 	Print(("Module %s loaded"):format(mod.ModuleName))
 	Apollo.RegisterEventHandler("UnitCreated", 			"OnUnitCreated", self)
@@ -84,6 +89,7 @@ function mod:OnReset()
 	gungrid_timer = 20
 	obliteration_beam_timer = 69
 	holo_hands = {}
+	core:ResetMarks()
 end
 
 function mod:OnUnitCreated(unit)
@@ -104,6 +110,7 @@ function mod:OnUnitCreated(unit)
 		core:AddPixie(unitId, 2, unit, nil, "Blue", 7, 20, 0)
 	elseif sName == "Mobius Physics Constructor" then
 		core:AddUnit(unit)
+		core:WatchUnit(unit)
 	elseif sName == "Holo Cannon" then
 		core:AddPixie(unit:GetId(), 2, unit, nil, "Blue", 5, 100, 0)
 	elseif sName == "Shock Sphere" then
@@ -173,7 +180,7 @@ function mod:OnBuffApplied(unitName, splId, unit)
 end
 
 function mod:OnHealthChanged(unitName, health)
-	if unitName == "Avatus" and health >= 75 and health <= 80 and not phase2warn then
+	if unitName == "Avatus" and health >= 75 and health <= 77 and not phase2warn then
 		phase2warn = true
 		core:AddMsg("AVAP2", "P2 SOON !", 5, "Info")
 	end
@@ -204,6 +211,9 @@ function mod:OnSpellCastStart(unitName, castName, unit)
 		if closest_holo_hand["unit"]:GetCastName() == "Crushing Blow" then
 			core:AddMsg("CRBLOW", "INTERRUPT CRUSHING BLOW!", 5, "Inferno")
 		end
+	elseif unitName == "Mobius Physics Constructor" and castName == "Data Flare" then
+		core:AddBar("BLIND", "Blind", 29, true)
+		core:AddMsg("BLIND", "BLIND! TURN AWAY FROM BOSS", 5, "Inferno")
 	end
 
 	--Print(eventTime .. " " .. unitName .. " is casting " .. castName)
@@ -280,6 +290,8 @@ function mod:OnCombatStateChanged(unit, bInCombat)
 
 			core:AddBar("OBBEAM", "Obliteration Beam", obliteration_beam_timer, true)
 			core:AddBar("GGRID", "~Gun Grid", gungrid_timer, true)
+			core:SetWorldMarker(handpos["hand1"], "Hand Spawn")
+			core:SetWorldMarker(handpos["hand2"], "Hand Spawn")
 			gungrid_timer = 112
 			obliteration_beam_timer = 37
 		elseif sName == "Infinite Logic Loop" then
@@ -309,7 +321,6 @@ function mod:OnCombatStateChanged(unit, bInCombat)
 			ChatSystemLib.Command('/p ' .. strGreenBuffs)
 			ChatSystemLib.Command('/p ' .. strBlueBuffs)
 			--]]
-
 		end
 	end
 end

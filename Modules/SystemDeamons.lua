@@ -7,7 +7,7 @@ local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local mod = core:NewBoss("SystemDeamons", 52)
 if not mod then return end
 
-mod:RegisterEnableMob("Binary System Daemon","Null System Daemon")
+mod:RegisterEnableBossPair("Binary System Daemon","Null System Daemon")
 mod:RegisterRestrictZone("SystemDeamons", "Halls of the Infinite Mind", "Infinite Generator Core")
 
 --------------------------------------------------------------------------------
@@ -91,7 +91,7 @@ function mod:OnUnitCreated(unit)
 		end
 	elseif sName == "Null System Daemon" or sName == "Binary System Daemon" then
 		--core:MarkUnit(unit, 0, ("N%s"):format(sdSurgeCount[unit:GetId()] or 0))
-		core:MarkUnit(unit, 0, ("%s%s"):format(sName:find("Null") and "S" or "N", sdSurgeCount[unit:GetId()] or 0))
+		core:MarkUnit(unit, 0, ("%s"):format(sName:find("Null") and "S" or "N"))
 		core:AddUnit(unit)
 		core:WatchUnit(unit)
 	--elseif sName == "Null System Daemon"  then
@@ -133,7 +133,7 @@ function mod:OnHealthChanged(unitName, health)
 	if health >= 70 and health <= 72 and not phase2warn and not phase2 then
 		phase2warn = true
 		core:AddMsg("SDP2", "P2 SOON !", 5, "Algalon")
-	elseif health >= 70 and health <= 32 and not phase2warn and not phase2 then
+	elseif health >= 32 and health <= 70 and not phase2warn and not phase2 then
 		phase2warn = true
 		core:AddMsg("SDP2", "P2 SOON !", 5, "Algalon")		
 	end
@@ -154,11 +154,7 @@ end
 
 
 function mod:OnSpellCastEnd(unitName, castName, unit)
-	if unitName == "Binary System Daemon" and castName == "Power Surge" then
-		core:MarkUnit(unit, 0, ("N%s"):format(sdSurgeCount[unit:GetId()]))
-	elseif unitName == "Null System Daemon" and castName == "Power Surge" then	
-		core:MarkUnit(unit, 0, ("S%s"):format(sdSurgeCount[unit:GetId()]))	
-	elseif unitName == "Recovery Protocol" and castName == "Repair Sequence" then
+	if unitName == "Recovery Protocol" and castName == "Repair Sequence" then
 		core:DropMark(unit:GetId())
 	end
 end
@@ -242,9 +238,7 @@ function mod:OnZoneChanged(zoneId, zoneName)
 		for id, timer in pairs(PurgeLast) do
 			core:StopBar("PURGE_" .. id)
 		end
-		local probenorth = { x = 95.76, y = -337.66, z = -561.55 }
 		local probesouth = { x = 95.89, y = -337.19, z = 211.26 }
-		core:SetWorldMarker(probenorth, "Probe Spawn")
 		core:SetWorldMarker(probesouth, "Probe Spawn")
 	end
 end
@@ -271,6 +265,7 @@ function mod:OnChatDC(message)
 		if phase2 then
 			core:ResetWorldMarkers()
 			phase2 = false
+			phase2warn = false
 		end
 		discoCount = discoCount + 1
 		if self:Tank() then
@@ -342,7 +337,7 @@ function mod:OnCombatStateChanged(unit, bInCombat)
 	if unit:GetType() == "NonPlayer" and bInCombat then
 		local sName = unit:GetName()
 
-		if sName == "Null System Daemon"  or  sName == "Binary System Daemon" then
+		if sName == "Null System Daemon" or sName == "Binary System Daemon" then
 			self:Start()
 			discoCount, sdwaveCount, probeCount = 0, 0, 0
 			phase2warn, phase2 = false, false
@@ -350,7 +345,6 @@ function mod:OnCombatStateChanged(unit, bInCombat)
 			sdSurgeCount[unit:GetId()] = 1
 			PurgeLast[unit:GetId()] = 0
 			playerName = GameLib.GetPlayerUnit():GetName()
-			core:MarkUnit(unit, 0, ("%s%s"):format(sName:find("Null") and "S" or "N", sdSurgeCount[unit:GetId()]))
 			core:AddUnit(unit)
 			core:WatchUnit(unit)
 			core:RaidDebuff()

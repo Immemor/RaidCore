@@ -48,6 +48,13 @@ local spawnCount = {
 	5,
 	5	
 }
+
+local maulerSpawn = {
+	["northwest"] = { x = 4288, y = -568, z = -17040 },
+	["northeast"] = { x = 4332, y = -568, z = -17040 },
+	["southwest"] = { x = 0, y = 0, z = 0 },
+	["southeast"] = { x = 0, y = 0, z = 0 },
+}
 --[[
 L1 : 4288.5, -568.48095703125, -16765.66796875
 R1 : 4332.5, -568.4833984375, -16765.66796875
@@ -97,6 +104,7 @@ end
 
 function mod:OnWipe()
 	Apollo.RemoveEventHandler("CombatLogHeal", self)
+	core:ResetWorldMarkers()
 end
 
 function mod:OnUnitCreated(unit)
@@ -108,6 +116,9 @@ function mod:OnUnitCreated(unit)
 	end--]]
 	if sName == "Corrupted Ravager" or sName == "Empowered Ravager" then
 		core:WatchUnit(unit)
+	elseif sName == "Volatile Mauler" then
+		--local Rover = Apollo.GetAddon("Rover")
+		--Rover:AddWatch("Mauler", unit:GetPosition(), 0)
 	end
 end
 
@@ -151,6 +162,8 @@ function mod:OnChatDC(message)
 			first = false
 		end
 		core:ResetWorldMarkers()
+		core:SetWorldMarker(maulerSpawn["northwest"], "FROG SPAWN")
+		core:SetWorldMarker(maulerSpawn["northeast"], "FROG SPAWN")
 		if leftSpawn[section] then
 			core:SetWorldMarker(leftSpawn[section], "LEFT")
 		end
@@ -217,6 +230,8 @@ function mod:OnCombatStateChanged(unit, bInCombat)
 			core:WatchUnit(unit)
 			core:AddBar("RUPTURE", "~RUPTURE", 35, 1)
 			core:AddBar("CORRUPTION", "FULL CORRUPTION", 106, 1)
+			core:SetWorldMarker(maulerSpawn["northwest"], "FROG SPAWN")
+			core:SetWorldMarker(maulerSpawn["northeast"], "FROG SPAWN")
 			core:StartScan()
 		elseif sName == "Strain Parasite" or sName == "Gloomclaw Skurge" or sName == "Corrupted Fraz" then
 			local timeOfEvent = GameLib.GetGameTime()

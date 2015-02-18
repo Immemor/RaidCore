@@ -51,7 +51,9 @@ function mod:OnUnitCreated(unit)
 		--core:AddLine(unit:GetId().."_2", 2, unit, nil, 1, 20, 180)
 	elseif sName == "Weather Station" then
 		-- Todo see if we can concat position to display in unit monitor.
-		--local stationPos = unit:GetPosition()
+		local stationPos = unit:GetPosition()
+		--local Rover = Apollo.GetAddon("Rover")
+		--Rover:AddWatch("stationPos", stationPos, 0)
 		--local posStr = (stationPos.z > bossPos.z) and "S" or "N", (stationPos.x > bossPos.x) and "E" or "W"
 		core:AddUnit(unit)
 		local playerUnit = GameLib.GetPlayerUnit()
@@ -76,6 +78,8 @@ end
 function mod:OnSpellCastStart(unitName, castName, unit)
 	if unitName == "Maelstrom Authority" and castName == "Activate Weather Cycle" then
 		bossPos = unit:GetPosition()
+		--local Rover = Apollo.GetAddon("Rover")
+		--Rover:AddWatch("bossPoss", bossPos, 0)
 		stationCount = 0
 		core:AddBar("STATION", ("[%s] STATION"):format(stationCount + 1), 13)
 	elseif unitName == "Maelstrom Authority" and castName == "Ice Breath" then
@@ -104,7 +108,7 @@ function mod:OnCombatStateChanged(unit, bInCombat)
 			core:AddUnit(unit)
 			core:WatchUnit(unit)
 			core:StartScan()
-			core:AddPixie(unit:GetId(), 2, unit, nil, "Green", 10, 15, 0)
+			core:AddPixie(unit:GetId(), 2, unit, nil, "Red", 10, 15, 0)
 		elseif sName == "Weather Station" then
 			stationCount = stationCount + 1
 			local station_name = "STATION" .. tostring(stationCount)
