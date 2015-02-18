@@ -106,6 +106,8 @@ function mod:OnUnitCreated(unit)
 		core:AddUnit(unit)
 	elseif sName == "Holo Cannon" then
 		core:AddPixie(unit:GetId(), 2, unit, nil, "Blue", 5, 100, 0)
+	elseif sName == "Shock Sphere" then
+		core:AddPixie(unit:GetId(), 2, unit, nil, "Blue", 5, -7, 0)
 	end
 
 	-- TESTING BLUE ROOM:
@@ -130,6 +132,8 @@ function mod:OnUnitDestroyed(unit)
 	elseif sName == "Holo Cannon" then
 		core:DropPixie(unit:GetId())
 	elseif sName == "Avatus" then
+		core:DropPixie(unit:GetId())
+	elseif sName == "Shock Sphere" then
 		core:DropPixie(unit:GetId())
 	end
 end
