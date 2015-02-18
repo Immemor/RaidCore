@@ -48,6 +48,7 @@ end
 
 function mod:OnSpellCastStart(unitName, castName, unit)
 	local eventTime = GameLib.GetGameTime()
+	--Print(eventTime .. castName .. unit:GetName())
 	if unitName == "Mnemesis" and castName == "Circuit Breaker" then
 		core:StopBar("MIDPHASE")
 		core:AddBar("MIDPHASE", "Middle Phase", 100, true)
@@ -60,26 +61,17 @@ function mod:OnSpellCastStart(unitName, castName, unit)
 	elseif unitName == "Mnemesis" and castName == "Defragment" then
 		core:StopBar("DEFRAG")
 		core:AddMsg("DEFRAG", "SPREAD", 5, "Beware")
-		core:AddBar("DEFRAG", 40, true)
+		core:AddBar("DEFRAG", "~Defrag", 40, true)
 	end
 end
 
 function mod:OnDebuffApplied(unitName, splId, unit)
-	splName = GameLib.GetSpell(splId):GetName()
+	local splName = GameLib.GetSpell(splId):GetName()
 	if unitName == strMyName and splName == "Data Disruptor" then
 		core:AddMsg("DISRUPTOR", "Stay away from boss with buff!", 5, "Beware")
 	end
 end
 
-function mod:OnUnitCreated(unit)
-	local sName = unit:GetName()
-	if sName == "Mnemesis" or sName == "Hydroflux" then
-		core:AddUnit(unit)
-		core:WatchUnit(unit)
-		self:Start()
-		self:StartScan()
-	end
-end
 function mod:OnCombatStateChanged(unit, bInCombat)
 	if unit:GetType() == "NonPlayer" and bInCombat then
 		local sName = unit:GetName()
