@@ -32,6 +32,7 @@ function mod:OnBossEnable()
 	--Apollo.RegisterEventHandler("CHAT_DATACHRON", 	"OnChatDC", self)
 	--Apollo.RegisterEventHandler("BUFF_APPLIED", 		"OnBuffApplied", self)
 	Apollo.RegisterEventHandler("DEBUFF_APPLIED", 		"OnDebuffApplied", self)
+	Apollo.RegisterEventHandler("DEBUFF_REMOVED", 		"OnDebuffRemoved", self)
 	Apollo.RegisterEventHandler("RAID_WIPE", 			"OnReset", self)
 end
 
@@ -76,8 +77,23 @@ end
 
 function mod:OnDebuffApplied(unitName, splId, unit)
 	local splName = GameLib.GetSpell(splId):GetName()
-	if unitName == strMyName and splName == "Data Disruptor" then
-		core:AddMsg("DISRUPTOR", "Stay away from boss with buff!", 5, "Beware")
+	if splName == "Data Disruptor" then
+		if unitName == strMyName then
+			core:AddMsg("DISRUPTOR", "Stay away from boss with buff!", 5, "Beware")
+		end
+		core:MarkUnit(unit, nil, "ORB")
+	end
+end
+
+function mod:OnDebuffRemoved(unitName, splId, unit)
+	local eventTime = GameLib.GetGameTime()
+	local tSpell = GameLib.GetSpell(splId)
+	local strSpellName = tSpell:GetName()
+	if strSpellName == "Data Disruptor" then
+		local unitId = unit:GetId()
+		if unitId then
+			core:DropMark(unit:GetId())
+		end
 	end
 end
 
@@ -130,7 +146,8 @@ function mod:OnCombatStateChanged(unit, bInCombat)
 			uPlayer = GameLib.GetPlayerUnit()
 			strMyName = uPlayer:GetName()
 			midphase = false
-			core:UnitDebuff(uPlayer)
+			--core:UnitDebuff(uPlayer)
+			core:RaidDebuff()
 			core:AddUnit(unit)
 			core:WatchUnit(unit)
 			core:StartScan()

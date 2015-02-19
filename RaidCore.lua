@@ -22,7 +22,7 @@ local monitoring = nil
 
 local trackMaster = Apollo.GetAddon("TrackMaster")
 local markCount = 0
-local AddonVersion = 15021901
+local AddonVersion = 15021902
 local VCReply, VCtimer = {}, nil
 local CommChannelTimer = nil
 local empCD, empTimer = 5, nil
@@ -557,7 +557,7 @@ function RaidCore:StartCombat(modName)
 			mod:Disable() 
 		end
 	end
-	Apollo.RemoveEventHandler("UnitCreated",	 	self)
+	--Apollo.RemoveEventHandler("UnitCreated",	 	self)
 	Apollo.RegisterEventHandler("UnitEnteredCombat", 		"CombatStateChanged", self)
 	Apollo.RegisterEventHandler("ChatMessage", 			"OnChatMessage", self)
 end
