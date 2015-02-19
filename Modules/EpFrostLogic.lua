@@ -16,6 +16,7 @@ mod:RegisterRestrictZone("EpFrostLogic", "Elemental Vortex Alpha", "Elemental Vo
 
 local uPlayer = nil
 local strMyName = ""
+local midphase = false
 
 --------------------------------------------------------------------------------
 -- Initialization
@@ -24,10 +25,10 @@ local strMyName = ""
 function mod:OnBossEnable()
 	Print(("Module %s loaded"):format(mod.ModuleName))
 	Apollo.RegisterEventHandler("UnitCreated", 			"OnUnitCreated", self)
-	--Apollo.RegisterEventHandler("UnitDestroyed", 		"OnUnitDestroyed", self)
+	Apollo.RegisterEventHandler("UnitDestroyed", 		"OnUnitDestroyed", self)
 	Apollo.RegisterEventHandler("UnitEnteredCombat", 	"OnCombatStateChanged", self)
 	Apollo.RegisterEventHandler("SPELL_CAST_START", 	"OnSpellCastStart", self)
-	--Apollo.RegisterEventHandler("SPELL_CAST_END", 	"OnSpellCastEnd", self)
+	Apollo.RegisterEventHandler("SPELL_CAST_END", 		"OnSpellCastEnd", self)
 	--Apollo.RegisterEventHandler("CHAT_DATACHRON", 	"OnChatDC", self)
 	--Apollo.RegisterEventHandler("BUFF_APPLIED", 		"OnBuffApplied", self)
 	Apollo.RegisterEventHandler("DEBUFF_APPLIED", 		"OnDebuffApplied", self)
@@ -44,6 +45,7 @@ function mod:OnReset()
 	core:StopBar("GRAVE")
 	core:StopBar("PRISON")
 	core:StopBar("DEFRAG")
+	midphase = false
 end
 
 function mod:OnSpellCastStart(unitName, castName, unit)
@@ -52,6 +54,7 @@ function mod:OnSpellCastStart(unitName, castName, unit)
 	if unitName == "Mnemesis" and castName == "Circuit Breaker" then
 		core:StopBar("MIDPHASE")
 		core:AddBar("MIDPHASE", "Middle Phase", 100, true)
+		midphase = true
 	elseif unitName == "Hydroflux" and castName == "Watery Grave" and self:Tank() then
 		core:StopBar("GRAVE")
 		core:AddBar("GRAVE", "Watery Grave", 10)
@@ -65,10 +68,52 @@ function mod:OnSpellCastStart(unitName, castName, unit)
 	end
 end
 
+function mod:OnSpellCastEnd(unitName, castName)
+	if unitName == "Mnemesis" and castName == "Circuit Breaker" then
+		midphase = false
+	end
+end
+
 function mod:OnDebuffApplied(unitName, splId, unit)
 	local splName = GameLib.GetSpell(splId):GetName()
 	if unitName == strMyName and splName == "Data Disruptor" then
 		core:AddMsg("DISRUPTOR", "Stay away from boss with buff!", 5, "Beware")
+	end
+end
+
+function mod:OnUnitCreated(unit)
+	local sName = unit:GetName()
+	local eventTime = GameLib.GetGameTime()
+
+	if sName == "Alphanumeric Hash" then
+		local unitId = unit:GetId()
+		if unitId then
+			core:AddPixie(unitId, 2, unit, nil, "Red", 10, 20, 0)	
+		end
+	elseif sName == "Hydro Disrupter - DNT" and not midphase then
+		local unitId = unit:GetId()
+		if unitId then
+			core:AddPixie(unitId, 1, unit, uPlayer, "Blue", 5, 10, 10)
+		end
+	end
+
+	--Print(eventTime .. " - " .. sName)
+end
+
+function mod:OnUnitDestroyed(unit)
+	local sName = unit:GetName()
+	local eventTime = GameLib.GetGameTime()
+	
+	if sName == "Alphanumeric Hash" then
+		local unitId = unit:GetId()
+		if unitId then
+			core:DropPixie(unitId)
+		end
+	elseif sName == "Hydro Disrupter - DNT" then
+		local unitId = unit:GetId()
+		if unitId then
+			core:DropPixie(unitId)
+		end
 	end
 end
 
@@ -84,6 +129,7 @@ function mod:OnCombatStateChanged(unit, bInCombat)
 			self:Start()
 			uPlayer = GameLib.GetPlayerUnit()
 			strMyName = uPlayer:GetName()
+			midphase = false
 			core:UnitDebuff(uPlayer)
 			core:AddUnit(unit)
 			core:WatchUnit(unit)
@@ -96,7 +142,7 @@ function mod:OnCombatStateChanged(unit, bInCombat)
 				core:AddBar("GRAVE", "Watery Grave", 10)
 			end
 
-			Print(eventTime .. " " .. sName .. " FIGHT STARTED ")
+			--Print(eventTime .. " " .. sName .. " FIGHT STARTED ")
 		end
 	end
 end

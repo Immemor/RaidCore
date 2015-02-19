@@ -22,7 +22,7 @@ local monitoring = nil
 
 local trackMaster = Apollo.GetAddon("TrackMaster")
 local markCount = 0
-local AddonVersion = 15021802
+local AddonVersion = 15021901
 local VCReply, VCtimer = {}, nil
 local CommChannelTimer = nil
 local empCD, empTimer = 5, nil
@@ -1252,6 +1252,8 @@ local function IsPartyMemberByName(sName)
 end
 
 function RaidCore:OnComMessage(channel, tMessage)
+	--local Rover = Apollo.GetAddon("Rover")
+	--Rover:AddWatch("msg", tMessage, 0)
 	if type(tMessage.action) ~= "string" then return end
 	local msg = {}
 
