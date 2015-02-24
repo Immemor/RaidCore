@@ -17,6 +17,7 @@ mod:RegisterRestrictZone("EpFrostLogic", "Elemental Vortex Alpha", "Elemental Vo
 local uPlayer = nil
 local strMyName = ""
 local midphase = false
+local encounter_started = false
 
 --------------------------------------------------------------------------------
 -- Initialization
@@ -47,6 +48,7 @@ function mod:OnReset()
 	core:StopBar("PRISON")
 	core:StopBar("DEFRAG")
 	midphase = false
+	encounter_started = false
 end
 
 function mod:OnSpellCastStart(unitName, castName, unit)
@@ -146,6 +148,7 @@ function mod:OnCombatStateChanged(unit, bInCombat)
 			uPlayer = GameLib.GetPlayerUnit()
 			strMyName = uPlayer:GetName()
 			midphase = false
+			encounter_started = true
 			--core:UnitDebuff(uPlayer)
 			core:RaidDebuff()
 			core:AddUnit(unit)
