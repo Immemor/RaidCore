@@ -52,8 +52,8 @@ local spawnCount = {
 local maulerSpawn = {
 	["northwest"] = { x = 4288, y = -568, z = -17040 },
 	["northeast"] = { x = 4332, y = -568, z = -17040 },
-	["southwest"] = { x = 0, y = 0, z = 0 },
-	["southeast"] = { x = 0, y = 0, z = 0 },
+	["southwest"] = { x = 4288, y = -568, z = -16949 }, --todo check if these 2 are sw/se or other way around
+	["southeast"] = { x = 4332, y = -568, z = -16949 },
 }
 --[[
 L1 : 4288.5, -568.48095703125, -16765.66796875
@@ -162,8 +162,10 @@ function mod:OnChatDC(message)
 			first = false
 		end
 		core:ResetWorldMarkers()
-		core:SetWorldMarker(maulerSpawn["northwest"], "FROG SPAWN")
-		core:SetWorldMarker(maulerSpawn["northeast"], "FROG SPAWN")
+		core:SetWorldMarker(maulerSpawn["northwest"], "FROG 1")
+		core:SetWorldMarker(maulerSpawn["northeast"], "FROG 2")
+		core:SetWorldMarker(maulerSpawn["southeast"], "FROG 3")
+		core:SetWorldMarker(maulerSpawn["southwest"], "FROG 4")
 		if leftSpawn[section] then
 			core:SetWorldMarker(leftSpawn[section], "LEFT")
 		end
@@ -199,13 +201,13 @@ end
 function mod:OnCombatLogHeal(tArgs)
 	if tArgs.unitTarget and tArgs.unitTarget:GetName() == "Essence of Logic" then
 		if not essenceUp[tArgs.unitTarget:GetId()] then
-			Print("Found EssLogic : ".. tArgs.unitTarget:GetId())
+			--Print("Found EssLogic : ".. tArgs.unitTarget:GetId())
 			essenceUp[tArgs.unitTarget:GetId()] = true
 			local essPos = tArgs.unitTarget:GetPosition()
 			core:MarkUnit(tArgs.unitTarget, 0, (essPos.x < 4310) and "L" or "R")
 			core:AddUnit(tArgs.unitTarget)
 			if #essenceUp == 2 then
-				Print("Found 2 essences")
+				--Print("Found 2 essences")
 				Apollo.RemoveEventHandler("CombatLogHeal", self)
 			end
 		end
