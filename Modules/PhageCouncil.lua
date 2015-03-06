@@ -44,8 +44,8 @@ function mod:OnSpellCastStart(unitName, castName, unit)
 		core:AddMsg("CONVP2", "P2 : SUBDUE", 5, "Alert")
 		core:AddBar("CONVP2", "P2 : SUBDUE", 29.5)
 	elseif unitName == "Noxmind the Insidious" and castName == "Teleport" then
-		core:AddMsg("CONVP2", "P2 : PILIERS", 5, "Alert")
-		core:AddBar("CONVP2", "P2 : PILIERS", 29.5)
+		core:AddMsg("CONVP2", "P2 : PILLARS", 5, "Alert")
+		core:AddBar("CONVP2", "P2 : PILLARS", 29.5)
 	elseif unitName == "Fleshmonger Vratorg" and castName == "Teleport" then
 		core:AddMsg("CONVP2", "P2 : SHIELD", 5, "Alert")
 		core:AddBar("CONVP2", "P2 : SHIELD", 29.5)	
