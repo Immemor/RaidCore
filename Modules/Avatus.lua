@@ -405,8 +405,8 @@ function mod:OnCombatStateChanged(unit, bInCombat)
 
 			core:AddBar("OBBEAM", "Obliteration Beam", obliteration_beam_timer, true)
 			core:AddBar("GGRID", "~Gun Grid", gungrid_timer, true)
-			core:SetWorldMarker(handpos["hand1"], "Hand Spawn")
-			core:SetWorldMarker(handpos["hand2"], "Hand Spawn")
+			core:SetWorldMarker(handpos["hand1"], "Hand 1")
+			core:SetWorldMarker(handpos["hand2"], "Hand 2")
 			core:SetWorldMarker(referencePos["north"], "North")
 			core:SetWorldMarker(referencePos["south"], "South")
 			gungrid_timer = 112
