@@ -95,7 +95,7 @@ function mod:OnSpellCastStart(unitName, castName, unit)
 	if unitName == "Dreadphage Ohmna" and castName == "Erupt" then
 		if OhmnaP3 then return end
 		local pilarActivated = self:OhmnaPE(pilarCount % 2)
-		core:AddBar("OPILAR", ("PILIER %s : %s"):format(pilarCount, pilarActivated), 32, 1)
+		core:AddBar("OPILAR", ("PILLAR %s : %s"):format(pilarCount, pilarActivated), 32, 1)
 		if self:Tank() then
 			core:AddBar("OBORE", "SWITCH TANK", 45)
 		end
@@ -143,7 +143,7 @@ function mod:OnChatDC(message)
 				firstPull = false
 			else
 				local pilarActivated = self:OhmnaPE(pilarCount % 2)
-				core:AddBar("OPILAR", ("PILIER %s : %s"):format(pilarCount, pilarActivated), 25, 1)
+				core:AddBar("OPILAR", ("PILLAR %s : %s"):format(pilarCount, pilarActivated), 25, 1)
 			end
 		elseif message:find("Dreadphage Ohmna submerges") then
 			pilarCount, boreCount = 1, 0
