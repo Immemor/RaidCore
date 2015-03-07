@@ -187,7 +187,9 @@ function mod:OnUnitCreated(unit)
 		core:WatchUnit(unit)
 		local unitId = unit:GetId()
 		if unitId then
-			core:AddPixie(unitId, 2, unit, nil, "Red", 5, 35, 0)
+			if unit:GetHealth() then -- Portals have same name, actual boss has HP, portals have nilvalue
+				core:AddPixie(unitId, 2, unit, nil, "Red", 5, 35, 0)
+			end
 		end
 	elseif sName == "Unstoppable Object Simulation" then
 		core:AddUnit(unit)

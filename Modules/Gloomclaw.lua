@@ -232,8 +232,6 @@ function mod:OnCombatStateChanged(unit, bInCombat)
 			core:WatchUnit(unit)
 			core:AddBar("RUPTURE", "~RUPTURE", 35, 1)
 			core:AddBar("CORRUPTION", "FULL CORRUPTION", 106, 1)
-			core:SetWorldMarker(maulerSpawn["northwest"], "FROG SPAWN")
-			core:SetWorldMarker(maulerSpawn["northeast"], "FROG SPAWN")
 			core:StartScan()
 		elseif sName == "Strain Parasite" or sName == "Gloomclaw Skurge" or sName == "Corrupted Fraz" then
 			local timeOfEvent = GameLib.GetGameTime()

@@ -98,6 +98,7 @@ function mod:OnUnitCreated(unit)
 
 		--Print(eventTime .. " Midphase STARTED")
 	elseif sName == "Life Force" then
+		--Print(eventTime .. " - Orb")
 		core:AddPixie(unit:GetId(), 2, unit, nil, "Blue", 10, 40, 0)
 	elseif sName == "Lifekeeper" then
 		--Print(eventTime .. " - " .. sName)
