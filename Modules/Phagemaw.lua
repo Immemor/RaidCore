@@ -8,6 +8,8 @@ local mod = core:NewBoss("PhageMaw", 67)
 if not mod then return end
 
 mod:RegisterEnableMob("Phage Maw")
+mod:RegisterRestrictZone("PhageMaw", "Experimentation Lab CX-33")
+mod:RegisterEnableZone("PhageMaw", "Experimentation Lab CX-33")
 
 --------------------------------------------------------------------------------
 -- Locals

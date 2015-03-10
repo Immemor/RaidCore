@@ -16,7 +16,7 @@ local addon = RaidCore
 -----------------------------------------------------------------------------------------------
 -- Constants
 -----------------------------------------------------------------------------------------------
-local enablezones, enablemobs, enablepairs, restrictzone = {}, {}, {}, {}
+local enablezones, enablemobs, enablepairs, restrictzone, enablezone = {}, {}, {}, {}, {}
 local monitoring = nil
 
 
@@ -123,6 +123,7 @@ function RaidCore:OnEnable()
 		--self.timer:Stop()
 
 		Apollo.RegisterEventHandler("ChangeWorld", 		"OnWorldChangedTimer", self)
+		Apollo.RegisterEventHandler("SubZoneChanged",	"OnSubZoneChanged", self)
 		Apollo.RegisterEventHandler("UnitDestroyed", 	"OnUnitDestroyed", self)
 
 		-- Do additional Addon initialization here
@@ -591,12 +592,35 @@ function RaidCore:OnWorldChanged()
 			end
 		elseif monitoring then
 			monitoring = nil
-			--Print("MONITORING OFF")
+			Print("MONITORING OFF")
 			Apollo.RemoveEventHandler("UnitCreated",	 	self)
 			Apollo.RemoveEventHandler("ChatMessage",	 	self)
 			Apollo.RemoveEventHandler("UnitEnteredCombat",	self)
 			self:ResetAll()
 			self.timer:Stop()
+		end
+	end
+end
+
+function RaidCore:OnSubZoneChanged(idZone, strSubZone)
+	for key, value in pairs(enablezone) do
+		if value[strSubZone] then
+			local modName = key
+			local bossMod = self.bossCore:GetModule(modName)
+			if not bossMod or bossMod:IsEnabled() then return end
+			Print("Enabling Boss Module : " .. modName)
+			bossMod:Enable()
+			return
+		end
+	end
+	-- if we haven't returned at this point we left the subzone and should disable the mod
+	-- if it is still enabled
+	for name, mod in self:IterateBossModules() do
+		for key, value in pairs(enablezone) do
+			local modName = mod.ModuleName
+			if key == modName and mod:IsEnabled() and not enablezone[modName][GetCurrentSubZoneName()] then
+				mod:Disable() 
+			end
 		end
 	end
 end
@@ -637,7 +661,9 @@ do
 	function RaidCore:GetEnableMobs() return enablemobs end
 	function RaidCore:GetEnablePairs() return enablepairs end
 	function RaidCore:RegisterRestrictZone(module, zone) add(zone, restrictzone, module.ModuleName) end
+	function RaidCore:RegisterEnableZone(module, zone) add(zone, enablezone, module.ModuleName) end
 	function RaidCore:GetRestrictZone() return restrictzone end
+	function RaidCore:GetEnableZone() return enablezone end
 end
 
 
@@ -651,6 +677,7 @@ do
 	end
 
 	function RaidCore:RegisterRestrictZone(module, ...) add2(module.ModuleName, restrictzone, ...) end
+	function RaidCore:RegisterEnableZone(module, ...) add2(module.ModuleName, enablezone, ...) end
 end
 	
 
