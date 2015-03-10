@@ -35,7 +35,8 @@ local function getMin(t)
     --if #t == 0 then return nil end
     local min_val, key = 1000, ""
     for k, v in pairs(t) do
-        if min_val > v then
+    	-- Ignore pillars that are on 0%
+        if min_val > v  and v > 0 then
             min_val, key = v, k
         elseif min_val == v then
         	key = key .. " / " .. k
