@@ -16,7 +16,7 @@ local addon = RaidCore
 -----------------------------------------------------------------------------------------------
 -- Constants
 -----------------------------------------------------------------------------------------------
-local enablezones, enablemobs, enablepairs, restrictzone, enablezone,restricteventobjective = {}, {}, {}, {}, {}, {}
+local enablezones, enablemobs, enablepairs, restrictzone, enablezone,restricteventobjective,enableeventobjective = {}, {}, {}, {}, {}, {}, {}
 local monitoring = nil
 
 
@@ -125,6 +125,7 @@ function RaidCore:OnEnable()
 		Apollo.RegisterEventHandler("ChangeWorld", 		"OnWorldChangedTimer", self)
 		Apollo.RegisterEventHandler("SubZoneChanged",	"OnSubZoneChanged", self)
 		Apollo.RegisterEventHandler("UnitDestroyed", 	"OnUnitDestroyed", self)
+		Apollo.RegisterEventHandler("PublicEventObjectiveUpdate",	"OnPublicEventObjectiveUpdate", self)
 
 		-- Do additional Addon initialization here
 
@@ -651,6 +652,26 @@ function RaidCore:OnSubZoneChanged(idZone, strSubZone)
 	end
 end
 
+function RaidCore:OnPublicEventObjectiveUpdate(peoUpdated)
+	for key, value in pairs(enableeventobjective) do
+		if value[peoUpdated:GetShortDescription()] then
+			if peoUpdated:GetStatus() == 1 then
+				local modName = key
+				local bossMod = self.bossCore:GetModule(modName)
+				if not bossMod or bossMod:IsEnabled() then return end
+				Print("Enabling Boss Module : " .. modName)
+				bossMod:Enable()
+				return
+			elseif peoUpdated:GetStatus() == 0 then
+				local modName = key
+				local bossMod = self.bossCore:GetModule(modName)
+				if not bossMod or not bossMod:IsEnabled() then return end
+				Print("Disabling Boss Module : " .. modName)
+				bossMod:Disable()
+			end
+		end
+	end
+end
 
 do
 	local function add(moduleName, tbl, ...)
@@ -687,7 +708,7 @@ do
 	function RaidCore:GetEnableMobs() return enablemobs end
 	function RaidCore:GetEnablePairs() return enablepairs end
 	function RaidCore:RegisterRestrictZone(module, zone) add(zone, restrictzone, module.ModuleName) end
-  function RaidCore:RegisterRestrictEventObjective(module, zone) add(zone, restricteventobjective, module.ModuleName) end
+  function RaidCore:RegisterRestrictEventObjective(module, objective) add(objective, restricteventobjective, module.ModuleName) end
 	function RaidCore:RegisterEnableZone(module, zone) add(zone, enablezone, module.ModuleName) end
 	function RaidCore:GetRestrictZone() return restrictzone end
   function RaidCore:GetRestrictEventObjective() return restricteventobjective end
@@ -706,6 +727,7 @@ do
 
 	function RaidCore:RegisterRestrictZone(module, ...) add2(module.ModuleName, restrictzone, ...) end
 	function RaidCore:RegisterEnableZone(module, ...) add2(module.ModuleName, enablezone, ...) end
+	function RaidCore:RegisterEnableEventObjective(module, ...) add2(module.ModuleName, enableeventobjective, ...) end
 end
 
 

@@ -9,6 +9,7 @@ if not mod then return end
 
 mod:RegisterEnableMob("Dreadphage Ohmna")
 mod:RegisterRestrictEventObjective("Defeat Dreadphage Ohmna")
+mod:RegisterEnableEventObjective("Defeat Dreadphage Ohmna")
 
 --------------------------------------------------------------------------------
 -- Locals
