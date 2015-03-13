@@ -2,21 +2,21 @@
 -- Client Lua Script for RaidCore
 -- Copyright (c) NCsoft. All rights reserved
 -----------------------------------------------------------------------------------------------
- 
+
 require "Window"
 require "ChatSystemLib"
 
 -----------------------------------------------------------------------------------------------
 -- RaidCore Module Definition
 -----------------------------------------------------------------------------------------------
---local RaidCore = {} 
+--local RaidCore = {}
 local RaidCore = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:NewAddon("RaidCore", false, {}, "Gemini:Timer-1.0")
 local addon = RaidCore
 
 -----------------------------------------------------------------------------------------------
 -- Constants
 -----------------------------------------------------------------------------------------------
-local enablezones, enablemobs, enablepairs, restrictzone, enablezone = {}, {}, {}, {}, {}
+local enablezones, enablemobs, enablepairs, restrictzone, enablezone,restricteventobjective = {}, {}, {}, {}, {}, {}
 local monitoring = nil
 
 
@@ -34,15 +34,15 @@ local chatEvent = {
 		[ChatSystemLib.ChatChannel_NPCYell] 	= 'CHAT_NPCYELL',
 		[ChatSystemLib.ChatChannel_NPCWhisper] 	= 'CHAT_NPCWHISPER',
 }
- 
- 
+
+
 -----------------------------------------------------------------------------------------------
 -- Initialization
 -----------------------------------------------------------------------------------------------
 function RaidCore:new(o)
     o = o or {}
     setmetatable(o, self)
-    self.__index = self 
+    self.__index = self
 
     -- initialize variables here
 
@@ -57,7 +57,7 @@ function RaidCore:Init()
 	}
     Apollo.RegisterAddon(self, bHasConfigureFunction, strConfigureButtonText, tDependencies)
 end
- 
+
 
 -----------------------------------------------------------------------------------------------
 -- RaidCore OnLoad
@@ -87,7 +87,7 @@ function RaidCore:OnEnable()
 			Apollo.AddAddonErrorText(self, "Could not load the main window for some reason.")
 			return
 		end
-		
+
 	    self.wndMain:Show(false, true)
 	    Apollo.LoadSprites("BarTextures.xml")
 
@@ -113,7 +113,7 @@ function RaidCore:OnEnable()
 	    end
 
 	    self.colorPicker = RaidCoreLibs.ColorPicker.new(self.xmlDoc)
-		
+
 		-- Register handlers for events, slash commands and timer, etc.
 		-- e.g. Apollo.RegisterEventHandler("KeyDown", "OnKeyDown", self)
 		Apollo.RegisterSlashCommand("raidc", "OnRaidCoreOn", self)
@@ -228,12 +228,12 @@ function RaidCore:OnSave(eLevel)
 	if eLevel ~= GameLib.CodeEnumAddonSaveLevel.Character then
         return nil
     end
-	local saveData = { 
+	local saveData = {
 		raidbars = self.raidbars:GetSaveData(),
 		unitmoni = self.unitmoni:GetSaveData(),
 		message = self.message:GetSaveData()
 	}
-	
+
 	return saveData
 end
 
@@ -244,7 +244,7 @@ function RaidCore:OnRestore(eLevel, tData)
 
 	if self.Loaded then
 		self:LoadSaveData(tData)
-		self:InitializeConfigForm()	
+		self:InitializeConfigForm()
 	else
 		self.saveData = tData
 	end
@@ -360,9 +360,9 @@ function RaidCore:OnRaidCoreOn(cmd, args)
 			self:AddMsg(tAllParams[2], tAllParams[3], 5)
 		end
 	elseif (tAllParams[1] == "version") then
-		Print("RaidCore version : " .. AddonVersion)	
+		Print("RaidCore version : " .. AddonVersion)
 	elseif (tAllParams[1] == "versioncheck") then
-		self:VersionCheck()	
+		self:VersionCheck()
 	elseif (tAllParams[1] == "pull") then
 		if tAllParams[2] ~= nil then
 			self:LaunchPull(tonumber(tAllParams[2]))
@@ -448,7 +448,7 @@ function RaidCore:OnRaidCoreOn(cmd, args)
 		y = -110.80034637451,
 		z = -483.20
 		}
-		self:SetWorldMarker(estpos, "EST")		
+		self:SetWorldMarker(estpos, "EST")
 		local sudpos = {
 		x = 165.79222106934,
 		y = -110.80034637451,
@@ -480,6 +480,28 @@ function RaidCore:OnTimer()
 	self.message:RefreshMsg()
 end
 
+function RaidCore:isPublicEventObjectiveActive(objectiveString)
+  local activeEvents = PublicEvent:GetActiveEvents()
+
+  if activeEvents == nil then
+    return false
+  end
+
+  for eventId, event in pairs(activeEvents) do
+    Print("Current event: " .. event:GetName())
+    local objectives = event:GetObjectives()
+    if objectives ~= nil then
+      for id,objective in pairs(objectives) do
+        if objective:GetShortDescription() == objectiveString then
+          Print("Found objective")
+          return objective:GetStatus() == 1
+        end
+      end
+    end
+  end
+  return false
+end
+
 function RaidCore:unitCheck(unit)
 	if unit and not unit:IsDead() then
 		local sName = unit:GetName()
@@ -490,6 +512,9 @@ function RaidCore:unitCheck(unit)
 				local module = self.bossCore:GetModule(modName)
 				if not module or module:IsEnabled() then return end
 				if restrictzone[modName] and not restrictzone[modName][GetCurrentSubZoneName()] then return end
+        --Print("Checking event " .. restricteventobjective[modName])
+        --Print(tostring(self:isPublicEventObjectiveActive(restricteventobjective[modName])))
+        if restricteventobjective[modName] and not self:isPublicEventObjectiveActive(restricteventobjective[modName]) then return end
 				Print("Enabling Boss Module : " .. enablemobs[sName])
 				for name, mod in self:IterateBossModules() do
 					if mod:IsEnabled() then mod:Disable() end
@@ -506,6 +531,7 @@ function RaidCore:unitCheck(unit)
 				for i, modName in next, enablemobs[sName] do
 					local module = self.bossCore:GetModule(modName)
 					if restrictzone[modName] and not restrictzone[modName][GetCurrentSubZoneName()] then return end
+          if restricteventobjective[modName] and not self:isPublicEventObjectiveActive(restricteventobjective[modName]) then return end
 					Print("Enabling Boss Module : " .. modName)
 					module:Enable()
 				end
@@ -554,8 +580,8 @@ end
 function RaidCore:StartCombat(modName)
 	Print("Starting Core Combat")
 	for name, mod in self:IterateBossModules() do
-		if mod:IsEnabled() and mod.ModuleName ~= modName then 
-			mod:Disable() 
+		if mod:IsEnabled() and mod.ModuleName ~= modName then
+			mod:Disable()
 		end
 	end
 	--Apollo.RemoveEventHandler("UnitCreated",	 	self)
@@ -584,7 +610,7 @@ function RaidCore:OnWorldChanged()
 				Apollo.RegisterEventHandler("UnitCreated", 			"unitCheck", self)
 				--Apollo.RegisterEventHandler("ChatMessage", 			"OnChatMessage", self)
 				--Apollo.RegisterEventHandler("UnitEnteredCombat", 		"CombatStateChanged", self)
-				if not self.timer then 
+				if not self.timer then
 					self.timer = ApolloTimer.Create(0.100, true, "OnTimer", self)
 				else
 					self.timer:Start()
@@ -619,7 +645,7 @@ function RaidCore:OnSubZoneChanged(idZone, strSubZone)
 		for key, value in pairs(enablezone) do
 			local modName = mod.ModuleName
 			if key == modName and mod:IsEnabled() and not enablezone[modName][GetCurrentSubZoneName()] then
-				mod:Disable() 
+				mod:Disable()
 			end
 		end
 	end
@@ -661,8 +687,10 @@ do
 	function RaidCore:GetEnableMobs() return enablemobs end
 	function RaidCore:GetEnablePairs() return enablepairs end
 	function RaidCore:RegisterRestrictZone(module, zone) add(zone, restrictzone, module.ModuleName) end
+  function RaidCore:RegisterRestrictEventObjective(module, zone) add(zone, restricteventobjective, module.ModuleName) end
 	function RaidCore:RegisterEnableZone(module, zone) add(zone, enablezone, module.ModuleName) end
 	function RaidCore:GetRestrictZone() return restrictzone end
+  function RaidCore:GetRestrictEventObjective() return restricteventobjective end
 	function RaidCore:GetEnableZone() return enablezone end
 end
 
@@ -679,7 +707,7 @@ do
 	function RaidCore:RegisterRestrictZone(module, ...) add2(module.ModuleName, restrictzone, ...) end
 	function RaidCore:RegisterEnableZone(module, ...) add2(module.ModuleName, enablezone, ...) end
 end
-	
+
 
 do
 	local function new(core, module, zoneId, ...)
@@ -849,7 +877,7 @@ function RaidCore:MarkUnit(unit, location, mark)
 		if  not self.mark[key] then
 			self.mark[key] = {}
 			self.mark[key]["unit"] = unit
-			if not mark then 
+			if not mark then
 				markCount = markCount + 1
 				self.mark[key].number = markCount
 			else
@@ -865,7 +893,7 @@ function RaidCore:MarkUnit(unit, location, mark)
 			self.mark[key].frame = markFrame
 
 			--Apollo.RegisterEventHandler("NextFrame",	 					"OnMarkUpdate", self)
-			--Apollo.RegisterEventHandler("VarChange_FrameCount",	 					"OnUpdate", self) 
+			--Apollo.RegisterEventHandler("VarChange_FrameCount",	 					"OnUpdate", self)
 		elseif mark then
 			self.mark[key].number = mark
 			self.mark[key].frame:FindChild("Name"):SetText(self.mark[key].number)
@@ -877,7 +905,7 @@ end
 function RaidCore:SetWorldMarker(position, mark)
 	if position then
 		self.worldmarker[mark] = {}
-		
+
 		local markFrame = Apollo.LoadForm(self.xmlDoc, "MarkFrame", "InWorldHudStratum", self)
 		markFrame:SetWorldLocation(position)
 		markFrame:FindChild("Name"):SetText(mark)
@@ -1026,7 +1054,7 @@ function RaidCore:OnUpdate()
 				end
 			end
 		end
-	end	
+	end
 
 	for k, v in pairs(self.debuffs) do
 		unit = v.unit
@@ -1069,7 +1097,7 @@ function RaidCore:OnUpdate()
 		--else
 		--	self.debuffs[k] = nil
 		end
-	end	
+	end
 
 end
 
@@ -1141,6 +1169,10 @@ end
 
 function RaidCore:TestPE()
 	local tActiveEvents = PublicEvent.GetActiveEvents()
+  local i = RaidCore:isPublicEventObjectiveActive("Talk to Captain Tero")
+  Print("result ".. tostring(i))
+  i = RaidCore:isPublicEventObjectiveActive("Talk to Captain Teroxx")
+  Print("result ".. tostring(i))
 	for idx, peEvent in pairs(tActiveEvents) do
 		local test = peEvent:GetName()
 		local truc
@@ -1364,7 +1396,7 @@ function RaidCore:LaunchPull(time)
 		local msg = {action = "LaunchPull", sender = GameLib.GetPlayerUnit():GetName(), cooldown = time}
 		self:SendMessage(msg)
 		self:OnComMessage(nil, msg)
-	end	
+	end
 end
 
 function RaidCore:LaunchBreak(time)
@@ -1372,7 +1404,7 @@ function RaidCore:LaunchBreak(time)
 		local msg = {action = "LaunchBreak", sender = GameLib.GetPlayerUnit():GetName(), cooldown = time}
 		self:SendMessage(msg)
 		self:OnComMessage(nil, msg)
-	end	
+	end
 end
 
 
@@ -1390,7 +1422,7 @@ function RaidCore:SendSync(syncName, param)
 		end
 	end
 	local msg = {action = "Sync", sender = GameLib.GetPlayerUnit():GetName(), sync = syncName, parameter = param}
-	self:SendMessage(msg)	
+	self:SendMessage(msg)
 end
 
 -----------------------------------------------------------------------------------------------
