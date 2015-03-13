@@ -25,7 +25,7 @@ function boss:OnEnable()
 	Apollo.RegisterEventHandler("RAID_WIPE", 			"OnRaidWipe", self)
 	self.isEngaged = false
 	self.delayedmsg = {}
-	--Print("Enabled Boss Module : " .. self.ModuleName)	
+	--Print("Enabled Boss Module : " .. self.ModuleName)
 end
 
 function boss:OnDisable()
@@ -42,7 +42,7 @@ function boss:OnDisable()
 	Apollo.RemoveEventHandler("RAID_WIPE", 		self)
 	Apollo.RemoveEventHandler("RAID_SYNC", 		self)
 	Apollo.RemoveEventHandler("DEBUFF_APPLIED", 	self)
-	Print("Unloaded Boss Module : " .. self.ModuleName)	
+	Print("Unloaded Boss Module : " .. self.ModuleName)
 end
 
 --function boss:GetOption(spellId)
@@ -63,6 +63,7 @@ end
 function boss:RegisterEnableMob(...) core:RegisterEnableMob(self, ...) end
 function boss:RegisterEnableBossPair(...) core:RegisterEnableBossPair(self, ...) end
 function boss:RegisterRestrictZone(...) core:RegisterRestrictZone(self, ...) end
+function boss:RegisterRestrictEventObjective(...) core:RegisterRestrictEventObjective(self, ...) end
 function boss:RegisterEnableZone(...) core:RegisterEnableZone(self, ...) end
 --function boss:RegisterEnableYell(...) core:RegisterEnableYell(self, ...) end
 
