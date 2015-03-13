@@ -8,7 +8,7 @@ local mod = core:NewBoss("Ohmna", 67)
 if not mod then return end
 
 mod:RegisterEnableMob("Dreadphage Ohmna")
---mod:RegisterRestrictZone("Techno-Phaged Laboratories")
+mod:RegisterRestrictEventObjective("Defeat Dreadphage Ohmna")
 
 --------------------------------------------------------------------------------
 -- Locals
@@ -121,7 +121,7 @@ function mod:OhmnaPE(lowest)
 			elseif peObjective:GetShortDescription() == "East Power Core Energy" then
 				tStatus["EAST"] = peObjective:GetCount()
 			elseif peObjective:GetShortDescription() == "West Power Core Energy" then
-				tStatus["WEST"] = peObjective:GetCount()				
+				tStatus["WEST"] = peObjective:GetCount()
 			end
 		end
 	end
@@ -185,7 +185,7 @@ function mod:OnCombatStateChanged(unit, bInCombat)
 			core:AddLine("Ohmna3", 2, unit, nil, 1, 25, -120)
 			if self:Tank() then
 				core:AddBar("OBORE", "SWITCH TANK", 45)
-			end	
+			end
 		end
 	end
 end
