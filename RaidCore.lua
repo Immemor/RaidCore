@@ -481,12 +481,21 @@ function RaidCore:OnTimer()
 end
 
 function RaidCore:isPublicEventObjectiveActive(objectiveString)
-  for eventId, event in pairs(PublicEvent:GetActiveEvents()) do
-    --Print("Current event: " .. event:GetName())
-    for id,objective in pairs(event:GetObjectives()) do
-      if objective:GetShortDescription() == objectiveString then
-        --Print("Found objective")
-        return objective:GetStatus() == 1
+  local activeEvents = PublicEvent:GetActiveEvents()
+
+  if activeEvents == nil then
+    return false
+  end
+
+  for eventId, event in pairs(activeEvents) do
+    Print("Current event: " .. event:GetName())
+    local objectives = event:GetObjectives()
+    if objectives ~= nil then
+      for id,objective in pairs(objectives) do
+        if objective:GetShortDescription() == objectiveString then
+          Print("Found objective")
+          return objective:GetStatus() == 1
+        end
       end
     end
   end
