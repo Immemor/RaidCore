@@ -64,6 +64,7 @@ function boss:RegisterEnableMob(...) core:RegisterEnableMob(self, ...) end
 function boss:RegisterEnableBossPair(...) core:RegisterEnableBossPair(self, ...) end
 function boss:RegisterRestrictZone(...) core:RegisterRestrictZone(self, ...) end
 function boss:RegisterRestrictEventObjective(...) core:RegisterRestrictEventObjective(self, ...) end
+function boss:RegisterEnableEventObjective(...) core:RegisterEnableEventObjective(self, ...) end
 function boss:RegisterEnableZone(...) core:RegisterEnableZone(self, ...) end
 --function boss:RegisterEnableYell(...) core:RegisterEnableYell(self, ...) end
 
