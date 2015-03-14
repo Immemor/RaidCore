@@ -16,7 +16,7 @@ local addon = RaidCore
 -----------------------------------------------------------------------------------------------
 -- Constants
 -----------------------------------------------------------------------------------------------
-local enablezones, enablemobs, enablepairs, restrictzone, enablezone,restricteventobjective,enableeventobjective = {}, {}, {}, {}, {}, {}, {}
+local enablezones, enablemobs, enablepairs, restrictzone, enablezone, restricteventobjective, enableeventobjective = {}, {}, {}, {}, {}, {}, {}
 local monitoring = nil
 
 
@@ -122,9 +122,9 @@ function RaidCore:OnEnable()
 		--self.timer = ApolloTimer.Create(0.100, true, "OnTimer", self)
 		--self.timer:Stop()
 
-		Apollo.RegisterEventHandler("ChangeWorld", 		"OnWorldChangedTimer", self)
-		Apollo.RegisterEventHandler("SubZoneChanged",	"OnSubZoneChanged", self)
-		Apollo.RegisterEventHandler("UnitDestroyed", 	"OnUnitDestroyed", self)
+		Apollo.RegisterEventHandler("ChangeWorld", 					"OnWorldChangedTimer",			self)
+		Apollo.RegisterEventHandler("SubZoneChanged",				"OnSubZoneChanged",				self)
+		Apollo.RegisterEventHandler("UnitDestroyed", 				"OnUnitDestroyed",				self)
 		Apollo.RegisterEventHandler("PublicEventObjectiveUpdate",	"OnPublicEventObjectiveUpdate", self)
 
 		-- Do additional Addon initialization here
@@ -482,25 +482,33 @@ function RaidCore:OnTimer()
 end
 
 function RaidCore:isPublicEventObjectiveActive(objectiveString)
-  local activeEvents = PublicEvent:GetActiveEvents()
+	local activeEvents = PublicEvent:GetActiveEvents()
+	if activeEvents == nil then
+    	return false
+	end
 
-  if activeEvents == nil then
-    return false
-  end
+	for eventId, event in pairs(activeEvents) do
+		--Print("Current event: " .. event:GetName())
+		local objectives = event:GetObjectives()
+		if objectives ~= nil then
+			for id, objective in pairs(objectives) do
+				if objective:GetShortDescription() == objectiveString then
+					--Print("Found objective")
+					return objective:GetStatus() == 1
+				end
+			end
+		end
+	end
+	return false
+end
 
-  for eventId, event in pairs(activeEvents) do
-    Print("Current event: " .. event:GetName())
-    local objectives = event:GetObjectives()
-    if objectives ~= nil then
-      for id,objective in pairs(objectives) do
-        if objective:GetShortDescription() == objectiveString then
-          Print("Found objective")
-          return objective:GetStatus() == 1
-        end
-      end
-    end
-  end
-  return false
+function RaidCore:hasActiveEvent(tblEvents)
+	for key, value in pairs(tblEvents) do
+		if self:isPublicEventObjectiveActive(key) then
+			return true
+		end
+	end
+	return false
 end
 
 function RaidCore:unitCheck(unit)
@@ -513,9 +521,9 @@ function RaidCore:unitCheck(unit)
 				local module = self.bossCore:GetModule(modName)
 				if not module or module:IsEnabled() then return end
 				if restrictzone[modName] and not restrictzone[modName][GetCurrentSubZoneName()] then return end
-        --Print("Checking event " .. restricteventobjective[modName])
-        --Print(tostring(self:isPublicEventObjectiveActive(restricteventobjective[modName])))
-        if restricteventobjective[modName] and not self:isPublicEventObjectiveActive(restricteventobjective[modName]) then return end
+        		--Print("Checking event " .. restricteventobjective[modName])
+        		--Print(tostring(self:isPublicEventObjectiveActive(restricteventobjective[modName])))
+        		if restricteventobjective[modName] and not self:hasActiveEvent(restricteventobjective[modName]) then return end
 				Print("Enabling Boss Module : " .. enablemobs[sName])
 				for name, mod in self:IterateBossModules() do
 					if mod:IsEnabled() then mod:Disable() end
@@ -532,7 +540,7 @@ function RaidCore:unitCheck(unit)
 				for i, modName in next, enablemobs[sName] do
 					local module = self.bossCore:GetModule(modName)
 					if restrictzone[modName] and not restrictzone[modName][GetCurrentSubZoneName()] then return end
-          if restricteventobjective[modName] and not self:isPublicEventObjectiveActive(restricteventobjective[modName]) then return end
+          			if restricteventobjective[modName] and not self:hasActiveEvent(restricteventobjective[modName]) then return end
 					Print("Enabling Boss Module : " .. modName)
 					module:Enable()
 				end
@@ -707,11 +715,11 @@ do
 	function RaidCore:RegisterEnableBossPair(module, ...) addPair(module.ModuleName, enablepairs, ...) end
 	function RaidCore:GetEnableMobs() return enablemobs end
 	function RaidCore:GetEnablePairs() return enablepairs end
-	function RaidCore:RegisterRestrictZone(module, zone) add(zone, restrictzone, module.ModuleName) end
-  function RaidCore:RegisterRestrictEventObjective(module, objective) add(objective, restricteventobjective, module.ModuleName) end
-	function RaidCore:RegisterEnableZone(module, zone) add(zone, enablezone, module.ModuleName) end
+	--function RaidCore:RegisterRestrictZone(module, zone) add(zone, restrictzone, module.ModuleName) end
+	--function RaidCore:RegisterEnableZone(module, zone) add(zone, enablezone, module.ModuleName) end
 	function RaidCore:GetRestrictZone() return restrictzone end
-  function RaidCore:GetRestrictEventObjective() return restricteventobjective end
+	function RaidCore:GetRestrictEventObjective() return restricteventobjective end
+	function RaidCore:GetEnableEventObjective() return enableeventobjective end
 	function RaidCore:GetEnableZone() return enablezone end
 end
 
@@ -727,6 +735,7 @@ do
 
 	function RaidCore:RegisterRestrictZone(module, ...) add2(module.ModuleName, restrictzone, ...) end
 	function RaidCore:RegisterEnableZone(module, ...) add2(module.ModuleName, enablezone, ...) end
+	function RaidCore:RegisterRestrictEventObjective(module, ...) add2(module.ModuleName, restricteventobjective, ...) end
 	function RaidCore:RegisterEnableEventObjective(module, ...) add2(module.ModuleName, enableeventobjective, ...) end
 end
 
@@ -1191,10 +1200,10 @@ end
 
 function RaidCore:TestPE()
 	local tActiveEvents = PublicEvent.GetActiveEvents()
-  local i = RaidCore:isPublicEventObjectiveActive("Talk to Captain Tero")
-  Print("result ".. tostring(i))
-  i = RaidCore:isPublicEventObjectiveActive("Talk to Captain Teroxx")
-  Print("result ".. tostring(i))
+	local i = RaidCore:isPublicEventObjectiveActive("Talk to Captain Tero")
+	Print("result ".. tostring(i))
+	i = RaidCore:isPublicEventObjectiveActive("Talk to Captain Teroxx")
+	Print("result ".. tostring(i))
 	for idx, peEvent in pairs(tActiveEvents) do
 		local test = peEvent:GetName()
 		local truc
@@ -1209,8 +1218,6 @@ function RaidCore:TestPE()
 		end
 	end
 end
-
-
 
 do
 	local chatFilter = {
