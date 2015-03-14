@@ -8,8 +8,8 @@ local mod = core:NewBoss("Ohmna", 67)
 if not mod then return end
 
 mod:RegisterEnableMob("Dreadphage Ohmna")
-mod:RegisterRestrictEventObjective("Defeat Dreadphage Ohmna")
-mod:RegisterEnableEventObjective("Defeat Dreadphage Ohmna")
+mod:RegisterRestrictEventObjective("Ohmna", "Defeat Dreadphage Ohmna")
+mod:RegisterEnableEventObjective("Ohmna", "Defeat Dreadphage Ohmna")
 
 --------------------------------------------------------------------------------
 -- Locals
@@ -37,7 +37,7 @@ local function getMin(t)
     local min_val, key = 1000, ""
     for k, v in pairs(t) do
     	-- Ignore pillars that are on 0%
-        if min_val > v  and v > 0 then
+        if min_val > v and v > 0 then
             min_val, key = v, k
         elseif min_val == v then
         	key = key .. " / " .. k
