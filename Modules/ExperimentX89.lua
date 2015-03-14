@@ -48,7 +48,9 @@ function mod:OnSpellCastStart(unitName, castName, unit)
 end
 
 function mod:OnChatDC(message)
-	if message:find("Experiment X-89 has placed a bomb") then
+	-- the dash in X-89 needs to be escaped... they are magic symbols in lua
+	-- can be escaped by adding a % in front of it.
+	if message:find("Experiment X%-89 has placed a bomb") then
 		local pName = string.gsub(string.sub(message, 38), "!", "")
 		if pName == playerName then
 			core:AddMsg("BIGB", "BIG BOMB on YOU !!!", 5, "Destruction", "Blue")
