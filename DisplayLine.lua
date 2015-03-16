@@ -30,6 +30,7 @@ local tOverlayDef = {
   Name = "Overlay",
   SwallowMouseClicks = true,
   IgnoreMouse = true,
+  Overlapped = false,
 }
 
 local tPixieLocPoints = { 0, 0, 0, 0 }
