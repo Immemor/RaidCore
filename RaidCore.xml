@@ -122,7 +122,7 @@
             <Control Class="Window" LAnchorPoint="0" LAnchorOffset="8" TAnchorPoint="0" TAnchorOffset="123" RAnchorPoint="0" RAnchorOffset="92" BAnchorPoint="0" BAnchorOffset="143" RelativeToClient="1" Font="CRB_InterfaceLarge_BB" Text="Bar Height:" BGColor="UI_WindowBGDefault" TextColor="UI_WindowTextDefault" Template="Default" TooltipType="OnCursor" Name="BarHeightLabel" TooltipColor="" TextId=""/>
         </Control>
     </Form>
-    <Form Class="WorldFixedWindow" LAnchorPoint="SELF" LAnchorOffset="-13" TAnchorPoint="0" TAnchorOffset="-4" RAnchorPoint="0" RAnchorOffset="63" BAnchorPoint="0" BAnchorOffset="65" RelativeToClient="1" Font="Default" Text="" TooltipType="OnCursor" Template="Default" Border="0" Picture="0" SwallowMouseClicks="1" Moveable="0" Escapable="0" Overlapped="1" BGColor="ffffffff" TextColor="ffffffff" IgnoreMouse="1" Visible="0" TransitionShowHide="0" Name="MarkFrame" TooltipColor="" Tooltip="">
+    <Form Class="WorldFixedWindow" LAnchorPoint="SELF" LAnchorOffset="-13" TAnchorPoint="0" TAnchorOffset="-4" RAnchorPoint="0" RAnchorOffset="63" BAnchorPoint="0" BAnchorOffset="65" RelativeToClient="0" Font="Default" Text="" TooltipType="OnCursor" Template="Default" Border="0" Picture="0" SwallowMouseClicks="1" Moveable="0" Escapable="0" Overlapped="0" BGColor="ffffffff" TextColor="ffffffff" IgnoreMouse="1" Visible="0" TransitionShowHide="0" Name="MarkFrame" TooltipColor="" Tooltip="">
         <Control Class="Window" LAnchorPoint="0" LAnchorOffset="0" TAnchorPoint="0" TAnchorOffset="0" RAnchorPoint="0" RAnchorOffset="69" BAnchorPoint="1" BAnchorOffset="1" RelativeToClient="1" Font="CRB_FloaterLarge" Text="POOP" Template="Default" TooltipType="OnCursor" Name="Name" BGColor="ffffffff" TextColor="ffffffff" TooltipColor="" TextId="" DT_CENTER="0" DT_VCENTER="0" Tooltip=""/>
     </Form>
     <Form Class="Window" LAnchorPoint="0" LAnchorOffset="0" TAnchorPoint="0" TAnchorOffset="-2" RAnchorPoint="0" RAnchorOffset="842" BAnchorPoint="0" BAnchorOffset="69" RelativeToClient="1" Font="CRB_Header20_O" Text="" BGColor="UI_WindowBGDefault" TextColor="red" Template="Default" TooltipType="OnCursor" Name="MsgTemplate" Border="1" Picture="1" SwallowMouseClicks="1" Moveable="0" Escapable="0" Overlapped="0" TooltipColor="" DT_CENTER="1" DT_VCENTER="1" TextId="" Tooltip="" IgnoreMouse="1" NewWindowDepth="0"/>
@@ -250,4 +250,5 @@
             </Control>
         </Control>
     </Form>
+    
 </Forms>

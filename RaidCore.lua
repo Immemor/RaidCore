@@ -643,6 +643,7 @@ function RaidCore:OnSubZoneChanged(idZone, strSubZone)
 			local modName = key
 			local bossMod = self.bossCore:GetModule(modName)
 			if not bossMod or bossMod:IsEnabled() then return end
+			if restricteventobjective[modName] and not self:hasActiveEvent(restricteventobjective[modName]) then return end
 			Print("Enabling Boss Module : " .. modName)
 			bossMod:Enable()
 			return
@@ -653,7 +654,7 @@ function RaidCore:OnSubZoneChanged(idZone, strSubZone)
 	for name, mod in self:IterateBossModules() do
 		for key, value in pairs(enablezone) do
 			local modName = mod.ModuleName
-			if key == modName and mod:IsEnabled() and not enablezone[modName][GetCurrentSubZoneName()] then
+			if key == modName and mod:IsEnabled() then
 				mod:Disable()
 			end
 		end
@@ -667,6 +668,7 @@ function RaidCore:OnPublicEventObjectiveUpdate(peoUpdated)
 				local modName = key
 				local bossMod = self.bossCore:GetModule(modName)
 				if not bossMod or bossMod:IsEnabled() then return end
+				if restrictzone[modName] and not restrictzone[modName][GetCurrentSubZoneName()] then return end
 				Print("Enabling Boss Module : " .. modName)
 				bossMod:Enable()
 				return
@@ -674,7 +676,6 @@ function RaidCore:OnPublicEventObjectiveUpdate(peoUpdated)
 				local modName = key
 				local bossMod = self.bossCore:GetModule(modName)
 				if not bossMod or not bossMod:IsEnabled() then return end
-				Print("Disabling Boss Module : " .. modName)
 				bossMod:Disable()
 			end
 		end
