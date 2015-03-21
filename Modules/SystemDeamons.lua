@@ -9,8 +9,10 @@ if not mod then return end
 
 --mod:RegisterEnableBossPair("Binary System Daemon","Null System Daemon")
 mod:RegisterEnableMob("Binary System Daemon","Null System Daemon")
-mod:RegisterRestrictZone("SystemDeamons", "Halls of the Infinite Mind", "Infinite Generator Core")
-
+mod:RegisterRestrictZone("SystemDeamons", "Halls of the Infinite Mind", "Infinite Generator Core", "Lower Infinite Generator Core")
+mod:RegisterEnableZone("SystemDeamons", "Halls of the Infinite Mind", "Infinite Generator Core", "Lower Infinite Generator Core")
+mod:RegisterRestrictEventObjective("SystemDeamons", "Defeat the System Daemons")
+mod:RegisterEnableEventObjective("SystemDeamons", "Defeat the System Daemons")
 --------------------------------------------------------------------------------
 -- Locals
 --
@@ -269,9 +271,9 @@ function mod:OnChatDC(message)
 			phase2warn = false
 		end
 		discoCount = discoCount + 1
-		if self:Tank() then
+		--if self:Tank() then
 			core:AddBar("DISC", ("DISCONNECT (%s)"):format(discoCount + 1), 60)
-		end
+		--end
 	elseif message:find("COMMENCING ENHANCEMENT SEQUENCE") then
 		phase2, phase2warn = true, false
 		phase2count = phase2count + 1

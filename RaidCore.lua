@@ -22,7 +22,7 @@ local monitoring = nil
 
 local trackMaster = Apollo.GetAddon("TrackMaster")
 local markCount = 0
-local AddonVersion = 15031401
+local AddonVersion = 15031701
 local VCReply, VCtimer = {}, nil
 local CommChannelTimer = nil
 local empCD, empTimer = 5, nil
@@ -73,6 +73,21 @@ function RaidCore:OnInitialize()
 	self.wndTargetFrame = self.wndConfig:FindChild("TargetFrame")
 
 	self.wndConfigGeneral = Apollo.LoadForm(self.xmlDoc, "ConfigFormGeneral", self.wndTargetFrame, self)
+	self.wndConfigSystemDaemons = Apollo.LoadForm(self.xmlDoc, "ConfigFormSystemDaemon", self.wndTargetFrame, self)
+	self.wndConfigGloomclaw = Apollo.LoadForm(self.xmlDoc, "ConfigFormGloomclaw", self.wndTargetFrame, self)
+	self.wndConfigMaelstrom = Apollo.LoadForm(self.xmlDoc, "ConfigFormMaelstrom", self.wndTargetFrame, self)
+	self.wndConfigLattice = Apollo.LoadForm(self.xmlDoc, "ConfigFormLattice", self.wndTargetFrame, self)
+	self.wndConfigLimbo = Apollo.LoadForm(self.xmlDoc, "ConfigFormLimbo", self.wndTargetFrame, self)
+	self.wndConfigAirEarth = Apollo.LoadForm(self.xmlDoc, "ConfigFormAir_Earth", self.wndTargetFrame, self)
+	self.wndConfigAirLife = Apollo.LoadForm(self.xmlDoc, "ConfigFormAir_Life", self.wndTargetFrame, self)
+	self.wndConfigAirWater = Apollo.LoadForm(self.xmlDoc, "ConfigFormAir_Water", self.wndTargetFrame, self)
+	self.wndConfigFireEarth = Apollo.LoadForm(self.xmlDoc, "ConfigFormFire_Earth", self.wndTargetFrame, self)
+	self.wndConfigFireLife = Apollo.LoadForm(self.xmlDoc, "ConfigFormFire_Life", self.wndTargetFrame, self)
+	self.wndConfigFireWater = Apollo.LoadForm(self.xmlDoc, "ConfigFormFire_Water", self.wndTargetFrame, self)
+	self.wndConfigLogicEarth = Apollo.LoadForm(self.xmlDoc, "ConfigFormLogic_Earth", self.wndTargetFrame, self)
+	self.wndConfigLogicLife = Apollo.LoadForm(self.xmlDoc, "ConfigFormLogic_Life", self.wndTargetFrame, self)
+	self.wndConfigLogicWater = Apollo.LoadForm(self.xmlDoc, "ConfigFormLogic_Water", self.wndTargetFrame, self)
+	self.wndConfigAvatus = Apollo.LoadForm(self.xmlDoc, "ConfigFormAvatus", self.wndTargetFrame, self)
 end
 
 -----------------------------------------------------------------------------------------------
@@ -643,6 +658,7 @@ function RaidCore:OnSubZoneChanged(idZone, strSubZone)
 			local modName = key
 			local bossMod = self.bossCore:GetModule(modName)
 			if not bossMod or bossMod:IsEnabled() then return end
+			if restricteventobjective[modName] and not self:hasActiveEvent(restricteventobjective[modName]) then return end
 			Print("Enabling Boss Module : " .. modName)
 			bossMod:Enable()
 			return
@@ -653,7 +669,7 @@ function RaidCore:OnSubZoneChanged(idZone, strSubZone)
 	for name, mod in self:IterateBossModules() do
 		for key, value in pairs(enablezone) do
 			local modName = mod.ModuleName
-			if key == modName and mod:IsEnabled() and not enablezone[modName][GetCurrentSubZoneName()] then
+			if key == modName and mod:IsEnabled() then
 				mod:Disable()
 			end
 		end
@@ -667,6 +683,7 @@ function RaidCore:OnPublicEventObjectiveUpdate(peoUpdated)
 				local modName = key
 				local bossMod = self.bossCore:GetModule(modName)
 				if not bossMod or bossMod:IsEnabled() then return end
+				if restrictzone[modName] and not restrictzone[modName][GetCurrentSubZoneName()] then return end
 				Print("Enabling Boss Module : " .. modName)
 				bossMod:Enable()
 				return
@@ -674,7 +691,6 @@ function RaidCore:OnPublicEventObjectiveUpdate(peoUpdated)
 				local modName = key
 				local bossMod = self.bossCore:GetModule(modName)
 				if not bossMod or not bossMod:IsEnabled() then return end
-				Print("Disabling Boss Module : " .. modName)
 				bossMod:Disable()
 			end
 		end
@@ -1499,6 +1515,127 @@ end
 function RaidCore:Button_SettingsGeneralUncheck( wndHandler, wndControl, eMouseButton )
 	self.wndConfigGeneral:Show(false)
 end
+
+function RaidCore:Button_SettingsSystemDaemonsCheck( wndHandler, wndControl, eMouseButton )
+	self.wndConfigSystemDaemons:Show(true)
+end
+
+function RaidCore:Button_SettingsSystemDaemonsUncheck( wndHandler, wndControl, eMouseButton )
+	self.wndConfigSystemDaemons:Show(false)
+end
+
+function RaidCore:Button_SettingsGloomclawCheck( wndHandler, wndControl, eMouseButton )
+	self.wndConfigGloomclaw:Show(true)
+end
+
+function RaidCore:Button_SettingsGloomclawUncheck( wndHandler, wndControl, eMouseButton )
+	self.wndConfigGloomclaw:Show(false)
+end
+
+function RaidCore:Button_SettingsMaelstromCheck( wndHandler, wndControl, eMouseButton )
+	self.wndConfigMaelstrom:Show(true)
+end
+
+function RaidCore:Button_SettingsMaelstromUncheck( wndHandler, wndControl, eMouseButton )
+	self.wndConfigMaelstrom:Show(false)
+end
+
+function RaidCore:Button_SettingsAvatusCheck( wndHandler, wndControl, eMouseButton )
+	self.wndConfigAvatus:Show(true)
+end
+
+function RaidCore:Button_SettingsAvatusUncheck( wndHandler, wndControl, eMouseButton )
+	self.wndConfigAvatus:Show(false)
+end
+
+function RaidCore:Button_SettingsLimboCheck( wndHandler, wndControl, eMouseButton )
+	self.wndConfigLimbo:Show(true)
+end
+
+function RaidCore:Button_SettingsLimboUncheck( wndHandler, wndControl, eMouseButton )
+	self.wndConfigLimbo:Show(false)
+end
+
+function RaidCore:Button_SettingsLatticeCheck( wndHandler, wndControl, eMouseButton )
+	self.wndConfigLattice:Show(true)
+end
+
+function RaidCore:Button_SettingsLatticeUncheck( wndHandler, wndControl, eMouseButton )
+	self.wndConfigLattice:Show(false)
+end
+
+function RaidCore:Button_SettingsAirEarthCheck( wndHandler, wndControl, eMouseButton )
+	self.wndConfigAirEarth:Show(true)
+end
+
+function RaidCore:Button_SettingsAirEarthUncheck( wndHandler, wndControl, eMouseButton )
+	self.wndConfigAirEarth:Show(false)
+end
+
+function RaidCore:Button_SettingsAirLifeCheck( wndHandler, wndControl, eMouseButton )
+	self.wndConfigAirLife:Show(true)
+end
+
+function RaidCore:Button_SettingsAirLifeUncheck( wndHandler, wndControl, eMouseButton )
+	self.wndConfigAirLife:Show(false)
+end
+
+function RaidCore:Button_SettingsAirWaterCheck( wndHandler, wndControl, eMouseButton )
+	self.wndConfigAirWater:Show(true)
+end
+
+function RaidCore:Button_SettingsAirWaterUncheck( wndHandler, wndControl, eMouseButton )
+	self.wndConfigAirWater:Show(false)
+end
+
+function RaidCore:Button_SettingsFireEarthCheck( wndHandler, wndControl, eMouseButton )
+	self.wndConfigFireEarth:Show(true)
+end
+
+function RaidCore:Button_SettingsFireEarthUncheck( wndHandler, wndControl, eMouseButton )
+	self.wndConfigFireEarth:Show(false)
+end
+
+function RaidCore:Button_SettingsFireLifeCheck( wndHandler, wndControl, eMouseButton )
+	self.wndConfigFireLife:Show(true)
+end
+
+function RaidCore:Button_SettingsFireLifeUncheck( wndHandler, wndControl, eMouseButton )
+	self.wndConfigFireLife:Show(false)
+end
+
+function RaidCore:Button_SettingsFireWaterCheck( wndHandler, wndControl, eMouseButton )
+	self.wndConfigFireWater:Show(true)
+end
+
+function RaidCore:Button_SettingsFireWaterUncheck( wndHandler, wndControl, eMouseButton )
+	self.wndConfigFireWater:Show(false)
+end
+
+function RaidCore:Button_SettingsLogicEarthCheck( wndHandler, wndControl, eMouseButton )
+	self.wndConfigLogicEarth:Show(true)
+end
+
+function RaidCore:Button_SettingsLogicEarthUncheck( wndHandler, wndControl, eMouseButton )
+	self.wndConfigLogicEarth:Show(false)
+end
+
+function RaidCore:Button_SettingsLogicLifeCheck( wndHandler, wndControl, eMouseButton )
+	self.wndConfigLogicLife:Show(true)
+end
+
+function RaidCore:Button_SettingsLogicLifeUncheck( wndHandler, wndControl, eMouseButton )
+	self.wndConfigLogicLife:Show(false)
+end
+
+function RaidCore:Button_SettingsLogicWaterCheck( wndHandler, wndControl, eMouseButton )
+	self.wndConfigLogicWater:Show(true)
+end
+
+function RaidCore:Button_SettingsLogicWaterUncheck( wndHandler, wndControl, eMouseButton )
+	self.wndConfigLogicWater:Show(false)
+end
+
 -----------------------------------------------------------------------------------------------
 -- RaidCore Instance
 -----------------------------------------------------------------------------------------------
