@@ -144,6 +144,11 @@ function mod:OnDebuffApplied(unitName, splId, unit)
 		if unitName == strMyName then
 			core:AddMsg("NOHEAL", "No-Healing Debuff!", 5, "Alarm")
 		end
+	elseif splName == "Lightning Strike" then
+		core:MarkUnit(unit, nil, "Lightning")
+		if unitName == strMyName then
+			core:AddMsg("LIGHTNING", "Lightning on YOU", 5, "RunAway")
+		end
 	elseif splName == "Recently Saved" then
 		core:AddMsg("SAVE", "Recently Saved!", 5, "Beware")
 	end
@@ -154,6 +159,8 @@ function mod:OnDebuffRemoved(unitName, splId, unit)
 	if splId == 70440 then
 		core:RemoveUnit(unit:GetId())
 	elseif splName == "Life Force Shackle" then
+		core:DropMark(unit:GetId())
+	elseif splName == "Lightning Strike" then
 		core:DropMark(unit:GetId())
 	end
 end

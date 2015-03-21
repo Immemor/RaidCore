@@ -78,7 +78,12 @@ function DisplayBar:UpdateProgress(timeRemaining)
                 self.lastPct = percent
                 Event_FireGenericEvent("UNIT_HEALTH", self.Message, percent)
             end
-            self.Frame:FindChild("Timer"):SetText(string.format("%.f%%",percent))
+            local hundreds = math.floor(timeRemaining / self.MaxTime) % 10
+            if hundreds == 0 then
+                self.Frame:FindChild("Timer"):SetText(string.format("%.1f%%", timeRemaining / self.MaxTime * 100))
+            else
+                self.Frame:FindChild("Timer"):SetText(string.format("%.0f%%", math.floor(timeRemaining / self.MaxTime) * 100))
+            end
             --self.Frame:FindChild("Timer"):SetText(string.format("%s (%.f%%)",self:FormatNumber(timeRemaining), percent))
         end
     else
