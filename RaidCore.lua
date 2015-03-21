@@ -73,6 +73,7 @@ function RaidCore:OnInitialize()
 	self.wndTargetFrame = self.wndConfig:FindChild("TargetFrame")
 
 	self.wndConfigGeneral = Apollo.LoadForm(self.xmlDoc, "ConfigFormGeneral", self.wndTargetFrame, self)
+	self.wndConfigSystemDaemons = Apollo.LoadForm(self.xmlDoc, "ConfigFormSystemDaemon", self.wndTargetFrame, self)
 	self.wndConfigGloomclaw = Apollo.LoadForm(self.xmlDoc, "ConfigFormGloomclaw", self.wndTargetFrame, self)
 	self.wndConfigMaelstrom = Apollo.LoadForm(self.xmlDoc, "ConfigFormMaelstrom", self.wndTargetFrame, self)
 	self.wndConfigLattice = Apollo.LoadForm(self.xmlDoc, "ConfigFormLattice", self.wndTargetFrame, self)
@@ -1513,6 +1514,14 @@ end
 
 function RaidCore:Button_SettingsGeneralUncheck( wndHandler, wndControl, eMouseButton )
 	self.wndConfigGeneral:Show(false)
+end
+
+function RaidCore:Button_SettingsSystemDaemonsCheck( wndHandler, wndControl, eMouseButton )
+	self.wndConfigSystemDaemons:Show(true)
+end
+
+function RaidCore:Button_SettingsSystemDaemonsUncheck( wndHandler, wndControl, eMouseButton )
+	self.wndConfigSystemDaemons:Show(false)
 end
 
 function RaidCore:Button_SettingsGloomclawCheck( wndHandler, wndControl, eMouseButton )
