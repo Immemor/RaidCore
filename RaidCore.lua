@@ -1516,14 +1516,10 @@ function RaidCore:Button_SettingsGeneralUncheck( wndHandler, wndControl, eMouseB
 end
 
 function RaidCore:Button_SettingsGloomclawCheck( wndHandler, wndControl, eMouseButton )
-	Print("Check gloomclaw")
-	local Rover = Apollo.GetAddon("Rover")
-	Rover:AddWatch("gloom", self.wndConfigGloomclaw, 0)
 	self.wndConfigGloomclaw:Show(true)
 end
 
 function RaidCore:Button_SettingsGloomclawUncheck( wndHandler, wndControl, eMouseButton )
-	Print("uncheck gloomclaw)")
 	self.wndConfigGloomclaw:Show(false)
 end
 
