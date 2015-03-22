@@ -71,6 +71,9 @@ function RaidCore:OnInitialize()
 	self.wndConfig:Show(false)
 
 	self.wndTargetFrame = self.wndConfig:FindChild("TargetFrame")
+	self.wndConfigOptionsTargetFrame = self.wndConfig:FindChild("ConfigOptionsTargetFrame")
+
+	self.wndModuleListDS = Apollo.LoadForm(self.xmlDoc, "ModuleListDS", self.wndConfigOptionsTargetFrame, self)
 
 	self.wndConfigGeneral = Apollo.LoadForm(self.xmlDoc, "ConfigFormGeneral", self.wndTargetFrame, self)
 	self.wndConfigSystemDaemons = Apollo.LoadForm(self.xmlDoc, "ConfigFormSystemDaemon", self.wndTargetFrame, self)
@@ -1473,6 +1476,13 @@ end
 -----------------------------------------------------------------------------------------------
 -- RaidCoreForm Functions
 -----------------------------------------------------------------------------------------------
+
+function RaidCore:HideChildWindows(wndParent)
+	for key, value in pairs(wndParent:GetChildren()) do
+		value:Show(false)
+	end
+end
+
 -- when the OK button is clicked
 function RaidCore:OnOK()
 	self.wndMain:Close() -- hide the window
@@ -1508,7 +1518,16 @@ function RaidCore:OnConfigCloseButton()
 	self.wndConfig:Show(false)
 end
 
+function RaidCore:Button_DSSettingsCheck(wndHandler, wndControl, eMouseButton)
+	self.wndModuleListDS:Show(true)
+end
+
+function RaidCore:Button_DSSettingsUncheck(wndHandler, wndControl, eMouseButton)
+	self.wndModuleListDS:Show(false)
+end
+
 function RaidCore:Button_SettingsGeneralCheck( wndHandler, wndControl, eMouseButton )
+	self:HideChildWindows(self.wndTargetFrame)
 	self.wndConfigGeneral:Show(true)
 end
 
