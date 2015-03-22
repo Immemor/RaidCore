@@ -394,6 +394,8 @@ function RaidCore:OnRaidCoreOn(cmd, args)
 		else
 			self:LaunchBreak(600)
 		end
+	elseif (tAllParams[1] == "summon") then
+		self:SyncSummon()
 	elseif (tAllParams[1] == "buff") then
 		local unit = GameLib.GetTargetUnit()
 		if unit ~= nil then
@@ -1386,6 +1388,16 @@ function RaidCore:OnComMessage(channel, tMessage)
 			self.syncTimer[tMessage.sync] = timeOfEvent
 			Event_FireGenericEvent("RAID_SYNC", tMessage.sync, tMessage.parameter)
 		end
+	elseif tMessage.action == "SyncSummon" then
+		Print(tMessage.sender .. " requested that you accept a summon. Attempting to accept now.")
+		local CSImsg = CSIsLib.GetActiveCSI()
+		if not CSImsg or not CSImsg["strContext"] then return end
+
+		if CSImsg["strContext"] == "Teleport to your group member?" then
+			if CSIsLib.IsCSIRunning() then
+				CSIsLib.CSIProcessInteraction(true)
+			end
+		end
 	end
 end
 
@@ -1455,6 +1467,10 @@ function RaidCore:LaunchBreak(time)
 	end
 end
 
+function RaidCore:SyncSummon()
+	local msg = {action = "SyncSummon", sender = GameLib.GetPlayerUnit():GetName()}
+	self:SendMessage(msg)
+end
 
 function RaidCore:AddSync(sync, throttle)
 	self.syncRegister[sync] = throttle or 5
