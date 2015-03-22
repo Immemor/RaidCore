@@ -1360,7 +1360,7 @@ local function IsPartyMemberByName(sName)
 	return false
 end
 
-function RaidCore:OnComMessage(channel, tMessage)
+function RaidCore:OnComMessage(channel, tMessage, strSender)
 	--local Rover = Apollo.GetAddon("Rover")
 	--Rover:AddWatch("msg", tMessage, 0)
 	if type(tMessage.action) ~= "string" then return end
@@ -1389,6 +1389,9 @@ function RaidCore:OnComMessage(channel, tMessage)
 			Event_FireGenericEvent("RAID_SYNC", tMessage.sync, tMessage.parameter)
 		end
 	elseif tMessage.action == "SyncSummon" then
+		if not self:isRaidManagement(strSender) then
+			return false
+		end
 		Print(tMessage.sender .. " requested that you accept a summon. Attempting to accept now.")
 		local CSImsg = CSIsLib.GetActiveCSI()
 		if not CSImsg or not CSImsg["strContext"] then return end
@@ -1468,7 +1471,12 @@ function RaidCore:LaunchBreak(time)
 end
 
 function RaidCore:SyncSummon()
-	local msg = {action = "SyncSummon", sender = GameLib.GetPlayerUnit():GetName()}
+	local myName = GameLib.GetPlayerUnit():GetName()
+	if not self:isRaidManagement(myName) then
+		Print("You must be a raid leader or assistant to use this command!")
+		return false
+	end
+	local msg = {action = "SyncSummon", sender = myName}
 	self:SendMessage(msg)
 end
 
@@ -1487,6 +1495,21 @@ function RaidCore:SendSync(syncName, param)
 	end
 	local msg = {action = "Sync", sender = GameLib.GetPlayerUnit():GetName(), sync = syncName, parameter = param}
 	self:SendMessage(msg)
+end
+
+function RaidCore:isRaidManagement(strName)
+	if not GroupLib.InGroup() then return false end
+	for nIdx=0, GroupLib.GetMemberCount() do
+		local tGroupMember = GroupLib.GetGroupMember(nIdx)
+		if tGroupMember and tGroupMember["strCharacterName"] == strName then
+			if tGroupMember["bIsLeader"] or tGroupMember["bRaidAssistant"] then
+				return true
+			else
+				return false
+			end
+		end
+	end
+	return false -- just in case
 end
 
 -----------------------------------------------------------------------------------------------
