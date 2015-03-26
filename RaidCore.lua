@@ -71,6 +71,9 @@ function RaidCore:OnInitialize()
 	self.wndConfig:Show(false)
 
 	self.wndTargetFrame = self.wndConfig:FindChild("TargetFrame")
+	self.wndConfigOptionsTargetFrame = self.wndConfig:FindChild("ConfigOptionsTargetFrame")
+
+	self.wndModuleListDS = Apollo.LoadForm(self.xmlDoc, "ModuleListDS", self.wndConfigOptionsTargetFrame, self)
 
 	self.wndConfigGeneral = Apollo.LoadForm(self.xmlDoc, "ConfigFormGeneral", self.wndTargetFrame, self)
 	self.wndConfigSystemDaemons = Apollo.LoadForm(self.xmlDoc, "ConfigFormSystemDaemon", self.wndTargetFrame, self)
@@ -391,6 +394,8 @@ function RaidCore:OnRaidCoreOn(cmd, args)
 		else
 			self:LaunchBreak(600)
 		end
+	elseif (tAllParams[1] == "summon") then
+		self:SyncSummon()
 	elseif (tAllParams[1] == "buff") then
 		local unit = GameLib.GetTargetUnit()
 		if unit ~= nil then
@@ -1355,7 +1360,7 @@ local function IsPartyMemberByName(sName)
 	return false
 end
 
-function RaidCore:OnComMessage(channel, tMessage)
+function RaidCore:OnComMessage(channel, tMessage, strSender)
 	--local Rover = Apollo.GetAddon("Rover")
 	--Rover:AddWatch("msg", tMessage, 0)
 	if type(tMessage.action) ~= "string" then return end
@@ -1382,6 +1387,19 @@ function RaidCore:OnComMessage(channel, tMessage)
 			--Print(("%s : Received %s msg from %s"):format(os.clock(), tMessage.sync, tMessage.sender))
 			self.syncTimer[tMessage.sync] = timeOfEvent
 			Event_FireGenericEvent("RAID_SYNC", tMessage.sync, tMessage.parameter)
+		end
+	elseif tMessage.action == "SyncSummon" then
+		if not self:isRaidManagement(strSender) then
+			return false
+		end
+		Print(tMessage.sender .. " requested that you accept a summon. Attempting to accept now.")
+		local CSImsg = CSIsLib.GetActiveCSI()
+		if not CSImsg or not CSImsg["strContext"] then return end
+
+		if CSImsg["strContext"] == "Teleport to your group member?" then
+			if CSIsLib.IsCSIRunning() then
+				CSIsLib.CSIProcessInteraction(true)
+			end
 		end
 	end
 end
@@ -1452,6 +1470,15 @@ function RaidCore:LaunchBreak(time)
 	end
 end
 
+function RaidCore:SyncSummon()
+	local myName = GameLib.GetPlayerUnit():GetName()
+	if not self:isRaidManagement(myName) then
+		Print("You must be a raid leader or assistant to use this command!")
+		return false
+	end
+	local msg = {action = "SyncSummon", sender = myName}
+	self:SendMessage(msg)
+end
 
 function RaidCore:AddSync(sync, throttle)
 	self.syncRegister[sync] = throttle or 5
@@ -1470,9 +1497,31 @@ function RaidCore:SendSync(syncName, param)
 	self:SendMessage(msg)
 end
 
+function RaidCore:isRaidManagement(strName)
+	if not GroupLib.InGroup() then return false end
+	for nIdx=0, GroupLib.GetMemberCount() do
+		local tGroupMember = GroupLib.GetGroupMember(nIdx)
+		if tGroupMember and tGroupMember["strCharacterName"] == strName then
+			if tGroupMember["bIsLeader"] or tGroupMember["bRaidAssistant"] then
+				return true
+			else
+				return false
+			end
+		end
+	end
+	return false -- just in case
+end
+
 -----------------------------------------------------------------------------------------------
 -- RaidCoreForm Functions
 -----------------------------------------------------------------------------------------------
+
+function RaidCore:HideChildWindows(wndParent)
+	for key, value in pairs(wndParent:GetChildren()) do
+		value:Show(false)
+	end
+end
+
 -- when the OK button is clicked
 function RaidCore:OnOK()
 	self.wndMain:Close() -- hide the window
@@ -1508,7 +1557,16 @@ function RaidCore:OnConfigCloseButton()
 	self.wndConfig:Show(false)
 end
 
+function RaidCore:Button_DSSettingsCheck(wndHandler, wndControl, eMouseButton)
+	self.wndModuleListDS:Show(true)
+end
+
+function RaidCore:Button_DSSettingsUncheck(wndHandler, wndControl, eMouseButton)
+	self.wndModuleListDS:Show(false)
+end
+
 function RaidCore:Button_SettingsGeneralCheck( wndHandler, wndControl, eMouseButton )
+	self:HideChildWindows(self.wndTargetFrame)
 	self.wndConfigGeneral:Show(true)
 end
 
