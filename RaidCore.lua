@@ -76,20 +76,20 @@ function RaidCore:OnInitialize()
 	self.wndModuleListDS = Apollo.LoadForm(self.xmlDoc, "ModuleListDS", self.wndConfigOptionsTargetFrame, self)
 
 	self.wndConfigGeneral = Apollo.LoadForm(self.xmlDoc, "ConfigFormGeneral", self.wndTargetFrame, self)
-	self.wndConfigSystemDaemons = Apollo.LoadForm(self.xmlDoc, "ConfigFormSystemDaemon", self.wndTargetFrame, self)
+	self.wndConfigSystemDaemons = Apollo.LoadForm(self.xmlDoc, "ConfigFormSystemDeamons", self.wndTargetFrame, self)
 	self.wndConfigGloomclaw = Apollo.LoadForm(self.xmlDoc, "ConfigFormGloomclaw", self.wndTargetFrame, self)
-	self.wndConfigMaelstrom = Apollo.LoadForm(self.xmlDoc, "ConfigFormMaelstrom", self.wndTargetFrame, self)
-	self.wndConfigLattice = Apollo.LoadForm(self.xmlDoc, "ConfigFormLattice", self.wndTargetFrame, self)
+	self.wndConfigMaelstromAuthority = Apollo.LoadForm(self.xmlDoc, "ConfigFormMaelstromAuthority", self.wndTargetFrame, self)
+	self.wndConfigLattice = Apollo.LoadForm(self.xmlDoc, "ConfigFormVolatilityLattice", self.wndTargetFrame, self)
 	self.wndConfigLimbo = Apollo.LoadForm(self.xmlDoc, "ConfigFormLimbo", self.wndTargetFrame, self)
-	self.wndConfigAirEarth = Apollo.LoadForm(self.xmlDoc, "ConfigFormAir_Earth", self.wndTargetFrame, self)
-	self.wndConfigAirLife = Apollo.LoadForm(self.xmlDoc, "ConfigFormAir_Life", self.wndTargetFrame, self)
-	self.wndConfigAirWater = Apollo.LoadForm(self.xmlDoc, "ConfigFormAir_Water", self.wndTargetFrame, self)
+	self.wndConfigAirEarth = Apollo.LoadForm(self.xmlDoc, "ConfigFormEpEarthAir", self.wndTargetFrame, self)
+	self.wndConfigAirLife = Apollo.LoadForm(self.xmlDoc, "ConfigFormEpAirLife", self.wndTargetFrame, self)
+	self.wndConfigAirWater = Apollo.LoadForm(self.xmlDoc, "ConfigFormEpFrostAir", self.wndTargetFrame, self)
 	self.wndConfigFireEarth = Apollo.LoadForm(self.xmlDoc, "ConfigFormFire_Earth", self.wndTargetFrame, self)
-	self.wndConfigFireLife = Apollo.LoadForm(self.xmlDoc, "ConfigFormFire_Life", self.wndTargetFrame, self)
-	self.wndConfigFireWater = Apollo.LoadForm(self.xmlDoc, "ConfigFormFire_Water", self.wndTargetFrame, self)
-	self.wndConfigLogicEarth = Apollo.LoadForm(self.xmlDoc, "ConfigFormLogic_Earth", self.wndTargetFrame, self)
-	self.wndConfigLogicLife = Apollo.LoadForm(self.xmlDoc, "ConfigFormLogic_Life", self.wndTargetFrame, self)
-	self.wndConfigLogicWater = Apollo.LoadForm(self.xmlDoc, "ConfigFormLogic_Water", self.wndTargetFrame, self)
+	self.wndConfigFireLife = Apollo.LoadForm(self.xmlDoc, "ConfigFormEpLifeFire", self.wndTargetFrame, self)
+	self.wndConfigFireWater = Apollo.LoadForm(self.xmlDoc, "ConfigFormEpFrostFire", self.wndTargetFrame, self)
+	self.wndConfigLogicEarth = Apollo.LoadForm(self.xmlDoc, "ConfigFormEpEarthLogic", self.wndTargetFrame, self)
+	self.wndConfigLogicLife = Apollo.LoadForm(self.xmlDoc, "ConfigFormEpLifeLogic", self.wndTargetFrame, self)
+	self.wndConfigLogicWater = Apollo.LoadForm(self.xmlDoc, "ConfigFormEpFrostLogic", self.wndTargetFrame, self)
 	self.wndConfigAvatus = Apollo.LoadForm(self.xmlDoc, "ConfigFormAvatus", self.wndTargetFrame, self)
 end
 
@@ -1591,11 +1591,11 @@ function RaidCore:Button_SettingsGloomclawUncheck( wndHandler, wndControl, eMous
 end
 
 function RaidCore:Button_SettingsMaelstromCheck( wndHandler, wndControl, eMouseButton )
-	self.wndConfigMaelstrom:Show(true)
+	self.wndConfigMaelstromAuthority:Show(true)
 end
 
 function RaidCore:Button_SettingsMaelstromUncheck( wndHandler, wndControl, eMouseButton )
-	self.wndConfigMaelstrom:Show(false)
+	self.wndConfigMaelstromAuthority:Show(false)
 end
 
 function RaidCore:Button_SettingsAvatusCheck( wndHandler, wndControl, eMouseButton )
