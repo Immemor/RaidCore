@@ -57,7 +57,7 @@ function mod:OnCombatStateChanged(unit, bInCombat)
 	if unit:GetType() == "NonPlayer" and bInCombat then
 		local sName = unit:GetName()
 
-		if sName == "Maelstrom Authority" then
+		if sName == "Phage Maw" then
 			self:Start()
 			core:AddUnit(unit)				
 		end

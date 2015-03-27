@@ -84,6 +84,7 @@ end
 function mod:OnSpellCastEnd(unitName, castName)
 	if unitName == "Hydroflux" and castName == "Tsunami" then
 		core:AddBar("MIDPHASE", "~Middle Phase", 88, true)
+		core:AddBar("TOMB", "~Frost Tombs", 30, true)
 	end
 	--Print(unitName .. " - " .. castName)
 end
@@ -175,6 +176,7 @@ function mod:OnCombatStateChanged(unit, bInCombat)
 			core:RaidDebuff()
 			core:StartScan()
 			core:AddBar("MIDPHASE", "Middle Phase", 60, true)
+			core:AddBar("TOMB", "~Frost Tombs", 30, true)
 
 			--Print(eventTime .. " " .. sName .. " FIGHT STARTED ")
 		end

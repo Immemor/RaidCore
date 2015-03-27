@@ -120,7 +120,12 @@ function mod:OnUnitCreated(unit)
 	elseif sName == "Essence of Life" then
 		--Print("Life essence spawned")
 		--core:AddUnit(unit)
-	end
+	elseif sName == "Flame Wave" then
+		local unitId = unit:GetId()
+		if unitId then
+			core:AddPixie(unitId, 2, unit, nil, "Green", 10, 20, 0)	
+		end
+	end	
 	--Print(eventTime .. " - " .. sName)
 end
 
@@ -130,6 +135,11 @@ function mod:OnUnitDestroyed(unit)
 
 	if sName == "Life Force" then
 		core:DropPixie(unit:GetId())
+	elseif sName == "Flame Wave" then
+		local unitId = unit:GetId()
+		if unitId then
+			core:DropPixie(unitId)
+		end
 	end
 end
 
