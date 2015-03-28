@@ -8,8 +8,8 @@ local mod = core:NewBoss("PhageCouncil", 67)
 if not mod then return end
 
 mod:RegisterEnableMob("Golgox the Lifecrusher", "Terax Blightweaver", "Ersoth Curseform", "Noxmind the Insidious", "Fleshmonger Vratorg", "Golgox der Lebenszermalmer", "Terax Brandweber", "Ersoth Fluchform", "Noxgeist der Hinterlistige", "Fleischhändler Vratorg")
-mod:RegisterRestrictZone("PhageCouncil", "Augmentation Core")
-mod:RegisterEnableZone("PhageCouncil", "Augmentation Core")
+mod:RegisterRestrictZone("PhageCouncil", "Augmentation Core", "Augmentationskern")
+mod:RegisterEnableZone("PhageCouncil", "Augmentation Core", "Augmentationskern")
 
 --------------------------------------------------------------------------------
 -- Locals
