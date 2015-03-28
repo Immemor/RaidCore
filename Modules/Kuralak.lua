@@ -8,8 +8,8 @@ local mod = core:NewBoss("Kuralak", 67)
 if not mod then return end
 
 mod:RegisterEnableMob("Kuralak the Defiler", "Kuralak die Schänderin")
-mod:RegisterRestrictZone("Kurulak", "Archive Access Core")
-mod:RegisterEnableZone("Kurulak", "Archive Access Core")
+mod:RegisterRestrictZone("Kurulak", "Archive Access Core", "Archiv-Zugangskern")
+mod:RegisterEnableZone("Kurulak", "Archive Access Core", "Archiv-Zugangskern")
 
 --------------------------------------------------------------------------------
 -- Locals
