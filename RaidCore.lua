@@ -1497,6 +1497,24 @@ function RaidCore:SendSync(syncName, param)
 	self:SendMessage(msg)
 end
 
+function RaidCore:GetLocale()
+		-- We cannot get this directly so need to do a comparision
+	local strCancel = Apollo.GetString(1)
+
+	-- German
+	if strCancel == "Abbrechen" then
+		return "deDE"
+	end
+
+	--[[-- French
+	if strCancel == "Annuler" then
+		return "frFR"
+	end--]]
+
+	-- Other
+	return "enUS"
+end
+
 function RaidCore:isRaidManagement(strName)
 	if not GroupLib.InGroup() then return false end
 	for nIdx=0, GroupLib.GetMemberCount() do
