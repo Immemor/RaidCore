@@ -9,8 +9,8 @@ local mod = core:NewBoss("ExperimentX89", 67)
 if not mod then return end
 
 mod:RegisterEnableMob("Experiment X-89")
-mod:RegisterRestrictZone("ExperimentX89", "Isolation Chamber")
-mod:RegisterEnableZone("ExperimentX89", "Isolation Chamber")
+mod:RegisterRestrictZone("ExperimentX89", "Isolation Chamber", "Isolationskammer")
+mod:RegisterEnableZone("ExperimentX89", "Isolation Chamber", "Isolationskammer")
 
 --------------------------------------------------------------------------------
 -- Locals
