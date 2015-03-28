@@ -8,8 +8,8 @@ local mod = core:NewBoss("Prototypes", 67)
 if not mod then return end
 
 mod:RegisterEnableMob("Phagetech Commander", "Phagetech Augmentor", "Phagetech Protector", "Phagetech Fabricator", "Phagentech-Kommandant", "Phagentech-Augmentor", "Phagentech-Protektor", "Phagentech-Fabrikant")
-mod:RegisterRestrictZone("Prototypes", "Phagetech Uplink Hub")
-mod:RegisterEnableZone("Prototypes", "Phagetech Uplink Hub")
+mod:RegisterRestrictZone("Prototypes", "Phagetech Uplink Hub", "Phagentech-Uplink-Zentrale")
+mod:RegisterEnableZone("Prototypes", "Phagetech Uplink Hub", "Phagentech-Uplink-Zentrale")
 
 --------------------------------------------------------------------------------
 -- Locals
