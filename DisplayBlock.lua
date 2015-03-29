@@ -32,13 +32,21 @@ function DisplayBlock.new(xmlDoc)
     return self
 end
 
+local function hexToCColor(color, a)
+  if not a then a = 1 end
+  local r = tonumber(string.sub(color,1,2), 16) / 255
+  local g = tonumber(string.sub(color,3,4), 16) / 255
+  local b = tonumber(string.sub(color,5,6), 16) / 255
+  return CColor.new(r,g,b,a)
+end
+
 function DisplayBlock:Load(saveData)
 	if saveData.bgColor ~= nil then
-		self:SetBGColor(CColor.new(saveData.bgColor[1], saveData.bgColor[2], saveData.bgColor[3], saveData.bgColor[4]))
+		self:SetBGColor(saveData.bgColor)
 	end
 
 	if saveData.barColor ~= nil then
-		self:SetBarColor(CColor.new(saveData.barColor[1], saveData.barColor[2], saveData.barColor[3], saveData.barColor[4]))
+		self:SetBarColor(saveData.barColor)
 	end
 
 	if saveData.isEnabled ~= nil then
@@ -62,12 +70,12 @@ end
 function DisplayBlock:GetSaveData()
 	local left, top, right, bottom = self.barsFrame:GetAnchorOffsets()
 	local saveData = {
-		bgColor = { self.bgColor.r, self.bgColor.g, self.bgColor.b, self.bgColor.a },
-		barColor = { self.barColor.r, self.barColor.g, self.barColor.b, self.barColor.a },
+		bgColor = self.bgColor,
+		barColor = self.barColor,
 		isEnabled = self.isEnabled,
 		Position = { left, top },
 		anchorFromTop = self.anchorFromTop,
-		barSize = self.barSize
+		barSize = self.barSize,
 	}
 	return saveData
 end
@@ -251,14 +259,6 @@ function DisplayBlock:RefreshUnits()
 			end
 		end
 	end
-end
-
-local function hexToCColor(color, a)
-  if not a then a = 1 end
-  local r = tonumber(string.sub(color,1,2), 16) / 255
-  local g = tonumber(string.sub(color,3,4), 16) / 255
-  local b = tonumber(string.sub(color,5,6), 16) / 255
-  return CColor.new(r,g,b,a)
 end
 
 function DisplayBlock:AddMsg(key, message, duration, sound, color)
