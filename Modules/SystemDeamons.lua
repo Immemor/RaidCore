@@ -73,7 +73,7 @@ end
 
 function mod:OnUnitCreated(unit)
 	local sName = unit:GetName()
-	if sName == "Brute Force Algorithm" or sName == "Encryption Program" or sName == "Radiation Dispersion Unit" or sName == "Defragmentation Unit" then
+	if sName == "Brute Force Algorithm" or sName == "Encryption Program" or sName == "Radiation Dispersion Unit" or sName == "Defragmentation Unit" or sName == "Extermination Sequence" or sName == "Data Compiler" or sName == "Viral Diffusion Inhibitor" then
 		if phase2 then return end
 		local timeOfEvent = GameLib.GetGameTime()
 		if timeOfEvent - prev > 48 then

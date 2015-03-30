@@ -3,7 +3,7 @@
 	<Script Name="Libs/GeminiAddon/GeminiAddon.lua" />
 	<Script Name="Libs/GeminiTimer/GeminiTimer-1.0.lua" />
 	<Script Name="Libs/GeminiGUI/GeminiGUI.lua"/>
-	<Script Name="ColorPicker.lua"/>
+	<Script Name="Libs/GeminiColor/GeminiColor.lua"/>
 	<Script Name="DisplayBar.lua"/>
 	<Script Name="DisplayMsg.lua"/>
 	<Script Name="DisplayBlock.lua"/>

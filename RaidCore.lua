@@ -35,6 +35,37 @@ local chatEvent = {
 		[ChatSystemLib.ChatChannel_NPCWhisper] 	= 'CHAT_NPCWHISPER',
 }
 
+local DefaultSettings = {
+	tGeneral = {
+		raidbars = {
+			isEnabled = true,
+			barSize = {
+				Width = 300,
+				Height = 25,
+			},
+			anchorFromTop = true,
+			barColor = "ff00007f",
+		},
+		message = {
+			isEnabled = true,
+			barSize = {
+				Width = 300,
+				Height = 25,
+			},
+			anchorFromTop = true,
+		},
+		unitmoni = {
+			isEnabled = true,
+			barSize = {
+				Width = 300,
+				Height = 25,
+			},
+			anchorFromTop = true,
+			barColor = "ff00007f",
+		},
+	},
+}
+
 
 -----------------------------------------------------------------------------------------------
 -- Initialization
@@ -91,6 +122,7 @@ function RaidCore:OnInitialize()
 	self.wndConfigLogicLife = Apollo.LoadForm(self.xmlDoc, "ConfigFormEpLifeLogic", self.wndTargetFrame, self)
 	self.wndConfigLogicWater = Apollo.LoadForm(self.xmlDoc, "ConfigFormEpFrostLogic", self.wndTargetFrame, self)
 	self.wndConfigAvatus = Apollo.LoadForm(self.xmlDoc, "ConfigFormAvatus", self.wndTargetFrame, self)
+
 end
 
 -----------------------------------------------------------------------------------------------
@@ -100,11 +132,13 @@ end
 function RaidCore:OnEnable()
 
 	if self.xmlDoc ~= nil and self.xmlDoc:IsLoaded() then
-	    self.wndMain = Apollo.LoadForm(self.xmlDoc, "RaidCoreForm", nil, self)
+	    self.wndMain = Apollo.LoadForm(self.xmlDoc, "ConfigForm", nil, self)
 		if self.wndMain == nil then
 			Apollo.AddAddonErrorText(self, "Could not load the main window for some reason.")
 			return
 		end
+
+		self.settings = self.settings or self:recursiveCopyTable(DefaultSettings)
 
 	    self.wndMain:Show(false, true)
 	    Apollo.LoadSprites("BarTextures.xml")
@@ -126,11 +160,11 @@ function RaidCore:OnEnable()
 
 	    self.drawline = RaidCoreLibs.DisplayLine.new(self.xmlDoc)
 
-	    if self.saveData ~= nil then
-	    	self:LoadSaveData(self.saveData)
-	    end
+	    self.GeminiColor = Apollo.GetPackage("GeminiColor").tPackage
 
-	    self.colorPicker = RaidCoreLibs.ColorPicker.new(self.xmlDoc)
+	    if self.settings ~= nil then
+	    	self:LoadSaveData()
+	    end
 
 		-- Register handlers for events, slash commands and timer, etc.
 		-- e.g. Apollo.RegisterEventHandler("KeyDown", "OnKeyDown", self)
@@ -146,8 +180,6 @@ function RaidCore:OnEnable()
 		Apollo.RegisterEventHandler("PublicEventObjectiveUpdate",	"OnPublicEventObjectiveUpdate", self)
 
 		-- Do additional Addon initialization here
-
-		self:InitializeConfigForm()
 
 		self.watch = {}
 		self.mark = {}
@@ -210,28 +242,6 @@ function RaidCore:SendMessage(msg)
 	end
 end
 
-function RaidCore:InitializeConfigForm()
-	local groupOptionsList = self.wndMain:FindChild("GroupOptionsList")
-	groupOptionsList:DestroyChildren()
-
-	local raidbarsOpt = Apollo.LoadForm(self.xmlDoc, "SubForms.GroupOptions", groupOptionsList, self)
-	raidbarsOpt:SetData(self.raidbars)
-	raidbarsOpt:FindChild("OptionsLabel"):SetText("Raid Bars")
-	self:InitializeGroup(raidbarsOpt, self.raidbars)
-
-	local unitmoniOpt = Apollo.LoadForm(self.xmlDoc, "SubForms.GroupOptions", groupOptionsList, self)
-	unitmoniOpt:SetData(self.unitmoni)
-	unitmoniOpt:FindChild("OptionsLabel"):SetText("Unit Bars")
-	self:InitializeGroup(unitmoniOpt, self.unitmoni)
-
-	local unitmoniOpt = Apollo.LoadForm(self.xmlDoc, "SubForms.GroupOptions", groupOptionsList, self)
-	unitmoniOpt:SetData(self.message)
-	unitmoniOpt:FindChild("OptionsLabel"):SetText("Message Bars")
-	self:InitializeGroup(unitmoniOpt, self.message)
-
-	groupOptionsList:ArrangeChildrenVert()
-end
-
 function RaidCore:InitializeGroup(groupFrame, group)
 	groupFrame:FindChild("Enabled"):SetCheck(group:IsEnabled())
 	groupFrame:FindChild("BackgroundColor"):FindChild("Text"):SetTextColor(group.bgColor)
@@ -247,11 +257,12 @@ function RaidCore:OnSave(eLevel)
 	if eLevel ~= GameLib.CodeEnumAddonSaveLevel.Character then
         return nil
     end
-	local saveData = {
-		raidbars = self.raidbars:GetSaveData(),
-		unitmoni = self.unitmoni:GetSaveData(),
-		message = self.message:GetSaveData()
-	}
+    self.settings["tGeneral"]["raidbars"] = self.raidbars:GetSaveData()
+    self.settings["tGeneral"]["unitmoni"] = self.unitmoni:GetSaveData()
+    self.settings["tGeneral"]["message"] = self.message:GetSaveData()
+	local saveData = {}
+
+	self:recursiveCopyTable(self.settings, saveData)
 
 	return saveData
 end
@@ -261,26 +272,14 @@ function RaidCore:OnRestore(eLevel, tData)
 		return nil
 	end
 
-	if self.Loaded then
-		self:LoadSaveData(tData)
-		self:InitializeConfigForm()
-	else
-		self.saveData = tData
-	end
+	self.settings = self:recursiveCopyTable(DefaultSettings, self.settings)
+	self.settings = self:recursiveCopyTable(tData, self.settings)
 end
 
-function RaidCore:LoadSaveData(tData)
-	if tData.raidbars then
-		self.raidbars:Load(tData.raidbars)
-	end
-
-	if tData.unitmoni then
-		self.unitmoni:Load(tData.unitmoni)
-	end
-
-	if tData.message then
-		self.message:Load(tData.message)
-	end
+function RaidCore:LoadSaveData()
+	self.raidbars:Load(self.settings["tGeneral"]["raidbars"])
+	self.unitmoni:Load(self.settings["tGeneral"]["unitmoni"])
+	self.message:Load(self.settings["tGeneral"]["message"])
 end
 
 function RaidCore:OnBarEnabledChanged( wndHandler, wndControl, eMouseButton )
@@ -321,24 +320,16 @@ function RaidCore:OnBarHeightValueChanged( wndHandler, wndControl, strText )
 	group:SetBarHeight(value)
 end
 
-function RaidCore:EditBarBGColor( wndHandler, wndControl, eMouseButton )
-	local group = wndHandler:GetParent():GetData()
-	local color = group.bgColor
-	self.colorPicker:OpenColorPicker(color, function()
-		wndHandler:FindChild("Text"):SetTextColor(color)
-		group:SetBGColor(color)
-	end)
-end
-
 function RaidCore:EditBarColor( wndHandler, wndControl, eMouseButton )
-	local group = wndHandler:GetParent():GetData()
-	local color = group.barColor
-	self.colorPicker:OpenColorPicker(color, function()
-		wndHandler:FindChild("Text"):SetTextColor(color)
-		group:SetBarColor(color)
-	end)
+	if wndHandler ~= wndControl or eMouseButton ~= GameLib.CodeEnumInputMouse.Left then return end
+	local identifier = self:SplitString(wndControl:GetName(), "_")
+	self.GeminiColor:ShowColorPicker(self, {callback = "OnGeminiColor", bCustomColor = true, strInitialColor = self.settings["tGeneral"][identifier[2]][identifier[3]]}, identifier)
 end
 
+function RaidCore:OnGeminiColor(strColor, identifier)
+	self.settings["tGeneral"][identifier[2]][identifier[3]] = strColor
+	self[identifier[2]]:Load(self.settings["tGeneral"][identifier[2]])
+end
 
 local function wipe(t)
 	for k,v in pairs(t) do
@@ -489,8 +480,7 @@ function RaidCore:OnRaidCoreOn(cmd, args)
 		}
 		self:SetWorldMarker(nordpos, "NORD")
 	else
-		self:InitializeConfigForm()
-		self.wndMain:Invoke() -- show the window
+		self:OnConfigOn()
 	end
 end
 
@@ -647,7 +637,7 @@ function RaidCore:OnWorldChanged()
 			end
 		elseif monitoring then
 			monitoring = nil
-			Print("MONITORING OFF")
+			Print("Left raid instance. Disabling RaidCore.")
 			Apollo.RemoveEventHandler("UnitCreated",	 	self)
 			Apollo.RemoveEventHandler("ChatMessage",	 	self)
 			Apollo.RemoveEventHandler("UnitEnteredCombat",	self)
@@ -1516,15 +1506,38 @@ end
 -- RaidCoreForm Functions
 -----------------------------------------------------------------------------------------------
 
+function RaidCore:recursiveCopyTable(from, to)
+	to = to or {}
+	for k,v in pairs(from) do
+		if type(v) == "table" then
+			to[k] = self:recursiveCopyTable(v, to[k])
+		else
+			to[k] = v
+		end
+	end
+	return to
+end
+
+function RaidCore:SplitString(inputstr, sep)
+        if sep == nil then
+                sep = "%s"
+        end
+        local t={} ; i=1
+        for str in string.gmatch(inputstr, "([^"..sep.."]+)") do
+                t[i] = str
+                i = i + 1
+        end
+        return t
+end
+
+function RaidCore:GetSettings()
+	return self.settings
+end
+
 function RaidCore:HideChildWindows(wndParent)
 	for key, value in pairs(wndParent:GetChildren()) do
 		value:Show(false)
 	end
-end
-
--- when the OK button is clicked
-function RaidCore:OnOK()
-	self.wndMain:Close() -- hide the window
 end
 
 -- when the Reset button is clicked
@@ -1550,11 +1563,11 @@ function RaidCore:OnMoveBars( wndHandler, wndControl, eMouseButton )
 end
 
 function RaidCore:OnConfigOn()
-	self.wndConfig:Show(true)
+	self.wndConfig:Invoke()
 end
 
 function RaidCore:OnConfigCloseButton()
-	self.wndConfig:Show(false)
+	self.wndConfig:Close()
 end
 
 function RaidCore:Button_DSSettingsCheck(wndHandler, wndControl, eMouseButton)
