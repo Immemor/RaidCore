@@ -242,17 +242,6 @@ function RaidCore:SendMessage(msg)
 	end
 end
 
-function RaidCore:InitializeGroup(groupFrame, group)
-	groupFrame:FindChild("Enabled"):SetCheck(group:IsEnabled())
-	groupFrame:FindChild("BackgroundColor"):FindChild("Text"):SetTextColor(group.bgColor)
-	groupFrame:FindChild("BarColor"):FindChild("Text"):SetTextColor(group.barColor)
-	groupFrame:FindChild("StartFromTop"):SetCheck(group.anchorFromTop)
-	groupFrame:FindChild("BarWidth"):SetValue(group.barSize.Width)
-	groupFrame:FindChild("BarWidthValue"):SetText(string.format("%.f", group.barSize.Width))
-	groupFrame:FindChild("BarHeight"):SetValue(group.barSize.Height)
-	groupFrame:FindChild("BarHeightValue"):SetText(string.format("%.f", group.barSize.Height))
-end
-
 function RaidCore:OnSave(eLevel)
 	if eLevel ~= GameLib.CodeEnumAddonSaveLevel.Character then
         return nil
@@ -280,6 +269,20 @@ function RaidCore:LoadSaveData()
 	self.raidbars:Load(self.settings["tGeneral"]["raidbars"])
 	self.unitmoni:Load(self.settings["tGeneral"]["unitmoni"])
 	self.message:Load(self.settings["tGeneral"]["message"])
+
+	self.wndConfigGeneral:FindChild("Slider_raidbars_barSize_Width"):SetValue(self.settings["tGeneral"]["raidbars"]["barSize"]["Width"])
+	self.wndConfigGeneral:FindChild("Slider_message_barSize_Width"):SetValue(self.settings["tGeneral"]["message"]["barSize"]["Width"])
+	self.wndConfigGeneral:FindChild("Slider_unitmoni_barSize_Width"):SetValue(self.settings["tGeneral"]["unitmoni"]["barSize"]["Width"])
+	self.wndConfigGeneral:FindChild("Slider_raidbars_barSize_Height"):SetValue(self.settings["tGeneral"]["raidbars"]["barSize"]["Height"])
+	self.wndConfigGeneral:FindChild("Slider_message_barSize_Height"):SetValue(self.settings["tGeneral"]["message"]["barSize"]["Height"])
+	self.wndConfigGeneral:FindChild("Slider_unitmoni_barSize_Height"):SetValue(self.settings["tGeneral"]["unitmoni"]["barSize"]["Height"])
+
+	self.wndConfigGeneral:FindChild("Label_raidbars_barSize_Width"):SetText(string.format("%.fpx", self.settings["tGeneral"]["raidbars"]["barSize"]["Width"]))
+	self.wndConfigGeneral:FindChild("Label_message_barSize_Width"):SetText(string.format("%.fpx", self.settings["tGeneral"]["message"]["barSize"]["Width"]))
+	self.wndConfigGeneral:FindChild("Label_unitmoni_barSize_Width"):SetText(string.format("%.fpx", self.settings["tGeneral"]["unitmoni"]["barSize"]["Width"]))
+	self.wndConfigGeneral:FindChild("Label_raidbars_barSize_Height"):SetText(string.format("%.fpx", self.settings["tGeneral"]["raidbars"]["barSize"]["Height"]))
+	self.wndConfigGeneral:FindChild("Label_message_barSize_Height"):SetText(string.format("%.fpx", self.settings["tGeneral"]["message"]["barSize"]["Height"]))
+	self.wndConfigGeneral:FindChild("Label_unitmoni_barSize_Height"):SetText(string.format("%.fpx", self.settings["tGeneral"]["unitmoni"]["barSize"]["Height"]))
 end
 
 function RaidCore:OnBarEnabledChanged( wndHandler, wndControl, eMouseButton )
@@ -292,32 +295,11 @@ function RaidCore:OnBarStartFromTopChanged( wndHandler, wndControl, eMouseButton
 	group:AnchorFromTop(wndHandler:IsChecked())
 end
 
-function RaidCore:OnBarWidthChanged( wndHandler, wndControl, fNewValue, fOldValue )
-	local group = wndHandler:GetParent():GetData()
-	group:SetBarWidth(fNewValue)
-	wndHandler:GetParent():FindChild("BarWidthValue"):SetText(string.format("%.f", fNewValue))
-end
-
-function RaidCore:OnBarWidthValueChanged( wndHandler, wndControl, strText )
-	local group = wndHandler:GetParent():GetData()
-	local value = tonumber(strText)
-	wndHandler:SetText(tostring(value))
-	wndHandler:GetParent():FindChild("BarWidth"):SetValue(value)
-	group:SetBarWidth(value)
-end
-
-function RaidCore:OnBarHeightChanged( wndHandler, wndControl, fNewValue, fOldValue )
-	local group = wndHandler:GetParent():GetData()
-	group:SetBarHeight(fNewValue)
-	wndHandler:GetParent():FindChild("BarHeightValue"):SetText(string.format("%.f", fNewValue))
-end
-
-function RaidCore:OnBarHeightValueChanged( wndHandler, wndControl, strText )
-	local group = wndHandler:GetParent():GetData()
-	local value = tonumber(strText)
-	wndHandler:SetText(tostring(value))
-	wndHandler:GetParent():FindChild("BarHeight"):SetValue(value)
-	group:SetBarHeight(value)
+function RaidCore:OnSliderBarChanged( wndHandler, wndControl, fNewValue, fOldValue )
+	local identifier = self:SplitString(wndControl:GetName(), "_")
+	self.settings["tGeneral"][identifier[2]][identifier[3]][identifier[4]] = fNewValue
+	wndHandler:GetParent():GetParent():FindChild("Label_".. identifier[2] .. "_" .. identifier[3] .. "_" .. identifier[4]):SetText(string.format("%.fpx", fNewValue))
+	self[identifier[2]]:Load(self.settings["tGeneral"][identifier[2]])
 end
 
 function RaidCore:EditBarColor( wndHandler, wndControl, eMouseButton )

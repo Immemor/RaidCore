@@ -58,6 +58,7 @@ function DisplayBlock:Load(saveData)
 	end
 
 	if saveData.Position ~= nil then
+		self:SetBarHeight(saveData.barSize.Height)
 		self.barsFrame:SetAnchorOffsets(saveData.Position[1], saveData.Position[2], saveData.Position[1] + self.barSize.Width, saveData.Position[2] + self.barsFrame:GetHeight())
 	end
 
@@ -361,6 +362,7 @@ function DisplayBlock:CreateMsg(key, message, maxTime)
 end
 
 function DisplayBlock:SetBGColor(color)
+	if not color then return end
 	self.bgColor = color
 	for _, bar in pairs(self.infos) do
 		local raidBar = bar.barFrame
@@ -369,6 +371,7 @@ function DisplayBlock:SetBGColor(color)
 end
 
 function DisplayBlock:SetBarColor(color)
+	if not color then return end
 	self.barColor = color
 	for _, bar in pairs(self.infos) do
 		local raidBar = bar.barFrame

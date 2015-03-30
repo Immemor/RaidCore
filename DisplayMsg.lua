@@ -40,7 +40,7 @@ function DisplayMsg:SetWidth(width)
 end
 
 function DisplayMsg:SetBGColor(color)
-    self.Frame:SetBGColor(color)
+    --self.Frame:SetBGColor(color)
 end
 
 function DisplayMsg:SetTextColor(color)
@@ -48,7 +48,7 @@ function DisplayMsg:SetTextColor(color)
 end
 
 function DisplayMsg:SetBarColor(color)
-    self.Frame:SetBarColor(color)
+    --self.Frame:SetBarColor(color)
 end
 
 
