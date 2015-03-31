@@ -25,8 +25,8 @@ function DisplayBar.new(xmlDoc, key, message, maxTime, type, block)
         self.Frame:FindChild("RemainingOverlay"):SetMax(maxTime)
         --self.Frame:SetSprite("BarTextures_Fire")
         --self.Frame:FindChild("RemainingOverlay"):SetFullSprite("BarTextures_Fire")
-        self.Frame:SetSprite("Minimalist")
-        self.Frame:FindChild("RemainingOverlay"):SetFullSprite("Minimalist")
+        self.Frame:SetSprite("RaidCoreMinimalist")
+        self.Frame:FindChild("RemainingOverlay"):SetFullSprite("RaidCoreMinimalist")
     end
     return self
 end

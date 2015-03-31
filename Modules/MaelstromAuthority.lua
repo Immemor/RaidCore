@@ -42,7 +42,7 @@ function mod:OnUnitCreated(unit)
 	--Print(sName)
 	if sName == "Avatus Hologram" then
 		self:Start()
-		core:AddBar("JUMP", "JUMP", 8.5, 1)
+		core:AddBar("JUMP", "Encounter Start", 8.5, 1)
 		bossPos = {}
 	elseif sName == "Wind Wall" then
 		core:AddPixie(unit:GetId().."_1", 2, unit, nil, "Green", 10, 20, 0)
