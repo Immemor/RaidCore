@@ -8,8 +8,8 @@ local mod = core:NewBoss("Ohmna", 67)
 if not mod then return end
 
 mod:RegisterEnableMob("Dreadphage Ohmna", "Schreckensphage Ohmna")
-mod:RegisterRestrictEventObjective("Ohmna", "Defeat Dreadphage Ohmna", "Besiege die Schreckensphage Ohmna")
-mod:RegisterEnableEventObjective("Ohmna", "Defeat Dreadphage Ohmna", "Besiege die Schreckensphage Ohmna")
+mod:RegisterRestrictEventObjective("Ohmna", "Defeat Dreadphage Ohmna", "Besiegt die Schreckensphage Ohmna")
+mod:RegisterEnableEventObjective("Ohmna", "Defeat Dreadphage Ohmna", "Besiegt die Schreckensphage Ohmna")
 
 --------------------------------------------------------------------------------
 -- Locals
