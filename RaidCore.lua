@@ -798,7 +798,7 @@ function RaidCore:AddDelayedMsg(key, delay, message, duration, sound, color)
 end
 
 function RaidCore:PrintEmphasize(key, num)
-	self:AddMsg("EMP"..key, num, 0.9, num, "Green")
+	self:AddMsg("EMP"..key..num, num, 0.9, num, "Green")
 	self.emphasize[key][num] = nil
 	if num == 1 then
 		self.emphasize[key] = nil
@@ -817,15 +817,15 @@ end
 function RaidCore:AddEmphasize(key, delay)
 	self:StopEmphasize(key)
 	if not self.emphasize[key] then self.emphasize[key] = {} end
-	if delay > 1 then
+	if delay >= 1 then
 		self.emphasize[key][1] = self:ScheduleTimer("PrintEmphasize", delay - 1, key, 1)
-		if delay > 2 then
+		if delay >= 2 then
 			self.emphasize[key][2] = self:ScheduleTimer("PrintEmphasize", delay - 2, key, 2)
-			if delay > 3 then
+			if delay >= 3 then
 				self.emphasize[key][3] = self:ScheduleTimer("PrintEmphasize", delay - 3, key, 3)
-				if delay > 4 then
+				if delay >= 4 then
 					self.emphasize[key][4] = self:ScheduleTimer("PrintEmphasize", delay - 4, key, 4)
-					if delay > 5 then
+					if delay >= 5 then
 						self.emphasize[key][5] = self:ScheduleTimer("PrintEmphasize", delay - 5, key, 5)
 					end
 				end
@@ -1427,7 +1427,7 @@ function RaidCore:VersionCheck()
 end
 
 function RaidCore:LaunchPull(time)
-	if time and time > 5 then
+	if time and time > 2 then
 		local msg = {action = "LaunchPull", sender = GameLib.GetPlayerUnit():GetName(), cooldown = time}
 		self:SendMessage(msg)
 		self:OnComMessage(nil, msg)

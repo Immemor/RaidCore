@@ -113,6 +113,9 @@ function mod:OnUnitCreated(unit)
 		if unitId then
 			core:AddPixie(unitId, 1, unit, uPlayer, "Blue", 5, 10, 10)
 		end
+	elseif sName == "Hydroflux" or sName == "Mnemesis" then
+		core:AddUnit(unit)
+		core:WatchUnit(unit)
 	end
 
 	--Print(eventTime .. " - " .. sName)
