@@ -16,7 +16,14 @@ local boss = {}
 
 function boss:IsBossModule() return true end
 
-function boss:OnInitialize() core:RegisterBossModule(self) end
+function boss:OnInitialize()
+	core:RegisterBossModule(self)
+	-- Create an empty locale table.
+	local GeminiLocale = Apollo.GetPackage("Gemini:Locale-1.0").tPackage
+	local sName = "RaidCore_" .. self:GetName()
+	GeminiLocale:NewLocale(sName)
+	self.L = GeminiLocale:GetLocale(sName)
+end
 
 function boss:OnEnable()
 	if debug then dbg(self, "OnEnable()") end
@@ -74,6 +81,29 @@ function boss:Start()
 		core:StartCombat(self.ModuleName)
 		Print("Fight started : " .. self.ModuleName)
 	end
+end
+
+local function RegisterLocale(tBoss, sLanguage, Locales)
+  local GeminiLocale = Apollo.GetPackage("Gemini:Locale-1.0").tPackage
+  local sName = "RaidCore_" .. tBoss:GetName()
+  local L = GeminiLocale:NewLocale(sName, sLanguage)
+  if L then
+    for key, val in next, Locales do
+      L[key] = val
+    end
+  end
+end
+
+function boss:RegisterEnglishLocale(Locales)
+  RegisterLocale(self, "enUS", Locales)
+end
+
+function boss:RegisterGermanLocale(Locales)
+  RegisterLocale(self, "deDE", Locales)
+end
+
+function boss:RegisterFrenchLocale(Locales)
+  RegisterLocale(self, "frFR", Locales)
 end
 
 function boss:OnRaidWipe()
