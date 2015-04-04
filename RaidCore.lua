@@ -270,6 +270,15 @@ function RaidCore:LoadSaveData()
 	self.unitmoni:Load(self.settings["tGeneral"]["unitmoni"])
 	self.message:Load(self.settings["tGeneral"]["message"])
 
+	
+	self.wndConfigGeneral:FindChild("Button_raidbars_isEnabled"):SetCheck(self.settings["tGeneral"]["raidbars"]["isEnabled"])
+	self.wndConfigGeneral:FindChild("Button_message_isEnabled"):SetCheck(self.settings["tGeneral"]["message"]["isEnabled"])
+	self.wndConfigGeneral:FindChild("Button_unitmoni_isEnabled"):SetCheck(self.settings["tGeneral"]["unitmoni"]["isEnabled"])
+
+	self.wndConfigGeneral:FindChild("Button_raidbars_anchorFromTop"):SetCheck(self.settings["tGeneral"]["raidbars"]["anchorFromTop"])
+	self.wndConfigGeneral:FindChild("Button_message_anchorFromTop"):SetCheck(self.settings["tGeneral"]["message"]["anchorFromTop"])
+	self.wndConfigGeneral:FindChild("Button_unitmoni_anchorFromTop"):SetCheck(self.settings["tGeneral"]["unitmoni"]["anchorFromTop"])
+
 	self.wndConfigGeneral:FindChild("Slider_raidbars_barSize_Width"):SetValue(self.settings["tGeneral"]["raidbars"]["barSize"]["Width"])
 	self.wndConfigGeneral:FindChild("Slider_message_barSize_Width"):SetValue(self.settings["tGeneral"]["message"]["barSize"]["Width"])
 	self.wndConfigGeneral:FindChild("Slider_unitmoni_barSize_Width"):SetValue(self.settings["tGeneral"]["unitmoni"]["barSize"]["Width"])
@@ -286,13 +295,17 @@ function RaidCore:LoadSaveData()
 end
 
 function RaidCore:OnBarEnabledChanged( wndHandler, wndControl, eMouseButton )
-	local group = wndHandler:GetParent():GetData()
-	group:SetEnabled(wndHandler:IsChecked())
+	local identifier = self:SplitString(wndControl:GetName(), "_")
+	self.settings[identifier[2]][identifier[3]] = wndControl:IsChecked()
+	self[identifier[2]]:SetEnabled(wndControl:IsChecked())
 end
 
 function RaidCore:OnBarStartFromTopChanged( wndHandler, wndControl, eMouseButton )
-	local group = wndHandler:GetParent():GetData()
-	group:AnchorFromTop(wndHandler:IsChecked())
+	local identifier = self:SplitString(wndControl:GetName(), "_")
+	self.settings[identifier[2]][identifier[3]] = wndControl:IsChecked()
+	self[identifier[2]]:AnchorFromTop(wndControl:IsChecked(), true)
+	local rover = Apollo.GetAddon("Rover")
+	rover:AddWatch("self", self, 0)
 end
 
 function RaidCore:OnSliderBarChanged( wndHandler, wndControl, fNewValue, fOldValue )
