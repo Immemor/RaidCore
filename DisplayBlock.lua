@@ -7,6 +7,16 @@ setmetatable(DisplayBlock, {
     return cls.new(...)
   end,
 })
+local GlobalSettings = {
+  soundsEnabled = true
+}
+function DisplayBlock.AreSoundsEnabled()
+  return GlobalSettings["soundsEnabled"]
+end
+
+function DisplayBlock.SetSoundsState(value)
+  GlobalSettings["soundsEnabled"] = value
+end
 
 
 function DisplayBlock.new(xmlDoc)
@@ -285,7 +295,7 @@ function DisplayBlock:AddMsg(key, message, duration, sound, color)
 			self.infos[key].barFrame = raidBar
 			self.infos[key].type = 3
 			self.itemList:ArrangeChildrenVert(self:GetAnchorPoint())
-			if sound then
+			if sound and self.AreSoundsEnabled() then
 				--Print("Sound : " .. Apollo.GetAssetFolder() .. "\\" .. sound .. ".wav")
 				Sound.PlayFile("..\\RaidCore\\Sounds\\"..sound .. ".wav")
 			end
