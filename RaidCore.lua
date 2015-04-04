@@ -16,6 +16,9 @@ local addon = RaidCore
 -----------------------------------------------------------------------------------------------
 -- Constants
 -----------------------------------------------------------------------------------------------
+-- Sometimes Carbine have inserted some no-break-space, for fun.
+-- Behavior seen with French language. This problem is not present in English.
+local NO_BREAK_SPACE = string.char(194, 160)
 local enablezones, enablemobs, enablepairs, restrictzone, enablezone, restricteventobjective, enableeventobjective = {}, {}, {}, {}, {}, {}, {}
 local monitoring = nil
 
@@ -742,8 +745,9 @@ function RaidCore:hasActiveEvent(tblEvents)
 end
 
 function RaidCore:unitCheck(unit)
+	local sName = unit:GetName():gsub(NO_BREAK_SPACE, " ")
+	Event_FireGenericEvent("RC_UnitCreated", unit, sName)
 	if unit and not unit:IsDead() then
-		local sName = unit:GetName()
 		--Print("Checking " .. sName)
 		if sName and enablemobs[sName] then
 			if type(enablemobs[sName]) == "string" then
@@ -1195,7 +1199,8 @@ function RaidCore:DropLine(key)
 end
 
 function RaidCore:OnUnitDestroyed(unit)
-	local unitName = unit:GetName()
+	local unitName = unit:GetName():gsub(NO_BREAK_SPACE, " ")
+	Event_FireGenericEvent("RC_UnitDestroyed", unit, unitName)
 	--Print("Removing 1".. unit:GetName())
 	local key = unit:GetId()
 	if self.watch[key] then
@@ -1268,11 +1273,13 @@ function RaidCore:OnUpdate()
 				if unit:ShouldShowCastBar() then
 					if not self.watch[k].tracked then
 						self.watch[k].tracked = unit:GetCastName()
-						Event_FireGenericEvent("SPELL_CAST_START", unit:GetName(), self.watch[k].tracked, unit)
+						local unitName = unit:GetName():gsub(NO_BREAK_SPACE, " ")
+						Event_FireGenericEvent("SPELL_CAST_START", unitName, self.watch[k].tracked, unit)
 						--Print("SPELL_CAST_START : " .. unit:GetName() .. " " .. self.watch[k].tracked)
 					end
 				elseif self.watch[k].tracked then
-					Event_FireGenericEvent("SPELL_CAST_END", unit:GetName(), self.watch[k].tracked, unit)
+					local unitName = unit:GetName():gsub(NO_BREAK_SPACE, " ")
+					Event_FireGenericEvent("SPELL_CAST_END", unitName, self.watch[k].tracked, unit)
 					--Print("SPELL_CAST_END : " .. unit:GetName() .. " " .. self.watch[k].tracked)
 					self.watch[k].tracked = nil
 				end
@@ -1285,13 +1292,14 @@ function RaidCore:OnUpdate()
 		if not unit:IsDead() then
 			local unitBuffs = unit:GetBuffs().arBeneficial
 			local tempbuff = {}
+			local unitName = unit:GetName():gsub(NO_BREAK_SPACE, " ")
 			for _, s in pairs(unitBuffs) do
 				tempbuff[s.idBuff] = true
 				if v.aura[s.idBuff] then -- refresh
 					if s.nCount ~= v.aura[s.idBuff].nCount then -- this for when an aura has no duration but has stacks
-						Event_FireGenericEvent("BUFF_APPLIED_DOSE", unit:GetName(), s.splEffect:GetId(), s.nCount)
+						Event_FireGenericEvent("BUFF_APPLIED_DOSE", unitName, s.splEffect:GetId(), s.nCount)
 					elseif s.fTimeRemaining > v.aura[s.idBuff].fTimeRemaining then
-						Event_FireGenericEvent("BUFF_APPLIED_RENEW", unit:GetName(), s.splEffect:GetId(), s.nCount)
+						Event_FireGenericEvent("BUFF_APPLIED_RENEW", unitName, s.splEffect:GetId(), s.nCount)
 					end
 					v.aura[s.idBuff] = {
 						["nCount"] = s.nCount,
@@ -1304,14 +1312,14 @@ function RaidCore:OnUpdate()
 						["fTimeRemaining"] = s.fTimeRemaining,
 						["splEffect"] = s.splEffect,
 					}
-						Event_FireGenericEvent("BUFF_APPLIED", unit:GetName(), s.splEffect:GetId(), unit)
-						--Print("BUFF_APPLIED : " .. unit:GetName() .. " " .. s.splEffect:GetId())
+						Event_FireGenericEvent("BUFF_APPLIED", unitName, s.splEffect:GetId(), unit)
+						--Print("BUFF_APPLIED : " .. unitName .. " " .. s.splEffect:GetId())
 				end
 			end
 			for buffId, buffData in pairs(v.aura) do
 				if not tempbuff[buffId] then
-					Event_FireGenericEvent("BUFF_REMOVED", unit:GetName(), buffData.splEffect:GetId(), unit)
-					--Print("BUFF_REMOVED : " .. unit:GetName() .. " " .. buffData.splEffect:GetId())
+					Event_FireGenericEvent("BUFF_REMOVED", unitName, buffData.splEffect:GetId(), unit)
+					--Print("BUFF_REMOVED : " .. unitName .. " " .. buffData.splEffect:GetId())
 					v.aura[buffId] = nil
 				end
 			end
@@ -1321,6 +1329,7 @@ function RaidCore:OnUpdate()
 	for k, v in pairs(self.debuffs) do
 		unit = v.unit
 		if not unit:IsDead() then
+			local unitName = unit:GetName():gsub(NO_BREAK_SPACE, " ")
 			local truc
 			if (unit:GetBuffs()) then
 				local unitDebuffs = unit:GetBuffs().arHarmful
@@ -1329,9 +1338,9 @@ function RaidCore:OnUpdate()
 					tempdebuff[s.idBuff] = true
 					if v.aura[s.idBuff] then -- refresh
 						if s.nCount ~= v.aura[s.idBuff].nCount then -- this for when an aura has no duration but has stacks
-							Event_FireGenericEvent("DEBUFF_APPLIED_DOSE", unit:GetName(), s.splEffect:GetId(), s.nCount)
+							Event_FireGenericEvent("DEBUFF_APPLIED_DOSE", unitName, s.splEffect:GetId(), s.nCount)
 						elseif s.fTimeRemaining > v.aura[s.idBuff].fTimeRemaining then
-							Event_FireGenericEvent("DEBUFF_APPLIED_RENEW", unit:GetName(), s.splEffect:GetId(), s.nCount)
+							Event_FireGenericEvent("DEBUFF_APPLIED_RENEW", unitName, s.splEffect:GetId(), s.nCount)
 						end
 						v.aura[s.idBuff] = {
 							["nCount"] = s.nCount,
@@ -1344,14 +1353,14 @@ function RaidCore:OnUpdate()
 							["fTimeRemaining"] = s.fTimeRemaining,
 							["splEffect"] = s.splEffect,
 						}
-							Event_FireGenericEvent("DEBUFF_APPLIED", unit:GetName(), s.splEffect:GetId(), unit)
-							--Print("DEBUFF_APPLIED : " .. unit:GetName() .. " " .. s.splEffect:GetId())
+							Event_FireGenericEvent("DEBUFF_APPLIED", unitName, s.splEffect:GetId(), unit)
+							--Print("DEBUFF_APPLIED : " .. unitName .. " " .. s.splEffect:GetId())
 					end
 				end
 				for buffId, buffData in pairs(v.aura) do
 					if not tempdebuff[buffId] then
-						Event_FireGenericEvent("DEBUFF_REMOVED", unit:GetName(), buffData.splEffect:GetId(), unit)
-							--Print("DEBUFF_REMOVED : " .. unit:GetName() .. " " .. buffData.splEffect:GetId())
+						Event_FireGenericEvent("DEBUFF_REMOVED", unitName, buffData.splEffect:GetId(), unit)
+							--Print("DEBUFF_REMOVED : " .. unitName .. " " .. buffData.splEffect:GetId())
 						v.aura[buffId] = nil
 					end
 				end
@@ -1472,7 +1481,7 @@ do
 		if checkChatFilter(channelType) then
 			local strMessage = ""
 			for _, tSegment in next, tMessage.arMessageSegments do
-				strMessage = strMessage .. tSegment.strText
+				strMessage = strMessage .. tSegment.strText:gsub(NO_BREAK_SPACE, " ")
 			end
 
 			Event_FireGenericEvent(chatEvent[channelType], strMessage)
@@ -1552,6 +1561,9 @@ function RaidCore:WipeCheck()
 end
 
 function RaidCore:CombatStateChanged(unit, bInCombat)
+	local UnitName = unit:GetName():gsub(NO_BREAK_SPACE, " ")
+	Event_FireGenericEvent("RC_UnitStateChanged", unit, bInCombat, UnitName)
+
 	if unit == GameLib.GetPlayerUnit() and not bInCombat and not self.wipeTimer then
 		--and GroupLib.InRaid() then
 		self.wipeTimer = ApolloTimer.Create(0.5, true, "WipeCheck", self)

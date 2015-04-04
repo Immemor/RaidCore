@@ -1,4 +1,5 @@
 local DisplayBlock = {} 
+local NO_BREAK_SPACE = string.char(194, 160)
 
 DisplayBlock.__index = DisplayBlock
 
@@ -207,7 +208,7 @@ function DisplayBlock:AddUnit(unit, mark)
 		local key = unit:GetId()
 		if self.infos[key] == nil and not unit:IsDead() then
 			
-			local unitName = unit:GetName()
+			local unitName = unit:GetName():gsub(NO_BREAK_SPACE, " ")
 			local maxHealth = unit:GetMaxHealth()
 			if maxHealth then
 				self.infos[key] = {}
