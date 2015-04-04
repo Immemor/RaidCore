@@ -328,12 +328,12 @@ end
 function RaidCore:EditBarColor( wndHandler, wndControl, eMouseButton )
 	if wndHandler ~= wndControl or eMouseButton ~= GameLib.CodeEnumInputMouse.Left then return end
 	local identifier = self:SplitString(wndControl:GetName(), "_")
-	self.GeminiColor:ShowColorPicker(self, {callback = "OnGeminiColor", bCustomColor = true, strInitialColor = self.settings["tGeneral"][identifier[2]][identifier[3]]}, identifier)
+	self.GeminiColor:ShowColorPicker(self, {callback = "OnGeminiColor", bCustomColor = true, strInitialColor = self.settings[identifier[2]][identifier[3]][identifier[4]]}, identifier)
 end
 
 function RaidCore:OnGeminiColor(strColor, identifier)
-	self.settings["tGeneral"][identifier[2]][identifier[3]] = strColor
-	self[identifier[2]]:Load(self.settings["tGeneral"][identifier[2]])
+	self.settings[identifier[2]][identifier[3]][identifier[4]] = strColor
+	self[identifier[3]]:Load(self.settings[identifier[2]][identifier[3]])
 end
 
 local function wipe(t)
