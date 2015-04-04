@@ -34,14 +34,16 @@ end
 --
 
 function mod:OnSpellCastStart(unitName, castName, unit)
-	if unitName == "Experiment X-89" and castName == "Resounding Shout" then
-		core:AddMsg("KNOCKBACK", "KNOCKBACK !!", 5, "Alert")
-		core:AddBar("KNOCKBACK", "KNOCKBACK", 23)
-	elseif unitName == "Experiment X-89" and castName == "Repugnant Spew" then
-		core:AddMsg("BEAM", "BEAM !!", 5, "Alarm")
-		core:AddBar("BEAM", "BEAM", 40)
-	elseif unitName == "Experiment X-89" and castName == "Shattering Shockwave" then
-		core:AddBar("SHOCKWAVE", "SHOCKWAVE", 19)
+	if unitName == "Experiment X-89" then
+		if castName == "Resounding Shout" then
+			core:AddMsg("KNOCKBACK", "KNOCKBACK !!", 5, "Alert")
+			core:AddBar("KNOCKBACK", "KNOCKBACK", 23)
+		elseif castName == "Repugnant Spew" then
+			core:AddMsg("BEAM", "BEAM !!", 5, "Alarm")
+			core:AddBar("BEAM", "BEAM", 40)
+		elseif castName == "Shattering Shockwave" then
+			core:AddBar("SHOCKWAVE", "SHOCKWAVE", 19)
+		end
 	end
 end
 
@@ -68,9 +70,10 @@ function mod:OnCombatStateChanged(unit, bInCombat)
 		local sName = unit:GetName()
 		if sName == "Experiment X-89" then
 			self:Start()
-			playerName = GameLib.GetPlayerUnit():GetName()
+			local playerUnit = GameLib.GetPlayerUnit()
+			playerName = playerUnit:GetName()
 			core:AddUnit(unit)
-			core:UnitDebuff(GameLib.GetPlayerUnit())
+			core:UnitDebuff(playerUnit)
 			core:WatchUnit(unit)
 			core:StartScan()
 			core:AddBar("KNOCKBACK", "KNOCKBACK", 6)
