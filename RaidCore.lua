@@ -305,20 +305,12 @@ function RaidCore:OnGeneralCheckBoxChecked(wndHandler, wndControl, eMouseButton 
 	local identifier = self:SplitString(wndControl:GetName(), "_")
 	self.settings[identifier[2]][identifier[3]][identifier[4]] = true
 	self[identifier[3]]:Load(self.settings[identifier[2]][identifier[3]])
-
-	if identifier[4] == "anchorFromTop" then
-		self[identifier[3]]:AnchorFromTop(true, true)
-	end
 end
 
 function RaidCore:OnGeneralCheckBoxUnchecked(wndHandler, wndControl, eMouseButton )
 	local identifier = self:SplitString(wndControl:GetName(), "_")
 	self.settings[identifier[2]][identifier[3]][identifier[4]] = false
 	self[identifier[3]]:Load(self.settings[identifier[2]][identifier[3]])
-
-	if identifier[4] == "anchorFromTop" then
-		self[identifier[3]]:AnchorFromTop(false, true)
-	end
 end
 
 function RaidCore:OnSoundsStateChanged(wndHandler, wndControl, eMouseButton)
