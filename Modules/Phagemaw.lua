@@ -10,6 +10,31 @@ if not mod then return end
 mod:RegisterEnableMob("Phage Maw")
 mod:RegisterRestrictZone("PhageMaw", "Experimentation Lab CX-33")
 mod:RegisterEnableZone("PhageMaw", "Experimentation Lab CX-33")
+mod:RegisterEnglishLocale({
+	-- Unit names.
+	["Phage Maw"] = "Phage Maw",
+	["Detonation Bomb"] = "Detonation Bomb",
+	-- Datachron messages.
+	["The augmented shield has been destroyed"] = "The augmented shield has been destroyed",
+	["Phage Maw begins charging an orbital strike"] = "Phage Maw begins charging an orbital strike",
+	-- Bar and messages.
+	["Bomb %u"] = "Bomb %u",
+	["BOOOM !"] = "BOOOM !",
+})
+mod:RegisterFrenchLocale({
+	-- Unit names.
+	["Phage Maw"] = "Phagegueule",
+	["Detonation Bomb"] = "Bombe à détonateur",
+	-- Datachron messages.
+	-- Bar and messages.
+	["Bomb %u"] = "Bombe %u",
+	["BOOOM !"] = "BOOOM !",
+})
+mod:RegisterGermanLocale({
+	-- Unit names.
+	-- Datachron messages.
+	-- Bar and messages.
+})
 
 --------------------------------------------------------------------------------
 -- Locals
@@ -21,39 +46,36 @@ mod:RegisterEnableZone("PhageMaw", "Experimentation Lab CX-33")
 
 function mod:OnBossEnable()
 	Print(("Module %s loaded"):format(mod.ModuleName))
-	Apollo.RegisterEventHandler("UnitCreated", "OnUnitCreated", self)
+	Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
 	Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
-	Apollo.RegisterEventHandler("UnitEnteredCombat", "OnCombatStateChanged", self)
+	Apollo.RegisterEventHandler("RC_UnitStateChanged", "OnUnitStateChanged", self)
 end
 
 --------------------------------------------------------------------------------
 -- Event Handlers
 --
 
-function mod:OnUnitCreated(unit)
-	local sName = unit:GetName()
-	if sName == "Detonation Bomb" then
+function mod:OnUnitCreated(unit, sName)
+	if sName == self.L["Detonation Bomb"] then
 		core:MarkUnit(unit, 1)
 		core:AddUnit(unit)
 	end
 end
 
 function mod:OnChatDC(message)
-	if message:find("The augmented shield has been destroyed") then
-		core:AddBar("MAW1", "Bomb 1", 20)
-		core:AddBar("MAW2", "Bomb 2", 49)
-		core:AddBar("MAW3", "Bomb 3", 78)
-		core:AddBar("PHAGEMAW", "BOOOM !", 104, 1)
-	elseif message:find("Phage Maw begins charging an orbital strike") then
+	if message:find(self.L["The augmented shield has been destroyed"]) then
+		core:AddBar("MAW1", self.L["Bomb %u"]:format(1), 20)
+		core:AddBar("MAW2", self.L["Bomb %u"]:format(2), 49)
+		core:AddBar("MAW3", self.L["Bomb %u"]:format(3), 78)
+		core:AddBar("PHAGEMAW", self.L["BOOOM !"], 104, 1)
+	elseif message:find(self.L["Phage Maw begins charging an orbital strike"]) then
 		core:ResetMarks()
 	end
 end
 
-function mod:OnCombatStateChanged(unit, bInCombat)
+function mod:OnUnitStateChanged(unit, bInCombat, sName)
 	if unit:GetType() == "NonPlayer" and bInCombat then
-		local sName = unit:GetName()
-
-		if sName == "Phage Maw" then
+		if sName == self.L["Phage Maw"] then
 			self:Start()
 			core:AddUnit(unit)
 		end
