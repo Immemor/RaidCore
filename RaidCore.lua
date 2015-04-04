@@ -63,6 +63,7 @@ local DefaultSettings = {
 			anchorFromTop = true,
 			barColor = "ff00007f",
 		},
+	bSoundsEnabled = true	
 	},
 }
 
@@ -282,7 +283,11 @@ function RaidCore:LoadSaveData()
 	self.wndConfigGeneral:FindChild("Label_unitmoni_barSize_Width"):SetText(string.format("%.fpx", self.settings["tGeneral"]["unitmoni"]["barSize"]["Width"]))
 	self.wndConfigGeneral:FindChild("Label_raidbars_barSize_Height"):SetText(string.format("%.fpx", self.settings["tGeneral"]["raidbars"]["barSize"]["Height"]))
 	self.wndConfigGeneral:FindChild("Label_message_barSize_Height"):SetText(string.format("%.fpx", self.settings["tGeneral"]["message"]["barSize"]["Height"]))
-	self.wndConfigGeneral:FindChild("Label_unitmoni_barSize_Height"):SetText(string.format("%.fpx", self.settings["tGeneral"]["unitmoni"]["barSize"]["Height"]))
+	self.wndConfigGeneral:FindChild("Label_unitmoni_barSize_Height"):SetText(string.format("%.fpx", self.settings["tGeneral"]["unitmoni"]["barSize"]["Height"]))	
+	self.wndConfigGeneral:FindChild("Button_bSoundsEnabled"):SetCheck(self.settings["tGeneral"]["bSoundsEnabled"])
+	
+	RaidCoreLibs.DisplayBlock.SetSoundsState(self.settings["tGeneral"]["bSoundsEnabled"])
+	
 end
 
 function RaidCore:OnBarEnabledChanged( wndHandler, wndControl, eMouseButton )
@@ -293,6 +298,12 @@ end
 function RaidCore:OnBarStartFromTopChanged( wndHandler, wndControl, eMouseButton )
 	local group = wndHandler:GetParent():GetData()
 	group:AnchorFromTop(wndHandler:IsChecked())
+end
+
+function RaidCore:OnSoundsStateChanged(wndHandler, wndControl, eMouseButton)
+	local identifier = self:SplitString(wndControl:GetName(), "_")
+	self.settings["tGeneral"][identifier[2]] = wndHandler:IsChecked()
+	RaidCoreLibs.DisplayBlock.SetSoundsState(wndHandler:IsChecked())
 end
 
 function RaidCore:OnSliderBarChanged( wndHandler, wndControl, fNewValue, fOldValue )
@@ -349,7 +360,7 @@ function RaidCore:OnRaidCoreOn(cmd, args)
 		self:TestPE()
 	elseif (tAllParams[1] == "msg") then
 		if tAllParams[2] ~= nil and tAllParams[3] ~= nil then
-			self:AddMsg(tAllParams[2], tAllParams[3], 5)
+			self:AddMsg(tAllParams[2], tAllParams[3], 5, "1")
 		end
 	elseif (tAllParams[1] == "version") then
 		Print("RaidCore version : " .. AddonVersion)
