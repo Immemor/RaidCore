@@ -63,7 +63,7 @@ local DefaultSettings = {
 			anchorFromTop = true,
 			barColor = "ff00007f",
 		},
-	bSoundsEnabled = true	
+		bSoundsEnabled = true	
 	},
 }
 

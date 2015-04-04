@@ -1,5 +1,4 @@
 local DisplayBlock = {} 
-
 DisplayBlock.__index = DisplayBlock
 
 setmetatable(DisplayBlock, {
@@ -7,15 +6,15 @@ setmetatable(DisplayBlock, {
     return cls.new(...)
   end,
 })
-local GlobalSettings = {
-  soundsEnabled = true
-}
+
 function DisplayBlock.AreSoundsEnabled()
-  return GlobalSettings["soundsEnabled"]
+  local RaidCore = Apollo.GetAddon("RaidCore")
+  return RaidCore:GetSettings()["tGeneral"]["bSoundsEnabled"]
 end
 
 function DisplayBlock.SetSoundsState(value)
-  GlobalSettings["soundsEnabled"] = value
+  local RaidCore = Apollo.GetAddon("RaidCore")
+  RaidCore:GetSettings()["tGeneral"]["bSoundsEnabled"] = value
 end
 
 
