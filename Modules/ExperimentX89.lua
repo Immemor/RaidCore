@@ -48,13 +48,11 @@ function mod:OnSpellCastStart(unitName, castName, unit)
 end
 
 function mod:OnChatDC(message)
-	-- the dash in X-89 needs to be escaped... they are magic symbols in lua
-	-- can be escaped by adding a % in front of it.
-	if message:find("Experiment X%-89 has placed a bomb") then
-		local pName = string.gsub(string.sub(message, 38), "!", "")
-		if pName == playerName then
-			core:AddMsg("BIGB", "BIG BOMB on YOU !!!", 5, "Destruction", "Blue")
-		end
+	-- The dash in X-89 needs to be escaped, by adding a % in front of it.
+	-- The value returned is the player name targeted by the boss.
+	local pName = message:match("Experiment X%-89 has placed a bomb on (.*)!")
+	if pName and pName == playerName then
+		core:AddMsg("BIGB", "BIG BOMB on YOU !!!", 5, "Destruction", "Blue")
 	end
 end
 
