@@ -10,11 +10,61 @@ if not mod then return end
 mod:RegisterEnableMob("Dreadphage Ohmna")
 mod:RegisterRestrictEventObjective("Ohmna", "Defeat Dreadphage Ohmna")
 mod:RegisterEnableEventObjective("Ohmna", "Defeat Dreadphage Ohmna")
+mod:RegisterEnglishLocale({
+	-- Unit names.
+	["Dreadphage Ohmna"] = "Dreadphage Ohmna",
+	["Tentacle of Ohmna"] = "Tentacle of Ohmna",
+	["Ravenous Maw of the Dreadphage"] = "Ravenous Maw of the Dreadphage",
+	-- Datachron messages.
+	["A plasma leech begins draining"] = "A plasma leech begins draining",
+	["Dreadphage Ohmna submerges"] = "Dreadphage Ohmna submerges",
+	["Dreadphage Ohmna is bored"] = "Dreadphage Ohmna is bored",
+	["The Archives tremble as Dreadphage Ohmna"] = "The Archives tremble as Dreadphage Ohmna",
+	["The Archives quake with the furious might"] = "The Archives quake with the furious might",
+	-- Objectifs.
+	["North Power Core Energy"] = "North Power Core Energy",
+	["South Power Core Energy"] = "South Power Core Energy",
+	["East Power Core Energy"] = "East Power Core Energy",
+	["West Power Core Energy"] = "West Power Core Energy",
+	-- Cast.
+	["Erupt"] = "Erupt",
+	["Genetic Torrent"] = "Genetic Torrent",
+	-- Bar and messages.
+	["Next Tentacles"] = "Next Tentacles",
+	["Tentacles"] = "Tentacles",
+	["P2 SOON !"] = "P2 SOON !",
+	["P2: TENTACLES"] = "P2: TENTACLES",
+	["PHASE 2"] = "PHASE 2",
+	["P3 SOON !"] = "P3 SOON !",
+	["P3: RAVENOUS"] = "P3: RAVENOUS",
+	["P3 REALLY SOON !"] = "P3 REALLY SOON !",
+	["PILLAR %u : %u"] = "PILLAR %u : %u",
+	["PILLAR %u"] = "PILLAR %u",
+	["SWITCH TANK"] = "SWITCH TANK",
+	["BIG SPEW"] = "BIG SPEW",
+	["NEXT BIG SPEW"] = "NEXT BIG SPEW",
+})
+mod:RegisterFrenchLocale({
+	-- Unit names.
+	["Dreadphage Ohmna"] = "Ohmna la Terriphage",
+	-- Datachron messages.
+	-- NPCSay messages.
+	-- Cast.
+	["Genetic Torrent"] = "Torrent génétique",
+	-- Bar and messages.
+})
+mod:RegisterGermanLocale({
+	-- Unit names.
+	-- Datachron messages.
+	-- NPCSay messages.
+	-- Cast.
+	-- Bar and messages.
+})
+
 
 --------------------------------------------------------------------------------
 -- Locals
 --
-
 local pilarCount, boreCount, submergeCount = 0, 0, 0
 local firstPull, OhmnaP3, OhmnaP4 = true, false, false
 
@@ -52,8 +102,8 @@ end
 
 function mod:OnBossEnable()
 	Print(("Module %s loaded"):format(mod.ModuleName))
-	Apollo.RegisterEventHandler("UnitEnteredCombat", "OnCombatStateChanged", self)
-	Apollo.RegisterEventHandler("UnitCreated", "OnUnitCreated", self)
+	Apollo.RegisterEventHandler("RC_UnitStateChanged", "OnUnitStateChanged", self)
+	Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
 	Apollo.RegisterEventHandler("UNIT_HEALTH", "OnHealthChanged", self)
 	Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
 	Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
@@ -63,43 +113,46 @@ end
 -- Event Handlers
 --
 
-function mod:OnUnitCreated(unit)
-	local sName = unit:GetName()
-	if sName == "Tentacle of Ohmna" then
+function mod:OnUnitCreated(unit, sName)
+	if sName == self.L["Tentacle of Ohmna"] then
 		if not OhmnaP4 then
-			core:AddMsg("OTENT", "Tentacles", 5, "Info", "Blue")
-			core:AddBar("OTENT", "Next Tentacles", 20)
+			core:AddMsg("OTENT", self.L["Tentacles"], 5, "Info", "Blue")
+			core:AddBar("OTENT", self.L["Next Tentacles"], 20)
 		end
-	elseif sName == "Ravenous Maw of the Dreadphage" then
+	elseif sName == self.L["Ravenous Maw of the Dreadphage"] then
 		core:MarkUnit(unit, 0)
 		core:AddLine(unit:GetId(), 2, unit, nil, 3, 25, 0)
-	elseif sName == "Dreadphage Ohmna" then
+	elseif sName == self.L["Dreadphage Ohmna"] then
 		core:AddUnit(unit)
 	end
 end
 
 function mod:OnHealthChanged(unitName, health)
-	if unitName == "Dreadphage Ohmna" and health == 52 then
-		core:AddMsg("OP2", "P2 SOON !", 5, "Alert")
-	elseif unitName == "Dreadphage Ohmna" and health == 20 then
-		core:AddMsg("OP3", "P3 SOON !", 5, "Alert")
-	elseif unitName == "Dreadphage Ohmna" and health == 17 then
-		core:AddMsg("OP3", "P3 REALLY SOON !", 5, "Alert")
+	if unitName == self.L["Dreadphage Ohmna"] then
+		if health == 52 then
+			core:AddMsg("OP2", self.L["P2 SOON !"], 5, "Alert")
+		elseif health == 20 then
+			core:AddMsg("OP3", self.L["P3 SOON !"], 5, "Alert")
+		elseif health == 17 then
+			core:AddMsg("OP3", self.L["P3 REALLY SOON !"], 5, "Alert")
+		end
 	end
 end
 
 function mod:OnSpellCastStart(unitName, castName, unit)
-	if unitName == "Dreadphage Ohmna" and castName == "Erupt" then
-		if OhmnaP3 then return end
-		local pilarActivated = self:OhmnaPE(pilarCount % 2)
-		core:AddBar("OPILAR", ("PILLAR %s : %s"):format(pilarCount, pilarActivated), 32, 1)
-		if self:Tank() then
-			core:AddBar("OBORE", "SWITCH TANK", 45)
+	if unitName == self.L["Dreadphage Ohmna"] then
+		if castName == self.L["Erupt"] then
+			if OhmnaP3 then return end
+			local pilarActivated = self:OhmnaPE(pilarCount % 2)
+			core:AddBar("OPILAR", self.L["pillar %u : %u"]:format(pilarCount, pilarActivated), 32, 1)
+			if self:Tank() then
+				core:AddBar("OBORE", self.L["SWITCH TANK"], 45)
+			end
+			core:StopScan()
+		elseif castName == self.L["Genetic Torrent"] then
+			core:AddMsg("SPEW", self.L["BIG SPEW"], 5, "RunAway")
+			core:AddBar("OSPEW", self.L["NEXT BIG SPEW"], OhmnaP4 and 40 or 60, 1)
 		end
-		core:StopScan()
-	elseif unitName == "Dreadphage Ohmna" and castName == "Genetic Torrent" then
-		core:AddMsg("SPEW", "BIG SPEW", 5, "RunAway")
-		core:AddBar("OSPEW", "NEXT BIG SPEW", OhmnaP4 and 40 or 60, 1)
 	end
 end
 
@@ -110,13 +163,13 @@ function mod:OhmnaPE(lowest)
 	local tActiveEvents = PublicEvent.GetActiveEvents()
 	for idx, peEvent in pairs(tActiveEvents) do
 		for idObjective, peObjective in pairs(peEvent:GetObjectives()) do
-			if peObjective:GetShortDescription() == "North Power Core Energy" then
+			if peObjective:GetShortDescription() == self.L["North Power Core Energy"] then
 				tStatus["NORTH"] = peObjective:GetCount()
-			elseif peObjective:GetShortDescription() == "South Power Core Energy" then
+			elseif peObjective:GetShortDescription() == self.L["South Power Core Energy"] then
 				tStatus["SOUTH"] = peObjective:GetCount()
-			elseif peObjective:GetShortDescription() == "East Power Core Energy" then
+			elseif peObjective:GetShortDescription() == self.L["East Power Core Energy"] then
 				tStatus["EAST"] = peObjective:GetCount()
-			elseif peObjective:GetShortDescription() == "West Power Core Energy" then
+			elseif peObjective:GetShortDescription() == self.L["West Power Core Energy"] then
 				tStatus["WEST"] = peObjective:GetCount()
 			end
 		end
@@ -132,53 +185,52 @@ function mod:OhmnaPE(lowest)
 end
 
 function mod:OnChatDC(message)
-		if message:find("A plasma leech begins draining") then
+		if message:find(self.L["A plasma leech begins draining"]) then
 			if OhmnaP3 then return end
 			pilarCount = pilarCount + 1
 			if submergeCount < 2 and pilarCount > 4 then
-				core:AddBar("OPILAR", "PHASE 2", firstPull and 27 or 22)
+				core:AddBar("OPILAR", self.L["PHASE 2"], firstPull and 27 or 22)
 				firstPull = false
 			else
 				local pilarActivated = self:OhmnaPE(pilarCount % 2)
-				core:AddBar("OPILAR", ("PILLAR %s : %s"):format(pilarCount, pilarActivated), 25, 1)
+				core:AddBar("OPILAR", self.L["PILLAR %u : %u"]:format(pilarCount, pilarActivated), 25, 1)
 			end
-		elseif message:find("Dreadphage Ohmna submerges") then
+		elseif message:find(self.L["Dreadphage Ohmna submerges"]) then
 			pilarCount, boreCount = 1, 0
 			submergeCount = submergeCount + 1
 			core:StopBar("OTENT")
 			core:StartScan()
-		elseif message:find("Dreadphage Ohmna is bored") then
+		elseif message:find(self.L["Dreadphage Ohmna is bored"]) then
 			boreCount = boreCount + 1
 			if boreCount < 2 and self:Tank() then
-				core:AddBar("OBORE", "SWITCH TANK", 42)
+				core:AddBar("OBORE", self.L["SWITCH TANK"], 42)
 			end
-		elseif message:find("The Archives tremble as Dreadphage Ohmna") then
-			core:AddMsg("OP2", "P2 : TENTACLES", 5, "Alert")
-		elseif message:find("The Archives quake with the furious might") then
-			core:AddMsg("OP3", "P3 : RAVENOUS", 5, "Alert")
+		elseif message:find(self.L["The Archives tremble as Dreadphage Ohmna"]) then
+			core:AddMsg("OP2", self.L["P2: TENTACLES"], 5, "Alert")
+		elseif message:find(self.L["The Archives quake with the furious might"]) then
+			core:AddMsg("OP3", self.L["P3: RAVENOUS"], 5, "Alert")
 			OhmnaP3 = true
 			core:StopBar("OPILAR")
 			core:StopBar("OBORE")
-			core:AddBar("OSPEW", "NEXT BIG SPEW", 45, 1)
+			core:AddBar("OSPEW", self.L["NEXT BIG SPEW"], 45, 1)
 			core:StartScan()
 		end
 end
 
-function mod:OnCombatStateChanged(unit, bInCombat)
+function mod:OnUnitStateChanged(unit, bInCombat, sName)
 	if unit:GetType() == "NonPlayer" and bInCombat then
-		local sName = unit:GetName()
-		if sName == "Dreadphage Ohmna" then
+		if sName == self.L["Dreadphage Ohmna"] then
 			self:Start()
 			pilarCount, boreCount, submergeCount = 1, 0, 0
 			firstPull, OhmnaP3, OhmnaP4 = true, false, false
 			core:AddUnit(unit)
 			core:WatchUnit(unit)
-			core:AddBar("OPILAR", ("PILLAR %s"):format(pilarCount), 25, 1)
+			core:AddBar("OPILAR", self.L["PILLAR %u"]:format(pilarCount), 25, 1)
 			core:AddLine("Ohmna1", 2, unit, nil, 3, 25, 0)
 			core:AddLine("Ohmna2", 2, unit, nil, 1, 25, 120)
 			core:AddLine("Ohmna3", 2, unit, nil, 1, 25, -120)
 			if self:Tank() then
-				core:AddBar("OBORE", "SWITCH TANK", 45)
+				core:AddBar("OBORE", self.L["SWITCH TANK"], 45)
 			end
 		end
 	end
