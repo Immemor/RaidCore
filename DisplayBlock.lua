@@ -16,6 +16,7 @@ function DisplayBlock.new(xmlDoc)
     self.infos = { }
     self.barsFrame = Apollo.LoadForm(self.xmlDoc, "RaidBars", nil, self)
     self.itemList = self.barsFrame:FindChild("ItemList")
+    self.RaidCore = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 
     self.bgColor = CColor.new(1,1,1,0.8)
     self.barColor = CColor.new(1,0,0,0.5)
@@ -27,7 +28,6 @@ function DisplayBlock.new(xmlDoc)
 	}
 
 	Apollo.RegisterEventHandler("UnitDestroyed", 					"OnUnitDestroyed", self)
-
 
     return self
 end
@@ -285,7 +285,8 @@ function DisplayBlock:AddMsg(key, message, duration, sound, color)
 			self.infos[key].barFrame = raidBar
 			self.infos[key].type = 3
 			self.itemList:ArrangeChildrenVert(self:GetAnchorPoint())
-			if sound then
+			local bSoundEnabled = self.RaidCore:GetSettings()["tGeneral"]["bSoundEnabled"]
+			if sound and bSoundEnabled then
 				--Print("Sound : " .. Apollo.GetAssetFolder() .. "\\" .. sound .. ".wav")
 				Sound.PlayFile("..\\RaidCore\\Sounds\\"..sound .. ".wav")
 			end

@@ -63,6 +63,7 @@ local DefaultSettings = {
 			anchorFromTop = true,
 			barColor = "ff00007f",
 		},
+		bSoundEnabled = true,
 	},
 }
 
@@ -275,13 +276,13 @@ function RaidCore:LoadSaveData()
 	self.unitmoni:Load(self.settings["tGeneral"]["unitmoni"])
 	self.message:Load(self.settings["tGeneral"]["message"])
 
-	self.wndSettings["General"]:FindChild("Button_raidbars_isEnabled"):SetCheck(self.settings["tGeneral"]["raidbars"]["isEnabled"])
-	self.wndSettings["General"]:FindChild("Button_message_isEnabled"):SetCheck(self.settings["tGeneral"]["message"]["isEnabled"])
-	self.wndSettings["General"]:FindChild("Button_unitmoni_isEnabled"):SetCheck(self.settings["tGeneral"]["unitmoni"]["isEnabled"])
+	self.wndSettings["General"]:FindChild("Button_tGeneral_raidbars_isEnabled"):SetCheck(self.settings["tGeneral"]["raidbars"]["isEnabled"])
+	self.wndSettings["General"]:FindChild("Button_tGeneral_message_isEnabled"):SetCheck(self.settings["tGeneral"]["message"]["isEnabled"])
+	self.wndSettings["General"]:FindChild("Button_tGeneral_unitmoni_isEnabled"):SetCheck(self.settings["tGeneral"]["unitmoni"]["isEnabled"])
 
-	self.wndSettings["General"]:FindChild("Button_raidbars_anchorFromTop"):SetCheck(self.settings["tGeneral"]["raidbars"]["anchorFromTop"])
-	self.wndSettings["General"]:FindChild("Button_message_anchorFromTop"):SetCheck(self.settings["tGeneral"]["message"]["anchorFromTop"])
-	self.wndSettings["General"]:FindChild("Button_unitmoni_anchorFromTop"):SetCheck(self.settings["tGeneral"]["unitmoni"]["anchorFromTop"])
+	self.wndSettings["General"]:FindChild("Button_tGeneral_raidbars_anchorFromTop"):SetCheck(self.settings["tGeneral"]["raidbars"]["anchorFromTop"])
+	self.wndSettings["General"]:FindChild("Button_tGeneral_message_anchorFromTop"):SetCheck(self.settings["tGeneral"]["message"]["anchorFromTop"])
+	self.wndSettings["General"]:FindChild("Button_tGeneral_unitmoni_anchorFromTop"):SetCheck(self.settings["tGeneral"]["unitmoni"]["anchorFromTop"])
 
 	self.wndSettings["General"]:FindChild("Slider_raidbars_barSize_Width"):SetValue(self.settings["tGeneral"]["raidbars"]["barSize"]["Width"])
 	self.wndSettings["General"]:FindChild("Slider_message_barSize_Width"):SetValue(self.settings["tGeneral"]["message"]["barSize"]["Width"])
@@ -296,18 +297,33 @@ function RaidCore:LoadSaveData()
 	self.wndSettings["General"]:FindChild("Label_raidbars_barSize_Height"):SetText(string.format("%.fpx", self.settings["tGeneral"]["raidbars"]["barSize"]["Height"]))
 	self.wndSettings["General"]:FindChild("Label_message_barSize_Height"):SetText(string.format("%.fpx", self.settings["tGeneral"]["message"]["barSize"]["Height"]))
 	self.wndSettings["General"]:FindChild("Label_unitmoni_barSize_Height"):SetText(string.format("%.fpx", self.settings["tGeneral"]["unitmoni"]["barSize"]["Height"]))
+
+	self.wndSettings["General"]:FindChild("Button_tGeneral_bSoundEnabled"):SetCheck(self.settings["tGeneral"]["bSoundEnabled"])
 end
 
 function RaidCore:OnGeneralCheckBoxChecked(wndHandler, wndControl, eMouseButton )
 	local identifier = self:SplitString(wndControl:GetName(), "_")
-	self.settings["tGeneral"][identifier[2]][identifier[3]] = true
-	self[identifier[2]]:AnchorFromTop(true, true)
+	self.settings[identifier[2]][identifier[3]][identifier[4]] = true
+	self[identifier[3]]:Load(self.settings[identifier[2]][identifier[3]])
+
+	if identifier[4] == "anchorFromTop" then
+		self[identifier[3]]:AnchorFromTop(true, true)
+	end
 end
 
 function RaidCore:OnGeneralCheckBoxUnchecked(wndHandler, wndControl, eMouseButton )
 	local identifier = self:SplitString(wndControl:GetName(), "_")
-	self.settings["tGeneral"][identifier[2]][identifier[3]] = false
-	self[identifier[2]]:AnchorFromTop(false, true)
+	self.settings[identifier[2]][identifier[3]][identifier[4]] = false
+	self[identifier[3]]:Load(self.settings[identifier[2]][identifier[3]])
+
+	if identifier[4] == "anchorFromTop" then
+		self[identifier[3]]:AnchorFromTop(false, true)
+	end
+end
+
+function RaidCore:OnSoundsStateChanged(wndHandler, wndControl, eMouseButton)
+	local identifier = self:SplitString(wndControl:GetName(), "_")
+	self.settings[identifier[2]][identifier[3]] = wndHandler:IsChecked()
 end
 
 function RaidCore:OnSliderBarChanged( wndHandler, wndControl, fNewValue, fOldValue )
