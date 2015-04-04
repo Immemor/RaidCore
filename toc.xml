@@ -20,7 +20,7 @@
 	<Script Name="Modules/PhageMaw.lua" />
 	<Script Name="Modules/PhageCouncil.lua" />
 	<Script Name="Modules/Ohmna.lua" />
-	<Script Name="Modules/SystemDeamons.lua" />
+	<Script Name="Modules/SystemDaemons.lua" />
 	<Script Name="Modules/DSFireWing.lua" />
 	<Script Name="Modules/DSFrostWing.lua" />
 	<Script Name="Modules/Gloomclaw.lua" />

@@ -104,25 +104,30 @@ function RaidCore:OnInitialize()
 	self.wndTargetFrame = self.wndConfig:FindChild("TargetFrame")
 	self.wndConfigOptionsTargetFrame = self.wndConfig:FindChild("ConfigOptionsTargetFrame")
 
-	self.wndModuleListDS = Apollo.LoadForm(self.xmlDoc, "ModuleListDS", self.wndConfigOptionsTargetFrame, self)
+	self.wndModuleList = {
+		DS = Apollo.LoadForm(self.xmlDoc, "ModuleList_DS", self.wndConfigOptionsTargetFrame, self),
+	}
 
-	self.wndConfigGeneral = Apollo.LoadForm(self.xmlDoc, "ConfigFormGeneral", self.wndTargetFrame, self)
-	self.wndConfigSystemDaemons = Apollo.LoadForm(self.xmlDoc, "ConfigFormSystemDeamons", self.wndTargetFrame, self)
-	self.wndConfigGloomclaw = Apollo.LoadForm(self.xmlDoc, "ConfigFormGloomclaw", self.wndTargetFrame, self)
-	self.wndConfigMaelstromAuthority = Apollo.LoadForm(self.xmlDoc, "ConfigFormMaelstromAuthority", self.wndTargetFrame, self)
-	self.wndConfigLattice = Apollo.LoadForm(self.xmlDoc, "ConfigFormVolatilityLattice", self.wndTargetFrame, self)
-	self.wndConfigLimbo = Apollo.LoadForm(self.xmlDoc, "ConfigFormLimbo", self.wndTargetFrame, self)
-	self.wndConfigAirEarth = Apollo.LoadForm(self.xmlDoc, "ConfigFormEpEarthAir", self.wndTargetFrame, self)
-	self.wndConfigAirLife = Apollo.LoadForm(self.xmlDoc, "ConfigFormEpAirLife", self.wndTargetFrame, self)
-	self.wndConfigAirWater = Apollo.LoadForm(self.xmlDoc, "ConfigFormEpFrostAir", self.wndTargetFrame, self)
-	self.wndConfigFireEarth = Apollo.LoadForm(self.xmlDoc, "ConfigFormFire_Earth", self.wndTargetFrame, self)
-	self.wndConfigFireLife = Apollo.LoadForm(self.xmlDoc, "ConfigFormEpLifeFire", self.wndTargetFrame, self)
-	self.wndConfigFireWater = Apollo.LoadForm(self.xmlDoc, "ConfigFormEpFrostFire", self.wndTargetFrame, self)
-	self.wndConfigLogicEarth = Apollo.LoadForm(self.xmlDoc, "ConfigFormEpEarthLogic", self.wndTargetFrame, self)
-	self.wndConfigLogicLife = Apollo.LoadForm(self.xmlDoc, "ConfigFormEpLifeLogic", self.wndTargetFrame, self)
-	self.wndConfigLogicWater = Apollo.LoadForm(self.xmlDoc, "ConfigFormEpFrostLogic", self.wndTargetFrame, self)
-	self.wndConfigAvatus = Apollo.LoadForm(self.xmlDoc, "ConfigFormAvatus", self.wndTargetFrame, self)
-
+	self.wndSettings = {
+		General = Apollo.LoadForm(self.xmlDoc, "ConfigFormGeneral", self.wndTargetFrame, self),
+		DS = {
+			SystemDaemons = Apollo.LoadForm(self.xmlDoc, "ConfigFormSystemDaemons", self.wndTargetFrame, self),
+			Gloomclaw = Apollo.LoadForm(self.xmlDoc, "ConfigFormGloomclaw", self.wndTargetFrame, self),
+			Maelstrom = Apollo.LoadForm(self.xmlDoc, "ConfigFormMaelstrom", self.wndTargetFrame, self),
+			Lattice = Apollo.LoadForm(self.xmlDoc, "ConfigFormLattice", self.wndTargetFrame, self),
+			Limbo = Apollo.LoadForm(self.xmlDoc, "ConfigFormLimbo", self.wndTargetFrame, self),
+			AirEarth = Apollo.LoadForm(self.xmlDoc, "ConfigFormEpEarthAir", self.wndTargetFrame, self),
+			AirLife = Apollo.LoadForm(self.xmlDoc, "ConfigFormEpAirLife", self.wndTargetFrame, self),
+			AirWater = Apollo.LoadForm(self.xmlDoc, "ConfigFormEpFrostAir", self.wndTargetFrame, self),
+			FireEarth = Apollo.LoadForm(self.xmlDoc, "ConfigFormFire_Earth", self.wndTargetFrame, self),
+			FireLife = Apollo.LoadForm(self.xmlDoc, "ConfigFormEpLifeFire", self.wndTargetFrame, self),
+			FireWater = Apollo.LoadForm(self.xmlDoc, "ConfigFormEpFrostFire", self.wndTargetFrame, self),
+			LogicEarth = Apollo.LoadForm(self.xmlDoc, "ConfigFormEpEarthLogic", self.wndTargetFrame, self),
+			LogicLife = Apollo.LoadForm(self.xmlDoc, "ConfigFormEpLifeLogic", self.wndTargetFrame, self),
+			LogicWater = Apollo.LoadForm(self.xmlDoc, "ConfigFormEpFrostLogic", self.wndTargetFrame, self),
+			Avatus = Apollo.LoadForm(self.xmlDoc, "ConfigFormAvatus", self.wndTargetFrame, self),
+		},
+	}
 end
 
 -----------------------------------------------------------------------------------------------
@@ -270,29 +275,39 @@ function RaidCore:LoadSaveData()
 	self.unitmoni:Load(self.settings["tGeneral"]["unitmoni"])
 	self.message:Load(self.settings["tGeneral"]["message"])
 
-	self.wndConfigGeneral:FindChild("Slider_raidbars_barSize_Width"):SetValue(self.settings["tGeneral"]["raidbars"]["barSize"]["Width"])
-	self.wndConfigGeneral:FindChild("Slider_message_barSize_Width"):SetValue(self.settings["tGeneral"]["message"]["barSize"]["Width"])
-	self.wndConfigGeneral:FindChild("Slider_unitmoni_barSize_Width"):SetValue(self.settings["tGeneral"]["unitmoni"]["barSize"]["Width"])
-	self.wndConfigGeneral:FindChild("Slider_raidbars_barSize_Height"):SetValue(self.settings["tGeneral"]["raidbars"]["barSize"]["Height"])
-	self.wndConfigGeneral:FindChild("Slider_message_barSize_Height"):SetValue(self.settings["tGeneral"]["message"]["barSize"]["Height"])
-	self.wndConfigGeneral:FindChild("Slider_unitmoni_barSize_Height"):SetValue(self.settings["tGeneral"]["unitmoni"]["barSize"]["Height"])
+	self.wndSettings["General"]:FindChild("Button_raidbars_isEnabled"):SetCheck(self.settings["tGeneral"]["raidbars"]["isEnabled"])
+	self.wndSettings["General"]:FindChild("Button_message_isEnabled"):SetCheck(self.settings["tGeneral"]["message"]["isEnabled"])
+	self.wndSettings["General"]:FindChild("Button_unitmoni_isEnabled"):SetCheck(self.settings["tGeneral"]["unitmoni"]["isEnabled"])
 
-	self.wndConfigGeneral:FindChild("Label_raidbars_barSize_Width"):SetText(string.format("%.fpx", self.settings["tGeneral"]["raidbars"]["barSize"]["Width"]))
-	self.wndConfigGeneral:FindChild("Label_message_barSize_Width"):SetText(string.format("%.fpx", self.settings["tGeneral"]["message"]["barSize"]["Width"]))
-	self.wndConfigGeneral:FindChild("Label_unitmoni_barSize_Width"):SetText(string.format("%.fpx", self.settings["tGeneral"]["unitmoni"]["barSize"]["Width"]))
-	self.wndConfigGeneral:FindChild("Label_raidbars_barSize_Height"):SetText(string.format("%.fpx", self.settings["tGeneral"]["raidbars"]["barSize"]["Height"]))
-	self.wndConfigGeneral:FindChild("Label_message_barSize_Height"):SetText(string.format("%.fpx", self.settings["tGeneral"]["message"]["barSize"]["Height"]))
-	self.wndConfigGeneral:FindChild("Label_unitmoni_barSize_Height"):SetText(string.format("%.fpx", self.settings["tGeneral"]["unitmoni"]["barSize"]["Height"]))
+	self.wndSettings["General"]:FindChild("Button_raidbars_anchorFromTop"):SetCheck(self.settings["tGeneral"]["raidbars"]["anchorFromTop"])
+	self.wndSettings["General"]:FindChild("Button_message_anchorFromTop"):SetCheck(self.settings["tGeneral"]["message"]["anchorFromTop"])
+	self.wndSettings["General"]:FindChild("Button_unitmoni_anchorFromTop"):SetCheck(self.settings["tGeneral"]["unitmoni"]["anchorFromTop"])
+
+	self.wndSettings["General"]:FindChild("Slider_raidbars_barSize_Width"):SetValue(self.settings["tGeneral"]["raidbars"]["barSize"]["Width"])
+	self.wndSettings["General"]:FindChild("Slider_message_barSize_Width"):SetValue(self.settings["tGeneral"]["message"]["barSize"]["Width"])
+	self.wndSettings["General"]:FindChild("Slider_unitmoni_barSize_Width"):SetValue(self.settings["tGeneral"]["unitmoni"]["barSize"]["Width"])
+	self.wndSettings["General"]:FindChild("Slider_raidbars_barSize_Height"):SetValue(self.settings["tGeneral"]["raidbars"]["barSize"]["Height"])
+	self.wndSettings["General"]:FindChild("Slider_message_barSize_Height"):SetValue(self.settings["tGeneral"]["message"]["barSize"]["Height"])
+	self.wndSettings["General"]:FindChild("Slider_unitmoni_barSize_Height"):SetValue(self.settings["tGeneral"]["unitmoni"]["barSize"]["Height"])
+
+	self.wndSettings["General"]:FindChild("Label_raidbars_barSize_Width"):SetText(string.format("%.fpx", self.settings["tGeneral"]["raidbars"]["barSize"]["Width"]))
+	self.wndSettings["General"]:FindChild("Label_message_barSize_Width"):SetText(string.format("%.fpx", self.settings["tGeneral"]["message"]["barSize"]["Width"]))
+	self.wndSettings["General"]:FindChild("Label_unitmoni_barSize_Width"):SetText(string.format("%.fpx", self.settings["tGeneral"]["unitmoni"]["barSize"]["Width"]))
+	self.wndSettings["General"]:FindChild("Label_raidbars_barSize_Height"):SetText(string.format("%.fpx", self.settings["tGeneral"]["raidbars"]["barSize"]["Height"]))
+	self.wndSettings["General"]:FindChild("Label_message_barSize_Height"):SetText(string.format("%.fpx", self.settings["tGeneral"]["message"]["barSize"]["Height"]))
+	self.wndSettings["General"]:FindChild("Label_unitmoni_barSize_Height"):SetText(string.format("%.fpx", self.settings["tGeneral"]["unitmoni"]["barSize"]["Height"]))
 end
 
-function RaidCore:OnBarEnabledChanged( wndHandler, wndControl, eMouseButton )
-	local group = wndHandler:GetParent():GetData()
-	group:SetEnabled(wndHandler:IsChecked())
+function RaidCore:OnGeneralCheckBoxChecked(wndHandler, wndControl, eMouseButton )
+	local identifier = self:SplitString(wndControl:GetName(), "_")
+	self.settings["tGeneral"][identifier[2]][identifier[3]] = true
+	self[identifier[2]]:AnchorFromTop(true, true)
 end
 
-function RaidCore:OnBarStartFromTopChanged( wndHandler, wndControl, eMouseButton )
-	local group = wndHandler:GetParent():GetData()
-	group:AnchorFromTop(wndHandler:IsChecked())
+function RaidCore:OnGeneralCheckBoxUnchecked(wndHandler, wndControl, eMouseButton )
+	local identifier = self:SplitString(wndControl:GetName(), "_")
+	self.settings["tGeneral"][identifier[2]][identifier[3]] = false
+	self[identifier[2]]:AnchorFromTop(false, true)
 end
 
 function RaidCore:OnSliderBarChanged( wndHandler, wndControl, fNewValue, fOldValue )
@@ -405,29 +420,29 @@ function RaidCore:OnRaidCoreOn(cmd, args)
 		self.drawline:ResetLines()
 	elseif (tAllParams[1] == "sysdm") then
 		if tAllParams[2] ~= nil and tAllParams[3] ~= nil then
-			local mod = self:GetBossModule("SystemDeamons", 1)
+			local mod = self:GetBossModule("SystemDaemons", 1)
 			if mod then
 				mod:SetInterrupter(tAllParams[2], tonumber(tAllParams[3]))
 			else
-				Print("Module SystemDeamons not loaded")
+				Print("Module SystemDaemons not loaded")
 			end
 		end
 	elseif (tAllParams[1] == "sysdm") then
 		if tAllParams[2] ~= nil and tAllParams[3] ~= nil then
-			local mod = self:GetBossModule("SystemDeamons", 1)
+			local mod = self:GetBossModule("SystemDaemons", 1)
 			if mod then
 				mod:SetInterrupter(tAllParams[2], tonumber(tAllParams[3]))
 			else
-				Print("Module SystemDeamons not loaded")
+				Print("Module SystemDaemons not loaded")
 			end
 		end
 	elseif (tAllParams[1] == "testdm") then
-		local mod = self:GetBossModule("SystemDeamons", 1)
+		local mod = self:GetBossModule("SystemDaemons", 1)
 		if mod then
 			mod:NextWave()
 			mod:OnChatDC("COMMENCING ENHANCEMENT SEQUENCE")
 		else
-			Print("Module SystemDeamons not loaded")
+			Print("Module SystemDaemons not loaded")
 		end
 	elseif (tAllParams[1] == "testel") then
 		local mod = self:GetBossModule("EpEarthLogic", 1)
@@ -1553,142 +1568,33 @@ function RaidCore:OnConfigCloseButton()
 end
 
 function RaidCore:Button_DSSettingsCheck(wndHandler, wndControl, eMouseButton)
-	self.wndModuleListDS:Show(true)
+	self.wndModuleList["DS"]:Show(true)
 end
 
 function RaidCore:Button_DSSettingsUncheck(wndHandler, wndControl, eMouseButton)
-	self.wndModuleListDS:Show(false)
+	self.wndModuleList["DS"]:Show(false)
 end
 
 function RaidCore:Button_SettingsGeneralCheck( wndHandler, wndControl, eMouseButton )
 	self:HideChildWindows(self.wndTargetFrame)
-	self.wndConfigGeneral:Show(true)
+	self.wndSettings["General"]:Show(true)
 end
 
 function RaidCore:Button_SettingsGeneralUncheck( wndHandler, wndControl, eMouseButton )
-	self.wndConfigGeneral:Show(false)
+	self.wndSettings["General"]:Show(false)
 end
 
-function RaidCore:Button_SettingsSystemDaemonsCheck( wndHandler, wndControl, eMouseButton )
-	self.wndConfigSystemDaemons:Show(true)
+function RaidCore:OnModuleSettingsCheck(wndHandler, wndControl, eMouseButton )
+	local raidInstance = self:SplitString(wndControl:GetParent():GetName(), "_")
+	local identifier = self:SplitString(wndControl:GetName(), "_")
+	self.wndSettings[raidInstance[2]][identifier[3]]:Show(true)
 end
 
-function RaidCore:Button_SettingsSystemDaemonsUncheck( wndHandler, wndControl, eMouseButton )
-	self.wndConfigSystemDaemons:Show(false)
+function RaidCore:OnModuleSettingsUncheck(wndHandler, wndControl, eMouseButton )
+	local raidInstance = self:SplitString(wndControl:GetParent():GetName(), "_")
+	local identifier = self:SplitString(wndControl:GetName(), "_")
+	self.wndSettings[raidInstance[2]][identifier[3]]:Show(false)
 end
-
-function RaidCore:Button_SettingsGloomclawCheck( wndHandler, wndControl, eMouseButton )
-	self.wndConfigGloomclaw:Show(true)
-end
-
-function RaidCore:Button_SettingsGloomclawUncheck( wndHandler, wndControl, eMouseButton )
-	self.wndConfigGloomclaw:Show(false)
-end
-
-function RaidCore:Button_SettingsMaelstromCheck( wndHandler, wndControl, eMouseButton )
-	self.wndConfigMaelstromAuthority:Show(true)
-end
-
-function RaidCore:Button_SettingsMaelstromUncheck( wndHandler, wndControl, eMouseButton )
-	self.wndConfigMaelstromAuthority:Show(false)
-end
-
-function RaidCore:Button_SettingsAvatusCheck( wndHandler, wndControl, eMouseButton )
-	self.wndConfigAvatus:Show(true)
-end
-
-function RaidCore:Button_SettingsAvatusUncheck( wndHandler, wndControl, eMouseButton )
-	self.wndConfigAvatus:Show(false)
-end
-
-function RaidCore:Button_SettingsLimboCheck( wndHandler, wndControl, eMouseButton )
-	self.wndConfigLimbo:Show(true)
-end
-
-function RaidCore:Button_SettingsLimboUncheck( wndHandler, wndControl, eMouseButton )
-	self.wndConfigLimbo:Show(false)
-end
-
-function RaidCore:Button_SettingsLatticeCheck( wndHandler, wndControl, eMouseButton )
-	self.wndConfigLattice:Show(true)
-end
-
-function RaidCore:Button_SettingsLatticeUncheck( wndHandler, wndControl, eMouseButton )
-	self.wndConfigLattice:Show(false)
-end
-
-function RaidCore:Button_SettingsAirEarthCheck( wndHandler, wndControl, eMouseButton )
-	self.wndConfigAirEarth:Show(true)
-end
-
-function RaidCore:Button_SettingsAirEarthUncheck( wndHandler, wndControl, eMouseButton )
-	self.wndConfigAirEarth:Show(false)
-end
-
-function RaidCore:Button_SettingsAirLifeCheck( wndHandler, wndControl, eMouseButton )
-	self.wndConfigAirLife:Show(true)
-end
-
-function RaidCore:Button_SettingsAirLifeUncheck( wndHandler, wndControl, eMouseButton )
-	self.wndConfigAirLife:Show(false)
-end
-
-function RaidCore:Button_SettingsAirWaterCheck( wndHandler, wndControl, eMouseButton )
-	self.wndConfigAirWater:Show(true)
-end
-
-function RaidCore:Button_SettingsAirWaterUncheck( wndHandler, wndControl, eMouseButton )
-	self.wndConfigAirWater:Show(false)
-end
-
-function RaidCore:Button_SettingsFireEarthCheck( wndHandler, wndControl, eMouseButton )
-	self.wndConfigFireEarth:Show(true)
-end
-
-function RaidCore:Button_SettingsFireEarthUncheck( wndHandler, wndControl, eMouseButton )
-	self.wndConfigFireEarth:Show(false)
-end
-
-function RaidCore:Button_SettingsFireLifeCheck( wndHandler, wndControl, eMouseButton )
-	self.wndConfigFireLife:Show(true)
-end
-
-function RaidCore:Button_SettingsFireLifeUncheck( wndHandler, wndControl, eMouseButton )
-	self.wndConfigFireLife:Show(false)
-end
-
-function RaidCore:Button_SettingsFireWaterCheck( wndHandler, wndControl, eMouseButton )
-	self.wndConfigFireWater:Show(true)
-end
-
-function RaidCore:Button_SettingsFireWaterUncheck( wndHandler, wndControl, eMouseButton )
-	self.wndConfigFireWater:Show(false)
-end
-
-function RaidCore:Button_SettingsLogicEarthCheck( wndHandler, wndControl, eMouseButton )
-	self.wndConfigLogicEarth:Show(true)
-end
-
-function RaidCore:Button_SettingsLogicEarthUncheck( wndHandler, wndControl, eMouseButton )
-	self.wndConfigLogicEarth:Show(false)
-end
-
-function RaidCore:Button_SettingsLogicLifeCheck( wndHandler, wndControl, eMouseButton )
-	self.wndConfigLogicLife:Show(true)
-end
-
-function RaidCore:Button_SettingsLogicLifeUncheck( wndHandler, wndControl, eMouseButton )
-	self.wndConfigLogicLife:Show(false)
-end
-
-function RaidCore:Button_SettingsLogicWaterCheck( wndHandler, wndControl, eMouseButton )
-	self.wndConfigLogicWater:Show(true)
-end
-
-function RaidCore:Button_SettingsLogicWaterUncheck( wndHandler, wndControl, eMouseButton )
-	self.wndConfigLogicWater:Show(false)
-end
-
 -----------------------------------------------------------------------------------------------
 -- RaidCore Instance
 -----------------------------------------------------------------------------------------------

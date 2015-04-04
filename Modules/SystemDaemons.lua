@@ -4,20 +4,42 @@
 
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 
-local mod = core:NewBoss("SystemDeamons", 52)
+local mod = core:NewBoss("SystemDaemons", 52)
 if not mod then return end
 
+--mod:RegisterEnableBossPair("Binary System Daemon","Null System Daemon")
 mod:RegisterEnableMob("Binary System Daemon","Null System Daemon")
-
+mod:RegisterRestrictZone("SystemDaemons", "Halls of the Infinite Mind", "Infinite Generator Core", "Lower Infinite Generator Core")
+mod:RegisterEnableZone("SystemDaemons", "Halls of the Infinite Mind", "Infinite Generator Core", "Lower Infinite Generator Core")
+mod:RegisterRestrictEventObjective("SystemDaemons", "Defeat the System Daemons")
+mod:RegisterEnableEventObjective("SystemDaemons", "Defeat the System Daemons")
 --------------------------------------------------------------------------------
 -- Locals
 --
 
-local discoCount, sdwaveCount, probeCount, sdSurgeCount = 0, 0, 0, {}
+local p1_pillar1north = { x = 133.217, y = -225.94, z = -207.71 }
+local p1_pillar2north = { x = 109.22, y = -225.94, z = -150.85 }
+local p1_pillar3north = { x = 109.23, y = -225.94, z = -198.13 }
+local p1_pillar1south = { x = 133.17, y = -225.94, z = -140.96 }
+local p1_pillar2south = { x = 156.79, y = -225.94, z = -198.126 }
+local p1_pillar3south = { x = 156.80, y = -225.94, z = -150.82 }
+
+local p2_pillar1north = { x = 109.23, y = -225.94, z = -198.12 }
+local p2_pillar2north = { x = 156.79, y = -225.94, z = -198.12 }
+local p2_pillar3north = { x = 99.91, y = -225.99, z = -174.35 }
+local p2_pillar4north = { x = 133.21, y = -225.94, z = -207.71 }
+local p2_pillar1south = { x = 109.22, y = -225.94, z = -150.85 }
+local p2_pillar2south = { x = 156.80, y = -225.94, z = -150.82 }
+local p2_pillar3south = { x = 133.17, y = -225.94, z = -140.93 }
+local p2_pillar4south = { x = 166.56, y = -225.94, z = -174.30 }
+
+local discoCount, sdwaveCount, probeCount, sdSurgeCount, PurgeLast = 0, 0, 0, {}, {}
 local phase2warn, phase2 = false, false
+local phase2count = 0
 local intNorth, intSouth = nil, nil
 local prev = 0
 local nbKick = 2
+local playerName
 
 --------------------------------------------------------------------------------
 -- Initialization
@@ -27,13 +49,16 @@ function mod:OnBossEnable()
 	Print(("Module %s loaded"):format(mod.ModuleName))
 	Apollo.RegisterEventHandler("UnitCreated", 			"OnUnitCreated", self)
 	Apollo.RegisterEventHandler("UnitDestroyed", 		"OnUnitDestroyed", self)
-	Apollo.RegisterEventHandler("UnitEnteredCombat", 		"OnCombatStateChanged", self)
-	Apollo.RegisterEventHandler("SPELL_CAST_START", 		"OnSpellCastStart", self)
+	Apollo.RegisterEventHandler("UnitEnteredCombat", 	"OnCombatStateChanged", self)
+	Apollo.RegisterEventHandler("SPELL_CAST_START", 	"OnSpellCastStart", self)
 	Apollo.RegisterEventHandler("SPELL_CAST_END", 		"OnSpellCastEnd", self)
+	Apollo.RegisterEventHandler("DEBUFF_APPLIED", 		"OnDebuffApplied", self)
+	Apollo.RegisterEventHandler("DEBUFF_REMOVED", 		"OnDebuffRemoved", self)
 	Apollo.RegisterEventHandler("UNIT_HEALTH", 			"OnHealthChanged", self)
 	Apollo.RegisterEventHandler("CHAT_DATACHRON", 		"OnChatDC", self)
-	--Apollo.RegisterEventHandler("RAID_WIPE", 			"OnReset", self)
 	Apollo.RegisterEventHandler("RAID_SYNC", 			"OnSyncRcv", self)
+	Apollo.RegisterEventHandler("SubZoneChanged", 		"OnZoneChanged", self)
+	Apollo.RegisterEventHandler("RAID_WIPE", 			"OnReset", self)
 end
 
 
@@ -41,9 +66,14 @@ end
 -- Event Handlers
 --
 
+function mod:OnReset()
+	core:ResetWorldMarkers()
+	phase2count = 0
+end
+
 function mod:OnUnitCreated(unit)
 	local sName = unit:GetName()
-	if sName == "Brute Force Algorithm" or sName == "Encryption Program" or sName == "Radiation Dispersion Unit" or sName == "Defragmentation Unit" then
+	if sName == "Brute Force Algorithm" or sName == "Encryption Program" or sName == "Radiation Dispersion Unit" or sName == "Defragmentation Unit" or sName == "Extermination Sequence" or sName == "Data Compiler" or sName == "Viral Diffusion Inhibitor" then
 		if phase2 then return end
 		local timeOfEvent = GameLib.GetGameTime()
 		if timeOfEvent - prev > 48 then
@@ -60,10 +90,11 @@ function mod:OnUnitCreated(unit)
 				core:AddMsg("SDWAVE", ("[%s] MINIBOSS"):format(sdwaveCount), 5, "Info", "Blue")
 				core:AddBar("SDWAVE", ("[%s] WAVE"):format(sdwaveCount + 1), 50, 1)
 			end
+			core:AddBar("PROBES", "[1] Probe", 10)
 		end
 	elseif sName == "Null System Daemon" or sName == "Binary System Daemon" then
 		--core:MarkUnit(unit, 0, ("N%s"):format(sdSurgeCount[unit:GetId()] or 0))
-		core:MarkUnit(unit, 0, ("%s%s"):format(sName:find("Null") and "S" or "N", sdSurgeCount[unit:GetId()] or 0))
+		core:MarkUnit(unit, 0, ("%s"):format(sName:find("Null") and "S" or "N"))
 		core:AddUnit(unit)
 		core:WatchUnit(unit)
 	--elseif sName == "Null System Daemon"  then
@@ -73,18 +104,22 @@ function mod:OnUnitCreated(unit)
 	elseif sName == "Conduction Unit Mk. I" then
 		if probeCount == 0 then probeCount = 1 end
 		if GetCurrentSubZoneName():find("Infinite Generator Core") then core:MarkUnit(unit, 1, 1) end
+		core:AddBar("PROBES", "[2] Probe", 10)
 	elseif sName == "Conduction Unit Mk. II" then
 		if probeCount == 1 then probeCount = 2 end
 		if GetCurrentSubZoneName():find("Infinite Generator Core") then core:MarkUnit(unit, 1, 2) end
+		core:AddBar("PROBES", "[3] Probe", 10)
 	elseif sName == "Conduction Unit Mark III" then
 		if probeCount == 2 then probeCount = 3 end
 		if GetCurrentSubZoneName():find("Infinite Generator Core") then core:MarkUnit(unit, 1, 3) end
 	elseif sName == "Enhancement Module" then
 		--Print("Adding Lines for " .. unit:GetId())
-		core:MarkUnit(unit, 0)
+		--core:MarkUnit(unit, 0)
 		core:AddUnit(unit)
 		core:AddLine(unit:GetId().."_1", 2, unit, nil, 1, 25, 90)
 		core:AddLine(unit:GetId().."_2", 2, unit, nil, 2, 25, -90)
+	elseif sName == "Recovery Protocol" then
+		core:WatchUnit(unit)
 	end
 end
 
@@ -100,10 +135,10 @@ end
 function mod:OnHealthChanged(unitName, health)
 	if health >= 70 and health <= 72 and not phase2warn and not phase2 then
 		phase2warn = true
-		core:AddMsg("SDP2", "P2 SOON !", 5, "Info")
-	elseif health >= 70 and health <= 32 and not phase2warn and not phase2 then
+		core:AddMsg("SDP2", "P2 SOON !", 5, "Algalon")
+	elseif health >= 32 and health <= 70 and not phase2warn and not phase2 then
 		phase2warn = true
-		core:AddMsg("SDP2", "P2 SOON !", 5, "Info")		
+		core:AddMsg("SDP2", "P2 SOON !", 5, "Algalon")		
 	end
 end
 
@@ -122,10 +157,8 @@ end
 
 
 function mod:OnSpellCastEnd(unitName, castName, unit)
-	if unitName == "Binary System Daemon" and castName == "Power Surge" then
-		core:MarkUnit(unit, 0, ("N%s"):format(sdSurgeCount[unit:GetId()]))
-	elseif unitName == "Null System Daemon" and castName == "Power Surge" then	
-		core:MarkUnit(unit, 0, ("S%s"):format(sdSurgeCount[unit:GetId()]))	
+	if unitName == "Recovery Protocol" and castName == "Repair Sequence" then
+		core:DropMark(unit:GetId())
 	end
 end
 
@@ -142,17 +175,79 @@ function mod:OnSpellCastStart(unitName, castName, unit)
 			core:AddMsg("PURGE", "INTERRUPT SOUTH", 5, "Alert")
 		end			
 	elseif castName == "Purge" then
+		PurgeLast[unit:GetId()] = GameLib.GetGameTime()
 		if dist2unit(GameLib.GetPlayerUnit(), unit) < 40 then
 			core:AddMsg("PURGE", "AIDDDDDDDS !", 5, "Beware")
+			core:AddBar("PURGE_"..unit:GetId(), ("PURGE - %s"):format(unitName:find("Null") and "NULL" or "BINARY"), 27)
+		elseif phase2 then
+			core:AddBar("PURGE_"..unit:GetId(), ("PURGE - %s"):format(unitName:find("Null") and "NULL" or "BINARY"), 27)
 		end
 	elseif unitName == "Defragmentation Unit" and castName == "Black IC" then
 		core:AddMsg("BLACKIC", "INTERRUPT !", 5, "Alert")
 		core:AddBar("BLACKIC", "BLACK IC", 30)
+	elseif unitName == "Recovery Protocol" and castName == "Repair Sequence" then
+		if dist2unit(GameLib.GetPlayerUnit(), unit) < 50 then
+			core:AddMsg("HEAL", "INTERRUPT HEAL!", 5, "Inferno")
+			core:MarkUnit(unit, nil, "HEAL")
+			self:ScheduleTimer("RemoveHealMarker", 5, unit)
+		end
 	end
 end
 
+function mod:RemoveHealMarker(unit)
+	if not unit then return end
+	core:DropMark(unit:GetId())
+end
+
+function mod:OnDebuffApplied(unitName, splId, unit)
+	local eventTime = GameLib.GetGameTime()
+	local tSpell = GameLib.GetSpell(splId)
+	local strSpellName = tSpell:GetName()
+	if strSpellName == "Overload" then
+		core:MarkUnit(unit, nil, "DOT DMG")
+	elseif strSpellName == "Purge" then
+		core:MarkUnit(unit, nil, "PURGE")
+		if unitName == playerName then
+			core:AddMsg("PURGEDEBUFF", "PURGE ON YOU", 5, "Beware")
+		end
+	end
+end
+
+function mod:OnDebuffRemoved(unitName, splId, unit)
+	local eventTime = GameLib.GetGameTime()
+	local tSpell = GameLib.GetSpell(splId)
+	local strSpellName = tSpell:GetName()
+	if strSpellName == "Overload" then
+		core:DropMark(unit:GetId())
+	elseif strSpellName == "Purge" then
+		core:DropMark(unit:GetId())
+	end
+end
+
+function mod:OnZoneChanged(zoneId, zoneName)
+	if zoneName == "Datascape" then
+		return
+	elseif zoneName == "Halls of the Infinite Mind" then
+		local timeOfEvent = GameLib.GetGameTime()
+		for id, timer in pairs(PurgeLast) do
+			local unit = GameLib.GetUnitById(id)
+			if unit and (dist2unit(GameLib.GetPlayerUnit(), unit) < 40 or phase2) then
+				if timeOfEvent - timer < 27 then
+					core:AddBar("PURGE_".. id, ("PURGE - %s"):format(unit:GetName():find("Null") and "NULL" or "BINARY"), timer + 27 - timeOfEvent)
+				end
+			end
+		end
+	elseif zoneName:find("Infinite Generator Core") then
+		for id, timer in pairs(PurgeLast) do
+			core:StopBar("PURGE_" .. id)
+		end
+		local probesouth = { x = 95.89, y = -337.19, z = 211.26 }
+		core:SetWorldMarker(probesouth, "Probe Spawn")
+	end
+end
+
+
 function mod:NextWave()
-	Print("ProbeCount : ".. probeCount)
 	if probeCount == 3 then
 		if sdwaveCount % 2 == 0 then
 			core:AddBar("SDWAVE", ("[%s] MINIBOSS"):format(sdwaveCount + 1), 90, 1)
@@ -160,7 +255,6 @@ function mod:NextWave()
 			core:AddBar("SDWAVE", ("[%s] WAVE"):format(sdwaveCount + 1), 90, 1)
 		end
 	else
-		core:AddBar("SDP1", ("[%s] PROBE %s"):format(sdwaveCount, probeCount + 1), 90, 1)
 		if sdwaveCount % 2 == 0 then
 			core:AddBar("SDWAVE", ("[%s] MINIBOSS"):format(sdwaveCount + 1), 110 + (2 - probeCount) * 10, 1)
 		else
@@ -171,21 +265,42 @@ end
 
 function mod:OnChatDC(message)
 	if message:find("INVALID SIGNAL. DISCONNECTING") then
-		if phase2 then phase2 = false end
-		discoCount = discoCount + 1
-		if self:Tank() then
-			core:AddBar("DISC", ("DISCONNECT (%s)"):format(discoCount + 1), 65)
+		if phase2 then
+			core:ResetWorldMarkers()
+			phase2 = false
+			phase2warn = false
 		end
+		discoCount = discoCount + 1
+		--if self:Tank() then
+			core:AddBar("DISC", ("DISCONNECT (%s)"):format(discoCount + 1), 60)
+		--end
 	elseif message:find("COMMENCING ENHANCEMENT SEQUENCE") then
 		phase2, phase2warn = true, false
+		phase2count = phase2count + 1
 		core:StopBar("DISC")
 		core:StopBar("SDWAVE")
 		core:AddMsg("SDP2", "PHASE 2 !", 5, "Alarm")
 		if self:Tank() then
-			core:AddBar("DISC", ("DISCONNECT (%s)"):format(discoCount + 1), 87)
+			core:AddBar("DISC", ("DISCONNECT (%s)"):format(discoCount + 1), 85)
 		end
-
-		self:ScheduleTimer("NextWave", 7)
+		if phase2count == 1 then
+			core:SetWorldMarker(p1_pillar1north, "N1")
+			core:SetWorldMarker(p1_pillar2north, "N2")
+			core:SetWorldMarker(p1_pillar3north, "N3")
+			core:SetWorldMarker(p1_pillar1south, "S1")
+			core:SetWorldMarker(p1_pillar2south, "S2")
+			core:SetWorldMarker(p1_pillar3south, "S3")
+		elseif phase2count == 2 then
+			core:SetWorldMarker(p2_pillar1north, "N1")
+			core:SetWorldMarker(p2_pillar2north, "N2")
+			core:SetWorldMarker(p2_pillar3north, "N3")
+			core:SetWorldMarker(p2_pillar4north, "N4")
+			core:SetWorldMarker(p2_pillar1south, "S1")
+			core:SetWorldMarker(p2_pillar2south, "S2")
+			core:SetWorldMarker(p2_pillar3south, "S3")
+			core:SetWorldMarker(p2_pillar4south, "S4")
+		end
+		self:ScheduleTimer("NextWave", 5)
 	end
 end
 
@@ -225,13 +340,17 @@ function mod:OnCombatStateChanged(unit, bInCombat)
 	if unit:GetType() == "NonPlayer" and bInCombat then
 		local sName = unit:GetName()
 
-		if sName == "Null System Daemon"  or  sName == "Binary System Daemon" then
+		if sName == "Null System Daemon" or sName == "Binary System Daemon" then
+			self:Start()
 			discoCount, sdwaveCount, probeCount = 0, 0, 0
 			phase2warn, phase2 = false, false
+			phase2count = 0
 			sdSurgeCount[unit:GetId()] = 1
-			core:MarkUnit(unit, 0, ("%s%s"):format(sName:find("Null") and "S" or "N", sdSurgeCount[unit:GetId()]))
+			PurgeLast[unit:GetId()] = 0
+			playerName = GameLib.GetPlayerUnit():GetName()
 			core:AddUnit(unit)
 			core:WatchUnit(unit)
+			core:RaidDebuff()
 			core:AddSync("NORTH_SURGE", 5)
 			core:AddSync("SOUTH_SURGE", 5)
 			if self:Tank() then
