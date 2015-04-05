@@ -61,7 +61,13 @@ function mod:OnBossEnable()
 	Apollo.RegisterEventHandler("RAID_WIPE", 			"OnReset", self)
 end
 
+local function GetSetting(key)
+	return core:GetSettings()["DS"]["SystemDaemons"][key]
+end
 
+local function GetSoundSetting(sound, key)
+	if core:GetSettings()["DS"]["SystemDaemons"][key] then return sound else return nil end
+end
 --------------------------------------------------------------------------------
 -- Event Handlers
 --
@@ -81,14 +87,14 @@ function mod:OnUnitCreated(unit)
 			sdwaveCount = sdwaveCount + 1
 			probeCount = 0
 			if sdwaveCount == 1 then
-				core:AddMsg("SDWAVE", ("[%s] WAVE"):format(sdwaveCount), 5, "Info", "Blue")
-				core:AddBar("SDWAVE", ("[%s] WAVE"):format(sdwaveCount + 1), 50, 1)
+				core:AddMsg("SDWAVE", ("[%s] WAVE"):format(sdwaveCount), 5, GetSoundSetting("Info", "SoundWave"), "Blue")
+				core:AddBar("SDWAVE", ("[%s] WAVE"):format(sdwaveCount + 1), 50, GetSoundSetting(true, "SoundWave"))
 			elseif sdwaveCount % 2 == 0 then
-				core:AddMsg("SDWAVE", ("[%s] WAVE"):format(sdwaveCount), 5, "Info", "Blue")
-				core:AddBar("SDWAVE", ("[%s] MINIBOSS"):format(sdwaveCount + 1), 50, 1)
+				core:AddMsg("SDWAVE", ("[%s] WAVE"):format(sdwaveCount), 5, GetSoundSetting("Info", "SoundWave"), "Blue")
+				core:AddBar("SDWAVE", ("[%s] MINIBOSS"):format(sdwaveCount + 1), 50, GetSoundSetting(true, "SoundWave"))
 			else
-				core:AddMsg("SDWAVE", ("[%s] MINIBOSS"):format(sdwaveCount), 5, "Info", "Blue")
-				core:AddBar("SDWAVE", ("[%s] WAVE"):format(sdwaveCount + 1), 50, 1)
+				core:AddMsg("SDWAVE", ("[%s] MINIBOSS"):format(sdwaveCount), 5, GetSoundSetting("Info", "SoundWave"), "Blue")
+				core:AddBar("SDWAVE", ("[%s] WAVE"):format(sdwaveCount + 1), 50, GetSoundSetting(true, "SoundWave"))
 			end
 			core:AddBar("PROBES", "[1] Probe", 10)
 		end
@@ -116,8 +122,10 @@ function mod:OnUnitCreated(unit)
 		--Print("Adding Lines for " .. unit:GetId())
 		--core:MarkUnit(unit, 0)
 		core:AddUnit(unit)
-		core:AddLine(unit:GetId().."_1", 2, unit, nil, 1, 25, 90)
-		core:AddLine(unit:GetId().."_2", 2, unit, nil, 2, 25, -90)
+		if GetSetting("LineOnModulesMidphase") then
+			core:AddLine(unit:GetId().."_1", 2, unit, nil, 1, 25, 90)
+			core:AddLine(unit:GetId().."_2", 2, unit, nil, 2, 25, -90)
+		end
 	elseif sName == "Recovery Protocol" then
 		core:WatchUnit(unit)
 	end
@@ -135,10 +143,10 @@ end
 function mod:OnHealthChanged(unitName, health)
 	if health >= 70 and health <= 72 and not phase2warn and not phase2 then
 		phase2warn = true
-		core:AddMsg("SDP2", "P2 SOON !", 5, "Algalon")
-	elseif health >= 32 and health <= 70 and not phase2warn and not phase2 then
+		core:AddMsg("SDP2", "P2 SOON !", 5, GetSoundSetting("Algalon", "SoundPhase2"))
+	elseif health >= 30 and health <= 32 and not phase2warn and not phase2 then
 		phase2warn = true
-		core:AddMsg("SDP2", "P2 SOON !", 5, "Algalon")		
+		core:AddMsg("SDP2", "P2 SOON !", 5, GetSoundSetting("Algalon", "SoundPhase2"))		
 	end
 end
 
@@ -167,17 +175,17 @@ function mod:OnSpellCastStart(unitName, castName, unit)
 	if unitName == "Binary System Daemon" and castName == "Power Surge" then
 		core:SendSync("NORTH_SURGE", unit:GetId())
 		if phase2 and dist2unit(GameLib.GetPlayerUnit(), unit) < 40 then
-			core:AddMsg("PURGE", "INTERRUPT NORTH", 5, "Alert")
+			core:AddMsg("SURGE", "INTERRUPT NORTH", 5, GetSoundSetting("Alert", "SoundPowerSurge"))
 		end		
 	elseif unitName == "Null System Daemon" and castName == "Power Surge" then
 		core:SendSync("SOUTH_SURGE", unit:GetId())
 		if phase2 and dist2unit(GameLib.GetPlayerUnit(), unit) < 40 then
-			core:AddMsg("PURGE", "INTERRUPT SOUTH", 5, "Alert")
+			core:AddMsg("SURGE", "INTERRUPT SOUTH", 5, GetSoundSetting("Alert", "SoundPowerSurge"))
 		end			
 	elseif castName == "Purge" then
 		PurgeLast[unit:GetId()] = GameLib.GetGameTime()
 		if dist2unit(GameLib.GetPlayerUnit(), unit) < 40 then
-			core:AddMsg("PURGE", "AIDDDDDDDS !", 5, "Beware")
+			core:AddMsg("PURGE", "AIDDDDDDDS !", 5, GetSoundSetting("Beware", "SoundPurge"))
 			core:AddBar("PURGE_"..unit:GetId(), ("PURGE - %s"):format(unitName:find("Null") and "NULL" or "BINARY"), 27)
 		elseif phase2 then
 			core:AddBar("PURGE_"..unit:GetId(), ("PURGE - %s"):format(unitName:find("Null") and "NULL" or "BINARY"), 27)
@@ -187,7 +195,7 @@ function mod:OnSpellCastStart(unitName, castName, unit)
 		core:AddBar("BLACKIC", "BLACK IC", 30)
 	elseif unitName == "Recovery Protocol" and castName == "Repair Sequence" then
 		if dist2unit(GameLib.GetPlayerUnit(), unit) < 50 then
-			core:AddMsg("HEAL", "INTERRUPT HEAL!", 5, "Inferno")
+			core:AddMsg("HEAL", "INTERRUPT HEAL!", 5, GetSoundSetting("Inferno", "SoundRepairSequence"))
 			core:MarkUnit(unit, nil, "HEAL")
 			self:ScheduleTimer("RemoveHealMarker", 5, unit)
 		end
@@ -204,11 +212,15 @@ function mod:OnDebuffApplied(unitName, splId, unit)
 	local tSpell = GameLib.GetSpell(splId)
 	local strSpellName = tSpell:GetName()
 	if strSpellName == "Overload" then
-		core:MarkUnit(unit, nil, "DOT DMG")
+		if GetSetting("OtherOverloadMarkers") then
+			core:MarkUnit(unit, nil, "DOT DMG")
+		end
 	elseif strSpellName == "Purge" then
-		core:MarkUnit(unit, nil, "PURGE")
+		if GetSetting("OtherPurgePlayerMarkers") then
+			core:MarkUnit(unit, nil, "PURGE")
+		end
 		if unitName == playerName then
-			core:AddMsg("PURGEDEBUFF", "PURGE ON YOU", 5, "Beware")
+			core:AddMsg("PURGEDEBUFF", "PURGE ON YOU", 5, GetSoundSetting("Beware", "SoundPurge"))
 		end
 	end
 end
@@ -250,15 +262,15 @@ end
 function mod:NextWave()
 	if probeCount == 3 then
 		if sdwaveCount % 2 == 0 then
-			core:AddBar("SDWAVE", ("[%s] MINIBOSS"):format(sdwaveCount + 1), 90, 1)
+			core:AddBar("SDWAVE", ("[%s] MINIBOSS"):format(sdwaveCount + 1), 90, GetSoundSetting(true, "SoundWave"))
 		else
-			core:AddBar("SDWAVE", ("[%s] WAVE"):format(sdwaveCount + 1), 90, 1)
+			core:AddBar("SDWAVE", ("[%s] WAVE"):format(sdwaveCount + 1), 90, GetSoundSetting(true, "SoundWave"))
 		end
 	else
 		if sdwaveCount % 2 == 0 then
-			core:AddBar("SDWAVE", ("[%s] MINIBOSS"):format(sdwaveCount + 1), 110 + (2 - probeCount) * 10, 1)
+			core:AddBar("SDWAVE", ("[%s] MINIBOSS"):format(sdwaveCount + 1), 110 + (2 - probeCount) * 10, GetSoundSetting(true, "SoundWave"))
 		else
-			core:AddBar("SDWAVE", ("[%s] WAVE"):format(sdwaveCount + 1), 110 + (2 - probeCount) * 10, 1)
+			core:AddBar("SDWAVE", ("[%s] WAVE"):format(sdwaveCount + 1), 110 + (2 - probeCount) * 10, GetSoundSetting(true, "SoundWave"))
 		end
 	end
 end
@@ -271,26 +283,26 @@ function mod:OnChatDC(message)
 			phase2warn = false
 		end
 		discoCount = discoCount + 1
-		--if self:Tank() then
+		if GetSetting("OtherDisconnectTimer") then
 			core:AddBar("DISC", ("DISCONNECT (%s)"):format(discoCount + 1), 60)
-		--end
+		end
 	elseif message:find("COMMENCING ENHANCEMENT SEQUENCE") then
 		phase2, phase2warn = true, false
 		phase2count = phase2count + 1
 		core:StopBar("DISC")
 		core:StopBar("SDWAVE")
-		core:AddMsg("SDP2", "PHASE 2 !", 5, "Alarm")
-		if self:Tank() then
+		core:AddMsg("SDP2", "PHASE 2 !", 5, GetSoundSetting("Alarm", "SoundPhase2"))
+		if GetSetting("OtherDisconnectTimer") then
 			core:AddBar("DISC", ("DISCONNECT (%s)"):format(discoCount + 1), 85)
 		end
-		if phase2count == 1 then
+		if GetSetting("OtherPillarMarkers") and phase2count == 1 then
 			core:SetWorldMarker(p1_pillar1north, "N1")
 			core:SetWorldMarker(p1_pillar2north, "N2")
 			core:SetWorldMarker(p1_pillar3north, "N3")
 			core:SetWorldMarker(p1_pillar1south, "S1")
 			core:SetWorldMarker(p1_pillar2south, "S2")
 			core:SetWorldMarker(p1_pillar3south, "S3")
-		elseif phase2count == 2 then
+		elseif GetSetting("OtherPillarMarkers") and phase2count == 2 then
 			core:SetWorldMarker(p2_pillar1north, "N1")
 			core:SetWorldMarker(p2_pillar2north, "N2")
 			core:SetWorldMarker(p2_pillar3north, "N3")
@@ -353,10 +365,10 @@ function mod:OnCombatStateChanged(unit, bInCombat)
 			core:RaidDebuff()
 			core:AddSync("NORTH_SURGE", 5)
 			core:AddSync("SOUTH_SURGE", 5)
-			if self:Tank() then
+			if GetSetting("OtherDisconnectTimer") then
 				core:AddBar("DISC", ("DISCONNECT (%s)"):format(discoCount + 1), 41)
 			end
-			core:AddBar("SDWAVE", ("[%s] WAVE"):format(sdwaveCount + 1), 15, 1)
+			core:AddBar("SDWAVE", ("[%s] WAVE"):format(sdwaveCount + 1), 15, GetSoundSetting(true, "SoundWave"))
 			core:StartScan()
 		elseif sName == "Defragmentation Unit" then
 			if GetCurrentSubZoneName():find("Infinite Generator Core") then
