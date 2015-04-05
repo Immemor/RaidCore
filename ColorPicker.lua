@@ -1,23 +1,23 @@
-local ColorPicker = {} 
+local ColorPicker = {}
 
 ColorPicker.__index = ColorPicker
 
 setmetatable(ColorPicker, {
-  __call = function (cls, ...)
-    return cls.new(...)
-  end,
+	__call = function (cls, ...)
+		return cls.new(...)
+	end,
 })
 
 function ColorPicker.new(xmlDoc)
 	local self = setmetatable({}, ColorPicker)
 
-    self.colorPicker = Apollo.LoadForm(xmlDoc, "ColorPicker", nil, self)
+	self.colorPicker = Apollo.LoadForm(xmlDoc, "ColorPicker", nil, self)
 	self.colorPicker:Show(false, true)
 	Apollo.LoadSprites("Sprites.xml")
 	self.colorPicker:FindChild("Color"):SetSprite("ColorPicker_Colors")
 	self.colorPicker:FindChild("Gradient"):SetSprite("ColorPicker_Gradient")
 
-    return self
+	return self
 end
 
 function ColorPicker:OpenColorPicker(color, callback)
@@ -79,74 +79,74 @@ function ColorPicker:OnColorMove(x, y)
 end
 
 local function ConvertRGBToHSV(r, g, b)
-    local h, s, v
-    local min, max, delta
+	local h, s, v
+	local min, max, delta
 
-    min = math.min(r, g, b)
-    max = math.max(r, g, b)
+	min = math.min(r, g, b)
+	max = math.max(r, g, b)
 
-    v = max;
-    delta = max - min;
-    if max > 0.0 then
-        s = (delta / max)
-    else
-        r, g ,b = 0, 0, 0
-        s = 0.0
-        h = nil
-        return h, s, v
-    end
-    if r >= max then
-        h = ( g - b ) / delta
-    else
-	    if g >= max then
-	        h = 2.0 + ( b - r ) / delta
-	    else
-	        h = 4.0 + ( r - g ) / delta
-	    end
+	v = max;
+	delta = max - min;
+	if max > 0.0 then
+		s = (delta / max)
+	else
+		r, g ,b = 0, 0, 0
+		s = 0.0
+		h = nil
+		return h, s, v
+	end
+	if r >= max then
+		h = ( g - b ) / delta
+	else
+		if g >= max then
+			h = 2.0 + ( b - r ) / delta
+		else
+			h = 4.0 + ( r - g ) / delta
+		end
 	end
 
-    h = h * 60.0
+	h = h * 60.0
 
-    if h < 0.0 then
-        h = h + 360.0
-    end
+	if h < 0.0 then
+		h = h + 360.0
+	end
 
-    return h, s, v
+	return h, s, v
 end
 
 local function ConvertHSVToRGB(h, s, v)
-    local hh, p, q, t, ff
-    local i
-    local r, g, b
+	local hh, p, q, t, ff
+	local i
+	local r, g, b
 
-    if s <= 0.0 then
-        r, g, b = v, v, v
-        return r, g, b
-    end
+	if s <= 0.0 then
+		r, g, b = v, v, v
+		return r, g, b
+	end
 
-    hh = h
-    if hh >= 360.0 then hh = 0.0 end
-    hh = hh / 60.0
-    i = math.floor(hh)
-    ff = hh - i;
-    p = v * (1.0 - s);
-    q = v * (1.0 - (s * ff));
-    t = v * (1.0 - (s * (1.0 - ff)));
+	hh = h
+	if hh >= 360.0 then hh = 0.0 end
+	hh = hh / 60.0
+	i = math.floor(hh)
+	ff = hh - i;
+	p = v * (1.0 - s);
+	q = v * (1.0 - (s * ff));
+	t = v * (1.0 - (s * (1.0 - ff)));
 
-    if i == 0 then
-    	r, g, b = v, t, p
-    elseif i == 1 then
-    	r, g, b = q, v, p
-    elseif i == 2 then
-    	r, g, b = p, v, t
-    elseif i == 3 then
-    	r, g, b = p, q, v
-    elseif i == 4 then
-    	r, g, b = t, p, v
-    else
-    	r, g, b = v, p, q
-    end
-    return r, g, b    
+	if i == 0 then
+		r, g, b = v, t, p
+	elseif i == 1 then
+		r, g, b = q, v, p
+	elseif i == 2 then
+		r, g, b = p, v, t
+	elseif i == 3 then
+		r, g, b = p, q, v
+	elseif i == 4 then
+		r, g, b = t, p, v
+	else
+		r, g, b = v, p, q
+	end
+	return r, g, b
 end
 
 function ColorPicker:UpdateColorPicker()
@@ -173,7 +173,7 @@ function ColorPicker:UpdateColorPicker()
 	self:UpdateColor()
 end
 
-function ColorPicker:	UnpackColor()
+function ColorPicker:UnpackColor()
 	local r = math.min(255, math.max(0, tonumber(self.colorPicker:FindChild("Red"):GetText()) or 0))
 	local g = math.min(255, math.max(0, tonumber(self.colorPicker:FindChild("Green"):GetText()) or 0))
 	local b = math.min(255, math.max(0, tonumber(self.colorPicker:FindChild("Blue"):GetText()) or 0))
@@ -257,7 +257,7 @@ function ColorPicker:OnHexCodeChanged( wndHandler, wndControl, strText )
 		local b = tonumber(string.sub(strText, 5, 6), 16)
 		local a = tonumber(string.sub(strText, 7, 8), 16)
 		self.editingColor.r, self.editingColor.g, self.editingColor.b, self.editingColor.a = r / 255, g / 255, b / 255, a / 255
-		
+
 
 		self.colorPicker:FindChild("AlphaText"):SetText(string.format("%i", self.editingColor.a * 100))
 		self.colorPicker:FindChild("AlphaSlider"):SetValue(self.editingColor.a * 100)

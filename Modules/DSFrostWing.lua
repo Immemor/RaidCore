@@ -21,9 +21,9 @@ local icicleSpell = false
 
 function mod:OnBossEnable()
 	Print(("Module %s loaded"):format(mod.ModuleName))
-	Apollo.RegisterEventHandler("UnitEnteredCombat", 		"OnCombatStateChanged", 	self)
-	Apollo.RegisterEventHandler("SPELL_CAST_START", 		"OnSpellCastStart", self)
-	Apollo.RegisterEventHandler("UNIT_HEALTH", 			"OnHealthChanged", 		self)
+	Apollo.RegisterEventHandler("UnitEnteredCombat", "OnCombatStateChanged", self)
+	Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
+	Apollo.RegisterEventHandler("UNIT_HEALTH", "OnHealthChanged", self)
 end
 
 
@@ -35,7 +35,7 @@ function mod:OnHealthChanged(unitName, health)
 	if unitName == "Frost-Boulder Avalanche" and (health == 85 or health == 55 or health == 31) then
 		core:AddMsg("CYCLONE", "CYCLONE SOON", 5, "Info", "Blue")
 	elseif unitName == "Frost-Boulder Avalanche" and health == 22 then
-		core:AddMsg("PHASE2", "PHASE 2 SOON", 5, "Info", "Blue")		
+		core:AddMsg("PHASE2", "PHASE 2 SOON", 5, "Info", "Blue")
 	end
 end
 
@@ -62,7 +62,6 @@ function mod:OnSpellCastStart(unitName, castName, unit)
 		core:AddBar("CYCLONE", "CYCLONE", 90, 1)
 	end
 end
-
 
 function mod:OnCombatStateChanged(unit, bInCombat)
 	if unit:GetType() == "NonPlayer" and bInCombat then

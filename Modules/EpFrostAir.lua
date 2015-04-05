@@ -21,23 +21,21 @@ local phase2 = false
 local myName
 local CheckTwirlTimer = nil
 
-
-
 --------------------------------------------------------------------------------
 -- Initialization
 --
 
 function mod:OnBossEnable()
 	Print(("Module %s loaded"):format(mod.ModuleName))
-	Apollo.RegisterEventHandler("UnitCreated", 			"OnUnitCreated", self)
-	--Apollo.RegisterEventHandler("UnitDestroyed", 		"OnUnitDestroyed", self)
-	Apollo.RegisterEventHandler("UnitEnteredCombat", 	"OnCombatStateChanged", self)
-	Apollo.RegisterEventHandler("SPELL_CAST_START", 	"OnSpellCastStart", self)
-	Apollo.RegisterEventHandler("SPELL_CAST_END", 		"OnSpellCastEnd", self)
-	Apollo.RegisterEventHandler("CHAT_DATACHRON", 		"OnChatDC", self)
-	Apollo.RegisterEventHandler("BUFF_APPLIED", 		"OnBuffApplied", self)
-	Apollo.RegisterEventHandler("DEBUFF_APPLIED", 		"OnDebuffApplied", self)
-	Apollo.RegisterEventHandler("RAID_WIPE", 			"OnReset", self)
+	Apollo.RegisterEventHandler("UnitCreated", "OnUnitCreated", self)
+	--Apollo.RegisterEventHandler("UnitDestroyed", "OnUnitDestroyed", self)
+	Apollo.RegisterEventHandler("UnitEnteredCombat", "OnCombatStateChanged", self)
+	Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
+	Apollo.RegisterEventHandler("SPELL_CAST_END", "OnSpellCastEnd", self)
+	Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
+	Apollo.RegisterEventHandler("BUFF_APPLIED", "OnBuffApplied", self)
+	Apollo.RegisterEventHandler("DEBUFF_APPLIED", "OnDebuffApplied", self)
+	Apollo.RegisterEventHandler("RAID_WIPE", "OnReset", self)
 end
 
 
@@ -67,9 +65,8 @@ function mod:OnUnitDestroyed(unit)
 	if sName == "Wind Wall" then
 		core:DropLine(unit:GetId().."_1")
 		core:DropLine(unit:GetId().."_2")
-	end	
+	end
 end
-
 
 function mod:OnSpellCastStart(unitName, castName, unit)
 	if unitName == "Hydroflux" and castName == "Tsunami" then

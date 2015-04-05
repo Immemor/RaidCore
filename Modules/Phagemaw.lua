@@ -15,23 +15,20 @@ mod:RegisterEnableZone("PhageMaw", "Experimentation Lab CX-33")
 -- Locals
 --
 
-
 --------------------------------------------------------------------------------
 -- Initialization
 --
 
 function mod:OnBossEnable()
 	Print(("Module %s loaded"):format(mod.ModuleName))
-	Apollo.RegisterEventHandler("UnitCreated", 			"OnUnitCreated", self)
-	Apollo.RegisterEventHandler("CHAT_DATACHRON", 		"OnChatDC", 				self)
-	Apollo.RegisterEventHandler("UnitEnteredCombat", 		"OnCombatStateChanged", self)
+	Apollo.RegisterEventHandler("UnitCreated", "OnUnitCreated", self)
+	Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
+	Apollo.RegisterEventHandler("UnitEnteredCombat", "OnCombatStateChanged", self)
 end
-
 
 --------------------------------------------------------------------------------
 -- Event Handlers
 --
-
 
 function mod:OnUnitCreated(unit)
 	local sName = unit:GetName()
@@ -40,7 +37,6 @@ function mod:OnUnitCreated(unit)
 		core:AddUnit(unit)
 	end
 end
-
 
 function mod:OnChatDC(message)
 	if message:find("The augmented shield has been destroyed") then
@@ -59,9 +55,7 @@ function mod:OnCombatStateChanged(unit, bInCombat)
 
 		if sName == "Phage Maw" then
 			self:Start()
-			core:AddUnit(unit)				
+			core:AddUnit(unit)
 		end
 	end
 end
-
-

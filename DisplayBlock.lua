@@ -1,44 +1,43 @@
-local DisplayBlock = {} 
+local DisplayBlock = {}
 local NO_BREAK_SPACE = string.char(194, 160)
 
 DisplayBlock.__index = DisplayBlock
 
 setmetatable(DisplayBlock, {
-  __call = function (cls, ...)
-    return cls.new(...)
-  end,
+	__call = function (cls, ...)
+		return cls.new(...)
+	end,
 })
 
 
 function DisplayBlock.new(xmlDoc)
 	local self = setmetatable({}, DisplayBlock)
 
-    self.xmlDoc = xmlDoc
-    self.infos = { }
-    self.barsFrame = Apollo.LoadForm(self.xmlDoc, "RaidBars", nil, self)
-    self.itemList = self.barsFrame:FindChild("ItemList")
-    self.RaidCore = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
+	self.xmlDoc = xmlDoc
+	self.infos = { }
+	self.barsFrame = Apollo.LoadForm(self.xmlDoc, "RaidBars", nil, self)
+	self.itemList = self.barsFrame:FindChild("ItemList")
+	self.RaidCore = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 
-    self.bgColor = CColor.new(1,1,1,0.8)
-    self.barColor = CColor.new(1,0,0,0.5)
-    self.isEnabled = true
-    self.anchorFromTop = true
-    self.barSize = {
-    	Width = 300,
-    	Height = 25
+	self.bgColor = CColor.new(1,1,1,0.8)
+	self.barColor = CColor.new(1,0,0,0.5)
+	self.isEnabled = true
+	self.anchorFromTop = true
+	self.barSize = {
+		Width = 300,
+		Height = 25
 	}
 
-	Apollo.RegisterEventHandler("UnitDestroyed", 					"OnUnitDestroyed", self)
-
-    return self
+	Apollo.RegisterEventHandler("UnitDestroyed", "OnUnitDestroyed", self)
+	return self
 end
 
 local function hexToCColor(color, a)
-  if not a then a = 1 end
-  local r = tonumber(string.sub(color,1,2), 16) / 255
-  local g = tonumber(string.sub(color,3,4), 16) / 255
-  local b = tonumber(string.sub(color,5,6), 16) / 255
-  return CColor.new(r,g,b,a)
+	if not a then a = 1 end
+	local r = tonumber(string.sub(color,1,2), 16) / 255
+	local g = tonumber(string.sub(color,3,4), 16) / 255
+	local b = tonumber(string.sub(color,5,6), 16) / 255
+	return CColor.new(r,g,b,a)
 end
 
 function DisplayBlock:Load(saveData)
@@ -173,7 +172,7 @@ function DisplayBlock:RefreshBars()
 			local raidBar = bar.barFrame
 			if duration > 0 then
 				raidBar:UpdateProgress(duration)
-			else 
+			else
 				self.infos[raidBar.Key] = nil
 				raidBar.Frame:Destroy()
 				self.itemList:ArrangeChildrenVert(self:GetAnchorPoint())
@@ -196,7 +195,7 @@ function DisplayBlock:RebuildList()
 		for i, info in pairs(tabSorted) do
 			--self.infos[info.key] = info
 			local raidBar = self:CreateBar(info.key, info.message, info.duration, info.type)
-			self.infos[info.key].barFrame = raidBar 
+			self.infos[info.key].barFrame = raidBar
 		end
 
 		self.itemList:ArrangeChildrenVert(self:GetAnchorPoint())
@@ -207,7 +206,7 @@ function DisplayBlock:AddUnit(unit, mark)
 	if self.isEnabled then
 		local key = unit:GetId()
 		if self.infos[key] == nil and not unit:IsDead() then
-			
+
 			local unitName = unit:GetName():gsub(NO_BREAK_SPACE, " ")
 			local maxHealth = unit:GetMaxHealth()
 			if maxHealth then
@@ -254,7 +253,7 @@ function DisplayBlock:RefreshUnits()
 			if not unit:IsDead() then
 				local health = unit:GetHealth()
 				if health then raidBar:UpdateProgress(health) end
-			else 
+			else
 				self.infos[raidBar.Key] = nil
 				raidBar.Frame:Destroy()
 				self.itemList:ArrangeChildrenVert(self:GetAnchorPoint())

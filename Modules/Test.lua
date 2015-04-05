@@ -7,7 +7,7 @@ mod:RegisterEnableMob("Gnash")
 
 function mod:OnBossEnable()
 	Print("YEAHHH")
-		Apollo.RegisterEventHandler("UnitCreated", 				"OnUnitCreated", self)
+		Apollo.RegisterEventHandler("UnitCreated", "OnUnitCreated", self)
 end
 
 function mod:OnUnitCreated(unit)

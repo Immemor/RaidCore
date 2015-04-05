@@ -30,18 +30,17 @@ local twirlCount = 0
 
 function mod:OnBossEnable()
 	Print(("Module %s loaded"):format(mod.ModuleName))
-	Apollo.RegisterEventHandler("UnitCreated", 			"OnUnitCreated", self)
-	Apollo.RegisterEventHandler("UnitDestroyed", 		"OnUnitDestroyed", self)
-	Apollo.RegisterEventHandler("UnitEnteredCombat", 	"OnCombatStateChanged", self)
-	Apollo.RegisterEventHandler("SPELL_CAST_START", 	"OnSpellCastStart", self)
-	--Apollo.RegisterEventHandler("SPELL_CAST_END", 	"OnSpellCastEnd", self)
-	--Apollo.RegisterEventHandler("CHAT_DATACHRON", 	"OnChatDC", self)
-	--Apollo.RegisterEventHandler("BUFF_APPLIED", 		"OnBuffApplied", self)
-	Apollo.RegisterEventHandler("DEBUFF_APPLIED", 		"OnDebuffApplied", self)
-	Apollo.RegisterEventHandler("DEBUFF_REMOVED", 		"OnDebuffRemoved", self)
-	Apollo.RegisterEventHandler("RAID_WIPE", 			"OnReset", self)
+	Apollo.RegisterEventHandler("UnitCreated", "OnUnitCreated", self)
+	Apollo.RegisterEventHandler("UnitDestroyed", "OnUnitDestroyed", self)
+	Apollo.RegisterEventHandler("UnitEnteredCombat", "OnCombatStateChanged", self)
+	Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
+	--Apollo.RegisterEventHandler("SPELL_CAST_END", "OnSpellCastEnd", self)
+	--Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
+	--Apollo.RegisterEventHandler("BUFF_APPLIED", "OnBuffApplied", self)
+	Apollo.RegisterEventHandler("DEBUFF_APPLIED", "OnDebuffApplied", self)
+	Apollo.RegisterEventHandler("DEBUFF_REMOVED", "OnDebuffRemoved", self)
+	Apollo.RegisterEventHandler("RAID_WIPE", "OnReset", self)
 end
-
 
 --------------------------------------------------------------------------------
 -- Event Handlers

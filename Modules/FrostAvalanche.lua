@@ -21,11 +21,10 @@ local icicleSpell = false
 
 function mod:OnBossEnable()
 	Print(("Module %s loaded"):format(mod.ModuleName))
-	Apollo.RegisterEventHandler("UnitEnteredCombat", 		"OnCombatStateChanged", 	self)
-	Apollo.RegisterEventHandler("SPELL_CAST_START", 		"OnSpellCastStart", self)
-	Apollo.RegisterEventHandler("UNIT_HEALTH", 			"OnHealthChanged", 		self)
+	Apollo.RegisterEventHandler("UnitEnteredCombat", "OnCombatStateChanged", self)
+	Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
+	Apollo.RegisterEventHandler("UNIT_HEALTH", "OnHealthChanged", self)
 end
-
 
 --------------------------------------------------------------------------------
 -- Event Handlers
@@ -51,7 +50,6 @@ function mod:OnSpellCastStart(unitName, castName, unit)
 		core:AddBar("ICICLE", icicleSpell and "ICICLE" or "SHATTER", 48)
 	end
 end
-
 
 function mod:OnCombatStateChanged(unit, bInCombat)
 	if unit:GetType() == "NonPlayer" and bInCombat then

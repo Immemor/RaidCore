@@ -18,20 +18,18 @@ local waveCount, beamCount = 0, 0
 local playerName
 local phase2 = false
 
-
 --------------------------------------------------------------------------------
 -- Initialization
 --
 
 function mod:OnBossEnable()
 	Print(("Module %s loaded"):format(mod.ModuleName))
-	Apollo.RegisterEventHandler("UnitCreated", 			"OnUnitCreated", self)
-	Apollo.RegisterEventHandler("UnitDestroyed", 		"OnUnitDestroyed", self)
-	Apollo.RegisterEventHandler("UnitEnteredCombat", 	"OnCombatStateChanged", self)
---	Apollo.RegisterEventHandler("SPELL_CAST_START", 	"OnSpellCastStart", self)
-	Apollo.RegisterEventHandler("CHAT_DATACHRON", 		"OnChatDC", self)
+	Apollo.RegisterEventHandler("UnitCreated", "OnUnitCreated", self)
+	Apollo.RegisterEventHandler("UnitDestroyed", "OnUnitDestroyed", self)
+	Apollo.RegisterEventHandler("UnitEnteredCombat", "OnCombatStateChanged", self)
+	--Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
+	Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
 end
-
 
 --------------------------------------------------------------------------------
 -- Event Handlers
@@ -77,13 +75,12 @@ function mod:OnUnitDestroyed(unit)
 	end
 end
 
-
 function mod:OnChatDC(message)
 	if message:find("Avatus sets his focus on") then
 		beamCount = beamCount + 1
 		local pName = string.gsub(string.sub(message, 26), "!", "")
 		local pUnit = GameLib.GetPlayerUnitByName(pName)
-		if pUnit then 
+		if pUnit then
 			core:MarkUnit(pUnit, nil, "LASER")
 			self:ScheduleTimer("RemoveLaserMark", 15, pUnit)
 		end
@@ -104,7 +101,7 @@ function mod:OnChatDC(message)
 	elseif message:find("Avatus prepares to delete all data") then
 		core:StopBar("BEAM")
 		core:StopBar("WAVE")
-		core:AddMsg("BIGC", "BIG CAST !!", 5, "Beware")		
+		core:AddMsg("BIGC", "BIG CAST !!", 5, "Beware")
 		core:AddBar("BIGC", "BIG CAST", 10)
 		beamCount = 0
 	elseif message:find("The Secure Sector Enhancement Ports have been activated") then
@@ -113,19 +110,18 @@ function mod:OnChatDC(message)
 		phase2 = true
 		waveCount, beamCount = 0, 0
 		core:AddMsg("P2", "P2 : SHIELD PHASE", 5, "Alert")
-		core:AddBar("P2", "LASER", 15, 1)			
-		core:AddBar("BEAM", "NEXT BEAM", 44)		
+		core:AddBar("P2", "LASER", 15, 1)
+		core:AddBar("BEAM", "NEXT BEAM", 44)
 	elseif message:find("The Vertical Locomotion Enhancement Ports have been activated") then
 		core:StopBar("BEAM")
 		core:StopBar("WAVE")
 		phase2 = true
 		waveCount, beamCount = 0, 0
-		core:AddMsg("P2", "P2 : JUMP PHASE", 5, "Alert")			
+		core:AddMsg("P2", "P2 : JUMP PHASE", 5, "Alert")
 		core:AddBar("P2", "EXPLOSION", 15, 1)
 		core:AddBar("BEAM", "NEXT BEAM", 58)
 	end
 end
-
 
 function mod:OnCombatStateChanged(unit, bInCombat)
 	if unit:GetType() == "NonPlayer" and bInCombat then

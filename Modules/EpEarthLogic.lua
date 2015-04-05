@@ -35,20 +35,19 @@ local spreadPos = {
 
 function mod:OnBossEnable()
 	Print(("Module %s loaded"):format(mod.ModuleName))
-	--Apollo.RegisterEventHandler("UnitCreated", 			"OnUnitCreated", self)
-	Apollo.RegisterEventHandler("UnitDestroyed", 		"OnUnitDestroyed", self)
-	Apollo.RegisterEventHandler("UnitEnteredCombat", 		"OnCombatStateChanged", self)
-	Apollo.RegisterEventHandler("SPELL_CAST_START", 		"OnSpellCastStart", self)
-	Apollo.RegisterEventHandler("CHAT_DATACHRON", 		"OnChatDC", self)
-	Apollo.RegisterEventHandler("DEBUFF_APPLIED", 			"OnDebuffApplied", 			self)
-	--Apollo.RegisterEventHandler("BUFF_APPLIED", 		"OnBuffApplied", self)	
+	--Apollo.RegisterEventHandler("UnitCreated", "OnUnitCreated", self)
+	Apollo.RegisterEventHandler("UnitDestroyed", "OnUnitDestroyed", self)
+	Apollo.RegisterEventHandler("UnitEnteredCombat", "OnCombatStateChanged", self)
+	Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
+	Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
+	Apollo.RegisterEventHandler("DEBUFF_APPLIED", "OnDebuffApplied", self)
+	--Apollo.RegisterEventHandler("BUFF_APPLIED", "OnBuffApplied", self)
 end
 
 
 --------------------------------------------------------------------------------
 -- Event Handlers
 --
-
 
 function mod:OnUnitCreated(unit)
 	local sName = unit:GetName()
@@ -64,9 +63,8 @@ function mod:OnUnitDestroyed(unit)
 	--Print(sName)
 	if sName == "Obsidian Outcropping" then
 		core:DropPixie(unit:GetId())
-	end	
+	end
 end
-
 
 function mod:OnSpellCastStart(unitName, castName, unit)
 	if unitName == "Mnemesis" and castName == "Defragment" then
@@ -80,7 +78,6 @@ function mod:OnSpellCastStart(unitName, castName, unit)
 	end
 end
 
-
 function mod:OnChatDC(message)
 	if message:find("The ground shudders beneath Megalith") then
 		core:AddMsg("QUAKE", "JUMP !", 3, "Beware")
@@ -89,7 +86,6 @@ function mod:OnChatDC(message)
 		core:AddBar("STAR", "STARS", 60)
 	end
 end
-
 
 function mod:OnDebuffApplied(unitName, splId, unit)
 	if splId == 74570 then
@@ -126,7 +122,7 @@ function mod:OnCombatStateChanged(unit, bInCombat)
 			pilarCount = pilarCount + 1
 			--core:MarkUnit(unit)
 			--core:AddUnit(unit)
-			--core:AddMsg("PILAR", ("[%s] PILAR"):format(pilarCount), 5, "Info", "Blue")				
+			--core:AddMsg("PILAR", ("[%s] PILAR"):format(pilarCount), 5, "Info", "Blue")
 		end
 	elseif unit:GetType() == "NonPlayer" and not bInCombat then
 		local sName = unit:GetName()
@@ -136,7 +132,6 @@ function mod:OnCombatStateChanged(unit, bInCombat)
 		end
 	end
 end
-
 
 function mod:PlaceSpawnPos()
 	for k,v in pairs(spreadPos) do

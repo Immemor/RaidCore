@@ -17,19 +17,17 @@ mod:RegisterEnableZone("PhageCouncil", "Augmentation Core")
 
 local p2Count = 0
 
-
 --------------------------------------------------------------------------------
 -- Initialization
 --
 
 function mod:OnBossEnable()
 	Print(("Module %s loaded"):format(mod.ModuleName))
-	Apollo.RegisterEventHandler("UnitEnteredCombat", 		"OnCombatStateChanged", 	self)
-	Apollo.RegisterEventHandler("SPELL_CAST_START", 		"OnSpellCastStart", self)
-	Apollo.RegisterEventHandler("SPELL_CAST_END", 			"OnSpellCastEnd", self)
-	Apollo.RegisterEventHandler("CHAT_DATACHRON", 		"OnChatDC", 				self)
+	Apollo.RegisterEventHandler("UnitEnteredCombat", "OnCombatStateChanged", self)
+	Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
+	Apollo.RegisterEventHandler("SPELL_CAST_END", "OnSpellCastEnd", self)
+	Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
 end
-
 
 --------------------------------------------------------------------------------
 -- Event Handlers
@@ -50,7 +48,7 @@ function mod:OnSpellCastStart(unitName, castName, unit)
 		core:AddBar("CONVP2", "P2 : PILLARS", 29.5)
 	elseif unitName == "Fleshmonger Vratorg" and castName == "Teleport" then
 		core:AddMsg("CONVP2", "P2 : SHIELD", 5, "Alert")
-		core:AddBar("CONVP2", "P2 : SHIELD", 29.5)	
+		core:AddBar("CONVP2", "P2 : SHIELD", 29.5)
 	end
 end
 

@@ -23,17 +23,15 @@ local playerName
 
 function mod:OnBossEnable()
 	Print(("Module %s loaded"):format(mod.ModuleName))
-	Apollo.RegisterEventHandler("UnitEnteredCombat", 		"OnCombatStateChanged", 	self)
-	Apollo.RegisterEventHandler("CHAT_DATACHRON", 		"OnChatDC", 				self)
-	Apollo.RegisterEventHandler("SPELL_CAST_START", 		"OnSpellCastStart", self)
-	Apollo.RegisterEventHandler("DEBUFF_APPLIED", 			"OnDebuffApplied", 			self)
+	Apollo.RegisterEventHandler("UnitEnteredCombat", "OnCombatStateChanged", self)
+	Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
+	Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
+	Apollo.RegisterEventHandler("DEBUFF_APPLIED", "OnDebuffApplied", self)
 end
-
 
 --------------------------------------------------------------------------------
 -- Event Handlers
 --
-
 
 function mod:OnSpellCastStart(unitName, castName, unit)
 	if unitName == "Experiment X-89" and castName == "Resounding Shout" then
@@ -64,7 +62,6 @@ function mod:OnDebuffApplied(unitName, splId, unit)
 		core:AddBar("LITTLEB", "LITTLE BOMB", 5, 1)
 	end
 end
-
 
 function mod:OnCombatStateChanged(unit, bInCombat)
 	if unit:GetType() == "NonPlayer" and bInCombat then

@@ -30,13 +30,13 @@ local midpos = {
 
 function mod:OnBossEnable()
 	Print(("Module %s loaded"):format(mod.ModuleName))
-	Apollo.RegisterEventHandler("UnitEnteredCombat", 	"OnCombatStateChanged", self)
-	Apollo.RegisterEventHandler("SPELL_CAST_START", 	"OnSpellCastStart", self)
-	Apollo.RegisterEventHandler("UnitCreated", 			"OnUnitCreated", self)
-	Apollo.RegisterEventHandler("UnitDestroyed", 		"OnUnitDestroyed", self)
-	Apollo.RegisterEventHandler("DEBUFF_APPLIED", 		"OnDebuffApplied", self)
-	Apollo.RegisterEventHandler("DEBUFF_REMOVED", 		"OnDebuffRemoved", self)
-	Apollo.RegisterEventHandler("RAID_WIPE", 			"OnReset", self)
+	Apollo.RegisterEventHandler("UnitEnteredCombat", "OnCombatStateChanged", self)
+	Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
+	Apollo.RegisterEventHandler("UnitCreated", "OnUnitCreated", self)
+	Apollo.RegisterEventHandler("UnitDestroyed", "OnUnitDestroyed", self)
+	Apollo.RegisterEventHandler("DEBUFF_APPLIED", "OnDebuffApplied", self)
+	Apollo.RegisterEventHandler("DEBUFF_REMOVED", "OnDebuffRemoved", self)
+	Apollo.RegisterEventHandler("RAID_WIPE", "OnReset", self)
 end
 
 
@@ -119,7 +119,7 @@ function mod:OnUnitCreated(unit)
 	elseif sName == "Alphanumeric Hash" then
 		local unitId = unit:GetId()
 		if unitId then
-			core:AddPixie(unitId, 2, unit, nil, "Red", 10, 20, 0)	
+			core:AddPixie(unitId, 2, unit, nil, "Red", 10, 20, 0)
 		end
 	elseif sName == "Life Force" then
 		core:AddPixie(unit:GetId(), 2, unit, nil, "Blue", 3, 15, 0)

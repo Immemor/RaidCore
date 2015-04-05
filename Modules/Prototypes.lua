@@ -17,24 +17,21 @@ mod:RegisterEnableZone("Prototypes", "Phagetech Uplink Hub")
 
 local protoFirst = true
 
-
 --------------------------------------------------------------------------------
 -- Initialization
 --
 
 function mod:OnBossEnable()
 	Print(("Module %s loaded"):format(mod.ModuleName))
-	Apollo.RegisterEventHandler("UnitEnteredCombat", 		"OnCombatStateChanged", 	self)
-	Apollo.RegisterEventHandler("CHAT_DATACHRON", 		"OnChatDC", 				self)
-	Apollo.RegisterEventHandler("SPELL_CAST_START", 		"OnSpellCastStart", self)
-	Apollo.RegisterEventHandler("RAID_WIPE", 				"OnReset", self)
+	Apollo.RegisterEventHandler("UnitEnteredCombat", "OnCombatStateChanged", self)
+	Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
+	Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
+	Apollo.RegisterEventHandler("RAID_WIPE", "OnReset", self)
 end
-
 
 --------------------------------------------------------------------------------
 -- Event Handlers
 --
-
 
 function mod:OnSpellCastStart(unitName, castName, unit)
 	if unitName == "Phagetech Augmentor" and castName == "Summon Repairbot" then

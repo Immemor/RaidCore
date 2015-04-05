@@ -25,16 +25,16 @@ local encounter_started = false
 
 function mod:OnBossEnable()
 	Print(("Module %s loaded"):format(mod.ModuleName))
-	Apollo.RegisterEventHandler("UnitCreated", 			"OnUnitCreated", self)
-	Apollo.RegisterEventHandler("UnitDestroyed", 		"OnUnitDestroyed", self)
-	Apollo.RegisterEventHandler("UnitEnteredCombat", 	"OnCombatStateChanged", self)
-	Apollo.RegisterEventHandler("SPELL_CAST_START", 	"OnSpellCastStart", self)
-	Apollo.RegisterEventHandler("SPELL_CAST_END", 		"OnSpellCastEnd", self)
-	--Apollo.RegisterEventHandler("CHAT_DATACHRON", 	"OnChatDC", self)
-	--Apollo.RegisterEventHandler("BUFF_APPLIED", 		"OnBuffApplied", self)
-	Apollo.RegisterEventHandler("DEBUFF_APPLIED", 		"OnDebuffApplied", self)
-	Apollo.RegisterEventHandler("DEBUFF_REMOVED", 		"OnDebuffRemoved", self)
-	Apollo.RegisterEventHandler("RAID_WIPE", 			"OnReset", self)
+	Apollo.RegisterEventHandler("UnitCreated", "OnUnitCreated", self)
+	Apollo.RegisterEventHandler("UnitDestroyed", "OnUnitDestroyed", self)
+	Apollo.RegisterEventHandler("UnitEnteredCombat", "OnCombatStateChanged", self)
+	Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
+	Apollo.RegisterEventHandler("SPELL_CAST_END", "OnSpellCastEnd", self)
+	--Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
+	--Apollo.RegisterEventHandler("BUFF_APPLIED", "OnBuffApplied", self)
+	Apollo.RegisterEventHandler("DEBUFF_APPLIED", "OnDebuffApplied", self)
+	Apollo.RegisterEventHandler("DEBUFF_REMOVED", "OnDebuffRemoved", self)
+	Apollo.RegisterEventHandler("RAID_WIPE", "OnReset", self)
 end
 
 
@@ -106,7 +106,7 @@ function mod:OnUnitCreated(unit)
 	if sName == "Alphanumeric Hash" then
 		local unitId = unit:GetId()
 		if unitId then
-			core:AddPixie(unitId, 2, unit, nil, "Red", 10, 20, 0)	
+			core:AddPixie(unitId, 2, unit, nil, "Red", 10, 20, 0)
 		end
 	elseif sName == "Hydro Disrupter - DNT" and not midphase then
 		local unitId = unit:GetId()
@@ -124,7 +124,7 @@ end
 function mod:OnUnitDestroyed(unit)
 	local sName = unit:GetName()
 	local eventTime = GameLib.GetGameTime()
-	
+
 	if sName == "Alphanumeric Hash" then
 		local unitId = unit:GetId()
 		if unitId then

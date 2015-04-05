@@ -19,34 +19,32 @@ local pilarCount, boreCount, submergeCount = 0, 0, 0
 local firstPull, OhmnaP3, OhmnaP4 = true, false, false
 
 local function getMax(t)
-    --if #t == 0 then return nil end
-    local max_val, key = -1000, ""
-    for k, v in pairs(t) do
-    	--Print(k.. " " .. v)
-        if max_val < v then
-            max_val, key = v, k
-        elseif max_val == v then
-        	key = key .. " / " .. k
-        end
-    end
-    return max_val, key
+	--if #t == 0 then return nil end
+	local max_val, key = -1000, ""
+	for k, v in pairs(t) do
+		--Print(k.. " " .. v)
+		if max_val < v then
+			max_val, key = v, k
+		elseif max_val == v then
+			key = key .. " / " .. k
+		end
+	end
+	return max_val, key
 end
 
 local function getMin(t)
-    --if #t == 0 then return nil end
-    local min_val, key = 1000, ""
-    for k, v in pairs(t) do
-    	-- Ignore pillars that are on 0%
-        if min_val > v and v > 0 then
-            min_val, key = v, k
-        elseif min_val == v then
-        	key = key .. " / " .. k
-        end
-    end
-    return min_val, key
+	--if #t == 0 then return nil end
+	local min_val, key = 1000, ""
+	for k, v in pairs(t) do
+		-- Ignore pillars that are on 0%
+		if min_val > v and v > 0 then
+			min_val, key = v, k
+		elseif min_val == v then
+			key = key .. " / " .. k
+		end
+	end
+	return min_val, key
 end
-
-
 
 --------------------------------------------------------------------------------
 -- Initialization
@@ -54,18 +52,16 @@ end
 
 function mod:OnBossEnable()
 	Print(("Module %s loaded"):format(mod.ModuleName))
-	Apollo.RegisterEventHandler("UnitEnteredCombat", 		"OnCombatStateChanged", 	self)
-	Apollo.RegisterEventHandler("UnitCreated", 			"OnUnitCreated", 			self)
-	Apollo.RegisterEventHandler("UNIT_HEALTH", 			"OnHealthChanged", 		self)
-	Apollo.RegisterEventHandler("CHAT_DATACHRON", 		"OnChatDC", 				self)
-	Apollo.RegisterEventHandler("SPELL_CAST_START", 		"OnSpellCastStart", 		self)
+	Apollo.RegisterEventHandler("UnitEnteredCombat", "OnCombatStateChanged", self)
+	Apollo.RegisterEventHandler("UnitCreated", "OnUnitCreated", self)
+	Apollo.RegisterEventHandler("UNIT_HEALTH", "OnHealthChanged", self)
+	Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
+	Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
 end
-
 
 --------------------------------------------------------------------------------
 -- Event Handlers
 --
-
 
 function mod:OnUnitCreated(unit)
 	local sName = unit:GetName()
@@ -91,7 +87,6 @@ function mod:OnHealthChanged(unitName, health)
 		core:AddMsg("OP3", "P3 REALLY SOON !", 5, "Alert")
 	end
 end
-
 
 function mod:OnSpellCastStart(unitName, castName, unit)
 	if unitName == "Dreadphage Ohmna" and castName == "Erupt" then
@@ -168,8 +163,6 @@ function mod:OnChatDC(message)
 			core:StartScan()
 		end
 end
-
-
 
 function mod:OnCombatStateChanged(unit, bInCombat)
 	if unit:GetType() == "NonPlayer" and bInCombat then

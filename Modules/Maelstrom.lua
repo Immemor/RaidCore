@@ -17,18 +17,17 @@ local prev = 0
 local stationCount = 0
 local bossPos = {}
 
-
 --------------------------------------------------------------------------------
 -- Initialization
 --
 
 function mod:OnBossEnable()
 	Print(("Module %s loaded"):format(mod.ModuleName))
-	Apollo.RegisterEventHandler("UnitCreated", 			"OnUnitCreated", self)
-	Apollo.RegisterEventHandler("UnitDestroyed", 		"OnUnitDestroyed", self)
-	Apollo.RegisterEventHandler("UnitEnteredCombat", 	"OnCombatStateChanged", self)
-	Apollo.RegisterEventHandler("SPELL_CAST_START", 	"OnSpellCastStart", self)
-	Apollo.RegisterEventHandler("CHAT_DATACHRON", 		"OnChatDC", self)
+	Apollo.RegisterEventHandler("UnitCreated", "OnUnitCreated", self)
+	Apollo.RegisterEventHandler("UnitDestroyed", "OnUnitDestroyed", self)
+	Apollo.RegisterEventHandler("UnitEnteredCombat", "OnCombatStateChanged", self)
+	Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
+	Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
 end
 
 local function GetSetting(key)
@@ -42,7 +41,6 @@ end
 --------------------------------------------------------------------------------
 -- Event Handlers
 --
-
 
 function mod:OnUnitCreated(unit)
 	local sName = unit:GetName()
@@ -83,7 +81,6 @@ function mod:OnUnitDestroyed(unit)
 	end
 end
 
-
 function mod:OnSpellCastStart(unitName, castName, unit)
 	if unitName == "Maelstrom Authority" and castName == "Activate Weather Cycle" then
 		bossPos = unit:GetPosition()
@@ -100,13 +97,11 @@ function mod:OnSpellCastStart(unitName, castName, unit)
 	end
 end
 
-
 function mod:OnChatDC(message)
 	if message:find("The platform trembles") then
 		core:AddBar("JUMP", "JUMP", 7, 14)
 	end
 end
-
 
 function mod:OnCombatStateChanged(unit, bInCombat)
 	if unit:GetType() == "NonPlayer" and bInCombat then
@@ -131,7 +126,7 @@ function mod:OnCombatStateChanged(unit, bInCombat)
 			else
 				core:AddMsg(station_name, ("[%s] STATION"):format(stationCount), 5, GetSoundSetting("Info", "SoundWeatherStationSwitch"), "Blue")
 			end
-			core:AddBar(station_name, ("[%s] STATION"):format(stationCount + 1), 10)				
+			core:AddBar(station_name, ("[%s] STATION"):format(stationCount + 1), 10)
 		end
 	end
 end

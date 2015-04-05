@@ -33,16 +33,15 @@ local frostbomb_players = {}
 
 function mod:OnBossEnable()
 	Print(("Module %s loaded"):format(mod.ModuleName))
-	Apollo.RegisterEventHandler("UnitCreated", 			"OnUnitCreated", self)
-	Apollo.RegisterEventHandler("UnitDestroyed", 		"OnUnitDestroyed", self)
-	Apollo.RegisterEventHandler("UnitEnteredCombat", 	"OnCombatStateChanged", self)
-	Apollo.RegisterEventHandler("CHAT_NPCSAY", 			"OnChatNPCSay", self)
-	Apollo.RegisterEventHandler("DEBUFF_APPLIED", 		"OnDebuffApplied", self)
-	Apollo.RegisterEventHandler("DEBUFF_APPLIED_DOSE", 	"OnDebuffAppliedDose", self)
-	Apollo.RegisterEventHandler("DEBUFF_REMOVED", 		"OnDebuffRemoved", self)
-	Apollo.RegisterEventHandler("RAID_WIPE", 			"OnReset", self)
+	Apollo.RegisterEventHandler("UnitCreated", "OnUnitCreated", self)
+	Apollo.RegisterEventHandler("UnitDestroyed", "OnUnitDestroyed", self)
+	Apollo.RegisterEventHandler("UnitEnteredCombat", "OnCombatStateChanged", self)
+	Apollo.RegisterEventHandler("CHAT_NPCSAY", "OnChatNPCSay", self)
+	Apollo.RegisterEventHandler("DEBUFF_APPLIED", "OnDebuffApplied", self)
+	Apollo.RegisterEventHandler("DEBUFF_APPLIED_DOSE", "OnDebuffAppliedDose", self)
+	Apollo.RegisterEventHandler("DEBUFF_REMOVED", "OnDebuffRemoved", self)
+	Apollo.RegisterEventHandler("RAID_WIPE", "OnReset", self)
 end
-
 
 --------------------------------------------------------------------------------
 -- Event Handlers
@@ -173,7 +172,7 @@ function mod:OnUnitCreated(unit)
 	elseif sName == "Flame Wave" then
 		local unitId = unit:GetId()
 		if unitId then
-			core:AddPixie(unitId, 2, unit, nil, "Green", 10, 20, 0)	
+			core:AddPixie(unitId, 2, unit, nil, "Green", 10, 20, 0)
 		end
 	end
 end
@@ -185,7 +184,7 @@ function mod:OnUnitDestroyed(unit)
 		if unitId then
 			core:DropPixie(unitId)
 		end
-	end	
+	end
 end
 
 function mod:OnDebuffAppliedDose(unitName, splId, stack)
@@ -198,10 +197,10 @@ function mod:OnDebuffAppliedDose(unitName, splId, stack)
 end
 
 function mod:OnChatNPCSay(message)
-	if message:find("Burning mortals... such sweet agony") 
+	if message:find("Burning mortals... such sweet agony")
 	or message:find("Run! Soon my fires will destroy you")
-	or message:find("Ah! The smell of seared flesh") 
-	or message:find("Enshrouded in deadly flame")  
+	or message:find("Ah! The smell of seared flesh")
+	or message:find("Enshrouded in deadly flame")
 	or message:find("Pyrobane ignites you")   then
 		core:AddBar("BOMBS", "BOMBS", 30)
 	end

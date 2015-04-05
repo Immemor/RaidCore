@@ -19,22 +19,20 @@ local prev = 0
 local midphase = false
 local startTime
 
-
 --------------------------------------------------------------------------------
 -- Initialization
 --
 
 function mod:OnBossEnable()
 	Print(("Module %s loaded"):format(mod.ModuleName))
-	Apollo.RegisterEventHandler("UnitCreated", 			"OnUnitCreated", self)
-	Apollo.RegisterEventHandler("UnitDestroyed", 		"OnUnitDestroyed", self)
-	Apollo.RegisterEventHandler("UnitEnteredCombat", 	"OnCombatStateChanged", self)
-	Apollo.RegisterEventHandler("SPELL_CAST_START", 	"OnSpellCastStart", self)
-	Apollo.RegisterEventHandler("CHAT_DATACHRON", 		"OnChatDC", self)
-	--Apollo.RegisterEventHandler("DEBUFF_APPLIED", 	"OnDebuffApplied", 			self)
-	--Apollo.RegisterEventHandler("BUFF_APPLIED", 		"OnBuffApplied", self)	
+	Apollo.RegisterEventHandler("UnitCreated", "OnUnitCreated", self)
+	Apollo.RegisterEventHandler("UnitDestroyed", "OnUnitDestroyed", self)
+	Apollo.RegisterEventHandler("UnitEnteredCombat", "OnCombatStateChanged", self)
+	Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
+	Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
+	--Apollo.RegisterEventHandler("DEBUFF_APPLIED", "OnDebuffApplied", self)
+	--Apollo.RegisterEventHandler("BUFF_APPLIED", "OnBuffApplied", self)
 end
-
 
 --------------------------------------------------------------------------------
 -- Event Handlers
@@ -58,11 +56,11 @@ function mod:OnUnitDestroyed(unit)
 	--Print(sName)
 	if sName == "Air Column" then
 		core:DropLine(unit:GetId())
-	end	
+	end
 end
 
 function mod:OnSpellCastStart(unitName, castName, unit)
-	if unitName == "Megalith" and castName == "Raw Power" then	
+	if unitName == "Megalith" and castName == "Raw Power" then
 			midphase = true
 			core:AddMsg("RAW", "RAW POWER", 5, "Alert")
 	elseif unitName == "Aileron" and castName == "Supercell" then
@@ -75,7 +73,6 @@ function mod:OnSpellCastStart(unitName, castName, unit)
 	end
 end
 
-
 function mod:OnChatDC(message)
 	if message:find("The ground shudders beneath Megalith") then
 		core:AddMsg("QUAKE", "JUMP !", 3, "Beware")
@@ -85,8 +82,6 @@ function mod:OnChatDC(message)
 		core:AddBar("RAW", "RAW POWER", 60, 1)
 	end
 end
-
-
 
 function mod:OnCombatStateChanged(unit, bInCombat)
 	if unit:GetType() == "NonPlayer" and bInCombat then

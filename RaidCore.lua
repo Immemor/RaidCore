@@ -31,11 +31,11 @@ local CommChannelTimer = nil
 local empCD, empTimer = 5, nil
 
 local chatEvent = {
-		[ChatSystemLib.ChatChannel_Datachron] 	= 'CHAT_DATACHRON',
-		[ChatSystemLib.ChatChannel_Say] 		= 'CHAT_SAY',
-		[ChatSystemLib.ChatChannel_NPCSay] 		= 'CHAT_NPCSAY',
-		[ChatSystemLib.ChatChannel_NPCYell] 	= 'CHAT_NPCYELL',
-		[ChatSystemLib.ChatChannel_NPCWhisper] 	= 'CHAT_NPCWHISPER',
+	[ChatSystemLib.ChatChannel_Datachron] = 'CHAT_DATACHRON',
+	[ChatSystemLib.ChatChannel_Say] = 'CHAT_SAY',
+	[ChatSystemLib.ChatChannel_NPCSay] = 'CHAT_NPCSAY',
+	[ChatSystemLib.ChatChannel_NPCYell] = 'CHAT_NPCYELL',
+	[ChatSystemLib.ChatChannel_NPCWhisper] = 'CHAT_NPCWHISPER',
 }
 
 local DefaultSettings = {
@@ -679,27 +679,27 @@ function RaidCore:OnRaidCoreOn(cmd, args)
 		end
 	elseif (tAllParams[1] == "wm") then
 		local estpos = {
-		x = 194.44,
-		y = -110.80034637451,
-		z = -483.20
+			x = 194.44,
+			y = -110.80034637451,
+			z = -483.20
 		}
 		self:SetWorldMarker(estpos, "EST")
 		local sudpos = {
-		x = 165.79222106934,
-		y = -110.80034637451,
-		z = -464.8489074707
+			x = 165.79222106934,
+			y = -110.80034637451,
+			z = -464.8489074707
 		}
 		self:SetWorldMarker(sudpos, "SUD")
 		local ouestpos = {
-		x = 144.20,
-		y = -110.80034637451,
-		z = -494.38
+			x = 144.20,
+			y = -110.80034637451,
+			z = -494.38
 		}
 		self:SetWorldMarker(ouestpos, "WEST")
 		local nordpos = {
-		x = 175.00,
-		y = -110.80034637451,
-		z = -513.31
+			x = 175.00,
+			y = -110.80034637451,
+			z = -513.31
 		}
 		self:SetWorldMarker(nordpos, "NORD")
 	else
@@ -839,9 +839,9 @@ end
 
 function RaidCore:OnWorldChanged()
 	--if not IsInInstance() then
-	--	for _, module in addon:IterateBossModules() do
-	--		if module.isEngaged then module:Reboot(true) end
-	--	end
+		--for _, module in addon:IterateBossModules() do
+			--if module.isEngaged then module:Reboot(true) end
+		--end
 	--end
 	--Print("TESTING ZONES")
 	local zoneMap = GameLib.GetCurrentZoneMap()
@@ -1016,12 +1016,10 @@ function RaidCore:AddBar(key, message, duration, emphasize)
 	end
 end
 
-
 function RaidCore:StopBar(key)
 	self.raidbars:ClearBar(key)
 	self:StopEmphasize(key)
 end
-
 
 function RaidCore:AddMsg(key, message, duration, sound, color)
 	self.message:AddMsg(key, message, duration, sound, color)
@@ -1074,8 +1072,6 @@ function RaidCore:AddEmphasize(key, delay)
 			end
 		end
 	end
-
-
 end
 
 function RaidCore:AddUnit(unit)
@@ -1098,7 +1094,7 @@ function RaidCore:SetMarkToUnit(unit, marked)
 end
 
 function RaidCore:StartScan()
-	Apollo.RegisterEventHandler("VarChange_FrameCount",	 					"OnUpdate", self)
+	Apollo.RegisterEventHandler("VarChange_FrameCount", "OnUpdate", self)
 end
 
 function RaidCore:StopScan()
@@ -1158,8 +1154,8 @@ function RaidCore:MarkUnit(unit, location, mark)
 
 			self.mark[key].frame = markFrame
 
-			--Apollo.RegisterEventHandler("NextFrame",	 					"OnMarkUpdate", self)
-			--Apollo.RegisterEventHandler("VarChange_FrameCount",	 					"OnUpdate", self)
+			--Apollo.RegisterEventHandler("NextFrame", "OnMarkUpdate", self)
+			--Apollo.RegisterEventHandler("VarChange_FrameCount", "OnUpdate", self)
 		elseif mark then
 			self.mark[key].number = mark
 			self.mark[key].frame:FindChild("Name"):SetText(self.mark[key].number)
@@ -1257,7 +1253,6 @@ function RaidCore:OnUnitDestroyed(unit)
 	end
 end
 
-
 function RaidCore:SetTarget(position)
 	if trackMaster ~= nil then
 		trackMaster:SetTarget(position)
@@ -1312,8 +1307,8 @@ function RaidCore:OnUpdate()
 						["fTimeRemaining"] = s.fTimeRemaining,
 						["splEffect"] = s.splEffect,
 					}
-						Event_FireGenericEvent("BUFF_APPLIED", unitName, s.splEffect:GetId(), unit)
-						--Print("BUFF_APPLIED : " .. unitName .. " " .. s.splEffect:GetId())
+					Event_FireGenericEvent("BUFF_APPLIED", unitName, s.splEffect:GetId(), unit)
+					--Print("BUFF_APPLIED : " .. unitName .. " " .. s.splEffect:GetId())
 				end
 			end
 			for buffId, buffData in pairs(v.aura) do
@@ -1353,14 +1348,14 @@ function RaidCore:OnUpdate()
 							["fTimeRemaining"] = s.fTimeRemaining,
 							["splEffect"] = s.splEffect,
 						}
-							Event_FireGenericEvent("DEBUFF_APPLIED", unitName, s.splEffect:GetId(), unit)
-							--Print("DEBUFF_APPLIED : " .. unitName .. " " .. s.splEffect:GetId())
+						Event_FireGenericEvent("DEBUFF_APPLIED", unitName, s.splEffect:GetId(), unit)
+						--Print("DEBUFF_APPLIED : " .. unitName .. " " .. s.splEffect:GetId())
 					end
 				end
 				for buffId, buffData in pairs(v.aura) do
 					if not tempdebuff[buffId] then
 						Event_FireGenericEvent("DEBUFF_REMOVED", unitName, buffData.splEffect:GetId(), unit)
-							--Print("DEBUFF_REMOVED : " .. unitName .. " " .. buffData.splEffect:GetId())
+						--Print("DEBUFF_REMOVED : " .. unitName .. " " .. buffData.splEffect:GetId())
 						v.aura[buffId] = nil
 					end
 				end
@@ -1369,7 +1364,6 @@ function RaidCore:OnUpdate()
 		--	self.debuffs[k] = nil
 		end
 	end
-
 end
 
 function RaidCore:OnMarkUpdate()
@@ -1554,9 +1548,9 @@ function RaidCore:WipeCheck()
 	self:ResetDelayedMsg()
 	self:ResetSync()
 	self:ResetLines()
-	Apollo.RemoveEventHandler("ChatMessage",	 	self)
-	Apollo.RemoveEventHandler("UnitEnteredCombat",	self)
-	Apollo.RegisterEventHandler("UnitCreated", 			"unitCheck", self)
+	Apollo.RemoveEventHandler("ChatMessage", self)
+	Apollo.RemoveEventHandler("UnitEnteredCombat",self)
+	Apollo.RegisterEventHandler("UnitCreated", "unitCheck", self)
 	Event_FireGenericEvent("RAID_WIPE")
 end
 
@@ -1751,15 +1745,15 @@ function RaidCore:recursiveCopyTable(from, to)
 end
 
 function RaidCore:SplitString(inputstr, sep)
-		if sep == nil then
-				sep = "%s"
-		end
-		local t={} ; i=1
-		for str in string.gmatch(inputstr, "([^"..sep.."]+)") do
-				t[i] = str
-				i = i + 1
-		end
-		return t
+	if sep == nil then
+		sep = "%s"
+	end
+	local t={} ; i=1
+	for str in string.gmatch(inputstr, "([^"..sep.."]+)") do
+		t[i] = str
+		i = i + 1
+	end
+	return t
 end
 
 function RaidCore:GetSettings()

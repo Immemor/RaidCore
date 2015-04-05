@@ -26,15 +26,14 @@ local CheckRootTimer = nil
 
 function mod:OnBossEnable()
 	Print(("Module %s loaded"):format(mod.ModuleName))
-	Apollo.RegisterEventHandler("UnitEnteredCombat", 	"OnCombatStateChanged", self)
-	Apollo.RegisterEventHandler("SPELL_CAST_START", 	"OnSpellCastStart", self)
-	Apollo.RegisterEventHandler("UnitCreated", 			"OnUnitCreated", self)
-	Apollo.RegisterEventHandler("UnitDestroyed", 		"OnUnitDestroyed", self)
-	Apollo.RegisterEventHandler("DEBUFF_APPLIED", 		"OnDebuffApplied", self)
-	Apollo.RegisterEventHandler("DEBUFF_APPLIED_DOSE", 	"OnDebuffAppliedDose", self)
-	Apollo.RegisterEventHandler("RAID_WIPE", 			"OnReset", self)
+	Apollo.RegisterEventHandler("UnitEnteredCombat", "OnCombatStateChanged", self)
+	Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
+	Apollo.RegisterEventHandler("UnitCreated", "OnUnitCreated", self)
+	Apollo.RegisterEventHandler("UnitDestroyed", "OnUnitDestroyed", self)
+	Apollo.RegisterEventHandler("DEBUFF_APPLIED", "OnDebuffApplied", self)
+	Apollo.RegisterEventHandler("DEBUFF_APPLIED_DOSE", "OnDebuffAppliedDose", self)
+	Apollo.RegisterEventHandler("RAID_WIPE", "OnReset", self)
 end
-
 
 --------------------------------------------------------------------------------
 -- Event Handlers
@@ -114,7 +113,7 @@ end
 function mod:OnUnitCreated(unit)
 	local sName = unit:GetName()
 	local eventTime = GameLib.GetGameTime()
-	
+
 	if sName == "Life Force" then
 		core:AddPixie(unit:GetId(), 2, unit, nil, "Blue", 10, -40, 0)
 	elseif sName == "Essence of Life" then
@@ -123,9 +122,9 @@ function mod:OnUnitCreated(unit)
 	elseif sName == "Flame Wave" then
 		local unitId = unit:GetId()
 		if unitId then
-			core:AddPixie(unitId, 2, unit, nil, "Green", 10, 20, 0)	
+			core:AddPixie(unitId, 2, unit, nil, "Green", 10, 20, 0)
 		end
-	end	
+	end
 	--Print(eventTime .. " - " .. sName)
 end
 

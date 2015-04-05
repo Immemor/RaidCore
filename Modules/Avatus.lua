@@ -32,19 +32,19 @@ local referencePos = {
 
 function mod:OnBossEnable()
 	Print(("Module %s loaded"):format(mod.ModuleName))
-	Apollo.RegisterEventHandler("UnitCreated", 			"OnUnitCreated", self)
-	Apollo.RegisterEventHandler("UnitDestroyed", 		"OnUnitDestroyed", self)
-	Apollo.RegisterEventHandler("UnitEnteredCombat", 	"OnCombatStateChanged", self)
-	Apollo.RegisterEventHandler("SPELL_CAST_START", 	"OnSpellCastStart", self)
-	--Apollo.RegisterEventHandler("SPELL_CAST_END", 	"OnSpellCastEnd", self)
-	Apollo.RegisterEventHandler("UNIT_HEALTH", 			"OnHealthChanged", self)
-	Apollo.RegisterEventHandler("CHAT_DATACHRON", 		"OnChatDC", self)
-	--Apollo.RegisterEventHandler("RAID_SYNC", 			"OnSyncRcv", self)
-	--Apollo.RegisterEventHandler("SubZoneChanged", 	"OnZoneChanged", self)
-	Apollo.RegisterEventHandler("CHAT_NPCSAY", 			"OnChatNPCSay", self)
-	Apollo.RegisterEventHandler("RAID_WIPE", 			"OnReset", self)
-	Apollo.RegisterEventHandler("BUFF_APPLIED", 		"OnBuffApplied", self) -- temp disabled. Not finished.
-	Apollo.RegisterEventHandler("ChatMessage",			"OnChatMessage", self) -- temp dissabled. Not finished
+	Apollo.RegisterEventHandler("UnitCreated", "OnUnitCreated", self)
+	Apollo.RegisterEventHandler("UnitDestroyed", "OnUnitDestroyed", self)
+	Apollo.RegisterEventHandler("UnitEnteredCombat", "OnCombatStateChanged", self)
+	Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
+	--Apollo.RegisterEventHandler("SPELL_CAST_END", "OnSpellCastEnd", self)
+	Apollo.RegisterEventHandler("UNIT_HEALTH", "OnHealthChanged", self)
+	Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
+	--Apollo.RegisterEventHandler("RAID_SYNC", "OnSyncRcv", self)
+	--Apollo.RegisterEventHandler("SubZoneChanged", "OnZoneChanged", self)
+	Apollo.RegisterEventHandler("CHAT_NPCSAY", "OnChatNPCSay", self)
+	Apollo.RegisterEventHandler("RAID_WIPE", "OnReset", self)
+	Apollo.RegisterEventHandler("BUFF_APPLIED", "OnBuffApplied", self) -- temp disabled. Not finished.
+	Apollo.RegisterEventHandler("ChatMessage", "OnChatMessage", self) -- temp dissabled. Not finished
 end
 
 local function GetSetting(key)
@@ -79,15 +79,15 @@ local function lowestKeyValue(tbl)
 		elseif value == lowestValue then
 		    tmp_table[key] = value
 		end
-    end
-    -- Now that we only have the keys with the lowest values left, order alphabetically
-    local lowest_key = nil
-    for key, value in pairs(tmp_table) do
-        if not lowest_key or (key < lowest_key) then
-            lowest_key = key
-        end
-    end
-    return lowest_key
+	end
+	-- Now that we only have the keys with the lowest values left, order alphabetically
+	local lowest_key = nil
+	for key, value in pairs(tmp_table) do
+		if not lowest_key or (key < lowest_key) then
+			lowest_key = key
+		end
+	end
+	return lowest_key
 end
 
 local function isAlive(strPlayerName)
@@ -110,47 +110,47 @@ local function getPlayerAssignment(tbl)
 end
 
 local function __genOrderedIndex( t )
-    local orderedIndex = {}
-    for key in pairs(t) do
-        table.insert( orderedIndex, key )
-    end
-    table.sort( orderedIndex )
-    return orderedIndex
+	local orderedIndex = {}
+	for key in pairs(t) do
+		table.insert( orderedIndex, key )
+	end
+	table.sort( orderedIndex )
+	return orderedIndex
 end
 
 local function orderedNext(t, state)
-    -- Equivalent of the next function, but returns the keys in the alphabetic
-    -- order. We use a temporary ordered key table that is stored in the
-    -- table being iterated.
+	-- Equivalent of the next function, but returns the keys in the alphabetic
+	-- order. We use a temporary ordered key table that is stored in the
+	-- table being iterated.
 
-    --print("orderedNext: state = "..tostring(state) )
-    if state == nil then
-        -- the first time, generate the index
-        t.__orderedIndex = __genOrderedIndex( t )
-        key = t.__orderedIndex[1]
-        return key, t[key]
-    end
-    -- fetch the next value
-    key = nil
-    for i = 1,table.getn(t.__orderedIndex) do
-        if t.__orderedIndex[i] == state then
-            key = t.__orderedIndex[i+1]
-        end
-    end
+	--print("orderedNext: state = "..tostring(state) )
+	if state == nil then
+		-- the first time, generate the index
+		t.__orderedIndex = __genOrderedIndex( t )
+		key = t.__orderedIndex[1]
+		return key, t[key]
+	end
+	-- fetch the next value
+	key = nil
+	for i = 1,table.getn(t.__orderedIndex) do
+		if t.__orderedIndex[i] == state then
+			key = t.__orderedIndex[i+1]
+		end
+	end
 
-    if key then
-        return key, t[key]
-    end
+	if key then
+		return key, t[key]
+	end
 
-    -- no more value to return, cleanup
-    t.__orderedIndex = nil
-    return
+	-- no more value to return, cleanup
+	t.__orderedIndex = nil
+	return
 end
 
 local function orderedPairs(t)
-    -- Equivalent of the pairs() function on tables. Allows to iterate
-    -- in order
-    return orderedNext, t, nil
+	-- Equivalent of the pairs() function on tables. Allows to iterate
+	-- in order
+	return orderedNext, t, nil
 end
 
 function mod:OnReset()
@@ -230,7 +230,7 @@ function mod:OnUnitDestroyed(unit)
 			--core:DropPixie(unitId .. "_2")
 		end
 	end
-	
+
 	if sName == "Holo Hand" and holo_hands[unitId] then
 		holo_hands[unitId] = nil
 	elseif sName == "Holo Cannon" then
@@ -293,7 +293,7 @@ function mod:OnBuffApplied(unitName, splId, unit)
 			phase2_blueroom_rotation["red"][playerAssigned] = phase2_blueroom_rotation["red"][playerAssigned] + 1
 			redBuffCount = redBuffCount + 1
 			if not buffCountTimer then buffCountTimer = true self:ScheduleTimer("ResetBuffCount", 13) end
-		end		
+		end
 	end
 end
 
@@ -368,7 +368,7 @@ function mod:OnChatMessage(channelCurrent, tMessage)
 	if strChannelName == "Party" and phase2 then
 		local msg = string.lower(tMessage["arMessageSegments"][1]["strText"])
 		local strSender = tMessage["strSender"]
-		
+
 		if msg == "red" then
 			if not phase2_blueroom_rotation["red"] then phase2_blueroom_rotation["red"] = {} end
 			phase2_blueroom_rotation["red"][strSender] = 1
@@ -429,7 +429,7 @@ function mod:OnCombatStateChanged(unit, bInCombat)
 			local strRedBuffs = "Red Buffs:"
 			local strGreenBuffs = "Green Buffs:"
 			local strBlueBuffs = "Blue Buffs:"
-		
+
 			local redPlayerCount = 1
 			local greenPlayerCount = 1
 			local bluePlayerCount = 1

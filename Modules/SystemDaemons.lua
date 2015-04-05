@@ -47,18 +47,18 @@ local playerName
 
 function mod:OnBossEnable()
 	Print(("Module %s loaded"):format(mod.ModuleName))
-	Apollo.RegisterEventHandler("UnitCreated", 			"OnUnitCreated", self)
-	Apollo.RegisterEventHandler("UnitDestroyed", 		"OnUnitDestroyed", self)
-	Apollo.RegisterEventHandler("UnitEnteredCombat", 	"OnCombatStateChanged", self)
-	Apollo.RegisterEventHandler("SPELL_CAST_START", 	"OnSpellCastStart", self)
-	Apollo.RegisterEventHandler("SPELL_CAST_END", 		"OnSpellCastEnd", self)
-	Apollo.RegisterEventHandler("DEBUFF_APPLIED", 		"OnDebuffApplied", self)
-	Apollo.RegisterEventHandler("DEBUFF_REMOVED", 		"OnDebuffRemoved", self)
-	Apollo.RegisterEventHandler("UNIT_HEALTH", 			"OnHealthChanged", self)
-	Apollo.RegisterEventHandler("CHAT_DATACHRON", 		"OnChatDC", self)
-	Apollo.RegisterEventHandler("RAID_SYNC", 			"OnSyncRcv", self)
-	Apollo.RegisterEventHandler("SubZoneChanged", 		"OnZoneChanged", self)
-	Apollo.RegisterEventHandler("RAID_WIPE", 			"OnReset", self)
+	Apollo.RegisterEventHandler("UnitCreated", "OnUnitCreated", self)
+	Apollo.RegisterEventHandler("UnitDestroyed", "OnUnitDestroyed", self)
+	Apollo.RegisterEventHandler("UnitEnteredCombat", "OnCombatStateChanged", self)
+	Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
+	Apollo.RegisterEventHandler("SPELL_CAST_END", "OnSpellCastEnd", self)
+	Apollo.RegisterEventHandler("DEBUFF_APPLIED", "OnDebuffApplied", self)
+	Apollo.RegisterEventHandler("DEBUFF_REMOVED", "OnDebuffRemoved", self)
+	Apollo.RegisterEventHandler("UNIT_HEALTH", "OnHealthChanged", self)
+	Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
+	Apollo.RegisterEventHandler("RAID_SYNC", "OnSyncRcv", self)
+	Apollo.RegisterEventHandler("SubZoneChanged", "OnZoneChanged", self)
+	Apollo.RegisterEventHandler("RAID_WIPE", "OnReset", self)
 end
 
 local function GetSetting(key)
@@ -104,9 +104,9 @@ function mod:OnUnitCreated(unit)
 		core:AddUnit(unit)
 		core:WatchUnit(unit)
 	--elseif sName == "Null System Daemon"  then
-	--	core:MarkUnit(unit, 0, ("S%s"):format(sdSurgeCount[unit:GetId()] or 0))
-	--	core:AddUnit(unit)
-	--	core:WatchUnit(unit)
+		--core:MarkUnit(unit, 0, ("S%s"):format(sdSurgeCount[unit:GetId()] or 0))
+		--core:AddUnit(unit)
+		--core:WatchUnit(unit)
 	elseif sName == "Conduction Unit Mk. I" then
 		if probeCount == 0 then probeCount = 1 end
 		if GetCurrentSubZoneName():find("Infinite Generator Core") then core:MarkUnit(unit, 1, 1) end
@@ -137,7 +137,7 @@ function mod:OnUnitDestroyed(unit)
 		--Print("Dropping Lines for " .. unit:GetId())
 		core:DropLine(unit:GetId().."_1")
 		core:DropLine(unit:GetId().."_2")
-	end	
+	end
 end
 
 function mod:OnHealthChanged(unitName, health)
@@ -146,7 +146,7 @@ function mod:OnHealthChanged(unitName, health)
 		core:AddMsg("SDP2", "P2 SOON !", 5, GetSoundSetting("Algalon", "SoundPhase2"))
 	elseif health >= 30 and health <= 32 and not phase2warn and not phase2 then
 		phase2warn = true
-		core:AddMsg("SDP2", "P2 SOON !", 5, GetSoundSetting("Algalon", "SoundPhase2"))		
+		core:AddMsg("SDP2", "P2 SOON !", 5, GetSoundSetting("Algalon", "SoundPhase2"))
 	end
 end
 
@@ -163,25 +163,23 @@ local function dist2unit(unitSource, unitTarget)
 	return tonumber(dist)
 end
 
-
 function mod:OnSpellCastEnd(unitName, castName, unit)
 	if unitName == "Recovery Protocol" and castName == "Repair Sequence" then
 		core:DropMark(unit:GetId())
 	end
 end
 
-
 function mod:OnSpellCastStart(unitName, castName, unit)
 	if unitName == "Binary System Daemon" and castName == "Power Surge" then
 		core:SendSync("NORTH_SURGE", unit:GetId())
 		if phase2 and dist2unit(GameLib.GetPlayerUnit(), unit) < 40 then
 			core:AddMsg("SURGE", "INTERRUPT NORTH", 5, GetSoundSetting("Alert", "SoundPowerSurge"))
-		end		
+		end
 	elseif unitName == "Null System Daemon" and castName == "Power Surge" then
 		core:SendSync("SOUTH_SURGE", unit:GetId())
 		if phase2 and dist2unit(GameLib.GetPlayerUnit(), unit) < 40 then
 			core:AddMsg("SURGE", "INTERRUPT SOUTH", 5, GetSoundSetting("Alert", "SoundPowerSurge"))
-		end			
+		end
 	elseif castName == "Purge" then
 		PurgeLast[unit:GetId()] = GameLib.GetGameTime()
 		if dist2unit(GameLib.GetPlayerUnit(), unit) < 40 then
@@ -257,7 +255,6 @@ function mod:OnZoneChanged(zoneId, zoneName)
 		core:SetWorldMarker(probesouth, "Probe Spawn")
 	end
 end
-
 
 function mod:NextWave()
 	if probeCount == 3 then
@@ -379,7 +376,7 @@ function mod:OnCombatStateChanged(unit, bInCombat)
 end
 
 function mod:SetInterrupter(position, num)
-	if num > nbKick then 
+	if num > nbKick then
 		Print("MORON ! Set a good number")
 		return
 	end

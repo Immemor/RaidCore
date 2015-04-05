@@ -29,7 +29,7 @@ function boss:OnEnable()
 	if debug then dbg(self, "OnEnable()") end
 	if self.SetupOptions then self:SetupOptions() end
 	if type(self.OnBossEnable) == "function" then self:OnBossEnable() end
-	Apollo.RegisterEventHandler("RAID_WIPE", 			"OnRaidWipe", self)
+	Apollo.RegisterEventHandler("RAID_WIPE", "OnRaidWipe", self)
 	self.isEngaged = false
 	self.delayedmsg = {}
 	--Print("Enabled Boss Module : " .. self.ModuleName)
@@ -38,20 +38,20 @@ end
 function boss:OnDisable()
 	if type(self.OnBossDisable) == "function" then self:OnBossDisable() end
 	self.isEngaged = nil
-	Apollo.RemoveEventHandler("UnitCreated",	 	self)
-	Apollo.RemoveEventHandler("UnitEnteredCombat",	self)
-	Apollo.RemoveEventHandler("UnitDestroyed", 		self)
-	Apollo.RemoveEventHandler("RC_UnitCreated",	 	self)
-	Apollo.RemoveEventHandler("RC_UnitStateChanged",	self)
-	Apollo.RemoveEventHandler("RC_UnitDestroyed", 		self)
-	Apollo.RemoveEventHandler("SPELL_CAST_START", 	self)
-	Apollo.RemoveEventHandler("SPELL_CAST_END", 	self)
-	Apollo.RemoveEventHandler("UNIT_HEALTH", 		self)
-	Apollo.RemoveEventHandler("CHAT_DATACHRON", 	self)
-	Apollo.RemoveEventHandler("CHAT_NPCSAY", 		self)
-	Apollo.RemoveEventHandler("RAID_WIPE", 		self)
-	Apollo.RemoveEventHandler("RAID_SYNC", 		self)
-	Apollo.RemoveEventHandler("DEBUFF_APPLIED", 	self)
+	Apollo.RemoveEventHandler("UnitCreated",self)
+	Apollo.RemoveEventHandler("UnitEnteredCombat", self)
+	Apollo.RemoveEventHandler("UnitDestroyed", self)
+	Apollo.RemoveEventHandler("RC_UnitCreated", self)
+	Apollo.RemoveEventHandler("RC_UnitStateChanged", self)
+	Apollo.RemoveEventHandler("RC_UnitDestroyed", self)
+	Apollo.RemoveEventHandler("SPELL_CAST_START", self)
+	Apollo.RemoveEventHandler("SPELL_CAST_END", self)
+	Apollo.RemoveEventHandler("UNIT_HEALTH", self)
+	Apollo.RemoveEventHandler("CHAT_DATACHRON", self)
+	Apollo.RemoveEventHandler("CHAT_NPCSAY", self)
+	Apollo.RemoveEventHandler("RAID_WIPE", self)
+	Apollo.RemoveEventHandler("RAID_SYNC", self)
+	Apollo.RemoveEventHandler("DEBUFF_APPLIED", self)
 	Print("Unloaded Boss Module : " .. self.ModuleName)
 end
 

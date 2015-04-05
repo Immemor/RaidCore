@@ -17,21 +17,19 @@ mod:RegisterEnableZone("Kuralak", "Archive Access Core")
 
 local eggsCount, siphonCount, outbreakCount = 0, 0, 0
 
-
 --------------------------------------------------------------------------------
 -- Initialization
 --
 
 function mod:OnBossEnable()
 	Print(("Module %s loaded"):format(mod.ModuleName))
-	Apollo.RegisterEventHandler("UnitEnteredCombat", 		"OnCombatStateChanged", 	self)
-	Apollo.RegisterEventHandler("UNIT_HEALTH", 			"OnHealthChanged", 		self)
-	Apollo.RegisterEventHandler("CHAT_DATACHRON", 		"OnChatDC", 				self)
-	Apollo.RegisterEventHandler("CHAT_NPCSAY", 			"OnChatNPCSay", 			self)
-	Apollo.RegisterEventHandler("DEBUFF_APPLIED", 		"OnDebuffApplied", 			self)
-	Apollo.RegisterEventHandler("UnitCreated", 			"OnUnitCreated", self)
+	Apollo.RegisterEventHandler("UnitEnteredCombat", "OnCombatStateChanged", self)
+	Apollo.RegisterEventHandler("UNIT_HEALTH", "OnHealthChanged", self)
+	Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
+	Apollo.RegisterEventHandler("CHAT_NPCSAY", "OnChatNPCSay", self)
+	Apollo.RegisterEventHandler("DEBUFF_APPLIED", "OnDebuffApplied", self)
+	Apollo.RegisterEventHandler("UnitCreated", "OnUnitCreated", self)
 end
-
 
 --------------------------------------------------------------------------------
 -- Event Handlers
@@ -49,7 +47,6 @@ function mod:OnHealthChanged(unitName, health)
 		core:AddMsg("P2", "P2 SOON !", 5, "Info")
 	end
 end
-
 
 function mod:OnChatDC(message)
 	if message:find("Kuralak the Defiler returns to the Archive Core") then
@@ -87,11 +84,11 @@ function mod:OnChatDC(message)
 end
 
 function mod:OnChatNPCSay(message)
-		if message:find("Through the Strain you will be transformed") 
+		if message:find("Through the Strain you will be transformed")
 		or message:find("Your form is flawed, but I will make you beautiful")
-		or message:find("Let the Strain perfect you")  
-		or message:find("The Experiment has failed")  
-		or message:find("Join us... become one with the Strain") 
+		or message:find("Let the Strain perfect you")
+		or message:find("The Experiment has failed")
+		or message:find("Join us... become one with the Strain")
 		or message:find("One of us... you will become one of us") then
 			eggsCount, siphonCount, outbreakCount = 2, 1, 0
 			core:StopBar("VANISH")
@@ -102,7 +99,7 @@ function mod:OnChatNPCSay(message)
 				core:AddBar("SIPHON", ("Switch Tank (%s)"):format(siphonCount), 37)
 			end
 			local estpos = { x = 194.44, y = -110.80034637451, z = -483.20 }
-			core:SetWorldMarker(estpos, "E")		
+			core:SetWorldMarker(estpos, "E")
 			local sudpos = { x = 165.79222106934, y = -110.80034637451, z = -464.8489074707 }
 			core:SetWorldMarker(sudpos, "S")
 			local ouestpos = { x = 144.20, y = -110.80034637451, z = -494.38 }
@@ -127,7 +124,7 @@ function mod:OnCombatStateChanged(unit, bInCombat)
 		if sName == "Kuralak the Defiler" then
 			self:Start()
 			core:AddUnit(unit)
-			eggsCount, siphonCount, outbreakCount = 2, 1, 0		
+			eggsCount, siphonCount, outbreakCount = 2, 1, 0
 		end
 	end
 end

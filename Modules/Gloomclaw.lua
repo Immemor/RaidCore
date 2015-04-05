@@ -46,7 +46,7 @@ local spawnCount = {
 	3,
 	4,
 	5,
-	5	
+	5
 }
 
 local maulerSpawn = {
@@ -78,10 +78,10 @@ R5 : 4332.5, -568.95300292969, -17054.87109375
 
 function mod:OnBossEnable()
 	Print(("Module %s loaded"):format(mod.ModuleName))
-	Apollo.RegisterEventHandler("UnitCreated", 			"OnUnitCreated", self)
-	Apollo.RegisterEventHandler("UnitEnteredCombat", 	"OnCombatStateChanged", self)
-	Apollo.RegisterEventHandler("SPELL_CAST_START", 	"OnSpellCastStart", self)
-	Apollo.RegisterEventHandler("CHAT_DATACHRON", 		"OnChatDC", self)
+	Apollo.RegisterEventHandler("UnitCreated", "OnUnitCreated", self)
+	Apollo.RegisterEventHandler("UnitEnteredCombat", "OnCombatStateChanged", self)
+	Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
+	Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
 end
 
 local function GetSetting(key)
@@ -135,7 +135,7 @@ function mod:OnSpellCastStart(unitName, castName, unit)
 		ruptCount = ruptCount + 1
 		core:AddMsg("RUPTURE", "INTERRUPT BOSS", 5, GetSoundSetting("Destruction", "SoundRuptureInterrupt"))
 		if ruptCount == 1 then
-			core:AddBar("RUPTURE", "RUPTURE", 43, GetSoundSetting(true, "SoundRuptureCountdown"))			
+			core:AddBar("RUPTURE", "RUPTURE", 43, GetSoundSetting(true, "SoundRuptureCountdown"))
 		end
 	elseif (unitName == "Corrupted Ravager" or unitName == "Empowered Ravager") and castName == "Corrupting Rays" then
 		local playerUnit = GameLib.GetPlayerUnit()
@@ -145,7 +145,6 @@ function mod:OnSpellCastStart(unitName, castName, unit)
 		end
 	end
 end
-
 
 function mod:OnChatDC(message)
 	if message:find("Gloomclaw is pushed back by the purification of the essences") or message:find("Gloomclaw is moving forward to corrupt more essences!") then
@@ -181,12 +180,12 @@ function mod:OnChatDC(message)
 		if GetSetting("OtherLeftRightMarkers") and rightSpawn[section] then
 			core:SetWorldMarker(rightSpawn[section], "RIGHT")
 		end
-		Apollo.RegisterEventHandler("CombatLogHeal", 		"OnCombatLogHeal", self)		
+		Apollo.RegisterEventHandler("CombatLogHeal", "OnCombatLogHeal", self)
 	elseif message:find("Gloomclaw is reduced to a weakened state") then
 		core:StopBar("RUPTURE")
 		core:StopBar("CORRUPTION")
 		core:StopBar("WAVE")
-		core:AddMsg("TRANSITION", "TRANSITION", 5, GetSoundSetting("Alert", "SoundMoOWarning"))		
+		core:AddMsg("TRANSITION", "TRANSITION", 5, GetSoundSetting("Alert", "SoundMoOWarning"))
 		core:AddBar("MOO", "MOO PHASE", 15)
 		for unitId, v in pairs(essenceUp) do
 			core:RemoveUnit(unitId)
@@ -197,7 +196,7 @@ function mod:OnChatDC(message)
 		core:StopBar("RUPTURE")
 		core:StopBar("CORRUPTION")
 		core:StopBar("WAVE")
-		core:AddMsg("TRANSITION", "BURN HIM HARD", 5, GetSoundSetting("Alert", "SoundMoOWarning"))		
+		core:AddMsg("TRANSITION", "BURN HIM HARD", 5, GetSoundSetting("Alert", "SoundMoOWarning"))
 		core:AddBar("MOO", "MOO PHASE", 20, GetSoundSetting(true, "SoundMoOWarning"))
 		for unitId, v in pairs(essenceUp) do
 			core:RemoveUnit(unitId)
@@ -222,7 +221,6 @@ function mod:OnCombatLogHeal(tArgs)
 		end
 	end
 end
-
 
 function mod:OnCombatStateChanged(unit, bInCombat)
 	if unit:GetType() == "NonPlayer" and bInCombat then

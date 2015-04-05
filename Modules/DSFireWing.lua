@@ -16,18 +16,17 @@ mod:RegisterEnableMob("Warmonger Agratha", "Warmonger Talarii", "Grand Warmonger
 local prev, first = 0, true
 local boss
 
-
 --------------------------------------------------------------------------------
 -- Initialization
 --
 
 function mod:OnBossEnable()
 	Print(("Module %s loaded"):format(mod.ModuleName))
-	Apollo.RegisterEventHandler("UnitEnteredCombat", 		"OnCombatStateChanged", 	self)
-	Apollo.RegisterEventHandler("SPELL_CAST_START", 		"OnSpellCastStart", self)
-	Apollo.RegisterEventHandler("DEBUFF_APPLIED", 			"OnDebuffApplied", 			self)
-	Apollo.RegisterEventHandler("UNIT_HEALTH", 			"OnHealthChanged", 		self)
-	Apollo.RegisterEventHandler("UnitCreated", 			"OnUnitCreated", self)
+	Apollo.RegisterEventHandler("UnitEnteredCombat", "OnCombatStateChanged", self)
+	Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
+	Apollo.RegisterEventHandler("DEBUFF_APPLIED", "OnDebuffApplied", self)
+	Apollo.RegisterEventHandler("UNIT_HEALTH", "OnHealthChanged", self)
+	Apollo.RegisterEventHandler("UnitCreated", "OnUnitCreated", self)
 end
 
 
@@ -59,14 +58,14 @@ function mod:OnSpellCastStart(unitName, castName, unit)
 	elseif unitName == "Warmonger Agratha" and castName == "Conjure Fire Elementals" then
 		core:AddMsg("ELEMENTALS", "ELEMENTALS", 5, "Alert")
 		core:AddBar("1STAB", "FIRST ABILITY", 15)
-		core:AddBar("2DNAB", "SECOND ABILITY", 24)			
+		core:AddBar("2DNAB", "SECOND ABILITY", 24)
 	elseif unitName == "Warmonger Talarii" and castName == "Conjure Fire Elementals" then
 		core:AddMsg("ELEMENTALS", "ELEMENTALS", 5, "Alert")
 		core:AddBar("1STAB", "FIRST ABILITY", 15)
-		core:AddBar("2DNAB", "SECOND ABILITY", 24)	
+		core:AddBar("2DNAB", "SECOND ABILITY", 24)
 	elseif unitName == "Grand Warmonger Tar'gresh" and castName == "Meteor Storm" then
 		core:AddMsg("STORM", "STORM !!", 5, "RunAway")
-		core:AddBar("STORM", "METEOR STORM", 43, 1)	
+		core:AddBar("STORM", "METEOR STORM", 43, 1)
 	end
 end
 
@@ -107,7 +106,7 @@ function mod:OnCombatStateChanged(unit, bInCombat)
 			core:AddUnit(unit)
 			core:WatchUnit(unit)
 			core:StartScan()
-			core:AddBar("STORM", "METEOR STORM", 26, 1)			
+			core:AddBar("STORM", "METEOR STORM", 26, 1)
 		end
 	end
 end

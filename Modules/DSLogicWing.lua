@@ -17,22 +17,20 @@ local prevInt = ""
 local castCount = 0
 local nbKick = 28
 
-
 --------------------------------------------------------------------------------
 -- Initialization
 --
 
 function mod:OnBossEnable()
 	Print(("Module %s loaded"):format(mod.ModuleName))
-	Apollo.RegisterEventHandler("UnitEnteredCombat", 		"OnCombatStateChanged", 	self)
-	Apollo.RegisterEventHandler("SPELL_CAST_START", 		"OnSpellCastStart", self)
-	Apollo.RegisterEventHandler("CHAT_DATACHRON", 		"OnChatDC", self)
-	Apollo.RegisterEventHandler("DEBUFF_APPLIED", 			"OnDebuffApplied", 			self)
-	Apollo.RegisterEventHandler("DEBUFF_APPLIED_DOSE", 			"OnDebuffApplied", 			self)	
-	Apollo.RegisterEventHandler("UNIT_HEALTH", 			"OnHealthChanged", 		self)
-	--Apollo.RegisterEventHandler("UnitCreated", 			"OnUnitCreated", self)
+	Apollo.RegisterEventHandler("UnitEnteredCombat", "OnCombatStateChanged", self)
+	Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
+	Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
+	Apollo.RegisterEventHandler("DEBUFF_APPLIED", "OnDebuffApplied", self)
+	Apollo.RegisterEventHandler("DEBUFF_APPLIED_DOSE", "OnDebuffApplied", self)
+	Apollo.RegisterEventHandler("UNIT_HEALTH", "OnHealthChanged", self)
+	--Apollo.RegisterEventHandler("UnitCreated", "OnUnitCreated", self)
 end
-
 
 --------------------------------------------------------------------------------
 -- Event Handlers
@@ -55,7 +53,7 @@ end
 
 function mod:OnSpellCastStart(unitName, castName, unit)
 	if unitName == "Augmented Herald of Avatus" and castName == "Cube Smash" then
-		core:AddBar("CUBE", "CUBE SMASH", 17)	
+		core:AddBar("CUBE", "CUBE SMASH", 17)
 	elseif unitName == "Abstract Augmentation Algorithm" and castName == "Data Deconstruction" then
 		castCount = castCount + 1
 		core:AddMsg("DATA", ("[%s] INTERRUPT"):format(castCount), 3, "Long", "Blue")
@@ -66,7 +64,7 @@ end
 function mod:OnChatDC(message)
 	if message:find("The Abstract Augmentation Algorithm has amplified a Quantum Processing Unit") then
 		core:AddMsg("EMPOWER", "EMPOWER !!", 5, "Alert")
-		core:AddBar("EMPOWER", "EMPOWER", 30, 1)		
+		core:AddBar("EMPOWER", "EMPOWER", 30, 1)
 	end
 end
 
@@ -113,7 +111,7 @@ function mod:OnCombatStateChanged(unit, bInCombat)
 			core:AddUnit(unit)
 			core:WatchUnit(unit)
 			core:StartScan()
-			core:AddBar("CUBE", "CUBE SMASH", 8)							
+			core:AddBar("CUBE", "CUBE SMASH", 8)
 		end
 	end
 end
