@@ -285,7 +285,7 @@ function DisplayBlock:AddMsg(key, message, duration, sound, color)
 			self.infos[key].barFrame = raidBar
 			self.infos[key].type = 3
 			self.itemList:ArrangeChildrenVert(self:GetAnchorPoint())
-			local bSoundEnabled = self.RaidCore:GetSettings()["tGeneral"]["bSoundEnabled"]
+			local bSoundEnabled = self.RaidCore:GetSettings()["General"]["bSoundEnabled"]
 			if sound and bSoundEnabled then
 				--Print("Sound : " .. Apollo.GetAssetFolder() .. "\\" .. sound .. ".wav")
 				Sound.PlayFile("..\\RaidCore\\Sounds\\"..sound .. ".wav")

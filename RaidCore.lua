@@ -36,7 +36,7 @@ local chatEvent = {
 }
 
 local DefaultSettings = {
-	tGeneral = {
+	General = {
 		raidbars = {
 			isEnabled = true,
 			barSize = {
@@ -255,7 +255,7 @@ function RaidCore:OnEnable()
 		}
 
 		self.wndSettings = {
-			General = Apollo.LoadForm(self.xmlDoc, "ConfigFormGeneral", self.wndTargetFrame, self),
+			General = Apollo.LoadForm(self.xmlDoc, "ConfigForm_General", self.wndTargetFrame, self),
 			DS = {
 				SystemDaemons = Apollo.LoadForm(self.xmlDoc, "ConfigForm_DS_SystemDaemons", self.wndTargetFrame, self),
 				Gloomclaw = Apollo.LoadForm(self.xmlDoc, "ConfigForm_DS_Gloomclaw", self.wndTargetFrame, self),
@@ -378,9 +378,9 @@ function RaidCore:OnSave(eLevel)
 	if eLevel ~= GameLib.CodeEnumAddonSaveLevel.Character then
 		return nil
 	end
-	self.settings["tGeneral"]["raidbars"] = self.raidbars:GetSaveData()
-	self.settings["tGeneral"]["unitmoni"] = self.unitmoni:GetSaveData()
-	self.settings["tGeneral"]["message"] = self.message:GetSaveData()
+	self.settings["General"]["raidbars"] = self.raidbars:GetSaveData()
+	self.settings["General"]["unitmoni"] = self.unitmoni:GetSaveData()
+	self.settings["General"]["message"] = self.message:GetSaveData()
 	local saveData = {}
 
 	self:recursiveCopyTable(self.settings, saveData)
@@ -398,68 +398,59 @@ function RaidCore:OnRestore(eLevel, tData)
 end
 
 function RaidCore:LoadSaveData()
-	self.raidbars:Load(self.settings["tGeneral"]["raidbars"])
-	self.unitmoni:Load(self.settings["tGeneral"]["unitmoni"])
-	self.message:Load(self.settings["tGeneral"]["message"])
-
-	self.wndSettings["General"]:FindChild("Button_tGeneral_raidbars_isEnabled"):SetCheck(self.settings["tGeneral"]["raidbars"]["isEnabled"])
-	self.wndSettings["General"]:FindChild("Button_tGeneral_message_isEnabled"):SetCheck(self.settings["tGeneral"]["message"]["isEnabled"])
-	self.wndSettings["General"]:FindChild("Button_tGeneral_unitmoni_isEnabled"):SetCheck(self.settings["tGeneral"]["unitmoni"]["isEnabled"])
-
-	self.wndSettings["General"]:FindChild("Button_tGeneral_raidbars_anchorFromTop"):SetCheck(self.settings["tGeneral"]["raidbars"]["anchorFromTop"])
-	self.wndSettings["General"]:FindChild("Button_tGeneral_message_anchorFromTop"):SetCheck(self.settings["tGeneral"]["message"]["anchorFromTop"])
-	self.wndSettings["General"]:FindChild("Button_tGeneral_unitmoni_anchorFromTop"):SetCheck(self.settings["tGeneral"]["unitmoni"]["anchorFromTop"])
-
-	self.wndSettings["General"]:FindChild("Slider_raidbars_barSize_Width"):SetValue(self.settings["tGeneral"]["raidbars"]["barSize"]["Width"])
-	self.wndSettings["General"]:FindChild("Slider_message_barSize_Width"):SetValue(self.settings["tGeneral"]["message"]["barSize"]["Width"])
-	self.wndSettings["General"]:FindChild("Slider_unitmoni_barSize_Width"):SetValue(self.settings["tGeneral"]["unitmoni"]["barSize"]["Width"])
-	self.wndSettings["General"]:FindChild("Slider_raidbars_barSize_Height"):SetValue(self.settings["tGeneral"]["raidbars"]["barSize"]["Height"])
-	self.wndSettings["General"]:FindChild("Slider_message_barSize_Height"):SetValue(self.settings["tGeneral"]["message"]["barSize"]["Height"])
-	self.wndSettings["General"]:FindChild("Slider_unitmoni_barSize_Height"):SetValue(self.settings["tGeneral"]["unitmoni"]["barSize"]["Height"])
-
-	self.wndSettings["General"]:FindChild("Label_raidbars_barSize_Width"):SetText(string.format("%.fpx", self.settings["tGeneral"]["raidbars"]["barSize"]["Width"]))
-	self.wndSettings["General"]:FindChild("Label_message_barSize_Width"):SetText(string.format("%.fpx", self.settings["tGeneral"]["message"]["barSize"]["Width"]))
-	self.wndSettings["General"]:FindChild("Label_unitmoni_barSize_Width"):SetText(string.format("%.fpx", self.settings["tGeneral"]["unitmoni"]["barSize"]["Width"]))
-	self.wndSettings["General"]:FindChild("Label_raidbars_barSize_Height"):SetText(string.format("%.fpx", self.settings["tGeneral"]["raidbars"]["barSize"]["Height"]))
-	self.wndSettings["General"]:FindChild("Label_message_barSize_Height"):SetText(string.format("%.fpx", self.settings["tGeneral"]["message"]["barSize"]["Height"]))
-	self.wndSettings["General"]:FindChild("Label_unitmoni_barSize_Height"):SetText(string.format("%.fpx", self.settings["tGeneral"]["unitmoni"]["barSize"]["Height"]))
-
-	self.wndSettings["General"]:FindChild("Button_tGeneral_bSoundEnabled"):SetCheck(self.settings["tGeneral"]["bSoundEnabled"])
+	self.raidbars:Load(self.settings["General"]["raidbars"])
+	self.unitmoni:Load(self.settings["General"]["unitmoni"])
+	self.message:Load(self.settings["General"]["message"])
 end
 
 function RaidCore:OnGeneralCheckBoxChecked(wndHandler, wndControl, eMouseButton )
-	local identifier = self:SplitString(wndControl:GetName(), "_")
-	self.settings[identifier[2]][identifier[3]][identifier[4]] = true
-	self[identifier[3]]:Load(self.settings[identifier[2]][identifier[3]])
+	local settingType = self:SplitString(wndControl:GetParent():GetParent():GetName(), "_")[2]
+	local settingKey = self:SplitString(wndControl:GetName(), "_")[2]
+
+	self.settings[settingType][settingKey] = true
 end
 
 function RaidCore:OnGeneralCheckBoxUnchecked(wndHandler, wndControl, eMouseButton )
-	local identifier = self:SplitString(wndControl:GetName(), "_")
-	self.settings[identifier[2]][identifier[3]][identifier[4]] = false
-	self[identifier[3]]:Load(self.settings[identifier[2]][identifier[3]])
+	local settingType = self:SplitString(wndControl:GetParent():GetParent():GetName(), "_")[2]
+	local settingKey = self:SplitString(wndControl:GetName(), "_")[2]
+
+	self.settings[settingType][settingKey] = false
 end
 
-function RaidCore:OnSoundsStateChanged(wndHandler, wndControl, eMouseButton)
+function RaidCore:OnBarSettingChecked(wndHandler, wndControl, eMouseButton )
+	local settingType = self:SplitString(wndControl:GetParent():GetParent():GetName(), "_")[2]
 	local identifier = self:SplitString(wndControl:GetName(), "_")
-	self.settings[identifier[2]][identifier[3]] = wndHandler:IsChecked()
+	self.settings[settingType][identifier[2]][identifier[3]] = true
+
+	self[identifier[2]]:Load(self.settings[settingType][identifier[2]])
+end
+
+function RaidCore:OnBarSettingUnchecked(wndHandler, wndControl, eMouseButton )
+	local settingType = self:SplitString(wndControl:GetParent():GetParent():GetName(), "_")[2]
+	local identifier = self:SplitString(wndControl:GetName(), "_")
+	self.settings[settingType][identifier[2]][identifier[3]] = false
+
+	self[identifier[2]]:Load(self.settings[settingType][identifier[2]])
 end
 
 function RaidCore:OnSliderBarChanged( wndHandler, wndControl, fNewValue, fOldValue )
+	local settingType = self:SplitString(wndControl:GetParent():GetParent():GetParent():GetName(), "_")[2]
 	local identifier = self:SplitString(wndControl:GetName(), "_")
-	self.settings["tGeneral"][identifier[2]][identifier[3]][identifier[4]] = fNewValue
+	self.settings[settingType][identifier[2]][identifier[3]][identifier[4]] = fNewValue
 	wndHandler:GetParent():GetParent():FindChild("Label_".. identifier[2] .. "_" .. identifier[3] .. "_" .. identifier[4]):SetText(string.format("%.fpx", fNewValue))
-	self[identifier[2]]:Load(self.settings["tGeneral"][identifier[2]])
+	self[identifier[2]]:Load(self.settings[settingType][identifier[2]])
 end
 
 function RaidCore:EditBarColor( wndHandler, wndControl, eMouseButton )
 	if wndHandler ~= wndControl or eMouseButton ~= GameLib.CodeEnumInputMouse.Left then return end
+	local settingType = self:SplitString(wndControl:GetParent():GetParent():GetName(), "_")[2]
 	local identifier = self:SplitString(wndControl:GetName(), "_")
-	self.GeminiColor:ShowColorPicker(self, {callback = "OnGeminiColor", bCustomColor = true, strInitialColor = self.settings[identifier[2]][identifier[3]][identifier[4]]}, identifier)
+	self.GeminiColor:ShowColorPicker(self, {callback = "OnGeminiColor", bCustomColor = true, strInitialColor = self.settings[settingType][identifier[2]][identifier[3]]}, identifier, settingType)
 end
 
-function RaidCore:OnGeminiColor(strColor, identifier)
-	self.settings[identifier[2]][identifier[3]][identifier[4]] = strColor
-	self[identifier[3]]:Load(self.settings[identifier[2]][identifier[3]])
+function RaidCore:OnGeminiColor(strColor, identifier, settingType)
+	self.settings[settingType][identifier[2]][identifier[3]] = strColor
+	self[identifier[2]]:Load(self.settings[settingType][identifier[2]])
 end
 
 function RaidCore:OnBossSettingChecked(wndHandler, wndControl, eMouseButton )
@@ -490,6 +481,66 @@ function RaidCore:OnWindowLoad(wndHandler, wndControl )
 			wndControl:SetCheck(val)
 		elseif type(val) == "number" then
 			wndControl:SetText(val)
+		elseif type(val) == "string" then
+			wndControl:SetText(val)
+		end
+	end
+end
+
+-- Custom handler for general settings, since they are not specific to a bossinstance it'll be saved
+-- differently in the settings table
+function RaidCore:OnWindowLoadGeneral(wndHandler, wndControl )
+	local settingType = self:SplitString(wndControl:GetParent():GetParent():GetName(), "_")[2]
+	local settingKey = self:SplitString(wndControl:GetName(), "_")[2]
+	local val = self.settings[settingType][settingKey]
+
+	if val ~= nil then
+		if type(val) == "boolean" then
+			wndControl:SetCheck(val)
+		elseif type(val) == "number" then
+			wndControl:SetText(val)
+		elseif type(val) == "string" then
+			wndControl:SetText(val)
+		end
+	end
+end
+
+-- Custom handler for the bar settings, they are in separate tables so we can call
+-- DisplayBlock with these specific settings
+function RaidCore:OnWindowLoadGeneralBars(wndhandler, wndControl )
+	local settingType = self:SplitString(wndControl:GetParent():GetParent():GetName(), "_")[2]
+	local setting = self:SplitString(wndControl:GetName(), "_")
+	local barType = setting[2]
+	local settingKey = setting[3]
+	local val = self.settings[settingType][barType][settingKey]
+
+	if val ~= nil then
+		if type(val) == "boolean" then
+			wndControl:SetCheck(val)
+		elseif type(val) == "number" then
+			wndControl:SetText(val)
+		elseif type(val) == "string" then
+			wndControl:SetText(val)
+		end
+	end
+end
+
+-- (Hopefully!) last custom handler for setting save & restore stuff
+-- This one for the sliders in general, since we use them in DisplayBlock
+-- and have some extra tables for width/height!
+function RaidCore:LoadGeneralSliders(wndHandler, wndControl )
+	local settingType = self:SplitString(wndControl:GetParent():GetParent():GetName(), "_")[2]
+	local setting = self:SplitString(wndControl:GetName(), "_")
+	local val = self.settings[settingType][setting[2]][setting[3]][setting[4]]
+
+	if val ~= nil then
+		if type(val) == "boolean" then
+			wndControl:SetCheck(val)
+		elseif type(val) == "number" then
+			wndControl:SetText(string.format("%.fpx", val))
+			if wndControl.SetValue then
+				wndControl:SetValue(val)
+			end
 		elseif type(val) == "string" then
 			wndControl:SetText(val)
 		end
