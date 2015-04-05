@@ -8,6 +8,71 @@ local mod = core:NewBoss("Gloomclaw", 52)
 if not mod then return end
 
 mod:RegisterEnableMob("Gloomclaw")
+mod:RegisterEnglishLocale({
+	-- Unit names.
+	["Gloomclaw"] = "Gloomclaw",
+	["Corrupted Ravager"] = "Corrupted Ravager",
+	["Empowered Ravager"] = "Empowered Ravager",
+	["Strain Parasite"] = "Strain Parasite",
+	["Gloomclaw Skurge"] = "Gloomclaw Skurge",
+	["Corrupted Fraz"] = "Corrupted Fraz",
+	["Essence of Logic"] = "Essence of Logic",
+	-- Datachron messages.
+	["Gloomclaw is reduced to a weakened state"] = "Gloomclaw is reduced to a weakened state!",
+	["Gloomclaw is vulnerable"] = "Gloomclaw is vulnerable!",
+	["Gloomclaw is pushed back"] = "Gloomclaw is pushed back by the purification of the essences!",
+	["Gloomclaw is moving forward"] = "Gloomclaw is moving forward to corrupt more essences!",
+	-- Cast.
+	["Rupture"] = "Rupture",
+	["Corrupting Rays"] = "Corrupting Rays",
+	-- Bar and messages.
+	["INTERRUPT %s"] = "INTERRUPT %s",
+	["NEXT RUPTURE"] = "NEXT RUPTURE",
+	["~NEXT RUPTURE"] = "~NEXT RUPTURE",
+	["FULL CORRUPTION"] = "FULL CORRUPTION",
+	["SECTION %u"] = "SECTION %u",
+	["[%u] WAVE"] = "[%u] WAVE",
+	["FROG %u"] = "FROG %u",
+	["LEFT"] = "LEFT",
+	["RIGHT"] = "RIGHT",
+	["TRANSITION"] = "TRANSITION",
+	["MOO PHASE"] = "MOO PHASE",
+	["BURN HIM HARD"] = "BURN HIM HARD",
+})
+mod:RegisterFrenchLocale({
+	-- Unit names.
+	["Gloomclaw"] = "Serrenox",
+	["Corrupted Ravager"] = "Ravageur corrompu",
+	["Empowered Ravager"] = "Ravageur renforcé",
+	["Strain Parasite"] = "Parasite de la Souillure",
+	["Gloomclaw Skurge"] = "Skurge serrenox",
+	["Corrupted Fraz"] = "Friz corrompu",
+	-- Datachron messages.
+	["Gloomclaw is reduced to a weakened state"] = "Serrenox a été affaibli !",
+	["Gloomclaw is vulnerable"] = "Serrenox est vulnérable !",
+	["Gloomclaw is pushed back"] = "Serrenox est repoussé par la purification des essences !",
+	["Gloomclaw is moving forward"] = "Serrenox s'approche pour corrompre davantage d'essences !",
+	-- Cast.
+	["Rupture"] = "Rupture",
+	-- Bar and messages.
+	["INTERRUPT %s"] = "INTÉRROMPRE %s",
+	["NEXT RUPTURE"] = "PROCHAINE RUPTURE",
+	["~NEXT RUPTURE"] = "~PROCHAINE RUPTURE",
+	["FULL CORRUPTION"] = "100% CORROMPU",
+	["SECTION %u"] = "SECTION %u",
+	["[%u] WAVE"] = "[%u] WAVE",
+	["FROG %u"] = "ADD %u",
+	["LEFT"] = "GAUCHE",
+	["RIGHT"] = "DROITE",
+	["TRANSITION"] = "TRANSITION",
+	["MOO PHASE"] = "MOO PHASE",
+})
+mod:RegisterGermanLocale({
+	-- Unit names.
+	-- Datachron messages.
+	-- Cast.
+	-- Bar and messages.
+})
 
 --------------------------------------------------------------------------------
 -- Locals
@@ -78,8 +143,8 @@ R5 : 4332.5, -568.95300292969, -17054.87109375
 
 function mod:OnBossEnable()
 	Print(("Module %s loaded"):format(mod.ModuleName))
-	Apollo.RegisterEventHandler("UnitCreated", "OnUnitCreated", self)
-	Apollo.RegisterEventHandler("UnitEnteredCombat", "OnCombatStateChanged", self)
+	Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
+	Apollo.RegisterEventHandler("RC_UnitStateChanged", "OnUnitStateChanged", self)
 	Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
 	Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
 end
@@ -114,90 +179,91 @@ function mod:OnWipe()
 	core:ResetWorldMarkers()
 end
 
-function mod:OnUnitCreated(unit)
-	local sName = unit:GetName()
+function mod:OnUnitCreated(unit, sName)
 	--Print(sName .. " Created")
 	--[[
 	if sName == "Datascape Corruption Pool" then
 		core:MarkUnit(unit)
 	end--]]
-	if sName == "Corrupted Ravager" or sName == "Empowered Ravager" then
+	if sName == self.L["Corrupted Ravager"] or sName == self.L["Empowered Ravager"] then
 		core:WatchUnit(unit)
-	elseif sName == "Volatile Mauler" then
-		--local Rover = Apollo.GetAddon("Rover")
-		--Rover:AddWatch("Mauler", unit:GetPosition(), 0)
 	end
 end
 
 function mod:OnSpellCastStart(unitName, castName, unit)
 	--Print(castName .. " by " .. unitName)
-	if unitName == "Gloomclaw" and castName == "Rupture" then
+	if unitName == self.L["Gloomclaw"] and castName == self.L["Rupture"] then
 		ruptCount = ruptCount + 1
-		core:AddMsg("RUPTURE", "INTERRUPT BOSS", 5, GetSoundSetting("Destruction", "SoundRuptureInterrupt"))
+		core:AddMsg("RUPTURE", self.L["INTERRUPT %s"]:format(unitName:upper()), 5, GetSoundSetting("Destruction", "SoundRuptureInterrupt"))
 		if ruptCount == 1 then
-			core:AddBar("RUPTURE", "RUPTURE", 43, GetSoundSetting(true, "SoundRuptureCountdown"))
+			core:AddBar("RUPTURE", self.L["NEXT RUPTURE"], 43, GetSoundSetting(true, "SoundRuptureCountdown"))
 		end
-	elseif (unitName == "Corrupted Ravager" or unitName == "Empowered Ravager") and castName == "Corrupting Rays" then
+	elseif (unitName == self.L["Corrupted Ravager"] or unitName == self.L["Empowered Ravager"])
+		and castName == self.L["Corrupting Rays"] then
+
 		local playerUnit = GameLib.GetPlayerUnit()
 		local distance_to_unit = dist2unit(playerUnit, unit)
 		if distance_to_unit < 35 then
-			core:AddMsg("RAYS", "INTERRUPT SPIDER", 5, GetSoundSetting("Inferno", "SoundCorruptingRays"))
+			core:AddMsg("RAYS", self.L["INTERRUPT %s"]:format(unitName:upper()), 5, GetSoundSetting("Inferno", "SoundCorruptingRays"))
 		end
 	end
 end
 
 function mod:OnChatDC(message)
-	if message:find("Gloomclaw is pushed back by the purification of the essences") or message:find("Gloomclaw is moving forward to corrupt more essences!") then
+	local isPushBack = message == self.L["Gloomclaw is pushed back"]
+	local isMoveForward = message == self.L["Gloomclaw is pushed back"]
+
+	if isPushBack or isMoveForward then
 		if not first then
 			waveCount, ruptCount, prev = 0, 0, 0
 			core:StopBar("RUPTURE")
 			core:StopBar("CORRUPTION")
 			core:StopBar("WAVE")
-			if message:find("pushed") then
+			if isPushBack then
 				section = section + 1
 			else
 				section = section - 1
 			end
-			core:AddMsg("PHASE", ("SECTION %s"):format(section), 5, GetSoundSetting("Info", "SoundSectionSwitch"), "Blue")
+			core:AddMsg("PHASE", self.L["SECTION %u"]:format(section), 5, GetSoundSetting("Info", "SoundSectionSwitch"), "Blue")
 			if section ~= 4 then 
-				core:AddBar("WAVE", ("[%s] WAVE"):format(waveCount + 1), 11)
-				core:AddBar("RUPTURE", "RUPTURE", 39, GetSoundSetting(true, "SoundRuptureCountdown"))
+				core:AddBar("WAVE", self.L["[%u] WAVE"]:format(waveCount + 1), 11)
+				core:AddBar("RUPTURE", self.L["NEXT RUPTURE"], 39, GetSoundSetting(true, "SoundRuptureCountdown"))
 			end
-			core:AddBar("CORRUPTION", "FULL CORRUPTION", 111, GetSoundSetting(true, "SoundCorruptionCountdown"))
+			core:AddBar("CORRUPTION", self.L["FULL CORRUPTION"], 111, GetSoundSetting(true, "SoundCorruptionCountdown"))
 		else
 			first = false
 		end
 		core:ResetWorldMarkers()
 		if GetSetting("OtherMaulerMarkers") then
-			core:SetWorldMarker(maulerSpawn["northwest"], "FROG 1")
-			core:SetWorldMarker(maulerSpawn["northeast"], "FROG 2")
-			core:SetWorldMarker(maulerSpawn["southeast"], "FROG 3")
-			core:SetWorldMarker(maulerSpawn["southwest"], "FROG 4")
+			core:SetWorldMarker(maulerSpawn["northwest"], self.L["FROG %u"]:format(1))
+			core:SetWorldMarker(maulerSpawn["northeast"], self.L["FROG %u"]:format(2))
+			core:SetWorldMarker(maulerSpawn["southeast"], self.L["FROG %u"]:format(3))
+			core:SetWorldMarker(maulerSpawn["southwest"], self.L["FROG %u"]:format(4))
 		end
 		if GetSetting("OtherLeftRightMarkers") and leftSpawn[section] then
-			core:SetWorldMarker(leftSpawn[section], "LEFT")
+			core:SetWorldMarker(leftSpawn[section], self.L["LEFT"])
 		end
 		if GetSetting("OtherLeftRightMarkers") and rightSpawn[section] then
-			core:SetWorldMarker(rightSpawn[section], "RIGHT")
+			core:SetWorldMarker(rightSpawn[section], self.L["RIGHT"])
 		end
 		Apollo.RegisterEventHandler("CombatLogHeal", "OnCombatLogHeal", self)
-	elseif message:find("Gloomclaw is reduced to a weakened state") then
+	elseif message:find(self.L["Gloomclaw is reduced to a weakened state"]) then
 		core:StopBar("RUPTURE")
 		core:StopBar("CORRUPTION")
 		core:StopBar("WAVE")
-		core:AddMsg("TRANSITION", "TRANSITION", 5, GetSoundSetting("Alert", "SoundMoOWarning"))
-		core:AddBar("MOO", "MOO PHASE", 15)
+		core:AddMsg("TRANSITION", self.L["TRANSITION"], 5, GetSoundSetting("Alert", "SoundMoOWarning"))
+		core:AddBar("MOO", self.L["MOO PHASE"], 15)
 		for unitId, v in pairs(essenceUp) do
 			core:RemoveUnit(unitId)
 			essenceUp[unitId] = nil
 		end
 		--essenceUp = {}
-	elseif message:find("Gloomclaw is vulnerable") then
+	elseif message:find(self.L["Gloomclaw is vulnerable"]) then
 		core:StopBar("RUPTURE")
 		core:StopBar("CORRUPTION")
 		core:StopBar("WAVE")
-		core:AddMsg("TRANSITION", "BURN HIM HARD", 5, GetSoundSetting("Alert", "SoundMoOWarning"))
-		core:AddBar("MOO", "MOO PHASE", 20, GetSoundSetting(true, "SoundMoOWarning"))
+		core:AddMsg("TRANSITION", self.L["BURN HIM HARD"], 5, GetSoundSetting("Alert", "SoundMoOWarning"))
+		core:AddBar("MOO", self.L["MOO PHASE"], 20, GetSoundSetting(true, "SoundMoOWarning"))
 		for unitId, v in pairs(essenceUp) do
 			core:RemoveUnit(unitId)
 			essenceUp[unitId] = nil
@@ -207,26 +273,29 @@ function mod:OnChatDC(message)
 end
 
 function mod:OnCombatLogHeal(tArgs)
-	if tArgs.unitTarget and tArgs.unitTarget:GetName() == "Essence of Logic" then
-		if not essenceUp[tArgs.unitTarget:GetId()] then
-			--Print("Found EssLogic : ".. tArgs.unitTarget:GetId())
-			essenceUp[tArgs.unitTarget:GetId()] = true
-			local essPos = tArgs.unitTarget:GetPosition()
-			core:MarkUnit(tArgs.unitTarget, 0, (essPos.x < 4310) and "L" or "R")
-			core:AddUnit(tArgs.unitTarget)
-			if #essenceUp == 2 then
-				--Print("Found 2 essences")
-				Apollo.RemoveEventHandler("CombatLogHeal", self)
+	if tArgs.unitTarget then
+		local NO_BREAK_SPACE = string.char(194, 160)
+		local targetName = tArgs.unitTarget:GetName():gsub(NO_BREAK_SPACE, " ")
+		local targetId = tArgs.unitTarget:GetId()
+		if targetName == self.L["Essence of Logic"] then
+			if not essenceUp[targetId] then
+				--Print("Found EssLogic : ".. tArgs.unitTarget:GetId())
+				essenceUp[targetId] = true
+				local essPos = tArgs.unitTarget:GetPosition()
+				core:MarkUnit(tArgs.unitTarget, 0, (essPos.x < 4310) and "L" or "R")
+				core:AddUnit(tArgs.unitTarget)
+				if #essenceUp == 2 then
+					--Print("Found 2 essences")
+					Apollo.RemoveEventHandler("CombatLogHeal", self)
+				end
 			end
 		end
 	end
 end
 
-function mod:OnCombatStateChanged(unit, bInCombat)
+function mod:OnUnitStateChanged(unit, bInCombat, sName)
 	if unit:GetType() == "NonPlayer" and bInCombat then
-		local sName = unit:GetName()
-
-		if sName == "Gloomclaw" then
+		if sName == self.L["Gloomclaw"] then
 			self:Start()
 			waveCount, ruptCount, prev = 0, 0, 0
 			section = 1
@@ -237,26 +306,29 @@ function mod:OnCombatStateChanged(unit, bInCombat)
 			end
 			core:AddUnit(unit)
 			core:WatchUnit(unit)
-			core:AddBar("RUPTURE", "~RUPTURE", 35, GetSoundSetting(true, "SoundRuptureCountdown"))
-			core:AddBar("CORRUPTION", "FULL CORRUPTION", 106, GetSoundSetting(true, "SoundCorruptionCountdown"))
+			core:AddBar("RUPTURE", self.L["~NEXT RUPTURE"], 35, GetSoundSetting(true, "SoundRuptureCountdown"))
+			core:AddBar("CORRUPTION", self.L["FULL CORRUPTION"], 106, GetSoundSetting(true, "SoundCorruptionCountdown"))
 			core:StartScan()
-		elseif sName == "Strain Parasite" or sName == "Gloomclaw Skurge" or sName == "Corrupted Fraz" then
+		elseif sName == self.L["Strain Parasite"]
+			or sName == self.L["Gloomclaw Skurge"]
+			or sName == self.L["Corrupted Fraz"] then
+
 			local timeOfEvent = GameLib.GetGameTime()
 			if timeOfEvent - prev > 10 then
 				prev = timeOfEvent
 				waveCount = waveCount + 1
-				core:AddMsg("WAVE", ("[%s] WAVE"):format(waveCount), 5, GetSoundSetting("Info", "SoundWaveWarning"), "Blue")
+				core:AddMsg("WAVE", self.L["[%u] WAVE"]:format(waveCount), 5, GetSoundSetting("Info", "SoundWaveWarning"), "Blue")
 				if section < 5 then
 					if waveCount < spawnCount[section] then
-						core:AddBar("WAVE", ("[%s] WAVE"):format(waveCount + 1), spawnTimer[section])
+						core:AddBar("WAVE", self.L["[%u] WAVE"]:format(waveCount + 1), spawnTimer[section])
 					end
 				else
 					if waveCount == 1 then
-						core:AddBar("WAVE", ("[%s] WAVE"):format(waveCount + 1), 20.5)
+						core:AddBar("WAVE", self.L["[%u] WAVE"]:format(waveCount + 1), 20.5)
 					elseif waveCount == 2 then
-						core:AddBar("WAVE", ("[%s] WAVE"):format(waveCount + 1), 30)
+						core:AddBar("WAVE", self.L["[%u] WAVE"]:format(waveCount + 1), 30)
 					elseif waveCount == 3 then
-						core:AddBar("WAVE", ("[%s] WAVE"):format(waveCount + 1), 15)
+						core:AddBar("WAVE", self.L["[%u] WAVE"]:format(waveCount + 1), 15)
 					end
 				end
 			end
