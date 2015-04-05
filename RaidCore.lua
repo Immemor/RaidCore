@@ -205,13 +205,13 @@ local DefaultSettings = {
 -- Initialization
 -----------------------------------------------------------------------------------------------
 function RaidCore:new(o)
-    o = o or {}
-    setmetatable(o, self)
-    self.__index = self
+	o = o or {}
+	setmetatable(o, self)
+	self.__index = self
 
-    -- initialize variables here
+	-- initialize variables here
 
-    return o
+	return o
 end
 
 function RaidCore:Init()
@@ -220,7 +220,7 @@ function RaidCore:Init()
 	local tDependencies = {
 		-- "UnitOrPackageName",
 	}
-    Apollo.RegisterAddon(self, bHasConfigureFunction, strConfigureButtonText, tDependencies)
+	Apollo.RegisterAddon(self, bHasConfigureFunction, strConfigureButtonText, tDependencies)
 end
 
 
@@ -229,7 +229,7 @@ end
 -----------------------------------------------------------------------------------------------
 --function RaidCore:OnLoad()
 function RaidCore:OnInitialize()
-    -- load our form file
+	-- load our form file
 	self.xmlDoc = XmlDoc.CreateFromFile("RaidCore.xml")
 	self.xmlDoc:RegisterCallback("OnDocLoaded", self)
 end
@@ -243,7 +243,7 @@ function RaidCore:OnEnable()
 	if self.xmlDoc ~= nil and self.xmlDoc:IsLoaded() then
 		self.settings = self.settings or self:recursiveCopyTable(DefaultSettings)
 
-	    Apollo.LoadSprites("BarTextures.xml")
+		Apollo.LoadSprites("BarTextures.xml")
 
 		self.wndConfig = Apollo.LoadForm(self.xmlDoc, "ConfigForm", nil, self)
 		self.wndConfig:Show(false)
@@ -275,28 +275,28 @@ function RaidCore:OnEnable()
 			},
 		}
 
-	    self.raidbars = RaidCoreLibs.DisplayBlock.new(self.xmlDoc)
-	    self.raidbars:SetName("Raid Bars")
-	    self.raidbars:SetPosition(0.3, 0.5)
-	    self.raidbars:AnchorFromTop(true)
+		self.raidbars = RaidCoreLibs.DisplayBlock.new(self.xmlDoc)
+		self.raidbars:SetName("Raid Bars")
+		self.raidbars:SetPosition(0.3, 0.5)
+		self.raidbars:AnchorFromTop(true)
 
-	    self.unitmoni = RaidCoreLibs.DisplayBlock.new(self.xmlDoc)
-	    self.unitmoni:SetName("Unit Monitor")
-	    self.unitmoni:SetPosition(0.7, 0.5)
-	    self.unitmoni:AnchorFromTop(true)
+		self.unitmoni = RaidCoreLibs.DisplayBlock.new(self.xmlDoc)
+		self.unitmoni:SetName("Unit Monitor")
+		self.unitmoni:SetPosition(0.7, 0.5)
+		self.unitmoni:AnchorFromTop(true)
 
-	    self.message = RaidCoreLibs.DisplayBlock.new(self.xmlDoc)
-	    self.message:SetName("Messages")
-	    self.message:SetPosition(0.5, 0.5)
-	    self.message:AnchorFromTop(true)
+		self.message = RaidCoreLibs.DisplayBlock.new(self.xmlDoc)
+		self.message:SetName("Messages")
+		self.message:SetPosition(0.5, 0.5)
+		self.message:AnchorFromTop(true)
 
-	    self.drawline = RaidCoreLibs.DisplayLine.new(self.xmlDoc)
+		self.drawline = RaidCoreLibs.DisplayLine.new(self.xmlDoc)
 
-	    self.GeminiColor = Apollo.GetPackage("GeminiColor").tPackage
+		self.GeminiColor = Apollo.GetPackage("GeminiColor").tPackage
 
-	    if self.settings ~= nil then
-	    	self:LoadSaveData()
-	    end
+		if self.settings ~= nil then
+			self:LoadSaveData()
+		end
 
 		-- Register handlers for events, slash commands and timer, etc.
 		-- e.g. Apollo.RegisterEventHandler("KeyDown", "OnKeyDown", self)
@@ -376,11 +376,11 @@ end
 
 function RaidCore:OnSave(eLevel)
 	if eLevel ~= GameLib.CodeEnumAddonSaveLevel.Character then
-        return nil
-    end
-    self.settings["tGeneral"]["raidbars"] = self.raidbars:GetSaveData()
-    self.settings["tGeneral"]["unitmoni"] = self.unitmoni:GetSaveData()
-    self.settings["tGeneral"]["message"] = self.message:GetSaveData()
+		return nil
+	end
+	self.settings["tGeneral"]["raidbars"] = self.raidbars:GetSaveData()
+	self.settings["tGeneral"]["unitmoni"] = self.unitmoni:GetSaveData()
+	self.settings["tGeneral"]["message"] = self.message:GetSaveData()
 	local saveData = {}
 
 	self:recursiveCopyTable(self.settings, saveData)
@@ -573,17 +573,17 @@ function RaidCore:OnRaidCoreOn(cmd, args)
 	elseif (tAllParams[1] == "testline") then
 		local uPlayer = GameLib.GetPlayerUnit()
 		local unit = GameLib.GetTargetUnit()
-	    self.drawline:AddLine("Ohmna1", 2, unit, nil, 3, 25, 0, 10)
-	    self.drawline:AddLine("Ohmna2", 2, unit, nil, 1, 25, 120)
-	    self.drawline:AddLine("Ohmna3", 2, unit, nil, 1, 25, -120)
-	    self.drawline:AddLine("Ohmna4", 1, uPlayer, unit, 2)
+		self.drawline:AddLine("Ohmna1", 2, unit, nil, 3, 25, 0, 10)
+		self.drawline:AddLine("Ohmna2", 2, unit, nil, 1, 25, 120)
+		self.drawline:AddLine("Ohmna3", 2, unit, nil, 1, 25, -120)
+		self.drawline:AddLine("Ohmna4", 1, uPlayer, unit, 2)
 	elseif (tAllParams[1] == "testpixie") then
 		local uPlayer = GameLib.GetPlayerUnit()
 		local unit = GameLib.GetTargetUnit()
-	    self.drawline:AddPixie("Ohmna1", 2, unit, nil, "Blue", 10, 25, 0)
-	    self.drawline:AddPixie("Ohmna2", 2, unit, nil, "Green", 10, 25, 120)
-	    self.drawline:AddPixie("Ohmna3", 2, unit, nil, "Green", 10, 25, -120)
-	    self.drawline:AddPixie("Ohmna4", 1, uPlayer, unit, "Yellow", 5)
+		self.drawline:AddPixie("Ohmna1", 2, unit, nil, "Blue", 10, 25, 0)
+		self.drawline:AddPixie("Ohmna2", 2, unit, nil, "Green", 10, 25, 120)
+		self.drawline:AddPixie("Ohmna3", 2, unit, nil, "Green", 10, 25, -120)
+		self.drawline:AddPixie("Ohmna4", 1, uPlayer, unit, "Yellow", 5)
 	elseif (tAllParams[1] == "stopline") then
 		self.drawline:ResetLines()
 	elseif (tAllParams[1] == "sysdm") then
@@ -659,7 +659,7 @@ end
 function RaidCore:isPublicEventObjectiveActive(objectiveString)
 	local activeEvents = PublicEvent:GetActiveEvents()
 	if activeEvents == nil then
-    	return false
+		return false
 	end
 
 	for eventId, event in pairs(activeEvents) do
@@ -696,9 +696,9 @@ function RaidCore:unitCheck(unit)
 				local module = self.bossCore:GetModule(modName)
 				if not module or module:IsEnabled() then return end
 				if restrictzone[modName] and not restrictzone[modName][GetCurrentSubZoneName()] then return end
-        		--Print("Checking event " .. restricteventobjective[modName])
-        		--Print(tostring(self:isPublicEventObjectiveActive(restricteventobjective[modName])))
-        		if restricteventobjective[modName] and not self:hasActiveEvent(restricteventobjective[modName]) then return end
+				--Print("Checking event " .. restricteventobjective[modName])
+				--Print(tostring(self:isPublicEventObjectiveActive(restricteventobjective[modName])))
+				if restricteventobjective[modName] and not self:hasActiveEvent(restricteventobjective[modName]) then return end
 				Print("Enabling Boss Module : " .. enablemobs[sName])
 				for name, mod in self:IterateBossModules() do
 					if mod:IsEnabled() then mod:Disable() end
@@ -715,7 +715,7 @@ function RaidCore:unitCheck(unit)
 				for i, modName in next, enablemobs[sName] do
 					local module = self.bossCore:GetModule(modName)
 					if restrictzone[modName] and not restrictzone[modName][GetCurrentSubZoneName()] then return end
-          			if restricteventobjective[modName] and not self:hasActiveEvent(restricteventobjective[modName]) then return end
+					if restricteventobjective[modName] and not self:hasActiveEvent(restricteventobjective[modName]) then return end
 					Print("Enabling Boss Module : " .. modName)
 					module:Enable()
 				end
@@ -1081,7 +1081,7 @@ end
 function RaidCore:MarkUnit(unit, location, mark)
 	if unit and not unit:IsDead() then
 		local key = unit:GetId()
-		if  not self.mark[key] then
+		if not self.mark[key] then
 			self.mark[key] = {}
 			self.mark[key]["unit"] = unit
 			if not mark then
@@ -1397,12 +1397,12 @@ end
 
 do
 	local chatFilter = {
-		ChatSystemLib.ChatChannel_Datachron,  --23
+		ChatSystemLib.ChatChannel_Datachron,	--23
 		--ChatSystemLib.ChatChannel_Say,
-		ChatSystemLib.ChatChannel_NPCSay,     --20
-		ChatSystemLib.ChatChannel_NPCYell,    --21
-		ChatSystemLib.ChatChannel_NPCWhisper, --22
-		--ChatSystemLib.ChatChannel_Datachron,  --23
+		ChatSystemLib.ChatChannel_NPCSay,		--20
+		ChatSystemLib.ChatChannel_NPCYell,		--21
+		ChatSystemLib.ChatChannel_NPCWhisper,	--22
+		--ChatSystemLib.ChatChannel_Datachron,	--23
 	}
 	local function checkChatFilter(channelType)
 		for _, v in next, chatFilter do
@@ -1684,15 +1684,15 @@ function RaidCore:recursiveCopyTable(from, to)
 end
 
 function RaidCore:SplitString(inputstr, sep)
-        if sep == nil then
-                sep = "%s"
-        end
-        local t={} ; i=1
-        for str in string.gmatch(inputstr, "([^"..sep.."]+)") do
-                t[i] = str
-                i = i + 1
-        end
-        return t
+		if sep == nil then
+				sep = "%s"
+		end
+		local t={} ; i=1
+		for str in string.gmatch(inputstr, "([^"..sep.."]+)") do
+				t[i] = str
+				i = i + 1
+		end
+		return t
 end
 
 function RaidCore:GetSettings()
