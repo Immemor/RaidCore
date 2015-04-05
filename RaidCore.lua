@@ -65,6 +65,139 @@ local DefaultSettings = {
 		},
 		bSoundEnabled = true,
 	},
+	DS = {
+		SystemDaemons = {
+			LineOnModulesMidphase = true,
+			SoundPhase2 = true,
+			SoundPurge = true,
+			SoundWave = true,
+			SoundRepairSequence = true,
+			SoundPowerSurge = true,
+			OtherPillarMarkers = true,
+			OtherPurgePlayerMarkers = true,
+			OtherOverloadMarkers = true,
+			OtherDisconnectTimer = true,
+		},
+		Gloomclaw = {
+			SoundRuptureInterrupt = true,
+			SoundRuptureCountdown = true,
+			SoundSectionSwitch = true,
+			SoundCorruptionCountdown = true,
+			SoundMoOWarning = true,
+			OtherLeftRightMarkers = true,
+			OtherMaulerMarkers = true,
+		},
+		Maelstrom = {
+			LineWeatherStations = true,
+			LineCleaveBoss = true,
+			LineWindWalls = true,
+			SoundIcyBreath = true,
+			SoundTyphoon = true,
+			SoundCrystallize = true,
+			SoundWeatherStationSwitch = true,
+		},
+		Avatus = {
+			LineCleaveBoss = true,
+			LineCleaveHands = true,
+			LineCannons = true,
+			LineCleaveYellowRoomBoss = true,
+			LineOrbsYellowRoom = true,
+			SoundHandInterrupt = true,
+			SoundObliterationBeam = true,
+			SoundBlindYellowRoom = true,
+			SoundGunGrid = true,
+			OtherDirectionMarkers = true,
+			OtherHandSpawnMarkers = true,
+		},
+		Limbo = {
+
+		},
+		Lattice = {
+			LineDataDevourers = true,
+			SoundBeam = true,
+			SoundBigCast = true,
+			SoundShieldPhase = true,
+			SoundJumpPhase = true,
+			SoundNewWave = true,
+			OtherPlayerBeamMarkers = true,
+			OtherLogicWallMarkers = true,
+		},
+		AirEarth = {
+			LineTornado = true,
+			LineCleaveAileron = true,
+			SoundMidphase = true,
+			SoundQuakeJump = true,
+			SoundSupercell = true,
+		},
+		AirWater = {
+			SoundTwirl = true,
+			SoundMoO = true,
+			SoundIcestorm = true,
+			OtherTwirlWarning = true,
+			OtherTwirlPlayerMarkers = true,
+		},
+		AirLife = {
+			LineLifeOrbs = true,
+			LineHealingTrees = true,
+			LineCleaveAileron = true,
+			SoundTwirl = true,
+			SoundNoHealDebuff = true,
+			SoundBlindingLight = true,
+			OtherTwirlWarning = true,
+			OtherNoHealDebuff = true,
+			OtherBlindingLight = true,
+			OtherTwirlPlayerMarkers = true,
+			OtherNoHealDebuffPlayerMarkers = true,
+		},
+		FireEarth = {
+
+		},
+		FireWater = {
+			LineFlameWaves = true,
+			LineCleaveHydroflux = true,
+			LineBombPlayers = true,
+			LineIceTomb = true,
+			SoundBomb = true,
+			SoundHighDebuffStacks = true,
+			SoundIceTomb = true,
+			OtherBombPlayerMarkers = true,
+		},
+		FireLife = {
+			LineLifeOrbs = true,
+			SoundRooted = true,
+			SoundBlindingLight = true,
+			SoundNoHealDebuff = true,
+			OtherRootedPlayersMarkers = true,
+		},
+		LogicEarth = {
+			LineObsidianOutcropping = true,
+			SoundDefrag = true,
+			SoundStars = true,
+			SoundQuakeJump = true,
+			SoundSnake = true,
+		},
+		LogicWater = {
+			LineTetrisBlocks = true,
+			LineOrbs = true,
+			SoundDefrag = true,
+			SoundDataDisruptorDebuff = true,
+			OtherWateryGraveTimer = true,
+		},
+		LogicLife = {
+			LineTetrisBlocks = true,
+			LineLifeOrbs = true,
+			LineCleaveVisceralus = true,
+			SoundSnake = true,
+			SoundNoHealDebuff = true,
+			SoundBlindingLight = true,
+			SoundDefrag = true,
+			OtherSnakePlayerMarkers = true,
+			OtherNoHealDebuffPlayerMarkers = true,
+			OtherOverloadPlayerMarkers = true,
+			OtherRootedPlayersMarkers = true,
+			OtherDirectionMarkers = true,
+		},
+	}
 }
 
 
@@ -112,21 +245,21 @@ function RaidCore:OnInitialize()
 	self.wndSettings = {
 		General = Apollo.LoadForm(self.xmlDoc, "ConfigFormGeneral", self.wndTargetFrame, self),
 		DS = {
-			SystemDaemons = Apollo.LoadForm(self.xmlDoc, "ConfigFormSystemDaemons", self.wndTargetFrame, self),
-			Gloomclaw = Apollo.LoadForm(self.xmlDoc, "ConfigFormGloomclaw", self.wndTargetFrame, self),
-			Maelstrom = Apollo.LoadForm(self.xmlDoc, "ConfigFormMaelstrom", self.wndTargetFrame, self),
-			Lattice = Apollo.LoadForm(self.xmlDoc, "ConfigFormLattice", self.wndTargetFrame, self),
-			Limbo = Apollo.LoadForm(self.xmlDoc, "ConfigFormLimbo", self.wndTargetFrame, self),
-			AirEarth = Apollo.LoadForm(self.xmlDoc, "ConfigFormEpEarthAir", self.wndTargetFrame, self),
-			AirLife = Apollo.LoadForm(self.xmlDoc, "ConfigFormEpAirLife", self.wndTargetFrame, self),
-			AirWater = Apollo.LoadForm(self.xmlDoc, "ConfigFormEpFrostAir", self.wndTargetFrame, self),
-			FireEarth = Apollo.LoadForm(self.xmlDoc, "ConfigFormFire_Earth", self.wndTargetFrame, self),
-			FireLife = Apollo.LoadForm(self.xmlDoc, "ConfigFormEpLifeFire", self.wndTargetFrame, self),
-			FireWater = Apollo.LoadForm(self.xmlDoc, "ConfigFormEpFrostFire", self.wndTargetFrame, self),
-			LogicEarth = Apollo.LoadForm(self.xmlDoc, "ConfigFormEpEarthLogic", self.wndTargetFrame, self),
-			LogicLife = Apollo.LoadForm(self.xmlDoc, "ConfigFormEpLifeLogic", self.wndTargetFrame, self),
-			LogicWater = Apollo.LoadForm(self.xmlDoc, "ConfigFormEpFrostLogic", self.wndTargetFrame, self),
-			Avatus = Apollo.LoadForm(self.xmlDoc, "ConfigFormAvatus", self.wndTargetFrame, self),
+			SystemDaemons = Apollo.LoadForm(self.xmlDoc, "ConfigForm_DS_SystemDaemons", self.wndTargetFrame, self),
+			Gloomclaw = Apollo.LoadForm(self.xmlDoc, "ConfigForm_DS_Gloomclaw", self.wndTargetFrame, self),
+			Maelstrom = Apollo.LoadForm(self.xmlDoc, "ConfigForm_DS_Maelstrom", self.wndTargetFrame, self),
+			Lattice = Apollo.LoadForm(self.xmlDoc, "ConfigForm_DS_Lattice", self.wndTargetFrame, self),
+			Limbo = Apollo.LoadForm(self.xmlDoc, "ConfigForm_DS_Limbo", self.wndTargetFrame, self),
+			AirEarth = Apollo.LoadForm(self.xmlDoc, "ConfigForm_DS_AirEarth", self.wndTargetFrame, self),
+			AirLife = Apollo.LoadForm(self.xmlDoc, "ConfigForm_DS_AirLife", self.wndTargetFrame, self),
+			AirWater = Apollo.LoadForm(self.xmlDoc, "ConfigForm_DS_AirWater", self.wndTargetFrame, self),
+			FireEarth = Apollo.LoadForm(self.xmlDoc, "ConfigForm_DS_FireEarth", self.wndTargetFrame, self),
+			FireLife = Apollo.LoadForm(self.xmlDoc, "ConfigForm_DS_FireLife", self.wndTargetFrame, self),
+			FireWater = Apollo.LoadForm(self.xmlDoc, "ConfigForm_DS_FireWater", self.wndTargetFrame, self),
+			LogicEarth = Apollo.LoadForm(self.xmlDoc, "ConfigForm_DS_LogicEarth", self.wndTargetFrame, self),
+			LogicLife = Apollo.LoadForm(self.xmlDoc, "ConfigForm_DS_LogicLife", self.wndTargetFrame, self),
+			LogicWater = Apollo.LoadForm(self.xmlDoc, "ConfigForm_DS_LogicWater", self.wndTargetFrame, self),
+			Avatus = Apollo.LoadForm(self.xmlDoc, "ConfigForm_DS_Avatus", self.wndTargetFrame, self),
 		},
 	}
 end
@@ -334,6 +467,22 @@ end
 function RaidCore:OnGeminiColor(strColor, identifier)
 	self.settings[identifier[2]][identifier[3]][identifier[4]] = strColor
 	self[identifier[3]]:Load(self.settings[identifier[2]][identifier[3]])
+end
+
+function RaidCore:OnBossSettingChecked(wndHandler, wndControl, eMouseButton )
+	local settingInfo = self:SplitString(wndControl:GetParent():GetParent():GetName(), "_")
+	local setting = self:SplitString(wndControl:GetName(), "_")[2]
+	local raidInstance = settingInfo[2]
+	local bossModule = settingInfo[3]
+	self.settings[raidInstance][bossModule][setting] = true
+end
+
+function RaidCore:OnBossSettingUnchecked(wndHandler, wndControl, eMouseButton )
+	local settingInfo = self:SplitString(wndControl:GetParent():GetParent():GetName(), "_")
+	local setting = self:SplitString(wndControl:GetName(), "_")[2]
+	local raidInstance = settingInfo[2]
+	local bossModule = settingInfo[3]
+	self.settings[raidInstance][bossModule][setting] = false
 end
 
 local function wipe(t)
