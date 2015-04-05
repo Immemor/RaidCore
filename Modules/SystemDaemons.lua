@@ -13,6 +13,65 @@ mod:RegisterRestrictZone("SystemDaemons", "Halls of the Infinite Mind", "Infinit
 mod:RegisterEnableZone("SystemDaemons", "Halls of the Infinite Mind", "Infinite Generator Core", "Lower Infinite Generator Core")
 mod:RegisterRestrictEventObjective("SystemDaemons", "Defeat the System Daemons")
 mod:RegisterEnableEventObjective("SystemDaemons", "Defeat the System Daemons")
+mod:RegisterEnglishLocale({
+	-- Unit names.
+	["Binary System Daemon"] = "Binary System Daemon",
+	["Null System Daemon"] = "Null System Daemon",
+	["Brute Force Algorithm"] = "Brute Force Algorithm",
+	["Encryption Program"] = "Encryption Program",
+	["Radiation Dispersion Unit"] = "Radiation Dispersion Unit",
+	["Defragmentation Unit"] = "Defragmentation Unit",
+	["Extermination Sequence"] = "Extermination Sequence",
+	["Data Compiler"] = "Data Compiler",
+	["Viral Diffusion Inhibitor"] = "Viral Diffusion Inhibitor",
+	["Enhancement Module"] = "Enhancement Module",
+	["Conduction Unit Mk. I"]  = "Conduction Unit Mk. I",
+	["Conduction Unit Mk. II"]  = "Conduction Unit Mk. II",
+	["Conduction Unit Mk. III"]  = "Conduction Unit Mk. III",
+	["Infinite Generator Core"] = "Infinite Generator Core",
+	["Recovery Protocol"] = "Recovery Protocol",
+	-- Datachron messages.
+	["INVALID SIGNAL. DISCONNECTING"] = "INVALID SIGNAL. DISCONNECTING",
+	["COMMENCING ENHANCEMENT SEQUENCE"] = "COMMENCING ENHANCEMENT SEQUENCE",
+	-- Cast.
+	["Repair Sequence"] = "Repair Sequence",
+	["Power Surge"] = "Power Surge",
+	["Black IC"] = "Black IC",
+	-- Bar and messages.
+	["[%u] Probe"] = "[%u] Probe",
+	["[%u] WAVE"] = "[%u] WAVE",
+	["[%u] MINIBOSS"] = "[%u] MINIBOSS",
+	["MARKER north"] = "N",
+	["MARKER south"] = "S",
+	["P2 SOON !"] = "P2 SOON !",
+	["PHASE 2 !"] = "PHASE 2 !",
+	["INTERRUPT NORTH"] = "INTERRUPT NORTH",
+	["INTERRUPT SOUTH"] = "INTERRUPT SOUTH",
+	["AIDDDDDDDS !"] = "AIDDDDDDDS !",
+	["PURGE - %s"] = "PURGE - %s",
+	["INTERRUPT !"] = "INTERRUPT !",
+	["INTERRUPT HEAL!"] = "INTERRUPT HEAL!",
+	["BLACK IC"] = "BLACK IC",
+	["HEAL"] = "HEAL",
+	["PURGE ON YOU"] = "PURGE ON YOU",
+	["Probe Spawn"] = "Probe Spawn",
+	["DISCONNECT (%u)"] = "DISCONNECT (%u)",
+	["YOU ARE NEXT ON NORTH !"] = "YOU ARE NEXT ON NORTH !",
+	["YOU ARE NEXT ON SOUTH !"] = "YOU ARE NEXT ON SOUTH !",
+})
+mod:RegisterFrenchLocale({
+	-- Unit names.
+	-- Datachron messages.
+	-- Cast.
+	-- Bar and messages.
+})
+mod:RegisterGermanLocale({
+	-- Unit names.
+	-- Datachron messages.
+	-- Cast.
+	-- Bar and messages.
+})
+
 --------------------------------------------------------------------------------
 -- Locals
 --
@@ -47,9 +106,9 @@ local playerName
 
 function mod:OnBossEnable()
 	Print(("Module %s loaded"):format(mod.ModuleName))
-	Apollo.RegisterEventHandler("UnitCreated", "OnUnitCreated", self)
-	Apollo.RegisterEventHandler("UnitDestroyed", "OnUnitDestroyed", self)
-	Apollo.RegisterEventHandler("UnitEnteredCombat", "OnCombatStateChanged", self)
+	Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
+	Apollo.RegisterEventHandler("RC_UnitDestroyed", "OnUnitDestroyed", self)
+	Apollo.RegisterEventHandler("RC_UnitStateChanged", "OnUnitStateChanged", self)
 	Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
 	Apollo.RegisterEventHandler("SPELL_CAST_END", "OnSpellCastEnd", self)
 	Apollo.RegisterEventHandler("DEBUFF_APPLIED", "OnDebuffApplied", self)
@@ -77,9 +136,15 @@ function mod:OnReset()
 	phase2count = 0
 end
 
-function mod:OnUnitCreated(unit)
-	local sName = unit:GetName()
-	if sName == "Brute Force Algorithm" or sName == "Encryption Program" or sName == "Radiation Dispersion Unit" or sName == "Defragmentation Unit" or sName == "Extermination Sequence" or sName == "Data Compiler" or sName == "Viral Diffusion Inhibitor" then
+function mod:OnUnitCreated(unit, sName)
+	if sName == self.L["Brute Force Algorithm"]
+		or sName == self.L["Encryption Program"]
+		or sName == self.L["Radiation Dispersion Unit"]
+		or sName == self.L["Defragmentation Unit"]
+		or sName == self.L["Extermination Sequence"]
+		or sName == self.L["Data Compiler"]
+		or sName == self.L["Viral Diffusion Inhibitor"] then
+
 		if phase2 then return end
 		local timeOfEvent = GameLib.GetGameTime()
 		if timeOfEvent - prev > 48 then
@@ -87,38 +152,42 @@ function mod:OnUnitCreated(unit)
 			sdwaveCount = sdwaveCount + 1
 			probeCount = 0
 			if sdwaveCount == 1 then
-				core:AddMsg("SDWAVE", ("[%s] WAVE"):format(sdwaveCount), 5, GetSoundSetting("Info", "SoundWave"), "Blue")
-				core:AddBar("SDWAVE", ("[%s] WAVE"):format(sdwaveCount + 1), 50, GetSoundSetting(true, "SoundWave"))
+				core:AddMsg("SDWAVE", self.L["[%u] WAVE"]:format(sdwaveCount), 5, GetSoundSetting("Info", "SoundWave"), "Blue")
+				core:AddBar("SDWAVE", self.L["[%u] WAVE"]:format(sdwaveCount + 1), 50, GetSoundSetting(true, "SoundWave"))
 			elseif sdwaveCount % 2 == 0 then
-				core:AddMsg("SDWAVE", ("[%s] WAVE"):format(sdwaveCount), 5, GetSoundSetting("Info", "SoundWave"), "Blue")
-				core:AddBar("SDWAVE", ("[%s] MINIBOSS"):format(sdwaveCount + 1), 50, GetSoundSetting(true, "SoundWave"))
+				core:AddMsg("SDWAVE", self.L["[%u] WAVE"]:format(sdwaveCount), 5, GetSoundSetting("Info", "SoundWave"), "Blue")
+				core:AddBar("SDWAVE", self.L["[%u] MINIBOSS"]:format(sdwaveCount + 1), 50, GetSoundSetting(true, "SoundWave"))
 			else
-				core:AddMsg("SDWAVE", ("[%s] MINIBOSS"):format(sdwaveCount), 5, GetSoundSetting("Info", "SoundWave"), "Blue")
-				core:AddBar("SDWAVE", ("[%s] WAVE"):format(sdwaveCount + 1), 50, GetSoundSetting(true, "SoundWave"))
+				core:AddMsg("SDWAVE", self.L["[%u] MINIBOSS"]:format(sdwaveCount), 5, GetSoundSetting("Info", "SoundWave"), "Blue")
+				core:AddBar("SDWAVE", self.L["[%u] WAVE"]:format(sdwaveCount + 1), 50, GetSoundSetting(true, "SoundWave"))
 			end
-			core:AddBar("PROBES", "[1] Probe", 10)
+			core:AddBar("PROBES", self.L["[%u] Probe"]:format(1), 10)
 		end
-	elseif sName == "Null System Daemon" or sName == "Binary System Daemon" then
+	elseif sName == self.L["Null System Daemon"] or sName == self.L["Binary System Daemon"] then
 		--core:MarkUnit(unit, 0, ("N%s"):format(sdSurgeCount[unit:GetId()] or 0))
-		core:MarkUnit(unit, 0, ("%s"):format(sName:find("Null") and "S" or "N"))
+		if sName == self.L["Null System Daemon"] then
+			core:MarkUnit(unit, 0, self.L["MARKER south"])
+		else
+			core:MarkUnit(unit, 0, self.L["MARKER north"])
+		end
 		core:AddUnit(unit)
 		core:WatchUnit(unit)
 	--elseif sName == "Null System Daemon"  then
 		--core:MarkUnit(unit, 0, ("S%s"):format(sdSurgeCount[unit:GetId()] or 0))
 		--core:AddUnit(unit)
 		--core:WatchUnit(unit)
-	elseif sName == "Conduction Unit Mk. I" then
+	elseif sName == self.L["Conduction Unit Mk. I"] then
 		if probeCount == 0 then probeCount = 1 end
-		if GetCurrentSubZoneName():find("Infinite Generator Core") then core:MarkUnit(unit, 1, 1) end
-		core:AddBar("PROBES", "[2] Probe", 10)
-	elseif sName == "Conduction Unit Mk. II" then
+		if GetCurrentSubZoneName():find(self.L["Infinite Generator Core"]) then core:MarkUnit(unit, 1, 1) end
+		core:AddBar("PROBES", self.L["[%u] Probe"]:format(2), 10)
+	elseif sName == self.L["Conduction Unit Mk. II"] then
 		if probeCount == 1 then probeCount = 2 end
-		if GetCurrentSubZoneName():find("Infinite Generator Core") then core:MarkUnit(unit, 1, 2) end
-		core:AddBar("PROBES", "[3] Probe", 10)
-	elseif sName == "Conduction Unit Mark III" then
+		if GetCurrentSubZoneName():find(self.L["Infinite Generator Core"]) then core:MarkUnit(unit, 1, 2) end
+		core:AddBar("PROBES", self.L["[%u] Probe"]:format(3), 10)
+	elseif sName == self.L["Conduction Unit Mk. III"] then
 		if probeCount == 2 then probeCount = 3 end
-		if GetCurrentSubZoneName():find("Infinite Generator Core") then core:MarkUnit(unit, 1, 3) end
-	elseif sName == "Enhancement Module" then
+		if GetCurrentSubZoneName():find(self.L["Infinite Generator Core"]) then core:MarkUnit(unit, 1, 3) end
+	elseif sName == self.L["Enhancement Module"] then
 		--Print("Adding Lines for " .. unit:GetId())
 		--core:MarkUnit(unit, 0)
 		core:AddUnit(unit)
@@ -126,14 +195,13 @@ function mod:OnUnitCreated(unit)
 			core:AddLine(unit:GetId().."_1", 2, unit, nil, 1, 25, 90)
 			core:AddLine(unit:GetId().."_2", 2, unit, nil, 2, 25, -90)
 		end
-	elseif sName == "Recovery Protocol" then
+	elseif sName == self.L["Recovery Protocol"] then
 		core:WatchUnit(unit)
 	end
 end
 
-function mod:OnUnitDestroyed(unit)
-	local sName = unit:GetName()
-	if sName == "Enhancement Module" then
+function mod:OnUnitDestroyed(unit, sName)
+	if sName == self.L["Enhancement Module"] then
 		--Print("Dropping Lines for " .. unit:GetId())
 		core:DropLine(unit:GetId().."_1")
 		core:DropLine(unit:GetId().."_2")
@@ -143,10 +211,10 @@ end
 function mod:OnHealthChanged(unitName, health)
 	if health >= 70 and health <= 72 and not phase2warn and not phase2 then
 		phase2warn = true
-		core:AddMsg("SDP2", "P2 SOON !", 5, GetSoundSetting("Algalon", "SoundPhase2"))
+		core:AddMsg("SDP2", self.L["P2 SOON !"], 5, GetSoundSetting("Algalon", "SoundPhase2"))
 	elseif health >= 30 and health <= 32 and not phase2warn and not phase2 then
 		phase2warn = true
-		core:AddMsg("SDP2", "P2 SOON !", 5, GetSoundSetting("Algalon", "SoundPhase2"))
+		core:AddMsg("SDP2", self.L["P2 SOON !"], 5, GetSoundSetting("Algalon", "SoundPhase2"))
 	end
 end
 
@@ -164,37 +232,45 @@ local function dist2unit(unitSource, unitTarget)
 end
 
 function mod:OnSpellCastEnd(unitName, castName, unit)
-	if unitName == "Recovery Protocol" and castName == "Repair Sequence" then
+	if unitName == self.L["Recovery Protocol"] and castName == self.L["Repair Sequence"] then
 		core:DropMark(unit:GetId())
 	end
 end
 
 function mod:OnSpellCastStart(unitName, castName, unit)
-	if unitName == "Binary System Daemon" and castName == "Power Surge" then
+	if unitName == self.L["Binary System Daemon"] and castName == self.L["Power Surge"] then
 		core:SendSync("NORTH_SURGE", unit:GetId())
 		if phase2 and dist2unit(GameLib.GetPlayerUnit(), unit) < 40 then
-			core:AddMsg("SURGE", "INTERRUPT NORTH", 5, GetSoundSetting("Alert", "SoundPowerSurge"))
+			core:AddMsg("SURGE", self.L["INTERRUPT NORTH"], 5, GetSoundSetting("Alert", "SoundPowerSurge"))
 		end
-	elseif unitName == "Null System Daemon" and castName == "Power Surge" then
+	elseif unitName == self.L["Null System Daemon"] and castName == self.L["Power Surge"] then
 		core:SendSync("SOUTH_SURGE", unit:GetId())
 		if phase2 and dist2unit(GameLib.GetPlayerUnit(), unit) < 40 then
-			core:AddMsg("SURGE", "INTERRUPT SOUTH", 5, GetSoundSetting("Alert", "SoundPowerSurge"))
+			core:AddMsg("SURGE", self.L["INTERRUPT SOUTH"], 5, GetSoundSetting("Alert", "SoundPowerSurge"))
 		end
 	elseif castName == "Purge" then
 		PurgeLast[unit:GetId()] = GameLib.GetGameTime()
 		if dist2unit(GameLib.GetPlayerUnit(), unit) < 40 then
-			core:AddMsg("PURGE", "AIDDDDDDDS !", 5, GetSoundSetting("Beware", "SoundPurge"))
-			core:AddBar("PURGE_"..unit:GetId(), ("PURGE - %s"):format(unitName:find("Null") and "NULL" or "BINARY"), 27)
+			core:AddMsg("PURGE", self.L["AIDDDDDDDS !"], 5, GetSoundSetting("Beware", "SoundPurge"))
+			if unitName == self.L["Null System Daemon"] then
+				core:AddBar("PURGE_"..unit:GetId(), self.L["PURGE - %s"]:format("NULL"), 27)
+			elseif unitName == self.L["Binary System Daemon"] then
+				core:AddBar("PURGE_"..unit:GetId(), self.L["PURGE - %s"]:format("BINARY"), 27)
+			end
 		elseif phase2 then
-			core:AddBar("PURGE_"..unit:GetId(), ("PURGE - %s"):format(unitName:find("Null") and "NULL" or "BINARY"), 27)
+			if unitName == self.L["Null System Daemon"] then
+				core:AddBar("PURGE_"..unit:GetId(), self.L["PURGE - %s"]:format("NULL"), 27)
+			elseif unitName == self.L["Binary System Daemon"] then
+				core:AddBar("PURGE_"..unit:GetId(), self.L["PURGE - %s"]:format("BINARY"), 27)
+			end
 		end
-	elseif unitName == "Defragmentation Unit" and castName == "Black IC" then
-		core:AddMsg("BLACKIC", "INTERRUPT !", 5, "Alert")
-		core:AddBar("BLACKIC", "BLACK IC", 30)
-	elseif unitName == "Recovery Protocol" and castName == "Repair Sequence" then
+	elseif unitName == self.L["Defragmentation Unit"] and castName == self.L["Black IC"] then
+		core:AddMsg("BLACKIC", self.L["INTERRUPT !"], 5, "Alert")
+		core:AddBar("BLACKIC", self.L["BLACK IC"], 30)
+	elseif unitName == self.L["Recovery Protocol"] and castName == self.L["Repair Sequence"] then
 		if dist2unit(GameLib.GetPlayerUnit(), unit) < 50 then
-			core:AddMsg("HEAL", "INTERRUPT HEAL!", 5, GetSoundSetting("Inferno", "SoundRepairSequence"))
-			core:MarkUnit(unit, nil, "HEAL")
+			core:AddMsg("HEAL", self.L["INTERRUPT HEAL!"], 5, GetSoundSetting("Inferno", "SoundRepairSequence"))
+			core:MarkUnit(unit, nil, self.L["HEAL"])
 			self:ScheduleTimer("RemoveHealMarker", 5, unit)
 		end
 	end
@@ -218,7 +294,7 @@ function mod:OnDebuffApplied(unitName, splId, unit)
 			core:MarkUnit(unit, nil, "PURGE")
 		end
 		if unitName == playerName then
-			core:AddMsg("PURGEDEBUFF", "PURGE ON YOU", 5, GetSoundSetting("Beware", "SoundPurge"))
+			core:AddMsg("PURGEDEBUFF", self.L["PURGE ON YOU"], 5, GetSoundSetting("Beware", "SoundPurge"))
 		end
 	end
 end
@@ -243,7 +319,13 @@ function mod:OnZoneChanged(zoneId, zoneName)
 			local unit = GameLib.GetUnitById(id)
 			if unit and (dist2unit(GameLib.GetPlayerUnit(), unit) < 40 or phase2) then
 				if timeOfEvent - timer < 27 then
-					core:AddBar("PURGE_".. id, ("PURGE - %s"):format(unit:GetName():find("Null") and "NULL" or "BINARY"), timer + 27 - timeOfEvent)
+					local NO_BREAK_SPACE = string.char(194, 160)
+					local unitName = unit:GetName():gsub(NO_BREAK_SPACE, " ")
+					if unitName == self.L["Null System Daemon"] then
+						core:AddBar("PURGE_".. id, self.L["PURGE - %s"]:format("NULL"), timer + 27 - timeOfEvent)
+					elseif unitName == self.L["Binary System Daemon"] then
+						core:AddBar("PURGE_".. id, self.L["PURGE - %s"]:format("BINARY"), timer + 27 - timeOfEvent)
+					end
 				end
 			end
 		end
@@ -252,28 +334,28 @@ function mod:OnZoneChanged(zoneId, zoneName)
 			core:StopBar("PURGE_" .. id)
 		end
 		local probesouth = { x = 95.89, y = -337.19, z = 211.26 }
-		core:SetWorldMarker(probesouth, "Probe Spawn")
+		core:SetWorldMarker(probesouth, self.L["Probe Spawn"])
 	end
 end
 
 function mod:NextWave()
 	if probeCount == 3 then
 		if sdwaveCount % 2 == 0 then
-			core:AddBar("SDWAVE", ("[%s] MINIBOSS"):format(sdwaveCount + 1), 90, GetSoundSetting(true, "SoundWave"))
+			core:AddBar("SDWAVE", self.L["[%u] MINIBOSS"]:format(sdwaveCount + 1), 90, GetSoundSetting(true, "SoundWave"))
 		else
-			core:AddBar("SDWAVE", ("[%s] WAVE"):format(sdwaveCount + 1), 90, GetSoundSetting(true, "SoundWave"))
+			core:AddBar("SDWAVE", self.L["[%u] WAVE"]:format(sdwaveCount + 1), 90, GetSoundSetting(true, "SoundWave"))
 		end
 	else
 		if sdwaveCount % 2 == 0 then
-			core:AddBar("SDWAVE", ("[%s] MINIBOSS"):format(sdwaveCount + 1), 110 + (2 - probeCount) * 10, GetSoundSetting(true, "SoundWave"))
+			core:AddBar("SDWAVE", self.L["[%u] MINIBOSS"]:format(sdwaveCount + 1), 110 + (2 - probeCount) * 10, GetSoundSetting(true, "SoundWave"))
 		else
-			core:AddBar("SDWAVE", ("[%s] WAVE"):format(sdwaveCount + 1), 110 + (2 - probeCount) * 10, GetSoundSetting(true, "SoundWave"))
+			core:AddBar("SDWAVE", self.L["[%u] WAVE"]:format(sdwaveCount + 1), 110 + (2 - probeCount) * 10, GetSoundSetting(true, "SoundWave"))
 		end
 	end
 end
 
 function mod:OnChatDC(message)
-	if message:find("INVALID SIGNAL. DISCONNECTING") then
+	if message:find(self.L["INVALID SIGNAL. DISCONNECTING"]) then
 		if phase2 then
 			core:ResetWorldMarkers()
 			phase2 = false
@@ -281,16 +363,16 @@ function mod:OnChatDC(message)
 		end
 		discoCount = discoCount + 1
 		if GetSetting("OtherDisconnectTimer") then
-			core:AddBar("DISC", ("DISCONNECT (%s)"):format(discoCount + 1), 60)
+			core:AddBar("DISC", self.L["DISCONNECT (%u)"]:format(discoCount + 1), 60)
 		end
-	elseif message:find("COMMENCING ENHANCEMENT SEQUENCE") then
+	elseif message:find(self.L["COMMENCING ENHANCEMENT SEQUENCE"]) then
 		phase2, phase2warn = true, false
 		phase2count = phase2count + 1
 		core:StopBar("DISC")
 		core:StopBar("SDWAVE")
-		core:AddMsg("SDP2", "PHASE 2 !", 5, GetSoundSetting("Alarm", "SoundPhase2"))
+		core:AddMsg("SDP2", self.L["PHASE 2 !"], 5, GetSoundSetting("Alarm", "SoundPhase2"))
 		if GetSetting("OtherDisconnectTimer") then
-			core:AddBar("DISC", ("DISCONNECT (%s)"):format(discoCount + 1), 85)
+			core:AddBar("DISC", self.L["DISCONNECT (%u)"]:format(discoCount + 1), 85)
 		end
 		if GetSetting("OtherPillarMarkers") and phase2count == 1 then
 			core:SetWorldMarker(p1_pillar1north, "N1")
@@ -316,7 +398,7 @@ end
 function mod:OnSyncRcv(sync, parameter)
 	if sync == "NORTH_SURGE" then
 		if intNorth and intNorth == sdSurgeCount[parameter] and not phase2 then
-			core:AddMsg("SURGE", "INTERRUPT NORTH", 5, "Alert")
+			core:AddMsg("SURGE", self.L["INTERRUPT NORTH"], 5, "Alert")
 		end
 
 		sdSurgeCount[parameter] = sdSurgeCount[parameter] + 1
@@ -326,11 +408,11 @@ function mod:OnSyncRcv(sync, parameter)
 		--if unit then core:MarkUnit(unit, 0, sdSurgeCount[parameter]) end
 
 		if intNorth and intNorth == sdSurgeCount[parameter] then
-			core:AddMsg("SURGE", "YOU ARE NEXT ON NORTH !", 5, "Long", "Blue")
+			core:AddMsg("SURGE", self.L["YOU ARE NEXT ON NORTH !"], 5, "Long", "Blue")
 		end
 	elseif sync == "SOUTH_SURGE" then
 		if intSouth and intSouth == sdSurgeCount[parameter] and not phase2 then
-			core:AddMsg("SURGE", "INTERRUPT SOUTH", 5, "Alert")
+			core:AddMsg("SURGE", self.L["INTERRUPT SOUTH"], 5, "Alert")
 		end
 
 		sdSurgeCount[parameter] = sdSurgeCount[parameter] + 1
@@ -340,16 +422,14 @@ function mod:OnSyncRcv(sync, parameter)
 		--if unit then core:MarkUnit(unit, 0, sdSurgeCount[parameter]) end
 
 		if intSouth and intSouth == sdSurgeCount[parameter] then
-			core:AddMsg("SURGE", "YOU ARE NEXT ON SOUTH !", 5, "Long", "Blue")
+			core:AddMsg("SURGE", self.L["YOU ARE NEXT ON SOUTH !"], 5, "Long", "Blue")
 		end
 	end
 end
 
-function mod:OnCombatStateChanged(unit, bInCombat)
+function mod:OnUnitStateChanged(unit, bInCombat, sName)
 	if unit:GetType() == "NonPlayer" and bInCombat then
-		local sName = unit:GetName()
-
-		if sName == "Null System Daemon" or sName == "Binary System Daemon" then
+		if sName == self.L["Null System Daemon"] or sName == self.L["Binary System Daemon"] then
 			self:Start()
 			discoCount, sdwaveCount, probeCount = 0, 0, 0
 			phase2warn, phase2 = false, false
@@ -363,11 +443,11 @@ function mod:OnCombatStateChanged(unit, bInCombat)
 			core:AddSync("NORTH_SURGE", 5)
 			core:AddSync("SOUTH_SURGE", 5)
 			if GetSetting("OtherDisconnectTimer") then
-				core:AddBar("DISC", ("DISCONNECT (%s)"):format(discoCount + 1), 41)
+				core:AddBar("DISC", self.L["DISCONNECT (%u)"]:format(discoCount + 1), 41)
 			end
-			core:AddBar("SDWAVE", ("[%s] WAVE"):format(sdwaveCount + 1), 15, GetSoundSetting(true, "SoundWave"))
+			core:AddBar("SDWAVE", self.L["[%u] WAVE"]:format(sdwaveCount + 1), 15, GetSoundSetting(true, "SoundWave"))
 			core:StartScan()
-		elseif sName == "Defragmentation Unit" then
+		elseif sName == self.L["Defragmentation Unit"] then
 			if GetCurrentSubZoneName():find("Infinite Generator Core") then
 				core:WatchUnit(unit)
 			end
