@@ -245,7 +245,7 @@ function RaidCore:OnEnable()
 
 	    Apollo.LoadSprites("BarTextures.xml")
 
-	    self.wndConfig = Apollo.LoadForm(self.xmlDoc, "ConfigForm", nil, self)
+		self.wndConfig = Apollo.LoadForm(self.xmlDoc, "ConfigForm", nil, self)
 		self.wndConfig:Show(false)
 
 		self.wndTargetFrame = self.wndConfig:FindChild("TargetFrame")
