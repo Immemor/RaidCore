@@ -232,36 +232,6 @@ function RaidCore:OnInitialize()
     -- load our form file
 	self.xmlDoc = XmlDoc.CreateFromFile("RaidCore.xml")
 	self.xmlDoc:RegisterCallback("OnDocLoaded", self)
-	self.wndConfig = Apollo.LoadForm(self.xmlDoc, "ConfigForm", nil, self)
-	self.wndConfig:Show(false)
-
-	self.wndTargetFrame = self.wndConfig:FindChild("TargetFrame")
-	self.wndConfigOptionsTargetFrame = self.wndConfig:FindChild("ConfigOptionsTargetFrame")
-
-	self.wndModuleList = {
-		DS = Apollo.LoadForm(self.xmlDoc, "ModuleList_DS", self.wndConfigOptionsTargetFrame, self),
-	}
-
-	self.wndSettings = {
-		General = Apollo.LoadForm(self.xmlDoc, "ConfigFormGeneral", self.wndTargetFrame, self),
-		DS = {
-			SystemDaemons = Apollo.LoadForm(self.xmlDoc, "ConfigForm_DS_SystemDaemons", self.wndTargetFrame, self),
-			Gloomclaw = Apollo.LoadForm(self.xmlDoc, "ConfigForm_DS_Gloomclaw", self.wndTargetFrame, self),
-			Maelstrom = Apollo.LoadForm(self.xmlDoc, "ConfigForm_DS_Maelstrom", self.wndTargetFrame, self),
-			Lattice = Apollo.LoadForm(self.xmlDoc, "ConfigForm_DS_Lattice", self.wndTargetFrame, self),
-			Limbo = Apollo.LoadForm(self.xmlDoc, "ConfigForm_DS_Limbo", self.wndTargetFrame, self),
-			AirEarth = Apollo.LoadForm(self.xmlDoc, "ConfigForm_DS_AirEarth", self.wndTargetFrame, self),
-			AirLife = Apollo.LoadForm(self.xmlDoc, "ConfigForm_DS_AirLife", self.wndTargetFrame, self),
-			AirWater = Apollo.LoadForm(self.xmlDoc, "ConfigForm_DS_AirWater", self.wndTargetFrame, self),
-			FireEarth = Apollo.LoadForm(self.xmlDoc, "ConfigForm_DS_FireEarth", self.wndTargetFrame, self),
-			FireLife = Apollo.LoadForm(self.xmlDoc, "ConfigForm_DS_FireLife", self.wndTargetFrame, self),
-			FireWater = Apollo.LoadForm(self.xmlDoc, "ConfigForm_DS_FireWater", self.wndTargetFrame, self),
-			LogicEarth = Apollo.LoadForm(self.xmlDoc, "ConfigForm_DS_LogicEarth", self.wndTargetFrame, self),
-			LogicLife = Apollo.LoadForm(self.xmlDoc, "ConfigForm_DS_LogicLife", self.wndTargetFrame, self),
-			LogicWater = Apollo.LoadForm(self.xmlDoc, "ConfigForm_DS_LogicWater", self.wndTargetFrame, self),
-			Avatus = Apollo.LoadForm(self.xmlDoc, "ConfigForm_DS_Avatus", self.wndTargetFrame, self),
-		},
-	}
 end
 
 -----------------------------------------------------------------------------------------------
@@ -271,16 +241,39 @@ end
 function RaidCore:OnEnable()
 
 	if self.xmlDoc ~= nil and self.xmlDoc:IsLoaded() then
-	    self.wndMain = Apollo.LoadForm(self.xmlDoc, "ConfigForm", nil, self)
-		if self.wndMain == nil then
-			Apollo.AddAddonErrorText(self, "Could not load the main window for some reason.")
-			return
-		end
-
 		self.settings = self.settings or self:recursiveCopyTable(DefaultSettings)
 
-	    self.wndMain:Show(false, true)
 	    Apollo.LoadSprites("BarTextures.xml")
+
+	    self.wndConfig = Apollo.LoadForm(self.xmlDoc, "ConfigForm", nil, self)
+		self.wndConfig:Show(false)
+
+		self.wndTargetFrame = self.wndConfig:FindChild("TargetFrame")
+		self.wndConfigOptionsTargetFrame = self.wndConfig:FindChild("ConfigOptionsTargetFrame")
+		self.wndModuleList = {
+			DS = Apollo.LoadForm(self.xmlDoc, "ModuleList_DS", self.wndConfigOptionsTargetFrame, self),
+		}
+
+		self.wndSettings = {
+			General = Apollo.LoadForm(self.xmlDoc, "ConfigFormGeneral", self.wndTargetFrame, self),
+			DS = {
+				SystemDaemons = Apollo.LoadForm(self.xmlDoc, "ConfigForm_DS_SystemDaemons", self.wndTargetFrame, self),
+				Gloomclaw = Apollo.LoadForm(self.xmlDoc, "ConfigForm_DS_Gloomclaw", self.wndTargetFrame, self),
+				Maelstrom = Apollo.LoadForm(self.xmlDoc, "ConfigForm_DS_Maelstrom", self.wndTargetFrame, self),
+				Lattice = Apollo.LoadForm(self.xmlDoc, "ConfigForm_DS_Lattice", self.wndTargetFrame, self),
+				Limbo = Apollo.LoadForm(self.xmlDoc, "ConfigForm_DS_Limbo", self.wndTargetFrame, self),
+				AirEarth = Apollo.LoadForm(self.xmlDoc, "ConfigForm_DS_AirEarth", self.wndTargetFrame, self),
+				AirLife = Apollo.LoadForm(self.xmlDoc, "ConfigForm_DS_AirLife", self.wndTargetFrame, self),
+				AirWater = Apollo.LoadForm(self.xmlDoc, "ConfigForm_DS_AirWater", self.wndTargetFrame, self),
+				FireEarth = Apollo.LoadForm(self.xmlDoc, "ConfigForm_DS_FireEarth", self.wndTargetFrame, self),
+				FireLife = Apollo.LoadForm(self.xmlDoc, "ConfigForm_DS_FireLife", self.wndTargetFrame, self),
+				FireWater = Apollo.LoadForm(self.xmlDoc, "ConfigForm_DS_FireWater", self.wndTargetFrame, self),
+				LogicEarth = Apollo.LoadForm(self.xmlDoc, "ConfigForm_DS_LogicEarth", self.wndTargetFrame, self),
+				LogicLife = Apollo.LoadForm(self.xmlDoc, "ConfigForm_DS_LogicLife", self.wndTargetFrame, self),
+				LogicWater = Apollo.LoadForm(self.xmlDoc, "ConfigForm_DS_LogicWater", self.wndTargetFrame, self),
+				Avatus = Apollo.LoadForm(self.xmlDoc, "ConfigForm_DS_Avatus", self.wndTargetFrame, self),
+			},
+		}
 
 	    self.raidbars = RaidCoreLibs.DisplayBlock.new(self.xmlDoc)
 	    self.raidbars:SetName("Raid Bars")
@@ -483,6 +476,24 @@ function RaidCore:OnBossSettingUnchecked(wndHandler, wndControl, eMouseButton )
 	local raidInstance = settingInfo[2]
 	local bossModule = settingInfo[3]
 	self.settings[raidInstance][bossModule][setting] = false
+end
+
+function RaidCore:OnWindowLoad(wndHandler, wndControl )
+	local settingInfo = self:SplitString(wndControl:GetParent():GetParent():GetName(), "_")
+	local setting = self:SplitString(wndControl:GetName(), "_")[2]
+	local raidInstance = settingInfo[2]
+	local bossModule = settingInfo[3]
+	local val = self.settings[raidInstance][bossModule][setting]
+
+	if val ~= nil then
+		if type(val) == "boolean" then
+			wndControl:SetCheck(val)
+		elseif type(val) == "number" then
+			wndControl:SetText(val)
+		elseif type(val) == "string" then
+			wndControl:SetText(val)
+		end
+	end
 end
 
 local function wipe(t)
