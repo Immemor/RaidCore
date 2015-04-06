@@ -84,6 +84,13 @@ function mod:OnBossEnable()
 	Apollo.RegisterEventHandler("CHAT_DATACHRON", 		"OnChatDC", self)
 end
 
+local function GetSetting(key)
+	return core:GetSettings()["DS"]["Gloomclaw"][key]
+end
+
+local function GetSoundSetting(sound, key)
+	if core:GetSettings()["DS"]["Gloomclaw"][key] then return sound else return nil end
+end
 
 --------------------------------------------------------------------------------
 -- Event Handlers
@@ -126,15 +133,15 @@ function mod:OnSpellCastStart(unitName, castName, unit)
 	--Print(castName .. " by " .. unitName)
 	if unitName == "Gloomclaw" and castName == "Rupture" then
 		ruptCount = ruptCount + 1
-		core:AddMsg("RUPTURE", "INTERRUPT BOSS", 5, "Destruction")
+		core:AddMsg("RUPTURE", "INTERRUPT BOSS", 5, GetSoundSetting("Destruction", "SoundRuptureInterrupt"))
 		if ruptCount == 1 then
-			core:AddBar("RUPTURE", "RUPTURE", 43, 1)			
+			core:AddBar("RUPTURE", "RUPTURE", 43, GetSoundSetting(true, "SoundRuptureCountdown"))			
 		end
 	elseif (unitName == "Corrupted Ravager" or unitName == "Empowered Ravager") and castName == "Corrupting Rays" then
 		local playerUnit = GameLib.GetPlayerUnit()
 		local distance_to_unit = dist2unit(playerUnit, unit)
 		if distance_to_unit < 35 then
-			core:AddMsg("RAYS", "INTERRUPT SPIDER", 5, "Inferno")
+			core:AddMsg("RAYS", "INTERRUPT SPIDER", 5, GetSoundSetting("Inferno", "SoundCorruptingRays"))
 		end
 	end
 end
@@ -152,24 +159,26 @@ function mod:OnChatDC(message)
 			else
 				section = section - 1
 			end
-			core:AddMsg("PHASE", ("SECTION %s"):format(section), 5, "Info", "Blue")
+			core:AddMsg("PHASE", ("SECTION %s"):format(section), 5, GetSoundSetting("Info", "SoundSectionSwitch"), "Blue")
 			if section ~= 4 then 
 				core:AddBar("WAVE", ("[%s] WAVE"):format(waveCount + 1), 11)
-				core:AddBar("RUPTURE", "RUPTURE", 39, 1)
+				core:AddBar("RUPTURE", "RUPTURE", 39, GetSoundSetting(true, "SoundRuptureCountdown"))
 			end
-			core:AddBar("CORRUPTION", "FULL CORRUPTION", 111, 1)
+			core:AddBar("CORRUPTION", "FULL CORRUPTION", 111, GetSoundSetting(true, "SoundCorruptionCountdown"))
 		else
 			first = false
 		end
 		core:ResetWorldMarkers()
-		core:SetWorldMarker(maulerSpawn["northwest"], "FROG 1")
-		core:SetWorldMarker(maulerSpawn["northeast"], "FROG 2")
-		core:SetWorldMarker(maulerSpawn["southeast"], "FROG 3")
-		core:SetWorldMarker(maulerSpawn["southwest"], "FROG 4")
-		if leftSpawn[section] then
+		if GetSetting("OtherMaulerMarkers") then
+			core:SetWorldMarker(maulerSpawn["northwest"], "FROG 1")
+			core:SetWorldMarker(maulerSpawn["northeast"], "FROG 2")
+			core:SetWorldMarker(maulerSpawn["southeast"], "FROG 3")
+			core:SetWorldMarker(maulerSpawn["southwest"], "FROG 4")
+		end
+		if GetSetting("OtherLeftRightMarkers") and leftSpawn[section] then
 			core:SetWorldMarker(leftSpawn[section], "LEFT")
 		end
-		if rightSpawn[section] then
+		if GetSetting("OtherLeftRightMarkers") and rightSpawn[section] then
 			core:SetWorldMarker(rightSpawn[section], "RIGHT")
 		end
 		Apollo.RegisterEventHandler("CombatLogHeal", 		"OnCombatLogHeal", self)		
@@ -177,7 +186,7 @@ function mod:OnChatDC(message)
 		core:StopBar("RUPTURE")
 		core:StopBar("CORRUPTION")
 		core:StopBar("WAVE")
-		core:AddMsg("TRANSITION", "TRANSITION", 5, "Alert")		
+		core:AddMsg("TRANSITION", "TRANSITION", 5, GetSoundSetting("Alert", "SoundMoOWarning"))		
 		core:AddBar("MOO", "MOO PHASE", 15)
 		for unitId, v in pairs(essenceUp) do
 			core:RemoveUnit(unitId)
@@ -188,8 +197,8 @@ function mod:OnChatDC(message)
 		core:StopBar("RUPTURE")
 		core:StopBar("CORRUPTION")
 		core:StopBar("WAVE")
-		core:AddMsg("TRANSITION", "BURN HIM HARD", 5, "Alert")		
-		core:AddBar("MOO", "MOO PHASE", 20, 1)
+		core:AddMsg("TRANSITION", "BURN HIM HARD", 5, GetSoundSetting("Alert", "SoundMoOWarning"))		
+		core:AddBar("MOO", "MOO PHASE", 20, GetSoundSetting(true, "SoundMoOWarning"))
 		for unitId, v in pairs(essenceUp) do
 			core:RemoveUnit(unitId)
 			essenceUp[unitId] = nil
@@ -230,15 +239,15 @@ function mod:OnCombatStateChanged(unit, bInCombat)
 			end
 			core:AddUnit(unit)
 			core:WatchUnit(unit)
-			core:AddBar("RUPTURE", "~RUPTURE", 35, 1)
-			core:AddBar("CORRUPTION", "FULL CORRUPTION", 106, 1)
+			core:AddBar("RUPTURE", "~RUPTURE", 35, GetSoundSetting(true, "SoundRuptureCountdown"))
+			core:AddBar("CORRUPTION", "FULL CORRUPTION", 106, GetSoundSetting(true, "SoundCorruptionCountdown"))
 			core:StartScan()
 		elseif sName == "Strain Parasite" or sName == "Gloomclaw Skurge" or sName == "Corrupted Fraz" then
 			local timeOfEvent = GameLib.GetGameTime()
 			if timeOfEvent - prev > 10 then
 				prev = timeOfEvent
 				waveCount = waveCount + 1
-				core:AddMsg("WAVE", ("[%s] WAVE"):format(waveCount), 5, "Info", "Blue")
+				core:AddMsg("WAVE", ("[%s] WAVE"):format(waveCount), 5, GetSoundSetting("Info", "SoundWaveWarning"), "Blue")
 				if section < 5 then
 					if waveCount < spawnCount[section] then
 						core:AddBar("WAVE", ("[%s] WAVE"):format(waveCount + 1), spawnTimer[section])

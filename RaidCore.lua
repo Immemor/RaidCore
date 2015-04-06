@@ -81,9 +81,11 @@ local DefaultSettings = {
 		Gloomclaw = {
 			SoundRuptureInterrupt = true,
 			SoundRuptureCountdown = true,
+			SoundCorruptingRays = true,
 			SoundSectionSwitch = true,
 			SoundCorruptionCountdown = true,
 			SoundMoOWarning = true,
+			SoundWaveWarning = true,
 			OtherLeftRightMarkers = true,
 			OtherMaulerMarkers = true,
 		},
