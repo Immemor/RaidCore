@@ -10,10 +10,47 @@ if not mod then return end
 --mod:RegisterEnableMob("Hydroflux")
 mod:RegisterEnableBossPair("Hydroflux", "Pyrobane")
 mod:RegisterRestrictZone("EpFrostFire", "Elemental Vortex Alpha", "Elemental Vortex Beta", "Elemental Vortex Delta")
+mod:RegisterEnglishLocale({
+	-- Unit names.
+	["Hydroflux"] = "Hydroflux",
+	["Pyrobane"] = "Pyrobane",
+	["Ice Tomb"] = "Ice Tomb",
+	-- Datachron messages.
+	-- NPCSay messages.
+	["Burning mortals... such sweet agony"] = "Burning mortals... such sweet agony",
+	["Run! Soon my fires will destroy you"] = "Run! Soon my fires will destroy you",
+	["Ah! The smell of seared flesh"] = "Ah! The smell of seared flesh",
+	["Enshrouded in deadly flame"] = "Enshrouded in deadly flame",
+	["Pyrobane ignites you"] = "Pyrobane ignites you",
+	-- Cast.
+	["Flame Wave"] = "Flame Wave",
+	-- Bar and messages.
+	["Frost Bomb"] = "Frost\nBomb",
+	["BOMBS"] = "BOMBS",
+	["BOMBS UP !"] = "BOMBS UP !",
+	["Bomb Explosion"] = "Bomb Explosion",
+	["ICE TOMB"] = "ICE TOMB",
+})
+mod:RegisterFrenchLocale({
+	-- Unit names.
+	-- Datachron messages.
+	-- Cast.
+	-- Bar and messages.
+})
+mod:RegisterGermanLocale({
+	-- Unit names.
+	-- Datachron messages.
+	-- Cast.
+	-- Bar and messages.
+})
 
 --------------------------------------------------------------------------------
 -- Locals
 --
+local DEBUFFID_ICE_TOMB = 74326
+local DEBUFFID_FROSTBOMB = 75058
+local DEBUFFID_FIREBOMB = 75059
+
 local GeminiGUI = Apollo.GetPackage("Gemini:GUI-1.0").tPackage
 
 local groupCount = 0
@@ -22,8 +59,6 @@ local strMyName = ""
 local prev = 0
 local prevBomb = 0
 
-local splId_frostbomb = 75058
-local splId_firebomb = 75059
 local firebomb_players = {}
 local frostbomb_players = {}
 
@@ -33,10 +68,10 @@ local frostbomb_players = {}
 
 function mod:OnBossEnable()
 	Print(("Module %s loaded"):format(mod.ModuleName))
-	Apollo.RegisterEventHandler("UnitCreated", "OnUnitCreated", self)
-	Apollo.RegisterEventHandler("UnitDestroyed", "OnUnitDestroyed", self)
-	Apollo.RegisterEventHandler("UnitEnteredCombat", "OnCombatStateChanged", self)
-	Apollo.RegisterEventHandler("CHAT_NPCSAY", "OnChatNPCSay", self)
+	Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
+	Apollo.RegisterEventHandler("RC_UnitDestroyed", "OnUnitDestroyed", self)
+	Apollo.RegisterEventHandler("RC_UnitStateChanged", "OnUnitStateChanged", self)
+	rpollo.RegisterEventHandler("CHAT_NPCSAY", "OnChatNPCSay", self)
 	Apollo.RegisterEventHandler("DEBUFF_APPLIED", "OnDebuffApplied", self)
 	Apollo.RegisterEventHandler("DEBUFF_APPLIED_DOSE", "OnDebuffAppliedDose", self)
 	Apollo.RegisterEventHandler("DEBUFF_REMOVED", "OnDebuffRemoved", self)
@@ -102,11 +137,11 @@ function mod:ApplyBombLines(bomb_type)
 end
 
 function mod:OnDebuffRemoved(unitName, splId, unit)
-	if splId == splId_firebomb then
+	if splId == DEBUFFID_FIREBOMB then
 		mod:RemoveBombMarker("fire", unit)
-	elseif splId == splId_frostbomb then
+	elseif splId == DEBUFFID_FROSTBOMB then
 		mod:RemoveBombMarker("frost", unit)
-	elseif splId == 74326 then -- Ice Tomb debuff
+	elseif splId == DEBUFFID_ICE_TOMB then
 		local unitId = unit:GetId()
 		if unitId then
 			core:DropPixie(unitId .. "_TOMB")
@@ -124,52 +159,51 @@ function mod:OnDebuffApplied(unitName, splId, unit)
 			Print("Unknown tSpell")
 	end
 
-	if splId == splId_firebomb then
+	if splId == DEBUFFID_FIREBOMB then
 		core:MarkUnit(unit, nil, "Fire\nBomb")
 		--core:AddPixie(unit:GetId() .. "_BOMB", 2, unit, nil, "Red", 7, 10, 0, 50)
 		core:AddUnit(unit)
 		firebomb_players[unitName] = unit
 		if unitName == strMyName then
-			core:AddMsg("BOMB", "BOMBS UP !", 5, "RunAway")
+			core:AddMsg("BOMB", self.L["BOMBS UP !"], 5, "RunAway")
 			self:ScheduleTimer("ApplyBombLines", 1, "fire")
 		end
 		self:ScheduleTimer("RemoveBombMarker", 10, "fire", unit)
-	elseif splId == splId_frostbomb then
-		core:MarkUnit(unit, nil, "Frost\nBomb")
+	elseif splId == DEBUFFID_FROSTBOMB then
+		core:MarkUnit(unit, nil, self.L["Frost Bomb"])
 		--core:AddPixie(unit:GetId() .. "_BOMB", 2, unit, nil, "Blue", 7, 10, 0, 50)
 		core:AddUnit(unit)
 		frostbomb_players[unitName] = unit
 		if unitName == strMyName then
-			core:AddMsg("BOMB", "BOMBS UP !", 5, "RunAway")
+			core:AddMsg("BOMB", self.L["BOMBS UP !"], 5, "RunAway")
 			self:ScheduleTimer("ApplyBombLines", 1, "frost")
 		end
 		self:ScheduleTimer("RemoveBombMarker", 10, "frost", unit)
-	elseif splId == 74326 and dist2unit(uPlayer, unit) < 45 then -- Ice Tomb Debuff
+	elseif splId == DEBUFFID_ICE_TOMB and dist2unit(uPlayer, unit) < 45 then -- Ice Tomb Debuff
 		local unitId = unit:GetId()
 		if unitId then
 			core:AddPixie(unitId .. "_TOMB", 1, uPlayer, unit, "Blue", 5, 10, 10)
 		end
 	end
-	if splId == splId_firebomb or splId == splId_frostbomb then
+	if splId == DEBUFFID_FIREBOMB or splId == DEBUFFID_FROSTBOMB then
 		if eventTime - prevBomb > 10 then
 			prevBomb = eventTime
-			core:AddBar("BEXPLODE", "Bomb Explosion", 10, true)
+			core:AddBar("BEXPLODE", self.L["Bomb Explosion"], 10, true)
 		end
 	end
 	--Print(eventTime .. " " .. unitName .. "has debuff: " .. strSpellName .. " with splId: " .. splId .. " - type: DebuffNormal")
 end
 
-function mod:OnUnitCreated(unit)
-	local sName = unit:GetName()
-	if sName == "Ice Tomb" then
+function mod:OnUnitCreated(unit, sName)
+	if sName == self.L["Ice Tomb"] then
 		local timeOfEvent = GameLib.GetGameTime()
 		if timeOfEvent - prev > 13 then
 			prev = timeOfEvent
-			core:AddMsg("TOMB", "ICE TOMB", 5, "Alert", "Blue")
-			core:AddBar("TOMB", "ICE TOMB", 15)
+			core:AddMsg("TOMB", self.L["ICE TOMB"], 5, "Alert", "Blue")
+			core:AddBar("TOMB", self.L["ICE TOMB"], 15)
 		end
 		core:AddUnit(unit)
-	elseif sName == "Flame Wave" then
+	elseif sName == self.L["Flame Wave"] then
 		local unitId = unit:GetId()
 		if unitId then
 			core:AddPixie(unitId, 2, unit, nil, "Green", 10, 20, 0)
@@ -177,9 +211,8 @@ function mod:OnUnitCreated(unit)
 	end
 end
 
-function mod:OnUnitDestroyed(unit)
-	local sName = unit:GetName()
-	if sName == "Flame Wave" then
+function mod:OnUnitDestroyed(unit, sName)
+	if sName == self.L["Flame Wave"] then
 		local unitId = unit:GetId()
 		if unitId then
 			core:DropPixie(unitId)
@@ -197,27 +230,25 @@ function mod:OnDebuffAppliedDose(unitName, splId, stack)
 end
 
 function mod:OnChatNPCSay(message)
-	if message:find("Burning mortals... such sweet agony")
-	or message:find("Run! Soon my fires will destroy you")
-	or message:find("Ah! The smell of seared flesh")
-	or message:find("Enshrouded in deadly flame")
-	or message:find("Pyrobane ignites you")   then
-		core:AddBar("BOMBS", "BOMBS", 30)
+	if message:find(self.L["Burning mortals... such sweet agony"])
+	or message:find(self.L["Run! Soon my fires will destroy you"])
+	or message:find(self.L["Ah! The smell of seared flesh"])
+	or message:find(self.L["Enshrouded in deadly flame"])
+	or message:find(self.L["Pyrobane ignites you"]) then
+		core:AddBar("BOMBS", self.L["BOMBS"], 30)
 	end
 end
 
-function mod:OnCombatStateChanged(unit, bInCombat)
+function mod:OnUnitStateChanged(unit, bInCombat, sName)
 	if unit:GetType() == "NonPlayer" and bInCombat then
-		local sName = unit:GetName()
-
-		if sName == "Hydroflux" then
+		if sName == self.L["Hydroflux"] then
 			core:AddUnit(unit)
 			local unitId = unit:GetId()
 			if unitId then
 				core:AddPixie(unitId .. "_1", 2, unit, nil, "Yellow", 3, 7, 0)
 				core:AddPixie(unitId .. "_2", 2, unit, nil, "Yellow", 3, 7, 180)
 			end
-		elseif sName == "Pyrobane" then
+		elseif sName == self.L["Pyrobane"] then
 			self:Start()
 			uPlayer = GameLib.GetPlayerUnit()
 			strMyName = uPlayer:GetName()
@@ -227,7 +258,7 @@ function mod:OnCombatStateChanged(unit, bInCombat)
 
 			core:AddUnit(unit)
 			core:RaidDebuff()
-			core:AddBar("BOMBS", "BOMBS", 30)
+			core:AddBar("BOMBS", self.L["BOMBS"], 30)
 			core:StartScan()
 		end
 	end
