@@ -4,7 +4,7 @@
 
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 
-local mod = core:NewBoss("MaelstromAuthority", 52)
+local mod = core:NewBoss("Maelstrom", 52)
 if not mod then return end
 
 mod:RegisterEnableMob("Weather Control Station")
@@ -31,6 +31,13 @@ function mod:OnBossEnable()
 	Apollo.RegisterEventHandler("CHAT_DATACHRON", 		"OnChatDC", self)
 end
 
+local function GetSetting(key)
+	return core:GetSettings()["DS"]["Maelstrom"][key]
+end
+
+local function GetSoundSetting(sound, key)
+	if core:GetSettings()["DS"]["Maelstrom"][key] then return sound else return nil end
+end
 
 --------------------------------------------------------------------------------
 -- Event Handlers
@@ -44,7 +51,7 @@ function mod:OnUnitCreated(unit)
 		self:Start()
 		core:AddBar("JUMP", "Encounter Start", 8.5, 1)
 		bossPos = {}
-	elseif sName == "Wind Wall" then
+	elseif sName == "Wind Wall" and GetSetting("LineWindWalls") then
 		core:AddPixie(unit:GetId().."_1", 2, unit, nil, "Green", 10, 20, 0)
 		core:AddPixie(unit:GetId().."_2", 2, unit, nil, "Green", 10, 20, 180)
 		--core:AddLine(unit:GetId().."_1", 2, unit, nil, 1, 20, 0)
@@ -56,8 +63,10 @@ function mod:OnUnitCreated(unit)
 		--Rover:AddWatch("stationPos", stationPos, 0)
 		--local posStr = (stationPos.z > bossPos.z) and "S" or "N", (stationPos.x > bossPos.x) and "E" or "W"
 		core:AddUnit(unit)
-		local playerUnit = GameLib.GetPlayerUnit()
-		core:AddPixie(unit:GetId(), 1, playerUnit, unit, "Blue", 5, 10, 10)
+		if GetSetting("LineWeatherStations") then
+			local playerUnit = GameLib.GetPlayerUnit()
+			core:AddPixie(unit:GetId(), 1, playerUnit, unit, "Blue", 5, 10, 10)
+		end
 	end
 end
 
@@ -83,11 +92,11 @@ function mod:OnSpellCastStart(unitName, castName, unit)
 		stationCount = 0
 		core:AddBar("STATION", ("[%s] STATION"):format(stationCount + 1), 13)
 	elseif unitName == "Maelstrom Authority" and castName == "Ice Breath" then
-		core:AddMsg("BREATH", "ICE BREATH", 5, "RunAway")
+		core:AddMsg("BREATH", "ICE BREATH", 5, GetSoundSetting("RunAway", "SoundIcyBreath"))
 	elseif unitName == "Maelstrom Authority" and castName == "Crystallize" then
-		core:AddMsg("BREATH", "ICE BREATH", 5, "Beware")
+		core:AddMsg("BREATH", "ICE BREATH", 5, GetSoundSetting("Beware", "SoundCrystallize"))
 	elseif unitName == "Maelstrom Authority" and castName == "Typhoon" then
-		core:AddMsg("BREATH", "TYPHOON", 5, "Beware")
+		core:AddMsg("BREATH", "TYPHOON", 5, GetSoundSetting("Beware", "SoundTyphoon"))
 	end
 end
 
@@ -108,7 +117,9 @@ function mod:OnCombatStateChanged(unit, bInCombat)
 			core:AddUnit(unit)
 			core:WatchUnit(unit)
 			core:StartScan()
-			core:AddPixie(unit:GetId(), 2, unit, nil, "Red", 10, 15, 0)
+			if GetSetting("LineCleaveBoss") then
+				core:AddPixie(unit:GetId(), 2, unit, nil, "Red", 10, 15, 0)
+			end
 		elseif sName == "Weather Station" then
 			stationCount = stationCount + 1
 			local station_name = "STATION" .. tostring(stationCount)
@@ -116,9 +127,9 @@ function mod:OnCombatStateChanged(unit, bInCombat)
 			local posStr = ""
 			local stationPos = unit:GetPosition()
 			if stationPos and bossPos then
-				core:AddMsg(station_name, ("[%s] STATION : %s %s"):format(stationCount, (stationPos.z > bossPos.z) and "SOUTH" or "NORTH", (stationPos.x > bossPos.x) and "EAST" or "WEST"), 5, "Info", "Blue")
+				core:AddMsg(station_name, ("[%s] STATION : %s %s"):format(stationCount, (stationPos.z > bossPos.z) and "SOUTH" or "NORTH", (stationPos.x > bossPos.x) and "EAST" or "WEST"), 5, GetSoundSetting("Info", "SoundWeatherStationSwitch"), "Blue")
 			else
-				core:AddMsg(station_name, ("[%s] STATION"):format(stationCount), 5, "Info", "Blue")
+				core:AddMsg(station_name, ("[%s] STATION"):format(stationCount), 5, GetSoundSetting("Info", "SoundWeatherStationSwitch"), "Blue")
 			end
 			core:AddBar(station_name, ("[%s] STATION"):format(stationCount + 1), 10)				
 		end

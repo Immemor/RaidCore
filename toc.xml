@@ -26,7 +26,7 @@
 	<Script Name="Modules/Gloomclaw.lua" />
 	<Script Name="Modules/DSLogicWing.lua" />
 	<Script Name="Modules/VolatilyLattice.lua" />
-	<Script Name="Modules/MaelstromAuthority.lua" />
+	<Script Name="Modules/Maelstrom.lua" />
 	<Script Name="Modules/EPFrostAir.lua" />
 	<Script Name="Modules/EPFrostFire.lua" />
 	<Script Name="Modules/EPFrostLogic.lua" />
