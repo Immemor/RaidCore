@@ -10,6 +10,41 @@ if not mod then return end
 --mod:RegisterEnableMob("Hydroflux")
 mod:RegisterEnableBossPair("Hydroflux", "Aileron")
 mod:RegisterRestrictZone("EpFrostAir", "Elemental Vortex Alpha", "Elemental Vortex Beta", "Elemental Vortex Delta")
+mod:RegisterEnglishLocale({
+	-- Unit names.
+	["Hydroflux"] = "Hydroflux",
+	["Aileron"] = "Aileron",
+	["Landing Volume"] = "Landing Volume",
+	["Wind Wall"] = "Wind Wall",
+	-- Datachron messages.
+	["Hydroflux evaporates"] = "Hydroflux evaporates",
+	["Aileron dissipates with a flurry"] = "Aileron dissipates with a flurry",
+	["The wind starts to blow faster and faster"] = "The wind starts to blow faster and faster",
+	-- Cast.
+	["Tsunami"] = "Tsunami",
+	["Glacial Icestorm"] = "Glacial Icestorm",
+	-- Bar and messages.
+	["EYE OF THE STORM"] = "EYE OF THE STORM",
+	["MOO !"] = "MOO !",
+	["MOO PHASE"] = "MOO PHASE",
+	["ICESTORM"] = "ICESTORM",
+	["~Middle Phase"] = "~Middle Phase",
+	["~Frost Tombs"] = "~Frost Tombs",
+	["TWIRL ON YOU!"] = "TWIRL ON YOU!",
+	["TWIRL"] = "TWIRL",
+})
+mod:RegisterFrenchLocale({
+	-- Unit names.
+	-- Datachron messages.
+	-- Cast.
+	-- Bar and messages.
+})
+mod:RegisterGermanLocale({
+	-- Unit names.
+	-- Datachron messages.
+	-- Cast.
+	-- Bar and messages.
+})
 
 --------------------------------------------------------------------------------
 -- Locals
@@ -27,9 +62,9 @@ local CheckTwirlTimer = nil
 
 function mod:OnBossEnable()
 	Print(("Module %s loaded"):format(mod.ModuleName))
-	Apollo.RegisterEventHandler("UnitCreated", "OnUnitCreated", self)
-	--Apollo.RegisterEventHandler("UnitDestroyed", "OnUnitDestroyed", self)
-	Apollo.RegisterEventHandler("UnitEnteredCombat", "OnCombatStateChanged", self)
+	Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
+	--Apollo.RegisterEventHandler("RC_UnitDestroyed", "OnUnitDestroyed", self)
+	Apollo.RegisterEventHandler("RC_UnitStateChanged", "OnUnitStateChanged", self)
 	Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
 	Apollo.RegisterEventHandler("SPELL_CAST_END", "OnSpellCastEnd", self)
 	Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
@@ -51,62 +86,62 @@ function mod:OnReset()
 	twirl_units = {}
 end
 
-function mod:OnUnitCreated(unit)
-	local sName = unit:GetName()
+function mod:OnUnitCreated(unit, sName)
 	--Print(sName)
-	if sName == "Landing Volume" then
+	if sName == self.L["Landing Volume"] then
 		core:MarkUnit(unit, 0, "LAND")
 	end
 end
 
-function mod:OnUnitDestroyed(unit)
-	local sName = unit:GetName()
+function mod:OnUnitDestroyed(unit, sName)
 	--Print(sName)
-	if sName == "Wind Wall" then
+	if sName == self.L["Wind Wall"] then
 		core:DropLine(unit:GetId().."_1")
 		core:DropLine(unit:GetId().."_2")
 	end
 end
 
 function mod:OnSpellCastStart(unitName, castName, unit)
-	if unitName == "Hydroflux" and castName == "Tsunami" then
-		phase2 = true
-		mooCount = mooCount + 1
-		core:AddMsg("PHASE2", "TSUNAMI", 5, "Alert")
-	elseif unitName == "Hydroflux" and castName == "Glacial Icestorm" then
-		core:AddMsg("ICESTORM", "ICESTORM", 5, "RunAway")
+	if unitName == self.L["Hydroflux"] then
+		if castName == self.L["Tsunami"] then
+			phase2 = true
+			mooCount = mooCount + 1
+			core:AddMsg("PHASE2", self.L["Tsunami"]:upper(), 5, "Alert")
+		elseif castName == self.L["Glacial Icestorm"] then
+			core:AddMsg("ICESTORM", self.L["ICESTORM"], 5, "RunAway")
+		end
 	end
 end
 
 function mod:OnSpellCastEnd(unitName, castName)
-	if unitName == "Hydroflux" and castName == "Tsunami" then
-		core:AddBar("MIDPHASE", "~Middle Phase", 88, true)
-		core:AddBar("TOMB", "~Frost Tombs", 30, true)
+	if unitName == self.L["Hydroflux"] and castName == self.L["Tsunami"] then
+		core:AddBar("MIDPHASE", self.L["~Middle Phase"], 88, true)
+		core:AddBar("TOMB", self.L["~Frost Tombs"], 30, true)
 	end
 	--Print(unitName .. " - " .. castName)
 end
 
 function mod:OnChatDC(message)
-	if message:find("Hydroflux evaporates") then
+	if message:find(self.L["Hydroflux evaporates"]) then
 		--core:AddMsg("PHASE1", "MOO !", 5, "Info", "Blue")
-		core:AddBar("PHASE2", "EYE OF THE STORM", 45, 1)
-	elseif message:find("Aileron dissipates with a flurry") then
-		core:AddBar("PHASE2", "TSUNAMI", 45, 1)
-	elseif message:find("The wind starts to blow faster and faster") then
+		core:AddBar("PHASE2", self.L["EYE OF THE STORM"], 45, 1)
+	elseif message:find(self.L["Aileron dissipates with a flurry"]) then
+		core:AddBar("PHASE2", self.L["Tsunami"]:upper(), 45, 1)
+	elseif message:find(self.L["The wind starts to blow faster and faster"]) then
 		phase2 = true
 		mooCount = mooCount + 1
-		core:AddMsg("PHASE2", "EYE OF THE STORM", 5, "Alert")
+		core:AddMsg("PHASE2", self.L["EYE OF THE STORM"], 5, "Alert")
 	end
 end
 
 function mod:OnBuffApplied(unitName, splId, unit)
 	if phase2 and (splId == 69959 or splId == 47075) then
 		phase2 = false
-		core:AddMsg("MOO", "MOO !", 5, "Info", "Blue")
-		core:AddBar("MOO", "MOO PHASE", 10, 1)
+		core:AddMsg("MOO", self.L["MOO !"], 5, "Info", "Blue")
+		core:AddBar("MOO", self.L["MOO PHASE"], 10, 1)
 		if mooCount == 2 then
 			mooCount = 0
-			core:AddBar("ICESTORM", "ICESTORM", 15)
+			core:AddBar("ICESTORM", self.L["ICESTORM"], 15)
 		end
 	end
 end
@@ -118,10 +153,10 @@ function mod:OnDebuffApplied(unitName, splId, unit)
 		--Print(eventTime .. " debuff applied on unit: " .. unitName .. " - " .. splId)
 
 		if unitName == myName then
-			core:AddMsg("TWIRL", "TWIRL ON YOU!", 5, "Inferno")
+			core:AddMsg("TWIRL", self.L["TWIRL ON YOU!"], 5, "Inferno")
 		end
 
-		core:MarkUnit(unit, nil, "TWIRL")
+		core:MarkUnit(unit, nil, self.L["TWIRL"])
 		core:AddUnit(unit)
 		twirl_units[unitName] = unit
 		if not CheckTwirlTimer then
@@ -150,18 +185,17 @@ function mod:CheckTwirlTimer()
 	end
 end
 
-function mod:OnCombatStateChanged(unit, bInCombat)
+function mod:OnUnitStateChanged(unit, bInCombat, sName)
 	if unit:GetType() == "NonPlayer" and bInCombat then
-		local sName = unit:GetName()
 		local eventTime = GameLib.GetGameTime()
 		local playerUnit = GameLib.GetPlayerUnit()
 		myName = playerUnit:GetName()
 
-		if sName == "Hydroflux" then
+		if sName == self.L["Hydroflux"] then
 			core:AddUnit(unit)
 			core:WatchUnit(unit)
 			core:UnitBuff(unit)
-		elseif sName == "Aileron" then
+		elseif sName == self.L["Aileron"] then
 			self:Start()
 			mooCount = 0
 			phase2 = false
@@ -172,8 +206,8 @@ function mod:OnCombatStateChanged(unit, bInCombat)
 			core:UnitDebuff(playerUnit)
 			core:RaidDebuff()
 			core:StartScan()
-			core:AddBar("MIDPHASE", "Middle Phase", 60, true)
-			core:AddBar("TOMB", "~Frost Tombs", 30, true)
+			core:AddBar("MIDPHASE", self.L["Middle Phase"], 60, true)
+			core:AddBar("TOMB", self.L["~Frost Tombs"], 30, true)
 
 			--Print(eventTime .. " " .. sName .. " FIGHT STARTED ")
 		end
