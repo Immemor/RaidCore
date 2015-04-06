@@ -47,6 +47,14 @@ function mod:OnBossEnable()
 	Apollo.RegisterEventHandler("ChatMessage",			"OnChatMessage", self) -- temp dissabled. Not finished
 end
 
+local function GetSetting(key)
+	return core:GetSettings()["DS"]["Avatus"][key]
+end
+
+local function GetSoundSetting(sound, key)
+	if core:GetSettings()["DS"]["Avatus"][key] then return sound else return nil end
+end
+
 local function dist2unit(unitSource, unitTarget)
 	if not unitSource or not unitTarget then return 999 end
 	local sPos = unitSource:GetPosition()
@@ -170,7 +178,9 @@ function mod:OnUnitCreated(unit)
 	if sName == "Avatus" then
 		core:AddUnit(unit)
 		core:WatchUnit(unit)
-		core:AddPixie(unit:GetId(), 2, unit, nil, "Green", 10, 22, 0)
+		if GetSetting("LineCleaveBoss") then
+			core:AddPixie(unit:GetId(), 2, unit, nil, "Green", 10, 22, 0)
+		end
 	elseif sName == "Holo Hand" then
 		--Print(eventTime .. " Holo hand Spawned")
 		local unitId = unit:GetId()
@@ -178,31 +188,31 @@ function mod:OnUnitCreated(unit)
 		core:WatchUnit(unit)
 		table.insert(holo_hands, unitId, {["unit"] = unit})
 		core:AddMsg("HHAND", "Holo Hand Spawned", 5, "Info")
-		if unitId then
+		if unitId and GetSetting("LineCleaveHands") then
 			core:AddPixie(unitId .. "_1", 2, unit, nil, "Blue", 7, 20, 0)
 			--core:AddPixie(unitId .. "_2", 2, unit, nil, "Blue", 7, 20, 270)
 		end
-	elseif sName == "Mobius Physics Constructor" then
+	elseif sName == "Mobius Physics Constructor" then -- yellow room
 		core:AddUnit(unit)
 		core:WatchUnit(unit)
 		local unitId = unit:GetId()
 		if unitId then
-			if unit:GetHealth() then -- Portals have same name, actual boss has HP, portals have nilvalue
+			if unit:GetHealth() and GetSetting("LineCleaveYellowRoomBoss") then -- Portals have same name, actual boss has HP, portals have nilvalue
 				core:AddPixie(unitId, 2, unit, nil, "Red", 5, 35, 0)
 			end
 		end
-	elseif sName == "Unstoppable Object Simulation" then
+	elseif sName == "Unstoppable Object Simulation" then -- green
 		core:AddUnit(unit)
-	elseif sName == "Holo Cannon" then
+	elseif sName == "Holo Cannon" and GetSetting("LineCannons") then
 		core:AddPixie(unit:GetId(), 2, unit, nil, "Blue", 5, 100, 0)
-	elseif sName == "Shock Sphere" then
+	elseif sName == "Shock Sphere" and GetSetting("LineOrbsYellowRoom") then -- yellow room orbs
 		core:AddPixie(unit:GetId(), 2, unit, nil, "Blue", 5, -7, 0)
 	elseif sName == "Support Cannon" then
 		core:AddUnit(unit)
 	end
 
 	-- TESTING BLUE ROOM:
-	if sName == "Infinite Logic Loop" then
+	if sName == "Infinite Logic Loop" then -- blue
 		core:AddUnit(unit)
 		core:UnitBuff(unit)
 		phase2_blueroom = true
@@ -256,7 +266,7 @@ function mod:OnBuffApplied(unitName, splId, unit)
 		if strSpellName == "Green Reconstitution Matrix" then
 			local playerAssigned = getPlayerAssignment(phase2_blueroom_rotation["green"])
 			if playerAssigned == strMyName then
-				core:AddMsg("BLUEPURGE", "PURGE BLUE BOSS", 5, "Inferno")
+				core:AddMsg("BLUEPURGE", "PURGE BLUE BOSS", 5, GetSoundSetting("Inferno", "SoundBlueInterrupt"))
 			end
 			--ChatSystemLib.Command('/p [#' .. tostring(greenBuffCount) .. '] ' .. unitName .. " has GREEN buff - assigned to: " .. playerAssigned)
 			Print('[#' .. tostring(greenBuffCount) .. '] ' .. unitName .. " has GREEN buff - assigned to: " .. playerAssigned)
@@ -266,7 +276,7 @@ function mod:OnBuffApplied(unitName, splId, unit)
 		elseif strSpellName == "Blue Disruption Matrix" then
 			local playerAssigned = getPlayerAssignment(phase2_blueroom_rotation["blue"])
 			if playerAssigned == strMyName then
-				core:AddMsg("BLUEPURGE", "PURGE BLUE BOSS", 5, "Inferno")
+				core:AddMsg("BLUEPURGE", "PURGE BLUE BOSS", 5, GetSoundSetting("Inferno", "SoundBlueInterrupt"))
 			end
 			--ChatSystemLib.Command('/p [#' .. tostring(blueBuffCount) .. '] ' .. unitName .. " has BLUE buff - assigned to: " .. playerAssigned)
 			Print('[#' .. tostring(blueBuffCount) .. '] ' .. unitName .. " has BLUE buff - assigned to: " .. playerAssigned)
@@ -276,7 +286,7 @@ function mod:OnBuffApplied(unitName, splId, unit)
 		elseif strSpellName == "Red Empowerment Matrix" then
 			local playerAssigned = getPlayerAssignment(phase2_blueroom_rotation["red"])
 			if playerAssigned == strMyName then
-				core:AddMsg("BLUEPURGE", "PURGE BLUE BOSS", 5, "Inferno")
+				core:AddMsg("BLUEPURGE", "PURGE BLUE BOSS", 5, GetSoundSetting("Inferno", "SoundBlueInterrupt"))
 			end
 			--ChatSystemLib.Command('/p [#' .. tostring(redBuffCount) .. '] ' .. unitName .. " has RED buff - assigned to: " .. playerAssigned)
 			Print('[#' .. tostring(redBuffCount) .. '] ' .. unitName .. " has RED buff - assigned to: " .. playerAssigned)
@@ -290,10 +300,10 @@ end
 function mod:OnHealthChanged(unitName, health)
 	if unitName == "Avatus" and health >= 75 and health <= 77 and not phase2warn then
 		phase2warn = true
-		core:AddMsg("AVAP2", "P2 SOON !", 5, "Info")
+		core:AddMsg("AVAP2", "P2 SOON !", 5, GetSoundSetting("Info", "SoundPortalPhase"))
 	elseif unitName == "Avatus" and health >= 50 and health <= 52 and not phase2warn then
 		phase2warn = true
-		core:AddMsg("AVAP2", "P2 SOON!", 5, "Info")
+		core:AddMsg("AVAP2", "P2 SOON!", 5, GetSoundSetting("Info", "SoundPortalPhase"))
 	end
 	if unitName == "Avatus" and health >= 70 and health <= 72 and phase2warn then
 		phase2warn = false
@@ -303,11 +313,11 @@ end
 function mod:OnSpellCastStart(unitName, castName, unit)
 	local eventTime = GameLib.GetGameTime()
 	if unitName == "Avatus" and castName == "Obliteration Beam" then
-		core:AddMsg("BEAMS", "GO TO SIDES !", 5, "RunAway")
+		core:AddMsg("BEAMS", "GO TO SIDES !", 5, GetSoundSetting("RunAway", "SoundObliterationBeam"))
 		core:StopBar("OBBEAM")
 		-- check if next ob beam in {obliteration_beam_timer} sec doesn't happen during a gungrid which takes 20 sec
 		if gungrid_time + gungrid_timer + 20 < eventTime + obliteration_beam_timer then
-			core:AddBar("OBBEAM", "Obliteration Beam", obliteration_beam_timer, true)
+			core:AddBar("OBBEAM", "Obliteration Beam", obliteration_beam_timer, GetSoundSetting(true, "SoundObliterationBeam"))
 		end
 	elseif unitName == "Holo Hand" and castName == "Crushing Blow" then
 		local playerUnit = GameLib.GetPlayerUnit()
@@ -323,11 +333,11 @@ function mod:OnSpellCastStart(unitName, castName, unit)
 			end
 		end
 		if closest_holo_hand["unit"]:GetCastName() == "Crushing Blow" then
-			core:AddMsg("CRBLOW", "INTERRUPT CRUSHING BLOW!", 5, "Inferno")
+			core:AddMsg("CRBLOW", "INTERRUPT CRUSHING BLOW!", 5, GetSoundSetting("Inferno", "SoundHandInterrupt"))
 		end
 	elseif unitName == "Mobius Physics Constructor" and castName == "Data Flare" then
-		core:AddBar("BLIND", "Blind", 29, true)
-		core:AddMsg("BLIND", "BLIND! TURN AWAY FROM BOSS", 5, "Inferno")
+		core:AddBar("BLIND", "Blind", 29, GetSoundSetting(true, "SoundBlindYellowRoom"))
+		core:AddMsg("BLIND", "BLIND! TURN AWAY FROM BOSS", 5, GetSoundSetting("Inferno", "SoundBlindYellowRoom"))
 	end
 
 	--Print(eventTime .. " " .. unitName .. " is casting " .. castName)
@@ -339,10 +349,10 @@ function mod:OnChatDC(message)
 	if message:find("Gun Grid Activated") then
 		--Print(eventTime .. " ChatDC Message: " .. message)
 		gungrid_time = eventTime
-		core:AddMsg("GGRIDMSG", "Gun Grid NOW!", 5, "Beware")
+		core:AddMsg("GGRIDMSG", "Gun Grid NOW!", 5, GetSoundSetting("Beware", "SoundGunGrid"))
 		core:StopBar("GGRID")
 		core:StopBar("HHAND")
-		core:AddBar("GGRID", "~Gun Grid", gungrid_timer, true)
+		core:AddBar("GGRID", "~Gun Grid", gungrid_timer, GetSoundSetting(true, "SoundGunGrid"))
 		core:AddBar("HHAND", "Holo Hands spawn", 22)
 	end
 	if message:find("Portals have opened!") then
@@ -403,12 +413,16 @@ function mod:OnCombatStateChanged(unit, bInCombat)
 
 			--Print(eventTime .. " " .. sName .. " FIGHT STARTED ")
 
-			core:AddBar("OBBEAM", "Obliteration Beam", obliteration_beam_timer, true)
-			core:AddBar("GGRID", "~Gun Grid", gungrid_timer, true)
-			core:SetWorldMarker(handpos["hand1"], "Hand 1")
-			core:SetWorldMarker(handpos["hand2"], "Hand 2")
-			core:SetWorldMarker(referencePos["north"], "North")
-			core:SetWorldMarker(referencePos["south"], "South")
+			core:AddBar("OBBEAM", "Obliteration Beam", obliteration_beam_timer, GetSoundSetting(true, "SoundObliterationBeam"))
+			core:AddBar("GGRID", "~Gun Grid", gungrid_timer, GetSoundSetting(true, "SoundGunGrid"))
+			if GetSetting("OtherHandSpawnMarkers") then
+				core:SetWorldMarker(handpos["hand1"], "Hand 1")
+				core:SetWorldMarker(handpos["hand2"], "Hand 2")
+			end
+			if GetSetting("OtherDirectionMarkers") then
+				core:SetWorldMarker(referencePos["north"], "North")
+				core:SetWorldMarker(referencePos["south"], "South")
+			end
 			gungrid_timer = 112
 			obliteration_beam_timer = 37
 		elseif sName == "Infinite Logic Loop" then
