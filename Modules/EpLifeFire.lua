@@ -10,6 +10,35 @@ if not mod then return end
 --mod:RegisterEnableMob("Visceralus")
 mod:RegisterEnableBossPair("Visceralus", "Pyrobane")
 mod:RegisterRestrictZone("EpLifeFire", "Elemental Vortex Alpha", "Elemental Vortex Beta", "Elemental Vortex Delta")
+mod:RegisterEnglishLocale({
+	-- Unit names.
+	["Visceralus"] = "Visceralus",
+	["Pyrobane"] = "Pyrobane",
+	["Life Force"] = "Life Force",
+	["Essence of Life"] = "Essence of Life",
+	["Flame Wave"] = "Flame Wave",
+	-- Datachron messages.
+	-- Cast.
+	["Blinding Light"] = "Blinding Light",
+	-- Bar and messages.
+	["You are rooted"] = "You are rooted",
+	["MIDPHASE"] = "MIDPHASE",
+})
+mod:RegisterFrenchLocale({
+	-- Unit names.
+	-- Datachron messages.
+	-- Cast.
+	-- Bar and messages.
+})
+mod:RegisterGermanLocale({
+	-- Unit names.
+	-- Datachron messages.
+	-- Cast.
+	-- Bar and messages.
+})
+
+local DEBUFFID_PRIMAL_ENTANGLEMENT = 73179 -- A root ability.
+local DEBUFFIF__TODO__ = 73177 -- TODO: set english debuff name as define name.
 
 --------------------------------------------------------------------------------
 -- Locals
@@ -26,10 +55,10 @@ local CheckRootTimer = nil
 
 function mod:OnBossEnable()
 	Print(("Module %s loaded"):format(mod.ModuleName))
-	Apollo.RegisterEventHandler("UnitEnteredCombat", "OnCombatStateChanged", self)
+	Apollo.RegisterEventHandler("RC_UnitStateChanged", "OnUnitStateChanged", self)
 	Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
-	Apollo.RegisterEventHandler("UnitCreated", "OnUnitCreated", self)
-	Apollo.RegisterEventHandler("UnitDestroyed", "OnUnitDestroyed", self)
+	Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
+	Apollo.RegisterEventHandler("RC_UnitDestroyed", "OnUnitDestroyed", self)
 	Apollo.RegisterEventHandler("DEBUFF_APPLIED", "OnDebuffApplied", self)
 	Apollo.RegisterEventHandler("DEBUFF_APPLIED_DOSE", "OnDebuffAppliedDose", self)
 	Apollo.RegisterEventHandler("RAID_WIPE", "OnReset", self)
@@ -66,7 +95,7 @@ function mod:CheckRootTracker()
 			local bUnitIsRooted = false
 			local debuffs = unit:GetBuffs().arHarmful
 			for _, debuff in pairs(debuffs) do
-				if debuff.splEffect:GetId() == 73179 then -- the root ability, Primal Entanglement
+				if debuff.splEffect:GetId() == DEBUFFID_PRIMAL_ENTANGLEMENT then
 					bUnitIsRooted = true
 				end
 			end
@@ -92,10 +121,10 @@ function mod:OnDebuffApplied(unitName, splId, unit)
 			Print("Unknown tSpell")
 	end--]]
 
-	if splId == 73179 or splId == 73177 then -- the root ability, Primal Entanglement
+	if splId == DEBUFFID_PRIMAL_ENTANGLEMENT or splId == DEBUFFIF__TODO__ then
 		--Print(unitName .. " has debuff: Primal Entanglement")
 		if unitName == strMyName then
-			core:AddMsg("ROOT", "You are rooted", 5, "Info")
+			core:AddMsg("ROOT", self.L["You are rooted"], 5, "Info")
 		end
 		core:MarkUnit(unit, nil, "ROOT")
 		core:AddUnit(unit)
@@ -110,31 +139,24 @@ function mod:OnDebuffApplied(unitName, splId, unit)
 	--Print(eventTime .. " " .. unitName .. "has debuff: " .. strSpellName .. " with splId: " .. splId)
 end
 
-function mod:OnUnitCreated(unit)
-	local sName = unit:GetName()
-	local eventTime = GameLib.GetGameTime()
-
-	if sName == "Life Force" then
+function mod:OnUnitCreated(unit, sName)
+	if sName == self.L["Life Force"] then
 		core:AddPixie(unit:GetId(), 2, unit, nil, "Blue", 10, -40, 0)
-	elseif sName == "Essence of Life" then
+	elseif sName == self.L["Essence of Life"] then
 		--Print("Life essence spawned")
 		--core:AddUnit(unit)
-	elseif sName == "Flame Wave" then
+	elseif sName == self.L["Flame Wave"] then
 		local unitId = unit:GetId()
 		if unitId then
 			core:AddPixie(unitId, 2, unit, nil, "Green", 10, 20, 0)
 		end
 	end
-	--Print(eventTime .. " - " .. sName)
 end
 
-function mod:OnUnitDestroyed(unit)
-	local sName = unit:GetName()
-	local eventTime = GameLib.GetGameTime()
-
-	if sName == "Life Force" then
+function mod:OnUnitDestroyed(unit, sName)
+	if sName == self.L["Life Force"] then
 		core:DropPixie(unit:GetId())
-	elseif sName == "Flame Wave" then
+	elseif sName == self.L["Flame Wave"] then
 		local unitId = unit:GetId()
 		if unitId then
 			core:DropPixie(unitId)
@@ -144,23 +166,21 @@ end
 
 function mod:OnSpellCastStart(unitName, castName, unit)
 	local eventTime = GameLib.GetGameTime()
-	if unitName == "Visceralus" and castName == "Blinding Light" then
+	if unitName == self.L["Visceralus"] and castName == self.L["Blinding Light"] then
 		local playerUnit = GameLib.GetPlayerUnit()
 		if dist2unit(unit, playerUnit) < 33 then
-			core:AddMsg("BLIND", "Blinding Light", 5, "Beware")
+			core:AddMsg("BLIND", self.L["Blinding Light"], 5, "Beware")
 		end
 	end
 	--Print(eventTime .. " " .. unitName .. " is casting " .. castName)
 end
 
-function mod:OnCombatStateChanged(unit, bInCombat)
+function mod:OnUnitStateChanged(unit, bInCombat, sName)
 	if unit:GetType() == "NonPlayer" and bInCombat then
-		local sName = unit:GetName()
-
-		if sName == "Visceralus" then
+		if sName == self.L["Visceralus"] then
 			core:AddUnit(unit)
 			core:WatchUnit(unit)
-		elseif sName == "Pyrobane" then
+		elseif sName == self.L["Pyrobane"] then
 			self:Start()
 			rooted_units = {}
 			CheckRootTimer = nil
@@ -169,7 +189,7 @@ function mod:OnCombatStateChanged(unit, bInCombat)
 			core:AddUnit(unit)
 			core:RaidDebuff()
 			core:StartScan()
-			core:AddBar("MID", "MIDPHASE", 90)
+			core:AddBar("MID", self.L["MIDPHASE"], 90)
 		end
 	end
 end
