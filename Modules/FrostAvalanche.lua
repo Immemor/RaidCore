@@ -8,6 +8,32 @@ local mod = core:NewBoss("FrostAvalanche", 52)
 if not mod then return end
 
 mod:RegisterEnableMob("Frost-Boulder Avalanche")
+mod:RegisterEnglishLocale({
+	-- Unit names.
+	["Frost-Boulder Avalanche"] = "Frost-Boulder Avalanche",
+	-- Cast.
+	["Icicle Storm"] = "Icicle Storm",
+	["Shatter"] = "Shatter",
+	["Cyclone"] = "Cyclone",
+	-- Bar and messages.
+	["CYCLONE SOON"] = "CYCLONE SOON",
+	["ICICLE"] = "ICICLE%s"
+	["SHATTER"] = "SHATTER%s"
+})
+mod:RegisterFrenchLocale({
+	-- Unit names.
+	-- Datachron messages.
+	-- NPCSay messages.
+	-- Cast.
+	-- Bar and messages.
+})
+mod:RegisterGermanLocale({
+	-- Unit names.
+	-- Datachron messages.
+	-- NPCSay messages.
+	-- Cast.
+	-- Bar and messages.
+})
 
 --------------------------------------------------------------------------------
 -- Locals
@@ -21,7 +47,7 @@ local icicleSpell = false
 
 function mod:OnBossEnable()
 	Print(("Module %s loaded"):format(mod.ModuleName))
-	Apollo.RegisterEventHandler("UnitEnteredCombat", "OnCombatStateChanged", self)
+	Apollo.RegisterEventHandler("RC_UnitStateChanged", "OnUnitStateChanged", self)
 	Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
 	Apollo.RegisterEventHandler("UNIT_HEALTH", "OnHealthChanged", self)
 end
@@ -31,30 +57,34 @@ end
 --
 
 function mod:OnHealthChanged(unitName, health)
-	if unitName == "Frost-Boulder Avalanche" and (health == 85 or health == 55 or health ==31) then
-		core:AddMsg("CYCLONE", "CYCLONE SOON", 5, "Info", "Blue")
+	if unitName == self.L["Frost-Boulder Avalanche"] then
+		if (health == 85 or health == 55 or health ==31) then
+			core:AddMsg("CYCLONE", self.L["CYCLONE SOON"], 5, "Info", "Blue")
+		end
 	end
 end
 
 function mod:OnSpellCastStart(unitName, castName, unit)
-	if unitName == "Frost-Boulder Avalanche" and castName == "Icicle Storm" then
-		core:AddMsg("ICICLE", "ICICLE !!", 5, "Alert")
-		core:AddBar("ICICLE", "ICICLE", 22)
-		icicleSpell = true
-	elseif unitName == "Frost-Boulder Avalanche" and castName == "Shatter" then
-		core:AddMsg("ICICLE", "SHATTER !!", 5, "Alert")
-		core:AddBar("ICICLE", "SHATTER", 22)
-	elseif unitName == "Frost-Boulder Avalanche" and castName == "Cyclone" then
-		core:AddMsg("CYCLONE", "CYCLONE", 5, "RunAway")
-		core:AddBar("RUN", "CYCLONE", 23)
-		core:AddBar("ICICLE", icicleSpell and "ICICLE" or "SHATTER", 48)
+	if unitName == self.L["Frost-Boulder Avalanche"] then
+		if castName == self.L["Icicle Storm"] then
+			core:AddMsg("ICICLE", self.L["ICICLE"]:format(" !!"), 5, "Alert")
+			core:AddBar("ICICLE", self.L["ICICLE"]:format(""), 22)
+			icicleSpell = true
+		elseif castName == self.L["Shatter"] then
+			core:AddMsg("ICICLE", self.L["SHATTER"]:format(" !!"), 5, "Alert")
+			core:AddBar("ICICLE", self.L["SHATTER"]:format(""), 22)
+		elseif castName == self.L["Cyclone"] then
+			core:AddMsg("CYCLONE", self.L["Cyclone"]:upper(), 5, "RunAway")
+			core:AddBar("RUN", self.L["Cyclone"]:upper(), 23)
+			local txt = icicleSpell and self.L["ICICLE"]:format("") or self.L["SHATTER"]:format("")
+			core:AddBar("ICICLE", txt, 48)
+		end
 	end
 end
 
-function mod:OnCombatStateChanged(unit, bInCombat)
+function mod:OnUnitStateChanged(unit, bInCombat, sName)
 	if unit:GetType() == "NonPlayer" and bInCombat then
-		local sName = unit:GetName()
-		if sName == "Frost-Boulder Avalanche" then
+		if sName == self.L["Frost-Boulder Avalanche"] then
 			icicleSpell = false
 			core:AddUnit(unit)
 			core:WatchUnit(unit)
