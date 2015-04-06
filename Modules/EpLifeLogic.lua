@@ -9,6 +9,46 @@ if not mod then return end
 
 mod:RegisterEnableBossPair("Mnemesis", "Visceralus")
 mod:RegisterRestrictZone("EpLifeLogic", "Elemental Vortex Alpha", "Elemental Vortex Beta", "Elemental Vortex Delta")
+mod:RegisterEnglishLocale({
+	-- Unit names.
+	["Essence of Life"] = "Essence of Life",
+	["Essence of Logic"] = "Essence of Logic",
+	["Alphanumeric Hash"] = "Alphanumeric Hash",
+	["Life Force"] = "Life Force",
+	["Mnemesis"] = "Mnemesis",
+	["Visceralus"] = "Visceralus",
+	-- Datachron messages.
+	-- Cast.
+	["Blinding Light"] = "Blinding Light",
+	["Defragment"] = "Defragment",
+	-- Bar and messages.
+	["Defrag Explosion"] = "Defrag Explosion",
+	["~DEFRAG CD"] = "~DEFRAG CD",
+	["DEFRAG"] = "DEFRAG",
+	["ENRAGE"] = "ENRAGE",
+	["No-Healing Debuff!"] = "No-Healing Debuff!",
+	["NO HEAL DEBUFF"] = "NO HEAL\nDEBUFF",
+	["SNAKE ON YOU!"] = "SNAKE ON YOU!",
+	["SNAKE ON %s!"] = "SNAKE ON %s!",
+	["SNAKE"] = "SNAKE",
+	["THORNS DEBUFF"] = "THORNS\nDEBUFF",
+	["MARKER North"] = "North",
+	["MARKER South"] = "South",
+	["MARKER East"] = "East",
+	["MARKER West"] = "West",
+})
+mod:RegisterFrenchLocale({
+	-- Unit names.
+	-- Datachron messages.
+	-- Cast.
+	-- Bar and messages.
+})
+mod:RegisterGermanLocale({
+	-- Unit names.
+	-- Datachron messages.
+	-- Cast.
+	-- Bar and messages.
+})
 
 --------------------------------------------------------------------------------
 -- Locals
@@ -30,10 +70,10 @@ local midpos = {
 
 function mod:OnBossEnable()
 	Print(("Module %s loaded"):format(mod.ModuleName))
-	Apollo.RegisterEventHandler("UnitEnteredCombat", "OnCombatStateChanged", self)
+	Apollo.RegisterEventHandler("RC_UnitStateChanged", "OnUnitStateChanged", self)
 	Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
-	Apollo.RegisterEventHandler("UnitCreated", "OnUnitCreated", self)
-	Apollo.RegisterEventHandler("UnitDestroyed", "OnUnitDestroyed", self)
+	Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
+	Apollo.RegisterEventHandler("RC_UnitDestroyed", "OnUnitDestroyed", self)
 	Apollo.RegisterEventHandler("DEBUFF_APPLIED", "OnDebuffApplied", self)
 	Apollo.RegisterEventHandler("DEBUFF_REMOVED", "OnDebuffRemoved", self)
 	Apollo.RegisterEventHandler("RAID_WIPE", "OnReset", self)
@@ -63,31 +103,27 @@ function mod:OnReset()
 end
 
 function mod:OnDebuffApplied(unitName, splId, unit)
-	local eventTime = GameLib.GetGameTime()
 	local tSpell = GameLib.GetSpell(splId)
 	local strSpellName = tSpell:GetName()
 
 	if strSpellName == "Snake Snack" then
 		if unitName == strMyName then
-			core:AddMsg("SNAKE", "SNAKE ON YOU!", 5, "RunAway")
+			core:AddMsg("SNAKE", self.L["SNAKE ON YOU!"], 5, "RunAway")
 		else
-			local msgString = "SNAKE ON " .. unitName
-			core:AddMsg("SNAKE", msgString, 5, "Info")
+			core:AddMsg("SNAKE", self.L["SNAKE ON %s!"]:format(unitName), 5, "Info")
 		end
-		core:MarkUnit(unit, nil, "SNAKE")
+		core:MarkUnit(unit, nil, self.L["SNAKE"])
 	elseif strSpellName == "Life Force Shackle" then
-		core:MarkUnit(unit, nil, "NO HEAL\nDEBUFF")
+		core:MarkUnit(unit, nil, self.L["NO HEAL DEBUFF"])
 		if unitName == strMyName then
-			core:AddMsg("NOHEAL", "No-Healing Debuff!", 5, "Alarm")
+			core:AddMsg("NOHEAL", self.L["No-Healing Debuff!"], 5, "Alarm")
 		end
 	elseif strSpellName == "Thorns" then
-		core:MarkUnit(unit, nil, "THORNS\nDEBUFF")
+		core:MarkUnit(unit, nil, self.L["THORNS\nDEBUFF"])
 	end
-	--Print(eventTime .. " " .. unitName .. "has debuff: " .. strSpellName .. " with splId: " .. splId)
 end
 
 function mod:OnDebuffRemoved(unitName, splId, unit)
-	local eventTime = GameLib.GetGameTime()
 	local tSpell = GameLib.GetSpell(splId)
 	local strSpellName = tSpell:GetName()
 
@@ -100,70 +136,61 @@ function mod:OnDebuffRemoved(unitName, splId, unit)
 	end
 end
 
-function mod:OnUnitCreated(unit)
-	local sName = unit:GetName()
-	local eventTime = GameLib.GetGameTime()
-	if sName == "Essence of Life" then
+function mod:OnUnitCreated(unit, sName)
+	if sName == self.L["Essence of Life"] then
 		core:AddUnit(unit)
 		if not midphase then
 			midphase = true
-			core:SetWorldMarker(midpos["north"], "North")
-			core:SetWorldMarker(midpos["east"], "East")
-			core:SetWorldMarker(midpos["south"], "South")
-			core:SetWorldMarker(midpos["west"], "West")
-
+			core:SetWorldMarker(midpos["north"], self.L["MARKER North"])
+			core:SetWorldMarker(midpos["east"], self.L["MARKER East"])
+			core:SetWorldMarker(midpos["south"], self.L["MARKER South"])
+			core:SetWorldMarker(midpos["west"], self.L["MARKER West"])
 			core:StopBar("DEFRAG")
 		end
-	elseif sName == "Essence of Logic" then
+	elseif sName == self.L["Essence of Logic"] then
 		core:AddUnit(unit)
-	elseif sName == "Alphanumeric Hash" then
+	elseif sName == self.L["Alphanumeric Hash"] then
 		local unitId = unit:GetId()
 		if unitId then
 			core:AddPixie(unitId, 2, unit, nil, "Red", 10, 20, 0)
 		end
-	elseif sName == "Life Force" then
+	elseif sName == self.L["Life Force"] then
 		core:AddPixie(unit:GetId(), 2, unit, nil, "Blue", 3, 15, 0)
 	end
-	--Print(eventTime .. " - " .. sName)
 end
 
-function mod:OnUnitDestroyed(unit)
-	local sName = unit:GetName()
-	local eventTime = GameLib.GetGameTime()
-	if sName == "Essence of Logic" then
+function mod:OnUnitDestroyed(unit, sName)
+	if sName == self.L["Essence of Logic"] then
 		midphase = false
 		core:ResetWorldMarkers()
-	elseif sName == "Alphanumeric Hash" then
+	elseif sName == self.L["Alphanumeric Hash"] then
 		local unitId = unit:GetId()
 		if unitId then
 			core:DropPixie(unitId)
 		end
-	elseif sName == "Life Force" then
+	elseif sName == self.L["Life Force"] then
 		core:DropPixie(unit:GetId())
 	end
 end
 
 function mod:OnSpellCastStart(unitName, castName, unit)
 	local eventTime = GameLib.GetGameTime()
-	if unitName == "Visceralus" and castName == "Blinding Light" then
+	if unitName == self.L["Visceralus"] and castName == self.L["Blinding Light"] then
 		if dist2unit(unit, uPlayer) < 33 then
-			core:AddMsg("BLIND", "Blinding Light", 5, "Beware")
+			core:AddMsg("BLIND", self.L["Blinding Light"], 5, "Beware")
 		end
-	elseif unitName == "Mnemesis" and castName == "Defragment" then
+	elseif unitName == self.L["Mnemesis"] and castName == self.L["Defragment"] then
 		core:StopBar("DEFRAG")
-		core:AddBar("DEFRAG", "~DEFRAG CD", 40, true) -- Defrag is unreliable, but seems to take at least this long.
-		core:AddBar("DEFRAG1", "Defrag Explosion", 9, true)
-		core:AddMsg("DEFRAG", "DEFRAG", 5, "Beware")
+		core:AddBar("DEFRAG", self.L["~DEFRAG CD"], 40, true) -- Defrag is unreliable, but seems to take at least this long.
+		core:AddBar("DEFRAG1", self.L["Defrag Explosion"], 9, true)
+		core:AddMsg("DEFRAG", self.L["DEFRAG"], 5, "Beware")
 	end
 	--Print(eventTime .. " " .. unitName .. " Casting: " .. castName)
 end
 
-function mod:OnCombatStateChanged(unit, bInCombat)
+function mod:OnUnitStateChanged(unit, bInCombat, sName)
 	if unit:GetType() == "NonPlayer" and bInCombat then
-		local sName = unit:GetName()
-		local eventTime = GameLib.GetGameTime()
-
-		if sName == "Visceralus" then
+		if sName == self.L["Visceralus"] then
 			core:AddUnit(unit)
 			core:WatchUnit(unit)
 			core:AddLine("Visc1", 2, unit, nil, 3, 25, 0, 10)
@@ -171,7 +198,7 @@ function mod:OnCombatStateChanged(unit, bInCombat)
 			core:AddLine("Visc3", 2, unit, nil, 1, 25, 144)
 			core:AddLine("Visc4", 2, unit, nil, 1, 25, 216)
 			core:AddLine("Visc5", 2, unit, nil, 1, 25, 288)
-		elseif sName == "Mnemesis" then
+		elseif sName == self.L["Mnemesis"] then
 			self:Start()
 			core:WatchUnit(unit)
 			uPlayer = GameLib.GetPlayerUnit()
@@ -180,10 +207,8 @@ function mod:OnCombatStateChanged(unit, bInCombat)
 			core:AddUnit(unit)
 			core:RaidDebuff()
 			core:StartScan()
-			core:AddBar("DEFRAG", "~DEFRAG CD", 21, true)
-			core:AddBar("ENRAGE", "ENRAGE", 480, true)
-
-			--Print(eventTime .. " FIGHT STARTED")
+			core:AddBar("DEFRAG", self.L["~DEFRAG CD"], 21, true)
+			core:AddBar("ENRAGE", self.L["ENRAGE"], 480, true)
 		end
 	end
 end
