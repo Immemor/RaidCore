@@ -89,7 +89,7 @@ end
 local function RegisterLocale(tBoss, sLanguage, Locales)
   local GeminiLocale = Apollo.GetPackage("Gemini:Locale-1.0").tPackage
   local sName = "RaidCore_" .. tBoss:GetName()
-  local L = GeminiLocale:NewLocale(sName, sLanguage)
+  local L = GeminiLocale:NewLocale(sName, sLanguage, sLanguage == "enUS", true)
   if L then
     for key, val in next, Locales do
       L[key] = val
