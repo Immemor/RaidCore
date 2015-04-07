@@ -10,6 +10,43 @@ if not mod then return end
 --mod:RegisterEnableMob("Aileron", "Test")
 mod:RegisterEnableBossPair("Aileron", "Visceralus")
 mod:RegisterRestrictZone("EpAirLife", "Elemental Vortex Alpha", "Elemental Vortex Beta", "Elemental Vortex Delta")
+mod:RegisterEnglishLocale({
+	-- Unit names.
+	["Visceralus"] = "Visceralus",
+	["Aileron"] = "Aileron",
+	["Wild Brambles"] = "Wild Brambles",
+	["[DS] e395 - Air - Tornado"] = "[DS] e395 - Air - Tornado",
+	["Life Force"] = "Life Force",
+	["Lifekeeper"] = "Lifekeeper",
+	-- Datachron messages.
+	-- Cast.
+	["Blinding Light"] = "Blinding Light",
+	-- Bar and messages.
+	["TWIRL ON YOU!"] = "TWIRL ON YOU!",
+	["Thorns"] = "Thorns",
+	["Twirl"] = "Twirl",
+	["Midphase ending"] = "Midphase ending",
+	["Middle Phase"] = "Middle Phase",
+	["Next Healing Tree"] = "Next Healing Tree",
+	["No-Healing Debuff!"] = "No-Healing Debuff!",
+	["NO HEAL DEBUFF"] = "NO HEAL\nDEBUFF",
+	["Lightning"] = "Lightning",
+	["Lightning on YOU"] = "Lightning on YOU",
+	["Recently Saved!"] = "Recently Saved!",
+})
+mod:RegisterFrenchLocale({
+	-- Unit names.
+	["Aileron"] = "Ventemort",
+	-- Datachron messages.
+	-- Cast.
+	-- Bar and messages.
+})
+mod:RegisterGermanLocale({
+	-- Unit names.
+	-- Datachron messages.
+	-- Cast.
+	-- Bar and messages.
+})
 
 -- Tracking Blinding Light and Aileron knockback seems too random to display on timers.
 
@@ -30,9 +67,9 @@ local twirlCount = 0
 
 function mod:OnBossEnable()
 	Print(("Module %s loaded"):format(mod.ModuleName))
-	Apollo.RegisterEventHandler("UnitCreated", "OnUnitCreated", self)
-	Apollo.RegisterEventHandler("UnitDestroyed", "OnUnitDestroyed", self)
-	Apollo.RegisterEventHandler("UnitEnteredCombat", "OnCombatStateChanged", self)
+	Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
+	Apollo.RegisterEventHandler("RC_UnitDestroyed", "OnUnitDestroyed", self)
+	Apollo.RegisterEventHandler("RC_UnitStateChanged", "OnUnitStateChanged", self)
 	Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
 	--Apollo.RegisterEventHandler("SPELL_CAST_END", "OnSpellCastEnd", self)
 	--Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
@@ -74,51 +111,49 @@ function mod:OnReset()
 	core:StopBar("TWIRL")
 end
 
-function mod:OnUnitCreated(unit)
-	local sName = unit:GetName()
+function mod:OnUnitCreated(unit, sName)
 	local eventTime = GameLib.GetGameTime()
-	if sName == "Wild Brambles" and eventTime > last_thorns + 1 and eventTime + 16 < midphase_start then
+	if sName == self.L["Wild Brambles"] and eventTime > last_thorns + 1 and eventTime + 16 < midphase_start then
 		last_thorns = eventTime
 		twirlCount = twirlCount + 1
-		core:AddBar("THORN", "Thorns", 15)
+		core:AddBar("THORN", self.L["Thorns"], 15)
 		if twirlCount == 1 then
-			core:AddBar("TWIRL", "Twirl", 15)
+			core:AddBar("TWIRL", self.L["Twirl"], 15)
 		elseif twirlCount % 2 == 1 then
-			core:AddBar("TWIRL", "Twirl", 15)
+			core:AddBar("TWIRL", self.L["Twirl"], 15)
 		end
 		--Print(eventTime .. " - " .. sName)
-	elseif not midphase and sName == "[DS] e395 - Air - Tornado" then
+	elseif not midphase and sName == self.L["[DS] e395 - Air - Tornado"] then
 		midphase = true
 		twirlCount = 0
 		midphase_start = eventTime + 115
-		core:AddBar("MIDEND", "Midphase ending", 35)
-		core:AddBar("THORN", "Thorns", 35)
-		core:AddBar("Lifekeep", "Next Healing Tree", 35)
+		core:AddBar("MIDEND", self.L["Midphase ending"], 35)
+		core:AddBar("THORN", self.L["Thorns"], 35)
+		core:AddBar("Lifekeep", self.L["Next Healing Tree"], 35)
 
 		--Print(eventTime .. " Midphase STARTED")
-	elseif sName == "Life Force" then
+	elseif sName == self.L["Life Force"] then
 		--Print(eventTime .. " - Orb")
 		core:AddPixie(unit:GetId(), 2, unit, nil, "Blue", 10, 40, 0)
-	elseif sName == "Lifekeeper" then
+	elseif sName == self.L["Lifekeeper"] then
 		--Print(eventTime .. " - " .. sName)
 		core:AddPixie(unit:GetId(), 1, GameLib.GetPlayerUnit(), unit, "Yellow", 5, 10, 10)
 		core:AddUnit(unit)
-		core:AddBar("Lifekeep", "Next Healing Tree", 30, true)
+		core:AddBar("Lifekeep", self.L["Next Healing Tree"], 30, true)
 	end
 	--Print(eventTime .. " - " .. sName)
 end
 
-function mod:OnUnitDestroyed(unit)
-	local sName = unit:GetName()
+function mod:OnUnitDestroyed(unit, sName)
 	local eventTime = GameLib.GetGameTime()
 	--Print(sName)
-	if midphase and sName == "[DS] e395 - Air - Tornado" then
+	if midphase and sName == self.L["[DS] e395 - Air - Tornado"] then
 		midphase = false
-		core:AddBar("MIDPHASE", "Middle Phase", 90, true)
+		core:AddBar("MIDPHASE", self.L["Middle Phase"], 90, true)
 		--Print(eventTime .. " Midphase ENDED")
-	elseif sName == "Life Force" then
+	elseif sName == self.L["Life Force"] then
 		core:DropPixie(unit:GetId())
-	elseif sName == "Lifekeeper" then
+	elseif sName == self.L["Lifekeeper"] then
 		core:DropPixie(unit:GetId())
 	end
 end
@@ -129,27 +164,27 @@ function mod:OnDebuffApplied(unitName, splId, unit)
 	--Print(eventTime .. " debuff applied on unit: " .. unitName .. " - " .. splId)
 	if splId == 70440 then -- Twirl
 		if unitName == myName then
-			core:AddMsg("TWIRL", "TWIRL ON YOU!", 5, "Inferno")
+			core:AddMsg("TWIRL", self.L["TWIRL ON YOU!"], 5, "Inferno")
 		end
 
-		core:MarkUnit(unit, nil, "TWIRL")
+		core:MarkUnit(unit, nil, self.L["Twirl"]:upper())
 		core:AddUnit(unit)
 		twirl_units[unitName] = unit
 		if not CheckTwirlTimer then
 			CheckTwirlTimer = self:ScheduleRepeatingTimer("CheckTwirlTimer", 1)
 		end
 	elseif splName == "Life Force Shackle" then
-		core:MarkUnit(unit, nil, "NO HEAL\nDEBUFF")
+		core:MarkUnit(unit, nil, self.L["NO HEAL DEBUFF"])
 		if unitName == strMyName then
-			core:AddMsg("NOHEAL", "No-Healing Debuff!", 5, "Alarm")
+			core:AddMsg("NOHEAL", self.L["No-Healing Debuff!"], 5, "Alarm")
 		end
 	elseif splName == "Lightning Strike" then
-		core:MarkUnit(unit, nil, "Lightning")
+		core:MarkUnit(unit, nil, self.L["Lightning"])
 		if unitName == strMyName then
-			core:AddMsg("LIGHTNING", "Lightning on YOU", 5, "RunAway")
+			core:AddMsg("LIGHTNING", self.L["Lightning on YOU"], 5, "RunAway")
 		end
 	elseif splName == "Recently Saved" then
-		core:AddMsg("SAVE", "Recently Saved!", 5, "Beware")
+		core:AddMsg("SAVE", self.L["Recently Saved!"], 5, "Beware")
 	end
 end
 
@@ -166,10 +201,10 @@ end
 
 function mod:OnSpellCastStart(unitName, castName, unit)
 	local eventTime = GameLib.GetGameTime()
-	if unitName == "Visceralus" and castName == "Blinding Light" then
+	if unitName == self.L["Visceralus"] and castName == self.L["Blinding Light"] then
 		local playerUnit = GameLib.GetPlayerUnit()
 		if dist2unit(unit, playerUnit) < 33 then
-			core:AddMsg("BLIND", "Blinding Light", 5, "Beware")
+			core:AddMsg("BLIND", self.L["Blinding Light"], 5, "Beware")
 		end
 	end
 	--Print(eventTime .. " " .. unitName .. " is casting " .. castName)
@@ -195,17 +230,16 @@ function mod:CheckTwirlTimer()
 	end
 end
 
-function mod:OnCombatStateChanged(unit, bInCombat)
+function mod:OnUnitStateChanged(unit, bInCombat)
 	if unit:GetType() == "NonPlayer" and bInCombat then
-		local sName = unit:GetName()
 		local eventTime = GameLib.GetGameTime()
 		local playerUnit = GameLib.GetPlayerUnit()
 		myName = playerUnit:GetName()
 
-		if sName == "Aileron" then
+		if sName == self.L["Aileron"] then
 			core:AddUnit(unit)
 			core:AddPixie(unit:GetId(), 2, unit, nil, "Red", 10, 30, 0)
-		elseif sName == "Visceralus" then
+		elseif sName == self.L["Visceralus"] then
 			self:Start()
 			core:AddUnit(unit)
 			core:WatchUnit(unit)
@@ -220,8 +254,8 @@ function mod:OnCombatStateChanged(unit, bInCombat)
 			midphase_start = eventTime + 90
 			twirlCount = 0
 
-			core:AddBar("MIDPHASE", "Middle Phase", 90, true)
-			core:AddBar("THORN", "Thorns", 20)
+			core:AddBar("MIDPHASE", self.L["Middle Phase"], 90, true)
+			core:AddBar("THORN", self.L["Thorns"], 20)
 			--core:AddBar("TWIRL", "Twirl", 22)
 
 			--core:AddLine("Visc1", 2, unit, nil, 3, 25, 0, 10)
