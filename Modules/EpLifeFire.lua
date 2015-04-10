@@ -26,15 +26,31 @@ mod:RegisterEnglishLocale({
 })
 mod:RegisterFrenchLocale({
 	-- Unit names.
+	["Visceralus"] = "Visceralus",
+	["Pyrobane"] = "Pyromagnus",
+	["Life Force"] = "Force vitale",
+	["Essence of Life"] = "Essence de vie",
+	["Flame Wave"] = "Vague de feu",
 	-- Datachron messages.
 	-- Cast.
+	["Blinding Light"] = "Lumière aveuglante",
 	-- Bar and messages.
+--	["You are rooted"] = "You are rooted",	-- TODO: French translation missing !!!!
+--	["MIDPHASE"] = "MIDPHASE",	-- TODO: French translation missing !!!!
 })
 mod:RegisterGermanLocale({
 	-- Unit names.
+	["Visceralus"] = "Viszeralus",
+	["Pyrobane"] = "Pyroman",
+	["Life Force"] = "Lebenskraft",
+	["Essence of Life"] = "Lebensessenz",
+	["Flame Wave"] = "Flammenwelle",
 	-- Datachron messages.
 	-- Cast.
+	["Blinding Light"] = "Blendendes Licht",
 	-- Bar and messages.
+--	["You are rooted"] = "You are rooted",	-- TODO: German translation missing !!!!
+--	["MIDPHASE"] = "MIDPHASE",	-- TODO: German translation missing !!!!
 })
 
 local DEBUFFID_PRIMAL_ENTANGLEMENT = 73179 -- A root ability.
