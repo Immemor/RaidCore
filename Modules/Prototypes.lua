@@ -40,6 +40,10 @@ mod:RegisterFrenchLocale({
 	["Phagetech Protector"] = "Protecteur technophage",
 	["Phagetech Fabricator"] = "Fabricant technophage",
 	-- Datachron messages.
+--	["Phagetech Commander is now active!"] = "Phagetech Commander is now active!",	-- TODO: French translation missing !!!!
+--	["Phagetech Augmentor is now active!"] = "Phagetech Augmentor is now active!",	-- TODO: French translation missing !!!!
+--	["Phagetech Protector is now active!"] = "Phagetech Protector is now active!",	-- TODO: French translation missing !!!!
+--	["Phagetech Fabricator is now active!"] = "Phagetech Fabricator is now active!",	-- TODO: French translation missing !!!!
 	-- Cast.
 	["Summon Repairbot"] = "Déployer Bricobot",
 	["Summon Destructobot"] = "Déployer Destructobot",
@@ -54,10 +58,26 @@ mod:RegisterFrenchLocale({
 })
 mod:RegisterGermanLocale({
 	-- Unit names.
+	["Phagetech Commander"] = "Phagentech-Kommandant",
+	["Phagetech Augmentor"] = "Phagentech-Augmentor",
+	["Phagetech Protector"] = "Phagentech-Protektor",
+	["Phagetech Fabricator"] = "Phagentech-Fabrikant",
 	-- Datachron messages.
-	-- NPCSay messages.
+	["Phagetech Commander is now active!"] = "Phagentech-Kommandant ist jetzt aktiv",
+	["Phagetech Augmentor is now active!"] = "Phagentech-Augmentor ist jetzt aktiv",
+	["Phagetech Protector is now active!"] = "Phagentech-Protektor ist jetzt aktiv",
+	["Phagetech Fabricator is now active!"] = "Phagentech-Fabrikant ist jetzt aktiv",
 	-- Cast.
+	["Summon Repairbot"] = "Reparaturbot herbeirufen",
+	["Summon Destructobot"] = "Destruktobot herbeirufen",
 	-- Bar and messages.
+	["[1] LINK + KICK"] = "[1] VERBINDUNG + KICK",
+	["[2] TP + CROIX + BOTS"] = "[2] FARBEN + KREUZ + REPARATURBOTS",
+	["[3] SINGULARITY + VAGUE"] = "[3] SINGULARITÄT + WELLEN",
+	["[4] SOAK + BOTS"] = "[4] KREISE + DESTRUKTOBOTS",
+--	["BOTS !!"] = "BOTS !!",	-- TODO: German translation missing !!!!
+	["BERSERK"] = "BERSERK",
+	["Singularity"] = "SINGULARITÄT",
 })
 
 --------------------------------------------------------------------------------

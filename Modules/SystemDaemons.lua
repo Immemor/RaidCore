@@ -61,15 +61,95 @@ mod:RegisterEnglishLocale({
 })
 mod:RegisterFrenchLocale({
 	-- Unit names.
+	["Binary System Daemon"] = "Daemon 2.0",
+	["Null System Daemon"] = "Daemon 1.0",
+	["Brute Force Algorithm"] = "Algorithme de force brute",
+	["Encryption Program"] = "Programme de cryptage",
+	["Radiation Dispersion Unit"] = "Unité de dispersion de radiations",
+	["Defragmentation Unit"] = "Unité de défragmentation",
+	["Extermination Sequence"] = "Séquence d'extermination",
+	["Data Compiler"] = "Compilateur de données",
+	["Viral Diffusion Inhibitor"] = "Inhibiteur de diffusion virale",
+	["Enhancement Module"] = "Module d'amélioration",
+	["Conduction Unit Mk. I"]  = "Unité de conductivité v1",
+	["Conduction Unit Mk. II"]  = "Unité de conductivité v2",
+--	["Conduction Unit Mk. III"]  = "Conduction Unit Mk. III",	-- TODO: French translation missing !!!!
+	["Infinite Generator Core"] = "Noyau du générateur d'infinité",
+	["Recovery Protocol"] = "Protocole de récupération",
 	-- Datachron messages.
+	["INVALID SIGNAL. DISCONNECTING"] = "SIGNAL INCORRECT.",
+	["COMMENCING ENHANCEMENT SEQUENCE"] = "DÉBUT DE LA SEQUENCE D'AMÉLIORATION",
 	-- Cast.
+	["Repair Sequence"] = "Séquence de réparation",
+	["Power Surge"] = "Afflux d'énergie",
+	["Black IC"] = "CI noir",
 	-- Bar and messages.
+--	["[%u] Probe"] = "[%u] Probe",	-- TODO: French translation missing !!!!
+	["[%u] WAVE"] = "[%u] WAVE",
+--	["[%u] MINIBOSS"] = "[%u] MINIBOSS",	-- TODO: French translation missing !!!!
+--	["MARKER north"] = "N",	-- TODO: French translation missing !!!!
+--	["MARKER south"] = "S",	-- TODO: French translation missing !!!!
+	["P2 SOON !"] = "P2 SOON !",
+	["PHASE 2 !"] = "PHASE 2 !",
+--	["INTERRUPT NORTH"] = "INTERRUPT NORTH",	-- TODO: French translation missing !!!!
+--	["INTERRUPT SOUTH"] = "INTERRUPT SOUTH",	-- TODO: French translation missing !!!!
+--	["AIDDDDDDDS !"] = "AIDDDDDDDS !",	-- TODO: French translation missing !!!!
+--	["PURGE - %s"] = "PURGE - %s",	-- TODO: French translation missing !!!!
+--	["INTERRUPT !"] = "INTERRUPT !",	-- TODO: French translation missing !!!!
+--	["INTERRUPT HEAL!"] = "INTERRUPT HEAL!",	-- TODO: French translation missing !!!!
+--	["BLACK IC"] = "BLACK IC",	-- TODO: French translation missing !!!!
+--	["HEAL"] = "HEAL",	-- TODO: French translation missing !!!!
+--	["PURGE ON YOU"] = "PURGE ON YOU",	-- TODO: French translation missing !!!!
+--	["Probe Spawn"] = "Probe Spawn",	-- TODO: French translation missing !!!!
+--	["DISCONNECT (%u)"] = "DISCONNECT (%u)",	-- TODO: French translation missing !!!!
+--	["YOU ARE NEXT ON NORTH !"] = "YOU ARE NEXT ON NORTH !",	-- TODO: French translation missing !!!!
+--	["YOU ARE NEXT ON SOUTH !"] = "YOU ARE NEXT ON SOUTH !",	-- TODO: French translation missing !!!!
 })
 mod:RegisterGermanLocale({
 	-- Unit names.
+	["Binary System Daemon"] = "Binärsystem-Dämon",
+	["Null System Daemon"] = "Nullsystem-Dämon",
+	["Brute Force Algorithm"] = "Brachialgewalt-Algorithmus",
+	["Encryption Program"] = "Verschlüsselungsprogramm",
+	["Radiation Dispersion Unit"] = "Strahlungsverteilungseinheit",
+	["Defragmentation Unit"] = "Defragmentierungseinheit",
+	["Extermination Sequence"] = "Vernichtungssequenz",
+	["Data Compiler"] = "Datenkompilierer",
+	["Viral Diffusion Inhibitor"] = "Virushemmstoff",
+	["Enhancement Module"] = "Verbesserungsmodul",
+	["Conduction Unit Mk. I"]  = "Leistungseinheit V1",
+	["Conduction Unit Mk. II"]  = "Leistungseinheit V2",
+--	["Conduction Unit Mk. III"]  = "Conduction Unit Mk. III",	-- TODO: German translation missing !!!!
+--	["Infinite Generator Core"] = "Infinite Generator Core",	-- TODO: German translation missing !!!!
+	["Recovery Protocol"] = "Wiederherstellungsprotokoll",
 	-- Datachron messages.
+--	["INVALID SIGNAL. DISCONNECTING"] = "INVALID SIGNAL. DISCONNECTING",	-- TODO: German translation missing !!!!
+--	["COMMENCING ENHANCEMENT SEQUENCE"] = "COMMENCING ENHANCEMENT SEQUENCE",	-- TODO: German translation missing !!!!
 	-- Cast.
+	["Repair Sequence"] = "Reparatursequenz",
+	["Power Surge"] = "Energieschweller",
+	["Black IC"] = "Glatteis",
 	-- Bar and messages.
+--	["[%u] Probe"] = "[%u] Probe",	-- TODO: German translation missing !!!!
+--	["[%u] WAVE"] = "[%u] WAVE",	-- TODO: German translation missing !!!!
+--	["[%u] MINIBOSS"] = "[%u] MINIBOSS",	-- TODO: German translation missing !!!!
+--	["MARKER north"] = "N",	-- TODO: German translation missing !!!!
+--	["MARKER south"] = "S",	-- TODO: German translation missing !!!!
+	["P2 SOON !"] = "GLEICH PHASE 2 !",
+--	["PHASE 2 !"] = "PHASE 2 !",	-- TODO: German translation missing !!!!
+--	["INTERRUPT NORTH"] = "INTERRUPT NORTH",	-- TODO: German translation missing !!!!
+--	["INTERRUPT SOUTH"] = "INTERRUPT SOUTH",	-- TODO: German translation missing !!!!
+--	["AIDDDDDDDS !"] = "AIDDDDDDDS !",	-- TODO: German translation missing !!!!
+--	["PURGE - %s"] = "PURGE - %s",	-- TODO: German translation missing !!!!
+--	["INTERRUPT !"] = "INTERRUPT !",	-- TODO: German translation missing !!!!
+--	["INTERRUPT HEAL!"] = "INTERRUPT HEAL!",	-- TODO: German translation missing !!!!
+--	["BLACK IC"] = "BLACK IC",	-- TODO: German translation missing !!!!
+--	["HEAL"] = "HEAL",	-- TODO: German translation missing !!!!
+--	["PURGE ON YOU"] = "PURGE ON YOU",	-- TODO: German translation missing !!!!
+--	["Probe Spawn"] = "Probe Spawn",	-- TODO: German translation missing !!!!
+--	["DISCONNECT (%u)"] = "DISCONNECT (%u)",	-- TODO: German translation missing !!!!
+--	["YOU ARE NEXT ON NORTH !"] = "YOU ARE NEXT ON NORTH !",	-- TODO: German translation missing !!!!
+--	["YOU ARE NEXT ON SOUTH !"] = "YOU ARE NEXT ON SOUTH !",	-- TODO: German translation missing !!!!
 })
 
 --------------------------------------------------------------------------------

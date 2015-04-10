@@ -48,7 +48,17 @@ mod:RegisterFrenchLocale({
 	-- Unit names.
 	["Kuralak the Defiler"] = "Kuralak la Profanatrice",
 	-- Datachron messages.
+--	["Kuralak the Defiler returns to the Archive Core"] = "Kuralak the Defiler returns to the Archive Core",	-- TODO: French translation missing !!!!
+--	["Kuralak the Defiler causes a violent outbreak of corruption"] = "Kuralak the Defiler causes a violent outbreak of corruption",	-- TODO: French translation missing !!!!
+--	["The corruption begins to fester"] = "The corruption begins to fester",	-- TODO: French translation missing !!!!
+--	["has been anesthetized"] = "has been anesthetized",	-- TODO: French translation missing !!!!
 	-- NPCSay messages.
+--	["Through the Strain you will be transformed"] = "Through the Strain you will be transformed",	-- TODO: French translation missing !!!!
+--	["Your form is flawed, but I will make you beautiful"] = "Your form is flawed, but I will make you beautiful",	-- TODO: French translation missing !!!!
+--	["Let the Strain perfect you"] = "Let the Strain perfect you",	-- TODO: French translation missing !!!!
+--	["The Experiment has failed"] = "The Experiment has failed",	-- TODO: French translation missing !!!!
+--	["Join us... become one with the Strain"] = "Join us... become one with the Strain",	-- TODO: French translation missing !!!!
+--	["One of us... you will become one of us"] = "One of us... you will become one of us",	-- TODO: French translation missing !!!!
 	-- Cast.
 	["Vanish into Darkness"] = "Disparaître dans les ténèbres",
 	-- Bar and messages.
@@ -63,17 +73,44 @@ mod:RegisterFrenchLocale({
 	["BERSERK !!"] = "BERSERK !!",
 	["SWITCH TANK"] = "CHANGEMENT TANK",
 	["Switch Tank (%s)"] = "Changement de Tank (%s)",
-	["MARKER north"] = "N",
-	["MARKER south"] = "S",
-	["MARKER east"] = "E",
-	["MARKER west"] = "O",
+--	["MARKER north"] = "N",	-- TODO: French translation missing !!!!
+--	["MARKER south"] = "S",	-- TODO: French translation missing !!!!
+--	["MARKER east"] = "E",	-- TODO: French translation missing !!!!
+--	["MARKER west"] = "W",	-- TODO: French translation missing !!!!
 })
 mod:RegisterGermanLocale({
 	-- Unit names.
+	["Kuralak the Defiler"] = "Kuralak die Schänderin",
 	-- Datachron messages.
+	["Kuralak the Defiler returns to the Archive Core"] = "Kuralak die Schänderin kehrt zum Archivkern zurück",
+	["Kuralak the Defiler causes a violent outbreak of corruption"] = "Kuralak die Schänderin verursacht einen heftigen Ausbruch der Korrumpierung",
+	["The corruption begins to fester"] = "Die Korrumpierung beginnt zu eitern",
+	["has been anesthetized"] = "wurde narkotisiert",
 	-- NPCSay messages.
+	["Through the Strain you will be transformed"] = "Durch die Transformation wirst du",
+	["Your form is flawed, but I will make you beautiful"] = "aber ich werde dich schön machen",
+	["Let the Strain perfect you"] = "Dies ist mein Reich! Daraus gibt es kein Entrinnen ...",
+	["The Experiment has failed"] = "Lass dich von der Transmutation perfektionieren",
+	["Join us... become one with the Strain"] = "Die Transmutation ... Lass dich von ihr verschlingen ...",
+	["One of us... you will become one of us"] = "Einer von uns ...",
 	-- Cast.
+	["Vanish into Darkness"] = "In der Dunkelheit verschwinden",
 	-- Bar and messages.
+	["P2 SOON !"] = "GLEICH PHASE 2 !",
+--	["PHASE 2 !"] = "PHASE 2 !",	-- TODO: German translation missing !!!!
+	["VANISH"] = "VERSCHWINDEN",
+	["Vanish"] = "Verschwinden",
+	["OUTBREAK"] = "AUSBRUCH",
+--	["Outbreak (%s)"] = "Outbreak (%s)",	-- TODO: German translation missing !!!!
+--	["EGGS (%s)"] = "EGGS (%s)",	-- TODO: German translation missing !!!!
+--	["Eggs (%s)"] = "Eggs (%s)",	-- TODO: German translation missing !!!!
+	["BERSERK !!"] = "DAS WARS !!",
+	["SWITCH TANK"] = "TANKWECHSEL",
+--	["Switch Tank (%s)"] = "Switch Tank (%s)",	-- TODO: German translation missing !!!!
+--	["MARKER north"] = "N",	-- TODO: German translation missing !!!!
+--	["MARKER south"] = "S",	-- TODO: German translation missing !!!!
+--	["MARKER east"] = "E",	-- TODO: German translation missing !!!!
+--	["MARKER west"] = "W",	-- TODO: German translation missing !!!!
 })
 
 --------------------------------------------------------------------------------

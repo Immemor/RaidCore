@@ -43,15 +43,53 @@ mod:RegisterEnglishLocale({
 })
 mod:RegisterFrenchLocale({
 	-- Unit names.
+	["Wind Wall"] = "Mur de vent",
+--	["Avatus Hologram"] = "Avatus Hologram",	-- TODO: French translation missing !!!!
+	["Weather Station"] = "Station météorologique",
+	["Maelstrom Authority"] = "Contrôleur du Maelstrom",
 	-- Datachron messages.
+--	["The platform trembles"] = "The platform trembles",	-- TODO: French translation missing !!!!
 	-- Cast.
+	["Activate Weather Cycle"] = "Activer cycle climatique",
+	["Ice Breath"] = "Souffle de glace",
+	["Crystallize"] = "Cristalliser",
+	["Typhoon"] = "Typhon",
 	-- Bar and messages.
+--	["[%u] STATION: %s %s"] = "[%u] STATION: %s %s",	-- TODO: French translation missing !!!!
+--	["[%u] STATION"] = "[%u] STATION",	-- TODO: French translation missing !!!!
+--	["ICE BREATH"] = "ICE BREATH",	-- TODO: French translation missing !!!!
+--	["TYPHOON"] = "TYPHOON",	-- TODO: French translation missing !!!!
+--	["JUMP"] = "JUMP",	-- TODO: French translation missing !!!!
+--	["Encounter Start"] = "Encounter Start",	-- TODO: French translation missing !!!!
+--	["NORTH"] = "NORTH",	-- TODO: French translation missing !!!!
+--	["SOUTH"] = "SOUTH",	-- TODO: French translation missing !!!!
+--	["EAST"] = "EAST",	-- TODO: French translation missing !!!!
+--	["WEST"] = "WEST",	-- TODO: French translation missing !!!!
 })
 mod:RegisterGermanLocale({
 	-- Unit names.
+	["Wind Wall"] = "Windwand",
+--	["Avatus Hologram"] = "Avatus Hologram",	-- TODO: German translation missing !!!!
+	["Weather Station"] = "Wetterstation",
+	["Maelstrom Authority"] = "Mahlstromgewalt",
 	-- Datachron messages.
+--	["The platform trembles"] = "The platform trembles",	-- TODO: German translation missing !!!!
 	-- Cast.
+	["Activate Weather Cycle"] = "Wetterzyklus aktivieren",
+	["Ice Breath"] = "Eisatem",
+	["Crystallize"] = "Kristallisieren",
+	["Typhoon"] = "Taifun",
 	-- Bar and messages.
+--	["[%u] STATION: %s %s"] = "[%u] STATION: %s %s",	-- TODO: German translation missing !!!!
+--	["[%u] STATION"] = "[%u] STATION",	-- TODO: German translation missing !!!!
+--	["ICE BREATH"] = "ICE BREATH",	-- TODO: German translation missing !!!!
+--	["TYPHOON"] = "TYPHOON",	-- TODO: German translation missing !!!!
+--	["JUMP"] = "JUMP",	-- TODO: German translation missing !!!!
+--	["Encounter Start"] = "Encounter Start",	-- TODO: German translation missing !!!!
+	["NORTH"] = "N",
+	["SOUTH"] = "S",
+	["EAST"] = "E",
+	["WEST"] = "W",
 })
 
 --------------------------------------------------------------------------------

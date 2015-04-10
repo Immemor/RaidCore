@@ -34,7 +34,8 @@ mod:RegisterFrenchLocale({
 	-- Unit names.
 	["Experiment X-89"] = "Expérience X-89",
 	-- Datachron messages.
-	["Experiment X-89 has placed a bomb"] = "L'expérience X%-89 a posé une bombe sur (.*) !",
+	---- This entry is used with string.match, so the dash in X-89 needs to be escaped.
+--	["Experiment X-89 has placed a bomb"] = "Experiment X%-89 has placed a bomb on (.*)!",	-- TODO: French translation missing !!!!
 	-- Cast.
 	["Shattering Shockwave"] = "Onde de choc dévastatrice",
 	["Repugnant Spew"] = "Crachat répugnant",
@@ -53,15 +54,16 @@ mod:RegisterGermanLocale({
 	-- Unit names.
 	["Experiment X-89"] = "Experiment X-89",
 	-- Datachron messages.
-	["Experiment X-89 has placed a bomb"] = "Experiment X%-89 hat eine Bombe auf (.*)!",
+	---- This entry is used with string.match, so the dash in X-89 needs to be escaped.
+--	["Experiment X-89 has placed a bomb"] = "Experiment X%-89 has placed a bomb on (.*)!",	-- TODO: German translation missing !!!!
 	-- Cast.
 	["Shattering Shockwave"] = "Zerschmetternde Schockwelle",
 	["Repugnant Spew"] = "Widerliches Erbrochenes",
 	["Resounding Shout"] = "Widerhallender Schrei",
 	-- Bar and messages.
+--	["KNOCKBACK !!"] = "KNOCKBACK !!",	-- TODO: German translation missing !!!!
 	["KNOCKBACK"] = "RÜCKSTOß",
-	["KNOCKBACK !!"] = "RÜCKSTOß !!!",
-	["BEAM !!"] = "LASER !!",
+--	["BEAM !!"] = "BEAM !!",	-- TODO: German translation missing !!!!
 	["BEAM"] = "LASER",
 	["SHOCKWAVE"] = "SCHOCKWELLE",
 	["BIG BOMB on YOU !!!"] = "GROßE BOMBE auf DIR !!!",

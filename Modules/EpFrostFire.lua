@@ -33,15 +33,45 @@ mod:RegisterEnglishLocale({
 })
 mod:RegisterFrenchLocale({
 	-- Unit names.
+	["Hydroflux"] = "Hydroflux",
+	["Pyrobane"] = "Pyromagnus",
+	["Ice Tomb"] = "Tombeau de glace",
 	-- Datachron messages.
+	-- NPCSay messages.
+--	["Burning mortals... such sweet agony"] = "Burning mortals... such sweet agony",	-- TODO: French translation missing !!!!
+--	["Run! Soon my fires will destroy you"] = "Run! Soon my fires will destroy you",	-- TODO: French translation missing !!!!
+--	["Ah! The smell of seared flesh"] = "Ah! The smell of seared flesh",	-- TODO: French translation missing !!!!
+--	["Enshrouded in deadly flame"] = "Enshrouded in deadly flame",	-- TODO: French translation missing !!!!
+--	["Pyrobane ignites you"] = "Pyrobane ignites you",	-- TODO: French translation missing !!!!
 	-- Cast.
+	["Flame Wave"] = "Vague de feu",
 	-- Bar and messages.
+--	["Frost Bomb"] = "Frost\nBomb",	-- TODO: French translation missing !!!!
+--	["BOMBS"] = "BOMBS",	-- TODO: French translation missing !!!!
+--	["BOMBS UP !"] = "BOMBS UP !",	-- TODO: French translation missing !!!!
+	["Bomb Explosion"] = "Bomb Explosion",
+--	["ICE TOMB"] = "ICE TOMB",	-- TODO: French translation missing !!!!
 })
 mod:RegisterGermanLocale({
 	-- Unit names.
+	["Hydroflux"] = "Hydroflux",
+	["Pyrobane"] = "Pyroman",
+	["Ice Tomb"] = "Eisgrab",
 	-- Datachron messages.
+	-- NPCSay messages.
+--	["Burning mortals... such sweet agony"] = "Burning mortals... such sweet agony",	-- TODO: German translation missing !!!!
+--	["Run! Soon my fires will destroy you"] = "Run! Soon my fires will destroy you",	-- TODO: German translation missing !!!!
+--	["Ah! The smell of seared flesh"] = "Ah! The smell of seared flesh",	-- TODO: German translation missing !!!!
+--	["Enshrouded in deadly flame"] = "Enshrouded in deadly flame",	-- TODO: German translation missing !!!!
+--	["Pyrobane ignites you"] = "Pyrobane ignites you",	-- TODO: German translation missing !!!!
 	-- Cast.
+	["Flame Wave"] = "Flammenwelle",
 	-- Bar and messages.
+--	["Frost Bomb"] = "Frost\nBomb",	-- TODO: German translation missing !!!!
+--	["BOMBS"] = "BOMBS",	-- TODO: German translation missing !!!!
+--	["BOMBS UP !"] = "BOMBS UP !",	-- TODO: German translation missing !!!!
+	["Bomb Explosion"] = "Bomb Explosion",
+--	["ICE TOMB"] = "ICE TOMB",	-- TODO: German translation missing !!!!
 })
 
 --------------------------------------------------------------------------------
