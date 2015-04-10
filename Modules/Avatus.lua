@@ -39,15 +39,67 @@ mod:RegisterEnglishLocale({
 })
 mod:RegisterFrenchLocale({
 	-- Unit names.
+	["Avatus"] = "Avatus",
+	["Holo Hand"] = "Holo-main",
+--	["Holo Hand Spawned"] = "Holo Hand Spawned",	-- TODO: French translation missing !!!!
+	["Mobius Physics Constructor"] = "Constructeur de physique de Möbius",
+	["Unstoppable Object Simulation"] = "Simulacre invincible",
+	["Holo Cannon"] = "Holocanon",
+	["Shock Sphere"] = "Sphère de choc",
+	["Support Cannon"] = "Canon d'appui",
+	["Infinite Logic Loop"] = "Boucle de logique infinie",
 	-- Datachron messages.
+--	["Portals have opened!"] = "Portals have opened!",	-- TODO: French translation missing !!!!
+--	["Gun Grid Activated"] = "Gun Grid Activated",	-- TODO: French translation missing !!!!
 	-- Cast.
+	["Crushing Blow"] = "Coup écrasant",
+	["Data Flare"] = "Signal de données",
+	["Obliteration Beam"] = "Rayon de suppression",
 	-- Bar and messages.
+--	["PURGE BLUE BOSS"] = "PURGE BLUE BOSS",	-- TODO: French translation missing !!!!
+	["P2 SOON !"] = "P2 SOON !",
+--	["GO TO SIDES !"] = "GO TO SIDES !",	-- TODO: French translation missing !!!!
+--	["INTERRUPT CRUSHING BLOW!"] = "INTERRUPT CRUSHING BLOW!",	-- TODO: French translation missing !!!!
+--	["BLIND! TURN AWAY FROM BOSS"] = "BLIND! TURN AWAY FROM BOSS",	-- TODO: French translation missing !!!!
+	["Blind"] = "Aveugler",
+--	["Gun Grid NOW!"] = "Gun Grid NOW!",	-- TODO: French translation missing !!!!
+--	["~Gun Grid"] = "~Gun Grid",	-- TODO: French translation missing !!!!
+--	["Holo Hands spawn"] = "Holo Hands spawn",	-- TODO: French translation missing !!!!
+--	["Hand %u"] = "Hand %u",	-- TODO: French translation missing !!!!
+--	["MARKER North"] = "North",	-- TODO: French translation missing !!!!
+--	["MARKER South"] = "South",	-- TODO: French translation missing !!!!
 })
 mod:RegisterGermanLocale({
 	-- Unit names.
+	["Avatus"] = "Avatus",
+	["Holo Hand"] = "Holohand",
+--	["Holo Hand Spawned"] = "Holo Hand Spawned",	-- TODO: German translation missing !!!!
+	["Mobius Physics Constructor"] = "Mobius Physikkonstrukteur",
+	["Unstoppable Object Simulation"] = "Unaufhaltbare Objektsimulation",
+	["Holo Cannon"] = "Holokanone",
+	["Shock Sphere"] = "Schocksphäre",
+	["Support Cannon"] = "Hilfskanone",
+	["Infinite Logic Loop"] = "Unendliche Logikschleife",
 	-- Datachron messages.
+--	["Portals have opened!"] = "Portals have opened!",	-- TODO: German translation missing !!!!
+--	["Gun Grid Activated"] = "Gun Grid Activated",	-- TODO: German translation missing !!!!
 	-- Cast.
+	["Crushing Blow"] = "Vernichtender Schlag",
+	["Data Flare"] = "Daten-Leuchtsignal",
+	["Obliteration Beam"] = "Vernichtungsstrahl",
 	-- Bar and messages.
+--	["PURGE BLUE BOSS"] = "PURGE BLUE BOSS",	-- TODO: German translation missing !!!!
+	["P2 SOON !"] = "GLEICH PHASE 2 !",
+--	["GO TO SIDES !"] = "GO TO SIDES !",	-- TODO: German translation missing !!!!
+--	["INTERRUPT CRUSHING BLOW!"] = "INTERRUPT CRUSHING BLOW!",	-- TODO: German translation missing !!!!
+--	["BLIND! TURN AWAY FROM BOSS"] = "BLIND! TURN AWAY FROM BOSS",	-- TODO: German translation missing !!!!
+	["Blind"] = "Geblendet",
+--	["Gun Grid NOW!"] = "Gun Grid NOW!",	-- TODO: German translation missing !!!!
+--	["~Gun Grid"] = "~Gun Grid",	-- TODO: German translation missing !!!!
+--	["Holo Hands spawn"] = "Holo Hands spawn",	-- TODO: German translation missing !!!!
+--	["Hand %u"] = "Hand %u",	-- TODO: German translation missing !!!!
+--	["MARKER North"] = "North",	-- TODO: German translation missing !!!!
+--	["MARKER South"] = "South",	-- TODO: German translation missing !!!!
 })
 
 local phase2warn, phase2 = false, false

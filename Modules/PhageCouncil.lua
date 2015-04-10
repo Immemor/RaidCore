@@ -37,8 +37,10 @@ mod:RegisterFrenchLocale({
 	["Noxmind the Insidious"] = "Toxultime l'Insidieux",
 	["Ersoth Curseform"] = "Ersoth le Maudisseur",
 	-- Datachron messages.
+--	["The Phageborn Convergence begins gathering its power"] = "The Phageborn Convergence begins gathering its power",	-- TODO: French translation missing !!!!
 	-- Cast.
 	["Teleport"] = "Se téléporter",
+	["Channeling Energy"] = "Canaliser l'énergie",
 	-- Bar and messages.
 	["[%u] NEXT P2"] = "[%u] PROCHAINE P2",
 	["P2 : 20 IA"] = "P2 : 20 IA",
@@ -48,9 +50,22 @@ mod:RegisterFrenchLocale({
 })
 mod:RegisterGermanLocale({
 	-- Unit names.
+	["Terax Blightweaver"] = "Terax Brandweber",
+	["Golgox the Lifecrusher"] = "Golgox der Lebenszermalmer",
+	["Fleshmonger Vratorg"] = "Fleischhändler Vratorg",
+	["Noxmind the Insidious"] = "Noxgeist der Hinterlistige",
+	["Ersoth Curseform"] = "Ersoth Fluchform",
 	-- Datachron messages.
+	["The Phageborn Convergence begins gathering its power"] = "Die Konvergenz der Phagengeborenen sammelt ihre Macht",
 	-- Cast.
+	["Teleport"] = "Teleportieren",
+	["Channeling Energy"] = "Energie kanalisieren",
 	-- Bar and messages.
+--	["[%u] NEXT P2"] = "[%u] NEXT P2",	-- TODO: German translation missing !!!!
+	["P2 : 20 IA"] = "P2 : 20x UNTERBRECHEN",
+	["P2 : MINI ADDS"] = "P2 : MINI ADDS",
+	["P2 : SUBDUE"] = "P2 : ENTWAFFNEN",
+	["P2 : PILLARS"] = "P2 : GENERATOREN",
 })
 
 

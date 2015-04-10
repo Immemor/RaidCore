@@ -47,18 +47,70 @@ mod:RegisterEnglishLocale({
 mod:RegisterFrenchLocale({
 	-- Unit names.
 	["Dreadphage Ohmna"] = "Ohmna la Terriphage",
+	["Tentacle of Ohmna"] = "Tentacule d'Ohmna",
+	["Ravenous Maw of the Dreadphage"] = "Gueule vorace de la Terriphage",
 	-- Datachron messages.
-	-- NPCSay messages.
+--	["A plasma leech begins draining"] = "A plasma leech begins draining",	-- TODO: French translation missing !!!!
+--	["Dreadphage Ohmna submerges"] = "Dreadphage Ohmna submerges",	-- TODO: French translation missing !!!!
+--	["Dreadphage Ohmna is bored"] = "Dreadphage Ohmna is bored",	-- TODO: French translation missing !!!!
+--	["The Archives tremble as Dreadphage Ohmna"] = "The Archives tremble as Dreadphage Ohmna",	-- TODO: French translation missing !!!!
+--	["The Archives quake with the furious might"] = "The Archives quake with the furious might",	-- TODO: French translation missing !!!!
+	-- Objectifs.
+--	["North Power Core Energy"] = "North Power Core Energy",	-- TODO: French translation missing !!!!
+--	["South Power Core Energy"] = "South Power Core Energy",	-- TODO: French translation missing !!!!
+--	["East Power Core Energy"] = "East Power Core Energy",	-- TODO: French translation missing !!!!
+--	["West Power Core Energy"] = "West Power Core Energy",	-- TODO: French translation missing !!!!
 	-- Cast.
+	["Erupt"] = "Erupt",
 	["Genetic Torrent"] = "Torrent génétique",
 	-- Bar and messages.
+--	["Next Tentacles"] = "Next Tentacles",	-- TODO: French translation missing !!!!
+	["Tentacles"] = "Tentacule",
+	["P2 SOON !"] = "P2 SOON !",
+--	["P2: TENTACLES"] = "P2: TENTACLES",	-- TODO: French translation missing !!!!
+--	["PHASE 2"] = "PHASE 2",	-- TODO: French translation missing !!!!
+--	["P3 SOON !"] = "P3 SOON !",	-- TODO: French translation missing !!!!
+--	["P3: RAVENOUS"] = "P3: RAVENOUS",	-- TODO: French translation missing !!!!
+--	["P3 REALLY SOON !"] = "P3 REALLY SOON !",	-- TODO: French translation missing !!!!
+--	["PILLAR %u : %u"] = "PILLAR %u : %u",	-- TODO: French translation missing !!!!
+--	["PILLAR %u"] = "PILLAR %u",	-- TODO: French translation missing !!!!
+	["SWITCH TANK"] = "CHANGEMENT TANK",
+--	["BIG SPEW"] = "BIG SPEW",	-- TODO: French translation missing !!!!
+--	["NEXT BIG SPEW"] = "NEXT BIG SPEW",	-- TODO: French translation missing !!!!
 })
 mod:RegisterGermanLocale({
 	-- Unit names.
+	["Dreadphage Ohmna"] = "Schreckensphage Ohmna",
+	["Tentacle of Ohmna"] = "Tentakel von Ohmna",
+	["Ravenous Maw of the Dreadphage"] = "Unersättliches Maul der Schreckensphage",
 	-- Datachron messages.
-	-- NPCSay messages.
+	["A plasma leech begins draining"] = "Ein Plasmaegel beginnt, den",
+	["Dreadphage Ohmna submerges"] = "Die Schreckensphage Ohmna taucht in den",
+	["Dreadphage Ohmna is bored"] = "Die Schreckensphage Ohmna langweilt sich",
+	["The Archives tremble as Dreadphage Ohmna"] = "Die Archive beben, als die Tentakeln der Schreckensphage Ohmna um dich herum auftauchen",
+	["The Archives quake with the furious might"] = "Die Archive beben unter der wütenden Macht der Schreckensphage",
+	-- Objectifs.
+	["North Power Core Energy"] = "Nördliche Kraftkernenergie",
+	["South Power Core Energy"] = "Südliche Kraftkernenergie",
+	["East Power Core Energy"] = "Östliche Kraftkernenergie",
+	["West Power Core Energy"] = "Westliche Kraftkernenergie",
 	-- Cast.
+	["Erupt"] = "Ausbrechen",
+	["Genetic Torrent"] = "Genetische Strömung",
 	-- Bar and messages.
+	["Next Tentacles"] = "NÄCHSTE TENTAKEL",
+	["Tentacles"] = "TENTAKEL",
+	["P2 SOON !"] = "GLEICH PHASE 2 !",
+--	["P2: TENTACLES"] = "P2: TENTACLES",	-- TODO: German translation missing !!!!
+	["PHASE 2"] = "PHASE 2",
+	["P3 SOON !"] = "GLEICH PHASE 3 !",
+--	["P3: RAVENOUS"] = "P3: RAVENOUS",	-- TODO: German translation missing !!!!
+	["P3 REALLY SOON !"] = "17 % | VORSICHT MIT DAMAGE",
+--	["PILLAR %u : %u"] = "PILLAR %u : %u",	-- TODO: German translation missing !!!!
+--	["PILLAR %u"] = "PILLAR %u",	-- TODO: German translation missing !!!!
+	["SWITCH TANK"] = "TANKWECHSEL",
+	["BIG SPEW"] = "GROßES BRECHEN",
+	["NEXT BIG SPEW"] = "NÄCHSTES GROßES BRECHEN",
 })
 
 

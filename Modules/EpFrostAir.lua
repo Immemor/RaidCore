@@ -35,15 +35,49 @@ mod:RegisterEnglishLocale({
 })
 mod:RegisterFrenchLocale({
 	-- Unit names.
+	["Hydroflux"] = "Hydroflux",
+	["Aileron"] = "Ventemort",
+--	["Landing Volume"] = "Landing Volume",	-- TODO: French translation missing !!!!
+	["Wind Wall"] = "Mur de vent",
 	-- Datachron messages.
+--	["Hydroflux evaporates"] = "Hydroflux evaporates",	-- TODO: French translation missing !!!!
+--	["Aileron dissipates with a flurry"] = "Aileron dissipates with a flurry",	-- TODO: French translation missing !!!!
+--	["The wind starts to blow faster and faster"] = "The wind starts to blow faster and faster",	-- TODO: French translation missing !!!!
 	-- Cast.
+	["Tsunami"] = "Tsunami",
+	["Glacial Icestorm"] = "Glacial Icestorm",
 	-- Bar and messages.
+--	["EYE OF THE STORM"] = "EYE OF THE STORM",	-- TODO: French translation missing !!!!
+--	["MOO !"] = "MOO !",	-- TODO: French translation missing !!!!
+	["MOO PHASE"] = "MOO PHASE",
+--	["ICESTORM"] = "ICESTORM",	-- TODO: French translation missing !!!!
+--	["~Middle Phase"] = "~Middle Phase",	-- TODO: French translation missing !!!!
+--	["~Frost Tombs"] = "~Frost Tombs",	-- TODO: French translation missing !!!!
+--	["TWIRL ON YOU!"] = "TWIRL ON YOU!",	-- TODO: French translation missing !!!!
+--	["TWIRL"] = "TWIRL",	-- TODO: French translation missing !!!!
 })
 mod:RegisterGermanLocale({
 	-- Unit names.
+	["Hydroflux"] = "Hydroflux",
+	["Aileron"] = "Aileron",
+--	["Landing Volume"] = "Landing Volume",	-- TODO: German translation missing !!!!
+	["Wind Wall"] = "Windwand",
 	-- Datachron messages.
+--	["Hydroflux evaporates"] = "Hydroflux evaporates",	-- TODO: German translation missing !!!!
+--	["Aileron dissipates with a flurry"] = "Aileron dissipates with a flurry",	-- TODO: German translation missing !!!!
+--	["The wind starts to blow faster and faster"] = "The wind starts to blow faster and faster",	-- TODO: German translation missing !!!!
 	-- Cast.
+	["Tsunami"] = "Tsunami",
+	["Glacial Icestorm"] = "Frostiger Eissturm",
 	-- Bar and messages.
+--	["EYE OF THE STORM"] = "EYE OF THE STORM",	-- TODO: German translation missing !!!!
+--	["MOO !"] = "MOO !",	-- TODO: German translation missing !!!!
+--	["MOO PHASE"] = "MOO PHASE",	-- TODO: German translation missing !!!!
+--	["ICESTORM"] = "ICESTORM",	-- TODO: German translation missing !!!!
+--	["~Middle Phase"] = "~Middle Phase",	-- TODO: German translation missing !!!!
+--	["~Frost Tombs"] = "~Frost Tombs",	-- TODO: German translation missing !!!!
+--	["TWIRL ON YOU!"] = "TWIRL ON YOU!",	-- TODO: German translation missing !!!!
+--	["TWIRL"] = "TWIRL",	-- TODO: German translation missing !!!!
 })
 
 --------------------------------------------------------------------------------
