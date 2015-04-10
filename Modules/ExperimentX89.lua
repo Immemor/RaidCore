@@ -34,6 +34,7 @@ mod:RegisterFrenchLocale({
 	-- Unit names.
 	["Experiment X-89"] = "Expérience X-89",
 	-- Datachron messages.
+	---- This entry is used with string.match, so the dash in X-89 needs to be escaped.
 	["Experiment X-89 has placed a bomb"] = "L'expérience X%-89 a posé une bombe sur (.*) !",
 	-- Cast.
 	["Shattering Shockwave"] = "Onde de choc dévastatrice",
@@ -53,14 +54,15 @@ mod:RegisterGermanLocale({
 	-- Unit names.
 	["Experiment X-89"] = "Experiment X-89",
 	-- Datachron messages.
+	---- This entry is used with string.match, so the dash in X-89 needs to be escaped.
 	["Experiment X-89 has placed a bomb"] = "Experiment X%-89 hat eine Bombe auf (.*)!",
 	-- Cast.
 	["Shattering Shockwave"] = "Zerschmetternde Schockwelle",
 	["Repugnant Spew"] = "Widerliches Erbrochenes",
 	["Resounding Shout"] = "Widerhallender Schrei",
 	-- Bar and messages.
-	["KNOCKBACK"] = "RÜCKSTOß",
 	["KNOCKBACK !!"] = "RÜCKSTOß !!!",
+	["KNOCKBACK"] = "RÜCKSTOß",
 	["BEAM !!"] = "LASER !!",
 	["BEAM"] = "LASER",
 	["SHOCKWAVE"] = "SCHOCKWELLE",

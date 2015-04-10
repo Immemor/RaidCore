@@ -31,15 +31,41 @@ mod:RegisterEnglishLocale({
 })
 mod:RegisterFrenchLocale({
 	-- Unit names.
+	["Megalith"] = "Mégalithe",
+	["Mnemesis"] = "Mnémésis",
+--	["Obsidian Outcropping"] = "Obsidian Outcropping",	-- TODO: French translation missing !!!!
+	["Crystalline Matrix"] = "Matrice cristalline",
 	-- Datachron messages.
+--	["The ground shudders beneath Megalith"] = "The ground shudders beneath Megalith",	-- TODO: French translation missing !!!!
+--	["Logic creates powerful data caches"] = "Logic creates powerful data caches",	-- TODO: French translation missing !!!!
 	-- Cast.
+	["Defragment"] = "Défragmentation",
 	-- Bar and messages.
+--	["SNAKE ON %s"] = "SNAKE ON %s",	-- TODO: French translation missing !!!!
+--	["DEFRAG"] = "DEFRAG",	-- TODO: French translation missing !!!!
+--	["SPREAD"] = "SPREAD",	-- TODO: French translation missing !!!!
+--	["BOOM"] = "BOOM",	-- TODO: French translation missing !!!!
+--	["JUMP !"] = "JUMP !",	-- TODO: French translation missing !!!!
+--	["STARS"] = "STARS%s"	-- TODO: French translation missing !!!!
 })
 mod:RegisterGermanLocale({
 	-- Unit names.
+	["Megalith"] = "Megalith",
+	["Mnemesis"] = "Mnemesis",
+--	["Obsidian Outcropping"] = "Obsidian Outcropping",	-- TODO: German translation missing !!!!
+	["Crystalline Matrix"] = "Kristallmatrix",
 	-- Datachron messages.
+--	["The ground shudders beneath Megalith"] = "The ground shudders beneath Megalith",	-- TODO: German translation missing !!!!
+--	["Logic creates powerful data caches"] = "Logic creates powerful data caches",	-- TODO: German translation missing !!!!
 	-- Cast.
+	["Defragment"] = "Defragmentieren",
 	-- Bar and messages.
+--	["SNAKE ON %s"] = "SNAKE ON %s",	-- TODO: German translation missing !!!!
+--	["DEFRAG"] = "DEFRAG",	-- TODO: German translation missing !!!!
+--	["SPREAD"] = "SPREAD",	-- TODO: German translation missing !!!!
+--	["BOOM"] = "BOOM",	-- TODO: German translation missing !!!!
+--	["JUMP !"] = "JUMP !",	-- TODO: German translation missing !!!!
+--	["STARS"] = "STARS%s"	-- TODO: German translation missing !!!!
 })
 
 --------------------------------------------------------------------------------
