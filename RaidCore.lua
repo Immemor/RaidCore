@@ -142,6 +142,8 @@ local DefaultSettings = {
 			SoundTwirl = true,
 			SoundMoO = true,
 			SoundIcestorm = true,
+			SoundMidphase = true,
+			SoundFrostTombs = true,
 			OtherTwirlWarning = true,
 			OtherTwirlPlayerMarkers = true,
 		},
