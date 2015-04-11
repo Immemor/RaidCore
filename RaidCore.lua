@@ -179,6 +179,7 @@ local DefaultSettings = {
 		},
 		FireLife = {
 			LineLifeOrbs = true,
+			LineFlameWaves = true,
 			SoundRooted = true,
 			SoundBlindingLight = true,
 			SoundNoHealDebuff = true,
