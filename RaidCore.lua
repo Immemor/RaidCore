@@ -135,6 +135,8 @@ local DefaultSettings = {
 			SoundMidphase = true,
 			SoundQuakeJump = true,
 			SoundSupercell = true,
+			SoundTornadoCountdown = true,
+			SoundMoO = true,
 		},
 		AirWater = {
 			SoundTwirl = true,
