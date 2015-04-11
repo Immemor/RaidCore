@@ -126,6 +126,8 @@ local DefaultSettings = {
 			SoundShieldPhase = true,
 			SoundJumpPhase = true,
 			SoundNewWave = true,
+			SoundLaser = true,
+			SoundExplosion = true,
 			OtherPlayerBeamMarkers = true,
 			OtherLogicWallMarkers = true,
 		},
