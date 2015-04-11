@@ -197,7 +197,9 @@ local DefaultSettings = {
 			LineOrbs = true,
 			SoundDefrag = true,
 			SoundDataDisruptorDebuff = true,
+			SoundMidphase = true,
 			OtherWateryGraveTimer = true,
+			OtherOrbMarkers = true,
 		},
 		LogicLife = {
 			LineTetrisBlocks = true,
