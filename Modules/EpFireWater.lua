@@ -168,35 +168,43 @@ function mod:OnDebuffApplied(unitName, splId, unit)
 	end
 
 	if splId == DEBUFFID_FIREBOMB then
-		core:MarkUnit(unit, nil, "Fire\nBomb")
+		if GetSetting("OtherBombPlayerMarkers") then
+			core:MarkUnit(unit, nil, "Fire\nBomb")
+		end
 		--core:AddPixie(unit:GetId() .. "_BOMB", 2, unit, nil, "Red", 7, 10, 0, 50)
 		core:AddUnit(unit)
 		firebomb_players[unitName] = unit
 		if unitName == strMyName then
-			core:AddMsg("BOMB", self.L["BOMBS UP !"], 5, "RunAway")
-			self:ScheduleTimer("ApplyBombLines", 1, "fire")
+			core:AddMsg("BOMB", self.L["BOMBS UP !"], 5, GetSoundSetting("RunAway", "SoundBomb"))
+			if GetSetting("LineBombPlayers") then
+				self:ScheduleTimer("ApplyBombLines", 1, "fire")
+			end
 		end
 		self:ScheduleTimer("RemoveBombMarker", 10, "fire", unit)
 	elseif splId == DEBUFFID_FROSTBOMB then
-		core:MarkUnit(unit, nil, self.L["Frost Bomb"])
+		if GetSetting("OtherBombPlayerMarkers") then
+			core:MarkUnit(unit, nil, self.L["Frost Bomb"])
+		end
 		--core:AddPixie(unit:GetId() .. "_BOMB", 2, unit, nil, "Blue", 7, 10, 0, 50)
 		core:AddUnit(unit)
 		frostbomb_players[unitName] = unit
 		if unitName == strMyName then
-			core:AddMsg("BOMB", self.L["BOMBS UP !"], 5, "RunAway")
-			self:ScheduleTimer("ApplyBombLines", 1, "frost")
+			core:AddMsg("BOMB", self.L["BOMBS UP !"], 5, GetSoundSetting("RunAway", "SoundBomb"))
+			if GetSetting("LineBombPlayers") then
+				self:ScheduleTimer("ApplyBombLines", 1, "frost")
+			end
 		end
 		self:ScheduleTimer("RemoveBombMarker", 10, "frost", unit)
 	elseif splId == DEBUFFID_ICE_TOMB and dist2unit(uPlayer, unit) < 45 then -- Ice Tomb Debuff
 		local unitId = unit:GetId()
-		if unitId then
+		if unitId and GetSetting("LineIceTomb") then
 			core:AddPixie(unitId .. "_TOMB", 1, uPlayer, unit, "Blue", 5, 10, 10)
 		end
 	end
 	if splId == DEBUFFID_FIREBOMB or splId == DEBUFFID_FROSTBOMB then
 		if eventTime - prevBomb > 10 then
 			prevBomb = eventTime
-			core:AddBar("BEXPLODE", self.L["Bomb Explosion"], 10, true)
+			core:AddBar("BEXPLODE", self.L["Bomb Explosion"], 10, GetSetting("SoundBomb"))
 		end
 	end
 	--Print(eventTime .. " " .. unitName .. "has debuff: " .. strSpellName .. " with splId: " .. splId .. " - type: DebuffNormal")
@@ -207,11 +215,11 @@ function mod:OnUnitCreated(unit, sName)
 		local timeOfEvent = GameLib.GetGameTime()
 		if timeOfEvent - prev > 13 then
 			prev = timeOfEvent
-			core:AddMsg("TOMB", self.L["ICE TOMB"], 5, "Alert", "Blue")
+			core:AddMsg("TOMB", self.L["ICE TOMB"], 5, GetSoundSetting("Alert", "SoundIceTomb"), "Blue")
 			core:AddBar("TOMB", self.L["ICE TOMB"], 15)
 		end
 		core:AddUnit(unit)
-	elseif sName == self.L["Flame Wave"] then
+	elseif sName == self.L["Flame Wave"] and GetSetting("LineFlameWaves") then
 		local unitId = unit:GetId()
 		if unitId then
 			core:AddPixie(unitId, 2, unit, nil, "Green", 10, 20, 0)
@@ -232,7 +240,7 @@ function mod:OnDebuffAppliedDose(unitName, splId, stack)
 	if (splId == 52874 or splId == 52876) and ((self:Tank() and stack == 13) or (not self:Tank() and stack == 10)) then
 		if unitName == strMyName then
 			local msgString = stack .. " STACKS!"
-			core:AddMsg("STACK", msgString, 5, "Beware")
+			core:AddMsg("STACK", msgString, 5, GetSoundSetting("Beware", "SoundHighDebuffStacks"))
 		end
 	end
 end
@@ -252,7 +260,7 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
 		if sName == self.L["Hydroflux"] then
 			core:AddUnit(unit)
 			local unitId = unit:GetId()
-			if unitId then
+			if unitId and GetSetting("LineCleaveHydroflux") then
 				core:AddPixie(unitId .. "_1", 2, unit, nil, "Yellow", 3, 7, 0)
 				core:AddPixie(unitId .. "_2", 2, unit, nil, "Yellow", 3, 7, 180)
 			end
