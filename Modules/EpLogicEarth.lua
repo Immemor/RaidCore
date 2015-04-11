@@ -90,7 +90,7 @@ end
 function mod:OnUnitCreated(unit, sName)
 	local sName = unit:GetName()
 	--Print(sName)
-	if sName == self.L["Obsidian Outcropping"] then
+	if sName == self.L["Obsidian Outcropping"] and GetSetting("LineObsidianOutcropping") then
 		--core:AddLine(unit:GetId(), 1, GameLib.GetPlayerUnit(), unit, 3)
 		core:AddPixie(unit:GetId().."_1", 1, GameLib.GetPlayerUnit(), unit, "Blue", 10)
 	end
@@ -107,7 +107,7 @@ function mod:OnSpellCastStart(unitName, castName, unit)
 		local timeOfEvent = GameLib.GetGameTime()
 		if timeOfEvent - prev > 10 then
 			prev = timeOfEvent
-			core:AddMsg("DEFRAG", self.L["SPREAD"], 5, "Alarm")
+			core:AddMsg("DEFRAG", self.L["SPREAD"], 5, GetSoundSetting("Alarm", "SoundDefrag"))
 			core:AddBar("BOOM", self.L["BOOM"], 9)
 			core:AddBar("DEFRAG", self.L["DEFRAG"], 40)
 		end
@@ -116,9 +116,9 @@ end
 
 function mod:OnChatDC(message)
 	if message:find(self.L["The ground shudders beneath Megalith"]) then
-		core:AddMsg("QUAKE", self.L["JUMP !"], 3, "Beware")
+		core:AddMsg("QUAKE", self.L["JUMP !"], 3, GetSoundSetting("Beware", "SoundQuakeJump"))
 	elseif message:find(self.L["Logic creates powerful data caches"]) then
-		core:AddMsg("STAR", self.L["STARS"]:format(" !"), 5, "Alert")
+		core:AddMsg("STAR", self.L["STARS"]:format(" !"), 5, GetSoundSetting("Alert", "SoundStars"))
 		core:AddBar("STAR", self.L["STARS"]:format(""), 60)
 	end
 end
@@ -129,7 +129,7 @@ function mod:OnDebuffApplied(unitName, splId, unit)
 		--if timeOfEvent - prev > 10 then
 		--	first = false
 		if unitName == GameLib.GetPlayerUnit():GetName() then
-			core:AddMsg("SNAKE", self.L["SNAKE ON %s"]:format(unitName), 5, "RunAway", "Blue")
+			core:AddMsg("SNAKE", self.L["SNAKE ON %s"]:format(unitName), 5, GetSoundSetting("RunAway", "SoundSnake"), "Blue")
 		end
 		core:AddBar("SNAKE", self.L["SNAKE ON %s"]:format(unitName), 20)
 		--end
