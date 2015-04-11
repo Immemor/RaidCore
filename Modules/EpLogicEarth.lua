@@ -4,12 +4,12 @@
 
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 
-local mod = core:NewBoss("EpEarthLogic", 52)
+local mod = core:NewBoss("EpLogicEarth", 52)
 if not mod then return end
 
 --mod:RegisterEnableMob("Megalith")
 mod:RegisterEnableBossPair("Megalith", "Mnemesis")
-mod:RegisterRestrictZone("EpEarthLogic", "Elemental Vortex Alpha", "Elemental Vortex Beta", "Elemental Vortex Delta")
+mod:RegisterRestrictZone("EpLogicEarth", "Elemental Vortex Alpha", "Elemental Vortex Beta", "Elemental Vortex Delta")
 mod:RegisterEnglishLocale({
 	-- Unit names.
 	["Megalith"] = "Megalith",
@@ -75,6 +75,13 @@ function mod:OnBossEnable()
 	--Apollo.RegisterEventHandler("BUFF_APPLIED", "OnBuffApplied", self)
 end
 
+local function GetSetting(key)
+	return core:GetSettings()["DS"]["LogicEarth"][key]
+end
+
+local function GetSoundSetting(sound, key)
+	if core:GetSettings()["DS"]["LogicEarth"][key] then return sound else return nil end
+end
 
 --------------------------------------------------------------------------------
 -- Event Handlers
