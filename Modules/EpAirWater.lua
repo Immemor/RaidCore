@@ -4,12 +4,12 @@
 
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 
-local mod = core:NewBoss("EpFrostAir", 52)
+local mod = core:NewBoss("EpAirWater", 52)
 if not mod then return end
 
 --mod:RegisterEnableMob("Hydroflux")
 mod:RegisterEnableBossPair("Hydroflux", "Aileron")
-mod:RegisterRestrictZone("EpFrostAir", "Elemental Vortex Alpha", "Elemental Vortex Beta", "Elemental Vortex Delta")
+mod:RegisterRestrictZone("EpAirWater", "Elemental Vortex Alpha", "Elemental Vortex Beta", "Elemental Vortex Delta")
 mod:RegisterEnglishLocale({
 	-- Unit names.
 	["Hydroflux"] = "Hydroflux",
@@ -73,6 +73,13 @@ function mod:OnBossEnable()
 	Apollo.RegisterEventHandler("RAID_WIPE", "OnReset", self)
 end
 
+local function GetSetting(key)
+	return core:GetSettings()["DS"]["AirWater"][key]
+end
+
+local function GetSoundSetting(sound, key)
+	if core:GetSettings()["DS"]["AirWater"][key] then return sound else return nil end
+end
 
 --------------------------------------------------------------------------------
 -- Event Handlers

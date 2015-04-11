@@ -4,11 +4,11 @@
 
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 
-local mod = core:NewBoss("EpFrostLogic", 52)
+local mod = core:NewBoss("EpLogicWater", 52)
 if not mod then return end
 
 mod:RegisterEnableBossPair("Hydroflux", "Mnemesis")
-mod:RegisterRestrictZone("EpFrostLogic", "Elemental Vortex Alpha", "Elemental Vortex Beta", "Elemental Vortex Delta")
+mod:RegisterRestrictZone("EpLogicWater", "Elemental Vortex Alpha", "Elemental Vortex Beta", "Elemental Vortex Delta")
 mod:RegisterEnglishLocale({
 	-- Unit names.
 	["Mnemesis"] = "Mnemesis",
@@ -69,6 +69,13 @@ function mod:OnBossEnable()
 	Apollo.RegisterEventHandler("RAID_WIPE", "OnReset", self)
 end
 
+local function GetSetting(key)
+	return core:GetSettings()["DS"]["LogicWater"][key]
+end
+
+local function GetSoundSetting(sound, key)
+	if core:GetSettings()["DS"]["LogicWater"][key] then return sound else return nil end
+end
 
 --------------------------------------------------------------------------------
 -- Event Handlers

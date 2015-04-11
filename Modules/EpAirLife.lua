@@ -79,6 +79,14 @@ function mod:OnBossEnable()
 	Apollo.RegisterEventHandler("RAID_WIPE", "OnReset", self)
 end
 
+local function GetSetting(key)
+	return core:GetSettings()["DS"]["AirLife"][key]
+end
+
+local function GetSoundSetting(sound, key)
+	if core:GetSettings()["DS"]["AirLife"][key] then return sound else return nil end
+end
+
 --------------------------------------------------------------------------------
 -- Event Handlers
 --

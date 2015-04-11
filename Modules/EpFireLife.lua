@@ -4,12 +4,12 @@
 
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 
-local mod = core:NewBoss("EpLifeFire", 52)
+local mod = core:NewBoss("EpFireLife", 52)
 if not mod then return end
 
 --mod:RegisterEnableMob("Visceralus")
 mod:RegisterEnableBossPair("Visceralus", "Pyrobane")
-mod:RegisterRestrictZone("EpLifeFire", "Elemental Vortex Alpha", "Elemental Vortex Beta", "Elemental Vortex Delta")
+mod:RegisterRestrictZone("EpFireLife", "Elemental Vortex Alpha", "Elemental Vortex Beta", "Elemental Vortex Delta")
 mod:RegisterEnglishLocale({
 	-- Unit names.
 	["Visceralus"] = "Visceralus",
@@ -62,6 +62,14 @@ function mod:OnBossEnable()
 	Apollo.RegisterEventHandler("DEBUFF_APPLIED", "OnDebuffApplied", self)
 	Apollo.RegisterEventHandler("DEBUFF_APPLIED_DOSE", "OnDebuffAppliedDose", self)
 	Apollo.RegisterEventHandler("RAID_WIPE", "OnReset", self)
+end
+
+local function GetSetting(key)
+	return core:GetSettings()["DS"]["FireLife"][key]
+end
+
+local function GetSoundSetting(sound, key)
+	if core:GetSettings()["DS"]["FireLife"][key] then return sound else return nil end
 end
 
 --------------------------------------------------------------------------------

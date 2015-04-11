@@ -671,11 +671,11 @@ function RaidCore:OnRaidCoreOn(cmd, args)
 			Print("Module SystemDaemons not loaded")
 		end
 	elseif (tAllParams[1] == "testel") then
-		local mod = self:GetBossModule("EpEarthLogic", 1)
+		local mod = self:GetBossModule("EpLogicEarth", 1)
 		if mod then
 			mod:PlaceSpawnPos()
 		else
-			Print("Module EpEarthLogic not loaded")
+			Print("Module EpLogicEarth not loaded")
 		end
 	elseif (tAllParams[1] == "wm") then
 		local estpos = {
