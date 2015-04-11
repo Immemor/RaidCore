@@ -126,6 +126,8 @@ local DefaultSettings = {
 	Lattice_SoundShieldPhase = true,
 	Lattice_SoundJumpPhase = true,
 	Lattice_SoundNewWave = true,
+	Lattice_SoundLaser = true,
+	Lattice_SoundExplosion = true,
 	Lattice_OtherPlayerBeamMarkers = true,
 	Lattice_OtherLogicWallMarkers = true,
 
