@@ -75,11 +75,19 @@ function mod:OnBossEnable()
 	Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
 end
 
+local function GetSetting(key)
+	return core:GetSettings()["DS"]["Lattice"][key]
+end
+
+local function GetSoundSetting(sound, key)
+	if core:GetSettings()["DS"]["Lattice"][key] then return sound else return nil end
+end
+
 --------------------------------------------------------------------------------
 -- Event Handlers
 --
 function mod:OnUnitCreated(unit, sName)
-	if sName == self.L["Data Devourer"] and self:GetDistanceBetweenUnits(unit, GameLib.GetPlayerUnit()) < 45 then
+	if sName == self.L["Data Devourer"] and self:GetDistanceBetweenUnits(unit, GameLib.GetPlayerUnit()) < 45 and GetSetting("LineDataDevourers") then
 		core:AddPixie(unit:GetId(), 1, GameLib.GetPlayerUnit(), unit, "Blue", 5, 10, 10)
 	end
 end
@@ -96,7 +104,7 @@ function mod:OnUnitDestroyed(unit, sName)
 		waveCount, beamCount = 0, 0
 		phase2 = false
 		core:AddBar("BEAM", self.L["NEXT BEAM"], 24)
-		core:AddBar("WAVE", self.L["[%u] WAVE"]:format(waveCount + 1), 24, 1)
+		core:AddBar("WAVE", self.L["[%u] WAVE"]:format(waveCount + 1), 24, GetSetting("SoundNewWave"))
 		core:Berserk(600)
 	elseif sName == self.L["Data Devourer"] then
 		core:DropPixie(unit:GetId())
@@ -108,28 +116,28 @@ function mod:OnChatDC(message)
 	if playerFocus then
 		beamCount = beamCount + 1
 		local pUnit = GameLib.GetPlayerUnitByName(playerFocus)
-		if pUnit then
+		if pUnit and GetSetting("OtherPlayerBeamMarkers") then
 			core:MarkUnit(pUnit, nil, self.L["LASER"])
 			self:ScheduleTimer("RemoveLaserMark", 15, pUnit)
 		end
 		if playerFocus == playerName then
-			core:AddMsg("BEAM", self.L["BEAM on YOU !!!"], 5, "RunAway")
+			core:AddMsg("BEAM", self.L["BEAM on YOU !!!"], 5, GetSoundSetting("RunAway", "SoundBeam"))
 		else
-			core:AddMsg("BEAM", self.L["[%u] BEAM on %s"]:format(beamCount, playerFocus), 5, "Info", "Blue")
+			core:AddMsg("BEAM", self.L["[%u] BEAM on %s"]:format(beamCount, playerFocus), 5, GetSoundSetting("Info", "SoundBeam"), "Blue")
 		end
 		if phase2 then
-			core:AddBar("WAVE", self.L["[%u] WAVE"]:format(waveCount + 1), 15, 1)
+			core:AddBar("WAVE", self.L["[%u] WAVE"]:format(waveCount + 1), 15, GetSetting("SoundNewWave"))
 			phase2 = false
 		else
 			core:AddBar("BEAM", self.L["[%u] BEAM on %s"]:format(beamCount, playerFocus), 15)
 			if beamCount == 3 then
-				core:AddBar("WAVE", self.L["[%u] WAVE"]:format(waveCount + 1), 15, 1)
+				core:AddBar("WAVE", self.L["[%u] WAVE"]:format(waveCount + 1), 15, GetSetting("SoundNewWave"))
 			end
 		end
 	elseif message == self.L["Avatus prepares to delete all"] then
 		core:StopBar("BEAM")
 		core:StopBar("WAVE")
-		core:AddMsg("BIGC", self.L["BIG CAST"] .. " !!", 5, "Beware")
+		core:AddMsg("BIGC", self.L["BIG CAST"] .. " !!", 5, GetSoundSetting("Beware", "SoundBigCast"))
 		core:AddBar("BIGC", self.L["BIG CAST"], 10)
 		beamCount = 0
 	elseif message == self.L["Secure Sector Enhancement"] then
@@ -137,16 +145,16 @@ function mod:OnChatDC(message)
 		core:StopBar("WAVE")
 		phase2 = true
 		waveCount, beamCount = 0, 0
-		core:AddMsg("P2", self.L["P2: SHIELD PHASE"], 5, "Alert")
-		core:AddBar("P2", self.L["LASER"], 15, 1)
+		core:AddMsg("P2", self.L["P2: SHIELD PHASE"], 5, GetSoundSetting("Alert", "SoundShieldPhase"))
+		core:AddBar("P2", self.L["LASER"], 15, GetSetting("SoundLaser"))
 		core:AddBar("BEAM", self.L["NEXT BEAM"], 44)
 	elseif message == self.L["Vertical Locomotion Enhancement"] then
 		core:StopBar("BEAM")
 		core:StopBar("WAVE")
 		phase2 = true
 		waveCount, beamCount = 0, 0
-		core:AddMsg("P2", self.L["P2: JUMP PHASE"], 5, "Alert")
-		core:AddBar("P2", self.L["EXPLOSION"], 15, 1)
+		core:AddMsg("P2", self.L["P2: JUMP PHASE"], 5, GetSoundSetting("Alert", "SoundJumpPhase"))
+		core:AddBar("P2", self.L["EXPLOSION"], 15, GetSetting("SoundExplosion"))
 		core:AddBar("BEAM", self.L["NEXT BEAM"], 58)
 	end
 end
@@ -155,12 +163,14 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
 	if unit:GetType() == "NonPlayer" and bInCombat then
 		if sName == self.L["Obstinate Logic Wall"] then
 			local timeOfEvent = GameLib.GetGameTime()
-			core:MarkUnit(unit)
+			if GetSetting("OtherLogicWallMarkers") then
+				core:MarkUnit(unit)
+			end
 			core:AddUnit(unit)
 			if timeOfEvent - prev > 20 and not phase2 then
 				prev = timeOfEvent
 				waveCount = waveCount + 1
-				core:AddMsg("WAVE", self.L["[%u] WAVE"]:format(waveCount), 5, "Alert")
+				core:AddMsg("WAVE", self.L["[%u] WAVE"]:format(waveCount), 5, GetSoundSetting("Alert", "SoundNewWave"))
 			end
 		end
 	end
