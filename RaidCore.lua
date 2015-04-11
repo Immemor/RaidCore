@@ -828,7 +828,7 @@ function RaidCore:StartCombat(modName)
 		end
 	end
 	--Apollo.RemoveEventHandler("UnitCreated",	 	self)
-	Apollo.RegisterEventHandler("UnitEnteredCombat", 		"CombatStateChanged", self)
+	--Apollo.RegisterEventHandler("UnitEnteredCombat", 		"CombatStateChanged", self)
 	Apollo.RegisterEventHandler("ChatMessage", 			"OnChatMessage", self)
 end
 
@@ -852,7 +852,7 @@ function RaidCore:OnWorldChanged()
 				--Print("MONITORING ON")
 				Apollo.RegisterEventHandler("UnitCreated", 			"unitCheck", self)
 				--Apollo.RegisterEventHandler("ChatMessage", 			"OnChatMessage", self)
-				--Apollo.RegisterEventHandler("UnitEnteredCombat", 		"CombatStateChanged", self)
+				Apollo.RegisterEventHandler("UnitEnteredCombat", 		"CombatStateChanged", self)
 				if not self.timer then
 					self.timer = ApolloTimer.Create(0.100, true, "OnTimer", self)
 				else
@@ -1549,7 +1549,7 @@ function RaidCore:WipeCheck()
 	self:ResetSync()
 	self:ResetLines()
 	Apollo.RemoveEventHandler("ChatMessage", self)
-	Apollo.RemoveEventHandler("UnitEnteredCombat",self)
+	--Apollo.RemoveEventHandler("UnitEnteredCombat",self)
 	Apollo.RegisterEventHandler("UnitCreated", "unitCheck", self)
 	Event_FireGenericEvent("RAID_WIPE")
 end
