@@ -113,17 +113,17 @@ function mod:OnSpellCastStart(unitName, castName, unit)
 		if castName == self.L["Tsunami"] then
 			phase2 = true
 			mooCount = mooCount + 1
-			core:AddMsg("PHASE2", self.L["Tsunami"]:upper(), 5, "Alert")
+			core:AddMsg("PHASE2", self.L["Tsunami"]:upper(), 5, GetSoundSetting("Alert", "SoundMidphase"))
 		elseif castName == self.L["Glacial Icestorm"] then
-			core:AddMsg("ICESTORM", self.L["ICESTORM"], 5, "RunAway")
+			core:AddMsg("ICESTORM", self.L["ICESTORM"], 5, GetSoundSetting("RunAway", "SoundIcestorm"))
 		end
 	end
 end
 
 function mod:OnSpellCastEnd(unitName, castName)
 	if unitName == self.L["Hydroflux"] and castName == self.L["Tsunami"] then
-		core:AddBar("MIDPHASE", self.L["~Middle Phase"], 88, true)
-		core:AddBar("TOMB", self.L["~Frost Tombs"], 30, true)
+		core:AddBar("MIDPHASE", self.L["~Middle Phase"], 88, GetSetting("SoundMidphase"))
+		core:AddBar("TOMB", self.L["~Frost Tombs"], 30, GetSetting("SoundFrostTombs"))
 	end
 	--Print(unitName .. " - " .. castName)
 end
@@ -131,21 +131,21 @@ end
 function mod:OnChatDC(message)
 	if message:find(self.L["Hydroflux evaporates"]) then
 		--core:AddMsg("PHASE1", "MOO !", 5, "Info", "Blue")
-		core:AddBar("PHASE2", self.L["EYE OF THE STORM"], 45, 1)
+		core:AddBar("PHASE2", self.L["EYE OF THE STORM"], 45, GetSetting("SoundMidphase"))
 	elseif message:find(self.L["Aileron dissipates with a flurry"]) then
-		core:AddBar("PHASE2", self.L["Tsunami"]:upper(), 45, 1)
+		core:AddBar("PHASE2", self.L["Tsunami"]:upper(), 45, GetSetting("SoundMidphase"))
 	elseif message:find(self.L["The wind starts to blow faster and faster"]) then
 		phase2 = true
 		mooCount = mooCount + 1
-		core:AddMsg("PHASE2", self.L["EYE OF THE STORM"], 5, "Alert")
+		core:AddMsg("PHASE2", self.L["EYE OF THE STORM"], 5, GetSoundSetting("Alert", "SoundMidphase"))
 	end
 end
 
 function mod:OnBuffApplied(unitName, splId, unit)
 	if phase2 and (splId == 69959 or splId == 47075) then
 		phase2 = false
-		core:AddMsg("MOO", self.L["MOO !"], 5, "Info", "Blue")
-		core:AddBar("MOO", self.L["MOO PHASE"], 10, 1)
+		core:AddMsg("MOO", self.L["MOO !"], 5, GetSoundSetting("Info", "SoundMoO"), "Blue")
+		core:AddBar("MOO", self.L["MOO PHASE"], 10, GetSetting("SoundMoO"))
 		if mooCount == 2 then
 			mooCount = 0
 			core:AddBar("ICESTORM", self.L["ICESTORM"], 15)
@@ -159,11 +159,12 @@ function mod:OnDebuffApplied(unitName, splId, unit)
 	if splId == 70440 then -- Twirl ability
 		--Print(eventTime .. " debuff applied on unit: " .. unitName .. " - " .. splId)
 
-		if unitName == myName then
-			core:AddMsg("TWIRL", self.L["TWIRL ON YOU!"], 5, "Inferno")
+		if unitName == myName  and GetSetting("OtherTwirlWarning") then
+			core:AddMsg("TWIRL", self.L["TWIRL ON YOU!"], 5, GetSoundSetting("Inferno", "SoundTwirl"))
 		end
-
-		core:MarkUnit(unit, nil, self.L["TWIRL"])
+		if GetSetting("OtherTwirlPlayerMarkers") then
+			core:MarkUnit(unit, nil, self.L["TWIRL"])
+		end
 		core:AddUnit(unit)
 		twirl_units[unitName] = unit
 		if not CheckTwirlTimer then
@@ -213,8 +214,8 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
 			core:UnitDebuff(playerUnit)
 			core:RaidDebuff()
 			core:StartScan()
-			core:AddBar("MIDPHASE", self.L["Middle Phase"], 60, true)
-			core:AddBar("TOMB", self.L["~Frost Tombs"], 30, true)
+			core:AddBar("MIDPHASE", self.L["Middle Phase"], 60, GetSetting("SoundMidphase"))
+			core:AddBar("TOMB", self.L["~Frost Tombs"], 30, GetSetting("SoundFrostTombs"))
 
 			--Print(eventTime .. " " .. sName .. " FIGHT STARTED ")
 		end
