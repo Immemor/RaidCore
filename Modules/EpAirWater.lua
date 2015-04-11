@@ -159,7 +159,7 @@ function mod:OnDebuffApplied(unitName, splId, unit)
 	if splId == 70440 then -- Twirl ability
 		--Print(eventTime .. " debuff applied on unit: " .. unitName .. " - " .. splId)
 
-		if unitName == myName  and GetSetting("OtherTwirlWarning") then
+		if unitName == myName and GetSetting("OtherTwirlWarning") then
 			core:AddMsg("TWIRL", self.L["TWIRL ON YOU!"], 5, GetSoundSetting("Inferno", "SoundTwirl"))
 		end
 		if GetSetting("OtherTwirlPlayerMarkers") then
