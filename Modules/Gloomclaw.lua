@@ -4,10 +4,10 @@
 
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 
-local mod = core:NewBoss("Gloomclaw", 52)
+local mod = core:NewBoss("DS_Gloomclaw", 52)
 if not mod then return end
 
-mod:RegisterEnableMob("Gloomclaw")
+mod:RegisterEnableMob("DS_Gloomclaw")
 mod:RegisterEnglishLocale({
 	-- Unit names.
 	["Gloomclaw"] = "Gloomclaw",
@@ -149,14 +149,6 @@ function mod:OnBossEnable()
 	Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
 end
 
-local function GetSetting(key)
-	return core:GetSettings()["DS"]["Gloomclaw"][key]
-end
-
-local function GetSoundSetting(sound, key)
-	if core:GetSettings()["DS"]["Gloomclaw"][key] then return sound else return nil end
-end
-
 --------------------------------------------------------------------------------
 -- Event Handlers
 --
@@ -180,9 +172,9 @@ function mod:OnSpellCastStart(unitName, castName, unit)
 	--Print(castName .. " by " .. unitName)
 	if unitName == self.L["Gloomclaw"] and castName == self.L["Rupture"] then
 		ruptCount = ruptCount + 1
-		core:AddMsg("RUPTURE", self.L["INTERRUPT %s"]:format(unitName:upper()), 5, GetSoundSetting("Destruction", "SoundRuptureInterrupt"))
+		core:AddMsg("RUPTURE", self.L["INTERRUPT %s"]:format(unitName:upper()), 5, mod:GetSetting("SoundRuptureInterrupt", "Destruction"))
 		if ruptCount == 1 then
-			core:AddBar("RUPTURE", self.L["NEXT RUPTURE"], 43, GetSoundSetting(true, "SoundRuptureCountdown"))
+			core:AddBar("RUPTURE", self.L["NEXT RUPTURE"], 43, mod:GetSetting("SoundRuptureCountdown"))
 		end
 	elseif (unitName == self.L["Corrupted Ravager"] or unitName == self.L["Empowered Ravager"])
 		and castName == self.L["Corrupting Rays"] then
@@ -190,7 +182,7 @@ function mod:OnSpellCastStart(unitName, castName, unit)
 		local playerUnit = GameLib.GetPlayerUnit()
 		local distance_to_unit = self:GetDistanceBetweenUnits(playerUnit, unit)
 		if distance_to_unit < 35 then
-			core:AddMsg("RAYS", self.L["INTERRUPT %s"]:format(unitName:upper()), 5, GetSoundSetting("Inferno", "SoundCorruptingRays"))
+			core:AddMsg("RAYS", self.L["INTERRUPT %s"]:format(unitName:upper()), 5, mod:GetSetting("SoundCorruptingRays", "Inferno"))
 		end
 	end
 end
@@ -210,26 +202,26 @@ function mod:OnChatDC(message)
 			else
 				section = section - 1
 			end
-			core:AddMsg("PHASE", self.L["SECTION %u"]:format(section), 5, GetSoundSetting("Info", "SoundSectionSwitch"), "Blue")
+			core:AddMsg("PHASE", self.L["SECTION %u"]:format(section), 5, mod:GetSetting("SoundSectionSwitch", "Info"), "Blue")
 			if section ~= 4 then 
 				core:AddBar("WAVE", self.L["[%u] WAVE"]:format(waveCount + 1), 11)
-				core:AddBar("RUPTURE", self.L["NEXT RUPTURE"], 39, GetSoundSetting(true, "SoundRuptureCountdown"))
+				core:AddBar("RUPTURE", self.L["NEXT RUPTURE"], 39, mod:GetSetting("SoundRuptureCountdown"))
 			end
-			core:AddBar("CORRUPTION", self.L["FULL CORRUPTION"], 111, GetSoundSetting(true, "SoundCorruptionCountdown"))
+			core:AddBar("CORRUPTION", self.L["FULL CORRUPTION"], 111, mod:GetSetting("SoundCorruptionCountdown"))
 		else
 			first = false
 		end
 		core:ResetWorldMarkers()
-		if GetSetting("OtherMaulerMarkers") then
+		if mod:GetSetting("OtherMaulerMarkers") then
 			core:SetWorldMarker(maulerSpawn["northwest"], self.L["FROG %u"]:format(1))
 			core:SetWorldMarker(maulerSpawn["northeast"], self.L["FROG %u"]:format(2))
 			core:SetWorldMarker(maulerSpawn["southeast"], self.L["FROG %u"]:format(3))
 			core:SetWorldMarker(maulerSpawn["southwest"], self.L["FROG %u"]:format(4))
 		end
-		if GetSetting("OtherLeftRightMarkers") and leftSpawn[section] then
+		if mod:GetSetting("OtherLeftRightMarkers") and leftSpawn[section] then
 			core:SetWorldMarker(leftSpawn[section], self.L["LEFT"])
 		end
-		if GetSetting("OtherLeftRightMarkers") and rightSpawn[section] then
+		if mod:GetSetting("OtherLeftRightMarkers") and rightSpawn[section] then
 			core:SetWorldMarker(rightSpawn[section], self.L["RIGHT"])
 		end
 		Apollo.RegisterEventHandler("CombatLogHeal", "OnCombatLogHeal", self)
@@ -237,7 +229,7 @@ function mod:OnChatDC(message)
 		core:StopBar("RUPTURE")
 		core:StopBar("CORRUPTION")
 		core:StopBar("WAVE")
-		core:AddMsg("TRANSITION", self.L["TRANSITION"], 5, GetSoundSetting("Alert", "SoundMoOWarning"))
+		core:AddMsg("TRANSITION", self.L["TRANSITION"], 5, mod:GetSetting("SoundMoOWarning", "Alert"))
 		core:AddBar("MOO", self.L["MOO PHASE"], 15)
 		for unitId, v in pairs(essenceUp) do
 			core:RemoveUnit(unitId)
@@ -248,8 +240,8 @@ function mod:OnChatDC(message)
 		core:StopBar("RUPTURE")
 		core:StopBar("CORRUPTION")
 		core:StopBar("WAVE")
-		core:AddMsg("TRANSITION", self.L["BURN HIM HARD"], 5, GetSoundSetting("Alert", "SoundMoOWarning"))
-		core:AddBar("MOO", self.L["MOO PHASE"], 20, GetSoundSetting(true, "SoundMoOWarning"))
+		core:AddMsg("TRANSITION", self.L["BURN HIM HARD"], 5, mod:GetSetting("SoundMoOWarning", "Alert"))
+		core:AddBar("MOO", self.L["MOO PHASE"], 20, mod:GetSetting("SoundMoOWarning"))
 		for unitId, v in pairs(essenceUp) do
 			core:RemoveUnit(unitId)
 			essenceUp[unitId] = nil
@@ -292,8 +284,8 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
 			end
 			core:AddUnit(unit)
 			core:WatchUnit(unit)
-			core:AddBar("RUPTURE", self.L["~NEXT RUPTURE"], 35, GetSoundSetting(true, "SoundRuptureCountdown"))
-			core:AddBar("CORRUPTION", self.L["FULL CORRUPTION"], 106, GetSoundSetting(true, "SoundCorruptionCountdown"))
+			core:AddBar("RUPTURE", self.L["~NEXT RUPTURE"], 35, mod:GetSetting("SoundRuptureCountdown"))
+			core:AddBar("CORRUPTION", self.L["FULL CORRUPTION"], 106, mod:GetSetting("SoundCorruptionCountdown"))
 			core:StartScan()
 		elseif sName == self.L["Strain Parasite"]
 			or sName == self.L["Gloomclaw Skurge"]
@@ -303,7 +295,7 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
 			if timeOfEvent - prev > 10 then
 				prev = timeOfEvent
 				waveCount = waveCount + 1
-				core:AddMsg("WAVE", self.L["[%u] WAVE"]:format(waveCount), 5, GetSoundSetting("Info", "SoundWaveWarning"), "Blue")
+				core:AddMsg("WAVE", self.L["[%u] WAVE"]:format(waveCount), 5, mod:GetSetting("SoundWaveWarning", "Info"), "Blue")
 				if section < 5 then
 					if waveCount < spawnCount[section] then
 						core:AddBar("WAVE", self.L["[%u] WAVE"]:format(waveCount + 1), spawnTimer[section])

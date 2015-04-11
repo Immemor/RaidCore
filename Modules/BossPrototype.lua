@@ -109,6 +109,16 @@ function boss:RegisterFrenchLocale(Locales)
   RegisterLocale(self, "frFR", Locales)
 end
 
+function boss:GetSetting(setting, returnString)
+	if not setting then return false end
+	local settingValue = core.settings[self:GetName() ..  "_" .. setting]
+	if returnString and settingValue then
+		return returnString
+	else
+		return settingValue
+	end
+end
+
 function boss:OnRaidWipe()
 	self.isEngaged = false
 	self:CancelAllTimers()

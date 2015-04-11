@@ -4,12 +4,12 @@
 
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 
-local mod = core:NewBoss("EpAirLife", 52)
+local mod = core:NewBoss("DS_EpAirLife", 52)
 if not mod then return end
 
 --mod:RegisterEnableMob("Aileron", "Test")
 mod:RegisterEnableBossPair("Aileron", "Visceralus")
-mod:RegisterRestrictZone("EpAirLife", "Elemental Vortex Alpha", "Elemental Vortex Beta", "Elemental Vortex Delta")
+mod:RegisterRestrictZone("DS_EpAirLife", "Elemental Vortex Alpha", "Elemental Vortex Beta", "Elemental Vortex Delta")
 mod:RegisterEnglishLocale({
 	-- Unit names.
 	["Visceralus"] = "Visceralus",
@@ -79,14 +79,6 @@ function mod:OnBossEnable()
 	Apollo.RegisterEventHandler("RAID_WIPE", "OnReset", self)
 end
 
-local function GetSetting(key)
-	return core:GetSettings()["DS"]["AirLife"][key]
-end
-
-local function GetSoundSetting(sound, key)
-	if core:GetSettings()["DS"]["AirLife"][key] then return sound else return nil end
-end
-
 --------------------------------------------------------------------------------
 -- Event Handlers
 --
@@ -127,16 +119,16 @@ function mod:OnUnitCreated(unit, sName)
 		core:AddBar("Lifekeep", self.L["Next Healing Tree"], 35)
 
 		--Print(eventTime .. " Midphase STARTED")
-	elseif sName == self.L["Life Force"] and GetSetting("LineLifeOrbs") then
+	elseif sName == self.L["Life Force"] and mod:GetSetting("LineLifeOrbs") then
 		--Print(eventTime .. " - Orb")
 		core:AddPixie(unit:GetId(), 2, unit, nil, "Blue", 10, 40, 0)
 	elseif sName == self.L["Lifekeeper"] then
 		--Print(eventTime .. " - " .. sName)
-		if GetSetting("LineHealingTrees") then
+		if mod:GetSetting("LineHealingTrees") then
 			core:AddPixie(unit:GetId(), 1, GameLib.GetPlayerUnit(), unit, "Yellow", 5, 10, 10)
 		end
 		core:AddUnit(unit)
-		core:AddBar("Lifekeep", self.L["Next Healing Tree"], 30, GetSetting("SoundHealingTree"))
+		core:AddBar("Lifekeep", self.L["Next Healing Tree"], 30, mod:GetSetting("SoundHealingTree"))
 	end
 	--Print(eventTime .. " - " .. sName)
 end
@@ -146,7 +138,7 @@ function mod:OnUnitDestroyed(unit, sName)
 	--Print(sName)
 	if midphase and sName == self.L["[DS] e395 - Air - Tornado"] then
 		midphase = false
-		core:AddBar("MIDPHASE", self.L["Middle Phase"], 90, GetSetting("SoundMidphase"))
+		core:AddBar("MIDPHASE", self.L["Middle Phase"], 90, mod:GetSetting("SoundMidphase"))
 		--Print(eventTime .. " Midphase ENDED")
 	elseif sName == self.L["Life Force"] then
 		core:DropPixie(unit:GetId())
@@ -160,11 +152,11 @@ function mod:OnDebuffApplied(unitName, splId, unit)
 	local splName = GameLib.GetSpell(splId):GetName()
 	--Print(eventTime .. " debuff applied on unit: " .. unitName .. " - " .. splId)
 	if splId == 70440 then -- Twirl
-		if unitName == myName and GetSetting("OtherTwirlWarning") then
-			core:AddMsg("TWIRL", self.L["TWIRL ON YOU!"], 5, GetSoundSetting("Inferno", "SoundTwirl"))
+		if unitName == myName and mod:GetSetting("OtherTwirlWarning") then
+			core:AddMsg("TWIRL", self.L["TWIRL ON YOU!"], 5, mod:GetSetting("SoundTwirl", "Inferno"))
 		end
 
-		if GetSetting("OtherTwirlPlayerMarkers") then
+		if mod:GetSetting("OtherTwirlPlayerMarkers") then
 			core:MarkUnit(unit, nil, self.L["Twirl"]:upper())
 		end
 		core:AddUnit(unit)
@@ -173,18 +165,18 @@ function mod:OnDebuffApplied(unitName, splId, unit)
 			CheckTwirlTimer = self:ScheduleRepeatingTimer("CheckTwirlTimer", 1)
 		end
 	elseif splName == "Life Force Shackle" then
-		if GetSetting("OtherNoHealDebuffPlayerMarkers") then
+		if mod:GetSetting("OtherNoHealDebuffPlayerMarkers") then
 			core:MarkUnit(unit, nil, self.L["NO HEAL DEBUFF"])
 		end
-		if unitName == strMyName and GetSetting("OtherNoHealDebuff") then
-			core:AddMsg("NOHEAL", self.L["No-Healing Debuff!"], 5, GetSoundSetting("Alarm", "SoundNoHealDebuff"))
+		if unitName == strMyName and mod:GetSetting("OtherNoHealDebuff") then
+			core:AddMsg("NOHEAL", self.L["No-Healing Debuff!"], 5, mod:GetSetting("SoundNoHealDebuff", "Alarm"))
 		end
 	elseif splName == "Lightning Strike" then
-		if GetSetting("OtherLightningMarkers") then
+		if mod:GetSetting("OtherLightningMarkers") then
 			core:MarkUnit(unit, nil, self.L["Lightning"])
 		end
 		if unitName == strMyName then
-			core:AddMsg("LIGHTNING", self.L["Lightning on YOU"], 5, GetSoundSetting("RunAway", "SoundLightning"))
+			core:AddMsg("LIGHTNING", self.L["Lightning on YOU"], 5, mod:GetSetting("SoundLightning", "RunAway"))
 		end
 	end
 end
@@ -202,10 +194,10 @@ end
 
 function mod:OnSpellCastStart(unitName, castName, unit)
 	local eventTime = GameLib.GetGameTime()
-	if unitName == self.L["Visceralus"] and castName == self.L["Blinding Light"] and GetSetting("OtherBlindingLight") then
+	if unitName == self.L["Visceralus"] and castName == self.L["Blinding Light"] and mod:GetSetting("OtherBlindingLight") then
 		local playerUnit = GameLib.GetPlayerUnit()
 		if self:GetDistanceBetweenUnits(unit, playerUnit) < 33 then
-			core:AddMsg("BLIND", self.L["Blinding Light"], 5, GetSoundSetting("Beware", "SoundBlindingLight"))
+			core:AddMsg("BLIND", self.L["Blinding Light"], 5, mod:GetSetting("SoundBlindingLight", "Beware"))
 		end
 	end
 	--Print(eventTime .. " " .. unitName .. " is casting " .. castName)
@@ -239,7 +231,7 @@ function mod:OnUnitStateChanged(unit, bInCombat)
 
 		if sName == self.L["Aileron"] then
 			core:AddUnit(unit)
-			if GetSetting("LineCleaveAileron") then
+			if mod:GetSetting("LineCleaveAileron") then
 				core:AddPixie(unit:GetId(), 2, unit, nil, "Red", 10, 30, 0)
 			end
 		elseif sName == self.L["Visceralus"] then
@@ -257,7 +249,7 @@ function mod:OnUnitStateChanged(unit, bInCombat)
 			midphase_start = eventTime + 90
 			twirlCount = 0
 
-			core:AddBar("MIDPHASE", self.L["Middle Phase"], 90, GetSetting("SoundMidphase"))
+			core:AddBar("MIDPHASE", self.L["Middle Phase"], 90, mod:GetSetting("SoundMidphase"))
 			core:AddBar("THORN", self.L["Thorns"], 20)
 			--core:AddBar("TWIRL", "Twirl", 22)
 
