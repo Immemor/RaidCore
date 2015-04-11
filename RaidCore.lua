@@ -154,11 +154,15 @@ local DefaultSettings = {
 			SoundTwirl = true,
 			SoundNoHealDebuff = true,
 			SoundBlindingLight = true,
+			SoundHealingTree = true,
+			SoundMidphase = true,
+			SoundLightning = true,
 			OtherTwirlWarning = true,
 			OtherNoHealDebuff = true,
 			OtherBlindingLight = true,
 			OtherTwirlPlayerMarkers = true,
 			OtherNoHealDebuffPlayerMarkers = true,
+			OtherLightningMarkers = true,
 		},
 		FireEarth = {
 
