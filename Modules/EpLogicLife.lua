@@ -114,18 +114,24 @@ function mod:OnDebuffApplied(unitName, splId, unit)
 
 	if strSpellName == "Snake Snack" then
 		if unitName == strMyName then
-			core:AddMsg("SNAKE", self.L["SNAKE ON YOU!"], 5, "RunAway")
+			core:AddMsg("SNAKE", self.L["SNAKE ON YOU!"], 5, GetSoundSetting("RunAway", "SoundSnake"))
 		else
-			core:AddMsg("SNAKE", self.L["SNAKE ON %s!"]:format(unitName), 5, "Info")
+			core:AddMsg("SNAKE", self.L["SNAKE ON %s!"]:format(unitName), 5, GetSoundSetting("Info", "SoundSnake"))
 		end
-		core:MarkUnit(unit, nil, self.L["SNAKE"])
+		if GetSetting("OtherSnakePlayerMarkers") then
+			core:MarkUnit(unit, nil, self.L["SNAKE"]) 
+		end
 	elseif strSpellName == "Life Force Shackle" then
-		core:MarkUnit(unit, nil, self.L["NO HEAL DEBUFF"])
+		if GetSetting("OtherNoHealDebuffPlayerMarkers") then
+			core:MarkUnit(unit, nil, self.L["NO HEAL DEBUFF"])
+		end
 		if unitName == strMyName then
-			core:AddMsg("NOHEAL", self.L["No-Healing Debuff!"], 5, "Alarm")
+			core:AddMsg("NOHEAL", self.L["No-Healing Debuff!"], 5, GetSoundSetting("Alarm", "SoundNoHealDebuff"))
 		end
 	elseif strSpellName == "Thorns" then
-		core:MarkUnit(unit, nil, self.L["THORNS\nDEBUFF"])
+		if GetSetting("OtherRootedPlayersMarkers") then
+			core:MarkUnit(unit, nil, self.L["THORNS\nDEBUFF"])
+		end
 	end
 end
 
@@ -147,10 +153,12 @@ function mod:OnUnitCreated(unit, sName)
 		core:AddUnit(unit)
 		if not midphase then
 			midphase = true
-			core:SetWorldMarker(midpos["north"], self.L["MARKER North"])
-			core:SetWorldMarker(midpos["east"], self.L["MARKER East"])
-			core:SetWorldMarker(midpos["south"], self.L["MARKER South"])
-			core:SetWorldMarker(midpos["west"], self.L["MARKER West"])
+			if GetSetting("OtherDirectionMarkers") then
+				core:SetWorldMarker(midpos["north"], self.L["MARKER North"])
+				core:SetWorldMarker(midpos["east"], self.L["MARKER East"])
+				core:SetWorldMarker(midpos["south"], self.L["MARKER South"])
+				core:SetWorldMarker(midpos["west"], self.L["MARKER West"])
+			end
 			core:StopBar("DEFRAG")
 		end
 	elseif sName == self.L["Essence of Logic"] then
@@ -158,9 +166,11 @@ function mod:OnUnitCreated(unit, sName)
 	elseif sName == self.L["Alphanumeric Hash"] then
 		local unitId = unit:GetId()
 		if unitId then
-			core:AddPixie(unitId, 2, unit, nil, "Red", 10, 20, 0)
+			if GetSetting("LineTetrisBlocks") then
+				core:AddPixie(unitId, 2, unit, nil, "Red", 10, 20, 0)
+			end
 		end
-	elseif sName == self.L["Life Force"] then
+	elseif sName == self.L["Life Force"] and GetSetting("LineLifeOrbs") then
 		core:AddPixie(unit:GetId(), 2, unit, nil, "Blue", 3, 15, 0)
 	end
 end
@@ -183,13 +193,13 @@ function mod:OnSpellCastStart(unitName, castName, unit)
 	local eventTime = GameLib.GetGameTime()
 	if unitName == self.L["Visceralus"] and castName == self.L["Blinding Light"] then
 		if dist2unit(unit, uPlayer) < 33 then
-			core:AddMsg("BLIND", self.L["Blinding Light"], 5, "Beware")
+			core:AddMsg("BLIND", self.L["Blinding Light"], 5, GetSoundSetting("Beware", "SoundBlindingLight"))
 		end
 	elseif unitName == self.L["Mnemesis"] and castName == self.L["Defragment"] then
 		core:StopBar("DEFRAG")
-		core:AddBar("DEFRAG", self.L["~DEFRAG CD"], 40, true) -- Defrag is unreliable, but seems to take at least this long.
-		core:AddBar("DEFRAG1", self.L["Defrag Explosion"], 9, true)
-		core:AddMsg("DEFRAG", self.L["DEFRAG"], 5, "Beware")
+		core:AddBar("DEFRAG", self.L["~DEFRAG CD"], 40, GetSetting("SoundDefrag")) -- Defrag is unreliable, but seems to take at least this long.
+		core:AddBar("DEFRAG1", self.L["Defrag Explosion"], 9, GetSetting("SoundDefrag"))
+		core:AddMsg("DEFRAG", self.L["DEFRAG"], 5, GetSoundSetting("Beware", "SoundDefrag"))
 	end
 	--Print(eventTime .. " " .. unitName .. " Casting: " .. castName)
 end
@@ -199,11 +209,13 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
 		if sName == self.L["Visceralus"] then
 			core:AddUnit(unit)
 			core:WatchUnit(unit)
-			core:AddLine("Visc1", 2, unit, nil, 3, 25, 0, 10)
-			core:AddLine("Visc2", 2, unit, nil, 1, 25, 72)
-			core:AddLine("Visc3", 2, unit, nil, 1, 25, 144)
-			core:AddLine("Visc4", 2, unit, nil, 1, 25, 216)
-			core:AddLine("Visc5", 2, unit, nil, 1, 25, 288)
+			if GetSetting("LineCleaveVisceralus") then
+				core:AddLine("Visc1", 2, unit, nil, 3, 25, 0, 10)
+				core:AddLine("Visc2", 2, unit, nil, 1, 25, 72)
+				core:AddLine("Visc3", 2, unit, nil, 1, 25, 144)
+				core:AddLine("Visc4", 2, unit, nil, 1, 25, 216)
+				core:AddLine("Visc5", 2, unit, nil, 1, 25, 288)
+			end
 		elseif sName == self.L["Mnemesis"] then
 			self:Start()
 			core:WatchUnit(unit)
@@ -213,8 +225,8 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
 			core:AddUnit(unit)
 			core:RaidDebuff()
 			core:StartScan()
-			core:AddBar("DEFRAG", self.L["~DEFRAG CD"], 21, true)
-			core:AddBar("ENRAGE", self.L["ENRAGE"], 480, true)
+			core:AddBar("DEFRAG", self.L["~DEFRAG CD"], 21, GetSetting("SoundDefrag"))
+			core:AddBar("ENRAGE", self.L["ENRAGE"], 480, GetSetting("SoundEnrage"))
 		end
 	end
 end
