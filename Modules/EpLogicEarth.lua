@@ -4,12 +4,12 @@
 
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 
-local mod = core:NewBoss("EpLogicEarth", 52)
+local mod = core:NewBoss("DS_EpLogicEarth", 52)
 if not mod then return end
 
 --mod:RegisterEnableMob("Megalith")
 mod:RegisterEnableBossPair("Megalith", "Mnemesis")
-mod:RegisterRestrictZone("EpLogicEarth", "Elemental Vortex Alpha", "Elemental Vortex Beta", "Elemental Vortex Delta")
+mod:RegisterRestrictZone("DS_EpLogicEarth", "Elemental Vortex Alpha", "Elemental Vortex Beta", "Elemental Vortex Delta")
 mod:RegisterEnglishLocale({
 	-- Unit names.
 	["Megalith"] = "Megalith",
@@ -75,14 +75,6 @@ function mod:OnBossEnable()
 	--Apollo.RegisterEventHandler("BUFF_APPLIED", "OnBuffApplied", self)
 end
 
-local function GetSetting(key)
-	return core:GetSettings()["DS"]["LogicEarth"][key]
-end
-
-local function GetSoundSetting(sound, key)
-	if core:GetSettings()["DS"]["LogicEarth"][key] then return sound else return nil end
-end
-
 --------------------------------------------------------------------------------
 -- Event Handlers
 --
@@ -90,7 +82,7 @@ end
 function mod:OnUnitCreated(unit, sName)
 	local sName = unit:GetName()
 	--Print(sName)
-	if sName == self.L["Obsidian Outcropping"] and GetSetting("LineObsidianOutcropping") then
+	if sName == self.L["Obsidian Outcropping"] and mod:GetSetting("LineObsidianOutcropping") then
 		--core:AddLine(unit:GetId(), 1, GameLib.GetPlayerUnit(), unit, 3)
 		core:AddPixie(unit:GetId().."_1", 1, GameLib.GetPlayerUnit(), unit, "Blue", 10)
 	end
@@ -107,7 +99,7 @@ function mod:OnSpellCastStart(unitName, castName, unit)
 		local timeOfEvent = GameLib.GetGameTime()
 		if timeOfEvent - prev > 10 then
 			prev = timeOfEvent
-			core:AddMsg("DEFRAG", self.L["SPREAD"], 5, GetSoundSetting("Alarm", "SoundDefrag"))
+			core:AddMsg("DEFRAG", self.L["SPREAD"], 5, mod:GetSetting("SoundDefrag", "Alarm"))
 			core:AddBar("BOOM", self.L["BOOM"], 9)
 			core:AddBar("DEFRAG", self.L["DEFRAG"], 40)
 		end
@@ -116,9 +108,9 @@ end
 
 function mod:OnChatDC(message)
 	if message:find(self.L["The ground shudders beneath Megalith"]) then
-		core:AddMsg("QUAKE", self.L["JUMP !"], 3, GetSoundSetting("Beware", "SoundQuakeJump"))
+		core:AddMsg("QUAKE", self.L["JUMP !"], 3, mod:GetSetting("SoundQuakeJump", "Beware"))
 	elseif message:find(self.L["Logic creates powerful data caches"]) then
-		core:AddMsg("STAR", self.L["STARS"]:format(" !"), 5, GetSoundSetting("Alert", "SoundStars"))
+		core:AddMsg("STAR", self.L["STARS"]:format(" !"), 5, mod:GetSetting("SoundStars", "Alert"))
 		core:AddBar("STAR", self.L["STARS"]:format(""), 60)
 	end
 end
@@ -129,7 +121,7 @@ function mod:OnDebuffApplied(unitName, splId, unit)
 		--if timeOfEvent - prev > 10 then
 		--	first = false
 		if unitName == GameLib.GetPlayerUnit():GetName() then
-			core:AddMsg("SNAKE", self.L["SNAKE ON %s"]:format(unitName), 5, GetSoundSetting("RunAway", "SoundSnake"), "Blue")
+			core:AddMsg("SNAKE", self.L["SNAKE ON %s"]:format(unitName), 5, mod:GetSetting("SoundSnake", "RunAway"), "Blue")
 		end
 		core:AddBar("SNAKE", self.L["SNAKE ON %s"]:format(unitName), 20)
 		--end

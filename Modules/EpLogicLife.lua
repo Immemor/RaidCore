@@ -4,11 +4,11 @@
 
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 
-local mod = core:NewBoss("EpLogicLife", 52)
+local mod = core:NewBoss("DS_EpLogicLife", 52)
 if not mod then return end
 
 mod:RegisterEnableBossPair("Mnemesis", "Visceralus")
-mod:RegisterRestrictZone("EpLogicLife", "Elemental Vortex Alpha", "Elemental Vortex Beta", "Elemental Vortex Delta")
+mod:RegisterRestrictZone("DS_EpLogicLife", "Elemental Vortex Alpha", "Elemental Vortex Beta", "Elemental Vortex Delta")
 mod:RegisterEnglishLocale({
 	-- Unit names.
 	["Essence of Life"] = "Essence of Life",
@@ -79,13 +79,6 @@ function mod:OnBossEnable()
 	Apollo.RegisterEventHandler("RAID_WIPE", "OnReset", self)
 end
 
-local function GetSetting(key)
-	return core:GetSettings()["DS"]["LogicLife"][key]
-end
-
-local function GetSoundSetting(sound, key)
-	if core:GetSettings()["DS"]["LogicLife"][key] then return sound else return nil end
-end
 --------------------------------------------------------------------------------
 -- Event Handlers
 --
@@ -114,22 +107,22 @@ function mod:OnDebuffApplied(unitName, splId, unit)
 
 	if strSpellName == "Snake Snack" then
 		if unitName == strMyName then
-			core:AddMsg("SNAKE", self.L["SNAKE ON YOU!"], 5, GetSoundSetting("RunAway", "SoundSnake"))
+			core:AddMsg("SNAKE", self.L["SNAKE ON YOU!"], 5, mod:GetSetting("SoundSnake", "RunAway"))
 		else
-			core:AddMsg("SNAKE", self.L["SNAKE ON %s!"]:format(unitName), 5, GetSoundSetting("Info", "SoundSnake"))
+			core:AddMsg("SNAKE", self.L["SNAKE ON %s!"]:format(unitName), 5, mod:GetSetting("SoundSnake", "Info"))
 		end
-		if GetSetting("OtherSnakePlayerMarkers") then
+		if mod:GetSetting("OtherSnakePlayerMarkers") then
 			core:MarkUnit(unit, nil, self.L["SNAKE"]) 
 		end
 	elseif strSpellName == "Life Force Shackle" then
-		if GetSetting("OtherNoHealDebuffPlayerMarkers") then
+		if mod:GetSetting("OtherNoHealDebuffPlayerMarkers") then
 			core:MarkUnit(unit, nil, self.L["NO HEAL DEBUFF"])
 		end
 		if unitName == strMyName then
-			core:AddMsg("NOHEAL", self.L["No-Healing Debuff!"], 5, GetSoundSetting("Alarm", "SoundNoHealDebuff"))
+			core:AddMsg("NOHEAL", self.L["No-Healing Debuff!"], 5, mod:GetSetting("SoundNoHealDebuff", "Alarm"))
 		end
 	elseif strSpellName == "Thorns" then
-		if GetSetting("OtherRootedPlayersMarkers") then
+		if mod:GetSetting("OtherRootedPlayersMarkers") then
 			core:MarkUnit(unit, nil, self.L["THORNS\nDEBUFF"])
 		end
 	end
@@ -153,7 +146,7 @@ function mod:OnUnitCreated(unit, sName)
 		core:AddUnit(unit)
 		if not midphase then
 			midphase = true
-			if GetSetting("OtherDirectionMarkers") then
+			if mod:GetSetting("OtherDirectionMarkers") then
 				core:SetWorldMarker(midpos["north"], self.L["MARKER North"])
 				core:SetWorldMarker(midpos["east"], self.L["MARKER East"])
 				core:SetWorldMarker(midpos["south"], self.L["MARKER South"])
@@ -166,11 +159,11 @@ function mod:OnUnitCreated(unit, sName)
 	elseif sName == self.L["Alphanumeric Hash"] then
 		local unitId = unit:GetId()
 		if unitId then
-			if GetSetting("LineTetrisBlocks") then
+			if mod:GetSetting("LineTetrisBlocks") then
 				core:AddPixie(unitId, 2, unit, nil, "Red", 10, 20, 0)
 			end
 		end
-	elseif sName == self.L["Life Force"] and GetSetting("LineLifeOrbs") then
+	elseif sName == self.L["Life Force"] and mod:GetSetting("LineLifeOrbs") then
 		core:AddPixie(unit:GetId(), 2, unit, nil, "Blue", 3, 15, 0)
 	end
 end
@@ -193,13 +186,13 @@ function mod:OnSpellCastStart(unitName, castName, unit)
 	local eventTime = GameLib.GetGameTime()
 	if unitName == self.L["Visceralus"] and castName == self.L["Blinding Light"] then
 		if dist2unit(unit, uPlayer) < 33 then
-			core:AddMsg("BLIND", self.L["Blinding Light"], 5, GetSoundSetting("Beware", "SoundBlindingLight"))
+			core:AddMsg("BLIND", self.L["Blinding Light"], 5, mod:GetSetting("SoundBlindingLight", "Beware"))
 		end
 	elseif unitName == self.L["Mnemesis"] and castName == self.L["Defragment"] then
 		core:StopBar("DEFRAG")
-		core:AddBar("DEFRAG", self.L["~DEFRAG CD"], 40, GetSetting("SoundDefrag")) -- Defrag is unreliable, but seems to take at least this long.
-		core:AddBar("DEFRAG1", self.L["Defrag Explosion"], 9, GetSetting("SoundDefrag"))
-		core:AddMsg("DEFRAG", self.L["DEFRAG"], 5, GetSoundSetting("Beware", "SoundDefrag"))
+		core:AddBar("DEFRAG", self.L["~DEFRAG CD"], 40, mod:GetSetting("SoundDefrag")) -- Defrag is unreliable, but seems to take at least this long.
+		core:AddBar("DEFRAG1", self.L["Defrag Explosion"], 9, mod:GetSetting("SoundDefrag"))
+		core:AddMsg("DEFRAG", self.L["DEFRAG"], 5, mod:GetSetting("SoundDefrag", "Beware"))
 	end
 	--Print(eventTime .. " " .. unitName .. " Casting: " .. castName)
 end
@@ -209,7 +202,7 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
 		if sName == self.L["Visceralus"] then
 			core:AddUnit(unit)
 			core:WatchUnit(unit)
-			if GetSetting("LineCleaveVisceralus") then
+			if mod:GetSetting("LineCleaveVisceralus") then
 				core:AddLine("Visc1", 2, unit, nil, 3, 25, 0, 10)
 				core:AddLine("Visc2", 2, unit, nil, 1, 25, 72)
 				core:AddLine("Visc3", 2, unit, nil, 1, 25, 144)
@@ -225,8 +218,8 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
 			core:AddUnit(unit)
 			core:RaidDebuff()
 			core:StartScan()
-			core:AddBar("DEFRAG", self.L["~DEFRAG CD"], 21, GetSetting("SoundDefrag"))
-			core:AddBar("ENRAGE", self.L["ENRAGE"], 480, GetSetting("SoundEnrage"))
+			core:AddBar("DEFRAG", self.L["~DEFRAG CD"], 21, mod:GetSetting("SoundDefrag"))
+			core:AddBar("ENRAGE", self.L["ENRAGE"], 480, mod:GetSetting("SoundEnrage"))
 		end
 	end
 end

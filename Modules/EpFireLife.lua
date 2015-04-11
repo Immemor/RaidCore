@@ -4,12 +4,12 @@
 
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 
-local mod = core:NewBoss("EpFireLife", 52)
+local mod = core:NewBoss("DS_EpFireLife", 52)
 if not mod then return end
 
 --mod:RegisterEnableMob("Visceralus")
 mod:RegisterEnableBossPair("Visceralus", "Pyrobane")
-mod:RegisterRestrictZone("EpFireLife", "Elemental Vortex Alpha", "Elemental Vortex Beta", "Elemental Vortex Delta")
+mod:RegisterRestrictZone("DS_EpFireLife", "Elemental Vortex Alpha", "Elemental Vortex Beta", "Elemental Vortex Delta")
 mod:RegisterEnglishLocale({
 	-- Unit names.
 	["Visceralus"] = "Visceralus",
@@ -62,14 +62,6 @@ function mod:OnBossEnable()
 	Apollo.RegisterEventHandler("DEBUFF_APPLIED", "OnDebuffApplied", self)
 	Apollo.RegisterEventHandler("DEBUFF_APPLIED_DOSE", "OnDebuffAppliedDose", self)
 	Apollo.RegisterEventHandler("RAID_WIPE", "OnReset", self)
-end
-
-local function GetSetting(key)
-	return core:GetSettings()["DS"]["FireLife"][key]
-end
-
-local function GetSoundSetting(sound, key)
-	if core:GetSettings()["DS"]["FireLife"][key] then return sound else return nil end
 end
 
 --------------------------------------------------------------------------------
@@ -132,30 +124,30 @@ function mod:OnDebuffApplied(unitName, splId, unit)
 	if splId == DEBUFFID_PRIMAL_ENTANGLEMENT or splId == DEBUFFIF__TODO__ then
 		--Print(unitName .. " has debuff: Primal Entanglement")
 		if unitName == strMyName then
-			core:AddMsg("ROOT", self.L["You are rooted"], 5, GetSoundSetting("Info", "SoundRooted"))
+			core:AddMsg("ROOT", self.L["You are rooted"], 5, mod:GetSetting("SoundRooted", "Info"))
 		end
-		if GetSetting("OtherRootedPlayersMarkers") then
+		if mod:GetSetting("OtherRootedPlayersMarkers") then
 			core:MarkUnit(unit, nil, "ROOT")
 			core:AddUnit(unit)
 			rooted_units[unitName] = unit
 		end
-		if not CheckRootTimer and GetSetting("OtherRootedPlayersMarkers") then
+		if not CheckRootTimer and mod:GetSetting("OtherRootedPlayersMarkers") then
 			CheckRootTimer = self:ScheduleRepeatingTimer("CheckRootTracker", 1)
 		end
 	elseif strSpellName == "Life Force Shackle" and unitName == strMyName then
 		--Print("Debuff!")
-		core:AddMsg("NOHEAL", "No-Healing Debuff!", 5, GetSoundSetting("Alarm", "SoundNoHealDebuff"))
+		core:AddMsg("NOHEAL", "No-Healing Debuff!", 5, mod:GetSetting("SoundNoHealDebuff", "Alarm"))
 	end
 	--Print(eventTime .. " " .. unitName .. "has debuff: " .. strSpellName .. " with splId: " .. splId)
 end
 
 function mod:OnUnitCreated(unit, sName)
-	if sName == self.L["Life Force"] and GetSetting("LineLifeOrbs") then
+	if sName == self.L["Life Force"] and mod:GetSetting("LineLifeOrbs") then
 		core:AddPixie(unit:GetId(), 2, unit, nil, "Blue", 10, -40, 0)
 	elseif sName == self.L["Essence of Life"] then
 		--Print("Life essence spawned")
 		--core:AddUnit(unit)
-	elseif sName == self.L["Flame Wave"] and GetSetting("LineFlameWaves") then
+	elseif sName == self.L["Flame Wave"] and mod:GetSetting("LineFlameWaves") then
 		local unitId = unit:GetId()
 		if unitId then
 			core:AddPixie(unitId, 2, unit, nil, "Green", 10, 20, 0)
@@ -179,7 +171,7 @@ function mod:OnSpellCastStart(unitName, castName, unit)
 	if unitName == self.L["Visceralus"] and castName == self.L["Blinding Light"] then
 		local playerUnit = GameLib.GetPlayerUnit()
 		if dist2unit(unit, playerUnit) < 33 then
-			core:AddMsg("BLIND", self.L["Blinding Light"], 5, GetSoundSetting("Beware", "SoundBlindingLight"))
+			core:AddMsg("BLIND", self.L["Blinding Light"], 5, mod:GetSetting("SoundBlindingLight", "Beware"))
 		end
 	end
 	--Print(eventTime .. " " .. unitName .. " is casting " .. castName)

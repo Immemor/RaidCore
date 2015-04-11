@@ -4,12 +4,12 @@
 
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 
-local mod = core:NewBoss("EpAirEarth", 52)
+local mod = core:NewBoss("DS_EpAirEarth", 52)
 if not mod then return end
 
 --mod:RegisterEnableMob("Megalith")
 mod:RegisterEnableBossPair("Megalith", "Aileron")
-mod:RegisterRestrictZone("EpAirEarth", "Elemental Vortex Alpha", "Elemental Vortex Beta", "Elemental Vortex Delta")
+mod:RegisterRestrictZone("DS_EpAirEarth", "Elemental Vortex Alpha", "Elemental Vortex Beta", "Elemental Vortex Delta")
 mod:RegisterEnglishLocale({
 	-- Unit names.
 	["Megalith"] = "Megalith",
@@ -62,14 +62,6 @@ function mod:OnBossEnable()
 	--Apollo.RegisterEventHandler("BUFF_APPLIED", "OnBuffApplied", self)
 end
 
-local function GetSetting(key)
-	return core:GetSettings()["DS"]["AirEarth"][key]
-end
-
-local function GetSoundSetting(sound, key)
-	if core:GetSettings()["DS"]["AirEarth"][key] then return sound else return nil end
-end
-
 --------------------------------------------------------------------------------
 -- Event Handlers
 --
@@ -78,12 +70,12 @@ function mod:OnUnitCreated(unit, sName)
 	local eventTime = GameLib.GetGameTime()
 	--Print(sName)
 	if sName == self.L["Air Column"] then
-		if GetSetting("LineTornado") then
+		if mod:GetSetting("LineTornado") then
 			core:AddLine(unit:GetId(), 2, unit, nil, 3, 30, 0, 10)
 		end
 		if eventTime > startTime + 10 then
 			core:StopBar("TORNADO")
-			core:AddBar("TORNADO", self.L["~Tornado Spawn"], 17, GetSetting("SoundTornadoCountdown"))
+			core:AddBar("TORNADO", self.L["~Tornado Spawn"], 17, mod:GetSetting("SoundTornadoCountdown"))
 		end
 	end
 end
@@ -99,12 +91,12 @@ end
 function mod:OnSpellCastStart(unitName, castName, unit)
 	if unitName == self.L["Megalith"] and castName == self.L["Raw Power"] then
 			midphase = true
-			core:AddMsg("RAW", self.L["Raw Power"]:upper(), 5, GetSoundSetting("Alert", "SoundMidphase"))
+			core:AddMsg("RAW", self.L["Raw Power"]:upper(), 5, mod:GetSetting("SoundMidphase", "Alert"))
 	elseif unitName == self.L["Aileron"] and castName == self.L["Supercell"] then
 		local timeOfEvent = GameLib.GetGameTime()
 		if timeOfEvent - prev > 30 then
 			prev = timeOfEvent
-			core:AddMsg("CELL", self.L["Supercell"]:upper(), 5, GetSoundSetting("Alarm", "SoundSupercell"))
+			core:AddMsg("CELL", self.L["Supercell"]:upper(), 5, mod:GetSetting("SoundSupercell", "Alarm"))
 			core:AddBar("CELL", self.L["Supercell"]:upper(), 80)
 		end
 	end
@@ -112,11 +104,11 @@ end
 
 function mod:OnChatDC(message)
 	if message:find(self.L["The ground shudders beneath Megalith"]) then
-		core:AddMsg("QUAKE", "JUMP !", 3, GetSoundSetting("Beware", "SoundQuakeJump"))
+		core:AddMsg("QUAKE", "JUMP !", 3, mod:GetSetting("SoundQuakeJump", "Beware"))
 	elseif message:find(self.L["fractured crust leaves it exposed"]) and midphase then
 		midphase = false
-		core:AddMsg("MOO", self.L["MOO !"], 5, "Info", GetSoundSetting("Blue", "SoundMoO"))
-		core:AddBar("RAW", self.L["Raw Power"]:upper(), 60, GetSetting("SoundMidphase"))
+		core:AddMsg("MOO", self.L["MOO !"], 5, "Info", mod:GetSetting("SoundMoO", "Blue"))
+		core:AddBar("RAW", self.L["Raw Power"]:upper(), 60, mod:GetSetting("SoundMidphase"))
 	end
 end
 
@@ -133,11 +125,11 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
 			self:Start()
 			prev = 0
 			midphase = false
-			if GetSetting("LineCleaveAileron") then
+			if mod:GetSetting("LineCleaveAileron") then
 				core:AddPixie(unit:GetId(), 2, unit, nil, "Green", 10, 15, 0)
 			end
-			core:AddBar("SCELL", self.L["Supercell"], 65, GetSetting("SoundSupercell"))
-			core:AddBar("TORNADO", self.L["~Tornado Spawn"], 16, GetSetting("SoundTornadoCountdown"))
+			core:AddBar("SCELL", self.L["Supercell"], 65, mod:GetSetting("SoundSupercell"))
+			core:AddBar("TORNADO", self.L["~Tornado Spawn"], 16, mod:GetSetting("SoundTornadoCountdown"))
 			core:AddUnit(unit)
 			core:WatchUnit(unit)
 			core:StartScan()
