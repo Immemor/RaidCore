@@ -126,28 +126,30 @@ function mod:OnDebuffApplied(unitName, splId, unit)
 	if splId == DEBUFFID_PRIMAL_ENTANGLEMENT or splId == DEBUFFIF__TODO__ then
 		--Print(unitName .. " has debuff: Primal Entanglement")
 		if unitName == strMyName then
-			core:AddMsg("ROOT", self.L["You are rooted"], 5, "Info")
+			core:AddMsg("ROOT", self.L["You are rooted"], 5, mod:GetSetting("SoundRooted", "Info"))
 		end
-		core:MarkUnit(unit, nil, "ROOT")
-		core:AddUnit(unit)
-		rooted_units[unitName] = unit
-		if not CheckRootTimer then
+		if mod:GetSetting("OtherRootedPlayersMarkers") then
+			core:MarkUnit(unit, nil, "ROOT")
+			core:AddUnit(unit)
+			rooted_units[unitName] = unit
+		end
+		if not CheckRootTimer and mod:GetSetting("OtherRootedPlayersMarkers") then
 			CheckRootTimer = self:ScheduleRepeatingTimer("CheckRootTracker", 1)
 		end
 	elseif strSpellName == "Life Force Shackle" and unitName == strMyName then
 		--Print("Debuff!")
-		core:AddMsg("NOHEAL", "No-Healing Debuff!", 5, "Alarm")
+		core:AddMsg("NOHEAL", "No-Healing Debuff!", 5, mod:GetSetting("SoundNoHealDebuff", "Alarm"))
 	end
 	--Print(eventTime .. " " .. unitName .. "has debuff: " .. strSpellName .. " with splId: " .. splId)
 end
 
 function mod:OnUnitCreated(unit, sName)
-	if sName == self.L["Life Force"] then
+	if sName == self.L["Life Force"] and mod:GetSetting("LineLifeOrbs") then
 		core:AddPixie(unit:GetId(), 2, unit, nil, "Blue", 10, -40, 0)
 	elseif sName == self.L["Essence of Life"] then
 		--Print("Life essence spawned")
 		--core:AddUnit(unit)
-	elseif sName == self.L["Flame Wave"] then
+	elseif sName == self.L["Flame Wave"] and mod:GetSetting("LineFlameWaves") then
 		local unitId = unit:GetId()
 		if unitId then
 			core:AddPixie(unitId, 2, unit, nil, "Green", 10, 20, 0)
@@ -171,7 +173,7 @@ function mod:OnSpellCastStart(unitName, castName, unit)
 	if unitName == self.L["Visceralus"] and castName == self.L["Blinding Light"] then
 		local playerUnit = GameLib.GetPlayerUnit()
 		if self:GetDistanceBetweenUnits(unit, playerUnit) < 33 then
-			core:AddMsg("BLIND", self.L["Blinding Light"], 5, "Beware")
+			core:AddMsg("BLIND", self.L["Blinding Light"], 5, mod:GetSetting("SoundBlindingLight", "Beware"))
 		end
 	end
 	--Print(eventTime .. " " .. unitName .. " is casting " .. castName)

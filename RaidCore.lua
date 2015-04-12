@@ -176,6 +176,7 @@ local DefaultSettings = {
 
 	-- Fire/Life
 	EpFireLife_LineLifeOrbs = true,
+	EpFireLife_LineFlameWaves = true,
 	EpFireLife_SoundRooted = true,
 	EpFireLife_SoundBlindingLight = true,
 	EpFireLife_SoundNoHealDebuff = true,
