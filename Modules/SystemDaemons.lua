@@ -218,19 +218,6 @@ function mod:OnHealthChanged(unitName, health)
 	end
 end
 
-local function dist2unit(unitSource, unitTarget)
-	if not unitSource or not unitTarget then return 999 end
-	local sPos = unitSource:GetPosition()
-	local tPos = unitTarget:GetPosition()
-
-	local sVec = Vector3.New(sPos.x, sPos.y, sPos.z)
-	local tVec = Vector3.New(tPos.x, tPos.y, tPos.z)
-
-	local dist = (tVec - sVec):Length()
-
-	return tonumber(dist)
-end
-
 function mod:OnSpellCastEnd(unitName, castName, unit)
 	if unitName == self.L["Recovery Protocol"] and castName == self.L["Repair Sequence"] then
 		core:DropMark(unit:GetId())
@@ -240,17 +227,17 @@ end
 function mod:OnSpellCastStart(unitName, castName, unit)
 	if unitName == self.L["Binary System Daemon"] and castName == self.L["Power Surge"] then
 		core:SendSync("NORTH_SURGE", unit:GetId())
-		if phase2 and dist2unit(GameLib.GetPlayerUnit(), unit) < 40 then
+		if phase2 and self:GetDistanceBetweenUnits(GameLib.GetPlayerUnit(), unit) < 40 then
 			core:AddMsg("SURGE", self.L["INTERRUPT NORTH"], 5, GetSoundSetting("Alert", "SoundPowerSurge"))
 		end
 	elseif unitName == self.L["Null System Daemon"] and castName == self.L["Power Surge"] then
 		core:SendSync("SOUTH_SURGE", unit:GetId())
-		if phase2 and dist2unit(GameLib.GetPlayerUnit(), unit) < 40 then
+		if phase2 and self:GetDistanceBetweenUnits(GameLib.GetPlayerUnit(), unit) < 40 then
 			core:AddMsg("SURGE", self.L["INTERRUPT SOUTH"], 5, GetSoundSetting("Alert", "SoundPowerSurge"))
 		end
 	elseif castName == "Purge" then
 		PurgeLast[unit:GetId()] = GameLib.GetGameTime()
-		if dist2unit(GameLib.GetPlayerUnit(), unit) < 40 then
+		if self:GetDistanceBetweenUnits(GameLib.GetPlayerUnit(), unit) < 40 then
 			core:AddMsg("PURGE", self.L["AIDDDDDDDS !"], 5, GetSoundSetting("Beware", "SoundPurge"))
 			if unitName == self.L["Null System Daemon"] then
 				core:AddBar("PURGE_"..unit:GetId(), self.L["PURGE - %s"]:format("NULL"), 27)
@@ -268,7 +255,7 @@ function mod:OnSpellCastStart(unitName, castName, unit)
 		core:AddMsg("BLACKIC", self.L["INTERRUPT !"], 5, "Alert")
 		core:AddBar("BLACKIC", self.L["BLACK IC"], 30)
 	elseif unitName == self.L["Recovery Protocol"] and castName == self.L["Repair Sequence"] then
-		if dist2unit(GameLib.GetPlayerUnit(), unit) < 50 then
+		if self:GetDistanceBetweenUnits(GameLib.GetPlayerUnit(), unit) < 50 then
 			core:AddMsg("HEAL", self.L["INTERRUPT HEAL!"], 5, GetSoundSetting("Inferno", "SoundRepairSequence"))
 			core:MarkUnit(unit, nil, self.L["HEAL"])
 			self:ScheduleTimer("RemoveHealMarker", 5, unit)
@@ -317,7 +304,7 @@ function mod:OnZoneChanged(zoneId, zoneName)
 		local timeOfEvent = GameLib.GetGameTime()
 		for id, timer in pairs(PurgeLast) do
 			local unit = GameLib.GetUnitById(id)
-			if unit and (dist2unit(GameLib.GetPlayerUnit(), unit) < 40 or phase2) then
+			if unit and (self:GetDistanceBetweenUnits(GameLib.GetPlayerUnit(), unit) < 40 or phase2) then
 				if timeOfEvent - timer < 27 then
 					local NO_BREAK_SPACE = string.char(194, 160)
 					local unitName = unit:GetName():gsub(NO_BREAK_SPACE, " ")
