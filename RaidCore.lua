@@ -154,11 +154,15 @@ local DefaultSettings = {
 	EpAirLife_SoundTwirl = true,
 	EpAirLife_SoundNoHealDebuff = true,
 	EpAirLife_SoundBlindingLight = true,
+	EpAirLife_SoundHealingTree = true,
+	EpAirLife_SoundMidphase = true,
+	EpAirLife_SoundLightning = true,
 	EpAirLife_OtherTwirlWarning = true,
 	EpAirLife_OtherNoHealDebuff = true,
 	EpAirLife_OtherBlindingLight = true,
 	EpAirLife_OtherTwirlPlayerMarkers = true,
 	EpAirLife_OtherNoHealDebuffPlayerMarkers = true,
+	EpAirLife_OtherLightningMarkers = true,
 
 	-- Fire/Water
 	EpFireWater_LineFlameWaves = true,
