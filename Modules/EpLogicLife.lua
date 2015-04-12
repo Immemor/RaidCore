@@ -4,11 +4,11 @@
 
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 
-local mod = core:NewBoss("EpLifeLogic", 52)
+local mod = core:NewBoss("EpLogicLife", 52)
 if not mod then return end
 
 mod:RegisterEnableBossPair("Mnemesis", "Visceralus")
-mod:RegisterRestrictZone("EpLifeLogic", "Elemental Vortex Alpha", "Elemental Vortex Beta", "Elemental Vortex Delta")
+mod:RegisterRestrictZone("EpLogicLife", "Elemental Vortex Alpha", "Elemental Vortex Beta", "Elemental Vortex Delta")
 mod:RegisterEnglishLocale({
 	-- Unit names.
 	["Essence of Life"] = "Essence of Life",
