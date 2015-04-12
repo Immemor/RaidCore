@@ -68,143 +68,153 @@ local DefaultSettings = {
 		},
 		bSoundEnabled = true,
 	},
-	DS = {
-		SystemDaemons = {
-			LineOnModulesMidphase = true,
-			SoundPhase2 = true,
-			SoundPurge = true,
-			SoundWave = true,
-			SoundRepairSequence = true,
-			SoundPowerSurge = true,
-			OtherPillarMarkers = true,
-			OtherPurgePlayerMarkers = true,
-			OtherOverloadMarkers = true,
-			OtherDisconnectTimer = true,
-		},
-		Gloomclaw = {
-			SoundRuptureInterrupt = true,
-			SoundRuptureCountdown = true,
-			SoundCorruptingRays = true,
-			SoundSectionSwitch = true,
-			SoundCorruptionCountdown = true,
-			SoundMoOWarning = true,
-			SoundWaveWarning = true,
-			OtherLeftRightMarkers = true,
-			OtherMaulerMarkers = true,
-		},
-		Maelstrom = {
-			LineWeatherStations = true,
-			LineCleaveBoss = true,
-			LineWindWalls = true,
-			SoundIcyBreath = true,
-			SoundTyphoon = true,
-			SoundCrystallize = true,
-			SoundWeatherStationSwitch = true,
-		},
-		Avatus = {
-			LineCleaveBoss = true,
-			LineCleaveHands = true,
-			LineCannons = true,
-			LineCleaveYellowRoomBoss = true,
-			LineOrbsYellowRoom = true,
-			SoundHandInterrupt = true,
-			SoundObliterationBeam = true,
-			SoundBlindYellowRoom = true,
-			SoundPortalPhase = true,
-			SoundBlueInterrupt = true,
-			SoundGunGrid = true,
-			OtherDirectionMarkers = true,
-			OtherHandSpawnMarkers = true,
-		},
-		Limbo = {
+	-- Datascape Settings
 
-		},
-		Lattice = {
-			LineDataDevourers = true,
-			SoundBeam = true,
-			SoundBigCast = true,
-			SoundShieldPhase = true,
-			SoundJumpPhase = true,
-			SoundNewWave = true,
-			OtherPlayerBeamMarkers = true,
-			OtherLogicWallMarkers = true,
-		},
-		AirEarth = {
-			LineTornado = true,
-			LineCleaveAileron = true,
-			SoundMidphase = true,
-			SoundQuakeJump = true,
-			SoundSupercell = true,
-		},
-		AirWater = {
-			SoundTwirl = true,
-			SoundMoO = true,
-			SoundIcestorm = true,
-			OtherTwirlWarning = true,
-			OtherTwirlPlayerMarkers = true,
-		},
-		AirLife = {
-			LineLifeOrbs = true,
-			LineHealingTrees = true,
-			LineCleaveAileron = true,
-			SoundTwirl = true,
-			SoundNoHealDebuff = true,
-			SoundBlindingLight = true,
-			OtherTwirlWarning = true,
-			OtherNoHealDebuff = true,
-			OtherBlindingLight = true,
-			OtherTwirlPlayerMarkers = true,
-			OtherNoHealDebuffPlayerMarkers = true,
-		},
-		FireEarth = {
+	-- System Daemons
+	DS_SystemDaemons_LineOnModulesMidphase = true,
+	DS_SystemDaemons_SoundPhase2 = true,
+	DS_SystemDaemons_SoundPurge = true,
+	DS_SystemDaemons_SoundWave = true,
+	DS_SystemDaemons_SoundRepairSequence = true,
+	DS_SystemDaemons_SoundPowerSurge = true,
+	DS_SystemDaemons_OtherPillarMarkers = true,
+	DS_SystemDaemons_OtherPurgePlayerMarkers = true,
+	DS_SystemDaemons_OtherOverloadMarkers = true,
+	DS_SystemDaemons_OtherDisconnectTimer = true,
 
-		},
-		FireWater = {
-			LineFlameWaves = true,
-			LineCleaveHydroflux = true,
-			LineBombPlayers = true,
-			LineIceTomb = true,
-			SoundBomb = true,
-			SoundHighDebuffStacks = true,
-			SoundIceTomb = true,
-			OtherBombPlayerMarkers = true,
-		},
-		FireLife = {
-			LineLifeOrbs = true,
-			SoundRooted = true,
-			SoundBlindingLight = true,
-			SoundNoHealDebuff = true,
-			OtherRootedPlayersMarkers = true,
-		},
-		LogicEarth = {
-			LineObsidianOutcropping = true,
-			SoundDefrag = true,
-			SoundStars = true,
-			SoundQuakeJump = true,
-			SoundSnake = true,
-		},
-		LogicWater = {
-			LineTetrisBlocks = true,
-			LineOrbs = true,
-			SoundDefrag = true,
-			SoundDataDisruptorDebuff = true,
-			OtherWateryGraveTimer = true,
-		},
-		LogicLife = {
-			LineTetrisBlocks = true,
-			LineLifeOrbs = true,
-			LineCleaveVisceralus = true,
-			SoundSnake = true,
-			SoundNoHealDebuff = true,
-			SoundBlindingLight = true,
-			SoundDefrag = true,
-			OtherSnakePlayerMarkers = true,
-			OtherNoHealDebuffPlayerMarkers = true,
-			OtherOverloadPlayerMarkers = true,
-			OtherRootedPlayersMarkers = true,
-			OtherDirectionMarkers = true,
-		},
-	}
+	-- Gloomclaw
+	DS_Gloomclaw_SoundRuptureInterrupt = true,
+	DS_Gloomclaw_SoundRuptureCountdown = true,
+	DS_Gloomclaw_SoundCorruptingRays = true,
+	DS_Gloomclaw_SoundSectionSwitch = true,
+	DS_Gloomclaw_SoundCorruptionCountdown = true,
+	DS_Gloomclaw_SoundMoOWarning = true,
+	DS_Gloomclaw_SoundWaveWarning = true,
+	DS_Gloomclaw_OtherLeftRightMarkers = true,
+	DS_Gloomclaw_OtherMaulerMarkers = true,
+
+	-- Maelstrom
+	DS_Maelstrom_LineWeatherStations = true,
+	DS_Maelstrom_LineCleaveBoss = true,
+	DS_Maelstrom_LineWindWalls = true,
+	DS_Maelstrom_SoundIcyBreath = true,
+	DS_Maelstrom_SoundTyphoon = true,
+	DS_Maelstrom_SoundCrystallize = true,
+	DS_Maelstrom_SoundWeatherStationSwitch = true,
+
+	-- Avatus
+	DS_Avatus_LineCleaveBoss = true,
+	DS_Avatus_LineCleaveHands = true,
+	DS_Avatus_LineCannons = true,
+	DS_Avatus_LineCleaveYellowRoomBoss = true,
+	DS_Avatus_LineOrbsYellowRoom = true,
+	DS_Avatus_SoundHandInterrupt = true,
+	DS_Avatus_SoundObliterationBeam = true,
+	DS_Avatus_SoundBlindYellowRoom = true,
+	DS_Avatus_SoundPortalPhase = true,
+	DS_Avatus_SoundBlueInterrupt = true,
+	DS_Avatus_SoundGunGrid = true,
+	DS_Avatus_OtherDirectionMarkers = true,
+	DS_Avatus_OtherHandSpawnMarkers = true,
+
+	-- Limbo
+
+	-- Lattice
+	DS_Lattice_LineDataDevourers = true,
+	DS_Lattice_SoundBeam = true,
+	DS_Lattice_SoundBigCast = true,
+	DS_Lattice_SoundShieldPhase = true,
+	DS_Lattice_SoundJumpPhase = true,
+	DS_Lattice_SoundNewWave = true,
+	DS_Lattice_SoundLaser = true,
+	DS_Lattice_SoundExplosion = true,
+	DS_Lattice_OtherPlayerBeamMarkers = true,
+	DS_Lattice_OtherLogicWallMarkers = true,
+
+	-- Air/Earth
+	DS_EpAirEarth_LineTornado = true,
+	DS_EpAirEarth_LineCleaveAileron = true,
+	DS_EpAirEarth_SoundMidphase = true,
+	DS_EpAirEarth_SoundQuakeJump = true,
+	DS_EpAirEarth_SoundSupercell = true,
+	DS_EpAirEarth_SoundTornadoCountdown = true,
+	DS_EpAirEarth_SoundMoO = true,
+
+	-- Air/Water
+	DS_EpAirWater_SoundTwirl = true,
+	DS_EpAirWater_SoundMoO = true,
+	DS_EpAirWater_SoundIcestorm = true,
+	DS_EpAirWater_SoundMidphase = true,
+	DS_EpAirWater_SoundFrostTombs = true,
+	DS_EpAirWater_OtherTwirlWarning = true,
+	DS_EpAirWater_OtherTwirlPlayerMarkers = true,
+
+	-- Air/Life
+	DS_EpAirLife_LineLifeOrbs = true,
+	DS_EpAirLife_LineHealingTrees = true,
+	DS_EpAirLife_LineCleaveAileron = true,
+	DS_EpAirLife_SoundTwirl = true,
+	DS_EpAirLife_SoundNoHealDebuff = true,
+	DS_EpAirLife_SoundBlindingLight = true,
+	DS_EpAirLife_SoundHealingTree = true,
+	DS_EpAirLife_SoundMidphase = true,
+	DS_EpAirLife_SoundLightning = true,
+	DS_EpAirLife_OtherTwirlWarning = true,
+	DS_EpAirLife_OtherNoHealDebuff = true,
+	DS_EpAirLife_OtherBlindingLight = true,
+	DS_EpAirLife_OtherTwirlPlayerMarkers = true,
+	DS_EpAirLife_OtherNoHealDebuffPlayerMarkers = true,
+	DS_EpAirLife_OtherLightningMarkers = true,
+
+	-- Fire/Water
+	DS_EpFireWater_LineFlameWaves = true,
+	DS_EpFireWater_LineCleaveHydroflux = true,
+	DS_EpFireWater_LineBombPlayers = true,
+	DS_EpFireWater_LineIceTomb = true,
+	DS_EpFireWater_SoundBomb = true,
+	DS_EpFireWater_SoundHighDebuffStacks = true,
+	DS_EpFireWater_SoundIceTomb = true,
+	DS_EpFireWater_OtherBombPlayerMarkers = true,
+
+	-- Fire/Life
+	DS_EpFireLife_LineLifeOrbs = true,
+	DS_EpFireLife_LineFlameWaves = true,
+	DS_EpFireLife_SoundRooted = true,
+	DS_EpFireLife_SoundBlindingLight = true,
+	DS_EpFireLife_SoundNoHealDebuff = true,
+	DS_EpFireLife_OtherRootedPlayersMarkers = true,
+
+	-- Fire/Earth
+
+	-- Logic/Earth
+	DS_EpLogicEarth_LineObsidianOutcropping = true,
+	DS_EpLogicEarth_SoundDefrag = true,
+	DS_EpLogicEarth_SoundStars = true,
+	DS_EpLogicEarth_SoundQuakeJump = true,
+	DS_EpLogicEarth_SoundSnake = true,
+
+	-- Logic/Water
+	DS_EpLogicWater_LineTetrisBlocks = true,
+	DS_EpLogicWater_LineOrbs = true,
+	DS_EpLogicWater_SoundDefrag = true,
+	DS_EpLogicWater_SoundDataDisruptorDebuff = true,
+	DS_EpLogicWater_SoundMidphase = true,
+	DS_EpLogicWater_OtherWateryGraveTimer = true,
+	DS_EpLogicWater_OtherOrbMarkers = true,
+
+	-- Logic/Life
+	DS_EpLogicLife_LineTetrisBlocks = true,
+	DS_EpLogicLife_LineLifeOrbs = true,
+	DS_EpLogicLife_LineCleaveVisceralus = true,
+	DS_EpLogicLife_SoundSnake = true,
+	DS_EpLogicLife_SoundNoHealDebuff = true,
+	DS_EpLogicLife_SoundBlindingLight = true,
+	DS_EpLogicLife_SoundDefrag = true,
+	DS_EpLogicLife_SoundEnrage = true,
+	DS_EpLogicLife_OtherSnakePlayerMarkers = true,
+	DS_EpLogicLife_OtherNoHealDebuffPlayerMarkers = true,
+	DS_EpLogicLife_OtherRootedPlayersMarkers = true,
+	DS_EpLogicLife_OtherDirectionMarkers = true,
 }
 
 
@@ -269,15 +279,15 @@ function RaidCore:OnEnable()
 				Maelstrom = Apollo.LoadForm(self.xmlDoc, "ConfigForm_DS_Maelstrom", self.wndTargetFrame, self),
 				Lattice = Apollo.LoadForm(self.xmlDoc, "ConfigForm_DS_Lattice", self.wndTargetFrame, self),
 				Limbo = Apollo.LoadForm(self.xmlDoc, "ConfigForm_DS_Limbo", self.wndTargetFrame, self),
-				AirEarth = Apollo.LoadForm(self.xmlDoc, "ConfigForm_DS_AirEarth", self.wndTargetFrame, self),
-				AirLife = Apollo.LoadForm(self.xmlDoc, "ConfigForm_DS_AirLife", self.wndTargetFrame, self),
-				AirWater = Apollo.LoadForm(self.xmlDoc, "ConfigForm_DS_AirWater", self.wndTargetFrame, self),
-				FireEarth = Apollo.LoadForm(self.xmlDoc, "ConfigForm_DS_FireEarth", self.wndTargetFrame, self),
-				FireLife = Apollo.LoadForm(self.xmlDoc, "ConfigForm_DS_FireLife", self.wndTargetFrame, self),
-				FireWater = Apollo.LoadForm(self.xmlDoc, "ConfigForm_DS_FireWater", self.wndTargetFrame, self),
-				LogicEarth = Apollo.LoadForm(self.xmlDoc, "ConfigForm_DS_LogicEarth", self.wndTargetFrame, self),
-				LogicLife = Apollo.LoadForm(self.xmlDoc, "ConfigForm_DS_LogicLife", self.wndTargetFrame, self),
-				LogicWater = Apollo.LoadForm(self.xmlDoc, "ConfigForm_DS_LogicWater", self.wndTargetFrame, self),
+				AirEarth = Apollo.LoadForm(self.xmlDoc, "ConfigForm_DS_EpAirEarth", self.wndTargetFrame, self),
+				AirLife = Apollo.LoadForm(self.xmlDoc, "ConfigForm_DS_EpAirLife", self.wndTargetFrame, self),
+				AirWater = Apollo.LoadForm(self.xmlDoc, "ConfigForm_DS_EpAirWater", self.wndTargetFrame, self),
+				FireEarth = Apollo.LoadForm(self.xmlDoc, "ConfigForm_DS_EpFireEarth", self.wndTargetFrame, self),
+				FireLife = Apollo.LoadForm(self.xmlDoc, "ConfigForm_DS_EpFireLife", self.wndTargetFrame, self),
+				FireWater = Apollo.LoadForm(self.xmlDoc, "ConfigForm_DS_EpFireWater", self.wndTargetFrame, self),
+				LogicEarth = Apollo.LoadForm(self.xmlDoc, "ConfigForm_DS_EpLogicEarth", self.wndTargetFrame, self),
+				LogicLife = Apollo.LoadForm(self.xmlDoc, "ConfigForm_DS_EpLogicLife", self.wndTargetFrame, self),
+				LogicWater = Apollo.LoadForm(self.xmlDoc, "ConfigForm_DS_EpLogicWater", self.wndTargetFrame, self),
 				Avatus = Apollo.LoadForm(self.xmlDoc, "ConfigForm_DS_Avatus", self.wndTargetFrame, self),
 			},
 		}
@@ -465,7 +475,8 @@ function RaidCore:OnBossSettingChecked(wndHandler, wndControl, eMouseButton )
 	local setting = self:SplitString(wndControl:GetName(), "_")[2]
 	local raidInstance = settingInfo[2]
 	local bossModule = settingInfo[3]
-	self.settings[raidInstance][bossModule][setting] = true
+	local settingString = raidInstance .. "_" .. bossModule .. "_" .. setting
+	self.settings[settingString] = true
 end
 
 function RaidCore:OnBossSettingUnchecked(wndHandler, wndControl, eMouseButton )
@@ -473,7 +484,8 @@ function RaidCore:OnBossSettingUnchecked(wndHandler, wndControl, eMouseButton )
 	local setting = self:SplitString(wndControl:GetName(), "_")[2]
 	local raidInstance = settingInfo[2]
 	local bossModule = settingInfo[3]
-	self.settings[raidInstance][bossModule][setting] = false
+	local settingString = raidInstance .. "_" .. bossModule .. "_" .. setting
+	self.settings[settingString] = false
 end
 
 function RaidCore:OnWindowLoad(wndHandler, wndControl )
@@ -481,7 +493,8 @@ function RaidCore:OnWindowLoad(wndHandler, wndControl )
 	local setting = self:SplitString(wndControl:GetName(), "_")[2]
 	local raidInstance = settingInfo[2]
 	local bossModule = settingInfo[3]
-	local val = self.settings[raidInstance][bossModule][setting]
+	local settingString = raidInstance .. "_" .. bossModule .. "_" .. setting
+	local val = self.settings[settingString]
 
 	if val ~= nil then
 		if type(val) == "boolean" then
@@ -671,11 +684,11 @@ function RaidCore:OnRaidCoreOn(cmd, args)
 			Print("Module SystemDaemons not loaded")
 		end
 	elseif (tAllParams[1] == "testel") then
-		local mod = self:GetBossModule("EpEarthLogic", 1)
+		local mod = self:GetBossModule("EpLogicEarth", 1)
 		if mod then
 			mod:PlaceSpawnPos()
 		else
-			Print("Module EpEarthLogic not loaded")
+			Print("Module EpLogicEarth not loaded")
 		end
 	elseif (tAllParams[1] == "wm") then
 		local estpos = {
@@ -828,7 +841,7 @@ function RaidCore:StartCombat(modName)
 		end
 	end
 	--Apollo.RemoveEventHandler("UnitCreated",	 	self)
-	Apollo.RegisterEventHandler("UnitEnteredCombat", 		"CombatStateChanged", self)
+	--Apollo.RegisterEventHandler("UnitEnteredCombat", 		"CombatStateChanged", self)
 	Apollo.RegisterEventHandler("ChatMessage", 			"OnChatMessage", self)
 end
 
@@ -852,7 +865,7 @@ function RaidCore:OnWorldChanged()
 				--Print("MONITORING ON")
 				Apollo.RegisterEventHandler("UnitCreated", 			"unitCheck", self)
 				--Apollo.RegisterEventHandler("ChatMessage", 			"OnChatMessage", self)
-				--Apollo.RegisterEventHandler("UnitEnteredCombat", 		"CombatStateChanged", self)
+				Apollo.RegisterEventHandler("UnitEnteredCombat", 		"CombatStateChanged", self)
 				if not self.timer then
 					self.timer = ApolloTimer.Create(0.100, true, "OnTimer", self)
 				else
@@ -1549,7 +1562,7 @@ function RaidCore:WipeCheck()
 	self:ResetSync()
 	self:ResetLines()
 	Apollo.RemoveEventHandler("ChatMessage", self)
-	Apollo.RemoveEventHandler("UnitEnteredCombat",self)
+	--Apollo.RemoveEventHandler("UnitEnteredCombat",self)
 	Apollo.RegisterEventHandler("UnitCreated", "unitCheck", self)
 	Event_FireGenericEvent("RAID_WIPE")
 end
