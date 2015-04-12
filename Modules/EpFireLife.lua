@@ -4,7 +4,7 @@
 
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 
-local mod = core:NewBoss("EpFireLife", 52)
+local mod = core:NewEncounter("EpFireLife", 52, 98, 119)
 if not mod then return end
 
 --mod:RegisterEnableMob("Visceralus")

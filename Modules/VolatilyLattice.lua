@@ -4,7 +4,7 @@
 
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 
-local mod = core:NewBoss("Lattice", 52)
+local mod = core:NewEncounter("Lattice", 52, 98, 116)
 if not mod then return end
 
 mod:RegisterEnableMob("Big Red Button")

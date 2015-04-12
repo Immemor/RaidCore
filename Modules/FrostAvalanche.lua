@@ -4,7 +4,7 @@
 
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 
-local mod = core:NewBoss("FrostAvalanche", 52)
+local mod = core:NewEncounter("FrostAvalanche", 52, 98, 109)
 if not mod then return end
 
 mod:RegisterEnableMob("Frost-Boulder Avalanche")

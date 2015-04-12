@@ -7,6 +7,9 @@
 	<Script Name="Libs/GeminiGUI/GeminiGUI.lua"/>
 	<Script Name="Libs/GeminiColor/GeminiColor.lua"/>
 	<!-- Global Locales -->
+	<Script Name="Locales/enUS.lua"/>
+	<Script Name="Locales/frFR.lua"/>
+	<Script Name="Locales/deDE.lua"/>
 	<!-- Forms -->
 	<Form Name="RaidCore.xml"/>
 	<!-- LUA Script -->

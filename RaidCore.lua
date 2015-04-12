@@ -248,6 +248,9 @@ function RaidCore:OnInitialize()
 	-- load our form file
 	self.xmlDoc = XmlDoc.CreateFromFile("RaidCore.xml")
 	self.xmlDoc:RegisterCallback("OnDocLoaded", self)
+
+	local GeminiLocale = Apollo.GetPackage("Gemini:Locale-1.0").tPackage
+	self.L = GeminiLocale:GetLocale("RaidCore")
 end
 
 -----------------------------------------------------------------------------------------------
@@ -350,9 +353,18 @@ function RaidCore:OnEnable()
 		CommChannelTimer = ApolloTimer.Create(5, false, "UpdateCommChannel", self) -- make sure everything is loaded, so after 5sec
 		--self.chanCom = ICCommLib.JoinChannel("WL_RaidCore", "OnComMessage", self)
 
+		-- Final parsing about encounters.
+		for name, module in self:IterateModules() do
+			local r, e = pcall(module.PrepareEncounter, module)
+			if not r then
+				Print(e)
+			else
+				for _, id in next, module.continentIdList do
+					enablezones[id] = true
+				end
+			end
+		end
 		self:ScheduleTimer("OnWorldChanged", 5)
-
-		self.Loaded = true
 	end
 end
 
@@ -652,7 +664,7 @@ function RaidCore:OnRaidCoreOn(cmd, args)
 		self.drawline:ResetLines()
 	elseif (tAllParams[1] == "sysdm") then
 		if tAllParams[2] ~= nil and tAllParams[3] ~= nil then
-			local mod = self:GetBossModule("SystemDaemons", 1)
+			local mod = self:GetModule("SystemDaemons", 1)
 			if mod then
 				mod:SetInterrupter(tAllParams[2], tonumber(tAllParams[3]))
 			else
@@ -661,7 +673,7 @@ function RaidCore:OnRaidCoreOn(cmd, args)
 		end
 	elseif (tAllParams[1] == "sysdm") then
 		if tAllParams[2] ~= nil and tAllParams[3] ~= nil then
-			local mod = self:GetBossModule("SystemDaemons", 1)
+			local mod = self:GetModule("SystemDaemons", 1)
 			if mod then
 				mod:SetInterrupter(tAllParams[2], tonumber(tAllParams[3]))
 			else
@@ -669,7 +681,7 @@ function RaidCore:OnRaidCoreOn(cmd, args)
 			end
 		end
 	elseif (tAllParams[1] == "testdm") then
-		local mod = self:GetBossModule("SystemDaemons", 1)
+		local mod = self:GetModule("SystemDaemons", 1)
 		if mod then
 			mod:NextWave()
 			mod:OnChatDC("COMMENCING ENHANCEMENT SEQUENCE")
@@ -677,7 +689,7 @@ function RaidCore:OnRaidCoreOn(cmd, args)
 			Print("Module SystemDaemons not loaded")
 		end
 	elseif (tAllParams[1] == "testel") then
-		local mod = self:GetBossModule("EpLogicEarth", 1)
+		local mod = self:GetModule("EpLogicEarth", 1)
 		if mod then
 			mod:PlaceSpawnPos()
 		else
@@ -758,27 +770,27 @@ function RaidCore:unitCheck(unit)
 		if sName and enablemobs[sName] then
 			if type(enablemobs[sName]) == "string" then
 				local modName = enablemobs[sName]
-				local module = self.bossCore:GetModule(modName)
+				local module = self:GetModule(modName)
 				if not module or module:IsEnabled() then return end
 				if restrictzone[modName] and not restrictzone[modName][GetCurrentSubZoneName()] then return end
 				--Print("Checking event " .. restricteventobjective[modName])
 				--Print(tostring(self:isPublicEventObjectiveActive(restricteventobjective[modName])))
 				if restricteventobjective[modName] and not self:hasActiveEvent(restricteventobjective[modName]) then return end
 				Print("Enabling Boss Module : " .. enablemobs[sName])
-				for name, mod in self:IterateBossModules() do
+				for name, mod in self:IterateModules() do
 					if mod:IsEnabled() then mod:Disable() end
 				end
 				module:Enable()
 			else
 				for i, modName in next, enablemobs[sName] do
-					local module = self.bossCore:GetModule(modName)
+					local module = self:GetModule(modName)
 					if not module or module:IsEnabled() then return end
 				end
-				for name, mod in self:IterateBossModules() do
+				for name, mod in self:IterateModules() do
 					if mod:IsEnabled() then mod:Disable() end
 				end
 				for i, modName in next, enablemobs[sName] do
-					local module = self.bossCore:GetModule(modName)
+					local module = self:GetModule(modName)
 					if restrictzone[modName] and not restrictzone[modName][GetCurrentSubZoneName()] then return end
 					if restricteventobjective[modName] and not self:hasActiveEvent(restricteventobjective[modName]) then return end
 					Print("Enabling Boss Module : " .. modName)
@@ -808,12 +820,12 @@ function RaidCore:unitCheck(unit)
 				-- At this point we know this boss pair should be enabled.
 				if bModNameBossActive then
 					-- Disable any other modules that are active
-					for name, mod in self:IterateBossModules() do
+					for name, mod in self:IterateModules() do
 						if name ~= modName and mod:IsEnabled() then
 							mod:Disable()
 						end
 					end
-					mod = self.bossCore:GetModule(modName)
+					mod = self:GetModule(modName)
 					if restrictzone[modName] and not restrictzone[modName][GetCurrentSubZoneName()] then return end
 					if mod:IsEnabled() then return end
 					Print("Enabling Boss Module : " .. modName)
@@ -828,7 +840,7 @@ end
 
 function RaidCore:StartCombat(modName)
 	Print("Starting Core Combat")
-	for name, mod in self:IterateBossModules() do
+	for name, mod in self:IterateModules() do
 		if mod:IsEnabled() and mod.ModuleName ~= modName then
 			mod:Disable()
 		end
@@ -845,7 +857,7 @@ end
 
 function RaidCore:OnWorldChanged()
 	--if not IsInInstance() then
-		--for _, module in addon:IterateBossModules() do
+		--for _, module in addon:IterateModules() do
 			--if module.isEngaged then module:Reboot(true) end
 		--end
 	--end
@@ -881,7 +893,7 @@ function RaidCore:OnSubZoneChanged(idZone, strSubZone)
 	for key, value in pairs(enablezone) do
 		if value[strSubZone] then
 			local modName = key
-			local bossMod = self.bossCore:GetModule(modName)
+			local bossMod = self:GetModule(modName)
 			if not bossMod or bossMod:IsEnabled() then return end
 			if restricteventobjective[modName] and not self:hasActiveEvent(restricteventobjective[modName]) then return end
 			Print("Enabling Boss Module : " .. modName)
@@ -891,7 +903,7 @@ function RaidCore:OnSubZoneChanged(idZone, strSubZone)
 	end
 	-- if we haven't returned at this point we left the subzone and should disable the mod
 	-- if it is still enabled
-	for name, mod in self:IterateBossModules() do
+	for name, mod in self:IterateModules() do
 		for key, value in pairs(enablezone) do
 			local modName = mod.ModuleName
 			if key == modName and mod:IsEnabled() then
@@ -906,7 +918,7 @@ function RaidCore:OnPublicEventObjectiveUpdate(peoUpdated)
 		if value[peoUpdated:GetShortDescription()] then
 			if peoUpdated:GetStatus() == 1 then
 				local modName = key
-				local bossMod = self.bossCore:GetModule(modName)
+				local bossMod = self:GetModule(modName)
 				if not bossMod or bossMod:IsEnabled() then return end
 				if restrictzone[modName] and not restrictzone[modName][GetCurrentSubZoneName()] then return end
 				Print("Enabling Boss Module : " .. modName)
@@ -914,7 +926,7 @@ function RaidCore:OnPublicEventObjectiveUpdate(peoUpdated)
 				return
 			elseif peoUpdated:GetStatus() == 0 then
 				local modName = key
-				local bossMod = self.bossCore:GetModule(modName)
+				local bossMod = self:GetModule(modName)
 				if not bossMod or not bossMod:IsEnabled() then return end
 				bossMod:Disable()
 			end
@@ -923,9 +935,8 @@ function RaidCore:OnPublicEventObjectiveUpdate(peoUpdated)
 end
 
 do
-	local function add(moduleName, tbl, ...)
-		for i = 1, select("#", ...) do
-			local entry = select(i, ...)
+	local function add(moduleName, tbl, list)
+		for i, entry in next, list do
 			local t = type(tbl[entry])
 			if t == "nil" then
 				tbl[entry] = moduleName
@@ -940,24 +951,21 @@ do
 		end
 	end
 
-	local function addPair(moduleName, tbl, ...)
+	local function addPair(moduleName, tbl, list)
 		-- ... is holding our actual bosses that we want to have in a pair
 		-- we will store them in the tbl (enablepairs)
-		local units = {...}
 		local bosses = {}
-		for key, value in pairs(units) do
+		for key, value in next, list do
 			-- Defaults to false meaning the unit is not active/in-range
 			bosses[value] = false
 		end
 		tbl[moduleName] = bosses
 	end
 
-	function RaidCore:RegisterEnableMob(module, ...) add(module.ModuleName, enablemobs, ...) end
-	function RaidCore:RegisterEnableBossPair(module, ...) addPair(module.ModuleName, enablepairs, ...) end
+	function RaidCore:RegisterEnableMob(module, list) add(module.ModuleName, enablemobs, list) end
+	function RaidCore:RegisterEnableBossPair(module, list) addPair(module.ModuleName, enablepairs, list) end
 	function RaidCore:GetEnableMobs() return enablemobs end
 	function RaidCore:GetEnablePairs() return enablepairs end
-	--function RaidCore:RegisterRestrictZone(module, zone) add(zone, restrictzone, module.ModuleName) end
-	--function RaidCore:RegisterEnableZone(module, zone) add(zone, enablezone, module.ModuleName) end
 	function RaidCore:GetRestrictZone() return restrictzone end
 	function RaidCore:GetRestrictEventObjective() return restricteventobjective end
 	function RaidCore:GetEnableEventObjective() return enableeventobjective end
@@ -966,53 +974,17 @@ end
 
 
 do
-	local function add2(moduleName, tbl, ...)
+	local function add2(moduleName, tbl, list)
 		if not tbl[moduleName] then tbl[moduleName] = {} end
-		for i = 1, select("#", ...) do
-			local entry = select(i, ...)
+		for i, entry in next, list do
 			if not tbl[moduleName][entry] then tbl[moduleName][entry] = true end
 		end
 	end
 
-	function RaidCore:RegisterRestrictZone(module, ...) add2(module.ModuleName, restrictzone, ...) end
-	function RaidCore:RegisterEnableZone(module, ...) add2(module.ModuleName, enablezone, ...) end
-	function RaidCore:RegisterRestrictEventObjective(module, ...) add2(module.ModuleName, restricteventobjective, ...) end
-	function RaidCore:RegisterEnableEventObjective(module, ...) add2(module.ModuleName, enableeventobjective, ...) end
-end
-
-
-do
-	local function new(core, module, zoneId, ...)
-		if core:GetModule(module, true) then
-			Print(("ERR : %s already loaded"):format(module))
-		else
-			local m = core:NewModule(module, ...)
-
-			m.zoneId = zoneId
-			return m
-		end
-	end
-
-	-- A wrapper for :NewModule to present users with more information in the
-	-- case where a module with the same name has already been registered.
-	function RaidCore:NewBoss(module, zoneId, ...)
-		return new(self.bossCore, module, zoneId, ...)
-	end
-
-	function RaidCore:IterateBossModules() return self.bossCore:IterateModules() end
-	function RaidCore:GetBossModule(...) return self.bossCore:GetModule(...) end
-
-
-	function RaidCore:RegisterBossModule(module)
-		if not module.displayName then module.displayName = module.ModuleName end
-
-		--module.SetupOptions = moduleOptions
-
-		if not enablezones[module.zoneId] then
-			enablezones[module.zoneId] = true
-			self:OnWorldChanged()
-		end
-	end
+	function RaidCore:RegisterRestrictZone(module, list) add2(module.ModuleName, restrictzone, list) end
+	function RaidCore:RegisterEnableZone(module, list) add2(module.ModuleName, enablezone, list) end
+	function RaidCore:RegisterRestrictEventObjective(module, list) add2(module.ModuleName, restricteventobjective, list) end
+	function RaidCore:RegisterEnableEventObjective(module, list) add2(module.ModuleName, enableeventobjective, list) end
 end
 
 function RaidCore:AddBar(key, message, duration, emphasize)
@@ -1250,7 +1222,7 @@ function RaidCore:OnUnitDestroyed(unit)
 		end
 		if not bModNameBossActive then
 			-- Disable any other modules that are active
-			for name, mod in self:IterateBossModules() do
+			for name, mod in self:IterateModules() do
 				if name == modName and mod:IsEnabled() then
 					mod:Disable()
 				end
