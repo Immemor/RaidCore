@@ -22,12 +22,14 @@ mod:RegisterEnglishLocale({
 	-- Cast.
 	["Teleport"] = "Teleport",
 	["Channeling Energy"] = "Channeling Energy",
+	["Stitching Strain"] = "Stitching Strain",
 	-- Bar and messages.
 	["[%u] NEXT P2"] = "[%u] NEXT P2",
 	["P2 : 20 IA"] = "P2 : 20 IA",
 	["P2 : MINI ADDS"] = "P2 : MINI ADDS",
 	["P2 : SUBDUE"] = "P2 : SUBDUE",
 	["P2 : PILLARS"] = "P2 : PILLARS",
+	["Interrupt Terax!"] = "Interrupt Terax!",
 })
 mod:RegisterFrenchLocale({
 	-- Unit names.
@@ -95,9 +97,13 @@ function mod:OnSpellCastStart(unitName, castName, unit)
 	if unitName == self.L["Golgox the Lifecrusher"] and castName == self.L["Teleport"] then
 		core:AddMsg("CONVP2", self.L["P2 : 20 IA"], 5, "Alert")
 		core:AddBar("CONVP2", self.L["P2 : 20 IA"], 29.5)
-	elseif unitName == self.L["Terax Blightweaver"] and castName == self.L["Teleport"] then
-		core:AddMsg("CONVP2", self.L["P2 : MINI ADDS"], 5, "Alert")
-		core:AddBar("CONVP2", self.L["P2 : MINI ADDS"], 29.5)
+	elseif unitName == self.L["Terax Blightweaver"] then
+		if castName == self.L["Teleport"] then
+			core:AddMsg("CONVP2", self.L["P2 : MINI ADDS"], 5, "Alert")
+			core:AddBar("CONVP2", self.L["P2 : MINI ADDS"], 29.5)
+		elseif castName == self.L["Stitching Strain"] and self:GetDistanceBetweenUnits(GameLib.GetPlayerUnit(), unit) < 30 then
+			core:AddMsg("INTSTRAIN", self.L["Interrupt Terax!"], 5, "Inferno")
+		end
 	elseif unitName == self.L["Ersoth Curseform"] and castName == self.L["Teleport"] then
 		core:AddMsg("CONVP2", self.L["P2 : SUBDUE"], 5, "Alert")
 		core:AddBar("CONVP2", self.L["P2 : SUBDUE"], 29.5)
