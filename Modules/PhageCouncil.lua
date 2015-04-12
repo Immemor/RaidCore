@@ -118,7 +118,6 @@ end
 
 function mod:OnSpellCastEnd(unitName, castName)
 	if castName == self.L["Channeling Energy"] then
-		core:StopScan()
 		core:StopBar("CONVP2")
 		core:AddBar("CONVP1", self.L["[%u] NEXT P2"]:format(p2Count + 1), 60, 1)
 	end
@@ -127,7 +126,6 @@ end
 function mod:OnChatDC(message)
 	if message:find(self.L["The Phageborn Convergence begins gathering its power"]) then
 		p2Count = p2Count + 1
-		core:StartScan()
 	end
 end
 
@@ -139,6 +137,7 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
 			or sName == self.L["Noxmind the Insidious"]
 			or sName == self.L["Fleshmonger Vratorg"] then
 			self:Start()
+			core:StartScan()
 			p2Count = 0
 			core:AddBar("CONVP1", self.L["[%u] NEXT P2"]:format(p2Count + 1), 90, 1)
 			core:AddUnit(unit)
