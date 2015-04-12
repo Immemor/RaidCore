@@ -142,6 +142,8 @@ local DefaultSettings = {
 	EpAirWater_SoundTwirl = true,
 	EpAirWater_SoundMoO = true,
 	EpAirWater_SoundIcestorm = true,
+	EpAirWater_SoundMidphase = true,
+	EpAirWater_SoundFrostTombs = true,
 	EpAirWater_OtherTwirlWarning = true,
 	EpAirWater_OtherTwirlPlayerMarkers = true,
 
