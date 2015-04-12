@@ -135,6 +135,8 @@ local DefaultSettings = {
 	EpAirEarth_SoundMidphase = true,
 	EpAirEarth_SoundQuakeJump = true,
 	EpAirEarth_SoundSupercell = true,
+	EpAirEarth_SoundTornadoCountdown = true,
+	EpAirEarth_SoundMoO = true,
 
 	-- Air/Water
 	EpAirWater_SoundTwirl = true,
