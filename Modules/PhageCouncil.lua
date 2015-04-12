@@ -78,19 +78,6 @@ end
 -- Event Handlers
 --
 
-local function dist2unit(unitSource, unitTarget)
-	if not unitSource or not unitTarget then return 999 end
-	local sPos = unitSource:GetPosition()
-	local tPos = unitTarget:GetPosition()
-
-	local sVec = Vector3.New(sPos.x, sPos.y, sPos.z)
-	local tVec = Vector3.New(tPos.x, tPos.y, tPos.z)
-
-	local dist = (tVec - sVec):Length()
-
-	return tonumber(dist)
-end
-
 function mod:OnSpellCastStart(unitName, castName, unit)
 	if unitName == self.L["Golgox the Lifecrusher"] and castName == self.L["Teleport"] then
 		core:AddMsg("CONVP2", self.L["P2 : 20 IA"], 5, "Alert")
@@ -99,7 +86,7 @@ function mod:OnSpellCastStart(unitName, castName, unit)
 		if castName == self.L["Teleport"] then
 			core:AddMsg("CONVP2", self.L["P2 : MINI ADDS"], 5, "Alert")
 			core:AddBar("CONVP2", self.L["P2 : MINI ADDS"], 29.5)
-		elseif castName == self.L["Stitching Strain"] and dist2unit(GameLib.GetPlayerUnit(), unit) < 30 then
+		elseif castName == self.L["Stitching Strain"] and self:GetDistanceBetweenUnits(GameLib.GetPlayerUnit(), unit) < 30 then
 			core:AddMsg("INTSTRAIN", self.L["Interrupt Terax!"], 5, "Inferno")
 		end
 	elseif unitName == self.L["Ersoth Curseform"] and castName == self.L["Teleport"] then
