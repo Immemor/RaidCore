@@ -135,6 +135,26 @@ function boss:DelayedMsg(key, delay, message, duration, sound, color)
 	self.delayedmsg[key] = self:ScheduleTimer("Msg", delay, key, message, duration, sound, color)
 end
 
+--- Compute the distance between 2 unit.
+-- @param tUnitFrom  userdata object from carbine.
+-- @param tUnitTo  userdata object from carbine.
+-- @return  The distance in meter.
+function boss:GetDistanceBetweenUnits(tUnitFrom, tUnitTo)
+	-- XXX If unit are unreachable, the distance should be nil.
+	local r = 999
+	if tUnitFrom and tUnitTo then
+		local positionA = tUnitFrom:GetPosition()
+		local positionB = tUnitTo:GetPosition()
+		if positionA and positionB then
+			local vectorA = Vector3.New(positionA)
+			local vectorB = Vector3.New(positionB)
+			r = (vectorB - vectorA):Length()
+		end
+	end
+	return r
+end
+
+
 local bossCore = core:NewModule("Bosses")
 bossCore:SetDefaultModuleState(false)
 bossCore:SetDefaultModulePrototype(boss)

@@ -83,20 +83,6 @@ end
 --------------------------------------------------------------------------------
 -- Event Handlers
 --
-
-local function dist2unit(unitSource, unitTarget)
-	if not unitSource or not unitTarget then return 999 end
-	local sPos = unitSource:GetPosition()
-	local tPos = unitTarget:GetPosition()
-
-	local sVec = Vector3.New(sPos.x, sPos.y, sPos.z)
-	local tVec = Vector3.New(tPos.x, tPos.y, tPos.z)
-
-	local dist = (tVec - sVec):Length()
-
-	return tonumber(dist)
-end
-
 function mod:OnReset()
 	core:ResetMarks()
 	midphase = false
@@ -176,7 +162,7 @@ end
 function mod:OnSpellCastStart(unitName, castName, unit)
 	local eventTime = GameLib.GetGameTime()
 	if unitName == self.L["Visceralus"] and castName == self.L["Blinding Light"] then
-		if dist2unit(unit, uPlayer) < 33 then
+		if self:GetDistanceBetweenUnits(unit, uPlayer) < 33 then
 			core:AddMsg("BLIND", self.L["Blinding Light"], 5, "Beware")
 		end
 	elseif unitName == self.L["Mnemesis"] and castName == self.L["Defragment"] then

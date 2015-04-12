@@ -160,20 +160,6 @@ end
 --------------------------------------------------------------------------------
 -- Event Handlers
 --
-
-local function dist2unit(unitSource, unitTarget)
-	if not unitSource or not unitTarget then return 999 end
-	local sPos = unitSource:GetPosition()
-	local tPos = unitTarget:GetPosition()
-
-	local sVec = Vector3.New(sPos.x, sPos.y, sPos.z)
-	local tVec = Vector3.New(tPos.x, tPos.y, tPos.z)
-
-	local dist = (tVec - sVec):Length()
-
-	return tonumber(dist)
-end
-
 function mod:OnWipe()
 	Apollo.RemoveEventHandler("CombatLogHeal", self)
 	core:ResetWorldMarkers()
@@ -202,7 +188,7 @@ function mod:OnSpellCastStart(unitName, castName, unit)
 		and castName == self.L["Corrupting Rays"] then
 
 		local playerUnit = GameLib.GetPlayerUnit()
-		local distance_to_unit = dist2unit(playerUnit, unit)
+		local distance_to_unit = self:GetDistanceBetweenUnits(playerUnit, unit)
 		if distance_to_unit < 35 then
 			core:AddMsg("RAYS", self.L["INTERRUPT %s"]:format(unitName:upper()), 5, GetSoundSetting("Inferno", "SoundCorruptingRays"))
 		end

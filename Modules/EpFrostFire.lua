@@ -81,20 +81,6 @@ end
 --------------------------------------------------------------------------------
 -- Event Handlers
 --
-
-local function dist2unit(unitSource, unitTarget)
-	if not unitSource or not unitTarget then return 999 end
-	local sPos = unitSource:GetPosition()
-	local tPos = unitTarget:GetPosition()
-
-	local sVec = Vector3.New(sPos.x, sPos.y, sPos.z)
-	local tVec = Vector3.New(tPos.x, tPos.y, tPos.z)
-
-	local dist = (tVec - sVec):Length()
-
-	return tonumber(dist)
-end
-
 function mod:OnReset()
 	core:ResetMarks()
 	firebomb_players = {}
@@ -179,7 +165,7 @@ function mod:OnDebuffApplied(unitName, splId, unit)
 			self:ScheduleTimer("ApplyBombLines", 1, "frost")
 		end
 		self:ScheduleTimer("RemoveBombMarker", 10, "frost", unit)
-	elseif splId == DEBUFFID_ICE_TOMB and dist2unit(uPlayer, unit) < 45 then -- Ice Tomb Debuff
+	elseif splId == DEBUFFID_ICE_TOMB and self:GetDistanceBetweenUnits(uPlayer, unit) < 45 then -- Ice Tomb Debuff
 		local unitId = unit:GetId()
 		if unitId then
 			core:AddPixie(unitId .. "_TOMB", 1, uPlayer, unit, "Blue", 5, 10, 10)

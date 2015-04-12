@@ -100,19 +100,6 @@ local function GetSoundSetting(sound, key)
 	if core:GetSettings()["DS"]["Avatus"][key] then return sound else return nil end
 end
 
-local function dist2unit(unitSource, unitTarget)
-	if not unitSource or not unitTarget then return 999 end
-	local sPos = unitSource:GetPosition()
-	local tPos = unitTarget:GetPosition()
-
-	local sVec = Vector3.New(sPos.x, sPos.y, sPos.z)
-	local tVec = Vector3.New(tPos.x, tPos.y, tPos.z)
-
-	local dist = (tVec - sVec):Length()
-
-	return tonumber(dist)
-end
-
 local function lowestKeyValue(tbl)
 	local lowestValue = false
 	local tmp_table = {}
@@ -361,7 +348,7 @@ function mod:OnSpellCastStart(unitName, castName, unit)
 	elseif unitName == self.L["Holo Hand"] and castName == self.L["Crushing Blow"] then
 		local playerUnit = GameLib.GetPlayerUnit()
 		for _, hand in pairs(holo_hands) do
-			local distance_to_hand = dist2unit(playerUnit, hand["unit"])
+			local distance_to_hand = self:GetDistanceBetweenUnits(playerUnit, hand["unit"])
 			hand["distance"] = distance_to_hand
 		end
 
