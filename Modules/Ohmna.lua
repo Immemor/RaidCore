@@ -4,7 +4,7 @@
 
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 
-local mod = core:NewBoss("Ohmna", 67)
+local mod = core:NewEncounter("Ohmna", 67, 147, 149)
 if not mod then return end
 
 mod:RegisterEnableMob("Dreadphage Ohmna")
