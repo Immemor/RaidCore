@@ -208,9 +208,9 @@ local DefaultSettings = {
 	EpLogicLife_SoundNoHealDebuff = true,
 	EpLogicLife_SoundBlindingLight = true,
 	EpLogicLife_SoundDefrag = true,
+	EpLogicLife_SoundEnrage = true,
 	EpLogicLife_OtherSnakePlayerMarkers = true,
 	EpLogicLife_OtherNoHealDebuffPlayerMarkers = true,
-	EpLogicLife_OtherOverloadPlayerMarkers = true,
 	EpLogicLife_OtherRootedPlayersMarkers = true,
 	EpLogicLife_OtherDirectionMarkers = true,
 }
