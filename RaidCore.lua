@@ -196,7 +196,9 @@ local DefaultSettings = {
 	EpLogicWater_LineOrbs = true,
 	EpLogicWater_SoundDefrag = true,
 	EpLogicWater_SoundDataDisruptorDebuff = true,
+	EpLogicWater_SoundMidphase = true,
 	EpLogicWater_OtherWateryGraveTimer = true,
+	EpLogicWater_OtherOrbMarkers = true,
 
 	-- Logic/Life
 	EpLogicLife_LineTetrisBlocks = true,
