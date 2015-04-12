@@ -4,7 +4,7 @@
 
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 
-local mod = core:NewBoss("DSFireWing", 52)
+local mod = core:NewEncounter("DSFireWing", 52, 98, 110)
 if not mod then return end
 
 mod:RegisterEnableMob("Warmonger Agratha", "Warmonger Talarii", "Grand Warmonger Tar'gresh")

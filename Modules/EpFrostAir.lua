@@ -4,7 +4,7 @@
 
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 
-local mod = core:NewBoss("EpFrostAir", 52)
+local mod = core:NewEncounter("EpFrostAir", 52, 98, 118)
 if not mod then return end
 
 --mod:RegisterEnableMob("Hydroflux")

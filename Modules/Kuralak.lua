@@ -4,7 +4,7 @@
 
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 
-local mod = core:NewBoss("Kuralak", 67)
+local mod = core:NewEncounter("Kuralak", 67, 147, 148)
 if not mod then return end
 
 mod:RegisterEnableMob("Kuralak the Defiler")

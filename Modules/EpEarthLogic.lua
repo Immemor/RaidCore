@@ -4,7 +4,7 @@
 
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 
-local mod = core:NewBoss("EpEarthLogic", 52)
+local mod = core:NewEncounter("EpEarthLogic", 52, 98, 117)
 if not mod then return end
 
 --mod:RegisterEnableMob("Megalith")

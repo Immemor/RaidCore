@@ -4,7 +4,7 @@
 
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 
-local mod = core:NewBoss("EpLifeLogic", 52)
+local mod = core:NewEncounter("EpLifeLogic", 52, 98, 119)
 if not mod then return end
 
 mod:RegisterEnableBossPair("Mnemesis", "Visceralus")
