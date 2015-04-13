@@ -31,13 +31,13 @@
 	<Script Name="Modules/Gloomclaw.lua" />
 	<Script Name="Modules/VolatilyLattice.lua" />
 	<Script Name="Modules/Maelstrom.lua" />
-	<Script Name="Modules/EpFrostAir.lua" />
-	<Script Name="Modules/EpFrostFire.lua" />
-	<Script Name="Modules/EpFrostLogic.lua" />
-	<Script Name="Modules/EpEarthLogic.lua" />
-	<Script Name="Modules/EpEarthAir.lua" />
-	<Script Name="Modules/EpLifeFire.lua" />
-	<Script Name="Modules/EpLifeLogic.lua" />
+	<Script Name="Modules/EpAirWater.lua" />
+	<Script Name="Modules/EpFireWater.lua" />
+	<Script Name="Modules/EpLogicWater.lua" />
+	<Script Name="Modules/EpLogicEarth.lua" />
+	<Script Name="Modules/EpAirEarth.lua" />
+	<Script Name="Modules/EpFireLife.lua" />
+	<Script Name="Modules/EpLogicLife.lua" />
 	<Script Name="Modules/EpAirLife.lua" />
 	<Script Name="Modules/Avatus.lua" />
 </Addon>
