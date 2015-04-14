@@ -4,7 +4,7 @@
 
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 
-local mod = core:NewBoss("DSLogicWing", 52)
+local mod = core:NewEncounter("DSLogicWing", 52, 98, 111)
 if not mod then return end
 
 mod:RegisterEnableMob("Hyper-Accelerated Skeledroid", "Augmented Herald of Avatus", "Abstract Augmentation Algorithm")

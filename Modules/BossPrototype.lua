@@ -1,10 +1,32 @@
-local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
-
--------------------------------------------------------------------------------
--- Debug
+------------------------------------------------------------------------------
+-- Client Lua Script for RaidCore Addon on WildStar Game.
 --
-local debug = false -- Set to true to get (very spammy) debug messages.
-local dbg = function(self, msg) Print(format("[DBG:%s] %s", self.displayName, msg)) end
+-- Copyright (C) 2015 RaidCore
+------------------------------------------------------------------------------
+------------------------------------------------------------------------------
+--
+-- EncounterPrototype contains all services useable by encounters itself.
+--
+------------------------------------------------------------------------------
+
+local RaidCore = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
+local EncounterPrototype = {}
+
+------------------------------------------------------------------------------
+-- Constants
+------------------------------------------------------------------------------
+local DEBUG = false -- Set to true to get (very spammy) debug messages.
+
+------------------------------------------------------------------------------
+-- Privates
+------------------------------------------------------------------------------
+local function assertfalse()
+	assert(false)
+end
+
+local function dbg(self, msg)
+	Print(format("[DBG:%s] %s", self.displayName, msg))
+end
 
 local function wipe(t)
 	for k,v in pairs(t) do
@@ -12,21 +34,88 @@ local function wipe(t)
 	end
 end
 
-local boss = {}
-
-function boss:IsBossModule() return true end
-
-function boss:OnInitialize()
-	core:RegisterBossModule(self)
-	-- Create an empty locale table.
-	local GeminiLocale = Apollo.GetPackage("Gemini:Locale-1.0").tPackage
-	local sName = "RaidCore_" .. self:GetName()
-	GeminiLocale:NewLocale(sName)
-	self.L = GeminiLocale:GetLocale(sName)
+local function RegisterLocale(tBoss, sLanguage, Locales)
+  local GeminiLocale = Apollo.GetPackage("Gemini:Locale-1.0").tPackage
+  local sName = "RaidCore_" .. tBoss:GetName()
+  local L = GeminiLocale:NewLocale(sName, sLanguage, sLanguage == "enUS", true)
+  if L then
+    for key, val in next, Locales do
+      L[key] = val
+    end
+  end
 end
 
-function boss:OnEnable()
-	if debug then dbg(self, "OnEnable()") end
+------------------------------------------------------------------------------
+-- Encounter Prototype.
+------------------------------------------------------------------------------
+function EncounterPrototype:RegisterEnableMob(...)
+	self.EnableMob = { ... }
+end
+
+function EncounterPrototype:RegisterRestrictZone(todrop, ...)
+	self.RestrictZone = { ... }
+end
+
+function EncounterPrototype:RegisterEnableZone(todrop, ...)
+	self.EnableZone = { ... }
+end
+
+function EncounterPrototype:RegisterRestrictEventObjective(todrop, ...)
+	self.RestrictEventObjective = { ... }
+end
+
+function EncounterPrototype:RegisterEnableEventObjective(todrop, ...)
+	self.EnableEventObjective = { ... }
+end
+
+function EncounterPrototype:RegisterEnableBossPair(...)
+	self.EnableBossPair = { ... }
+end
+
+function EncounterPrototype:PrepareEncounter()
+	-- Invalid registering functions.
+	self.RegisterEnableMob = assertfalse
+	self.RegisterRestrictZone = assertfalse
+	self.RegisterEnableZone = assertfalse
+	self.RegisterRestrictEventObjective = assertfalse
+	self.RegisterEnableEventObjective = assertfalse
+	self.RegisterEnableBossPair = assertfalse
+
+	local keys = {
+		"EnableMob", "EnableBossPair",
+		"RestrictZone", "EnableZone",
+		"RestrictEventObjective", "EnableEventObjective",
+	}
+	-- Translate all fields.
+	for _, field in next, keys do
+		if self[field] then
+			local tmp = {}
+			-- Global dictionnary or encounter dictionnary.
+			local ref = RaidCore
+			if field == "EnableMob" or field == "EnableBossPair" then
+				ref = self
+			end
+			for _, EnglishKey in next, self[field] do
+				table.insert(tmp, ref.L[EnglishKey])
+			end
+			-- Replace english data by local data.
+			self[field] = tmp
+			-- Do the link with current RaidCore implementation.
+			local handler = RaidCore[("Register%s"):format(field)]
+			handler(RaidCore, self, self[field])
+		end
+	end
+end
+
+function EncounterPrototype:IsBossModule()
+	return true
+end
+
+function EncounterPrototype:OnInitialize()
+end
+
+function EncounterPrototype:OnEnable()
+	if DEBUG then dbg(self, "OnEnable()") end
 	if self.SetupOptions then self:SetupOptions() end
 	if type(self.OnBossEnable) == "function" then self:OnBossEnable() end
 	Apollo.RegisterEventHandler("RAID_WIPE", "OnRaidWipe", self)
@@ -35,7 +124,7 @@ function boss:OnEnable()
 	--Print("Enabled Boss Module : " .. self.ModuleName)
 end
 
-function boss:OnDisable()
+function EncounterPrototype:OnDisable()
 	if type(self.OnBossDisable) == "function" then self:OnBossDisable() end
 	self.isEngaged = nil
 	Apollo.RemoveEventHandler("UnitCreated",self)
@@ -55,11 +144,11 @@ function boss:OnDisable()
 	Print("Unloaded Boss Module : " .. self.ModuleName)
 end
 
---function boss:GetOption(spellId)
+--function EncounterPrototype:GetOption(spellId)
 --	return self.db.profile[spells[spellId]]
 --end
 
-function boss:Reboot(isWipe)
+function EncounterPrototype:Reboot(isWipe)
 	-- Reboot covers everything including hard module reboots (clicking the minimap icon)
 	--self:SendMessage("BigWigs_OnBossReboot", self)
 	--if isWipe then
@@ -70,46 +159,27 @@ function boss:Reboot(isWipe)
 	self:Enable()
 end
 
-function boss:RegisterEnableMob(...) core:RegisterEnableMob(self, ...) end
-function boss:RegisterEnableBossPair(...) core:RegisterEnableBossPair(self, ...) end
-function boss:RegisterRestrictZone(...) core:RegisterRestrictZone(self, ...) end
-function boss:RegisterRestrictEventObjective(...) core:RegisterRestrictEventObjective(self, ...) end
-function boss:RegisterEnableEventObjective(...) core:RegisterEnableEventObjective(self, ...) end
-function boss:RegisterEnableZone(...) core:RegisterEnableZone(self, ...) end
---function boss:RegisterEnableYell(...) core:RegisterEnableYell(self, ...) end
-
-function boss:Start()
+function EncounterPrototype:Start()
 	if not self.isEngaged then
 		self.isEngaged = true
-		core:StartCombat(self.ModuleName)
+		RaidCore:StartCombat(self.ModuleName)
 		Print("Fight started : " .. self.ModuleName)
 	end
 end
 
-local function RegisterLocale(tBoss, sLanguage, Locales)
-  local GeminiLocale = Apollo.GetPackage("Gemini:Locale-1.0").tPackage
-  local sName = "RaidCore_" .. tBoss:GetName()
-  local L = GeminiLocale:NewLocale(sName, sLanguage, sLanguage == "enUS", true)
-  if L then
-    for key, val in next, Locales do
-      L[key] = val
-    end
-  end
-end
-
-function boss:RegisterEnglishLocale(Locales)
+function EncounterPrototype:RegisterEnglishLocale(Locales)
   RegisterLocale(self, "enUS", Locales)
 end
 
-function boss:RegisterGermanLocale(Locales)
+function EncounterPrototype:RegisterGermanLocale(Locales)
   RegisterLocale(self, "deDE", Locales)
 end
 
-function boss:RegisterFrenchLocale(Locales)
+function EncounterPrototype:RegisterFrenchLocale(Locales)
   RegisterLocale(self, "frFR", Locales)
 end
 
-function boss:GetSetting(setting, returnString)
+function EncounterPrototype:GetSetting(setting, returnString)
 	if not setting then return false end
 	local settingValue = core.settings[self:GetName() ..  "_" .. setting]
 	if returnString and settingValue then
@@ -119,24 +189,24 @@ function boss:GetSetting(setting, returnString)
 	end
 end
 
-function boss:OnRaidWipe()
+function EncounterPrototype:OnRaidWipe()
 	self.isEngaged = false
 	self:CancelAllTimers()
 	wipe(self.delayedmsg)
 	if type(self.OnWipe) == "function" then self:OnWipe() end
 end
 
-function boss:Tank()
+function EncounterPrototype:Tank()
 	local unit = GroupLib.GetGroupMember(1)
 	if unit then return unit.bTank end
 end
 
-function boss:Msg(key, message, duration, sound, color)
+function EncounterPrototype:Msg(key, message, duration, sound, color)
 	if not self.isEngaged then return end
-	core:AddMsg(key, message, duration, sound, color)
+	RaidCore:AddMsg(key, message, duration, sound, color)
 end
 
-function boss:DelayedMsg(key, delay, message, duration, sound, color)
+function EncounterPrototype:DelayedMsg(key, delay, message, duration, sound, color)
 	if not self.isEngaged then return end
 	if self.delayedmsg[key] then
 		self:CancelTimer(self.delayedmsg[key])
@@ -149,7 +219,7 @@ end
 -- @param tUnitFrom  userdata object from carbine.
 -- @param tUnitTo  userdata object from carbine.
 -- @return  The distance in meter.
-function boss:GetDistanceBetweenUnits(tUnitFrom, tUnitTo)
+function EncounterPrototype:GetDistanceBetweenUnits(tUnitFrom, tUnitTo)
 	-- XXX If unit are unreachable, the distance should be nil.
 	local r = 999
 	if tUnitFrom and tUnitTo then
@@ -164,9 +234,40 @@ function boss:GetDistanceBetweenUnits(tUnitFrom, tUnitTo)
 	return r
 end
 
+------------------------------------------------------------------------------
+-- RaidCore interaction
+------------------------------------------------------------------------------
+do
+	-- Sub modules are created when lua files are loaded by the WildStar.
+	-- Default setting must be done before encounter loading so.
+	RaidCore:SetDefaultModulePrototype(EncounterPrototype)
+	RaidCore:SetDefaultModuleState(false)
+	RaidCore:SetDefaultModulePackages("Gemini:Timer-1.0")
+end
 
-local bossCore = core:NewModule("Bosses")
-bossCore:SetDefaultModuleState(false)
-bossCore:SetDefaultModulePrototype(boss)
-bossCore:SetDefaultModulePackages("Gemini:Timer-1.0")
-core.bossCore = bossCore
+--- Registering a new encounter as a sub module of RaidCore.
+--@param name  Name of the encounter to create
+--@param continentId  Id list or id number
+--@param parentMapId  Id list or id number
+--@param mapId  Id list or id number
+function RaidCore:NewEncounter(name, continentId, parentMapId, mapId)
+	assert(name and continentId and parentMapId and mapId)
+	-- Transform an unique key into a list with 1 entry, if needed.
+	local continentIdList = type(continentId) == "table" and continentId or { continentId }
+	local parentMapIdList = type(parentMapId) == "table" and parentMapId or { parentMapId }
+	local mapIdList = type(mapId) == "table" and mapId or { mapId }
+
+	-- Create the new encounter, and set zone identifiers.
+	-- Library already manage unique name.
+	new = self:NewModule(name)
+	new.continentIdList = continentIdList
+	new.parentMapIdList = parentMapIdList
+	new.mapIdList = mapIdList
+	new.displayName = name
+	-- Register an empty locale table.
+	new:RegisterEnglishLocale({})
+	-- Retrieve Locale.
+	local GeminiLocale = Apollo.GetPackage("Gemini:Locale-1.0").tPackage
+	new.L = GeminiLocale:GetLocale("RaidCore_" .. name)
+	return new
+end
