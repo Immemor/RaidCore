@@ -4,11 +4,11 @@
 
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 
-local mod = core:NewBoss("EpFrostLogic", 52)
+local mod = core:NewBoss("EpLogicWater", 52)
 if not mod then return end
 
 mod:RegisterEnableBossPair("Hydroflux", "Mnemesis")
-mod:RegisterRestrictZone("EpFrostLogic", "Elemental Vortex Alpha", "Elemental Vortex Beta", "Elemental Vortex Delta")
+mod:RegisterRestrictZone("EpLogicWater", "Elemental Vortex Alpha", "Elemental Vortex Beta", "Elemental Vortex Delta")
 mod:RegisterEnglishLocale({
 	-- Unit names.
 	["Mnemesis"] = "Mnemesis",
@@ -97,7 +97,6 @@ function mod:OnBossEnable()
 	Apollo.RegisterEventHandler("RAID_WIPE", "OnReset", self)
 end
 
-
 --------------------------------------------------------------------------------
 -- Event Handlers
 --
@@ -115,18 +114,18 @@ function mod:OnSpellCastStart(unitName, castName, unit)
 	if unitName == self.L["Mnemesis"] then
 		if castName == self.L["Circuit Breaker"] then
 			core:StopBar("MIDPHASE")
-			core:AddBar("MIDPHASE", self.L["Middle Phase"], 100, true)
+			core:AddBar("MIDPHASE", self.L["Middle Phase"], 100, mod:GetSetting("SoundMidphase"))
 			midphase = true
 		elseif castName == self.L["Imprison"] then
 			core:StopBar("PRISON")
 			core:AddBar("PRISON", self.L["Imprison"], 19)
 		elseif castName == self.L["Defragment"] then
 			core:StopBar("DEFRAG")
-			core:AddMsg("DEFRAG", self.L["SPREAD"], 5, "Beware")
-			core:AddBar("DEFRAG", self.L["~Defrag"], 40, true)
+			core:AddMsg("DEFRAG", self.L["SPREAD"], 5, mod:GetSetting("SoundDefrag", "Beware"))
+			core:AddBar("DEFRAG", self.L["~Defrag"], 40, mod:GetSetting("SoundDefrag"))
 		end
 	elseif unitName == self.L["Hydroflux"] then
-		if castName == self.L["Watery Grave"] and self:Tank() then
+		if castName == self.L["Watery Grave"] and mod:GetSetting("OtherWateryGraveTimer") then
 			core:StopBar("GRAVE")
 			core:AddBar("GRAVE", self.L["Watery Grave"], 10)
 		end
@@ -143,9 +142,11 @@ function mod:OnDebuffApplied(unitName, splId, unit)
 	local splName = GameLib.GetSpell(splId):GetName()
 	if splName == "Data Disruptor" then
 		if unitName == strMyName then
-			core:AddMsg("DISRUPTOR", self.L["Stay away from boss with buff!"], 5, "Beware")
+			core:AddMsg("DISRUPTOR", self.L["Stay away from boss with buff!"], 5, mod:GetSetting("SoundDataDisruptorDebuff", "Beware"))
 		end
-		core:MarkUnit(unit, nil, self.L["ORB"])
+		if mod:GetSetting("OtherOrbMarkers") then
+			core:MarkUnit(unit, nil, self.L["ORB"])
+		end
 	end
 end
 
@@ -163,10 +164,10 @@ end
 function mod:OnUnitCreated(unit, sName)
 	if sName == self.L["Alphanumeric Hash"] then
 		local unitId = unit:GetId()
-		if unitId then
+		if unitId and mod:GetSetting("LineTetrisBlocks") then
 			core:AddPixie(unitId, 2, unit, nil, "Red", 10, 20, 0)
 		end
-	elseif sName == self.L["Hydro Disrupter - DNT"] and not midphase then
+	elseif sName == self.L["Hydro Disrupter - DNT"] and not midphase and mod:GetSetting("LineOrbs") then
 		local unitId = unit:GetId()
 		if unitId then
 			core:AddPixie(unitId, 1, unit, uPlayer, "Blue", 5, 10, 10)
@@ -207,11 +208,11 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
 			core:AddUnit(unit)
 			core:WatchUnit(unit)
 			core:StartScan()
-			core:AddBar("MIDPHASE", self.L["Middle Phase"], 75, true)
+			core:AddBar("MIDPHASE", self.L["Middle Phase"], 75, mod:GetSetting("SoundMidphase"))
 			core:AddBar("PRISON", self.L["Imprison"], 16)
-			core:AddBar("DEFRAG", self.L["Defrag"], 20, true)
+			core:AddBar("DEFRAG", self.L["Defrag"], 20, mod:GetSetting("SoundDefrag"))
 
-			if self:Tank() then
+			if mod:GetSetting("OtherWateryGraveTimer") then
 				core:AddBar("GRAVE", self.L["Watery Grave"], 10)
 			end
 		end
