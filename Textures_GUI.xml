@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Sprites>
+    <AutoButton Name="DefaultButton" Texture="DruseraBossMods\Textures\GUI\DefautBouton.tga" x0="0" x1="0" x2="0" x3="6" x4="114" x5="120" y0="0" y1="0" y2="0" y3="7" y4="23" y5="30" Stretchy="1" StateBits="15" Direction="Across"/>
+</Sprites>
