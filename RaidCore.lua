@@ -604,7 +604,6 @@ function RaidCore:OnRaidCoreOn(cmd, args)
 				["unit"] = unit,
 				["aura"] = {},
 			}
-			self:StartScan()
 		end
 	elseif (tAllParams[1] == "debuff") then
 		local unit = GameLib.GetTargetUnit()
@@ -615,7 +614,6 @@ function RaidCore:OnRaidCoreOn(cmd, args)
 				["unit"] = unit,
 				["aura"] = {},
 			}
-			self:StartScan()
 		end
 	elseif (tAllParams[1] == "testline") then
 		local uPlayer = GameLib.GetPlayerUnit()
@@ -1025,11 +1023,11 @@ function RaidCore:SetMarkToUnit(unit, marked)
 end
 
 function RaidCore:StartScan()
-	Apollo.RegisterEventHandler("VarChange_FrameCount", "OnUpdate", self)
+	-- Deprecated function
 end
 
 function RaidCore:StopScan()
-	Apollo.RemoveEventHandler("VarChange_FrameCount", self)
+	-- Deprecated function
 end
 
 function RaidCore:WatchUnit(unit)
@@ -1182,9 +1180,6 @@ function RaidCore:SetTarget(position)
 	if trackMaster ~= nil then
 		trackMaster:SetTarget(position)
 	end
-end
-
-function RaidCore:OnUpdate()
 end
 
 function RaidCore:OnCastStart(nId, sCastName)
@@ -1391,7 +1386,6 @@ function RaidCore:ResetAll()
 	self:ResetWatch()
 	self:ResetDebuff()
 	self:ResetBuff()
-	self:StopScan()
 	self:ResetMarks()
 	self:ResetWorldMarkers()
 	self:ResetEmphasize()
@@ -1421,7 +1415,6 @@ function RaidCore:WipeCheck()
 	self:ResetWatch()
 	self:ResetDebuff()
 	self:ResetBuff()
-	self:StopScan()
 	self:ResetMarks()
 	self:ResetWorldMarkers()
 	self:ResetEmphasize()
