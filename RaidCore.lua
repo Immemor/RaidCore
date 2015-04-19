@@ -233,6 +233,7 @@ local DefaultSettings = {
 function RaidCore:OnInitialize()
 	self.xmlDoc = XmlDoc.CreateFromFile("RaidCore.xml")
 	self.xmlDoc:RegisterCallback("OnDocLoaded", self)
+	Apollo.LoadSprites("BarTextures.xml")
 
 	local GeminiLocale = Apollo.GetPackage("Gemini:Locale-1.0").tPackage
 	self.L = GeminiLocale:GetLocale("RaidCore")
@@ -244,8 +245,6 @@ end
 function RaidCore:OnEnable()
 	if self.xmlDoc ~= nil and self.xmlDoc:IsLoaded() then
 		self.settings = self.settings or self:recursiveCopyTable(DefaultSettings)
-
-		Apollo.LoadSprites("BarTextures.xml")
 
 		self.wndConfig = Apollo.LoadForm(self.xmlDoc, "ConfigForm", nil, self)
 		self.wndConfig:Show(false)
