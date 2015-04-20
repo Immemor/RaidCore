@@ -1027,9 +1027,14 @@ function RaidCore:StopScan()
 end
 
 function RaidCore:WatchUnit(unit)
-	if unit and not unit:IsDead() and not self.watch[unit:GetId()] then
-		self.watch[unit:GetId()] = {}
-		self.watch[unit:GetId()]["unit"] = unit
+	if unit then
+		local id = unit:GetId()
+		if id and not unit:IsDead() and not self.watch[id] then
+			self:CombatInterface_Track(id)
+			self.watch[id] = {
+				["unit"] = unit,
+			}
+		end
 	end
 end
 
@@ -1165,26 +1170,6 @@ function RaidCore:SetTarget(position)
 end
 
 function RaidCore:OnUpdate()
-	local unit
-	for k, v in pairs(self.watch) do
-		unit = v.unit
-		if not unit:IsDead() then
-			if unit:GetType() and unit:GetType() == "NonPlayer" then -- XXX only track non player casts
-				if unit:ShouldShowCastBar() then
-					if not self.watch[k].tracked then
-						self.watch[k].tracked = unit:GetCastName()
-						local unitName = unit:GetName():gsub(NO_BREAK_SPACE, " ")
-						Event_FireGenericEvent("SPELL_CAST_START", unitName, self.watch[k].tracked, unit)
-					end
-				elseif self.watch[k].tracked then
-					local unitName = unit:GetName():gsub(NO_BREAK_SPACE, " ")
-					Event_FireGenericEvent("SPELL_CAST_END", unitName, self.watch[k].tracked, unit)
-					self.watch[k].tracked = nil
-				end
-			end
-		end
-	end
-
 	for k, v in pairs(self.buffs) do
 		unit = v.unit
 		if not unit:IsDead() then
@@ -1260,6 +1245,22 @@ function RaidCore:OnUpdate()
 				end
 			end
 		end
+	end
+end
+
+function RaidCore:OnCastStart(nId, sCastName)
+	local v = self.watch[nId]
+	if v then
+		local unitName = v.unit:GetName():gsub(NO_BREAK_SPACE, " ")
+		Event_FireGenericEvent("SPELL_CAST_START", unitName, sCastName, v.unit)
+	end
+end
+
+function RaidCore:OnCastEnd(nId, sCastName, bInterrupted)
+	local v = self.watch[nId]
+	if v then
+		local unitName = v.unit:GetName():gsub(NO_BREAK_SPACE, " ")
+		Event_FireGenericEvent("SPELL_CAST_END", unitName, sCastName, v.unit)
 	end
 end
 
