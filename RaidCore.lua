@@ -19,6 +19,7 @@ local RaidCore = GeminiAddon:NewAddon("RaidCore", false, {}, "Gemini:Timer-1.0")
 -- Copy of few objects to reduce the cpu load.
 -- Because all local objects are faster.
 ----------------------------------------------------------------------------------------------------
+local GetPlayerUnit = GameLib.GetPlayerUnit
 
 ----------------------------------------------------------------------------------------------------
 -- Constants.
@@ -41,14 +42,6 @@ local AddonVersion = 15031701
 local VCReply, VCtimer = {}, nil
 local CommChannelTimer = nil
 local empCD, empTimer = 5, nil
-
-local chatEvent = {
-	[ChatSystemLib.ChatChannel_Datachron] = 'CHAT_DATACHRON',
-	[ChatSystemLib.ChatChannel_Say] = 'CHAT_SAY',
-	[ChatSystemLib.ChatChannel_NPCSay] = 'CHAT_NPCSAY',
-	[ChatSystemLib.ChatChannel_NPCYell] = 'CHAT_NPCYELL',
-	[ChatSystemLib.ChatChannel_NPCWhisper] = 'CHAT_NPCWHISPER',
-}
 
 local DefaultSettings = {
 	General = {
@@ -246,6 +239,8 @@ end
 -- RaidCore OnDocLoaded
 ----------------------------------------------------------------------------------------------------
 function RaidCore:OnDocLoaded()
+	self:CombatInterface_Init(self)
+
 	self.settings = self.settings or self:recursiveCopyTable(DefaultSettings)
 
 	self.wndConfig = Apollo.LoadForm(self.xmlDoc, "ConfigForm", nil, self)
@@ -306,7 +301,6 @@ function RaidCore:OnDocLoaded()
 	Apollo.RegisterEventHandler("Group_MemberFlagsChanged", "OnGroup_MemberFlagsChanged", self)
 	Apollo.RegisterEventHandler("ChangeWorld", "OnWorldChangedTimer", self)
 	Apollo.RegisterEventHandler("SubZoneChanged", "OnSubZoneChanged", self)
-	Apollo.RegisterEventHandler("UnitDestroyed", "OnUnitDestroyed", self)
 	Apollo.RegisterEventHandler("PublicEventObjectiveUpdate", "OnPublicEventObjectiveUpdate", self)
 
 	-- Do additional Addon initialization here
@@ -731,8 +725,7 @@ function RaidCore:hasActiveEvent(tblEvents)
 	return false
 end
 
-function RaidCore:unitCheck(unit)
-	local sName = unit:GetName():gsub(NO_BREAK_SPACE, " ")
+function RaidCore:OnUnitCreated(nId, unit, sName)
 	Event_FireGenericEvent("RC_UnitCreated", unit, sName)
 	if unit and not unit:IsDead() then
 		if sName and enablemobs[sName] then
@@ -811,7 +804,6 @@ function RaidCore:StartCombat(modName)
 			mod:Disable()
 		end
 	end
-	Apollo.RegisterEventHandler("ChatMessage", 			"OnChatMessage", self)
 end
 
 function RaidCore:OnWorldChangedTimer()
@@ -821,27 +813,26 @@ end
 
 function RaidCore:OnWorldChanged()
 	local zoneMap = GameLib.GetCurrentZoneMap()
-	if zoneMap and zoneMap.continentId then
+
+	if zoneMap then
 		if enablezones[zoneMap.continentId] then
-			if not monitoring then
-				monitoring = true
-				Apollo.RegisterEventHandler("UnitCreated", 			"unitCheck", self)
-				Apollo.RegisterEventHandler("UnitEnteredCombat", 		"CombatStateChanged", self)
-				if not self.timer then
-					self.timer = ApolloTimer.Create(0.100, true, "OnTimer", self)
-				else
-					self.timer:Start()
-				end
+			self:CombatInterface_Activate("DetectAll")
+			monitoring = true
+			if self.timer == nil then
+				self.timer = ApolloTimer.Create(0.100, true, "OnTimer", self)
+			else
+				self.timer:Start()
 			end
-		elseif monitoring then
-			monitoring = nil
-			Print("Left raid instance. Disabling RaidCore.")
-			Apollo.RemoveEventHandler("UnitCreated",	 	self)
-			Apollo.RemoveEventHandler("ChatMessage",	 	self)
-			Apollo.RemoveEventHandler("UnitEnteredCombat",	self)
-			self:ResetAll()
-			self.timer:Stop()
+		else
+			self:CombatInterface_Activate("Disable")
+			if monitoring then
+				monitoring = nil
+				self:ResetAll()
+				self.timer:Stop()
+			end
 		end
+	else
+		self:ScheduleTimer("OnWorldChanged", 5)
 	end
 end
 
@@ -1123,10 +1114,8 @@ function RaidCore:DropLine(key)
 	self.drawline:DropLine(key)
 end
 
-function RaidCore:OnUnitDestroyed(unit)
-	local unitName = unit:GetName():gsub(NO_BREAK_SPACE, " ")
+function RaidCore:OnUnitDestroyed(key, unit, unitName)
 	Event_FireGenericEvent("RC_UnitDestroyed", unit, unitName)
-	local key = unit:GetId()
 	if self.watch[key] then
 		self.watch[key] = nil
 	end
@@ -1361,32 +1350,24 @@ function RaidCore:TestPE()
 	end
 end
 
-do
-	local chatFilter = {
-		ChatSystemLib.ChatChannel_Datachron,	--23
-		ChatSystemLib.ChatChannel_NPCSay,		--20
-		ChatSystemLib.ChatChannel_NPCYell,		--21
-		ChatSystemLib.ChatChannel_NPCWhisper,	--22
-	}
-	local function checkChatFilter(channelType)
-		for _, v in next, chatFilter do
-			if v == channelType then
-				return true
-			end
-		end
-		return false
-	end
-	function RaidCore:OnChatMessage(channelCurrent, tMessage)
-		local channelType = channelCurrent:GetType()
-		if checkChatFilter(channelType) then
-			local strMessage = ""
-			for _, tSegment in next, tMessage.arMessageSegments do
-				strMessage = strMessage .. tSegment.strText:gsub(NO_BREAK_SPACE, " ")
-			end
+function RaidCore:OnSay(sMessage)
+	Event_FireGenericEvent('CHAT_SAY', sMessage)
+end
 
-			Event_FireGenericEvent(chatEvent[channelType], strMessage)
-		end
-	end
+function RaidCore:OnNPCSay(sMessage)
+	Event_FireGenericEvent('CHAT_NPCSAY', sMessage)
+end
+
+function RaidCore:OnNPCYell(sMessage)
+	Event_FireGenericEvent('CHAT_NPCYELL', sMessage)
+end
+
+function RaidCore:OnNPCWisper(sMessage)
+	Event_FireGenericEvent('CHAT_NPCWHISPER', sMessage)
+end
+
+function RaidCore:OnDatachron(sMessage)
+	Event_FireGenericEvent('CHAT_DATACHRON', sMessage)
 end
 
 function RaidCore:PrintBerserk()
@@ -1453,17 +1434,26 @@ function RaidCore:WipeCheck()
 	self:ResetDelayedMsg()
 	self:ResetSync()
 	self:ResetLines()
-	Apollo.RemoveEventHandler("ChatMessage", self)
-	Apollo.RegisterEventHandler("UnitCreated", "unitCheck", self)
+
+	-- XXX Zone not Checked!
+	self:CombatInterface_Activate("DetectAll")
 	Event_FireGenericEvent("RAID_WIPE")
 end
 
-function RaidCore:CombatStateChanged(unit, bInCombat)
-	local UnitName = unit:GetName():gsub(NO_BREAK_SPACE, " ")
+function RaidCore:OnEnteredCombat(id, unit, UnitName, bInCombat)
 	Event_FireGenericEvent("RC_UnitStateChanged", unit, bInCombat, UnitName)
 
-	if unit == GameLib.GetPlayerUnit() and not bInCombat and not self.wipeTimer then
-		self.wipeTimer = ApolloTimer.Create(0.5, true, "WipeCheck", self)
+	if unit == GetPlayerUnit() then
+		if bInCombat then
+			-- Player entering in combat.
+			self:CombatInterface_Activate("FullEnable")
+		else
+			-- Player is dead or left the combat.
+			self.wipeTimer = ApolloTimer.Create(0.5, true, "WipeCheck", self)
+		end
+	elseif unit:IsInYourGroup() then
+		-- It's a raid member or group member.
+	else
 	end
 end
 
