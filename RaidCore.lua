@@ -598,17 +598,23 @@ function RaidCore:OnRaidCoreOn(cmd, args)
 	elseif (tAllParams[1] == "buff") then
 		local unit = GameLib.GetTargetUnit()
 		if unit ~= nil then
-			self.buffs[unit:GetId()] = {}
-			self.buffs[unit:GetId()].unit = unit
-			self.buffs[unit:GetId()].aura = {}
+			local id = unit:GetId()
+			self:CombatInterface_Track(id)
+			self.buffs[id] = {
+				["unit"] = unit,
+				["aura"] = {},
+			}
 			self:StartScan()
 		end
 	elseif (tAllParams[1] == "debuff") then
 		local unit = GameLib.GetTargetUnit()
 		if unit ~= nil then
-			self.debuffs[unit:GetId()] = {}
-			self.debuffs[unit:GetId()].unit = unit
-			self.debuffs[unit:GetId()].aura = {}
+			local id = unit:GetId()
+			self:CombatInterface_Track(id)
+			self.debuffs[id] = {
+				["unit"] = unit,
+				["aura"] = {},
+			}
 			self:StartScan()
 		end
 	elseif (tAllParams[1] == "testline") then
@@ -1039,18 +1045,27 @@ function RaidCore:WatchUnit(unit)
 end
 
 function RaidCore:UnitBuff(unit)
-	if unit and not unit:IsDead() and not self.buffs[unit:GetId()] then
-		self.buffs[unit:GetId()] = {}
-		self.buffs[unit:GetId()].unit = unit
-		self.buffs[unit:GetId()].aura = {}
+	if unit then
+		local id = unit:GetId()
+		if id and not unit:IsDead() and not self.buffs[id] then
+			self:CombatInterface_Track(id)
+			self.buffs[id] = {
+				["unit"] = unit,
+				["aura"] = {},
+			}
+		end
 	end
 end
 
 function RaidCore:UnitDebuff(unit)
-	if unit and not unit:IsDead() and not self.debuffs[unit:GetId()] then
-		self.debuffs[unit:GetId()] = {}
-		self.debuffs[unit:GetId()].unit = unit
-		self.debuffs[unit:GetId()].aura = {}
+	if unit then
+		local id = unit:GetId()
+		if id and not unit:IsDead() and not self.debuffs[id] then
+			self.debuffs[id] = {
+				["unit"] = unit,
+				["aura"] = {},
+			}
+		end
 	end
 end
 
@@ -1170,82 +1185,6 @@ function RaidCore:SetTarget(position)
 end
 
 function RaidCore:OnUpdate()
-	for k, v in pairs(self.buffs) do
-		unit = v.unit
-		if not unit:IsDead() then
-			local unitBuffs = unit:GetBuffs().arBeneficial
-			local tempbuff = {}
-			local unitName = unit:GetName():gsub(NO_BREAK_SPACE, " ")
-			for _, s in pairs(unitBuffs) do
-				tempbuff[s.idBuff] = true
-				if v.aura[s.idBuff] then -- refresh
-					if s.nCount ~= v.aura[s.idBuff].nCount then -- this for when an aura has no duration but has stacks
-						Event_FireGenericEvent("BUFF_APPLIED_DOSE", unitName, s.splEffect:GetId(), s.nCount)
-					elseif s.fTimeRemaining > v.aura[s.idBuff].fTimeRemaining then
-						Event_FireGenericEvent("BUFF_APPLIED_RENEW", unitName, s.splEffect:GetId(), s.nCount)
-					end
-					v.aura[s.idBuff] = {
-						["nCount"] = s.nCount,
-						["fTimeRemaining"] = s.fTimeRemaining,
-						["splEffect"] = s.splEffect,
-					}
-				else -- first application
-					v.aura[s.idBuff] = {
-						["nCount"] = s.nCount,
-						["fTimeRemaining"] = s.fTimeRemaining,
-						["splEffect"] = s.splEffect,
-					}
-					Event_FireGenericEvent("BUFF_APPLIED", unitName, s.splEffect:GetId(), unit)
-				end
-			end
-			for buffId, buffData in pairs(v.aura) do
-				if not tempbuff[buffId] then
-					Event_FireGenericEvent("BUFF_REMOVED", unitName, buffData.splEffect:GetId(), unit)
-					v.aura[buffId] = nil
-				end
-			end
-		end
-	end
-
-	for k, v in pairs(self.debuffs) do
-		unit = v.unit
-		if not unit:IsDead() then
-			local unitName = unit:GetName():gsub(NO_BREAK_SPACE, " ")
-			local truc
-			if (unit:GetBuffs()) then
-				local unitDebuffs = unit:GetBuffs().arHarmful
-				local tempdebuff = {}
-				for _, s in pairs(unitDebuffs) do
-					tempdebuff[s.idBuff] = true
-					if v.aura[s.idBuff] then -- refresh
-						if s.nCount ~= v.aura[s.idBuff].nCount then -- this for when an aura has no duration but has stacks
-							Event_FireGenericEvent("DEBUFF_APPLIED_DOSE", unitName, s.splEffect:GetId(), s.nCount)
-						elseif s.fTimeRemaining > v.aura[s.idBuff].fTimeRemaining then
-							Event_FireGenericEvent("DEBUFF_APPLIED_RENEW", unitName, s.splEffect:GetId(), s.nCount)
-						end
-						v.aura[s.idBuff] = {
-							["nCount"] = s.nCount,
-							["fTimeRemaining"] = s.fTimeRemaining,
-							["splEffect"] = s.splEffect,
-						}
-					else -- first application
-						v.aura[s.idBuff] = {
-							["nCount"] = s.nCount,
-							["fTimeRemaining"] = s.fTimeRemaining,
-							["splEffect"] = s.splEffect,
-						}
-						Event_FireGenericEvent("DEBUFF_APPLIED", unitName, s.splEffect:GetId(), unit)
-					end
-				end
-				for buffId, buffData in pairs(v.aura) do
-					if not tempdebuff[buffId] then
-						Event_FireGenericEvent("DEBUFF_REMOVED", unitName, buffData.splEffect:GetId(), unit)
-						v.aura[buffId] = nil
-					end
-				end
-			end
-		end
-	end
 end
 
 function RaidCore:OnCastStart(nId, sCastName)
@@ -1261,6 +1200,60 @@ function RaidCore:OnCastEnd(nId, sCastName, bInterrupted)
 	if v then
 		local unitName = v.unit:GetName():gsub(NO_BREAK_SPACE, " ")
 		Event_FireGenericEvent("SPELL_CAST_END", unitName, sCastName, v.unit)
+	end
+end
+
+function RaidCore:OnBuffAdd(nId, nSpellId, nStack)
+	local buffs = self.buffs[nId]
+	if buffs then
+		unit = buffs.unit
+		local unitName = unit:GetName():gsub(NO_BREAK_SPACE, " ")
+		Event_FireGenericEvent("BUFF_APPLIED", unitName, nSpellId, unit)
+	end
+end
+
+function RaidCore:OnBuffRemove(nId, nSpellId, nStack)
+	local buffs = self.buffs[nId]
+	if buffs then
+		unit = buffs.unit
+		local unitName = unit:GetName():gsub(NO_BREAK_SPACE, " ")
+		Event_FireGenericEvent("BUFF_REMOVED", unitName, nSpellId, unit)
+	end
+end
+
+function RaidCore:OnBuffUpdate(nId, nSpellId, nOldStack, nNewStack)
+	local buffs = self.buffs[nId]
+	if buffs then
+		unit = buffs.unit
+		local unitName = unit:GetName():gsub(NO_BREAK_SPACE, " ")
+		Event_FireGenericEvent("BUFF_APPLIED_DOSE", unitName, nSpellId, nStack)
+	end
+end
+
+function RaidCore:OnDebuffAdd(nId, nSpellId, nStack)
+	local debuffs = self.debuffs[nId]
+	if debuffs then
+		unit = debuffs.unit
+		local unitName = unit:GetName():gsub(NO_BREAK_SPACE, " ")
+		Event_FireGenericEvent("DEBUFF_APPLIED", unitName, nSpellId, unit)
+	end
+end
+
+function RaidCore:OnDebuffRemove(nId, nSpellId)
+	local debuffs = self.debuffs[nId]
+	if debuffs then
+		unit = debuffs.unit
+		local unitName = unit:GetName():gsub(NO_BREAK_SPACE, " ")
+		Event_FireGenericEvent("DEBUFF_REMOVED", unitName, nSpellId, unit)
+	end
+end
+
+function RaidCore:OnDebuffUpdate(nId, nSpellId, nOldStack, nNewStack)
+	local debuffs = self.debuffs[nId]
+	if debuffs then
+		unit = debuffs.unit
+		local unitName = unit:GetName():gsub(NO_BREAK_SPACE, " ")
+		Event_FireGenericEvent("DEBUFF_APPLIED_DOSE", unitName, nSpellId, nStack)
 	end
 end
 
