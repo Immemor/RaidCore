@@ -177,10 +177,10 @@ function mod:OnUnitCreated(unit, sName)
 		if not midphase then
 			midphase = true
 			if mod:GetSetting("OtherDirectionMarkers") then
-				core:SetWorldMarker(midpos["north"], self.L["MARKER North"])
-				core:SetWorldMarker(midpos["east"], self.L["MARKER East"])
-				core:SetWorldMarker(midpos["south"], self.L["MARKER South"])
-				core:SetWorldMarker(midpos["west"], self.L["MARKER West"])
+				core:SetWorldMarker("NORTH", self.L["MARKER North"], midpos["north"])
+				core:SetWorldMarker("EAST", self.L["MARKER East"], midpos["east"])
+				core:SetWorldMarker("SOUTH", self.L["MARKER South"], midpos["south"])
+				core:SetWorldMarker("WEST", self.L["MARKER West"], midpos["west"])
 			end
 			core:StopBar("DEFRAG")
 		end

@@ -200,13 +200,13 @@ function mod:OnChatNPCSay(message)
 				core:AddBar("SIPHON", (self.L["Switch Tank (%s)"]):format(siphonCount), 37)
 			end
 			local estpos = { x = 194.44, y = -110.80034637451, z = -483.20 }
-			core:SetWorldMarker(estpos, self.L["MARKER east"])
+			core:SetWorldMarker("EAST", self.L["MARKER east"], estpos)
 			local sudpos = { x = 165.79222106934, y = -110.80034637451, z = -464.8489074707 }
-			core:SetWorldMarker(sudpos, self.L["MARKER south"])
+			core:SetWorldMarker("SOUTH", self.L["MARKER south"], sudpos)
 			local ouestpos = { x = 144.20, y = -110.80034637451, z = -494.38 }
-			core:SetWorldMarker(ouestpos, self.L["MARKER west"])
+			core:SetWorldMarker("WEST", self.L["MARKER west"], ouestpos)
 			local nordpos = { x = 175.00, y = -110.80034637451, z = -513.31 }
-			core:SetWorldMarker(nordpos, self.L["MARKER north"])
+			core:SetWorldMarker("NORTH", self.L["MARKER north"], nordpos)
 			core:RaidDebuff()
 			core:StartScan()
 		end

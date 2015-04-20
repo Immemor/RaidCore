@@ -241,16 +241,16 @@ function mod:OnChatDC(message)
 		end
 		core:ResetWorldMarkers()
 		if mod:GetSetting("OtherMaulerMarkers") then
-			core:SetWorldMarker(maulerSpawn["northwest"], self.L["FROG %u"]:format(1))
-			core:SetWorldMarker(maulerSpawn["northeast"], self.L["FROG %u"]:format(2))
-			core:SetWorldMarker(maulerSpawn["southeast"], self.L["FROG %u"]:format(3))
-			core:SetWorldMarker(maulerSpawn["southwest"], self.L["FROG %u"]:format(4))
+			core:SetWorldMarker("FROG1", self.L["FROG %u"]:format(1), maulerSpawn["northwest"])
+			core:SetWorldMarker("FROG2", self.L["FROG %u"]:format(2), maulerSpawn["northeast"])
+			core:SetWorldMarker("FROG3", self.L["FROG %u"]:format(3), maulerSpawn["southeast"])
+			core:SetWorldMarker("FROG4", self.L["FROG %u"]:format(4), maulerSpawn["southwest"])
 		end
 		if mod:GetSetting("OtherLeftRightMarkers") and leftSpawn[section] then
-			core:SetWorldMarker(leftSpawn[section], self.L["LEFT"])
+			core:SetWorldMarker("SECLEFT", self.L["LEFT"], leftSpawn[section])
 		end
 		if mod:GetSetting("OtherLeftRightMarkers") and rightSpawn[section] then
-			core:SetWorldMarker(rightSpawn[section], self.L["RIGHT"])
+			core:SetWorldMarker("SECRIGHT", self.L["RIGHT"], rightSpawn[section])
 		end
 		Apollo.RegisterEventHandler("CombatLogHeal", "OnCombatLogHeal", self)
 	elseif message:find(self.L["Gloomclaw is reduced to a weakened state"]) then

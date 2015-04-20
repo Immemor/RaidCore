@@ -481,12 +481,12 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
 			core:AddBar("OBBEAM", self.L["Obliteration Beam"], obliteration_beam_timer, mod:GetSetting("SoundObliterationBeam"))
 			core:AddBar("GGRID", self.L["~Gun Grid"], gungrid_timer, mod:GetSetting("SoundGunGrid"))
 			if mod:GetSetting("OtherHandSpawnMarkers") then
-				core:SetWorldMarker(handpos["hand1"], self.L["Hand %u"]:format(1))
-				core:SetWorldMarker(handpos["hand2"], self.L["Hand %u"]:format(2))
+				core:SetWorldMarker("HAND1", self.L["Hand %u"]:format(1), handpos["hand1"])
+				core:SetWorldMarker("HAND2", self.L["Hand %u"]:format(2), handpos["hand2"])
 			end
 			if mod:GetSetting("OtherDirectionMarkers") then
-				core:SetWorldMarker(referencePos["north"], self.L["MARKER North"])
-				core:SetWorldMarker(referencePos["south"], self.L["MARKER South"])
+				core:SetWorldMarker("NORTH", self.L["MARKER North"], referencePos["north"])
+				core:SetWorldMarker("SOUTH", self.L["MARKER South"], referencePos["south"])
 			end
 			gungrid_timer = 112
 			obliteration_beam_timer = 37

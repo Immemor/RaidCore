@@ -672,25 +672,25 @@ function RaidCore:OnRaidCoreOn(cmd, args)
 			y = -110.80034637451,
 			z = -483.20
 		}
-		self:SetWorldMarker(estpos, "EST")
+		self:SetWorldMarker("EST", "EST", estpos)
 		local sudpos = {
 			x = 165.79222106934,
 			y = -110.80034637451,
 			z = -464.8489074707
 		}
-		self:SetWorldMarker(sudpos, "SUD")
+		self:SetWorldMarker("SUD", "SUD", sudpos)
 		local ouestpos = {
 			x = 144.20,
 			y = -110.80034637451,
 			z = -494.38
 		}
-		self:SetWorldMarker(ouestpos, "WEST")
+		self:SetWorldMarker("WEST", "WEST", ouestpos)
 		local nordpos = {
 			x = 175.00,
 			y = -110.80034637451,
 			z = -513.31
 		}
-		self:SetWorldMarker(nordpos, "NORD")
+		self:SetWorldMarker("NORD", "NORD", nordpos)
 	else
 		self:OnConfigOn()
 	end
@@ -1105,16 +1105,65 @@ function RaidCore:MarkUnit(unit, location, mark)
 	end
 end
 
-function RaidCore:SetWorldMarker(position, mark)
-	if position then
-		self.worldmarker[mark] = {}
-
-		local markFrame = Apollo.LoadForm(self.xmlDoc, "MarkFrame", "InWorldHudStratum", self)
-		markFrame:SetWorldLocation(position)
-		markFrame:FindChild("Name"):SetText(mark)
+function RaidCore:WorldMarkerVisibilityHandler(key)
+	-- If worldmarker was never on screen it might already have been destroyed again
+	-- so we'll check if it still exists
+	local markFrame = self.worldmarker[key]
+	if not markFrame then return end
+	if markFrame:IsOnScreen() then
 		markFrame:Show(true)
+	else
+		-- run check again later
+		self:ScheduleTimer("WorldMarkerVisibilityHandler", 1, key)
+	end
+end
 
-		self.worldmarker[mark] = markFrame
+-- Removes all the world markers
+function RaidCore:ResetWorldMarkers()
+	for k, over in pairs(self.worldmarker) do
+		over:Destroy()
+		self.worldmarker[k] = nil
+	end
+end
+
+function RaidCore:CreateWorldMarker(key, sText, tPosition)
+	local markFrame = Apollo.LoadForm(self.xmlDoc, "MarkFrame", "InWorldHudStratum", self)
+	markFrame:SetWorldLocation(tPosition)
+	markFrame:FindChild("Name"):SetText(sText)
+	self.worldmarker[key] = markFrame
+	self:WorldMarkerVisibilityHandler(key)
+end
+
+function RaidCore:UpdateWorldMarker(key, sText, tPosition)
+	if sText then
+		local wndText = self.worldmarker[key]:FindChild("Name")
+		if wndText:GetText() ~= sText then
+			wndText:SetText(sText)
+		end
+	end
+
+	if tPosition then 
+		self.worldmarker[key]:SetWorldLocation(tPosition)
+	end
+end
+
+function RaidCore:DropWorldMarker(key)
+	if self.worldmarker[key] then
+		self.worldmarker[key]:Destroy()
+		self.worldmarker[key] = nil
+		return true
+	end
+end
+
+function RaidCore:SetWorldMarker(key, sText, tPosition)
+	assert(key)
+	local tWorldMarker = self.worldmarker[key]
+	if not tWorldMarker and sText and tPosition then
+		self:CreateWorldMarker(key, sText, tPosition)
+	elseif tWorldMarker and (sText or tPosition) then
+		self:UpdateWorldMarker(key, sText, tPosition)
+	elseif tWorldMarker and not sText and not tPosition then
+		self:DropWorldMarker(key)
 	end
 end
 
@@ -1278,13 +1327,6 @@ function RaidCore:ResetMarks()
 		self.mark[k] = nil
 	end
 	markCount = 0
-end
-
-function RaidCore:ResetWorldMarkers()
-	for k, over in pairs(self.worldmarker) do
-		over:Destroy()
-		self.worldmarker[k] = nil
-	end
 end
 
 function RaidCore:ResetWatch()
