@@ -181,7 +181,7 @@ end
 
 function EncounterPrototype:GetSetting(setting, returnString)
 	if not setting then return false end
-	local settingValue = core.settings[self:GetName() ..  "_" .. setting]
+	local settingValue = RaidCore.settings[self:GetName() ..  "_" .. setting]
 	if returnString and settingValue then
 		return returnString
 	else
