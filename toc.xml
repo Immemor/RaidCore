@@ -23,6 +23,10 @@
 	<Script Name="CombatInterface.lua"/>
 	<Script Name="LogGUI.lua"/>
 	<Script Name="Encounters/BossPrototype.lua" />
+	<!-- Encounters: Testing purpose -->
+	<!--@alpha@-->
+	<Script Name="Encounters/TEST/GalerasTest.lua"/>
+	<!--@end-alpha@-->
 	<!-- Encounters: Genetic Archive -->
 	<Script Name="Encounters/GA/ExperimentX89.lua"/>
 	<Script Name="Encounters/GA/Kuralak.lua"/>
