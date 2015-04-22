@@ -12,6 +12,7 @@ require "GameLib"
 require "ChatSystemLib"
 
 local GeminiAddon = Apollo.GetPackage("Gemini:Addon-1.1").tPackage
+local LogPackage = Apollo.GetPackage("Log-1.0").tPackage
 local RaidCore = GeminiAddon:NewAddon("RaidCore", false, {}, "Gemini:Timer-1.0")
 
 ----------------------------------------------------------------------------------------------------
@@ -29,6 +30,7 @@ local NO_BREAK_SPACE = string.char(194, 160)
 ----------------------------------------------------------------------------------------------------
 -- Privates variables.
 ----------------------------------------------------------------------------------------------------
+local _wndrclog = nil
 local enablezones, enablemobs, enablepairs, restrictzone, enablezone, restricteventobjective, enableeventobjective = {}, {}, {}, {}, {}, {}, {}
 local monitoring = nil
 
@@ -234,6 +236,7 @@ function RaidCore:OnInitialize()
 	self.xmlDoc = XmlDoc.CreateFromFile("RaidCore.xml")
 	self.xmlDoc:RegisterCallback("OnDocLoaded", self)
 	Apollo.LoadSprites("BarTextures.xml")
+	Apollo.LoadSprites("Textures_GUI.xml")
 
 	local GeminiLocale = Apollo.GetPackage("Gemini:Locale-1.0").tPackage
 	self.L = GeminiLocale:GetLocale("RaidCore")
@@ -339,6 +342,7 @@ function RaidCore:OnDocLoaded()
 		end
 	end
 	self:ScheduleTimer("OnWorldChanged", 5)
+	self:LogGUI_init()
 end
 
 ----------------------------------------------------------------------------------------------------
@@ -1719,3 +1723,4 @@ function RaidCore:OnModuleSettingsUncheck(wndHandler, wndControl, eMouseButton )
 	local identifier = self:SplitString(wndControl:GetName(), "_")
 	self.wndSettings[raidInstance[2]][identifier[3]]:Show(false)
 end
+
