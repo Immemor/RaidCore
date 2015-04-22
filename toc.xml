@@ -20,12 +20,12 @@
 	<Script Name="RaidCore.lua"/>
 	<Script Name="Encounters/BossPrototype.lua" />
 	<!-- Encounters: Genetic Archive -->
-	<Script Name="Encounters/ExperimentX89.lua" />
-	<Script Name="Encounters/Kuralak.lua" />
-	<Script Name="Encounters/Prototypes.lua" />
-	<Script Name="Encounters/PhageMaw.lua" />
-	<Script Name="Encounters/PhageCouncil.lua" />
-	<Script Name="Encounters/Ohmna.lua" />
+	<Script Name="Encounters/GA/ExperimentX89.lua"/>
+	<Script Name="Encounters/GA/Kuralak.lua"/>
+	<Script Name="Encounters/GA/Prototypes.lua"/>
+	<Script Name="Encounters/GA/PhageMaw.lua"/>
+	<Script Name="Encounters/GA/PhageCouncil.lua"/>
+	<Script Name="Encounters/GA/Ohmna.lua"/>
 	<!-- Encounters: Datascape -->
 	<Script Name="Encounters/SystemDaemons.lua" />
 	<Script Name="Encounters/DSFireWing.lua" />
