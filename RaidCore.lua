@@ -1506,7 +1506,7 @@ function RaidCore:WipeCheck()
 			end
 		end
 	end
-	Print("WIPE")
+	--Print("WIPE")
 	self.wipeTimer:Stop()
 	self.wipeTimer = nil
 	if self.berserk then
