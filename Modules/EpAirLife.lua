@@ -258,7 +258,7 @@ function mod:CheckTwirlTimer()
 	end
 end
 
-function mod:OnUnitStateChanged(unit, bInCombat)
+function mod:OnUnitStateChanged(unit, bInCombat, sName)
 	if unit:GetType() == "NonPlayer" and bInCombat then
 		local eventTime = GameLib.GetGameTime()
 		local playerUnit = GameLib.GetPlayerUnit()
