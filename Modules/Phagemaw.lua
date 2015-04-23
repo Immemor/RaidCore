@@ -40,7 +40,7 @@ mod:RegisterGermanLocale({
 	["The augmented shield has been destroyed"] = "Der augmentierte Schild wurde zerstört",
 	["Phage Maw begins charging an orbital strike"] = "Phagenschlund beginnt einen Orbitalschlag aufzuladen",
 	-- Bar and messages.
---	["Bomb %u"] = "Bomb %u",	-- TODO: German translation missing !!!!
+	["Bomb %u"] = "Bombe %u",	
 	["BOOOM !"] = "BOOOM !",
 })
 
