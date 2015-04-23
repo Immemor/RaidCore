@@ -101,13 +101,13 @@ mod:RegisterGermanLocale({
 	["Next Tentacles"] = "NÄCHSTE TENTAKEL",
 	["Tentacles"] = "TENTAKEL",
 	["P2 SOON !"] = "GLEICH PHASE 2 !",
---	["P2: TENTACLES"] = "P2: TENTACLES",	-- TODO: German translation missing !!!!
+	["P2: TENTACLES"] = "P2: TENTAKEL",	
 	["PHASE 2"] = "PHASE 2",
 	["P3 SOON !"] = "GLEICH PHASE 3 !",
---	["P3: RAVENOUS"] = "P3: RAVENOUS",	-- TODO: German translation missing !!!!
+	["P3: RAVENOUS"] = "P3: GROßE WÜRMER",
 	["P3 REALLY SOON !"] = "17 % | VORSICHT MIT DAMAGE",
---	["PILLAR %u : %u"] = "PILLAR %u : %u",	-- TODO: German translation missing !!!!
---	["PILLAR %u"] = "PILLAR %u",	-- TODO: German translation missing !!!!
+	["PILLAR %u : %u"] = "SÄULE %u : %u",	
+	["PILLAR %u"] = "SÄULE %u",	
 	["SWITCH TANK"] = "AGGRO ZIEHEN !!!",
 	["BIG SPEW"] = "GROßES BRECHEN",
 	["NEXT BIG SPEW"] = "NÄCHSTES GROßES BRECHEN",
