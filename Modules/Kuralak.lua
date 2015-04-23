@@ -97,16 +97,16 @@ mod:RegisterGermanLocale({
 	["Vanish into Darkness"] = "In der Dunkelheit verschwinden",
 	-- Bar and messages.
 	["P2 SOON !"] = "GLEICH PHASE 2 !",
---	["PHASE 2 !"] = "PHASE 2 !",	-- TODO: German translation missing !!!!
+	["PHASE 2 !"] = "PHASE 2 !",
 	["VANISH"] = "VERSCHWINDEN",
 	["Vanish"] = "Verschwinden",
 	["OUTBREAK"] = "AUSBRUCH",
---	["Outbreak (%s)"] = "Outbreak (%s)",	-- TODO: German translation missing !!!!
---	["EGGS (%s)"] = "EGGS (%s)",	-- TODO: German translation missing !!!!
---	["Eggs (%s)"] = "Eggs (%s)",	-- TODO: German translation missing !!!!
+	["Outbreak (%s)"] = "Ausbruch (%s)",
+	["EGGS (%s)"] = "Eier (%s)",
+	["Eggs (%s)"] = "Eier (%s)",
 	["BERSERK !!"] = "DAS WARS !!",
 	["SWITCH TANK"] = "AGGRO ZIEHEN !!!",
---	["Switch Tank (%s)"] = "Switch Tank (%s)",	-- TODO: German translation missing !!!!
+	["Switch Tank (%s)"] = "Tankwechsel (%s)",
 	["MARKER north"] = "N",
 	["MARKER south"] = "S",
 	["MARKER east"] = "O",
