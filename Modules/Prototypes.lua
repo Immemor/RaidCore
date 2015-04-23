@@ -75,7 +75,7 @@ mod:RegisterGermanLocale({
 	["[2] TP + CROIX + BOTS"] = "[2] FARBEN + KREUZ + REPARATURBOTS",
 	["[3] SINGULARITY + VAGUE"] = "[3] SINGULARITÄT + WELLEN",
 	["[4] SOAK + BOTS"] = "[4] KREISE + DESTRUKTOBOTS",
---	["BOTS !!"] = "BOTS !!",	-- TODO: German translation missing !!!!
+	["BOTS !!"] = "BOTS !!",
 	["BERSERK"] = "BERSERK",
 	["Singularity"] = "SINGULARITÄT",
 })
