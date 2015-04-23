@@ -63,7 +63,7 @@ mod:RegisterGermanLocale({
 	["Teleport"] = "Teleportieren",
 	["Channeling Energy"] = "Energie kanalisieren",
 	-- Bar and messages.
---	["[%u] NEXT P2"] = "[%u] NEXT P2",	-- TODO: German translation missing !!!!
+	["[%u] NEXT P2"] = "[%u] NÄCHSTE P2",
 	["P2 : 20 IA"] = "P2 : 20x UNTERBRECHEN",
 	["P2 : MINI ADDS"] = "P2 : MINI ADDS",
 	["P2 : SUBDUE"] = "P2 : ENTWAFFNEN",
