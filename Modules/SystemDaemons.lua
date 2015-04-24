@@ -119,37 +119,37 @@ mod:RegisterGermanLocale({
 	["Enhancement Module"] = "Verbesserungsmodul",
 	["Conduction Unit Mk. I"]  = "Leistungseinheit V1",
 	["Conduction Unit Mk. II"]  = "Leistungseinheit V2",
---	["Conduction Unit Mk. III"]  = "Conduction Unit Mk. III",	-- TODO: German translation missing !!!!
---	["Infinite Generator Core"] = "Infinite Generator Core",	-- TODO: German translation missing !!!!
+	["Conduction Unit Mk. III"]  = "Leistungseinheit V3",
+	["Infinite Generator Core"] = "Infiniter Generatorkern",
 	["Recovery Protocol"] = "Wiederherstellungsprotokoll",
 	-- Datachron messages.
---	["INVALID SIGNAL. DISCONNECTING"] = "INVALID SIGNAL. DISCONNECTING",	-- TODO: German translation missing !!!!
---	["COMMENCING ENHANCEMENT SEQUENCE"] = "COMMENCING ENHANCEMENT SEQUENCE",	-- TODO: German translation missing !!!!
+	["INVALID SIGNAL. DISCONNECTING"] = "UNGÜLTIGES SIGNAL. VERBINDUNG ZU",
+	["COMMENCING ENHANCEMENT SEQUENCE"] = "BEGINNE VERBESSERUNGSSEQUENZ",
 	-- Cast.
 	["Repair Sequence"] = "Reparatursequenz",
 	["Power Surge"] = "Energieschweller",
 	["Black IC"] = "Glatteis",
 	-- Bar and messages.
---	["[%u] Probe"] = "[%u] Probe",	-- TODO: German translation missing !!!!
---	["[%u] WAVE"] = "[%u] WAVE",	-- TODO: German translation missing !!!!
---	["[%u] MINIBOSS"] = "[%u] MINIBOSS",	-- TODO: German translation missing !!!!
+	["[%u] Probe"] = "[%u] Sonde",
+	["[%u] WAVE"] = "[%u] WELLE",
+	["[%u] MINIBOSS"] = "[%u] MINIBOSS",
 	["MARKER north"] = "N",
 	["MARKER south"] = "S",
 	["P2 SOON !"] = "GLEICH PHASE 2 !",
---	["PHASE 2 !"] = "PHASE 2 !",	-- TODO: German translation missing !!!!
---	["INTERRUPT NORTH"] = "INTERRUPT NORTH",	-- TODO: German translation missing !!!!
---	["INTERRUPT SOUTH"] = "INTERRUPT SOUTH",	-- TODO: German translation missing !!!!
---	["AIDDDDDDDS !"] = "AIDDDDDDDS !",	-- TODO: German translation missing !!!!
---	["PURGE - %s"] = "PURGE - %s",	-- TODO: German translation missing !!!!
---	["INTERRUPT !"] = "INTERRUPT !",	-- TODO: German translation missing !!!!
---	["INTERRUPT HEAL!"] = "INTERRUPT HEAL!",	-- TODO: German translation missing !!!!
---	["BLACK IC"] = "BLACK IC",	-- TODO: German translation missing !!!!
---	["HEAL"] = "HEAL",	-- TODO: German translation missing !!!!
---	["PURGE ON YOU"] = "PURGE ON YOU",	-- TODO: German translation missing !!!!
---	["Probe Spawn"] = "Probe Spawn",	-- TODO: German translation missing !!!!
---	["DISCONNECT (%u)"] = "DISCONNECT (%u)",	-- TODO: German translation missing !!!!
---	["YOU ARE NEXT ON NORTH !"] = "YOU ARE NEXT ON NORTH !",	-- TODO: German translation missing !!!!
---	["YOU ARE NEXT ON SOUTH !"] = "YOU ARE NEXT ON SOUTH !",	-- TODO: German translation missing !!!!
+	["PHASE 2 !"] = "PHASE 2 !",
+	["INTERRUPT NORTH"] = "UNTERBRECHE NORDEN",
+	["INTERRUPT SOUTH"] = "UNTERBRECHE SÜDEN",
+	["AIDDDDDDDS !"] = "AIDDDDDDDS !",
+	["PURGE - %s"] = "SÄUBERN - %s",
+	["INTERRUPT !"] = "UNTERBRECHEN !",
+	["INTERRUPT HEAL!"] = "HEILUNG UNTERBRECHEN !",
+	["BLACK IC"] = "GLATTEIS",
+	["HEAL"] = "HEILUNG",
+	["PURGE ON YOU"] = "STEHEN BLEIBEN !!!",
+	["Probe Spawn"] = "Sonde Spawn",
+	["DISCONNECT (%u)"] = "TRENNUNG (%u)",
+	["YOU ARE NEXT ON NORTH !"] = "DU BIST DER NÄCHSTE IM NORDEN !",
+	["YOU ARE NEXT ON SOUTH !"] = "DU BIST DER NÄCHSTE IM SÜDEN !",
 })
 
 --------------------------------------------------------------------------------
