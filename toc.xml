@@ -20,6 +20,7 @@
 	<Script Name="DisplayBlock.lua"/>
 	<Script Name="DisplayLine.lua"/>
 	<Script Name="RaidCore.lua"/>
+	<Script Name="CombatInterface.lua"/>
 	<Script Name="Encounters/BossPrototype.lua" />
 	<!-- Encounters: Genetic Archive -->
 	<Script Name="Encounters/GA/ExperimentX89.lua"/>
