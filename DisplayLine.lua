@@ -70,7 +70,7 @@ function DisplayLine.new(xmlDoc)
 
 	self.pixie = {}
 
-	self.wOverlay = GeminiGUI:Create("WorldFixedWindow", tOverlayDef):GetInstance()
+	self.wOverlay = GeminiGUI:Create("WorldFixedWindow", tOverlayDef):GetInstance(nil, "InWorldHudStratum")
 	self.wOverlay:Show(false)
 
 	return self
