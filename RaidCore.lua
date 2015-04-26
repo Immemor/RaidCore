@@ -1,24 +1,34 @@
------------------------------------------------------------------------------------------------
--- Client Lua Script for RaidCore
--- Copyright (c) NCsoft. All rights reserved
------------------------------------------------------------------------------------------------
-
+----------------------------------------------------------------------------------------------------
+-- Client Lua Script for RaidCore Addon on WildStar Game.
+--
+-- Copyright (C) 2015 RaidCore
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+--  Description: TODO
+----------------------------------------------------------------------------------------------------
+require "Apollo"
 require "Window"
+require "GameLib"
 require "ChatSystemLib"
 
------------------------------------------------------------------------------------------------
--- RaidCore Module Definition
------------------------------------------------------------------------------------------------
---local RaidCore = {}
-local RaidCore = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:NewAddon("RaidCore", false, {}, "Gemini:Timer-1.0")
-local addon = RaidCore
+local GeminiAddon = Apollo.GetPackage("Gemini:Addon-1.1").tPackage
+local RaidCore = GeminiAddon:NewAddon("RaidCore", false, {}, "Gemini:Timer-1.0")
 
------------------------------------------------------------------------------------------------
--- Constants
------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+-- Copy of few objects to reduce the cpu load.
+-- Because all local objects are faster.
+----------------------------------------------------------------------------------------------------
+
+----------------------------------------------------------------------------------------------------
+-- Constants.
+----------------------------------------------------------------------------------------------------
 -- Sometimes Carbine have inserted some no-break-space, for fun.
 -- Behavior seen with French language. This problem is not present in English.
 local NO_BREAK_SPACE = string.char(194, 160)
+
+----------------------------------------------------------------------------------------------------
+-- Privates variables.
+----------------------------------------------------------------------------------------------------
 local enablezones, enablemobs, enablepairs, restrictzone, enablezone, restricteventobjective, enableeventobjective = {}, {}, {}, {}, {}, {}, {}
 local monitoring = nil
 
@@ -217,35 +227,10 @@ local DefaultSettings = {
 	EpLogicLife_OtherDirectionMarkers = true,
 }
 
------------------------------------------------------------------------------------------------
--- Initialization
------------------------------------------------------------------------------------------------
-function RaidCore:new(o)
-	o = o or {}
-	setmetatable(o, self)
-	self.__index = self
-
-	-- initialize variables here
-
-	return o
-end
-
-function RaidCore:Init()
-	local bHasConfigureFunction = false
-	local strConfigureButtonText = ""
-	local tDependencies = {
-		-- "UnitOrPackageName",
-	}
-	Apollo.RegisterAddon(self, bHasConfigureFunction, strConfigureButtonText, tDependencies)
-end
-
-
------------------------------------------------------------------------------------------------
--- RaidCore OnLoad
------------------------------------------------------------------------------------------------
---function RaidCore:OnLoad()
+----------------------------------------------------------------------------------------------------
+-- RaidCore Initialization
+----------------------------------------------------------------------------------------------------
 function RaidCore:OnInitialize()
-	-- load our form file
 	self.xmlDoc = XmlDoc.CreateFromFile("RaidCore.xml")
 	self.xmlDoc:RegisterCallback("OnDocLoaded", self)
 
@@ -253,12 +238,10 @@ function RaidCore:OnInitialize()
 	self.L = GeminiLocale:GetLocale("RaidCore")
 end
 
------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
 -- RaidCore OnDocLoaded
------------------------------------------------------------------------------------------------
---function RaidCore:OnDocLoaded()
+----------------------------------------------------------------------------------------------------
 function RaidCore:OnEnable()
-
 	if self.xmlDoc ~= nil and self.xmlDoc:IsLoaded() then
 		self.settings = self.settings or self:recursiveCopyTable(DefaultSettings)
 
@@ -318,17 +301,12 @@ function RaidCore:OnEnable()
 		end
 
 		-- Register handlers for events, slash commands and timer, etc.
-		-- e.g. Apollo.RegisterEventHandler("KeyDown", "OnKeyDown", self)
 		Apollo.RegisterSlashCommand("raidc", "OnRaidCoreOn", self)
 		Apollo.RegisterEventHandler("Group_MemberFlagsChanged", "OnGroup_MemberFlagsChanged", self)
-
-		--self.timer = ApolloTimer.Create(0.100, true, "OnTimer", self)
-		--self.timer:Stop()
-
-		Apollo.RegisterEventHandler("ChangeWorld", 					"OnWorldChangedTimer",			self)
-		Apollo.RegisterEventHandler("SubZoneChanged",				"OnSubZoneChanged",				self)
-		Apollo.RegisterEventHandler("UnitDestroyed", 				"OnUnitDestroyed",				self)
-		Apollo.RegisterEventHandler("PublicEventObjectiveUpdate",	"OnPublicEventObjectiveUpdate", self)
+		Apollo.RegisterEventHandler("ChangeWorld", "OnWorldChangedTimer", self)
+		Apollo.RegisterEventHandler("SubZoneChanged", "OnSubZoneChanged", self)
+		Apollo.RegisterEventHandler("UnitDestroyed", "OnUnitDestroyed", self)
+		Apollo.RegisterEventHandler("PublicEventObjectiveUpdate", "OnPublicEventObjectiveUpdate", self)
 
 		-- Do additional Addon initialization here
 
@@ -348,10 +326,8 @@ function RaidCore:OnEnable()
 
 		self.lines = {}
 
-		--self.uMyGuild = GameLib.GetPlayerUnit():GetGuildName()
 		self.chanCom = nil
 		CommChannelTimer = ApolloTimer.Create(5, false, "UpdateCommChannel", self) -- make sure everything is loaded, so after 5sec
-		--self.chanCom = ICCommLib.JoinChannel("WL_RaidCore", "OnComMessage", self)
 
 		-- Final parsing about encounters.
 		for name, module in self:IterateModules() do
@@ -368,11 +344,9 @@ function RaidCore:OnEnable()
 	end
 end
 
------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
 -- RaidCore Functions
------------------------------------------------------------------------------------------------
--- Define general functions here
-
+----------------------------------------------------------------------------------------------------
 function RaidCore:OnGroup_MemberFlagsChanged(nMemberIdx, bFromPromotion, tChangedFlags)
 	if bFromPromotion then
 		CommChannelTimer = ApolloTimer.Create(5, false, "UpdateCommChannel", self) -- after 5 sec for slow API leader update
@@ -593,12 +567,10 @@ function RaidCore:OnRaidCoreOn(cmd, args)
 		else
 			self:AddBar("truc", "OVERDRIVE", 10, true)
 			self:AddMsg("mtruc2", "OVERDRIVE", 5, "Alarm", "Blue")
-			--self:AddDelayedMsg("mtruc2",10, "OVERDRIVE", 5, "Alarm", "Blue")
 		end
 	elseif (tAllParams[1] == "unit") then
 		local unit = GameLib.GetTargetUnit()
 		if unit ~= nil then
-			--self.unitmoni:AddUnit(unit)
 			self:MarkUnit(unit, 1, "N1")
 			self:AddUnit(unit)
 		end
@@ -631,7 +603,6 @@ function RaidCore:OnRaidCoreOn(cmd, args)
 	elseif (tAllParams[1] == "buff") then
 		local unit = GameLib.GetTargetUnit()
 		if unit ~= nil then
-			--self.unitmoni:AddUnit(unit)
 			self.buffs[unit:GetId()] = {}
 			self.buffs[unit:GetId()].unit = unit
 			self.buffs[unit:GetId()].aura = {}
@@ -640,7 +611,6 @@ function RaidCore:OnRaidCoreOn(cmd, args)
 	elseif (tAllParams[1] == "debuff") then
 		local unit = GameLib.GetTargetUnit()
 		if unit ~= nil then
-			--self.unitmoni:AddUnit(unit)
 			self.debuffs[unit:GetId()] = {}
 			self.debuffs[unit:GetId()].unit = unit
 			self.debuffs[unit:GetId()].aura = {}
@@ -739,12 +709,10 @@ function RaidCore:isPublicEventObjectiveActive(objectiveString)
 	end
 
 	for eventId, event in pairs(activeEvents) do
-		--Print("Current event: " .. event:GetName())
 		local objectives = event:GetObjectives()
 		if objectives ~= nil then
 			for id, objective in pairs(objectives) do
 				if objective:GetShortDescription() == objectiveString then
-					--Print("Found objective")
 					return objective:GetStatus() == 1
 				end
 			end
@@ -766,15 +734,12 @@ function RaidCore:unitCheck(unit)
 	local sName = unit:GetName():gsub(NO_BREAK_SPACE, " ")
 	Event_FireGenericEvent("RC_UnitCreated", unit, sName)
 	if unit and not unit:IsDead() then
-		--Print("Checking " .. sName)
 		if sName and enablemobs[sName] then
 			if type(enablemobs[sName]) == "string" then
 				local modName = enablemobs[sName]
 				local module = self:GetModule(modName)
 				if not module or module:IsEnabled() then return end
 				if restrictzone[modName] and not restrictzone[modName][GetCurrentSubZoneName()] then return end
-				--Print("Checking event " .. restricteventobjective[modName])
-				--Print(tostring(self:isPublicEventObjectiveActive(restricteventobjective[modName])))
 				if restricteventobjective[modName] and not self:hasActiveEvent(restricteventobjective[modName]) then return end
 				Print("Enabling Boss Module : " .. enablemobs[sName])
 				for name, mod in self:IterateModules() do
@@ -845,8 +810,6 @@ function RaidCore:StartCombat(modName)
 			mod:Disable()
 		end
 	end
-	--Apollo.RemoveEventHandler("UnitCreated",	 	self)
-	--Apollo.RegisterEventHandler("UnitEnteredCombat", 		"CombatStateChanged", self)
 	Apollo.RegisterEventHandler("ChatMessage", 			"OnChatMessage", self)
 end
 
@@ -856,20 +819,12 @@ end
 
 
 function RaidCore:OnWorldChanged()
-	--if not IsInInstance() then
-		--for _, module in addon:IterateModules() do
-			--if module.isEngaged then module:Reboot(true) end
-		--end
-	--end
-	--Print("TESTING ZONES")
 	local zoneMap = GameLib.GetCurrentZoneMap()
 	if zoneMap and zoneMap.continentId then
 		if enablezones[zoneMap.continentId] then
 			if not monitoring then
 				monitoring = true
-				--Print("MONITORING ON")
 				Apollo.RegisterEventHandler("UnitCreated", 			"unitCheck", self)
-				--Apollo.RegisterEventHandler("ChatMessage", 			"OnChatMessage", self)
 				Apollo.RegisterEventHandler("UnitEnteredCombat", 		"CombatStateChanged", self)
 				if not self.timer then
 					self.timer = ApolloTimer.Create(0.100, true, "OnTimer", self)
@@ -1125,15 +1080,11 @@ function RaidCore:MarkUnit(unit, location, mark)
 			end
 
 			local markFrame = Apollo.LoadForm(self.xmlDoc, "MarkFrame", "InWorldHudStratum", self)
-			--markFrame:SetWorldLocation(unit:GetPosition())
 			markFrame:SetUnit(unit, location)
 			markFrame:FindChild("Name"):SetText(self.mark[key].number)
 			markFrame:Show(true)
 
 			self.mark[key].frame = markFrame
-
-			--Apollo.RegisterEventHandler("NextFrame", "OnMarkUpdate", self)
-			--Apollo.RegisterEventHandler("VarChange_FrameCount", "OnUpdate", self)
 		elseif mark then
 			self.mark[key].number = mark
 			self.mark[key].frame:FindChild("Name"):SetText(self.mark[key].number)
@@ -1158,7 +1109,6 @@ end
 function RaidCore:AddLine(... )
 	self.drawline:AddLine(...)
 end
---self.drawline:AddLine("Ohmna1", 2, unit, 3, 25, 0)
 
 function RaidCore:AddPixie(... )
 	self.drawline:AddPixie(...)
@@ -1175,31 +1125,18 @@ end
 function RaidCore:OnUnitDestroyed(unit)
 	local unitName = unit:GetName():gsub(NO_BREAK_SPACE, " ")
 	Event_FireGenericEvent("RC_UnitDestroyed", unit, unitName)
-	--Print("Removing 1".. unit:GetName())
 	local key = unit:GetId()
 	if self.watch[key] then
 		self.watch[key] = nil
-		--[[
-		if #self.watch == 0 and #self.mark == 0 then
-			Apollo.RemoveEventHandler("UnitDestroyed", self)
-		end
-		]]--
 	end
 	if self.mark[key] then
 		local markFrame = self.mark[key].frame
 		markFrame:SetUnit(nil)
 		markFrame:Destroy()
 		self.mark[key] = nil
-		--[[
-		Print("Removing ".. unit:GetName())
-		if #self.watch == 0 and #self.mark == 0 then
-			Apollo.RemoveEventHandler("UnitDestroyed", self)
-		end
-		]]--
 	end
 	if self.debuffs[key] and unit:IsDead() then
 		self.debuffs[key] = nil
-		--Print("Removing " .. unit:GetName() .. " from debuff")
 	end
 	if self.buffs[key] then
 		self.buffs[key] = nil
@@ -1248,12 +1185,10 @@ function RaidCore:OnUpdate()
 						self.watch[k].tracked = unit:GetCastName()
 						local unitName = unit:GetName():gsub(NO_BREAK_SPACE, " ")
 						Event_FireGenericEvent("SPELL_CAST_START", unitName, self.watch[k].tracked, unit)
-						--Print("SPELL_CAST_START : " .. unit:GetName() .. " " .. self.watch[k].tracked)
 					end
 				elseif self.watch[k].tracked then
 					local unitName = unit:GetName():gsub(NO_BREAK_SPACE, " ")
 					Event_FireGenericEvent("SPELL_CAST_END", unitName, self.watch[k].tracked, unit)
-					--Print("SPELL_CAST_END : " .. unit:GetName() .. " " .. self.watch[k].tracked)
 					self.watch[k].tracked = nil
 				end
 			end
@@ -1286,13 +1221,11 @@ function RaidCore:OnUpdate()
 						["splEffect"] = s.splEffect,
 					}
 					Event_FireGenericEvent("BUFF_APPLIED", unitName, s.splEffect:GetId(), unit)
-					--Print("BUFF_APPLIED : " .. unitName .. " " .. s.splEffect:GetId())
 				end
 			end
 			for buffId, buffData in pairs(v.aura) do
 				if not tempbuff[buffId] then
 					Event_FireGenericEvent("BUFF_REMOVED", unitName, buffData.splEffect:GetId(), unit)
-					--Print("BUFF_REMOVED : " .. unitName .. " " .. buffData.splEffect:GetId())
 					v.aura[buffId] = nil
 				end
 			end
@@ -1327,19 +1260,15 @@ function RaidCore:OnUpdate()
 							["splEffect"] = s.splEffect,
 						}
 						Event_FireGenericEvent("DEBUFF_APPLIED", unitName, s.splEffect:GetId(), unit)
-						--Print("DEBUFF_APPLIED : " .. unitName .. " " .. s.splEffect:GetId())
 					end
 				end
 				for buffId, buffData in pairs(v.aura) do
 					if not tempdebuff[buffId] then
 						Event_FireGenericEvent("DEBUFF_REMOVED", unitName, buffData.splEffect:GetId(), unit)
-						--Print("DEBUFF_REMOVED : " .. unitName .. " " .. buffData.splEffect:GetId())
 						v.aura[buffId] = nil
 					end
 				end
 			end
-		--else
-		--	self.debuffs[k] = nil
 		end
 	end
 end
@@ -1434,11 +1363,9 @@ end
 do
 	local chatFilter = {
 		ChatSystemLib.ChatChannel_Datachron,	--23
-		--ChatSystemLib.ChatChannel_Say,
 		ChatSystemLib.ChatChannel_NPCSay,		--20
 		ChatSystemLib.ChatChannel_NPCYell,		--21
 		ChatSystemLib.ChatChannel_NPCWhisper,	--22
-		--ChatSystemLib.ChatChannel_Datachron,	--23
 	}
 	local function checkChatFilter(channelType)
 		for _, v in next, chatFilter do
@@ -1526,7 +1453,6 @@ function RaidCore:WipeCheck()
 	self:ResetSync()
 	self:ResetLines()
 	Apollo.RemoveEventHandler("ChatMessage", self)
-	--Apollo.RemoveEventHandler("UnitEnteredCombat",self)
 	Apollo.RegisterEventHandler("UnitCreated", "unitCheck", self)
 	Event_FireGenericEvent("RAID_WIPE")
 end
@@ -1536,7 +1462,6 @@ function RaidCore:CombatStateChanged(unit, bInCombat)
 	Event_FireGenericEvent("RC_UnitStateChanged", unit, bInCombat, UnitName)
 
 	if unit == GameLib.GetPlayerUnit() and not bInCombat and not self.wipeTimer then
-		--and GroupLib.InRaid() then
 		self.wipeTimer = ApolloTimer.Create(0.5, true, "WipeCheck", self)
 	end
 end
@@ -1554,8 +1479,6 @@ local function IsPartyMemberByName(sName)
 end
 
 function RaidCore:OnComMessage(channel, tMessage, strSender)
-	--local Rover = Apollo.GetAddon("Rover")
-	--Rover:AddWatch("msg", tMessage, 0)
 	if type(tMessage.action) ~= "string" then return end
 	local msg = {}
 
@@ -1577,7 +1500,6 @@ function RaidCore:OnComMessage(channel, tMessage, strSender)
 	elseif tMessage.action == "Sync" and tMessage.sync and self.syncRegister[tMessage.sync] then
 		local timeOfEvent = GameLib.GetGameTime()
 		if timeOfEvent - self.syncTimer[tMessage.sync] >= self.syncRegister[tMessage.sync] then
-			--Print(("%s : Received %s msg from %s"):format(os.clock(), tMessage.sync, tMessage.sender))
 			self.syncTimer[tMessage.sync] = timeOfEvent
 			Event_FireGenericEvent("RAID_SYNC", tMessage.sync, tMessage.parameter)
 		end
@@ -1705,10 +1627,9 @@ function RaidCore:isRaidManagement(strName)
 	return false -- just in case
 end
 
------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
 -- RaidCoreForm Functions
------------------------------------------------------------------------------------------------
-
+----------------------------------------------------------------------------------------------------
 function RaidCore:recursiveCopyTable(from, to)
 	to = to or {}
 	for k,v in pairs(from) do
@@ -1801,8 +1722,3 @@ function RaidCore:OnModuleSettingsUncheck(wndHandler, wndControl, eMouseButton )
 	local identifier = self:SplitString(wndControl:GetName(), "_")
 	self.wndSettings[raidInstance[2]][identifier[3]]:Show(false)
 end
------------------------------------------------------------------------------------------------
--- RaidCore Instance
------------------------------------------------------------------------------------------------
---local RaidCoreInst = RaidCore:new()
---RaidCoreInst:Init()
