@@ -242,105 +242,103 @@ end
 ----------------------------------------------------------------------------------------------------
 -- RaidCore OnDocLoaded
 ----------------------------------------------------------------------------------------------------
-function RaidCore:OnEnable()
-	if self.xmlDoc ~= nil and self.xmlDoc:IsLoaded() then
-		self.settings = self.settings or self:recursiveCopyTable(DefaultSettings)
+function RaidCore:OnDocLoaded()
+	self.settings = self.settings or self:recursiveCopyTable(DefaultSettings)
 
-		self.wndConfig = Apollo.LoadForm(self.xmlDoc, "ConfigForm", nil, self)
-		self.wndConfig:Show(false)
+	self.wndConfig = Apollo.LoadForm(self.xmlDoc, "ConfigForm", nil, self)
+	self.wndConfig:Show(false)
 
-		self.wndTargetFrame = self.wndConfig:FindChild("TargetFrame")
-		self.wndConfigOptionsTargetFrame = self.wndConfig:FindChild("ConfigOptionsTargetFrame")
-		self.wndModuleList = {
-			DS = Apollo.LoadForm(self.xmlDoc, "ModuleList_DS", self.wndConfigOptionsTargetFrame, self),
-		}
+	self.wndTargetFrame = self.wndConfig:FindChild("TargetFrame")
+	self.wndConfigOptionsTargetFrame = self.wndConfig:FindChild("ConfigOptionsTargetFrame")
+	self.wndModuleList = {
+		DS = Apollo.LoadForm(self.xmlDoc, "ModuleList_DS", self.wndConfigOptionsTargetFrame, self),
+	}
 
-		self.wndSettings = {
-			General = Apollo.LoadForm(self.xmlDoc, "ConfigForm_General", self.wndTargetFrame, self),
-			DS = {
-				SystemDaemons = Apollo.LoadForm(self.xmlDoc, "ConfigForm_SystemDaemons", self.wndTargetFrame, self),
-				Gloomclaw = Apollo.LoadForm(self.xmlDoc, "ConfigForm_Gloomclaw", self.wndTargetFrame, self),
-				Maelstrom = Apollo.LoadForm(self.xmlDoc, "ConfigForm_Maelstrom", self.wndTargetFrame, self),
-				Lattice = Apollo.LoadForm(self.xmlDoc, "ConfigForm_Lattice", self.wndTargetFrame, self),
-				Limbo = Apollo.LoadForm(self.xmlDoc, "ConfigForm_Limbo", self.wndTargetFrame, self),
-				AirEarth = Apollo.LoadForm(self.xmlDoc, "ConfigForm_EpAirEarth", self.wndTargetFrame, self),
-				AirLife = Apollo.LoadForm(self.xmlDoc, "ConfigForm_EpAirLife", self.wndTargetFrame, self),
-				AirWater = Apollo.LoadForm(self.xmlDoc, "ConfigForm_EpAirWater", self.wndTargetFrame, self),
-				FireEarth = Apollo.LoadForm(self.xmlDoc, "ConfigForm_EpFireEarth", self.wndTargetFrame, self),
-				FireLife = Apollo.LoadForm(self.xmlDoc, "ConfigForm_EpFireLife", self.wndTargetFrame, self),
-				FireWater = Apollo.LoadForm(self.xmlDoc, "ConfigForm_EpFireWater", self.wndTargetFrame, self),
-				LogicEarth = Apollo.LoadForm(self.xmlDoc, "ConfigForm_EpLogicEarth", self.wndTargetFrame, self),
-				LogicLife = Apollo.LoadForm(self.xmlDoc, "ConfigForm_EpLogicLife", self.wndTargetFrame, self),
-				LogicWater = Apollo.LoadForm(self.xmlDoc, "ConfigForm_EpLogicWater", self.wndTargetFrame, self),
-				Avatus = Apollo.LoadForm(self.xmlDoc, "ConfigForm_Avatus", self.wndTargetFrame, self),
-			},
-		}
+	self.wndSettings = {
+		General = Apollo.LoadForm(self.xmlDoc, "ConfigForm_General", self.wndTargetFrame, self),
+		DS = {
+			SystemDaemons = Apollo.LoadForm(self.xmlDoc, "ConfigForm_SystemDaemons", self.wndTargetFrame, self),
+			Gloomclaw = Apollo.LoadForm(self.xmlDoc, "ConfigForm_Gloomclaw", self.wndTargetFrame, self),
+			Maelstrom = Apollo.LoadForm(self.xmlDoc, "ConfigForm_Maelstrom", self.wndTargetFrame, self),
+			Lattice = Apollo.LoadForm(self.xmlDoc, "ConfigForm_Lattice", self.wndTargetFrame, self),
+			Limbo = Apollo.LoadForm(self.xmlDoc, "ConfigForm_Limbo", self.wndTargetFrame, self),
+			AirEarth = Apollo.LoadForm(self.xmlDoc, "ConfigForm_EpAirEarth", self.wndTargetFrame, self),
+			AirLife = Apollo.LoadForm(self.xmlDoc, "ConfigForm_EpAirLife", self.wndTargetFrame, self),
+			AirWater = Apollo.LoadForm(self.xmlDoc, "ConfigForm_EpAirWater", self.wndTargetFrame, self),
+			FireEarth = Apollo.LoadForm(self.xmlDoc, "ConfigForm_EpFireEarth", self.wndTargetFrame, self),
+			FireLife = Apollo.LoadForm(self.xmlDoc, "ConfigForm_EpFireLife", self.wndTargetFrame, self),
+			FireWater = Apollo.LoadForm(self.xmlDoc, "ConfigForm_EpFireWater", self.wndTargetFrame, self),
+			LogicEarth = Apollo.LoadForm(self.xmlDoc, "ConfigForm_EpLogicEarth", self.wndTargetFrame, self),
+			LogicLife = Apollo.LoadForm(self.xmlDoc, "ConfigForm_EpLogicLife", self.wndTargetFrame, self),
+			LogicWater = Apollo.LoadForm(self.xmlDoc, "ConfigForm_EpLogicWater", self.wndTargetFrame, self),
+			Avatus = Apollo.LoadForm(self.xmlDoc, "ConfigForm_Avatus", self.wndTargetFrame, self),
+		},
+	}
 
-		self.raidbars = RaidCoreLibs.DisplayBlock.new(self.xmlDoc)
-		self.raidbars:SetName("Raid Bars")
-		self.raidbars:SetPosition(0.3, 0.5)
-		self.raidbars:AnchorFromTop(true)
+	self.raidbars = RaidCoreLibs.DisplayBlock.new(self.xmlDoc)
+	self.raidbars:SetName("Raid Bars")
+	self.raidbars:SetPosition(0.3, 0.5)
+	self.raidbars:AnchorFromTop(true)
 
-		self.unitmoni = RaidCoreLibs.DisplayBlock.new(self.xmlDoc)
-		self.unitmoni:SetName("Unit Monitor")
-		self.unitmoni:SetPosition(0.7, 0.5)
-		self.unitmoni:AnchorFromTop(true)
+	self.unitmoni = RaidCoreLibs.DisplayBlock.new(self.xmlDoc)
+	self.unitmoni:SetName("Unit Monitor")
+	self.unitmoni:SetPosition(0.7, 0.5)
+	self.unitmoni:AnchorFromTop(true)
 
-		self.message = RaidCoreLibs.DisplayBlock.new(self.xmlDoc)
-		self.message:SetName("Messages")
-		self.message:SetPosition(0.5, 0.5)
-		self.message:AnchorFromTop(true)
+	self.message = RaidCoreLibs.DisplayBlock.new(self.xmlDoc)
+	self.message:SetName("Messages")
+	self.message:SetPosition(0.5, 0.5)
+	self.message:AnchorFromTop(true)
 
-		self.drawline = RaidCoreLibs.DisplayLine.new(self.xmlDoc)
+	self.drawline = RaidCoreLibs.DisplayLine.new(self.xmlDoc)
 
-		self.GeminiColor = Apollo.GetPackage("GeminiColor").tPackage
+	self.GeminiColor = Apollo.GetPackage("GeminiColor").tPackage
 
-		if self.settings ~= nil then
-			self:LoadSaveData()
-		end
+	if self.settings ~= nil then
+		self:LoadSaveData()
+	end
 
-		-- Register handlers for events, slash commands and timer, etc.
-		Apollo.RegisterSlashCommand("raidc", "OnRaidCoreOn", self)
-		Apollo.RegisterEventHandler("Group_MemberFlagsChanged", "OnGroup_MemberFlagsChanged", self)
-		Apollo.RegisterEventHandler("ChangeWorld", "OnWorldChangedTimer", self)
-		Apollo.RegisterEventHandler("SubZoneChanged", "OnSubZoneChanged", self)
-		Apollo.RegisterEventHandler("UnitDestroyed", "OnUnitDestroyed", self)
-		Apollo.RegisterEventHandler("PublicEventObjectiveUpdate", "OnPublicEventObjectiveUpdate", self)
+	-- Register handlers for events, slash commands and timer, etc.
+	Apollo.RegisterSlashCommand("raidc", "OnRaidCoreOn", self)
+	Apollo.RegisterEventHandler("Group_MemberFlagsChanged", "OnGroup_MemberFlagsChanged", self)
+	Apollo.RegisterEventHandler("ChangeWorld", "OnWorldChangedTimer", self)
+	Apollo.RegisterEventHandler("SubZoneChanged", "OnSubZoneChanged", self)
+	Apollo.RegisterEventHandler("UnitDestroyed", "OnUnitDestroyed", self)
+	Apollo.RegisterEventHandler("PublicEventObjectiveUpdate", "OnPublicEventObjectiveUpdate", self)
 
-		-- Do additional Addon initialization here
+	-- Do additional Addon initialization here
 
-		self.watch = {}
-		self.mark = {}
-		self.worldmarker = {}
-		self.buffs = {}
-		self.debuffs = {}
-		self.emphasize = {}
-		self.delayedmsg = {}
-		self.berserk = false
+	self.watch = {}
+	self.mark = {}
+	self.worldmarker = {}
+	self.buffs = {}
+	self.debuffs = {}
+	self.emphasize = {}
+	self.delayedmsg = {}
+	self.berserk = false
 
-		self.syncRegister = {}
-		self.syncTimer = {}
+	self.syncRegister = {}
+	self.syncTimer = {}
 
-		self.wipeTimer = false
+	self.wipeTimer = false
 
-		self.lines = {}
+	self.lines = {}
 
-		self.chanCom = nil
-		CommChannelTimer = ApolloTimer.Create(5, false, "UpdateCommChannel", self) -- make sure everything is loaded, so after 5sec
+	self.chanCom = nil
+	CommChannelTimer = ApolloTimer.Create(5, false, "UpdateCommChannel", self) -- make sure everything is loaded, so after 5sec
 
-		-- Final parsing about encounters.
-		for name, module in self:IterateModules() do
-			local r, e = pcall(module.PrepareEncounter, module)
-			if not r then
-				Print(e)
-			else
-				for _, id in next, module.continentIdList do
-					enablezones[id] = true
-				end
+	-- Final parsing about encounters.
+	for name, module in self:IterateModules() do
+		local r, e = pcall(module.PrepareEncounter, module)
+		if not r then
+			Print(e)
+		else
+			for _, id in next, module.continentIdList do
+				enablezones[id] = true
 			end
 		end
-		self:ScheduleTimer("OnWorldChanged", 5)
 	end
+	self:ScheduleTimer("OnWorldChanged", 5)
 end
 
 ----------------------------------------------------------------------------------------------------
