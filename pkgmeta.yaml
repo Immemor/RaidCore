@@ -12,3 +12,8 @@ externals:
     url: https://github.com/wildstarnasa/GeminiLocale.git
   Libs/GeminiTimer:
     url: https://github.com/wildstarnasa/GeminiTimer.git
+  Libs/LibJSON:
+    url: https://github.com/wildstarnasa/LibJSON.git
+
+ignore:
+  Textures/GUI/DefaultBouton.ai
