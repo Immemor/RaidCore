@@ -68,7 +68,7 @@ mod:RegisterFrenchLocale({
 	["RIGHT"] = "DROITE",
 	["TRANSITION"] = "TRANSITION",
 	["MOO PHASE"] = "MOO PHASE",
---	["BURN HIM HARD"] = "BURN HIM HARD",	-- TODO: French translation missing !!!!
+	["BURN HIM HARD"] = "Burst DPS",
 })
 mod:RegisterGermanLocale({
 	-- Unit names.
