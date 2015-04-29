@@ -1,13 +1,19 @@
---------------------------------------------------------------------------------
--- Module Declaration
+----------------------------------------------------------------------------------------------------
+-- Client Lua Script for RaidCore Addon on WildStar Game.
 --
+-- Copyright (C) 2015 RaidCore
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+-- Description:
+--
+--   The elemental Pair Megalith and Mnemesis juste after Maelstrom fight.
+----------------------------------------------------------------------------------------------------
 
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 
 local mod = core:NewEncounter("EpLogicEarth", 52, 98, 117)
 if not mod then return end
 
---mod:RegisterEnableMob("Megalith")
 mod:RegisterEnableBossPair("Megalith", "Mnemesis")
 mod:RegisterRestrictZone("EpLogicEarth", "Elemental Vortex Alpha", "Elemental Vortex Beta", "Elemental Vortex Delta")
 mod:RegisterEnglishLocale({
@@ -86,30 +92,24 @@ local spreadPos = {
 	{x = -14279, y = -551.18, z = 17916 },
 }
 
---------------------------------------------------------------------------------
--- Initialization
---
 
+----------------------------------------------------------------------------------------------------
+-- Initialization
+----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-	Print(("Module %s loaded"):format(mod.ModuleName))
-	--Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
 	Apollo.RegisterEventHandler("RC_UnitDestroyed", "OnUnitDestroyed", self)
 	Apollo.RegisterEventHandler("RC_UnitStateChanged", "OnUnitStateChanged", self)
 	Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
 	Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
 	Apollo.RegisterEventHandler("DEBUFF_APPLIED", "OnDebuffApplied", self)
-	--Apollo.RegisterEventHandler("BUFF_APPLIED", "OnBuffApplied", self)
 end
 
---------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
 -- Event Handlers
---
-
+----------------------------------------------------------------------------------------------------
 function mod:OnUnitCreated(unit, sName)
 	local sName = unit:GetName()
-	--Print(sName)
 	if sName == self.L["Obsidian Outcropping"] and mod:GetSetting("LineObsidianOutcropping") then
-		--core:AddLine(unit:GetId(), 1, GameLib.GetPlayerUnit(), unit, 3)
 		core:AddPixie(unit:GetId().."_1", 1, GameLib.GetPlayerUnit(), unit, "Blue", 10)
 	end
 end
@@ -143,14 +143,10 @@ end
 
 function mod:OnDebuffApplied(unitName, splId, unit)
 	if splId == 74570 then
-		--local timeOfEvent = GameLib.GetGameTime()
-		--if timeOfEvent - prev > 10 then
-		--	first = false
 		if unitName == GameLib.GetPlayerUnit():GetName() then
 			core:AddMsg("SNAKE", self.L["SNAKE ON %s"]:format(unitName), 5, mod:GetSetting("SoundSnake", "RunAway"), "Blue")
 		end
 		core:AddBar("SNAKE", self.L["SNAKE ON %s"]:format(unitName), 20)
-		--end
 	end
 end
 
@@ -166,15 +162,10 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
 			core:AddBar("STAR", self.L["STARS"]:format(""), 60)
 			core:AddUnit(unit)
 			core:WatchUnit(unit)
-			--core:UnitDebuff(GameLib.GetPlayerUnit())
 			core:RaidDebuff()
 			Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
-			core:StartScan()
 		elseif sName == self.L["Crystalline Matrix"] then
 			pilarCount = pilarCount + 1
-			--core:MarkUnit(unit)
-			--core:AddUnit(unit)
-			--core:AddMsg("PILAR", ("[%s] PILAR"):format(pilarCount), 5, "Info", "Blue")
 		end
 	elseif unit:GetType() == "NonPlayer" and not bInCombat then
 		if sName == self.L["Mnemesis"] then
