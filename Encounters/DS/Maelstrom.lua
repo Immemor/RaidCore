@@ -44,27 +44,27 @@ mod:RegisterEnglishLocale({
 mod:RegisterFrenchLocale({
 	-- Unit names.
 	["Wind Wall"] = "Mur de vent",
---	["Avatus Hologram"] = "Avatus Hologram",	-- TODO: French translation missing !!!!
+	["Avatus Hologram"] = "Hologramme d'Avatus",
 	["Weather Station"] = "Station météorologique",
 	["Maelstrom Authority"] = "Contrôleur du Maelstrom",
 	-- Datachron messages.
---	["The platform trembles"] = "The platform trembles",	-- TODO: French translation missing !!!!
+	["The platform trembles"] = "La plateforme tremble !",
 	-- Cast.
 	["Activate Weather Cycle"] = "Activer cycle climatique",
 	["Ice Breath"] = "Souffle de glace",
 	["Crystallize"] = "Cristalliser",
 	["Typhoon"] = "Typhon",
 	-- Bar and messages.
---	["[%u] STATION: %s %s"] = "[%u] STATION: %s %s",	-- TODO: French translation missing !!!!
---	["[%u] STATION"] = "[%u] STATION",	-- TODO: French translation missing !!!!
---	["ICE BREATH"] = "ICE BREATH",	-- TODO: French translation missing !!!!
---	["TYPHOON"] = "TYPHOON",	-- TODO: French translation missing !!!!
---	["JUMP"] = "JUMP",	-- TODO: French translation missing !!!!
---	["Encounter Start"] = "Encounter Start",	-- TODO: French translation missing !!!!
---	["NORTH"] = "NORTH",	-- TODO: French translation missing !!!!
---	["SOUTH"] = "SOUTH",	-- TODO: French translation missing !!!!
---	["EAST"] = "EAST",	-- TODO: French translation missing !!!!
---	["WEST"] = "WEST",	-- TODO: French translation missing !!!!
+	["[%u] STATION: %s %s"] = "[%u] STATION: %s %s",
+	["[%u] STATION"] = "[%u] STATION",
+	["ICE BREATH"] = "SOUFFLE DE GLACE",
+	["TYPHOON"] = "TYPHON",
+	["JUMP"] = "SAUTER",
+	["Encounter Start"] = "Début de la Rencontre",
+	["NORTH"] = "NORD",
+	["SOUTH"] = "SUD",
+	["EAST"] = "EST",
+	["WEST"] = "OUEST",
 })
 mod:RegisterGermanLocale({
 	-- Unit names.
