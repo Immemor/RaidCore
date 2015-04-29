@@ -18,7 +18,7 @@ mod:RegisterEnglishLocale({
 	-- Datachron messages.
 	["A plasma leech begins draining"] = "A plasma leech begins draining",
 	["Dreadphage Ohmna submerges"] = "Dreadphage Ohmna submerges",
-	["Dreadphage Ohmna is bored"] = "Dreadphage Ohmna is bored",
+	["Dreadphage Ohmna is bored"] = "Dreadphage Ohmna is bored with (.*)!",
 	["The Archives tremble as Dreadphage Ohmna"] = "The Archives tremble as Dreadphage Ohmna",
 	["The Archives quake with the furious might"] = "The Archives quake with the furious might",
 	-- Objectifs.
@@ -50,33 +50,33 @@ mod:RegisterFrenchLocale({
 	["Tentacle of Ohmna"] = "Tentacule d'Ohmna",
 	["Ravenous Maw of the Dreadphage"] = "Gueule vorace de la Terriphage",
 	-- Datachron messages.
---	["A plasma leech begins draining"] = "A plasma leech begins draining",	-- TODO: French translation missing !!!!
---	["Dreadphage Ohmna submerges"] = "Dreadphage Ohmna submerges",	-- TODO: French translation missing !!!!
---	["Dreadphage Ohmna is bored"] = "Dreadphage Ohmna is bored",	-- TODO: French translation missing !!!!
---	["The Archives tremble as Dreadphage Ohmna"] = "The Archives tremble as Dreadphage Ohmna",	-- TODO: French translation missing !!!!
---	["The Archives quake with the furious might"] = "The Archives quake with the furious might",	-- TODO: French translation missing !!!!
+	["A plasma leech begins draining"] = "Une Sangsue à plasma commence à vider la cellule énergétique (.*) !",
+	["Dreadphage Ohmna submerges"] = "Ohmna la Terriphage s'immerge dans les bassins de Biophage.",
+	["Dreadphage Ohmna is bored"] = "(.*) n'amuse plus Ohmna la Terriphage !",
+	["The Archives tremble as Dreadphage Ohmna"] = "Les Archives tremblent alors que les tentacules d'Ohmna la Terriphage font surface autour de vous !",
+	["The Archives quake with the furious might"] = "Les Archives tremblent sous la puissance terrible de la Terriphage.",
 	-- Objectifs.
---	["North Power Core Energy"] = "North Power Core Energy",	-- TODO: French translation missing !!!!
---	["South Power Core Energy"] = "South Power Core Energy",	-- TODO: French translation missing !!!!
---	["East Power Core Energy"] = "East Power Core Energy",	-- TODO: French translation missing !!!!
---	["West Power Core Energy"] = "West Power Core Energy",	-- TODO: French translation missing !!!!
+	["North Power Core Energy"] = "Puissance de la cellule énergétique nord",
+	["South Power Core Energy"] = "Puissance de la cellule énergétique sud",
+	["East Power Core Energy"] = "Puissance de la cellule énergétique est",
+	["West Power Core Energy"] = "Puissance de la cellule énergétique ouest",
 	-- Cast.
 	["Erupt"] = "Erupt",
 	["Genetic Torrent"] = "Torrent génétique",
 	-- Bar and messages.
---	["Next Tentacles"] = "Next Tentacles",	-- TODO: French translation missing !!!!
-	["Tentacles"] = "Tentacule",
+	["Next Tentacles"] = "Prochaine Tentacules",
+	["Tentacles"] = "Tentacules",
 	["P2 SOON !"] = "P2 SOON !",
---	["P2: TENTACLES"] = "P2: TENTACLES",	-- TODO: French translation missing !!!!
---	["PHASE 2"] = "PHASE 2",	-- TODO: French translation missing !!!!
---	["P3 SOON !"] = "P3 SOON !",	-- TODO: French translation missing !!!!
---	["P3: RAVENOUS"] = "P3: RAVENOUS",	-- TODO: French translation missing !!!!
---	["P3 REALLY SOON !"] = "P3 REALLY SOON !",	-- TODO: French translation missing !!!!
---	["PILLAR %u : %u"] = "PILLAR %u : %u",	-- TODO: French translation missing !!!!
---	["PILLAR %u"] = "PILLAR %u",	-- TODO: French translation missing !!!!
+	["P2: TENTACLES"] = "P2: TENTACULES",
+	["PHASE 2"] = "PHASE 2",
+	["P3 SOON !"] = "P3 BIENTÔT !",
+	["P3: RAVENOUS"] = "P3: AFFAMÉ",
+	["P3 REALLY SOON !"] = "P3 RÉELLEMENT BIENTÔT !",
+	["PILLAR %u : %u"] = "PILLIER %u : %u",
+	["PILLAR %u"] = "PILLIER %u",
 	["SWITCH TANK"] = "CHANGEMENT TANK",
---	["BIG SPEW"] = "BIG SPEW",	-- TODO: French translation missing !!!!
---	["NEXT BIG SPEW"] = "NEXT BIG SPEW",	-- TODO: French translation missing !!!!
+	["BIG SPEW"] = "TORRENT",
+	["NEXT BIG SPEW"] = "PROCHAIN TORRENT",
 })
 mod:RegisterGermanLocale({
 	-- Unit names.

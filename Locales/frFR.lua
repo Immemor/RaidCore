@@ -22,4 +22,4 @@ L["Infinite Generator Core"] = "Noyau du générateur d'infinité"
 L["Lower Infinite Generator Core"] = "Noyau du générateur d'infinité inférieur"
 --L["Defeat the System Daemons"] = "Defeat the System Daemons" -- 	-- TODO: French translation missing !!!!
 L["The Oculus"] = "Oculus"
---L["Defeat Dreadphage Ohmna"] = "Defeat Dreadphage Ohmna" -- 	-- TODO: French translation missing !!!!
+L["Defeat Dreadphage Ohmna"] = "Terrasser Ohmna la Terriphage"
