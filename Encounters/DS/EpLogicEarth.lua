@@ -33,11 +33,11 @@ mod:RegisterFrenchLocale({
 	-- Unit names.
 	["Megalith"] = "Mégalithe",
 	["Mnemesis"] = "Mnémésis",
---	["Obsidian Outcropping"] = "Obsidian Outcropping",	-- TODO: French translation missing !!!!
+	["Obsidian Outcropping"] = "Affleurement d'obsidienne",
 	["Crystalline Matrix"] = "Matrice cristalline",
 	-- Datachron messages.
 --	["The ground shudders beneath Megalith"] = "The ground shudders beneath Megalith",	-- TODO: French translation missing !!!!
---	["Logic creates powerful data caches"] = "Logic creates powerful data caches",	-- TODO: French translation missing !!!!
+	["Logic creates powerful data caches"] = "La logique crée de puissantes caches de données !",
 	-- Cast.
 	["Defragment"] = "Défragmentation",
 	-- Bar and messages.
