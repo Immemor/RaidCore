@@ -42,17 +42,17 @@ mod:RegisterFrenchLocale({
 	["Obsidian Outcropping"] = "Affleurement d'obsidienne",
 	["Crystalline Matrix"] = "Matrice cristalline",
 	-- Datachron messages.
---	["The ground shudders beneath Megalith"] = "The ground shudders beneath Megalith",	-- TODO: French translation missing !!!!
+	["The ground shudders beneath Megalith"] = "Le sol tremble sous les pieds de Mégalithe !",
 	["Logic creates powerful data caches"] = "La logique crée de puissantes caches de données !",
 	-- Cast.
 	["Defragment"] = "Défragmentation",
 	-- Bar and messages.
---	["SNAKE ON %s"] = "SNAKE ON %s",	-- TODO: French translation missing !!!!
---	["DEFRAG"] = "DEFRAG",	-- TODO: French translation missing !!!!
---	["SPREAD"] = "SPREAD",	-- TODO: French translation missing !!!!
---	["BOOM"] = "BOOM",	-- TODO: French translation missing !!!!
---	["JUMP !"] = "JUMP !",	-- TODO: French translation missing !!!!
---	["STARS"] = "STARS%s"	-- TODO: French translation missing !!!!
+	["SNAKE ON %s"] = "SERPENT sur %s",
+	["DEFRAG"] = "DEFRAG",
+	["SPREAD"] = "ECARTER",
+	["BOOM"] = "BOOM",
+	["JUMP !"] = "SAUTEZ !",
+	["STARS"] = "Etoile%s"
 })
 mod:RegisterGermanLocale({
 	-- Unit names.
