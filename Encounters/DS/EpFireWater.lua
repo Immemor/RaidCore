@@ -17,14 +17,15 @@ mod:RegisterEnglishLocale({
 	["Ice Tomb"] = "Ice Tomb",
 	-- Datachron messages.
 	-- NPCSay messages.
-	["Burning mortals... such sweet agony"] = "Burning mortals... such sweet agony",
-	["Run! Soon my fires will destroy you"] = "Run! Soon my fires will destroy you",
-	["Ah! The smell of seared flesh"] = "Ah! The smell of seared flesh",
-	["Enshrouded in deadly flame"] = "Enshrouded in deadly flame",
-	["Pyrobane ignites you"] = "Pyrobane ignites you",
+	["Burning mortals... such sweet agony..."] = "Burning mortals... such sweet agony...",
+	["Run! Soon my fires will destroy you..."] = "Run! Soon my fires will destroy you...",
+	["Ah! The smell of seared flesh..."] = "Ah! The smell of seared flesh...",
+	["Enshrouded in deadly flame!"] = "Enshrouded in deadly flame!",
+	["Pyrobane ignites you!"] = "Pyrobane ignites you!",
 	-- Cast.
 	["Flame Wave"] = "Flame Wave",
 	-- Bar and messages.
+	["Fire Bomb"] = "Fire\nBomb",
 	["Frost Bomb"] = "Frost\nBomb",
 	["BOMBS"] = "BOMBS",
 	["BOMBS UP !"] = "BOMBS UP !",
@@ -38,19 +39,20 @@ mod:RegisterFrenchLocale({
 	["Ice Tomb"] = "Tombeau de glace",
 	-- Datachron messages.
 	-- NPCSay messages.
---	["Burning mortals... such sweet agony"] = "Burning mortals... such sweet agony",	-- TODO: French translation missing !!!!
---	["Run! Soon my fires will destroy you"] = "Run! Soon my fires will destroy you",	-- TODO: French translation missing !!!!
---	["Ah! The smell of seared flesh"] = "Ah! The smell of seared flesh",	-- TODO: French translation missing !!!!
---	["Enshrouded in deadly flame"] = "Enshrouded in deadly flame",	-- TODO: French translation missing !!!!
---	["Pyrobane ignites you"] = "Pyrobane ignites you",	-- TODO: French translation missing !!!!
+	["Burning mortals... such sweet agony..."] = "Des mortels en flammes... quelle délicieuse agonie...",
+	["Run! Soon my fires will destroy you..."] = "Fuyez ! Bientôt mes flammes vous détruiront...",
+	["Ah! The smell of seared flesh..."] = "Ah ! La douce odeur de la chair carbonisée...",
+	["Enshrouded in deadly flame!"] = "Drapés dans un voile de flammes meutrières !",
+	["Pyrobane ignites you!"] = "Pyromagnus vous enflamme",
 	-- Cast.
 	["Flame Wave"] = "Vague de feu",
 	-- Bar and messages.
---	["Frost Bomb"] = "Frost\nBomb",	-- TODO: French translation missing !!!!
---	["BOMBS"] = "BOMBS",	-- TODO: French translation missing !!!!
+	["Fire Bomb"] = "Feu",
+	["Frost Bomb"] = "Givre",
+	["BOMBS"] = "BOMBES",
 --	["BOMBS UP !"] = "BOMBS UP !",	-- TODO: French translation missing !!!!
 	["Bomb Explosion"] = "Bomb Explosion",
---	["ICE TOMB"] = "ICE TOMB",	-- TODO: French translation missing !!!!
+	["ICE TOMB"] = "Tombeau de Glace",
 })
 mod:RegisterGermanLocale({
 	-- Unit names.
@@ -59,14 +61,15 @@ mod:RegisterGermanLocale({
 	["Ice Tomb"] = "Eisgrab",
 	-- Datachron messages.
 	-- NPCSay messages.
---	["Burning mortals... such sweet agony"] = "Burning mortals... such sweet agony",	-- TODO: German translation missing !!!!
---	["Run! Soon my fires will destroy you"] = "Run! Soon my fires will destroy you",	-- TODO: German translation missing !!!!
---	["Ah! The smell of seared flesh"] = "Ah! The smell of seared flesh",	-- TODO: German translation missing !!!!
---	["Enshrouded in deadly flame"] = "Enshrouded in deadly flame",	-- TODO: German translation missing !!!!
---	["Pyrobane ignites you"] = "Pyrobane ignites you",	-- TODO: German translation missing !!!!
+--	["Burning mortals... such sweet agony..."] = "Burning mortals... such sweet agony...",	-- TODO: German translation missing !!!!
+--	["Run! Soon my fires will destroy you..."] = "Run! Soon my fires will destroy you...",	-- TODO: German translation missing !!!!
+--	["Ah! The smell of seared flesh..."] = "Ah! The smell of seared flesh...",	-- TODO: German translation missing !!!!
+--	["Enshrouded in deadly flame!"] = "Enshrouded in deadly flame!",	-- TODO: German translation missing !!!!
+--	["Pyrobane ignites you!"] = "Pyrobane ignites you!",	-- TODO: German translation missing !!!!
 	-- Cast.
 	["Flame Wave"] = "Flammenwelle",
 	-- Bar and messages.
+--	["Fire Bomb"] = "Fire\nBomb",	-- TODO: German translation missing !!!!
 --	["Frost Bomb"] = "Frost\nBomb",	-- TODO: German translation missing !!!!
 --	["BOMBS"] = "BOMBS",	-- TODO: German translation missing !!!!
 --	["BOMBS UP !"] = "BOMBS UP !",	-- TODO: German translation missing !!!!
@@ -177,7 +180,7 @@ function mod:OnDebuffApplied(unitName, splId, unit)
 
 	if splId == DEBUFFID_FIREBOMB then
 		if mod:GetSetting("OtherBombPlayerMarkers") then
-			core:MarkUnit(unit, nil, "Fire\nBomb")
+			core:MarkUnit(unit, nil, self.L["Fire Bomb"])
 		end
 		--core:AddPixie(unit:GetId() .. "_BOMB", 2, unit, nil, "Red", 7, 10, 0, 50)
 		core:AddUnit(unit)
@@ -215,7 +218,6 @@ function mod:OnDebuffApplied(unitName, splId, unit)
 			core:AddBar("BEXPLODE", self.L["Bomb Explosion"], 10, mod:GetSetting("SoundBomb"))
 		end
 	end
-	--Print(eventTime .. " " .. unitName .. "has debuff: " .. strSpellName .. " with splId: " .. splId .. " - type: DebuffNormal")
 end
 
 function mod:OnUnitCreated(unit, sName)
@@ -254,11 +256,11 @@ function mod:OnDebuffAppliedDose(unitName, splId, stack)
 end
 
 function mod:OnChatNPCSay(message)
-	if message:find(self.L["Burning mortals... such sweet agony"])
-	or message:find(self.L["Run! Soon my fires will destroy you"])
-	or message:find(self.L["Ah! The smell of seared flesh"])
-	or message:find(self.L["Enshrouded in deadly flame"])
-	or message:find(self.L["Pyrobane ignites you"]) then
+	if message:find(self.L["Burning mortals... such sweet agony..."])
+	or message:find(self.L["Run! Soon my fires will destroy you..."])
+	or message:find(self.L["Ah! The smell of seared flesh..."])
+	or message:find(self.L["Enshrouded in deadly flame!"])
+	or message:find(self.L["Pyrobane ignites you!"]) then
 		core:AddBar("BOMBS", self.L["BOMBS"], 30)
 	end
 end
