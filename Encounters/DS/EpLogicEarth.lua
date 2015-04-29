@@ -74,24 +74,23 @@ mod:RegisterGermanLocale({
 --	["STARS"] = "STARS%s"	-- TODO: German translation missing !!!!
 })
 
---------------------------------------------------------------------------------
--- Locals
---
+----------------------------------------------------------------------------------------------------
+-- Copy of few objects to reduce the cpu load.
+-- Because all local objects are faster.
+----------------------------------------------------------------------------------------------------
+local GetPlayerUnit = GameLib.GetPlayerUnit
+local GetGameTime = GameLib.GetGameTime
 
-local prev = 0
+----------------------------------------------------------------------------------------------------
+-- constants
+----------------------------------------------------------------------------------------------------
+local DEBUFF_SNAKE = 74570
+
+----------------------------------------------------------------------------------------------------
+-- Privates variables.
+----------------------------------------------------------------------------------------------------
+local _Previous_Defragment_time = 0
 local pilarCount = 0
-
-local spreadPos = {
-	{x = -14349, y = -551.18, z = 17916 },
-	{x = -14339, y = -551.18, z = 17916 },
-	{x = -14329, y = -551.18, z = 17916 },
-	{x = -14319, y = -551.18, z = 17916 },
-	{x = -14309, y = -551.18, z = 17916 },
-	{x = -14299, y = -551.18, z = 17916 },
-	{x = -14289, y = -551.18, z = 17916 },
-	{x = -14279, y = -551.18, z = 17916 },
-}
-
 
 ----------------------------------------------------------------------------------------------------
 -- Initialization
@@ -122,9 +121,9 @@ end
 
 function mod:OnSpellCastStart(unitName, castName, unit)
 	if unitName == self.L["Mnemesis"] and castName == self.L["Defragment"] then
-		local timeOfEvent = GameLib.GetGameTime()
-		if timeOfEvent - prev > 10 then
-			prev = timeOfEvent
+		local timeOfEvent = GetGameTime()
+		if timeOfEvent - _Previous_Defragment_time > 10 then
+			_Previous_Defragment_time = timeOfEvent
 			core:AddMsg("DEFRAG", self.L["SPREAD"], 5, mod:GetSetting("SoundDefrag", "Alarm"))
 			core:AddBar("BOOM", self.L["BOOM"], 9)
 			core:AddBar("DEFRAG", self.L["DEFRAG"], 40)
@@ -142,8 +141,8 @@ function mod:OnChatDC(message)
 end
 
 function mod:OnDebuffApplied(unitName, splId, unit)
-	if splId == 74570 then
-		if unitName == GameLib.GetPlayerUnit():GetName() then
+	if splId == DEBUFF_SNAKE then
+		if unit == GetPlayerUnit() then
 			core:AddMsg("SNAKE", self.L["SNAKE ON %s"]:format(unitName), 5, mod:GetSetting("SoundSnake", "RunAway"), "Blue")
 		end
 		core:AddBar("SNAKE", self.L["SNAKE ON %s"]:format(unitName), 20)
@@ -156,7 +155,7 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
 			core:AddUnit(unit)
 		elseif sName == self.L["Mnemesis"] then
 			self:Start()
-			prev = 0
+			_Previous_Defragment_time = 0
 			pilarCount = 0
 			core:AddBar("DEFRAG", self.L["DEFRAG"], 10)
 			core:AddBar("STAR", self.L["STARS"]:format(""), 60)
@@ -172,11 +171,5 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
 			Apollo.RemoveEventHandler("RC_UnitCreated", self)
 			core:ResetLines()
 		end
-	end
-end
-
-function mod:PlaceSpawnPos()
-	for k,v in pairs(spreadPos) do
-		core:SetWorldMarker(v, k)
 	end
 end
