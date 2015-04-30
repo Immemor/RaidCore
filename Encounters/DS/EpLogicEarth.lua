@@ -7,9 +7,7 @@ local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local mod = core:NewEncounter("EpLogicEarth", 52, 98, 117)
 if not mod then return end
 
---mod:RegisterEnableMob("Megalith")
-mod:RegisterEnableBossPair("Megalith", "Mnemesis")
-mod:RegisterRestrictZone("EpLogicEarth", "Elemental Vortex Alpha", "Elemental Vortex Beta", "Elemental Vortex Delta")
+mod:RegisterTrigMob("ALL", { "Megalith", "Mnemesis" })
 mod:RegisterEnglishLocale({
 	-- Unit names.
 	["Megalith"] = "Megalith",
@@ -89,10 +87,9 @@ local spreadPos = {
 --------------------------------------------------------------------------------
 -- Initialization
 --
-
 function mod:OnBossEnable()
 	Print(("Module %s loaded"):format(mod.ModuleName))
-	--Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
+	Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
 	Apollo.RegisterEventHandler("RC_UnitDestroyed", "OnUnitDestroyed", self)
 	Apollo.RegisterEventHandler("RC_UnitStateChanged", "OnUnitStateChanged", self)
 	Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
@@ -159,7 +156,6 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
 		if sName == self.L["Megalith"] then
 			core:AddUnit(unit)
 		elseif sName == self.L["Mnemesis"] then
-			self:Start()
 			prev = 0
 			pilarCount = 0
 			core:AddBar("DEFRAG", self.L["DEFRAG"], 10)
@@ -168,8 +164,6 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
 			core:WatchUnit(unit)
 			--core:UnitDebuff(GameLib.GetPlayerUnit())
 			core:RaidDebuff()
-			Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
-			core:StartScan()
 		elseif sName == self.L["Crystalline Matrix"] then
 			pilarCount = pilarCount + 1
 			--core:MarkUnit(unit)

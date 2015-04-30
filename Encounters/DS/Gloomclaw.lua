@@ -7,7 +7,7 @@ local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local mod = core:NewEncounter("Gloomclaw", 52, 98, 115)
 if not mod then return end
 
-mod:RegisterEnableMob("Gloomclaw")
+mod:RegisterTrigMob("ANY", { "Gloomclaw" })
 mod:RegisterEnglishLocale({
 	-- Unit names.
 	["Gloomclaw"] = "Gloomclaw",
@@ -302,7 +302,6 @@ end
 function mod:OnUnitStateChanged(unit, bInCombat, sName)
 	if unit:GetType() == "NonPlayer" and bInCombat then
 		if sName == self.L["Gloomclaw"] then
-			self:Start()
 			waveCount, ruptCount, prev = 0, 0, 0
 			section = 1
 			first = true
@@ -314,7 +313,6 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
 			core:WatchUnit(unit)
 			core:AddBar("RUPTURE", self.L["~NEXT RUPTURE"], 35, mod:GetSetting("SoundRuptureCountdown"))
 			core:AddBar("CORRUPTION", self.L["FULL CORRUPTION"], 106, mod:GetSetting("SoundCorruptionCountdown"))
-			core:StartScan()
 		elseif sName == self.L["Strain Parasite"]
 			or sName == self.L["Gloomclaw Skurge"]
 			or sName == self.L["Corrupted Fraz"] then

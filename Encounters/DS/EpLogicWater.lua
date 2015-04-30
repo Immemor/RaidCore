@@ -7,8 +7,7 @@ local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local mod = core:NewEncounter("EpLogicWater", 52, 98, 118)
 if not mod then return end
 
-mod:RegisterEnableBossPair("Hydroflux", "Mnemesis")
-mod:RegisterRestrictZone("EpLogicWater", "Elemental Vortex Alpha", "Elemental Vortex Beta", "Elemental Vortex Delta")
+mod:RegisterTrigMob("ALL", { "Hydroflux", "Mnemesis" })
 mod:RegisterEnglishLocale({
 	-- Unit names.
 	["Mnemesis"] = "Mnemesis",
@@ -82,7 +81,6 @@ local encounter_started = false
 --------------------------------------------------------------------------------
 -- Initialization
 --
-
 function mod:OnBossEnable()
 	Print(("Module %s loaded"):format(mod.ModuleName))
 	Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
@@ -198,7 +196,6 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
 			core:AddUnit(unit)
 			core:WatchUnit(unit)
 		elseif sName == self.L["Mnemesis"] then
-			self:Start()
 			uPlayer = GameLib.GetPlayerUnit()
 			strMyName = uPlayer:GetName()
 			midphase = false
@@ -207,7 +204,6 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
 			core:RaidDebuff()
 			core:AddUnit(unit)
 			core:WatchUnit(unit)
-			core:StartScan()
 			core:AddBar("MIDPHASE", self.L["Middle Phase"], 75, mod:GetSetting("SoundMidphase"))
 			core:AddBar("PRISON", self.L["Imprison"], 16)
 			core:AddBar("DEFRAG", self.L["Defrag"], 20, mod:GetSetting("SoundDefrag"))

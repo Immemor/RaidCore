@@ -7,8 +7,7 @@ local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local mod = core:NewEncounter("EpLogicLife", 52, 98, 119)
 if not mod then return end
 
-mod:RegisterEnableBossPair("Mnemesis", "Visceralus")
-mod:RegisterRestrictZone("EpLogicLife", "Elemental Vortex Alpha", "Elemental Vortex Beta", "Elemental Vortex Delta")
+mod:RegisterTrigMob("ALL", { "Mnemesis", "Visceralus" })
 mod:RegisterEnglishLocale({
 	-- Unit names.
 	["Essence of Life"] = "Essence of Life",
@@ -111,7 +110,6 @@ local midpos = {
 --------------------------------------------------------------------------------
 -- Initialization
 --
-
 function mod:OnBossEnable()
 	Print(("Module %s loaded"):format(mod.ModuleName))
 	Apollo.RegisterEventHandler("RC_UnitStateChanged", "OnUnitStateChanged", self)
@@ -240,14 +238,12 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
 				core:AddLine("Visc5", 2, unit, nil, 1, 25, 288)
 			end
 		elseif sName == self.L["Mnemesis"] then
-			self:Start()
 			core:WatchUnit(unit)
 			uPlayer = GameLib.GetPlayerUnit()
 			strMyName = uPlayer:GetName()
 			midphase = false
 			core:AddUnit(unit)
 			core:RaidDebuff()
-			core:StartScan()
 			core:AddBar("DEFRAG", self.L["~DEFRAG CD"], 21, mod:GetSetting("SoundDefrag"))
 			core:AddBar("ENRAGE", self.L["ENRAGE"], 480, mod:GetSetting("SoundEnrage"))
 		end

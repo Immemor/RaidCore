@@ -14,12 +14,15 @@ require "ChatSystemLib"
 local GeminiAddon = Apollo.GetPackage("Gemini:Addon-1.1").tPackage
 local LogPackage = Apollo.GetPackage("Log-1.0").tPackage
 local RaidCore = GeminiAddon:NewAddon("RaidCore", false, {}, "Gemini:Timer-1.0")
+local Log = LogPackage:CreateNamespace("CombatManager")
 
 ----------------------------------------------------------------------------------------------------
 -- Copy of few objects to reduce the cpu load.
 -- Because all local objects are faster.
 ----------------------------------------------------------------------------------------------------
 local GetPlayerUnit = GameLib.GetPlayerUnit
+local GetUnitById = GameLib.GetUnitById
+local GetCurrentZoneMap = GameLib.GetCurrentZoneMap
 
 ----------------------------------------------------------------------------------------------------
 -- Constants.
@@ -32,9 +35,13 @@ local NO_BREAK_SPACE = string.char(194, 160)
 -- Privates variables.
 ----------------------------------------------------------------------------------------------------
 local _wndrclog = nil
-local enablezones, enablemobs, enablepairs, restrictzone, enablezone, restricteventobjective, enableeventobjective = {}, {}, {}, {}, {}, {}, {}
-local monitoring = nil
 local _tWipeTimer
+local _tHUDtimer
+local _tTrigPerZone = {}
+local _tEncountersPerZone = {}
+local _tDelayedUnits = {}
+local _bIsEncounterInProgress = false
+local _tCurrentEncounter = nil
 
 
 local trackMaster = Apollo.GetAddon("TrackMaster")
@@ -224,6 +231,52 @@ local DefaultSettings = {
 }
 
 ----------------------------------------------------------------------------------------------------
+-- Privates functions
+----------------------------------------------------------------------------------------------------
+local function Add2DelayedUnit(nId, sName, bInCombat)
+    local tMap = GetCurrentZoneMap()
+    local id1 = tMap.continentId
+    local id2 = tMap.parentZoneId
+    local id3 = tMap.id
+    local tTrig = _tTrigPerZone[id1] and _tTrigPerZone[id1][id2] and _tTrigPerZone[id1][id2][id3]
+    if tTrig and tTrig[sName] then
+        Log:Add("Add2DelayedUnit", nId, sName, bInCombat)
+        if not _tDelayedUnits[sName] then
+            _tDelayedUnits[sName] = {}
+        end
+        table.insert(_tDelayedUnits[sName], nId)
+    end
+end
+
+local function SearchEncounter()
+    local tMap = GetCurrentZoneMap()
+    local id1 = tMap.continentId
+    local id2 = tMap.parentZoneId
+    local id3 = tMap.id
+    local tEncounters = _tEncountersPerZone[id1] and _tEncountersPerZone[id1][id2] and _tEncountersPerZone[id1][id2][id3]
+    if tEncounters then
+        for _, tEncounter in next, tEncounters do
+            if tEncounter:OnTrig(_tDelayedUnits) then
+                _tCurrentEncounter = tEncounter
+                Log:Add("Encounter Found", _tCurrentEncounter:GetName())
+                break
+            end
+        end
+    end
+end
+
+local function ProcessDelayedUnit()
+    for nDelayedName, tDelayedList in next, _tDelayedUnits do
+        for _, nDelayedId in next, tDelayedList do
+            local tUnit = GetUnitById(nDelayedId)
+            local bInCombat = tUnit:IsInCombat()
+            Event_FireGenericEvent("RC_UnitStateChanged", tUnit, bInCombat, nDelayedName)
+        end
+    end
+    _tDelayedUnits = {}
+end
+
+----------------------------------------------------------------------------------------------------
 -- RaidCore Initialization
 ----------------------------------------------------------------------------------------------------
 function RaidCore:OnInitialize()
@@ -300,9 +353,8 @@ function RaidCore:OnDocLoaded()
 	-- Register handlers for events, slash commands and timer, etc.
 	Apollo.RegisterSlashCommand("raidc", "OnRaidCoreOn", self)
 	Apollo.RegisterEventHandler("Group_MemberFlagsChanged", "OnGroup_MemberFlagsChanged", self)
-	Apollo.RegisterEventHandler("ChangeWorld", "OnWorldChangedTimer", self)
-	Apollo.RegisterEventHandler("SubZoneChanged", "OnSubZoneChanged", self)
-	Apollo.RegisterEventHandler("PublicEventObjectiveUpdate", "OnPublicEventObjectiveUpdate", self)
+    Apollo.RegisterEventHandler("ChangeWorld", "OnCheckMapZone", self)
+    Apollo.RegisterEventHandler("SubZoneChanged", "OnCheckMapZone", self)
 
 	-- Do additional Addon initialization here
 
@@ -320,25 +372,48 @@ function RaidCore:OnDocLoaded()
 
     _tWipeTimer = ApolloTimer.Create(0.5, true, "WipeCheck", self)
     _tWipeTimer:Stop()
+    _tHUDtimer = ApolloTimer.Create(0.1, true, "OnTimer", self)
+    _tHUDtimer:Stop()
 
 	self.lines = {}
 
 	self.chanCom = nil
 	CommChannelTimer = ApolloTimer.Create(5, false, "UpdateCommChannel", self) -- make sure everything is loaded, so after 5sec
 
-	-- Final parsing about encounters.
-	for name, module in self:IterateModules() do
-		local r, e = pcall(module.PrepareEncounter, module)
-		if not r then
-			Print(e)
-		else
-			for _, id in next, module.continentIdList do
-				enablezones[id] = true
-			end
-		end
-	end
-	self:ScheduleTimer("OnWorldChanged", 5)
-	self:LogGUI_init()
+    -- Final parsing about encounters.
+    for name, module in self:IterateModules() do
+        local r, e = pcall(module.PrepareEncounter, module)
+        if not r then
+            Print(e)
+        else
+            for _, id1 in next, module.continentIdList do
+                if _tTrigPerZone[id1] == nil then
+                    _tTrigPerZone[id1] = {}
+                    _tEncountersPerZone[id1] = {}
+                end
+                for _, id2 in next, module.parentMapIdList do
+                    if _tTrigPerZone[id1][id2] == nil then
+                        _tTrigPerZone[id1][id2] = {}
+                        _tEncountersPerZone[id1][id2] = {}
+                    end
+                    for _, id3 in next, module.mapIdList do
+                        if _tTrigPerZone[id1][id2][id3] == nil then
+                            _tTrigPerZone[id1][id2][id3] = {}
+                            _tEncountersPerZone[id1][id2][id3] = {}
+                        end
+                        table.insert(_tEncountersPerZone[id1][id2][id3], module)
+                        if module.EnableMob then
+                            for _, Mob in next, module.EnableMob do
+                                _tTrigPerZone[id1][id2][id3][Mob] = true
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+    self:LogGUI_init()
+    self:OnCheckMapZone()
 end
 
 ----------------------------------------------------------------------------------------------------
@@ -731,213 +806,31 @@ function RaidCore:hasActiveEvent(tblEvents)
 	return false
 end
 
-function RaidCore:OnUnitCreated(nId, unit, sName)
-	Event_FireGenericEvent("RC_UnitCreated", unit, sName)
-	if unit and not unit:IsDead() then
-		if sName and enablemobs[sName] then
-			if type(enablemobs[sName]) == "string" then
-				local modName = enablemobs[sName]
-				local module = self:GetModule(modName)
-				if not module or module:IsEnabled() then return end
-				if restrictzone[modName] and not restrictzone[modName][GetCurrentSubZoneName()] then return end
-				if restricteventobjective[modName] and not self:hasActiveEvent(restricteventobjective[modName]) then return end
-				Print("Enabling Boss Module : " .. enablemobs[sName])
-				for name, mod in self:IterateModules() do
-					if mod:IsEnabled() then mod:Disable() end
-				end
-				module:Enable()
-			else
-				for i, modName in next, enablemobs[sName] do
-					local module = self:GetModule(modName)
-					if not module or module:IsEnabled() then return end
-				end
-				for name, mod in self:IterateModules() do
-					if mod:IsEnabled() then mod:Disable() end
-				end
-				for i, modName in next, enablemobs[sName] do
-					local module = self:GetModule(modName)
-					if restrictzone[modName] and not restrictzone[modName][GetCurrentSubZoneName()] then return end
-					if restricteventobjective[modName] and not self:hasActiveEvent(restricteventobjective[modName]) then return end
-					Print("Enabling Boss Module : " .. modName)
-					module:Enable()
-				end
-			end
-		else
-			-- Check if part of a boss combination pair
-			for modName, bosses in pairs(enablepairs) do
-				for bossName, activeState in pairs(bosses) do
-					if sName == bossName then
-						-- Set this boss to true if it is active
-						enablepairs[modName][bossName] = true
-					end
-				end
-			end
-			-- Loop again to check if there's any boss pair that has
-			-- all bosses that are required for it to activate active
-			for modName, bosses in pairs(enablepairs) do
-				local bModNameBossActive = true
-				for bossName, activeState in pairs(bosses) do
-					if bModNameBossActive and not activeState then
-						bModNameBossActive = false
-					end
-				end
-
-				-- At this point we know this boss pair should be enabled.
-				if bModNameBossActive then
-					-- Disable any other modules that are active
-					for name, mod in self:IterateModules() do
-						if name ~= modName and mod:IsEnabled() then
-							mod:Disable()
-						end
-					end
-					mod = self:GetModule(modName)
-					if restrictzone[modName] and not restrictzone[modName][GetCurrentSubZoneName()] then return end
-					if mod:IsEnabled() then return end
-					Print("Enabling Boss Module : " .. modName)
-					mod:Enable()
-					return
-				end
-			end
-		end
-	end
-end
-
-
-function RaidCore:StartCombat(modName)
-	Print("Starting Core Combat")
-	for name, mod in self:IterateModules() do
-		if mod:IsEnabled() and mod.ModuleName ~= modName then
-			mod:Disable()
-		end
-	end
-end
-
-function RaidCore:OnWorldChangedTimer()
-	self:ScheduleTimer("OnWorldChanged", 5)
-end
-
-
-function RaidCore:OnWorldChanged()
-	local zoneMap = GameLib.GetCurrentZoneMap()
-
-	if zoneMap then
-		if enablezones[zoneMap.continentId] then
-			self:CombatInterface_Activate("DetectAll")
-			monitoring = true
-			if self.timer == nil then
-				self.timer = ApolloTimer.Create(0.100, true, "OnTimer", self)
-			else
-				self.timer:Start()
-			end
-		else
-			self:CombatInterface_Activate("Disable")
-			if monitoring then
-				monitoring = nil
-				self:ResetAll()
-				self.timer:Stop()
-			end
-		end
-	else
-		self:ScheduleTimer("OnWorldChanged", 5)
-	end
-end
-
-function RaidCore:OnSubZoneChanged(idZone, strSubZone)
-	for key, value in pairs(enablezone) do
-		if value[strSubZone] then
-			local modName = key
-			local bossMod = self:GetModule(modName)
-			if not bossMod or bossMod:IsEnabled() then return end
-			if restricteventobjective[modName] and not self:hasActiveEvent(restricteventobjective[modName]) then return end
-			Print("Enabling Boss Module : " .. modName)
-			bossMod:Enable()
-			return
-		end
-	end
-	-- if we haven't returned at this point we left the subzone and should disable the mod
-	-- if it is still enabled
-	for name, mod in self:IterateModules() do
-		for key, value in pairs(enablezone) do
-			local modName = mod.ModuleName
-			if key == modName and mod:IsEnabled() then
-				mod:Disable()
-			end
-		end
-	end
-end
-
-function RaidCore:OnPublicEventObjectiveUpdate(peoUpdated)
-	for key, value in pairs(enableeventobjective) do
-		if value[peoUpdated:GetShortDescription()] then
-			if peoUpdated:GetStatus() == 1 then
-				local modName = key
-				local bossMod = self:GetModule(modName)
-				if not bossMod or bossMod:IsEnabled() then return end
-				if restrictzone[modName] and not restrictzone[modName][GetCurrentSubZoneName()] then return end
-				Print("Enabling Boss Module : " .. modName)
-				bossMod:Enable()
-				return
-			elseif peoUpdated:GetStatus() == 0 then
-				local modName = key
-				local bossMod = self:GetModule(modName)
-				if not bossMod or not bossMod:IsEnabled() then return end
-				bossMod:Disable()
-			end
-		end
-	end
-end
-
-do
-	local function add(moduleName, tbl, list)
-		for i, entry in next, list do
-			local t = type(tbl[entry])
-			if t == "nil" then
-				tbl[entry] = moduleName
-			elseif t == "table" then
-				tbl[entry][#tbl[entry] + 1] = moduleName
-			elseif t == "string" then
-				local tmp = tbl[entry]
-				tbl[entry] = { tmp, moduleName }
-			else
-				Print(("Unknown type in a enable trigger table at index %d for %q."):format(i, tostring(moduleName)))
-			end
-		end
-	end
-
-	local function addPair(moduleName, tbl, list)
-		-- ... is holding our actual bosses that we want to have in a pair
-		-- we will store them in the tbl (enablepairs)
-		local bosses = {}
-		for key, value in next, list do
-			-- Defaults to false meaning the unit is not active/in-range
-			bosses[value] = false
-		end
-		tbl[moduleName] = bosses
-	end
-
-	function RaidCore:RegisterEnableMob(module, list) add(module.ModuleName, enablemobs, list) end
-	function RaidCore:RegisterEnableBossPair(module, list) addPair(module.ModuleName, enablepairs, list) end
-	function RaidCore:GetEnableMobs() return enablemobs end
-	function RaidCore:GetEnablePairs() return enablepairs end
-	function RaidCore:GetRestrictZone() return restrictzone end
-	function RaidCore:GetRestrictEventObjective() return restricteventobjective end
-	function RaidCore:GetEnableEventObjective() return enableeventobjective end
-	function RaidCore:GetEnableZone() return enablezone end
-end
-
-
-do
-	local function add2(moduleName, tbl, list)
-		if not tbl[moduleName] then tbl[moduleName] = {} end
-		for i, entry in next, list do
-			if not tbl[moduleName][entry] then tbl[moduleName][entry] = true end
-		end
-	end
-
-	function RaidCore:RegisterRestrictZone(module, list) add2(module.ModuleName, restrictzone, list) end
-	function RaidCore:RegisterEnableZone(module, list) add2(module.ModuleName, enablezone, list) end
-	function RaidCore:RegisterRestrictEventObjective(module, list) add2(module.ModuleName, restricteventobjective, list) end
-	function RaidCore:RegisterEnableEventObjective(module, list) add2(module.ModuleName, enableeventobjective, list) end
+function RaidCore:OnCheckMapZone()
+    if not _bIsEncounterInProgress then
+        local tMap = GetCurrentZoneMap()
+        if tMap then
+            local tTrigInZone = _tTrigPerZone[tMap.continentId]
+            local bSearching = false
+            if tTrigInZone then
+                tTrigInZone = tTrigInZone[tMap.parentZoneId]
+                if tTrigInZone then
+                    tTrigInZone = tTrigInZone[tMap.id]
+                    if tTrigInZone then
+                        bSearching = true
+                    end
+                end
+            end
+            if bSearching then
+                self:CombatInterface_Activate("DetectCombat")
+            else
+                self:CombatInterface_Activate("Disable")
+                self:ResetAll()
+            end
+        else
+            self:ScheduleTimer("OnCheckMapZone", 5)
+        end
+    end
 end
 
 function RaidCore:AddBar(key, message, duration, emphasize)
@@ -1150,31 +1043,6 @@ function RaidCore:OnUnitDestroyed(key, unit, unitName)
 	end
 	if self.buffs[key] then
 		self.buffs[key] = nil
-	end
-
-	-- Unload boss module if all units are destroyed within a module
-	for modName, bosses in pairs(enablepairs) do
-		for bossName, activeState in pairs(bosses) do
-			if activeState and bossName == unitName then
-				enablepairs[modName][bossName] = false
-			end
-		end
-	end
-	for modName, bosses in pairs(enablepairs) do
-		local bModNameBossActive = false
-		for bossName, activeState in pairs(bosses) do
-			if not bModNameBossActive and activeState then
-				bModNameBossActive = true
-			end
-		end
-		if not bModNameBossActive then
-			-- Disable any other modules that are active
-			for name, mod in self:IterateModules() do
-				if name == modName and mod:IsEnabled() then
-					mod:Disable()
-				end
-			end
-		end
 	end
 end
 
@@ -1407,6 +1275,12 @@ function RaidCore:WipeCheck()
 		self:CancelTimer(self.berserk)
 		self.berserk = nil
 	end
+    Log:Add("Encounter no more in progress")
+    _bIsEncounterInProgress = false
+    if _tCurrentEncounter then
+        _tCurrentEncounter:Disable()
+        _tCurrentEncounter = nil
+    end
 	self.raidbars:ClearAll()
 	self.unitmoni:ClearAll()
 	self.message:ClearAll()
@@ -1420,26 +1294,47 @@ function RaidCore:WipeCheck()
 	self:ResetSync()
 	self:ResetLines()
 
-	-- XXX Zone not Checked!
-	self:CombatInterface_Activate("DetectAll")
+    _tHUDtimer:Stop()
+    self:CombatInterface_Activate("DetectCombat")
 	Event_FireGenericEvent("RAID_WIPE")
 end
 
-function RaidCore:OnEnteredCombat(id, unit, UnitName, bInCombat)
-	Event_FireGenericEvent("RC_UnitStateChanged", unit, bInCombat, UnitName)
+function RaidCore:OnUnitCreated(nId, tUnit, sName)
+    Event_FireGenericEvent("RC_UnitCreated", tUnit, sName)
+end
 
-	if unit == GetPlayerUnit() then
-		if bInCombat then
-			-- Player entering in combat.
-			self:CombatInterface_Activate("FullEnable")
-		else
-			-- Player is dead or left the combat.
-			_tWipeTimer:Start()
-		end
-	elseif unit:IsInYourGroup() then
-		-- It's a raid member or group member.
-	else
-	end
+function RaidCore:OnEnteredCombat(nId, tUnit, sName, bInCombat)
+    -- Manage the lower layer.
+    if tUnit == GetPlayerUnit() then
+        if bInCombat then
+            -- Player entering in combat.
+            Log:Add("Player In Combat")
+            _bIsEncounterInProgress = true
+            self:CombatInterface_Activate("FullEnable")
+            _tHUDtimer:Start()
+            if _tCurrentEncounter and not _tCurrentEncounter:IsEnabled() then
+                _tCurrentEncounter:Enable()
+                ProcessDelayedUnit()
+            end
+        else
+            -- Player is dead or left the combat.
+            _tWipeTimer:Start()
+        end
+    elseif not tUnit:IsInYourGroup() then
+        if not _tCurrentEncounter then
+            Add2DelayedUnit(nId, sName, bInCombat)
+            if  _bIsEncounterInProgress then
+                SearchEncounter()
+                if _tCurrentEncounter and not _tCurrentEncounter:IsEnabled() then
+                    _tCurrentEncounter:Enable()
+                    ProcessDelayedUnit()
+                end
+            end
+        else
+            -- Dispatch this Event to the Encounter
+            Event_FireGenericEvent("RC_UnitStateChanged", tUnit, bInCombat, sName)
+        end
+    end
 end
 
 local function IsPartyMemberByName(sName)

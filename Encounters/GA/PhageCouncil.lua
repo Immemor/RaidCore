@@ -7,9 +7,9 @@ local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local mod = core:NewEncounter("PhageCouncil", 67, 147, 149)
 if not mod then return end
 
-mod:RegisterEnableMob("Golgox the Lifecrusher", "Terax Blightweaver", "Ersoth Curseform", "Noxmind the Insidious", "Fleshmonger Vratorg")
-mod:RegisterRestrictZone("PhageCouncil", "Augmentation Core")
-mod:RegisterEnableZone("PhageCouncil", "Augmentation Core")
+mod:RegisterTrigMob("ANY", {
+    "Golgox the Lifecrusher", "Terax Blightweaver", "Ersoth Curseform", "Noxmind the Insidious",
+    "Fleshmonger Vratorg"})
 mod:RegisterEnglishLocale({
 	-- Unit names.
 	["Terax Blightweaver"] = "Terax Blightweaver",
@@ -136,8 +136,6 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
 			or sName == self.L["Ersoth Curseform"]
 			or sName == self.L["Noxmind the Insidious"]
 			or sName == self.L["Fleshmonger Vratorg"] then
-			self:Start()
-			core:StartScan()
 			p2Count = 0
 			core:AddBar("CONVP1", self.L["[%u] NEXT P2"]:format(p2Count + 1), 90, 1)
 			core:AddUnit(unit)
