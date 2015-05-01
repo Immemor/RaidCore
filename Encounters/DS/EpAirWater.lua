@@ -14,17 +14,10 @@ mod:RegisterEnglishLocale({
 	-- Unit names.
 	["Hydroflux"] = "Hydroflux",
 	["Aileron"] = "Aileron",
-	["Landing Volume"] = "Landing Volume",
-	["Wind Wall"] = "Wind Wall",
-	-- Datachron messages.
-	["Hydroflux evaporates"] = "Hydroflux evaporates",
-	["Aileron dissipates with a flurry"] = "Aileron dissipates with a flurry",
-	["The wind starts to blow faster and faster"] = "The wind starts to blow faster and faster",
 	-- Cast.
 	["Tsunami"] = "Tsunami",
 	["Glacial Icestorm"] = "Glacial Icestorm",
 	-- Bar and messages.
-	["EYE OF THE STORM"] = "EYE OF THE STORM",
 	["MOO !"] = "MOO !",
 	["MOO PHASE"] = "MOO PHASE",
 	["ICESTORM"] = "ICESTORM",
@@ -37,17 +30,10 @@ mod:RegisterFrenchLocale({
 	-- Unit names.
 	["Hydroflux"] = "Hydroflux",
 	["Aileron"] = "Ventemort",
---	["Landing Volume"] = "Landing Volume",	-- TODO: French translation missing !!!!
-	["Wind Wall"] = "Mur de vent",
-	-- Datachron messages.
---	["Hydroflux evaporates"] = "Hydroflux evaporates",	-- TODO: French translation missing !!!!
---	["Aileron dissipates with a flurry"] = "Aileron dissipates with a flurry",	-- TODO: French translation missing !!!!
---	["The wind starts to blow faster and faster"] = "The wind starts to blow faster and faster",	-- TODO: French translation missing !!!!
 	-- Cast.
 	["Tsunami"] = "Tsunami",
 	["Glacial Icestorm"] = "Tempête de neige glaciale",
 	-- Bar and messages.
---	["EYE OF THE STORM"] = "EYE OF THE STORM",	-- TODO: French translation missing !!!!
 --	["MOO !"] = "MOO !",	-- TODO: French translation missing !!!!
 	["MOO PHASE"] = "MOO PHASE",
 --	["ICESTORM"] = "ICESTORM",	-- TODO: French translation missing !!!!
@@ -60,17 +46,10 @@ mod:RegisterGermanLocale({
 	-- Unit names.
 	["Hydroflux"] = "Hydroflux",
 	["Aileron"] = "Aileron",
---	["Landing Volume"] = "Landing Volume",	-- TODO: German translation missing !!!!
-	["Wind Wall"] = "Windwand",
-	-- Datachron messages.
---	["Hydroflux evaporates"] = "Hydroflux evaporates",	-- TODO: German translation missing !!!!
---	["Aileron dissipates with a flurry"] = "Aileron dissipates with a flurry",	-- TODO: German translation missing !!!!
---	["The wind starts to blow faster and faster"] = "The wind starts to blow faster and faster",	-- TODO: German translation missing !!!!
 	-- Cast.
 	["Tsunami"] = "Tsunami",
 	["Glacial Icestorm"] = "Frostiger Eissturm",
 	-- Bar and messages.
---	["EYE OF THE STORM"] = "EYE OF THE STORM",	-- TODO: German translation missing !!!!
 --	["MOO !"] = "MOO !",	-- TODO: German translation missing !!!!
 --	["MOO PHASE"] = "MOO PHASE",	-- TODO: German translation missing !!!!
 --	["ICESTORM"] = "ICESTORM",	-- TODO: German translation missing !!!!
@@ -96,12 +75,9 @@ local CheckTwirlTimer = nil
 
 function mod:OnBossEnable()
 	Print(("Module %s loaded"):format(mod.ModuleName))
-	Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
-	--Apollo.RegisterEventHandler("RC_UnitDestroyed", "OnUnitDestroyed", self)
 	Apollo.RegisterEventHandler("RC_UnitStateChanged", "OnUnitStateChanged", self)
 	Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
 	Apollo.RegisterEventHandler("SPELL_CAST_END", "OnSpellCastEnd", self)
-	Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
 	Apollo.RegisterEventHandler("BUFF_APPLIED", "OnBuffApplied", self)
 	Apollo.RegisterEventHandler("DEBUFF_APPLIED", "OnDebuffApplied", self)
 	Apollo.RegisterEventHandler("RAID_WIPE", "OnReset", self)
@@ -117,21 +93,6 @@ function mod:OnReset()
 	end
 	core:ResetMarks()
 	twirl_units = {}
-end
-
-function mod:OnUnitCreated(unit, sName)
-	--Print(sName)
-	if sName == self.L["Landing Volume"] then
-		core:MarkUnit(unit, 0, "LAND")
-	end
-end
-
-function mod:OnUnitDestroyed(unit, sName)
-	--Print(sName)
-	if sName == self.L["Wind Wall"] then
-		core:DropLine(unit:GetId().."_1")
-		core:DropLine(unit:GetId().."_2")
-	end
 end
 
 function mod:OnSpellCastStart(unitName, castName, unit)
@@ -152,19 +113,6 @@ function mod:OnSpellCastEnd(unitName, castName)
 		core:AddBar("TOMB", self.L["~Frost Tombs"], 30, mod:GetSetting("SoundFrostTombs"))
 	end
 	--Print(unitName .. " - " .. castName)
-end
-
-function mod:OnChatDC(message)
-	if message:find(self.L["Hydroflux evaporates"]) then
-		--core:AddMsg("PHASE1", "MOO !", 5, "Info", "Blue")
-		core:AddBar("PHASE2", self.L["EYE OF THE STORM"], 45, mod:GetSetting("SoundMidphase"))
-	elseif message:find(self.L["Aileron dissipates with a flurry"]) then
-		core:AddBar("PHASE2", self.L["Tsunami"]:upper(), 45, mod:GetSetting("SoundMidphase"))
-	elseif message:find(self.L["The wind starts to blow faster and faster"]) then
-		phase2 = true
-		mooCount = mooCount + 1
-		core:AddMsg("PHASE2", self.L["EYE OF THE STORM"], 5, mod:GetSetting("SoundMidphase", "Alert"))
-	end
 end
 
 function mod:OnBuffApplied(unitName, splId, unit)
