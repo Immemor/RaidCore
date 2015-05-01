@@ -14,8 +14,6 @@ mod:RegisterEnglishLocale({
 	-- Unit names.
 	["Hydroflux"] = "Hydroflux",
 	["Aileron"] = "Aileron",
-	["Landing Volume"] = "Landing Volume",
-	["Wind Wall"] = "Wind Wall",
 	-- Cast.
 	["Tsunami"] = "Tsunami",
 	["Glacial Icestorm"] = "Glacial Icestorm",
@@ -32,8 +30,6 @@ mod:RegisterFrenchLocale({
 	-- Unit names.
 	["Hydroflux"] = "Hydroflux",
 	["Aileron"] = "Ventemort",
---	["Landing Volume"] = "Landing Volume",	-- TODO: French translation missing !!!!
-	["Wind Wall"] = "Mur de vent",
 	-- Cast.
 	["Tsunami"] = "Tsunami",
 	["Glacial Icestorm"] = "Tempête de neige glaciale",
@@ -50,8 +46,6 @@ mod:RegisterGermanLocale({
 	-- Unit names.
 	["Hydroflux"] = "Hydroflux",
 	["Aileron"] = "Aileron",
---	["Landing Volume"] = "Landing Volume",	-- TODO: German translation missing !!!!
-	["Wind Wall"] = "Windwand",
 	-- Cast.
 	["Tsunami"] = "Tsunami",
 	["Glacial Icestorm"] = "Frostiger Eissturm",
@@ -81,8 +75,6 @@ local CheckTwirlTimer = nil
 
 function mod:OnBossEnable()
 	Print(("Module %s loaded"):format(mod.ModuleName))
-	Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
-	--Apollo.RegisterEventHandler("RC_UnitDestroyed", "OnUnitDestroyed", self)
 	Apollo.RegisterEventHandler("RC_UnitStateChanged", "OnUnitStateChanged", self)
 	Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
 	Apollo.RegisterEventHandler("SPELL_CAST_END", "OnSpellCastEnd", self)
@@ -101,21 +93,6 @@ function mod:OnReset()
 	end
 	core:ResetMarks()
 	twirl_units = {}
-end
-
-function mod:OnUnitCreated(unit, sName)
-	--Print(sName)
-	if sName == self.L["Landing Volume"] then
-		core:MarkUnit(unit, 0, "LAND")
-	end
-end
-
-function mod:OnUnitDestroyed(unit, sName)
-	--Print(sName)
-	if sName == self.L["Wind Wall"] then
-		core:DropLine(unit:GetId().."_1")
-		core:DropLine(unit:GetId().."_2")
-	end
 end
 
 function mod:OnSpellCastStart(unitName, castName, unit)
