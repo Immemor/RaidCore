@@ -34,6 +34,7 @@ local NO_BREAK_SPACE = string.char(194, 160)
 local _wndrclog = nil
 local enablezones, enablemobs, enablepairs, restrictzone, enablezone, restricteventobjective, enableeventobjective = {}, {}, {}, {}, {}, {}, {}
 local monitoring = nil
+local _tWipeTimer
 
 
 local trackMaster = Apollo.GetAddon("TrackMaster")
@@ -317,7 +318,8 @@ function RaidCore:OnDocLoaded()
 	self.syncRegister = {}
 	self.syncTimer = {}
 
-	self.wipeTimer = false
+    _tWipeTimer = ApolloTimer.Create(0.5, true, "WipeCheck", self)
+    _tWipeTimer:Stop()
 
 	self.lines = {}
 
@@ -1372,10 +1374,7 @@ function RaidCore:Berserk(timer)
 end
 
 function RaidCore:ResetAll()
-	if self.wipeTimer then
-		self.wipeTimer:Stop()
-		self.wipeTimer = nil
-	end
+    _tWipeTimer:Stop()
 	if self.berserk then
 		self:CancelTimer(self.berserk)
 		self.berserk = nil
@@ -1403,8 +1402,7 @@ function RaidCore:WipeCheck()
 			end
 		end
 	end
-	self.wipeTimer:Stop()
-	self.wipeTimer = nil
+	_tWipeTimer:Stop()
 	if self.berserk then
 		self:CancelTimer(self.berserk)
 		self.berserk = nil
@@ -1436,7 +1434,7 @@ function RaidCore:OnEnteredCombat(id, unit, UnitName, bInCombat)
 			self:CombatInterface_Activate("FullEnable")
 		else
 			-- Player is dead or left the combat.
-			self.wipeTimer = ApolloTimer.Create(0.5, true, "WipeCheck", self)
+			_tWipeTimer:Start()
 		end
 	elseif unit:IsInYourGroup() then
 		-- It's a raid member or group member.
