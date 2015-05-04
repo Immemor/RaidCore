@@ -16,4 +16,4 @@ externals:
     url: https://github.com/wildstarnasa/LibJSON.git
 
 ignore:
-  Textures/GUI/DefaultBouton.ai
+ - Textures/GUI/DefaultBouton.ai
