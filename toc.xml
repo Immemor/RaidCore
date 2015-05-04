@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Addon Author="Ninjouz" APIVersion="9" Name="RaidCore" Description="Core Functions for Raid Warnings" Version="0.2.0">
+<Addon Author="Ninjouz" APIVersion="10" Name="RaidCore" Description="Core Functions for Raid Warnings" Version="1.0">
 	<!-- Libraries -->
 	<Script Name="Libs/GeminiLocale/GeminiLocale.lua"/>
 	<Script Name="Libs/GeminiAddon/GeminiAddon.lua" />
