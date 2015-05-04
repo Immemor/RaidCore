@@ -7,9 +7,8 @@ local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local mod = core:NewEncounter("Prototypes", 67, 147, 149)
 if not mod then return end
 
-mod:RegisterEnableMob("Phagetech Commander", "Phagetech Augmentor", "Phagetech Protector", "Phagetech Fabricator")
-mod:RegisterRestrictZone("Prototypes", "Phagetech Uplink Hub")
-mod:RegisterEnableZone("Prototypes", "Phagetech Uplink Hub")
+mod:RegisterTrigMob("ANY", {
+    "Phagetech Commander", "Phagetech Augmentor", "Phagetech Protector", "Phagetech Fabricator"})
 mod:RegisterEnglishLocale({
 	-- Unit names.
 	["Phagetech Commander"] = "Phagetech Commander",
@@ -134,10 +133,8 @@ end
 function mod:OnUnitStateChanged(unit, bInCombat, sName)
 	if unit:GetType() == "NonPlayer" and bInCombat then
 		if sName == self.L["Phagetech Commander"] then
-			self:Start()
 		elseif sName == self.L["Phagetech Augmentor"] or sName == self.L["Phagetech Fabricator"] then
 			core:WatchUnit(unit)
-			core:StartScan()
 		end
 	end
 end

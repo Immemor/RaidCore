@@ -7,9 +7,7 @@ local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local mod = core:NewEncounter("EpAirEarth", 52, 98, 117)
 if not mod then return end
 
---mod:RegisterEnableMob("Megalith")
-mod:RegisterEnableBossPair("Megalith", "Aileron")
-mod:RegisterRestrictZone("EpAirEarth", "Elemental Vortex Alpha", "Elemental Vortex Beta", "Elemental Vortex Delta")
+mod:RegisterTrigMob("ALL", { "Megalith", "Aileron" })
 mod:RegisterEnglishLocale({
 	-- Unit names.
 	["Megalith"] = "Megalith",
@@ -70,7 +68,6 @@ local startTime
 --------------------------------------------------------------------------------
 -- Initialization
 --
-
 function mod:OnBossEnable()
 	Print(("Module %s loaded"):format(mod.ModuleName))
 	Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
@@ -142,7 +139,6 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
 			core:WatchUnit(unit)
 			core:MarkUnit(unit, nil, self.L["EARTH"])
 		elseif sName == self.L["Aileron"] then
-			self:Start()
 			prev = 0
 			midphase = false
 			if mod:GetSetting("LineCleaveAileron") then
@@ -152,8 +148,6 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
 			core:AddBar("TORNADO", self.L["~Tornado Spawn"], 16, mod:GetSetting("SoundTornadoCountdown"))
 			core:AddUnit(unit)
 			core:WatchUnit(unit)
-			core:StartScan()
-			--Print(eventTime .. "FIGHT STARTED")
 		end
 	end
 end

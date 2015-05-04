@@ -7,9 +7,7 @@ local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local mod = core:NewEncounter("EpFireWater", 52, 98, 118)
 if not mod then return end
 
---mod:RegisterEnableMob("Hydroflux")
-mod:RegisterEnableBossPair("Hydroflux", "Pyrobane")
-mod:RegisterRestrictZone("EpFireWater", "Elemental Vortex Alpha", "Elemental Vortex Beta", "Elemental Vortex Delta")
+mod:RegisterTrigMob("ALL", { "Hydroflux", "Pyrobane" })
 mod:RegisterEnglishLocale({
 	-- Unit names.
 	["Hydroflux"] = "Hydroflux",
@@ -98,7 +96,6 @@ local frostbomb_players = {}
 --------------------------------------------------------------------------------
 -- Initialization
 --
-
 function mod:OnBossEnable()
 	Print(("Module %s loaded"):format(mod.ModuleName))
 	Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
@@ -275,7 +272,6 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
 				core:AddPixie(unitId .. "_2", 2, unit, nil, "Yellow", 3, 7, 180)
 			end
 		elseif sName == self.L["Pyrobane"] then
-			self:Start()
 			uPlayer = GameLib.GetPlayerUnit()
 			strMyName = uPlayer:GetName()
 			groupCount = 1
@@ -285,7 +281,6 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
 			core:AddUnit(unit)
 			core:RaidDebuff()
 			core:AddBar("BOMBS", self.L["BOMBS"], 30)
-			core:StartScan()
 		end
 	end
 end
