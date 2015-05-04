@@ -7,7 +7,7 @@ local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local mod = core:NewEncounter("FrostAvalanche", 52, 98, 109)
 if not mod then return end
 
-mod:RegisterEnableMob("Frost-Boulder Avalanche")
+mod:RegisterTrigMob("ANY", { "Frost-Boulder Avalanche" })
 mod:RegisterEnglishLocale({
 	-- Unit names.
 	["Frost-Boulder Avalanche"] = "Frost-Boulder Avalanche",
@@ -98,7 +98,6 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
 			icicleSpell = false
 			core:AddUnit(unit)
 			core:WatchUnit(unit)
-			core:StartScan()
 		end
 	end
 end

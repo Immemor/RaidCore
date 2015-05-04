@@ -7,13 +7,12 @@ local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local mod = core:NewEncounter("Lattice", 52, 98, 116)
 if not mod then return end
 
-mod:RegisterEnableMob("Big Red Button")
+mod:RegisterTrigMob("ANY", { "Avatus" })
 mod:RegisterEnglishLocale({
 	-- Unit names.
 	["Avatus"] = "Avatus",
 	["Obstinate Logic Wall"] = "Obstinate Logic Wall",
 	["Data Devourer"] = "Data Devourer",
-	["Big Red Button"] = "Big Red Button",
 	-- Datachron messages.
 	["Avatus sets his focus on [PlayerName]!"] = "Avatus sets his focus on (.*)!",
 	["Avatus prepares to delete all"] = "Avatus prepares to delete all data!",
@@ -37,7 +36,6 @@ mod:RegisterFrenchLocale({
 	["Avatus"] = "Avatus",
 	["Obstinate Logic Wall"] = "Mur de logique obstiné",
 	["Data Devourer"] = "Dévoreur de données",
---	["Big Red Button"] = "Big Red Button",	-- TODO: French translation missing !!!!
 	-- Datachron messages.
 --	["Avatus sets his focus on [PlayerName]!"] = "Avatus sets his focus on (.*)!",	-- TODO: French translation missing !!!!
 	["Avatus prepares to delete all"] = "Avatus se prépare à effacer toutes les données !",
@@ -61,7 +59,6 @@ mod:RegisterGermanLocale({
 	["Avatus"] = "Avatus",
 	["Obstinate Logic Wall"] = "Hartnäckige Logikmauer",
 	["Data Devourer"] = "Datenverschlinger",
---	["Big Red Button"] = "Big Red Button",	-- TODO: German translation missing !!!!
 	-- Datachron messages.
 --	["Avatus sets his focus on [PlayerName]!"] = "Avatus sets his focus on (.*)!",	-- TODO: German translation missing !!!!
 --	["Avatus prepares to delete all"] = "Avatus prepares to delete all data!",	-- TODO: German translation missing !!!!
@@ -118,16 +115,7 @@ function mod:RemoveLaserMark(unit)
 end
 
 function mod:OnUnitDestroyed(unit, sName)
-	if sName == self.L["Big Red Button"] then
-		self:Start()
-		playerName = GameLib.GetPlayerUnit():GetName():gsub(NO_BREAK_SPACE, " ")
-		prev = 0
-		waveCount, beamCount = 0, 0
-		phase2 = false
-		core:AddBar("BEAM", self.L["NEXT BEAM"], 24)
-		core:AddBar("WAVE", self.L["[%u] WAVE"]:format(waveCount + 1), 24, mod:GetSetting("SoundNewWave"))
-		core:Berserk(600)
-	elseif sName == self.L["Data Devourer"] then
+	if sName == self.L["Data Devourer"] then
 		core:DropPixie(unit:GetId())
 	end
 end
@@ -193,6 +181,14 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
 				waveCount = waveCount + 1
 				core:AddMsg("WAVE", self.L["[%u] WAVE"]:format(waveCount), 5, mod:GetSetting("SoundNewWave", "Alert"))
 			end
+		elseif sName == self.L["Avatus"] then
+			playerName = GameLib.GetPlayerUnit():GetName():gsub(NO_BREAK_SPACE, " ")
+			prev = 0
+			waveCount, beamCount = 0, 0
+			phase2 = false
+			--core:AddBar("BEAM", self.L["NEXT BEAM"], 24)
+			--core:AddBar("WAVE", self.L["[%u] WAVE"]:format(waveCount + 1), 24, mod:GetSetting("SoundNewWave"))
+			core:Berserk(576)
 		end
 	end
 end

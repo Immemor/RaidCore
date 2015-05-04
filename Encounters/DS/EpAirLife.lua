@@ -7,9 +7,7 @@ local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local mod = core:NewEncounter("EpAirLife", 52, 98, 119)
 if not mod then return end
 
---mod:RegisterEnableMob("Aileron", "Test")
-mod:RegisterEnableBossPair("Aileron", "Visceralus")
-mod:RegisterRestrictZone("EpAirLife", "Elemental Vortex Alpha", "Elemental Vortex Beta", "Elemental Vortex Delta")
+mod:RegisterTrigMob("ALL", { "Aileron", "Visceralus" })
 mod:RegisterEnglishLocale({
 	-- Unit names.
 	["Visceralus"] = "Visceralus",
@@ -99,7 +97,6 @@ local twirlCount = 0
 --------------------------------------------------------------------------------
 -- Initialization
 --
-
 function mod:OnBossEnable()
 	Print(("Module %s loaded"):format(mod.ModuleName))
 	Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
@@ -270,11 +267,9 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
 				core:AddPixie(unit:GetId(), 2, unit, nil, "Red", 10, 30, 0)
 			end
 		elseif sName == self.L["Visceralus"] then
-			self:Start()
 			core:AddUnit(unit)
 			core:WatchUnit(unit)
 			core:RaidDebuff()
-			core:StartScan()
 
 			last_thorns = 0
 			last_twirl = 0

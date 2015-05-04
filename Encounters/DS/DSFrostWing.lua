@@ -7,7 +7,7 @@ local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local mod = core:NewEncounter("DSFrostWing", 52, 98, 109)
 if not mod then return end
 
-mod:RegisterEnableMob("Frost-Boulder Avalanche", "Frostbringer Warlock")
+mod:RegisterTrigMob("ANY", { "Frost-Boulder Avalanche", "Frostbringer Warlock" })
 
 --------------------------------------------------------------------------------
 -- Locals
@@ -122,15 +122,12 @@ end
 function mod:OnUnitStateChanged(unit, bInCombat, sName)
 	if unit:GetType() == "NonPlayer" and bInCombat then
 		if sName == self.L["Frost-Boulder Avalanche"] then
-			self:Start()
 			icicleSpell = false
 			core:AddUnit(unit)
 			core:WatchUnit(unit)
 			core:AddBar("ICICLE", "~" .. self.L["ICICLE"], 17)
 			core:AddBar("SHATTER", "~" .. self.L["Shatter"]:upper(), 30)
-			core:StartScan()
 		elseif sName == self.L["Frostbringer Warlock"] then
-			self:Start()
 			core:AddUnit(unit)
 			core:AddBar("WAVES", self.L["FROST WAVE"], 30)
 		end

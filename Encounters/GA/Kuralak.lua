@@ -7,9 +7,7 @@ local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local mod = core:NewEncounter("Kuralak", 67, 147, 148)
 if not mod then return end
 
-mod:RegisterEnableMob("Kuralak the Defiler")
-mod:RegisterRestrictZone("Kuralak", "Archive Access Core")
-mod:RegisterEnableZone("Kuralak", "Archive Access Core")
+mod:RegisterTrigMob("ANY", { "Kuralak the Defiler" })
 mod:RegisterEnglishLocale({
 	-- Unit names.
 	["Kuralak the Defiler"] = "Kuralak the Defiler",
@@ -130,19 +128,11 @@ function mod:OnBossEnable()
 	Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
 	Apollo.RegisterEventHandler("CHAT_NPCSAY", "OnChatNPCSay", self)
 	Apollo.RegisterEventHandler("DEBUFF_APPLIED", "OnDebuffApplied", self)
-	Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
 end
 
 --------------------------------------------------------------------------------
 -- Event Handlers
 --
-
-function mod:OnUnitCreated(unit, sName)
-	if sName == self.L["Kuralak the Defiler"] then
-		core:AddUnit(unit)
-	end
-end
-
 function mod:OnHealthChanged(unitName, health)
 	if health == 74 and unitName == self.L["Kuralak the Defiler"] then
 		core:AddMsg("P2", self.L["P2 SOON !"], 5, "Info")
@@ -208,7 +198,6 @@ function mod:OnChatNPCSay(message)
 			local nordpos = { x = 175.00, y = -110.80034637451, z = -513.31 }
 			core:SetWorldMarker(nordpos, self.L["MARKER north"])
 			core:RaidDebuff()
-			core:StartScan()
 		end
 end
 
@@ -222,7 +211,6 @@ end
 function mod:OnUnitStateChanged(unit, bInCombat, sName)
 	if unit:GetType() == "NonPlayer" and bInCombat then
 		if sName == self.L["Kuralak the Defiler"] then
-			self:Start()
 			core:AddUnit(unit)
 			eggsCount, siphonCount, outbreakCount = 2, 1, 0
 		end

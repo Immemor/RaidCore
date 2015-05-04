@@ -7,9 +7,7 @@ local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local mod = core:NewEncounter("ExperimentX89", 67, 147, 148)
 if not mod then return end
 
-mod:RegisterEnableMob("Experiment X-89")
-mod:RegisterRestrictZone("ExperimentX89", "Isolation Chamber")
-mod:RegisterEnableZone("ExperimentX89", "Isolation Chamber")
+mod:RegisterTrigMob("ANY", { "Experiment X-89" })
 mod:RegisterEnglishLocale({
 	-- Unit names.
 	["Experiment X-89"] = "Experiment X-89",
@@ -126,13 +124,11 @@ end
 function mod:OnUnitStateChanged(unit, bInCombat, sName)
 	if unit:GetType() == "NonPlayer" and bInCombat then
 		if sName == self.L["Experiment X-89"] then
-			self:Start()
 			local playerUnit = GameLib.GetPlayerUnit()
 			playerName = playerUnit:GetName()
 			core:AddUnit(unit)
 			core:UnitDebuff(playerUnit)
 			core:WatchUnit(unit)
-			core:StartScan()
 			core:AddBar("KNOCKBACK", self.L["KNOCKBACK"], 6)
 			core:AddBar("SHOCKWAVE", self.L["SHOCKWAVE"], 17)
 			core:AddBar("BEAM", self.L["BEAM"], 36)

@@ -7,12 +7,7 @@ local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local mod = core:NewEncounter("SystemDaemons", 52, 98, 105)
 if not mod then return end
 
---mod:RegisterEnableBossPair("Binary System Daemon","Null System Daemon")
-mod:RegisterEnableMob("Binary System Daemon","Null System Daemon")
-mod:RegisterRestrictZone("SystemDaemons", "Halls of the Infinite Mind", "Infinite Generator Core", "Lower Infinite Generator Core")
-mod:RegisterEnableZone("SystemDaemons", "Halls of the Infinite Mind", "Infinite Generator Core", "Lower Infinite Generator Core")
-mod:RegisterRestrictEventObjective("SystemDaemons", "Defeat the System Daemons")
-mod:RegisterEnableEventObjective("SystemDaemons", "Defeat the System Daemons")
+mod:RegisterTrigMob("ANY", { "Binary System Daemon", "Null System Daemon" })
 mod:RegisterEnglishLocale({
 	-- Unit names.
 	["Binary System Daemon"] = "Binary System Daemon",
@@ -236,19 +231,6 @@ function mod:OnUnitCreated(unit, sName)
 			end
 			core:AddBar("PROBES", self.L["[%u] Probe"]:format(1), 10)
 		end
-	elseif sName == self.L["Null System Daemon"] or sName == self.L["Binary System Daemon"] then
-		--core:MarkUnit(unit, 0, ("N%s"):format(sdSurgeCount[unit:GetId()] or 0))
-		if sName == self.L["Null System Daemon"] then
-			core:MarkUnit(unit, 0, self.L["MARKER south"])
-		else
-			core:MarkUnit(unit, 0, self.L["MARKER north"])
-		end
-		core:AddUnit(unit)
-		core:WatchUnit(unit)
-	--elseif sName == "Null System Daemon"  then
-		--core:MarkUnit(unit, 0, ("S%s"):format(sdSurgeCount[unit:GetId()] or 0))
-		--core:AddUnit(unit)
-		--core:WatchUnit(unit)
 	elseif sName == self.L["Conduction Unit Mk. I"] then
 		if probeCount == 0 then probeCount = 1 end
 		if GetCurrentSubZoneName():find(self.L["Infinite Generator Core"]) then core:MarkUnit(unit, 1, 1) end
@@ -490,7 +472,11 @@ end
 function mod:OnUnitStateChanged(unit, bInCombat, sName)
 	if unit:GetType() == "NonPlayer" and bInCombat then
 		if sName == self.L["Null System Daemon"] or sName == self.L["Binary System Daemon"] then
-			self:Start()
+			if sName == self.L["Null System Daemon"] then
+				core:MarkUnit(unit, 0, self.L["MARKER south"])
+			else
+				core:MarkUnit(unit, 0, self.L["MARKER north"])
+			end
 			discoCount, sdwaveCount, probeCount = 0, 0, 0
 			phase2warn, phase2 = false, false
 			phase2count = 0
@@ -506,7 +492,6 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
 				core:AddBar("DISC", self.L["DISCONNECT (%u)"]:format(discoCount + 1), 41)
 			end
 			core:AddBar("SDWAVE", self.L["[%u] WAVE"]:format(sdwaveCount + 1), 15, mod:GetSetting("SoundWave"))
-			core:StartScan()
 		elseif sName == self.L["Defragmentation Unit"] then
 			if GetCurrentSubZoneName():find("Infinite Generator Core") then
 				core:WatchUnit(unit)

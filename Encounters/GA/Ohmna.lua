@@ -7,9 +7,7 @@ local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local mod = core:NewEncounter("Ohmna", 67, 147, 149)
 if not mod then return end
 
-mod:RegisterEnableMob("Dreadphage Ohmna")
-mod:RegisterRestrictEventObjective("Ohmna", "Defeat Dreadphage Ohmna")
-mod:RegisterEnableEventObjective("Ohmna", "Defeat Dreadphage Ohmna")
+mod:RegisterTrigMob("ANY", { "Dreadphage Ohmna" })
 mod:RegisterEnglishLocale({
 	-- Unit names.
 	["Dreadphage Ohmna"] = "Dreadphage Ohmna",
@@ -174,8 +172,6 @@ function mod:OnUnitCreated(unit, sName)
 	elseif sName == self.L["Ravenous Maw of the Dreadphage"] then
 		core:MarkUnit(unit, 0)
 		core:AddLine(unit:GetId(), 2, unit, nil, 3, 25, 0)
-	elseif sName == self.L["Dreadphage Ohmna"] then
-		core:AddUnit(unit)
 	end
 end
 
@@ -251,7 +247,6 @@ function mod:OnChatDC(message)
 			pilarCount, boreCount = 1, 0
 			submergeCount = submergeCount + 1
 			core:StopBar("OTENT")
-			core:StartScan()
 		elseif message:find(self.L["Dreadphage Ohmna is bored"]) then
 			boreCount = boreCount + 1
 			if boreCount < 2 and self:Tank() then
@@ -265,14 +260,12 @@ function mod:OnChatDC(message)
 			core:StopBar("OPILAR")
 			core:StopBar("OBORE")
 			core:AddBar("OSPEW", self.L["NEXT BIG SPEW"], 45, 1)
-			core:StartScan()
 		end
 end
 
 function mod:OnUnitStateChanged(unit, bInCombat, sName)
 	if unit:GetType() == "NonPlayer" and bInCombat then
 		if sName == self.L["Dreadphage Ohmna"] then
-			self:Start()
 			pilarCount, boreCount, submergeCount = 1, 0, 0
 			firstPull, OhmnaP3, OhmnaP4 = true, false, false
 			core:AddUnit(unit)

@@ -7,9 +7,7 @@ local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local mod = core:NewEncounter("EpAirWater", 52, 98, 118)
 if not mod then return end
 
---mod:RegisterEnableMob("Hydroflux")
-mod:RegisterEnableBossPair("Hydroflux", "Aileron")
-mod:RegisterRestrictZone("EpAirWater", "Elemental Vortex Alpha", "Elemental Vortex Beta", "Elemental Vortex Delta")
+mod:RegisterTrigMob("ALL", { "Hydroflux", "Aileron" })
 mod:RegisterEnglishLocale({
 	-- Unit names.
 	["Hydroflux"] = "Hydroflux",
@@ -72,7 +70,6 @@ local CheckTwirlTimer = nil
 --------------------------------------------------------------------------------
 -- Initialization
 --
-
 function mod:OnBossEnable()
 	Print(("Module %s loaded"):format(mod.ModuleName))
 	Apollo.RegisterEventHandler("RC_UnitStateChanged", "OnUnitStateChanged", self)
@@ -178,7 +175,6 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
 			core:WatchUnit(unit)
 			core:UnitBuff(unit)
 		elseif sName == self.L["Aileron"] then
-			self:Start()
 			mooCount = 0
 			phase2 = false
 			twirl_units = {}
@@ -187,7 +183,6 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
 			core:UnitBuff(unit)
 			core:UnitDebuff(playerUnit)
 			core:RaidDebuff()
-			core:StartScan()
 			core:AddBar("MIDPHASE", self.L["Middle Phase"], 60, mod:GetSetting("SoundMidphase"))
 			core:AddBar("TOMB", self.L["~Frost Tombs"], 30, mod:GetSetting("SoundFrostTombs"))
 

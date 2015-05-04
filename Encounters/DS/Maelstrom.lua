@@ -7,7 +7,7 @@ local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local mod = core:NewEncounter("Maelstrom", 52, 98, 120)
 if not mod then return end
 
-mod:RegisterEnableMob("Weather Control Station")
+mod:RegisterTrigMob("ANY", { "Maelstrom Authority" })
 
 --------------------------------------------------------------------------------
 -- Locals
@@ -111,11 +111,7 @@ end
 
 function mod:OnUnitCreated(unit, sName)
 	--Print(sName)
-	if sName == self.L["Avatus Hologram"] then
-		self:Start()
-		core:AddBar("JUMP", self.L["Encounter Start"], 8.5, 1)
-		bossPos = {}
-	elseif sName == self.L["Wind Wall"] and mod:GetSetting("LineWindWalls") then
+	if sName == self.L["Wind Wall"] and mod:GetSetting("LineWindWalls") then
 		core:AddPixie(unit:GetId().."_1", 2, unit, nil, "Green", 10, 20, 0)
 		core:AddPixie(unit:GetId().."_2", 2, unit, nil, "Green", 10, 20, 180)
 		--core:AddLine(unit:GetId().."_1", 2, unit, nil, 1, 20, 0)
@@ -173,10 +169,10 @@ end
 function mod:OnUnitStateChanged(unit, bInCombat, sName)
 	if unit:GetType() == "NonPlayer" and bInCombat then
 		if sName == self.L["Maelstrom Authority"] then
+			bossPos = {}
 			stationCount = 0
 			core:AddUnit(unit)
 			core:WatchUnit(unit)
-			core:StartScan()
 			if mod:GetSetting("LineCleaveBoss") then
 				core:AddPixie(unit:GetId(), 2, unit, nil, "Red", 10, 15, 0)
 			end

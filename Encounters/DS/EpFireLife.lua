@@ -7,9 +7,7 @@ local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local mod = core:NewEncounter("EpFireLife", 52, 98, 119)
 if not mod then return end
 
---mod:RegisterEnableMob("Visceralus")
-mod:RegisterEnableBossPair("Visceralus", "Pyrobane")
-mod:RegisterRestrictZone("EpFireLife", "Elemental Vortex Alpha", "Elemental Vortex Beta", "Elemental Vortex Delta")
+mod:RegisterTrigMob("ALL", { "Visceralus", "Pyrobane" })
 mod:RegisterEnglishLocale({
 	-- Unit names.
 	["Visceralus"] = "Visceralus",
@@ -68,7 +66,6 @@ local CheckRootTimer = nil
 --------------------------------------------------------------------------------
 -- Initialization
 --
-
 function mod:OnBossEnable()
 	Print(("Module %s loaded"):format(mod.ModuleName))
 	Apollo.RegisterEventHandler("RC_UnitStateChanged", "OnUnitStateChanged", self)
@@ -185,14 +182,12 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
 			core:AddUnit(unit)
 			core:WatchUnit(unit)
 		elseif sName == self.L["Pyrobane"] then
-			self:Start()
 			rooted_units = {}
 			CheckRootTimer = nil
 			uPlayer = GameLib.GetPlayerUnit()
 			strMyName = uPlayer:GetName()
 			core:AddUnit(unit)
 			core:RaidDebuff()
-			core:StartScan()
 			core:AddBar("MID", self.L["MIDPHASE"], 90)
 		end
 	end

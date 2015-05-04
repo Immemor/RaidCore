@@ -7,9 +7,7 @@ local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local mod = core:NewEncounter("PhageMaw", 67, 147, 149)
 if not mod then return end
 
-mod:RegisterEnableMob("Phage Maw")
-mod:RegisterRestrictZone("PhageMaw", "Experimentation Lab CX-33")
-mod:RegisterEnableZone("PhageMaw", "Experimentation Lab CX-33")
+mod:RegisterTrigMob("ANY", { "Phage Maw" })
 mod:RegisterEnglishLocale({
 	-- Unit names.
 	["Phage Maw"] = "Phage Maw",
@@ -84,7 +82,6 @@ end
 function mod:OnUnitStateChanged(unit, bInCombat, sName)
 	if unit:GetType() == "NonPlayer" and bInCombat then
 		if sName == self.L["Phage Maw"] then
-			self:Start()
 			core:AddUnit(unit)
 		end
 	end
