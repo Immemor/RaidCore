@@ -7,7 +7,7 @@ local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local mod = core:NewEncounter("DSFireWing", 52, 98, 110)
 if not mod then return end
 
-mod:RegisterEnableMob("Warmonger Agratha", "Warmonger Talarii", "Grand Warmonger Tar'gresh")
+mod:RegisterTrigMob("ANY", { "Warmonger Agratha", "Warmonger Talarii", "Grand Warmonger Tar'gresh" })
 mod:RegisterEnglishLocale({
 	-- Unit names.
 	["Warmonger Agratha"] = "Warmonger Agratha",
@@ -157,28 +157,22 @@ end
 function mod:OnUnitStateChanged(unit, bInCombat, sName)
 	if unit:GetType() == "NonPlayer" and bInCombat then
 		if sName == self.L["Warmonger Agratha"] then
-			self:Start()
 			prev, first = 0, true
 			boss = sName
 			core:AddUnit(unit)
 			core:WatchUnit(unit)
 			core:RaidDebuff()
-			core:StartScan()
 			core:AddBar("BOMB", self.L["BOMB"], 23)
 		elseif sName == self.L["Warmonger Talarii"] then
-			self:Start()
 			prev = 0
 			boss = sName
 			core:AddUnit(unit)
 			core:WatchUnit(unit)
 			core:RaidDebuff()
-			core:StartScan()
 			core:AddBar("KNOCK", self.L["KNOCKBACK"], 23)
 		elseif sName == self.L["Grand Warmonger Tar'gresh"] then
-			self:Start()
 			core:AddUnit(unit)
 			core:WatchUnit(unit)
-			core:StartScan()
 			core:AddBar("STORM", self.L["METEOR STORM"], 26, 1)
 		end
 	end

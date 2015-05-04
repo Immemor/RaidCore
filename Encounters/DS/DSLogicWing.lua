@@ -7,7 +7,9 @@ local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local mod = core:NewEncounter("DSLogicWing", 52, 98, 111)
 if not mod then return end
 
-mod:RegisterEnableMob("Hyper-Accelerated Skeledroid", "Augmented Herald of Avatus", "Abstract Augmentation Algorithm")
+mod:RegisterTrigMob("ANY", {
+    "Hyper-Accelerated Skeledroid", "Augmented Herald of Avatus",
+    "Abstract Augmentation Algorithm" })
 mod:RegisterEnglishLocale({
 	-- Unit names.
 	["Conjured Fire Bomb"] = "Conjured Fire Bomb",
@@ -142,28 +144,22 @@ end
 function mod:OnUnitEnteredCombat(unit, bInCombat, sName)
 	if unit:GetType() == "NonPlayer" and bInCombat then
 		if sName == self.L["Abstract Augmentation Algorithm"] then
-			self:Start()
 			prevInt = ""
 			castCount = 1
 			core:AddUnit(unit)
 			--core:WatchUnit(unit)
 			core:RaidDebuff()
-			core:StartScan()
 			core:AddBar("DATA", self.L["[%u] INTERRUPT"]:format(castCount), 7)
 			core:AddBar("EMPOWER", self.L["EMPOWER"]:format(""), 30, 1)
 		elseif sName == self.L["Quantum Processing Unit"] then
-			self:Start()
 			core:AddUnit(unit)
 			core:MarkUnit(unit)
 		elseif sName == self.L["Hyper-Accelerated Skeledroid"] then
-			self:Start()
 			core:AddUnit(unit)
 			core:AddBar("BERSERK", self.L["BERSERK"], 180, 1)
 		elseif sName == self.L["Augmented Herald of Avatus"] then
-			self:Start()
 			core:AddUnit(unit)
 			core:WatchUnit(unit)
-			core:StartScan()
 			core:AddBar("CUBE", self.L["CUBE SMASH"], 8)
 		end
 	end

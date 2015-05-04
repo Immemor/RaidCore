@@ -3,8 +3,7 @@ local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local mod = core:NewEncounter("Avatus", 52, 98, 104)
 if not mod then return end
 
-mod:RegisterEnableMob("Avatus")
-mod:RegisterRestrictZone("Avatus", "The Oculus")
+mod:RegisterTrigMob("ANY", { "Avatus" })
 mod:RegisterEnglishLocale({
 	-- Unit names.
 	["Avatus"] = "Avatus",
@@ -249,13 +248,7 @@ end
 function mod:OnUnitCreated(unit, sName)
 	local eventTime = GameLib.GetGameTime()
 	--Print(eventTime .. " " .. sName .. " spawned")
-	if sName == self.L["Avatus"] then
-		core:AddUnit(unit)
-		core:WatchUnit(unit)
-		if mod:GetSetting("LineCleaveBoss") then
-			core:AddPixie(unit:GetId(), 2, unit, nil, "Green", 10, 22, 0)
-		end
-	elseif sName == self.L["Holo Hand"] then
+	if sName == self.L["Holo Hand"] then
 		--Print(eventTime .. " Holo hand Spawned")
 		local unitId = unit:GetId()
 		core:AddUnit(unit)
@@ -462,7 +455,6 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
 	if unit:GetType() == "NonPlayer" and bInCombat then
 		if sName == self.L["Avatus"] and not encounter_started then
 			local eventTime = GameLib.GetGameTime()
-			self:Start()
 			encounter_started = true
 			phase2warn, phase2 = false, false
 			phase2_blueroom = false
@@ -476,7 +468,9 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
 			strMyName = GameLib.GetPlayerUnit():GetName()
 			core:AddUnit(unit)
 			core:WatchUnit(unit)
-			core:StartScan()
+			if mod:GetSetting("LineCleaveBoss") then
+				core:AddPixie(unit:GetId(), 2, unit, nil, "Green", 10, 22, 0)
+			end
 
 			core:AddBar("OBBEAM", self.L["Obliteration Beam"], obliteration_beam_timer, mod:GetSetting("SoundObliterationBeam"))
 			core:AddBar("GGRID", self.L["~Gun Grid"], gungrid_timer, mod:GetSetting("SoundGunGrid"))

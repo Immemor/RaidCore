@@ -16,50 +16,51 @@ local mod = core:NewEncounter("GalerasTest", 6, 0, 16)
 --@end-alpha@
 if not mod then return end
 
-mod:RegisterEnableMob("Crimson Spiderbot")
+mod:RegisterTrigMob("ANY", { "Crimson Spiderbot", "Crimson Clanker" })
 mod:RegisterEnglishLocale({
-	-- Unit names.
-	["Crimson Spiderbot"] = "Crimson Spiderbot",
-	["Phaser Combo"] = "Phaser Combo",
+    -- Unit names.
+    ["Crimson Clanker"] = "Crimson Clanker",
+    ["Crimson Spiderbot"] = "Crimson Spiderbot",
+    ["Phaser Combo"] = "Phaser Combo",
 })
 mod:RegisterFrenchLocale({
-	-- Unit names.
-	["Crimson Spiderbot"] = "Arachnobot écarlate",
-	["Phaser Combo"] = "Combo de phaser",
+    -- Unit names.
+    ["Crimson Clanker"] = "Cybernéticien écarlate",
+    ["Crimson Spiderbot"] = "Arachnobot écarlate",
+    ["Phaser Combo"] = "Combo de phaser",
 })
 
 function mod:OnBossEnable()
-	Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
-	Apollo.RegisterEventHandler("RC_UnitStateChanged", "OnUnitStateChanged", self)
-	Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
-	Apollo.RegisterEventHandler("SPELL_CAST_END", "OnSpellCastEnd", self)
+    Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
+    Apollo.RegisterEventHandler("RC_UnitStateChanged", "OnUnitStateChanged", self)
+    Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
+    Apollo.RegisterEventHandler("SPELL_CAST_END", "OnSpellCastEnd", self)
 end
 
 function mod:OnUnitCreated(unit, sName)
-	if sName == self.L["Crimson Spiderbot"] then
-		core:AddUnit(unit)
-	end
+    if sName == self.L["Crimson Spiderbot"] then
+        core:MarkUnit(unit, 1, "A")
+    end
 end
 
 function mod:OnUnitStateChanged(unit, bInCombat, sName)
-	if bInCombat then
-		if unit == GameLib.GetPlayerUnit() then
-			self:Start()
-		elseif sName == self.L["Crimson Spiderbot"] then
-			core:WatchUnit(unit)
-			core:MarkUnit(unit, 1, "X")
-		end
-	end
+    if bInCombat then
+        if sName == self.L["Crimson Spiderbot"] then
+            core:WatchUnit(unit)
+            core:AddUnit(unit)
+            core:MarkUnit(unit, 1, "X")
+        end
+    end
 end
 
 function mod:OnSpellCastStart(unitName, castName, unit)
-	if castName == self.L["Phaser Combo"] then
-		Print("Cast Start")
-	end
+    if castName == self.L["Phaser Combo"] then
+        Print("Cast Start")
+    end
 end
 
 function mod:OnSpellCastEnd(unitName, castName, unit)
-	if castName == self.L["Phaser Combo"] then
-		Print("Cast End")
-	end
+    if castName == self.L["Phaser Combo"] then
+        Print("Cast End")
+    end
 end
