@@ -10,9 +10,12 @@ require "Apollo"
 require "Window"
 require "GameLib"
 require "ChatSystemLib"
+require "ICCommLib"
+require "ICComm"
 
 local GeminiAddon = Apollo.GetPackage("Gemini:Addon-1.1").tPackage
 local LogPackage = Apollo.GetPackage("Log-1.0").tPackage
+local JSON = Apollo.GetPackage("Lib:dkJSON-2.5").tPackage
 local RaidCore = GeminiAddon:NewAddon("RaidCore", false, {}, "Gemini:Timer-1.0")
 
 ----------------------------------------------------------------------------------------------------
@@ -299,7 +302,6 @@ function RaidCore:OnDocLoaded()
 
 	-- Register handlers for events, slash commands and timer, etc.
 	Apollo.RegisterSlashCommand("raidc", "OnRaidCoreOn", self)
-	Apollo.RegisterEventHandler("Group_MemberFlagsChanged", "OnGroup_MemberFlagsChanged", self)
 	Apollo.RegisterEventHandler("ChangeWorld", "OnWorldChangedTimer", self)
 	Apollo.RegisterEventHandler("SubZoneChanged", "OnSubZoneChanged", self)
 	Apollo.RegisterEventHandler("PublicEventObjectiveUpdate", "OnPublicEventObjectiveUpdate", self)
@@ -344,32 +346,29 @@ end
 ----------------------------------------------------------------------------------------------------
 -- RaidCore Functions
 ----------------------------------------------------------------------------------------------------
-function RaidCore:OnGroup_MemberFlagsChanged(nMemberIdx, bFromPromotion, tChangedFlags)
-	if bFromPromotion then
-		CommChannelTimer = ApolloTimer.Create(5, false, "UpdateCommChannel", self) -- after 5 sec for slow API leader update
-	end
-end
 
 function RaidCore:UpdateCommChannel()
-	if GroupLib.InGroup() then
-		for i = 1, GroupLib.GetMemberCount() do
-			local tPlayer = GroupLib.GetGroupMember(i)
-			if tPlayer and tPlayer.bIsLeader then
-				local channel = "RaidCore_" .. tPlayer.strCharacterName
-				self.chanCom = ICCommLib.JoinChannel(channel, "OnComMessage", self)
-				if self.chanCom then return true else return false end
-			end
-		end
+	if not self.chanCom then
+		self.chanCom = ICCommLib.JoinChannel("RaidCore", ICCommLib.CodeEnumICCommChannelType.Group)
 	end
-	return false
+
+	if self.chanCom:IsReady() then
+		-- Set handler for messages only if ready
+		self.chanCom:SetReceivedMessageFunction("OnComMessage", self)
+	else
+		-- Channel not ready yet, repeat in a few seconds
+		self:ScheduleTimer("UpdateCommChannel", 1)
+	end
 end
 
 function RaidCore:SendMessage(msg)
-	if not self.chanCom and not self:UpdateCommChannel() then
-		Print("[RaidCore] Error sending Sync Message. Are you sure that you're in a party?")
+	if not self.chanCom then
+		Print("[RaidCore] Error sending Sync Message. Attempting to fix this now. If this issue persists, contact the developers")
+		self:UpdateCommChannel()
 		return false
 	else
-		self.chanCom:SendMessage(msg)
+		local msg_encoded = JSON.encode(msg)
+		self.chanCom:SendMessage(msg_encoded)
 	end
 end
 
@@ -1454,7 +1453,8 @@ local function IsPartyMemberByName(sName)
 	return false
 end
 
-function RaidCore:OnComMessage(channel, tMessage, strSender)
+function RaidCore:OnComMessage(channel, strMessage, strSender)
+	local tMessage = JSON.decode(strMessage)
 	if type(tMessage.action) ~= "string" then return end
 	local msg = {}
 
@@ -1529,7 +1529,7 @@ function RaidCore:VersionCheckResults()
 	end
 	local msg = {action = "NewestVersion", version = maxver}
 	self:SendMessage(msg)
-	self:OnComMessage(nil, msg)
+	self:OnComMessage(nil, JSON.encode(msg))
 end
 
 function RaidCore:VersionCheck()
@@ -1549,7 +1549,7 @@ function RaidCore:LaunchPull(time)
 	if time and time > 2 then
 		local msg = {action = "LaunchPull", sender = GameLib.GetPlayerUnit():GetName(), cooldown = time}
 		self:SendMessage(msg)
-		self:OnComMessage(nil, msg)
+		self:OnComMessage(nil, JSON.encode(msg))
 	end
 end
 
@@ -1557,7 +1557,7 @@ function RaidCore:LaunchBreak(time)
 	if time and time > 5 then
 		local msg = {action = "LaunchBreak", sender = GameLib.GetPlayerUnit():GetName(), cooldown = time}
 		self:SendMessage(msg)
-		self:OnComMessage(nil, msg)
+		self:OnComMessage(nil, JSON.encode(msg))
 	end
 end
 
