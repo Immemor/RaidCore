@@ -253,7 +253,7 @@ local function ManageDelayedUnit(nId, sName, bInCombat)
             if _tDelayedUnits[sName] then
                 if _tDelayedUnits[sName][nId] then
                     Log:Add("Remove2DelayedUnit", nId, sName)
-                    _tDandelayedUnits[sName][nId] = nil
+                    _tDelayedUnits[sName][nId] = nil
                 end
                 if next(_tDelayedUnits[sName]) == nil then
                     _tDelayedUnits[sName] = nil
