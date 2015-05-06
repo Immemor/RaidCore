@@ -16,28 +16,15 @@ function DisplayBar.new(xmlDoc, key, message, maxTime, type, block)
 	self.lastPct = 100
 	self.Message = message
 
-	--if type == 3 then return nil end
-
 	self.Frame = Apollo.LoadForm(xmlDoc, "BarTemplate", block.barsFrame:FindChild("ItemList"), self)
 	self.Frame:FindChild("Text"):SetText(message)
-	--self.Frame:FindChild("Icon"):SetSprite(spell:GetIcon())
 	if type < 3 then
 		self.Frame:FindChild("RemainingOverlay"):SetMax(maxTime)
-		--self.Frame:SetSprite("BarTextures_Fire")
-		--self.Frame:FindChild("RemainingOverlay"):SetFullSprite("BarTextures_Fire")
 		self.Frame:SetSprite("RaidCoreMinimalist")
 		self.Frame:FindChild("RemainingOverlay"):SetFullSprite("RaidCoreMinimalist")
 	end
 	return self
 end
---[[
-function DisplayBar:OnGenerateSpellTooltip( wndHandler, wndControl, eToolTipType, x, y )
-if wndControl == wndHandler then
-Tooltip.GetSpellTooltipForm(self, wndHandler, GameLib.GetSpell(self.spell:GetId()), false)
-end
-end
-]]--
-
 
 function DisplayBar:FormatNumber(nArg)
 	if not nArg then return end
@@ -84,7 +71,6 @@ function DisplayBar:UpdateProgress(timeRemaining)
 			else
 				self.Frame:FindChild("Timer"):SetText(string.format("%.0f%%", math.floor(timeRemaining / self.MaxTime) * 100))
 			end
-			--self.Frame:FindChild("Timer"):SetText(string.format("%s (%.f%%)",self:FormatNumber(timeRemaining), percent))
 		end
 	else
 		self.Frame:FindChild("Timer"):SetText("")
@@ -97,7 +83,6 @@ function DisplayBar:SetHeight(height)
 
 	local mark = self.Frame:FindChild("Mark")
 	local markHeight = mark:GetHeight()
-	--Print("IconHeight = " .. markHeight)
 	local left, top, right, bottom = mark:GetAnchorOffsets()
 	mark:SetAnchorOffsets(left-12, top, right-12, bottom)
 
@@ -116,11 +101,11 @@ function DisplayBar:SetBarColor(color)
 end
 
 function DisplayBar:SetMark(mark)
-	--Print("Setting Mark " .. mark)
 	self.Frame:FindChild("Mark"):SetText(mark)
 end
 
 if _G["RaidCoreLibs"] == nil then
 	_G["RaidCoreLibs"] = { }
 end
+
 _G["RaidCoreLibs"]["DisplayBar"] = DisplayBar

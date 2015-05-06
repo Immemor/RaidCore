@@ -132,11 +132,8 @@ function mod:OnBossEnable()
 	Apollo.RegisterEventHandler("RC_UnitDestroyed", "OnUnitDestroyed", self)
 	Apollo.RegisterEventHandler("RC_UnitStateChanged", "OnUnitStateChanged", self)
 	Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
-	--Apollo.RegisterEventHandler("SPELL_CAST_END", "OnSpellCastEnd", self)
 	Apollo.RegisterEventHandler("UNIT_HEALTH", "OnHealthChanged", self)
 	Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
-	--Apollo.RegisterEventHandler("RAID_SYNC", "OnSyncRcv", self)
-	--Apollo.RegisterEventHandler("SubZoneChanged", "OnZoneChanged", self)
 	Apollo.RegisterEventHandler("CHAT_NPCSAY", "OnChatNPCSay", self)
 	Apollo.RegisterEventHandler("RAID_WIPE", "OnReset", self)
 	Apollo.RegisterEventHandler("BUFF_APPLIED", "OnBuffApplied", self) -- temp disabled. Not finished.
@@ -198,7 +195,6 @@ local function orderedNext(t, state)
 	-- order. We use a temporary ordered key table that is stored in the
 	-- table being iterated.
 
-	--print("orderedNext: state = "..tostring(state) )
 	if state == nil then
 		-- the first time, generate the index
 		t.__orderedIndex = __genOrderedIndex( t )
@@ -247,9 +243,7 @@ end
 
 function mod:OnUnitCreated(unit, sName)
 	local eventTime = GameLib.GetGameTime()
-	--Print(eventTime .. " " .. sName .. " spawned")
 	if sName == self.L["Holo Hand"] then
-		--Print(eventTime .. " Holo hand Spawned")
 		local unitId = unit:GetId()
 		core:AddUnit(unit)
 		core:WatchUnit(unit)
@@ -257,7 +251,6 @@ function mod:OnUnitCreated(unit, sName)
 		core:AddMsg("HHAND", self.L["Holo Hand Spawned"], 5, "Info")
 		if unitId and mod:GetSetting("LineCleaveHands") then
 			core:AddPixie(unitId .. "_1", 2, unit, nil, "Blue", 7, 20, 0)
-			--core:AddPixie(unitId .. "_2", 2, unit, nil, "Blue", 7, 20, 270)
 		end
 	elseif sName == self.L["Mobius Physics Constructor"] then -- yellow room
 		core:AddUnit(unit)
@@ -290,7 +283,6 @@ function mod:OnUnitDestroyed(unit, sName)
 	if sName == self.L["Holo Hand"] then
 		if unitId then
 			core:DropPixie(unitId .. "_1")
-			--core:DropPixie(unitId .. "_2")
 		end
 		if holo_hands[unitId] then
 			holo_hands[unitId] = nil
@@ -306,11 +298,6 @@ function mod:OnUnitDestroyed(unit, sName)
 	elseif sName == self.L["Mobius Physics Constructor"] then
 		core:DropPixie(unit:GetId())
 	end
-	--[[
-	elseif sName == "" then
-		core:DropPixie(unit:GetId())
-	end
-	]]
 end
 
 function mod:OnBuffApplied(unitName, splId, unit)
@@ -330,7 +317,6 @@ function mod:OnBuffApplied(unitName, splId, unit)
 			if playerAssigned == strMyName then
 				core:AddMsg("BLUEPURGE", self.L["PURGE BLUE BOSS"], 5, mod:GetSetting("SoundBlueInterrupt", "Inferno"))
 			end
-			--ChatSystemLib.Command('/p [#' .. tostring(greenBuffCount) .. '] ' .. unitName .. " has GREEN buff - assigned to: " .. playerAssigned)
 			Print('[#' .. tostring(greenBuffCount) .. '] ' .. unitName .. " has GREEN buff - assigned to: " .. playerAssigned)
 			greenBuffCount = greenBuffCount + 1
 			phase2_blueroom_rotation["green"][playerAssigned] = phase2_blueroom_rotation["green"][playerAssigned] + 1
@@ -340,7 +326,6 @@ function mod:OnBuffApplied(unitName, splId, unit)
 			if playerAssigned == strMyName then
 				core:AddMsg("BLUEPURGE", self.L["PURGE BLUE BOSS"], 5, mod:GetSetting("SoundBlueInterrupt", "Inferno"))
 			end
-			--ChatSystemLib.Command('/p [#' .. tostring(blueBuffCount) .. '] ' .. unitName .. " has BLUE buff - assigned to: " .. playerAssigned)
 			Print('[#' .. tostring(blueBuffCount) .. '] ' .. unitName .. " has BLUE buff - assigned to: " .. playerAssigned)
 			phase2_blueroom_rotation["blue"][playerAssigned] = phase2_blueroom_rotation["blue"][playerAssigned] + 1
 			blueBuffCount = blueBuffCount + 1
@@ -350,7 +335,6 @@ function mod:OnBuffApplied(unitName, splId, unit)
 			if playerAssigned == strMyName then
 				core:AddMsg("BLUEPURGE", self.L["PURGE BLUE BOSS"], 5, mod:GetSetting("SoundBlueInterrupt", "Inferno"))
 			end
-			--ChatSystemLib.Command('/p [#' .. tostring(redBuffCount) .. '] ' .. unitName .. " has RED buff - assigned to: " .. playerAssigned)
 			Print('[#' .. tostring(redBuffCount) .. '] ' .. unitName .. " has RED buff - assigned to: " .. playerAssigned)
 			phase2_blueroom_rotation["red"][playerAssigned] = phase2_blueroom_rotation["red"][playerAssigned] + 1
 			redBuffCount = redBuffCount + 1
@@ -407,9 +391,7 @@ end
 
 function mod:OnChatDC(message)
 	local eventTime = GameLib.GetGameTime()
-	--Print(eventTime .. " ChatDC Message: " .. message)
 	if message:find(self.L["Gun Grid Activated"]) then
-		--Print(eventTime .. " ChatDC Message: " .. message)
 		gungrid_time = eventTime
 		core:AddMsg("GGRIDMSG", self.L["Gun Grid NOW!"], 5, mod:GetSetting("SoundGunGrid", "Beware"))
 		core:StopBar("GGRID")
@@ -505,11 +487,6 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
 				strBlueBuffs = strBlueBuffs .. " - " .. tostring(bluePlayerCount) .. ". " .. key
 				bluePlayerCount = bluePlayerCount + 1
 			end
-			--[[
-			ChatSystemLib.Command('/p ' .. strRedBuffs)
-			ChatSystemLib.Command('/p ' .. strGreenBuffs)
-			ChatSystemLib.Command('/p ' .. strBlueBuffs)
-			--]]
 			Print(strRedBuffs)
 			Print(strGreenBuffs)
 			Print(strBlueBuffs)

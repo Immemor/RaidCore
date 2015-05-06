@@ -243,8 +243,6 @@ function mod:OnUnitCreated(unit, sName)
 		if probeCount == 2 then probeCount = 3 end
 		if GetCurrentSubZoneName():find(self.L["Infinite Generator Core"]) then core:MarkUnit(unit, 1, 3) end
 	elseif sName == self.L["Enhancement Module"] then
-		--Print("Adding Lines for " .. unit:GetId())
-		--core:MarkUnit(unit, 0)
 		core:AddUnit(unit)
 		if mod:GetSetting("LineOnModulesMidphase") then
 			core:AddLine(unit:GetId().."_1", 2, unit, nil, 1, 25, 90)
@@ -257,7 +255,6 @@ end
 
 function mod:OnUnitDestroyed(unit, sName)
 	if sName == self.L["Enhancement Module"] then
-		--Print("Dropping Lines for " .. unit:GetId())
 		core:DropLine(unit:GetId().."_1")
 		core:DropLine(unit:GetId().."_2")
 	end
@@ -445,9 +442,6 @@ function mod:OnSyncRcv(sync, parameter)
 
 		sdSurgeCount[parameter] = sdSurgeCount[parameter] + 1
 		if sdSurgeCount[parameter] > nbKick then sdSurgeCount[parameter] = 1 end
-		--Print("NORTH : "..sdSurgeCount[parameter])
-		--local unit = GameLib.GetUnitById(parameter)
-		--if unit then core:MarkUnit(unit, 0, sdSurgeCount[parameter]) end
 
 		if intNorth and intNorth == sdSurgeCount[parameter] then
 			core:AddMsg("SURGE", self.L["YOU ARE NEXT ON NORTH !"], 5, "Long", "Blue")
@@ -459,9 +453,6 @@ function mod:OnSyncRcv(sync, parameter)
 
 		sdSurgeCount[parameter] = sdSurgeCount[parameter] + 1
 		if sdSurgeCount[parameter] > nbKick then sdSurgeCount[parameter] = 1 end
-		--Print("SOUTH : "..sdSurgeCount[parameter])
-		--local unit = GameLib.GetUnitById(parameter)
-		--if unit then core:MarkUnit(unit, 0, sdSurgeCount[parameter]) end
 
 		if intSouth and intSouth == sdSurgeCount[parameter] then
 			core:AddMsg("SURGE", self.L["YOU ARE NEXT ON SOUTH !"], 5, "Long", "Blue")

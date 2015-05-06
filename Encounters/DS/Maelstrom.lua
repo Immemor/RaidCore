@@ -110,18 +110,11 @@ end
 --
 
 function mod:OnUnitCreated(unit, sName)
-	--Print(sName)
 	if sName == self.L["Wind Wall"] and mod:GetSetting("LineWindWalls") then
 		core:AddPixie(unit:GetId().."_1", 2, unit, nil, "Green", 10, 20, 0)
 		core:AddPixie(unit:GetId().."_2", 2, unit, nil, "Green", 10, 20, 180)
-		--core:AddLine(unit:GetId().."_1", 2, unit, nil, 1, 20, 0)
-		--core:AddLine(unit:GetId().."_2", 2, unit, nil, 1, 20, 180)
 	elseif sName == self.L["Weather Station"] then
-		-- Todo see if we can concat position to display in unit monitor.
 		local stationPos = unit:GetPosition()
-		--local Rover = Apollo.GetAddon("Rover")
-		--Rover:AddWatch("stationPos", stationPos, 0)
-		--local posStr = (stationPos.z > bossPos.z) and "S" or "N", (stationPos.x > bossPos.x) and "E" or "W"
 		core:AddUnit(unit)
 		if mod:GetSetting("LineWeatherStations") then
 			local playerUnit = GameLib.GetPlayerUnit()
@@ -133,8 +126,6 @@ end
 function mod:OnUnitDestroyed(unit, sName)
 	--Print(sName)
 	if sName == self.L["Wind Wall"] then
-		--core:DropLine(unit:GetId().."_1")
-		--core:DropLine(unit:GetId().."_2")
 		core:DropPixie(unit:GetId().."_1")
 		core:DropPixie(unit:GetId().."_2")
 	elseif sName == self.L["Weather Station"] then
@@ -146,8 +137,6 @@ function mod:OnSpellCastStart(unitName, castName, unit)
 	if unitName == self.L["Maelstrom Authority"] then
 		if castName == self.L["Activate Weather Cycle"] then
 			bossPos = unit:GetPosition()
-			--local Rover = Apollo.GetAddon("Rover")
-			--Rover:AddWatch("bossPoss", bossPos, 0)
 			stationCount = 0
 			core:AddBar("STATION", self.L["[%u] STATION"]:format(stationCount + 1), 13)
 		elseif castName == self.L["Ice Breath"] then

@@ -179,7 +179,6 @@ function mod:OnDebuffApplied(unitName, splId, unit)
 		if mod:GetSetting("OtherBombPlayerMarkers") then
 			core:MarkUnit(unit, nil, self.L["Fire Bomb"])
 		end
-		--core:AddPixie(unit:GetId() .. "_BOMB", 2, unit, nil, "Red", 7, 10, 0, 50)
 		core:AddUnit(unit)
 		firebomb_players[unitName] = unit
 		if unitName == strMyName then
@@ -193,7 +192,6 @@ function mod:OnDebuffApplied(unitName, splId, unit)
 		if mod:GetSetting("OtherBombPlayerMarkers") then
 			core:MarkUnit(unit, nil, self.L["Frost Bomb"])
 		end
-		--core:AddPixie(unit:GetId() .. "_BOMB", 2, unit, nil, "Blue", 7, 10, 0, 50)
 		core:AddUnit(unit)
 		frostbomb_players[unitName] = unit
 		if unitName == strMyName then

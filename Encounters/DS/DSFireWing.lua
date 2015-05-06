@@ -107,7 +107,6 @@ end
 -- Event Handlers
 --
 function mod:OnUnitCreated(unit, sName)
-	--Print(sName)
 	if sName == self.L["Conjured Fire Bomb"] then
 		core:AddMsg("BOMB", self.L["BOMB"], 5, "Long", "Blue")
 		core:AddBar("BOMB", self.L["BOMB"], first and 20 or 23)

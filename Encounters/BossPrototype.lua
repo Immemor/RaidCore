@@ -87,11 +87,6 @@ end
 
 function EncounterPrototype:Reboot(isWipe)
 	-- Reboot covers everything including hard module reboots (clicking the minimap icon)
-	--self:SendMessage("BigWigs_OnBossReboot", self)
-	--if isWipe then
-	--	-- Devs, in 99% of cases you'll want to use OnBossWipe
-	--	self:SendMessage("BigWigs_OnBossWipe", self)
-	--end
 	self:Disable()
 	self:Enable()
 end

@@ -75,8 +75,6 @@ function mod:OnBossEnable()
 	Apollo.RegisterEventHandler("RC_UnitStateChanged", "OnUnitStateChanged", self)
 	Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
 	Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
-	--Apollo.RegisterEventHandler("DEBUFF_APPLIED", "OnDebuffApplied", self)
-	--Apollo.RegisterEventHandler("BUFF_APPLIED", "OnBuffApplied", self)
 end
 
 --------------------------------------------------------------------------------
@@ -85,7 +83,6 @@ end
 
 function mod:OnUnitCreated(unit, sName)
 	local eventTime = GameLib.GetGameTime()
-	--Print(sName)
 	if sName == self.L["Air Column"] then
 		if mod:GetSetting("LineTornado") then
 			core:AddLine(unit:GetId(), 2, unit, nil, 3, 30, 0, 10)
@@ -99,7 +96,6 @@ end
 
 function mod:OnUnitDestroyed(unit, sName)
 	local sName = unit:GetName()
-	--Print(sName)
 	if sName == self.L["Air Column"] then
 		core:DropLine(unit:GetId())
 	end

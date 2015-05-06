@@ -110,7 +110,6 @@ function mod:OnSpellCastStart(unitName, castName, unit)
 				core:AddBar("1ST", self.L["1ST ABILITY"], 33)
 				core:AddBar("2ND", self.L["2ND ABILITY"], 40.5)
 				core:AddBar("3RD", self.L["3RD ABILITY"], 48)
-				--core:AddBar("ICICLE", self.L["ICICLE"], 48)
 			else
 				core:AddBar("SHATTER", self.L["Shatter"]:upper(), 50)
 			end

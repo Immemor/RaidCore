@@ -103,9 +103,6 @@ function mod:OnBossEnable()
 	Apollo.RegisterEventHandler("RC_UnitDestroyed", "OnUnitDestroyed", self)
 	Apollo.RegisterEventHandler("RC_UnitStateChanged", "OnUnitStateChanged", self)
 	Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
-	--Apollo.RegisterEventHandler("SPELL_CAST_END", "OnSpellCastEnd", self)
-	--Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
-	--Apollo.RegisterEventHandler("BUFF_APPLIED", "OnBuffApplied", self)
 	Apollo.RegisterEventHandler("DEBUFF_APPLIED", "OnDebuffApplied", self)
 	Apollo.RegisterEventHandler("DEBUFF_REMOVED", "OnDebuffRemoved", self)
 	Apollo.RegisterEventHandler("RAID_WIPE", "OnReset", self)
@@ -141,7 +138,6 @@ function mod:OnUnitCreated(unit, sName)
 		elseif twirlCount % 2 == 1 then
 			core:AddBar("TWIRL", self.L["Twirl"], 15)
 		end
-		--Print(eventTime .. " - " .. sName)
 	elseif not midphase and sName == self.L["[DS] e395 - Air - Tornado"] then
 		midphase = true
 		twirlCount = 0
@@ -149,29 +145,22 @@ function mod:OnUnitCreated(unit, sName)
 		core:AddBar("MIDEND", self.L["Midphase ending"], 35)
 		core:AddBar("THORN", self.L["Thorns"], 35)
 		core:AddBar("Lifekeep", self.L["Next Healing Tree"], 35)
-
-		--Print(eventTime .. " Midphase STARTED")
 	elseif sName == self.L["Life Force"] and mod:GetSetting("LineLifeOrbs") then
-		--Print(eventTime .. " - Orb")
 		core:AddPixie(unit:GetId(), 2, unit, nil, "Blue", 10, 40, 0)
 	elseif sName == self.L["Lifekeeper"] then
-		--Print(eventTime .. " - " .. sName)
 		if mod:GetSetting("LineHealingTrees") then
 			core:AddPixie(unit:GetId(), 1, GameLib.GetPlayerUnit(), unit, "Yellow", 5, 10, 10)
 		end
 		core:AddUnit(unit)
 		core:AddBar("Lifekeep", self.L["Next Healing Tree"], 30, mod:GetSetting("SoundHealingTree"))
 	end
-	--Print(eventTime .. " - " .. sName)
 end
 
 function mod:OnUnitDestroyed(unit, sName)
 	local eventTime = GameLib.GetGameTime()
-	--Print(sName)
 	if midphase and sName == self.L["[DS] e395 - Air - Tornado"] then
 		midphase = false
 		core:AddBar("MIDPHASE", self.L["Middle Phase"], 90, mod:GetSetting("SoundMidphase"))
-		--Print(eventTime .. " Midphase ENDED")
 	elseif sName == self.L["Life Force"] then
 		core:DropPixie(unit:GetId())
 	elseif sName == self.L["Lifekeeper"] then
@@ -182,7 +171,6 @@ end
 function mod:OnDebuffApplied(unitName, splId, unit)
 	local eventTime = GameLib.GetGameTime()
 	local splName = GameLib.GetSpell(splId):GetName()
-	--Print(eventTime .. " debuff applied on unit: " .. unitName .. " - " .. splId)
 	if splId == 70440 then -- Twirl
 		if unitName == myName and mod:GetSetting("OtherTwirlWarning") then
 			core:AddMsg("TWIRL", self.L["TWIRL ON YOU!"], 5, mod:GetSetting("SoundTwirl", "Inferno"))
@@ -232,7 +220,6 @@ function mod:OnSpellCastStart(unitName, castName, unit)
 			core:AddMsg("BLIND", self.L["Blinding Light"], 5, mod:GetSetting("SoundBlindingLight", "Beware"))
 		end
 	end
-	--Print(eventTime .. " " .. unitName .. " is casting " .. castName)
 end
 
 function mod:CheckTwirlTimer()
@@ -281,15 +268,6 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
 
 			core:AddBar("MIDPHASE", self.L["Middle Phase"], 90, mod:GetSetting("SoundMidphase"))
 			core:AddBar("THORN", self.L["Thorns"], 20)
-			--core:AddBar("TWIRL", "Twirl", 22)
-
-			--core:AddLine("Visc1", 2, unit, nil, 3, 25, 0, 10)
-			--core:AddLine("Visc2", 2, unit, nil, 1, 25, 72)
-			--core:AddLine("Visc3", 2, unit, nil, 1, 25, 144)
-			--core:AddLine("Visc4", 2, unit, nil, 1, 25, 216)
-			--core:AddLine("Visc5", 2, unit, nil, 1, 25, 288)
-
-			--Print(eventTime .. " " .. sName .. " FIGHT STARTED ")
 		end
 	end
 end

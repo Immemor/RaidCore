@@ -109,7 +109,6 @@ function mod:OnSpellCastEnd(unitName, castName)
 		core:AddBar("MIDPHASE", self.L["~Middle Phase"], 88, mod:GetSetting("SoundMidphase"))
 		core:AddBar("TOMB", self.L["~Frost Tombs"], 30, mod:GetSetting("SoundFrostTombs"))
 	end
-	--Print(unitName .. " - " .. castName)
 end
 
 function mod:OnBuffApplied(unitName, splId, unit)
@@ -126,10 +125,7 @@ end
 
 function mod:OnDebuffApplied(unitName, splId, unit)
 	local eventTime = GameLib.GetGameTime()
-	--Print(eventTime .. " debuff applied on unit: " .. unitName .. " - " .. splId)
 	if splId == 70440 then -- Twirl ability
-		--Print(eventTime .. " debuff applied on unit: " .. unitName .. " - " .. splId)
-
 		if unitName == myName and mod:GetSetting("OtherTwirlWarning") then
 			core:AddMsg("TWIRL", self.L["TWIRL ON YOU!"], 5, mod:GetSetting("SoundTwirl", "Inferno"))
 		end
@@ -185,8 +181,6 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
 			core:RaidDebuff()
 			core:AddBar("MIDPHASE", self.L["Middle Phase"], 60, mod:GetSetting("SoundMidphase"))
 			core:AddBar("TOMB", self.L["~Frost Tombs"], 30, mod:GetSetting("SoundFrostTombs"))
-
-			--Print(eventTime .. " " .. sName .. " FIGHT STARTED ")
 		end
 	end
 end

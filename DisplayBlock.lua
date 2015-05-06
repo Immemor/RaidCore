@@ -9,7 +9,6 @@ setmetatable(DisplayBlock, {
 	end,
 })
 
-
 function DisplayBlock.new(xmlDoc)
 	local self = setmetatable({}, DisplayBlock)
 
@@ -117,7 +116,6 @@ function DisplayBlock:SetMovable(isMovable)
 	self.barsFrame:FindChild("MoveAnchor"):Show(isMovable)
 	self.barsFrame:SetStyle("Picture", isMovable)
 	self.barsFrame:SetStyle("Moveable", isMovable)
-	--self.barsFrame:SetStyle("Sizeable", isMovable)
 end
 
 function DisplayBlock:SetBarWidth(width)
@@ -156,7 +154,6 @@ function DisplayBlock:AddBar(key, message, duration)
 			raidBar:ReloadBar(message, duration)
 		end
 
-		--self.itemList:ArrangeChildrenVert(self:GetAnchorPoint())
 		self:RebuildList()
 
 		local raidBar = self.infos[key].barFrame
@@ -189,11 +186,9 @@ function DisplayBlock:RebuildList()
 		end
 		table.sort(tabSorted, function(a,b) return a.endTime < b.endTime end)
 
-		--self.infos = {}
 		self.itemList:DestroyChildren()
 
 		for i, info in pairs(tabSorted) do
-			--self.infos[info.key] = info
 			local raidBar = self:CreateBar(info.key, info.message, info.duration, info.type)
 			self.infos[info.key].barFrame = raidBar
 		end
@@ -246,7 +241,6 @@ end
 
 function DisplayBlock:RefreshUnits()
 	if self.isEnabled then
-		--local timeOfEvent = GameLib.GetGameTime()
 		for _, bar in pairs(self.infos) do
 			local unit = bar.unit
 			local raidBar = bar.barFrame
@@ -287,12 +281,9 @@ function DisplayBlock:AddMsg(key, message, duration, sound, color)
 			self.itemList:ArrangeChildrenVert(self:GetAnchorPoint())
 			local bSoundEnabled = self.RaidCore:GetSettings()["General"]["bSoundEnabled"]
 			if sound and bSoundEnabled then
-				--Print("Sound : " .. Apollo.GetAssetFolder() .. "\\" .. sound .. ".wav")
 				Sound.PlayFile("..\\RaidCore\\Sounds\\"..sound .. ".wav")
 			end
 		end
-
-		--self:RebuildList()
 	end
 end
 
@@ -356,8 +347,6 @@ end
 
 function DisplayBlock:CreateMsg(key, message, maxTime)
 	local bar = RaidCoreLibs.DisplayMsg.new(self.xmlDoc, key, message, maxTime, self)
-	--bar:SetBGColor(self.bgColor)
-	--bar:SetBarColor(self.barColor)
 	bar:SetHeight(self.barSize.Height)
 	return bar
 end
@@ -400,4 +389,5 @@ end
 if _G["RaidCoreLibs"] == nil then
 	_G["RaidCoreLibs"] = { }
 end
+
 _G["RaidCoreLibs"]["DisplayBlock"] = DisplayBlock

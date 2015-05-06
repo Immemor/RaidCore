@@ -97,7 +97,6 @@ function mod:OnBossEnable()
 	Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
 	Apollo.RegisterEventHandler("RC_UnitDestroyed", "OnUnitDestroyed", self)
 	Apollo.RegisterEventHandler("RC_UnitStateChanged", "OnUnitStateChanged", self)
-	--Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
 	Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
 end
 
@@ -186,8 +185,6 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
 			prev = 0
 			waveCount, beamCount = 0, 0
 			phase2 = false
-			--core:AddBar("BEAM", self.L["NEXT BEAM"], 24)
-			--core:AddBar("WAVE", self.L["[%u] WAVE"]:format(waveCount + 1), 24, mod:GetSetting("SoundNewWave"))
 			core:Berserk(576)
 		end
 	end

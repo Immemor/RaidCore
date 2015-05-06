@@ -88,14 +88,12 @@ function mod:OnBossEnable()
 	Apollo.RegisterEventHandler("DEBUFF_APPLIED", "OnDebuffApplied", self)
 	Apollo.RegisterEventHandler("DEBUFF_APPLIED_DOSE", "OnDebuffApplied", self)
 	Apollo.RegisterEventHandler("UNIT_HEALTH", "OnHealthChanged", self)
-	--Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
 end
 
 --------------------------------------------------------------------------------
 -- Event Handlers
 --
 function mod:OnUnitCreated(unit, sName)
-	--Print(sName)
 	if sName == self.L["Conjured Fire Bomb"] then
 		core:AddMsg("BOMB", self.L["BOMB"], 5, "Long", "Blue")
 		core:AddBar("BOMB", self.L["BOMB"], first and 20 or 23)
@@ -128,16 +126,11 @@ end
 
 function mod:OnDebuffApplied(unitName, splId)
 	if splId == 72559 and prevInt ~= unitName then
-		--local timeOfEvent = GameLib.GetGameTime()
-		--if timeOfEvent - prev > 10 then
-			--first = false
 		Print(("[%s] %s"):format(castCount, unitName))
 		prevInt = unitName
 		castCount = castCount + 1
 		if castCount > nbKick then castCount = 1 end
-		--core:AddMsg("DATA", self.L["[%u] INTERRUPT"]:format(castCount), 3, "Long", "Blue")
 		core:AddBar("DATA", self.L["[%u] INTERRUPT"]:format(castCount), 7)
-		--end
 	end
 end
 
@@ -147,7 +140,6 @@ function mod:OnUnitEnteredCombat(unit, bInCombat, sName)
 			prevInt = ""
 			castCount = 1
 			core:AddUnit(unit)
-			--core:WatchUnit(unit)
 			core:RaidDebuff()
 			core:AddBar("DATA", self.L["[%u] INTERRUPT"]:format(castCount), 7)
 			core:AddBar("EMPOWER", self.L["EMPOWER"]:format(""), 30, 1)

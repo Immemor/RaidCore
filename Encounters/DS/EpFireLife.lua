@@ -112,16 +112,8 @@ function mod:OnDebuffApplied(unitName, splId, unit)
 	local eventTime = GameLib.GetGameTime()
 	local tSpell = GameLib.GetSpell(splId)
 	local strSpellName = tSpell:GetName()
-	--[[
-	local strSpellName
-		if tSpell then
-			strSpellName = tostring(tSpell:GetName())
-		else
-			Print("Unknown tSpell")
-	end--]]
 
 	if splId == DEBUFFID_PRIMAL_ENTANGLEMENT or splId == DEBUFFIF__TODO__ then
-		--Print(unitName .. " has debuff: Primal Entanglement")
 		if unitName == strMyName then
 			core:AddMsg("ROOT", self.L["You are rooted"], 5, mod:GetSetting("SoundRooted", "Info"))
 		end
@@ -134,18 +126,14 @@ function mod:OnDebuffApplied(unitName, splId, unit)
 			CheckRootTimer = self:ScheduleRepeatingTimer("CheckRootTracker", 1)
 		end
 	elseif strSpellName == "Life Force Shackle" and unitName == strMyName then
-		--Print("Debuff!")
 		core:AddMsg("NOHEAL", "No-Healing Debuff!", 5, mod:GetSetting("SoundNoHealDebuff", "Alarm"))
 	end
-	--Print(eventTime .. " " .. unitName .. "has debuff: " .. strSpellName .. " with splId: " .. splId)
 end
 
 function mod:OnUnitCreated(unit, sName)
 	if sName == self.L["Life Force"] and mod:GetSetting("LineLifeOrbs") then
 		core:AddPixie(unit:GetId(), 2, unit, nil, "Blue", 10, -40, 0)
 	elseif sName == self.L["Essence of Life"] then
-		--Print("Life essence spawned")
-		--core:AddUnit(unit)
 	elseif sName == self.L["Flame Wave"] and mod:GetSetting("LineFlameWaves") then
 		local unitId = unit:GetId()
 		if unitId then
@@ -173,7 +161,6 @@ function mod:OnSpellCastStart(unitName, castName, unit)
 			core:AddMsg("BLIND", self.L["Blinding Light"], 5, mod:GetSetting("SoundBlindingLight", "Beware"))
 		end
 	end
-	--Print(eventTime .. " " .. unitName .. " is casting " .. castName)
 end
 
 function mod:OnUnitStateChanged(unit, bInCombat, sName)

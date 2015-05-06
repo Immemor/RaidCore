@@ -186,18 +186,12 @@ function mod:OnWipe()
 end
 
 function mod:OnUnitCreated(unit, sName)
-	--Print(sName .. " Created")
-	--[[
-	if sName == "Datascape Corruption Pool" then
-		core:MarkUnit(unit)
-	end--]]
 	if sName == self.L["Corrupted Ravager"] or sName == self.L["Empowered Ravager"] then
 		core:WatchUnit(unit)
 	end
 end
 
 function mod:OnSpellCastStart(unitName, castName, unit)
-	--Print(castName .. " by " .. unitName)
 	if unitName == self.L["Gloomclaw"] and castName == self.L["Rupture"] then
 		ruptCount = ruptCount + 1
 		core:AddMsg("RUPTURE", self.L["INTERRUPT %s"]:format(unitName:upper()), 5, mod:GetSetting("SoundRuptureInterrupt", "Destruction"))
@@ -263,7 +257,6 @@ function mod:OnChatDC(message)
 			core:RemoveUnit(unitId)
 			essenceUp[unitId] = nil
 		end
-		--essenceUp = {}
 	elseif message:find(self.L["Gloomclaw is vulnerable"]) then
 		core:StopBar("RUPTURE")
 		core:StopBar("CORRUPTION")
@@ -274,7 +267,6 @@ function mod:OnChatDC(message)
 			core:RemoveUnit(unitId)
 			essenceUp[unitId] = nil
 		end
-		--essenceUp = {}
 	end
 end
 
@@ -285,13 +277,11 @@ function mod:OnCombatLogHeal(tArgs)
 		local targetId = tArgs.unitTarget:GetId()
 		if targetName == self.L["Essence of Logic"] then
 			if not essenceUp[targetId] then
-				--Print("Found EssLogic : ".. tArgs.unitTarget:GetId())
 				essenceUp[targetId] = true
 				local essPos = tArgs.unitTarget:GetPosition()
 				core:MarkUnit(tArgs.unitTarget, 0, (essPos.x < 4310) and "L" or "R")
 				core:AddUnit(tArgs.unitTarget)
 				if #essenceUp == 2 then
-					--Print("Found 2 essences")
 					Apollo.RemoveEventHandler("CombatLogHeal", self)
 				end
 			end

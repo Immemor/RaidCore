@@ -119,10 +119,8 @@ local pilarCount, boreCount, submergeCount = 0, 0, 0
 local firstPull, OhmnaP3, OhmnaP4 = true, false, false
 
 local function getMax(t)
-	--if #t == 0 then return nil end
 	local max_val, key = -1000, ""
 	for k, v in pairs(t) do
-		--Print(k.. " " .. v)
 		if max_val < v then
 			max_val, key = v, k
 		elseif max_val == v then
@@ -133,7 +131,6 @@ local function getMax(t)
 end
 
 local function getMin(t)
-	--if #t == 0 then return nil end
 	local min_val, key = 1000, ""
 	for k, v in pairs(t) do
 		-- Ignore pillars that are on 0%

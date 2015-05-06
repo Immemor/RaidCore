@@ -222,7 +222,6 @@ function mod:OnSpellCastStart(unitName, castName, unit)
 		core:AddBar("DEFRAG1", self.L["Defrag Explosion"], 9, mod:GetSetting("SoundDefrag"))
 		core:AddMsg("DEFRAG", self.L["DEFRAG"], 5, mod:GetSetting("SoundDefrag", "Beware"))
 	end
-	--Print(eventTime .. " " .. unitName .. " Casting: " .. castName)
 end
 
 function mod:OnUnitStateChanged(unit, bInCombat, sName)
