@@ -474,7 +474,7 @@ function CombatInterface:OnScanUpdate()
                         -- New cast just after a previous one.
                         if data.tCast.bSuccess == false then
                             ManagerCall("OnCastEnd", nId, data.tCast.sCastName, false,
-                                        data.tCast.nCastEndTime)
+                            data.tCast.nCastEndTime)
                         end
                         data.tCast = {
                             bCasting = true,
@@ -486,7 +486,7 @@ function CombatInterface:OnScanUpdate()
                     elseif not data.tCast.bSuccess and nCastElapsed >= nCastDuration then
                         -- The have reached the end.
                         ManagerCall("OnCastEnd", nId, data.tCast.sCastName, false,
-                                    data.tCast.nCastEndTime)
+                        data.tCast.nCastEndTime)
                         data.tCast = {
                             bCasting = true,
                             sCastName = sCastName,
@@ -506,7 +506,7 @@ function CombatInterface:OnScanUpdate()
                         bIsInterrupted = false
                     end
                     ManagerCall("OnCastEnd", nId, data.tCast.sCastName, bIsInterrupted,
-                                data.tCast.nCastEndTime)
+                    data.tCast.nCastEndTime)
                 end
                 data.tCast = {
                     bCasting = false,

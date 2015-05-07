@@ -27,14 +27,14 @@ local TRIG_STATES = {
 -- Privates
 ------------------------------------------------------------------------------
 local function RegisterLocale(tBoss, sLanguage, Locales)
-  local GeminiLocale = Apollo.GetPackage("Gemini:Locale-1.0").tPackage
-  local sName = "RaidCore_" .. tBoss:GetName()
-  local L = GeminiLocale:NewLocale(sName, sLanguage, sLanguage == "enUS", true)
-  if L then
-    for key, val in next, Locales do
-      L[key] = val
+    local GeminiLocale = Apollo.GetPackage("Gemini:Locale-1.0").tPackage
+    local sName = "RaidCore_" .. tBoss:GetName()
+    local L = GeminiLocale:NewLocale(sName, sLanguage, sLanguage == "enUS", true)
+    if L then
+        for key, val in next, Locales do
+            L[key] = val
+        end
     end
-  end
 end
 
 ------------------------------------------------------------------------------
@@ -61,81 +61,81 @@ function EncounterPrototype:PrepareEncounter()
 end
 
 function EncounterPrototype:OnEnable()
-	if self.SetupOptions then self:SetupOptions() end
-	if type(self.OnBossEnable) == "function" then self:OnBossEnable() end
-	Apollo.RegisterEventHandler("RAID_WIPE", "OnRaidWipe", self)
-	self.delayedmsg = {}
+    if self.SetupOptions then self:SetupOptions() end
+    if type(self.OnBossEnable) == "function" then self:OnBossEnable() end
+    Apollo.RegisterEventHandler("RAID_WIPE", "OnRaidWipe", self)
+    self.delayedmsg = {}
 end
 
 function EncounterPrototype:OnDisable()
-	if type(self.OnBossDisable) == "function" then self:OnBossDisable() end
-	Apollo.RemoveEventHandler("UnitCreated",self)
-	Apollo.RemoveEventHandler("UnitEnteredCombat", self)
-	Apollo.RemoveEventHandler("UnitDestroyed", self)
-	Apollo.RemoveEventHandler("RC_UnitCreated", self)
-	Apollo.RemoveEventHandler("RC_UnitStateChanged", self)
-	Apollo.RemoveEventHandler("RC_UnitDestroyed", self)
-	Apollo.RemoveEventHandler("SPELL_CAST_START", self)
-	Apollo.RemoveEventHandler("SPELL_CAST_END", self)
-	Apollo.RemoveEventHandler("UNIT_HEALTH", self)
-	Apollo.RemoveEventHandler("CHAT_DATACHRON", self)
-	Apollo.RemoveEventHandler("CHAT_NPCSAY", self)
-	Apollo.RemoveEventHandler("RAID_WIPE", self)
-	Apollo.RemoveEventHandler("RAID_SYNC", self)
-	Apollo.RemoveEventHandler("DEBUFF_APPLIED", self)
+    if type(self.OnBossDisable) == "function" then self:OnBossDisable() end
+    Apollo.RemoveEventHandler("UnitCreated",self)
+    Apollo.RemoveEventHandler("UnitEnteredCombat", self)
+    Apollo.RemoveEventHandler("UnitDestroyed", self)
+    Apollo.RemoveEventHandler("RC_UnitCreated", self)
+    Apollo.RemoveEventHandler("RC_UnitStateChanged", self)
+    Apollo.RemoveEventHandler("RC_UnitDestroyed", self)
+    Apollo.RemoveEventHandler("SPELL_CAST_START", self)
+    Apollo.RemoveEventHandler("SPELL_CAST_END", self)
+    Apollo.RemoveEventHandler("UNIT_HEALTH", self)
+    Apollo.RemoveEventHandler("CHAT_DATACHRON", self)
+    Apollo.RemoveEventHandler("CHAT_NPCSAY", self)
+    Apollo.RemoveEventHandler("RAID_WIPE", self)
+    Apollo.RemoveEventHandler("RAID_SYNC", self)
+    Apollo.RemoveEventHandler("DEBUFF_APPLIED", self)
 end
 
 function EncounterPrototype:Reboot(isWipe)
-	-- Reboot covers everything including hard module reboots (clicking the minimap icon)
-	self:Disable()
-	self:Enable()
+    -- Reboot covers everything including hard module reboots (clicking the minimap icon)
+    self:Disable()
+    self:Enable()
 end
 
 function EncounterPrototype:RegisterEnglishLocale(Locales)
-  RegisterLocale(self, "enUS", Locales)
+    RegisterLocale(self, "enUS", Locales)
 end
 
 function EncounterPrototype:RegisterGermanLocale(Locales)
-  RegisterLocale(self, "deDE", Locales)
+    RegisterLocale(self, "deDE", Locales)
 end
 
 function EncounterPrototype:RegisterFrenchLocale(Locales)
-  RegisterLocale(self, "frFR", Locales)
+    RegisterLocale(self, "frFR", Locales)
 end
 
 function EncounterPrototype:GetSetting(setting, returnString)
-	if not setting then return false end
-	local settingValue = RaidCore.settings[self:GetName() ..  "_" .. setting]
-	if returnString and settingValue then
-		return returnString
-	else
-		return settingValue
-	end
+    if not setting then return false end
+    local settingValue = RaidCore.settings[self:GetName() ..  "_" .. setting]
+    if returnString and settingValue then
+        return returnString
+    else
+        return settingValue
+    end
 end
 
 function EncounterPrototype:OnRaidWipe()
-	self:CancelAllTimers()
-	for k,v in pairs(self.delayedmsg) do
-		t[k] = nil
-	end
-	if type(self.OnWipe) == "function" then self:OnWipe() end
+    self:CancelAllTimers()
+    for k,v in pairs(self.delayedmsg) do
+        t[k] = nil
+    end
+    if type(self.OnWipe) == "function" then self:OnWipe() end
 end
 
 function EncounterPrototype:Tank()
-	local unit = GroupLib.GetGroupMember(1)
-	if unit then return unit.bTank end
+    local unit = GroupLib.GetGroupMember(1)
+    if unit then return unit.bTank end
 end
 
 function EncounterPrototype:Msg(key, message, duration, sound, color)
-	RaidCore:AddMsg(key, message, duration, sound, color)
+    RaidCore:AddMsg(key, message, duration, sound, color)
 end
 
 function EncounterPrototype:DelayedMsg(key, delay, message, duration, sound, color)
-	if self.delayedmsg[key] then
-		self:CancelTimer(self.delayedmsg[key])
-		self.delayedmsg[key] = nil
-	end
-	self.delayedmsg[key] = self:ScheduleTimer("Msg", delay, key, message, duration, sound, color)
+    if self.delayedmsg[key] then
+        self:CancelTimer(self.delayedmsg[key])
+        self.delayedmsg[key] = nil
+    end
+    self.delayedmsg[key] = self:ScheduleTimer("Msg", delay, key, message, duration, sound, color)
 end
 
 --- Compute the distance between 2 unit.
@@ -143,18 +143,18 @@ end
 -- @param tUnitTo  userdata object from carbine.
 -- @return  The distance in meter.
 function EncounterPrototype:GetDistanceBetweenUnits(tUnitFrom, tUnitTo)
-	-- XXX If unit are unreachable, the distance should be nil.
-	local r = 999
-	if tUnitFrom and tUnitTo then
-		local positionA = tUnitFrom:GetPosition()
-		local positionB = tUnitTo:GetPosition()
-		if positionA and positionB then
-			local vectorA = Vector3.New(positionA)
-			local vectorB = Vector3.New(positionB)
-			r = (vectorB - vectorA):Length()
-		end
-	end
-	return r
+    -- XXX If unit are unreachable, the distance should be nil.
+    local r = 999
+    if tUnitFrom and tUnitTo then
+        local positionA = tUnitFrom:GetPosition()
+        local positionB = tUnitTo:GetPosition()
+        if positionA and positionB then
+            local vectorA = Vector3.New(positionA)
+            local vectorB = Vector3.New(positionB)
+            r = (vectorB - vectorA):Length()
+        end
+    end
+    return r
 end
 
 --- Default trigger function to start an encounter.
@@ -186,11 +186,11 @@ end
 -- RaidCore interaction
 ------------------------------------------------------------------------------
 do
-	-- Sub modules are created when lua files are loaded by the WildStar.
-	-- Default setting must be done before encounter loading so.
-	RaidCore:SetDefaultModulePrototype(EncounterPrototype)
-	RaidCore:SetDefaultModuleState(false)
-	RaidCore:SetDefaultModulePackages("Gemini:Timer-1.0")
+    -- Sub modules are created when lua files are loaded by the WildStar.
+    -- Default setting must be done before encounter loading so.
+    RaidCore:SetDefaultModulePrototype(EncounterPrototype)
+    RaidCore:SetDefaultModuleState(false)
+    RaidCore:SetDefaultModulePackages("Gemini:Timer-1.0")
 end
 
 --- Registering a new encounter as a sub module of RaidCore.
@@ -199,23 +199,23 @@ end
 --@param parentMapId  Id list or id number
 --@param mapId  Id list or id number
 function RaidCore:NewEncounter(name, continentId, parentMapId, mapId)
-	assert(name and continentId and parentMapId and mapId)
-	-- Transform an unique key into a list with 1 entry, if needed.
-	local continentIdList = type(continentId) == "table" and continentId or { continentId }
-	local parentMapIdList = type(parentMapId) == "table" and parentMapId or { parentMapId }
-	local mapIdList = type(mapId) == "table" and mapId or { mapId }
+    assert(name and continentId and parentMapId and mapId)
+    -- Transform an unique key into a list with 1 entry, if needed.
+    local continentIdList = type(continentId) == "table" and continentId or { continentId }
+    local parentMapIdList = type(parentMapId) == "table" and parentMapId or { parentMapId }
+    local mapIdList = type(mapId) == "table" and mapId or { mapId }
 
-	-- Create the new encounter, and set zone identifiers.
-	-- Library already manage unique name.
-	new = self:NewModule(name)
-	new.continentIdList = continentIdList
-	new.parentMapIdList = parentMapIdList
-	new.mapIdList = mapIdList
-	new.displayName = name
-	-- Register an empty locale table.
-	new:RegisterEnglishLocale({})
-	-- Retrieve Locale.
-	local GeminiLocale = Apollo.GetPackage("Gemini:Locale-1.0").tPackage
-	new.L = GeminiLocale:GetLocale("RaidCore_" .. name)
-	return new
+    -- Create the new encounter, and set zone identifiers.
+    -- Library already manage unique name.
+    new = self:NewModule(name)
+    new.continentIdList = continentIdList
+    new.parentMapIdList = parentMapIdList
+    new.mapIdList = mapIdList
+    new.displayName = name
+    -- Register an empty locale table.
+    new:RegisterEnglishLocale({})
+    -- Retrieve Locale.
+    local GeminiLocale = Apollo.GetPackage("Gemini:Locale-1.0").tPackage
+    new.L = GeminiLocale:GetLocale("RaidCore_" .. name)
+    return new
 end
