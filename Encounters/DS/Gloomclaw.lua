@@ -211,7 +211,7 @@ end
 
 function mod:OnChatDC(message)
     local isPushBack = message == self.L["Gloomclaw is pushed back"]
-    local isMoveForward = message == self.L["Gloomclaw is pushed back"]
+    local isMoveForward = message == self.L["Gloomclaw is moving forward"]
 
     if isPushBack or isMoveForward then
         if not first then
