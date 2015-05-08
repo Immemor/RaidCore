@@ -837,7 +837,9 @@ function RaidCore:OnCheckMapZone()
             end
             if bSearching then
                 self:CombatInterface_Activate("DetectCombat")
+                _tHUDtimer:Start()
             else
+                _tHUDtimer:Stop()
                 self:CombatInterface_Activate("Disable")
                 self:ResetAll()
             end
@@ -1350,7 +1352,6 @@ function RaidCore:WipeCheck()
     self:ResetSync()
     self:ResetLines()
 
-    _tHUDtimer:Stop()
     self:CombatInterface_Activate("DetectCombat")
     Event_FireGenericEvent("RAID_WIPE")
 end
@@ -1367,7 +1368,6 @@ function RaidCore:OnEnteredCombat(nId, tUnit, sName, bInCombat)
             Log:Add("Player In Combat")
             _bIsEncounterInProgress = true
             self:CombatInterface_Activate("FullEnable")
-            _tHUDtimer:Start()
             if _tCurrentEncounter and not _tCurrentEncounter:IsEnabled() then
                 _tCurrentEncounter:Enable()
                 ProcessDelayedUnit()
