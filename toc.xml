@@ -1,54 +1,54 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Addon Author="Ninjouz" APIVersion="10" Name="RaidCore" Description="Core Functions for Raid Warnings" Version="1.0">
-	<!-- Libraries -->
-	<Script Name="Libs/GeminiLocale/GeminiLocale.lua"/>
-	<Script Name="Libs/GeminiAddon/GeminiAddon.lua" />
-	<Script Name="Libs/GeminiTimer/GeminiTimer-1.0.lua" />
-	<Script Name="Libs/GeminiGUI/GeminiGUI.lua"/>
-	<Script Name="Libs/GeminiColor/GeminiColor.lua"/>
-	<Script Name="Libs/LibJSON/LibJSON-2.5.lua"/>
-	<Script Name="Libs/Log.lua"/>
-	<!-- Global Locales -->
-	<Script Name="Locales/enUS.lua"/>
-	<Script Name="Locales/frFR.lua"/>
-	<Script Name="Locales/deDE.lua"/>
-	<!-- Forms -->
-	<Form Name="RaidCore.xml"/>
-	<!-- LUA Script -->
-	<Script Name="DisplayBar.lua"/>
-	<Script Name="DisplayMsg.lua"/>
-	<Script Name="DisplayBlock.lua"/>
-	<Script Name="DisplayLine.lua"/>
-	<Script Name="RaidCore.lua"/>
-	<Script Name="CombatInterface.lua"/>
-	<Script Name="LogGUI.lua"/>
-	<Script Name="Encounters/BossPrototype.lua" />
-	<!-- Encounters: Testing purpose -->
-	<!--@alpha@-->
-	<Script Name="Encounters/TEST/GalerasTest.lua"/>
-	<!--@end-alpha@-->
-	<!-- Encounters: Genetic Archive -->
-	<Script Name="Encounters/GA/ExperimentX89.lua"/>
-	<Script Name="Encounters/GA/Kuralak.lua"/>
-	<Script Name="Encounters/GA/Prototypes.lua"/>
-	<Script Name="Encounters/GA/PhageMaw.lua"/>
-	<Script Name="Encounters/GA/PhageCouncil.lua"/>
-	<Script Name="Encounters/GA/Ohmna.lua"/>
-	<!-- Encounters: Datascape -->
-	<Script Name="Encounters/DS/SystemDaemons.lua"/>
-	<Script Name="Encounters/DS/DSFireWing.lua"/>
-	<Script Name="Encounters/DS/DSFrostWing.lua"/>
-	<Script Name="Encounters/DS/DSLogicWing.lua"/>
-	<Script Name="Encounters/DS/Gloomclaw.lua"/>
-	<Script Name="Encounters/DS/VolatilyLattice.lua"/>
-	<Script Name="Encounters/DS/Maelstrom.lua"/>
-	<Script Name="Encounters/DS/EpAirWater.lua"/>
-	<Script Name="Encounters/DS/EpFireWater.lua"/>
-	<Script Name="Encounters/DS/EpLogicWater.lua"/>
-	<Script Name="Encounters/DS/EpLogicEarth.lua"/>
-	<Script Name="Encounters/DS/EpAirEarth.lua"/>
-	<Script Name="Encounters/DS/EpFireLife.lua"/>
-	<Script Name="Encounters/DS/EpLogicLife.lua"/>
-	<Script Name="Encounters/DS/EpAirLife.lua"/>
-	<Script Name="Encounters/DS/Avatus.lua"/>
+<Addon Author="RaidCore Team" APIVersion="10" Name="RaidCore" Description="Boss Encounters" Version="1.0">
+    <!-- Libraries -->
+    <Script Name="Libs/GeminiLocale/GeminiLocale.lua"/>
+    <Script Name="Libs/GeminiAddon/GeminiAddon.lua" />
+    <Script Name="Libs/GeminiTimer/GeminiTimer-1.0.lua" />
+    <Script Name="Libs/GeminiGUI/GeminiGUI.lua"/>
+    <Script Name="Libs/GeminiColor/GeminiColor.lua"/>
+    <Script Name="Libs/LibJSON/LibJSON-2.5.lua"/>
+    <Script Name="Libs/Log.lua"/>
+    <!-- Global Locales -->
+    <Script Name="Locales/enUS.lua"/>
+    <Script Name="Locales/frFR.lua"/>
+    <Script Name="Locales/deDE.lua"/>
+    <!-- Forms -->
+    <Form Name="RaidCore.xml"/>
+    <!-- LUA Script -->
+    <Script Name="DisplayBar.lua"/>
+    <Script Name="DisplayMsg.lua"/>
+    <Script Name="DisplayBlock.lua"/>
+    <Script Name="DisplayLine.lua"/>
+    <Script Name="RaidCore.lua"/>
+    <Script Name="CombatInterface.lua"/>
+    <Script Name="LogGUI.lua"/>
+    <Script Name="Encounters/BossPrototype.lua" />
+    <!-- Encounters: Testing purpose -->
+    <!--@alpha@-->
+    <Script Name="Encounters/TEST/GalerasTest.lua"/>
+    <!--@end-alpha@-->
+    <!-- Encounters: Genetic Archive -->
+    <Script Name="Encounters/GA/ExperimentX89.lua"/>
+    <Script Name="Encounters/GA/Kuralak.lua"/>
+    <Script Name="Encounters/GA/Prototypes.lua"/>
+    <Script Name="Encounters/GA/PhageMaw.lua"/>
+    <Script Name="Encounters/GA/PhageCouncil.lua"/>
+    <Script Name="Encounters/GA/Ohmna.lua"/>
+    <!-- Encounters: Datascape -->
+    <Script Name="Encounters/DS/SystemDaemons.lua"/>
+    <Script Name="Encounters/DS/DSFireWing.lua"/>
+    <Script Name="Encounters/DS/DSFrostWing.lua"/>
+    <Script Name="Encounters/DS/DSLogicWing.lua"/>
+    <Script Name="Encounters/DS/Gloomclaw.lua"/>
+    <Script Name="Encounters/DS/VolatilyLattice.lua"/>
+    <Script Name="Encounters/DS/Maelstrom.lua"/>
+    <Script Name="Encounters/DS/EpAirWater.lua"/>
+    <Script Name="Encounters/DS/EpFireWater.lua"/>
+    <Script Name="Encounters/DS/EpLogicWater.lua"/>
+    <Script Name="Encounters/DS/EpLogicEarth.lua"/>
+    <Script Name="Encounters/DS/EpAirEarth.lua"/>
+    <Script Name="Encounters/DS/EpFireLife.lua"/>
+    <Script Name="Encounters/DS/EpLogicLife.lua"/>
+    <Script Name="Encounters/DS/EpAirLife.lua"/>
+    <Script Name="Encounters/DS/Avatus.lua"/>
 </Addon>
