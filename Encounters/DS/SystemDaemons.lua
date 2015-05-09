@@ -151,21 +151,26 @@ mod:RegisterGermanLocale({
 -- Locals
 --
 
-local p1_pillar1north = { x = 133.217, y = -225.94, z = -207.71 }
-local p1_pillar2north = { x = 109.22, y = -225.94, z = -150.85 }
-local p1_pillar3north = { x = 109.23, y = -225.94, z = -198.13 }
-local p1_pillar1south = { x = 133.17, y = -225.94, z = -140.96 }
-local p1_pillar2south = { x = 156.79, y = -225.94, z = -198.126 }
-local p1_pillar3south = { x = 156.80, y = -225.94, z = -150.82 }
-
-local p2_pillar1north = { x = 109.23, y = -225.94, z = -198.12 }
-local p2_pillar2north = { x = 156.79, y = -225.94, z = -198.12 }
-local p2_pillar3north = { x = 99.91, y = -225.99, z = -174.35 }
-local p2_pillar4north = { x = 133.21, y = -225.94, z = -207.71 }
-local p2_pillar1south = { x = 109.22, y = -225.94, z = -150.85 }
-local p2_pillar2south = { x = 156.80, y = -225.94, z = -150.82 }
-local p2_pillar3south = { x = 133.17, y = -225.94, z = -140.93 }
-local p2_pillar4south = { x = 166.56, y = -225.94, z = -174.30 }
+local pillars = {
+    ["mid1"] = {
+        ["N1"] = { x = 133.217, y = -225.94, z = -207.71 },
+        ["N2"] = { x = 109.22, y = -225.94, z = -150.85 },
+        ["N3"] = { x = 109.23, y = -225.94, z = -198.13 },
+        ["S1"] = { x = 133.17, y = -225.94, z = -140.96 },
+        ["S2"] = { x = 156.79, y = -225.94, z = -198.126 },
+        ["S3"] = { x = 156.80, y = -225.94, z = -150.82 },
+    },
+    ["mid2"] = {
+        ["N1"] = { x = 109.23, y = -225.94, z = -198.12 },
+        ["N2"] = { x = 156.79, y = -225.94, z = -198.12 },
+        ["N3"] = { x = 99.91, y = -225.99, z = -174.35 },
+        ["N4"] = { x = 133.21, y = -225.94, z = -207.71 },
+        ["S1"] = { x = 109.22, y = -225.94, z = -150.85 },
+        ["S2"] = { x = 156.80, y = -225.94, z = -150.82 },
+        ["S3"] = { x = 133.17, y = -225.94, z = -140.93 },
+        ["S4"] = { x = 166.56, y = -225.94, z = -174.30 },
+    },
+}
 
 local discoCount, sdwaveCount, probeCount, sdSurgeCount, PurgeLast = 0, 0, 0, {}, {}
 local phase2warn, phase2 = false, false
@@ -373,7 +378,7 @@ function mod:OnZoneChanged(zoneId, zoneName)
             core:StopBar("PURGE_" .. id)
         end
         local probesouth = { x = 95.89, y = -337.19, z = 211.26 }
-        core:SetWorldMarker(probesouth, self.L["Probe Spawn"])
+        core:SetWorldMarker("PROBE_SOUTH", self.L["Probe Spawn"], probesouth)
     end
 end
 
@@ -414,21 +419,13 @@ function mod:OnChatDC(message)
             core:AddBar("DISC", self.L["DISCONNECT (%u)"]:format(discoCount + 1), 85)
         end
         if mod:GetSetting("OtherPillarMarkers") and phase2count == 1 then
-            core:SetWorldMarker(p1_pillar1north, "N1")
-            core:SetWorldMarker(p1_pillar2north, "N2")
-            core:SetWorldMarker(p1_pillar3north, "N3")
-            core:SetWorldMarker(p1_pillar1south, "S1")
-            core:SetWorldMarker(p1_pillar2south, "S2")
-            core:SetWorldMarker(p1_pillar3south, "S3")
+            for key, value in pairs(pillars["mid1"]) do
+                core:SetWorldMarker(key, key, value)
+            end
         elseif mod:GetSetting("OtherPillarMarkers") and phase2count == 2 then
-            core:SetWorldMarker(p2_pillar1north, "N1")
-            core:SetWorldMarker(p2_pillar2north, "N2")
-            core:SetWorldMarker(p2_pillar3north, "N3")
-            core:SetWorldMarker(p2_pillar4north, "N4")
-            core:SetWorldMarker(p2_pillar1south, "S1")
-            core:SetWorldMarker(p2_pillar2south, "S2")
-            core:SetWorldMarker(p2_pillar3south, "S3")
-            core:SetWorldMarker(p2_pillar4south, "S4")
+            for key, value in pairs(pillars["mid2"]) do
+                core:SetWorldMarker(key, key, value)
+            end
         end
         self:ScheduleTimer("NextWave", 5)
     end
