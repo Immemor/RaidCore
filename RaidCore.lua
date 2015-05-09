@@ -83,6 +83,7 @@ local DefaultSettings = {
             barColor = "ff00007f",
         },
         bSoundEnabled = true,
+        bAcceptSummons = true,
     },
     -- Datascape Settings
 
@@ -1432,7 +1433,7 @@ function RaidCore:OnComMessage(channel, strMessage, strSender)
             Event_FireGenericEvent("RAID_SYNC", tMessage.sync, tMessage.parameter)
         end
     elseif tMessage.action == "SyncSummon" then
-        if not self:isRaidManagement(strSender) then
+        if not self.settings["General"]["bAcceptSummons"] or not self:isRaidManagement(strSender) then
             return false
         end
         Print(tMessage.sender .. " requested that you accept a summon. Attempting to accept now.")
