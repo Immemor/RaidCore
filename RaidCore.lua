@@ -1334,6 +1334,7 @@ function RaidCore:WipeCheck()
     Log:Add("Encounter no more in progress")
     _bIsEncounterInProgress = false
     if _tCurrentEncounter then
+        Event_FireGenericEvent("RAID_WIPE")
         _tCurrentEncounter:Disable()
         _tCurrentEncounter = nil
     end
@@ -1352,7 +1353,6 @@ function RaidCore:WipeCheck()
 
     _tHUDtimer:Stop()
     self:CombatInterface_Activate("DetectCombat")
-    Event_FireGenericEvent("RAID_WIPE")
 end
 
 function RaidCore:OnUnitCreated(nId, tUnit, sName)
