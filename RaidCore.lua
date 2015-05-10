@@ -1004,7 +1004,7 @@ function RaidCore:MarkUnit(unit, location, mark)
             local markFrame = Apollo.LoadForm(self.xmlDoc, "MarkFrame", "InWorldHudStratum", self)
             markFrame:SetUnit(unit, location)
             markFrame:FindChild("Name"):SetText(self.mark[key].number)
-            markFrame:Show(true)
+            self:WorldMarkerVisibilityHandler(key, markFrame)
 
             self.mark[key].frame = markFrame
         elseif mark then
@@ -1015,16 +1015,15 @@ function RaidCore:MarkUnit(unit, location, mark)
     end
 end
 
-function RaidCore:WorldMarkerVisibilityHandler(key)
+function RaidCore:WorldMarkerVisibilityHandler(key, markFrame)
     -- If worldmarker was never on screen it might already have been destroyed again
     -- so we'll check if it still exists
-    local markFrame = self.worldmarker[key]
-    if not markFrame then return end
+    if not markFrame or not markFrame:IsValid() then return end
     if markFrame:IsOnScreen() then
         markFrame:Show(true)
     else
         -- run check again later
-        self:ScheduleTimer("WorldMarkerVisibilityHandler", 1, key)
+        self:ScheduleTimer("WorldMarkerVisibilityHandler", 1, key, markFrame)
     end
 end
 
@@ -1041,7 +1040,7 @@ function RaidCore:CreateWorldMarker(key, sText, tPosition)
     markFrame:SetWorldLocation(tPosition)
     markFrame:FindChild("Name"):SetText(sText)
     self.worldmarker[key] = markFrame
-    self:WorldMarkerVisibilityHandler(key)
+    self:WorldMarkerVisibilityHandler(key, markFrame)
 end
 
 function RaidCore:UpdateWorldMarker(key, sText, tPosition)
