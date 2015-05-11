@@ -51,4 +51,6 @@
     <Script Name="Encounters/DS/EpLogicLife.lua"/>
     <Script Name="Encounters/DS/EpAirLife.lua"/>
     <Script Name="Encounters/DS/Avatus.lua"/>
+    <!-- Encounters: Core-Y83 -->
+    <Script Name="Encounters/Y83/PrimeEvolutionaryOperant.lua"/>
 </Addon>
