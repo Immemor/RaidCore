@@ -189,11 +189,10 @@ function mod:OnSpellCastStart(unitName, castName, unit)
         if castName == self.L["Erupt"] then
             if OhmnaP3 then return end
             local pilarActivated = self:OhmnaPE(pilarCount % 2)
-            core:AddBar("OPILAR", self.L["pillar %u : %u"]:format(pilarCount, pilarActivated), 32, 1)
+            core:AddBar("OPILAR", self.L["PILLAR %u : %u"]:format(pilarCount, pilarActivated), 32, 1)
             if self:Tank() then
                 core:AddBar("OBORE", self.L["SWITCH TANK"], 45)
             end
-            core:StopScan()
         elseif castName == self.L["Genetic Torrent"] then
             core:AddMsg("SPEW", self.L["BIG SPEW"], 5, "RunAway")
             core:AddBar("OSPEW", self.L["NEXT BIG SPEW"], OhmnaP4 and 40 or 60, 1)
