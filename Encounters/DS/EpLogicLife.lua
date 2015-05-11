@@ -1,12 +1,25 @@
---------------------------------------------------------------------------------
--- Module Declaration
+---------------------------------------------------------------------------------------------------
+-- Client Lua Script for RaidCore Addon on WildStar Game.
 --
+-- Copyright (C) 2015 RaidCore
+---------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------
+-- Description:
+--   Elemental Pair after the Logic wings.
+---------------------------------------------------------------------------------------------------
 
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
-
 local mod = core:NewEncounter("EpLogicLife", 52, 98, 119)
 if not mod then return end
 
+---------------------------------------------------------------------------------------------------
+-- Fast and local object.
+---------------------------------------------------------------------------------------------------
+local GetPlayerUnit = GameLib.GetPlayerUnit
+
+---------------------------------------------------------------------------------------------------
+-- Languages.
+---------------------------------------------------------------------------------------------------
 mod:RegisterTrigMob("ALL", { "Mnemesis", "Visceralus" })
 mod:RegisterEnglishLocale({
     -- Unit names.
@@ -49,20 +62,20 @@ mod:RegisterFrenchLocale({
     ["Blinding Light"] = "Lumière aveuglante",
     ["Defragment"] = "Défragmentation",
     -- Bar and messages.
-    --["Defrag Explosion"] = "Defrag Explosion", -- TODO: French translation missing !!!!
-    --["~DEFRAG CD"] = "~DEFRAG CD", -- TODO: French translation missing !!!!
-    --["DEFRAG"] = "DEFRAG", -- TODO: French translation missing !!!!
-    --["ENRAGE"] = "ENRAGE", -- TODO: French translation missing !!!!
-    --["No-Healing Debuff!"] = "No-Healing Debuff!", -- TODO: French translation missing !!!!
-    --["NO HEAL DEBUFF"] = "NO HEAL\nDEBUFF", -- TODO: French translation missing !!!!
-    --["SNAKE ON YOU!"] = "SNAKE ON YOU!", -- TODO: French translation missing !!!!
-    --["SNAKE ON %s!"] = "SNAKE ON %s!", -- TODO: French translation missing !!!!
-    --["SNAKE"] = "SNAKE", -- TODO: French translation missing !!!!
-    --["THORNS DEBUFF"] = "THORNS\nDEBUFF", -- TODO: French translation missing !!!!
-    ["MARKER North"] = "N",
-    ["MARKER South"] = "S",
-    ["MARKER East"] = "E",
-    ["MARKER West"] = "O",
+    ["Defrag Explosion"] = "Defrag Explosion",
+    ["~DEFRAG CD"] = "~DEFRAG CD",
+    ["DEFRAG"] = "DEFRAG",
+    ["ENRAGE"] = "ENRAGE",
+    ["No-Healing Debuff!"] = "No-Healing Debuff!",
+    ["NO HEAL DEBUFF"] = "NO HEAL\nDEBUFF",
+    ["SNAKE ON YOU!"] = "SERPENT SUR VOUS!",
+    ["SNAKE ON %s!"] = "SERPENT SUR %s!",
+    ["SNAKE"] = "SERPENT",
+    ["THORNS DEBUFF"] = "ÉPINE",
+    ["MARKER North"] = "Nord",
+    ["MARKER South"] = "Sud",
+    ["MARKER East"] = "Est",
+    ["MARKER West"] = "Ouest",
 })
 mod:RegisterGermanLocale({
     -- Unit names.
@@ -93,48 +106,36 @@ mod:RegisterGermanLocale({
     ["MARKER West"] = "W",
 })
 
---------------------------------------------------------------------------------
--- Locals
---
-
-local uPlayer = nil
-local strMyName = ""
-local midphase = false
-local midpos = {
-    ["north"] = {x = 9741.53, y = -518, z = 17823.81},
-    ["west"] = {x = 9691.53, y = -518, z = 17873.81},
-    ["south"] = {x = 9741.53, y = -518, z = 17923.81},
-    ["east"] = {x = 9791.53, y = -518, z = 17873.81},
+---------------------------------------------------------------------------------------------------
+-- Constants.
+---------------------------------------------------------------------------------------------------
+local DEBUFF__SNAKE_SNACK = 74570
+local DEBUFF__THORNS = 75031
+local DEBUFF__LIFE_FORCE_SHACKLE = 74366
+local MID_POSITIONS = {
+    ["north"] = { x = 9741.53, y = -518, z = 17823.81 },
+    ["west"] = { x = 9691.53, y = -518, z = 17873.81 },
+    ["south"] = { x = 9741.53, y = -518, z = 17923.81 },
+    ["east"] = { x = 9791.53, y = -518, z = 17873.81 },
 }
 
---------------------------------------------------------------------------------
--- Initialization
---
+---------------------------------------------------------------------------------------------------
+-- Encounter description.
+---------------------------------------------------------------------------------------------------
+local midphase = false
+
 function mod:OnBossEnable()
-    Print(("Module %s loaded"):format(mod.ModuleName))
     Apollo.RegisterEventHandler("RC_UnitStateChanged", "OnUnitStateChanged", self)
     Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
     Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
     Apollo.RegisterEventHandler("RC_UnitDestroyed", "OnUnitDestroyed", self)
     Apollo.RegisterEventHandler("DEBUFF_APPLIED", "OnDebuffApplied", self)
     Apollo.RegisterEventHandler("DEBUFF_REMOVED", "OnDebuffRemoved", self)
-    Apollo.RegisterEventHandler("RAID_WIPE", "OnReset", self)
-end
-
---------------------------------------------------------------------------------
--- Event Handlers
---
-function mod:OnReset()
-    core:ResetMarks()
-    midphase = false
 end
 
 function mod:OnDebuffApplied(unitName, splId, unit)
-    local tSpell = GameLib.GetSpell(splId)
-    local strSpellName = tSpell:GetName()
-
-    if strSpellName == "Snake Snack" then
-        if unitName == strMyName then
+    if DEBUFF__SNAKE_SNACK == splId then
+        if unit == GetPlayerUnit() then
             core:AddMsg("SNAKE", self.L["SNAKE ON YOU!"], 5, mod:GetSetting("SoundSnake", "RunAway"))
         else
             core:AddMsg("SNAKE", self.L["SNAKE ON %s!"]:format(unitName), 5, mod:GetSetting("SoundSnake", "Info"))
@@ -142,29 +143,26 @@ function mod:OnDebuffApplied(unitName, splId, unit)
         if mod:GetSetting("OtherSnakePlayerMarkers") then
             core:MarkUnit(unit, nil, self.L["SNAKE"]) 
         end
-    elseif strSpellName == "Life Force Shackle" then
+    elseif DEBUFF__LIFE_FORCE_SHACKLE == splId then
         if mod:GetSetting("OtherNoHealDebuffPlayerMarkers") then
             core:MarkUnit(unit, nil, self.L["NO HEAL DEBUFF"])
         end
-        if unitName == strMyName then
+        if unit == GetPlayerUnit() then
             core:AddMsg("NOHEAL", self.L["No-Healing Debuff!"], 5, mod:GetSetting("SoundNoHealDebuff", "Alarm"))
         end
-    elseif strSpellName == "Thorns" then
+    elseif DEBUFF__THORNS == splId then
         if mod:GetSetting("OtherRootedPlayersMarkers") then
-            core:MarkUnit(unit, nil, self.L["THORNS\nDEBUFF"])
+            core:MarkUnit(unit, nil, self.L["THORNS DEBUFF"])
         end
     end
 end
 
 function mod:OnDebuffRemoved(unitName, splId, unit)
-    local tSpell = GameLib.GetSpell(splId)
-    local strSpellName = tSpell:GetName()
-
-    if strSpellName == "Snake Snack" then
+    if DEBUFF__SNAKE_SNACK == splId then
         core:DropMark(unit:GetId())
-    elseif strSpellName == "Life Force Shackle" then
+    elseif DEBUFF__LIFE_FORCE_SHACKLE == splId then
         core:DropMark(unit:GetId())
-    elseif strSpellName == "Thorns" then
+    elseif DEBUFF__THORNS == splId then
         core:DropMark(unit:GetId())
     end
 end
@@ -175,10 +173,10 @@ function mod:OnUnitCreated(unit, sName)
         if not midphase then
             midphase = true
             if mod:GetSetting("OtherDirectionMarkers") then
-                core:SetWorldMarker("NORTH", self.L["MARKER North"], midpos["north"])
-                core:SetWorldMarker("EAST", self.L["MARKER East"], midpos["east"])
-                core:SetWorldMarker("SOUTH", self.L["MARKER South"], midpos["south"])
-                core:SetWorldMarker("WEST", self.L["MARKER West"], midpos["west"])
+                core:SetWorldMarker("NORTH", self.L["MARKER North"], MID_POSITIONS["north"])
+                core:SetWorldMarker("EAST", self.L["MARKER East"], MID_POSITIONS["east"])
+                core:SetWorldMarker("SOUTH", self.L["MARKER South"], MID_POSITIONS["south"])
+                core:SetWorldMarker("WEST", self.L["MARKER West"], MID_POSITIONS["west"])
             end
             core:StopBar("DEFRAG")
         end
@@ -213,7 +211,7 @@ end
 function mod:OnSpellCastStart(unitName, castName, unit)
     local eventTime = GameLib.GetGameTime()
     if unitName == self.L["Visceralus"] and castName == self.L["Blinding Light"] then
-        if self:GetDistanceBetweenUnits(unit, uPlayer) < 33 then
+        if self:GetDistanceBetweenUnits(unit, GetPlayerUnit()) < 33 then
             core:AddMsg("BLIND", self.L["Blinding Light"], 5, mod:GetSetting("SoundBlindingLight", "Beware"))
         end
     elseif unitName == self.L["Mnemesis"] and castName == self.L["Defragment"] then
@@ -238,8 +236,6 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
             end
         elseif sName == self.L["Mnemesis"] then
             core:WatchUnit(unit)
-            uPlayer = GameLib.GetPlayerUnit()
-            strMyName = uPlayer:GetName()
             midphase = false
             core:AddUnit(unit)
             core:RaidDebuff()
