@@ -182,7 +182,7 @@ function mod:OnChatNPCSay(message)
         or message:find(self.L["Join us... become one with the Strain"])
         or message:find(self.L["One of us... you will become one of us"]) then
         eggsCount, siphonCount, outbreakCount = 2, 1, 0
-        core:StopBar(self.L["VANISH"])
+        core:StopBar("VANISH")
         core:AddMsg("KP2", self.L["PHASE 2 !"], 5, "Alert")
         core:AddBar("OUTBREAK", (self.L["Outbreak (%s)"]):format(outbreakCount + 1), 15)
         core:AddBar("EGGS", (self.L["Eggs (%s)"]):format(eggsCount), 73)
