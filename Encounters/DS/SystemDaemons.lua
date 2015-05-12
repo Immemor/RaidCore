@@ -56,8 +56,8 @@ mod:RegisterEnglishLocale({
 })
 mod:RegisterFrenchLocale({
     -- Unit names.
-    ["Binary System Daemon"] = "Daemon 2.0",
-    ["Null System Daemon"] = "Daemon 1.0",
+    ["Binary System Daemon"] = "Daemon 2.0",
+    ["Null System Daemon"] = "Daemon 1.0",
     ["Brute Force Algorithm"] = "Algorithme de force brute",
     ["Encryption Program"] = "Programme de cryptage",
     ["Radiation Dispersion Unit"] = "Unité de dispersion de radiations",
@@ -68,7 +68,7 @@ mod:RegisterFrenchLocale({
     ["Enhancement Module"] = "Module d'amélioration",
     ["Conduction Unit Mk. I"]  = "Unité de conductivité v1",
     ["Conduction Unit Mk. II"]  = "Unité de conductivité v2",
-    --["Conduction Unit Mk. III"]  = "Conduction Unit Mk. III", -- TODO: French translation missing !!!!
+    ["Conduction Unit Mk. III"]  = "Unité de conductivité v3",
     ["Infinite Generator Core"] = "Noyau du générateur d'infinité",
     ["Recovery Protocol"] = "Protocole de récupération",
     -- Datachron messages.
