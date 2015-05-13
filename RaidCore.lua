@@ -850,8 +850,8 @@ function RaidCore:OnCheckMapZone()
     end
 end
 
-function RaidCore:AddBar(key, message, duration, emphasize)
-    self.raidbars:AddBar(key, message, duration)
+function RaidCore:AddBar(key, message, duration, emphasize, color)
+    self.raidbars:AddBar(key, message, duration, color)
     if emphasize then
         self:AddEmphasize(key, duration)
     end

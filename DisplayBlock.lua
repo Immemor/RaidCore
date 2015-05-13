@@ -134,7 +134,7 @@ function DisplayBlock:SetBarHeight(height)
     self.itemList:ArrangeChildrenVert(self:GetAnchorPoint())
 end
 
-function DisplayBlock:AddBar(key, message, duration)
+function DisplayBlock:AddBar(key, message, duration, color)
     if self.isEnabled then
         local timeOfEvent = GameLib.GetGameTime()
         if self.infos[key] == nil then
@@ -143,15 +143,17 @@ function DisplayBlock:AddBar(key, message, duration)
             self.infos[key].endTime = timeOfEvent + duration
             self.infos[key].duration = duration
             self.infos[key].message = message
-            local raidBar = self:CreateBar(key, message, duration, 1)
+			self.infos[key].color = color
+            local raidBar = self:CreateBar(key, message, duration, 1, nil, color)
             self.infos[key].barFrame = raidBar
             self.infos[key].type = 1
         else
             self.infos[key].endTime = timeOfEvent + duration
             self.infos[key].duration = duration
             self.infos[key].message = message
+			self.infos[key].color = color
             local raidBar = self.infos[key].barFrame
-            raidBar:ReloadBar(message, duration)
+            raidBar:ReloadBar(message, duration, color)
         end
 
         self:RebuildList()
@@ -189,7 +191,7 @@ function DisplayBlock:RebuildList()
         self.itemList:DestroyChildren()
 
         for i, info in pairs(tabSorted) do
-            local raidBar = self:CreateBar(info.key, info.message, info.duration, info.type)
+            local raidBar = self:CreateBar(info.key, info.message, info.duration, info.type, nil, info.color)
             self.infos[info.key].barFrame = raidBar
         end
 
@@ -334,10 +336,10 @@ function DisplayBlock:ClearAll()
     self.itemList:ArrangeChildrenVert(self:GetAnchorPoint())
 end
 
-function DisplayBlock:CreateBar(key, message, maxTime, type, mark)
+function DisplayBlock:CreateBar(key, message, maxTime, type, mark, color)
     local bar = RaidCoreLibs.DisplayBar.new(self.xmlDoc, key, message, maxTime, type, self)
     bar:SetBGColor(self.bgColor)
-    bar:SetBarColor(self.barColor)
+	bar:SetBarColor(color or self.barColor)
     bar:SetHeight(self.barSize.Height)
     if mark then
         bar:SetMark(mark)

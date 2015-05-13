@@ -48,10 +48,13 @@ function DisplayBar:FormatNumber(nArg)
     return strResult
 end
 
-function DisplayBar:ReloadBar(message, maxTime)
+function DisplayBar:ReloadBar(message, maxTime, color)
     self.MaxTime = maxTime
     self.Frame:FindChild("Text"):SetText(message)
     self.Frame:FindChild("RemainingOverlay"):SetMax(maxTime)
+	if color then
+		self:SetBarColor(color)	
+	end
 end
 
 function DisplayBar:UpdateProgress(timeRemaining) 
