@@ -362,6 +362,7 @@ function RaidCore:CombatInterface_Init(class)
     _tTrackedUnits = {}
     _tMembers = {}
     _tScanTimer = ApolloTimer.Create(SCAN_PERIOD, true, "OnScanUpdate", CombatInterface)
+    _tScanTimer:Stop()
 
     InterfaceSwitch(INTERFACE__DISABLE)
 end
