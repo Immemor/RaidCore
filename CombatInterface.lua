@@ -19,7 +19,6 @@ require "GroupLib"
 local RaidCore = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local LogPackage = Apollo.GetPackage("Log-1.0").tPackage
 local Log = LogPackage:CreateNamespace("CombatInterface")
-local CombatInterface = {}
 
 ----------------------------------------------------------------------------------------------------
 -- Copy of few objects to reduce the cpu load.
@@ -292,20 +291,20 @@ end
 ----------------------------------------------------------------------------------------------------
 local function UnitInCombatActivate(bEnable)
     if _bUnitInCombatEnable == false and bEnable == true then
-        RegisterEventHandler("UnitEnteredCombat", "OnEnteredCombat", CombatInterface)
+        RegisterEventHandler("UnitEnteredCombat", "CI_OnEnteredCombat", RaidCore)
     elseif _bUnitInCombatEnable == true and bEnable == false then
-        RemoveEventHandler("UnitEnteredCombat", CombatInterface)
+        RemoveEventHandler("UnitEnteredCombat", RaidCore)
     end
     _bUnitInCombatEnable = bEnable
 end
 
 local function UnitScanActivate(bEnable)
     if _bDetectAllEnable == false and bEnable == true then
-        RegisterEventHandler("UnitCreated", "OnUnitCreated", CombatInterface)
-        RegisterEventHandler("UnitDestroyed", "OnUnitDestroyed", CombatInterface)
+        RegisterEventHandler("UnitCreated", "CI_OnUnitCreated", RaidCore)
+        RegisterEventHandler("UnitDestroyed", "CI_OnUnitDestroyed", RaidCore)
     elseif _bDetectAllEnable == true and bEnable == false then
-        RemoveEventHandler("UnitCreated", CombatInterface)
-        RemoveEventHandler("UnitDestroyed", CombatInterface)
+        RemoveEventHandler("UnitCreated", RaidCore)
+        RemoveEventHandler("UnitDestroyed", RaidCore)
     end
     _bDetectAllEnable = bEnable
 end
@@ -313,11 +312,11 @@ end
 local function FullActivate(bEnable)
     if _bRunning == false and bEnable == true then
         LogPackage:SetRefTime(GetGameTime())
-        RegisterEventHandler("ChatMessage", "OnChatMessage", CombatInterface)
+        RegisterEventHandler("ChatMessage", "CI_OnChatMessage", RaidCore)
         _tScanTimer:Start()
     elseif _bRunning == true and bEnable == false then
         _tScanTimer:Stop()
-        RemoveEventHandler("ChatMessage", CombatInterface)
+        RemoveEventHandler("ChatMessage", RaidCore)
         LogPackage:NextBuffer()
         -- Clear private data.
         _tTrackedUnits = {}
@@ -361,7 +360,7 @@ function RaidCore:CombatInterface_Init(class)
     _tAllUnits = {}
     _tTrackedUnits = {}
     _tMembers = {}
-    _tScanTimer = ApolloTimer.Create(SCAN_PERIOD, true, "OnScanUpdate", CombatInterface)
+    _tScanTimer = ApolloTimer.Create(SCAN_PERIOD, true, "CI_OnScanUpdate", self)
     _tScanTimer:Stop()
 
     InterfaceSwitch(INTERFACE__DISABLE)
@@ -390,7 +389,7 @@ end
 ----------------------------------------------------------------------------------------------------
 -- Combat Interface layer.
 ----------------------------------------------------------------------------------------------------
-function CombatInterface:OnEnteredCombat(tUnit, bInCombat)
+function RaidCore:CI_OnEnteredCombat(tUnit, bInCombat)
     local nId = tUnit:GetId()
     local sName = string.gsub(tUnit:GetName(), NO_BREAK_SPACE, " ")
     if not tUnit:IsInYourGroup() and nId ~= GetPlayerUnit():GetId() then
@@ -401,7 +400,7 @@ function CombatInterface:OnEnteredCombat(tUnit, bInCombat)
     ManagerCall("OnEnteredCombat", nId, tUnit, sName, bInCombat)
 end
 
-function CombatInterface:OnUnitCreated(tUnit)
+function RaidCore:CI_OnUnitCreated(tUnit)
     local nId = tUnit:GetId()
     local sName = tUnit:GetName():gsub(NO_BREAK_SPACE, " ")
 
@@ -413,7 +412,7 @@ function CombatInterface:OnUnitCreated(tUnit)
     end
 end
 
-function CombatInterface:OnUnitDestroyed(tUnit)
+function RaidCore:CI_OnUnitDestroyed(tUnit)
     local nId = tUnit:GetId()
     if _tAllUnits[nId] then
         _tAllUnits[nId] = nil
@@ -423,7 +422,7 @@ function CombatInterface:OnUnitDestroyed(tUnit)
     end
 end
 
-function CombatInterface:OnScanUpdate()
+function RaidCore:CI_OnScanUpdate()
     UpdateMemberList()
     for sName,tMember in next, _tMembers do
         if tMember.tUnit:IsValid() then
@@ -520,7 +519,7 @@ function CombatInterface:OnScanUpdate()
     end
 end
 
-function CombatInterface:OnChatMessage(tChannelCurrent, tMessage)
+function RaidCore:CI_OnChatMessage(tChannelCurrent, tMessage)
     local nChannelType = tChannelCurrent:GetType()
     local sHandler = CHANNEL_HANDLERS[nChannelType]
     if sHandler then
