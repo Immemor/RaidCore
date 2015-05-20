@@ -64,7 +64,6 @@ function EncounterPrototype:OnEnable()
     if self.SetupOptions then self:SetupOptions() end
     if type(self.OnBossEnable) == "function" then self:OnBossEnable() end
     Apollo.RegisterEventHandler("RAID_WIPE", "OnRaidWipe", self)
-    self.delayedmsg = {}
 end
 
 function EncounterPrototype:OnDisable()
@@ -115,27 +114,12 @@ end
 
 function EncounterPrototype:OnRaidWipe()
     self:CancelAllTimers()
-    for k,v in pairs(self.delayedmsg) do
-        t[k] = nil
-    end
     if type(self.OnWipe) == "function" then self:OnWipe() end
 end
 
 function EncounterPrototype:Tank()
     local unit = GroupLib.GetGroupMember(1)
     if unit then return unit.bTank end
-end
-
-function EncounterPrototype:Msg(key, message, duration, sound, color)
-    RaidCore:AddMsg(key, message, duration, sound, color)
-end
-
-function EncounterPrototype:DelayedMsg(key, delay, message, duration, sound, color)
-    if self.delayedmsg[key] then
-        self:CancelTimer(self.delayedmsg[key])
-        self.delayedmsg[key] = nil
-    end
-    self.delayedmsg[key] = self:ScheduleTimer("Msg", delay, key, message, duration, sound, color)
 end
 
 --- Compute the distance between 2 unit.
