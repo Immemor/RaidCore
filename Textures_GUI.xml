@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Sprites>
+    <Sprite Name="BarContainer" Cycle="1">
+        <Frame Texture="RaidCore\Textures\GUI\BarContainer.tga" x0="0" x1="0" x2="0" x3="2" x4="13" x5="15" y0="0" y1="0" y2="0" y3="2" y4="13" y5="15" Stretchy="1" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
+    </Sprite>
     <AutoButton Name="DefaultButton" Texture="DruseraBossMods\Textures\GUI\DefautBouton.tga" x0="0" x1="0" x2="0" x3="6" x4="114" x5="120" y0="0" y1="0" y2="0" y3="7" y4="23" y5="30" Stretchy="1" StateBits="15" Direction="Across"/>
+    <Sprite Name="SimpleBorder" Cycle="1">
+        <Frame Texture="RaidCore\Textures\GUI\SimpleBorder.tga" x0="0" x1="0" x2="0" x3="1" x4="14" x5="15" y0="0" y1="0" y2="0" y3="1" y4="14" y5="15" Stretchy="1" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
+    </Sprite>
 </Sprites>
