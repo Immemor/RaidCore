@@ -48,19 +48,19 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
         if sName == self.L["Crimson Spiderbot"] then
             core:WatchUnit(unit)
             core:AddUnit(unit)
-            core:MarkUnit(unit, 1, "X")
+            core:MarkUnit(unit, 51)
         end
     end
 end
 
 function mod:OnSpellCastStart(unitName, castName, unit)
     if castName == self.L["Phaser Combo"] then
-        Print("Cast Start")
+        core:AddBar("UNIT", "End of Combo Phaser", 3)
     end
 end
 
 function mod:OnSpellCastEnd(unitName, castName, unit)
     if castName == self.L["Phaser Combo"] then
-        Print("Cast End")
+        core:AddBar("UNIT", "Next Combo Phaser", 5)
     end
 end
