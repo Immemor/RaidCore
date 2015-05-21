@@ -1506,10 +1506,15 @@ function RaidCore:LaunchPull(time)
 end
 
 function RaidCore:LaunchBreak(time)
-    if time and time > 5 then
-        local msg = {action = "LaunchBreak", sender = GameLib.GetPlayerUnit():GetName(), cooldown = time}
-        self:SendMessage(msg)
-        self:OnComMessage(nil, JSON.encode(msg))
+    local sPlayerName = GetPlayerUnit():GetName()
+    if not self:isRaidManagement(sPlayerName) then
+        Print("You must be a raid leader or assistant to use this command!")
+    else
+        if time and time > 5 then
+            local msg = {action = "LaunchBreak", sender = sPlayerName, cooldown = time}
+            self:SendMessage(msg)
+            self:OnComMessage(nil, JSON.encode(msg))
+        end
     end
 end
 
