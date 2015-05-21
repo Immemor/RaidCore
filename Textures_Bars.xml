@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Sprites>
+    <Sprite Name="restrat1" Cycle="1">
+        <Frame Texture="RaidCore\Textures\Bars\restrat1.tga" x0="1" x1="1" x2="1" x3="73" x4="79" x5="79" y0="1" y1="1" y2="1" y3="1" y4="39" y5="39" Stretchy="1" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
+    </Sprite>
+    <Sprite Name="restrat2" Cycle="1">
+        <Frame Texture="RaidCore\Textures\Bars\restrat2.tga" x0="0" x1="2" x2="2" x3="126" x4="198" x5="200" y0="0" y1="2" y2="2" y3="2" y4="78" y5="80" Stretchy="1" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
+    </Sprite>
+</Sprites>
