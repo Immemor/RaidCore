@@ -73,7 +73,7 @@ mod:RegisterFrenchLocale({
     ["Recovery Protocol"] = "Protocole de récupération",
     -- Datachron messages.
     ["INVALID SIGNAL. DISCONNECTING"] = "SIGNAL INCORRECT.",
-    ["COMMENCING ENHANCEMENT SEQUENCE"] = "DÉBUT DE LA SEQUENCE D'AMÉLIORATION",
+    ["COMMENCING ENHANCEMENT SEQUENCE"] = "ACTIVATION DE LA SÉQUENCE D'AMÉLIORATION.",
     -- Cast.
     ["Repair Sequence"] = "Séquence de réparation",
     ["Power Surge"] = "Afflux d'énergie",
