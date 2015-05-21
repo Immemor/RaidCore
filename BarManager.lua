@@ -583,12 +583,23 @@ function RaidCore:AddMsg(sKey, sText, nDuration, sSound, sColor)
     end
 end
 
+-- Deprecated function, will be replaced by AddTimerBar.
 function RaidCore:AddBar(sKey, sText, nDuration, bEmphasize)
     Log:Add("AddBar", sKey, sText, nDuration, bEmphasize)
     local tOptions = {
         bEmphasize = bEmphasize
     }
     TimerManager:AddBar(sKey, sText, nDuration, nil, tOptions)
+end
+
+-- Add a timer bar on screen.
+-- @param sKey  timer identification, can be used to overwrite a timer.
+-- @param sText  Text to display in the timer bar.
+-- @param nDuration  Time to decrease.
+-- @param tCallback  structure about a callback action to do on timeout only.
+-- @param tOptions  structure with many graphical options.
+function RaidCore:AddTimerBar(sKey, sText, nDuration, tCallBack, tOptions)
+    TimerManager:AddBar(sKey, sText, nDuration, tCallBack, tOptions)
 end
 
 function RaidCore:StopBar(sKey)

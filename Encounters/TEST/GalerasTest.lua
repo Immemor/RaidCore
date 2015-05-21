@@ -31,6 +31,12 @@ mod:RegisterFrenchLocale({
     ["Crimson Spiderbot"] = "Arachnobot écarlate",
     ["Phaser Combo"] = "Combo de phaser",
 })
+mod:RegisterDefaultTimerBarConfigs({
+    ["UNIT"] = { sColor = "red", bEmphasize = false },
+    ["INFINITE"] = { sColor = "FF008080", bEmphasize = true },
+    ["INFINITE2"] = { bEmphasize = true },
+    ["LONG"] = { sColor = "FF80FF20" },
+})
 
 ----------------------------------------------------------------------------------------------------
 -- Constants.
@@ -39,6 +45,9 @@ mod:RegisterFrenchLocale({
 ----------------------------------------------------------------------------------------------------
 -- Locals.
 ----------------------------------------------------------------------------------------------------
+local function InfiniteTimer2()
+    mod:AddTimerBar("INFINITE2", "Loop Timer outside", 10, nil, InfiniteTimer2)
+end
 
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
@@ -48,6 +57,14 @@ function mod:OnBossEnable()
     Apollo.RegisterEventHandler("RC_UnitStateChanged", "OnUnitStateChanged", self)
     Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
     Apollo.RegisterEventHandler("SPELL_CAST_END", "OnSpellCastEnd", self)
+
+    mod:AddTimerBar("INFINITE", "Timer in class", 12, false, mod.InfiniteTimer, mod)
+    mod:AddTimerBar("INFINITE2", "Timer outside", 12, nil, InfiniteTimer2)
+    mod:AddTimerBar("LONG", "Long long timer...", 1000)
+end
+
+function mod:InfiniteTimer()
+    mod:AddTimerBar("INFINITE", "Loop Timer in class", 10, false, mod.InfiniteTimer, mod)
 end
 
 function mod:OnUnitCreated(unit, sName)
@@ -68,12 +85,12 @@ end
 
 function mod:OnSpellCastStart(unitName, castName, unit)
     if castName == self.L["Phaser Combo"] then
-        core:AddBar("UNIT", "End of Combo Phaser", 3)
+        mod:AddTimerBar("UNIT", "End of Combo Phaser", 3)
     end
 end
 
 function mod:OnSpellCastEnd(unitName, castName, unit)
     if castName == self.L["Phaser Combo"] then
-        core:AddBar("UNIT", "Next Combo Phaser", 5)
+        mod:AddTimerBar("UNIT", "Next Combo Phaser", 5)
     end
 end

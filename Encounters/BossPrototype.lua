@@ -48,6 +48,51 @@ function EncounterPrototype:RegisterTrigMob(sTrigType, tTrigList)
     self.EnableMob = tTrigList
 end
 
+-- Register a default config for bar manager.
+-- @param tConfig  Array of Timer Options indexed by the timer's key.
+function EncounterPrototype:RegisterDefaultTimerBarConfigs(tConfig)
+    assert(type(tConfig) == "table")
+    self.tDefaultTimerBarsOptions = tConfig
+end
+
+-- Create a timer bar.
+-- @param sKey  Index which will be used to match on AddTimerBar.
+-- @param sEnglishText  English text to search in language dictionnary.
+-- @param nDuration  Timer duration.
+-- @param bEmphasize  Timer count down requested (nil take the default one).
+-- @param fHandler  function to call on timeout
+-- @param tClass  Class used by callback action on timeout
+-- @param tData  Data forwarded by callback action on timeout
+--
+-- Note: If the English translation is not found, the current string will be used like that.
+function EncounterPrototype:AddTimerBar(sKey, sEnglishText, nDuration, bEmphasize, fHandler, tClass, tData)
+    local tOptions = nil
+    local sLocalText = self.L[sEnglishText]
+    if self.tDefaultTimerBarsOptions[sKey] then
+        tOptions = self.tDefaultTimerBarsOptions[sKey]
+    else
+        tOptions = {}
+    end
+    if bEmphasize ~= nil then
+        tOptions["bEmphasize"] = bEmphasize
+    end
+    local tCallback = nil
+    if type(fHandler) == "function" then
+        tCallback = {
+            fHandler = fHandler,
+            tClass = tClass,
+            tData = tData,
+        }
+    end
+    RaidCore:AddTimerBar(sKey, sLocalText, nDuration, tCallback, tOptions)
+end
+
+-- Remove a timer bar if exist.
+-- @param sKey  Index to remove.
+function EncounterPrototype:RemoveTimerBar(sKey)
+    RaidCore:StopBar(sKey)
+end
+
 function EncounterPrototype:PrepareEncounter()
     local tmp = {}
     -- Translate trigger names.
@@ -196,6 +241,7 @@ function RaidCore:NewEncounter(name, continentId, parentMapId, mapId)
     new.parentMapIdList = parentMapIdList
     new.mapIdList = mapIdList
     new.displayName = name
+    new.tDefaultTimerBarsOptions = {}
     -- Register an empty locale table.
     new:RegisterEnglishLocale({})
     -- Retrieve Locale.
