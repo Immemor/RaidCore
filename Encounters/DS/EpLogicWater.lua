@@ -1,12 +1,19 @@
---------------------------------------------------------------------------------
--- Module Declaration
+----------------------------------------------------------------------------------------------------
+-- Client Lua Script for RaidCore Addon on WildStar Game.
 --
-
+-- Copyright (C) 2015 RaidCore
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+-- Description:
+--   TODO
+----------------------------------------------------------------------------------------------------
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
-
 local mod = core:NewEncounter("EpLogicWater", 52, 98, 118)
 if not mod then return end
 
+----------------------------------------------------------------------------------------------------
+-- Registering combat.
+----------------------------------------------------------------------------------------------------
 mod:RegisterTrigMob("ALL", { "Hydroflux", "Mnemesis" })
 mod:RegisterEnglishLocale({
     -- Unit names.
@@ -69,20 +76,22 @@ mod:RegisterGermanLocale({
     --["ORB"] = "ORB", -- TODO: German translation missing !!!!
 })
 
---------------------------------------------------------------------------------
--- Locals
---
+----------------------------------------------------------------------------------------------------
+-- Constants.
+----------------------------------------------------------------------------------------------------
 
+----------------------------------------------------------------------------------------------------
+-- Locals.
+----------------------------------------------------------------------------------------------------
 local uPlayer = nil
 local strMyName = ""
 local midphase = false
 local encounter_started = false
 
---------------------------------------------------------------------------------
--- Initialization
---
+----------------------------------------------------------------------------------------------------
+-- Encounter description.
+----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Print(("Module %s loaded"):format(mod.ModuleName))
     Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
     Apollo.RegisterEventHandler("RC_UnitDestroyed", "OnUnitDestroyed", self)
     Apollo.RegisterEventHandler("RC_UnitStateChanged", "OnUnitStateChanged", self)
@@ -92,10 +101,6 @@ function mod:OnBossEnable()
     Apollo.RegisterEventHandler("DEBUFF_REMOVED", "OnDebuffRemoved", self)
     Apollo.RegisterEventHandler("RAID_WIPE", "OnReset", self)
 end
-
---------------------------------------------------------------------------------
--- Event Handlers
---
 
 function mod:OnReset()
     core:StopBar("MIDPHASE")

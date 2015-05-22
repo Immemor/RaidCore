@@ -1,12 +1,19 @@
---------------------------------------------------------------------------------
--- Module Declaration
+----------------------------------------------------------------------------------------------------
+-- Client Lua Script for RaidCore Addon on WildStar Game.
 --
-
+-- Copyright (C) 2015 RaidCore
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+-- Description:
+--   TODO
+----------------------------------------------------------------------------------------------------
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
-
 local mod = core:NewEncounter("EpAirWater", 52, 98, 118)
 if not mod then return end
 
+----------------------------------------------------------------------------------------------------
+-- Registering combat.
+----------------------------------------------------------------------------------------------------
 mod:RegisterTrigMob("ALL", { "Hydroflux", "Aileron" })
 mod:RegisterEnglishLocale({
     -- Unit names.
@@ -57,21 +64,23 @@ mod:RegisterGermanLocale({
     --["TWIRL"] = "TWIRL", -- TODO: German translation missing !!!!
 })
 
---------------------------------------------------------------------------------
--- Locals
---
+----------------------------------------------------------------------------------------------------
+-- Constants.
+----------------------------------------------------------------------------------------------------
 
+----------------------------------------------------------------------------------------------------
+-- Locals.
+----------------------------------------------------------------------------------------------------
 local prev = 0
 local mooCount = 0
 local phase2 = false
 local myName
 local CheckTwirlTimer = nil
 
---------------------------------------------------------------------------------
--- Initialization
---
+----------------------------------------------------------------------------------------------------
+-- Encounter description.
+----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Print(("Module %s loaded"):format(mod.ModuleName))
     Apollo.RegisterEventHandler("RC_UnitStateChanged", "OnUnitStateChanged", self)
     Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
     Apollo.RegisterEventHandler("SPELL_CAST_END", "OnSpellCastEnd", self)
@@ -79,10 +88,6 @@ function mod:OnBossEnable()
     Apollo.RegisterEventHandler("DEBUFF_APPLIED", "OnDebuffApplied", self)
     Apollo.RegisterEventHandler("RAID_WIPE", "OnReset", self)
 end
-
---------------------------------------------------------------------------------
--- Event Handlers
---
 
 function mod:OnReset()
     if CheckTwirlTimer then

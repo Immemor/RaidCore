@@ -8,12 +8,13 @@
 --
 --   The elemental Pair Megalith and Mnemesis juste after Maelstrom fight.
 ----------------------------------------------------------------------------------------------------
-
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
-
 local mod = core:NewEncounter("EpLogicEarth", 52, 98, 117)
 if not mod then return end
 
+----------------------------------------------------------------------------------------------------
+-- Registering combat.
+----------------------------------------------------------------------------------------------------
 mod:RegisterTrigMob("ALL", { "Megalith", "Mnemesis" })
 mod:RegisterEnglishLocale({
     -- Unit names.
@@ -74,26 +75,21 @@ mod:RegisterGermanLocale({
 })
 
 ----------------------------------------------------------------------------------------------------
--- Copy of few objects to reduce the cpu load.
--- Because all local objects are faster.
-----------------------------------------------------------------------------------------------------
-local GetPlayerUnit = GameLib.GetPlayerUnit
-local GetGameTime = GameLib.GetGameTime
-
-----------------------------------------------------------------------------------------------------
--- constants
+-- Constants.
 ----------------------------------------------------------------------------------------------------
 local BUFF_MNEMESIS_INFORMATIC_CLOUD = 52571
 local DEBUFF_SNAKE = 74570
 
 ----------------------------------------------------------------------------------------------------
--- Privates variables.
+-- Locals.
 ----------------------------------------------------------------------------------------------------
+local GetPlayerUnit = GameLib.GetPlayerUnit
+local GetGameTime = GameLib.GetGameTime
 local _Previous_Defragment_time = 0
 local pilarCount = 0
 
 ----------------------------------------------------------------------------------------------------
--- Initialization
+-- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
     Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
@@ -104,9 +100,6 @@ function mod:OnBossEnable()
     Apollo.RegisterEventHandler("DEBUFF_APPLIED", "OnDebuffApplied", self)
 end
 
-----------------------------------------------------------------------------------------------------
--- Event Handlers
-----------------------------------------------------------------------------------------------------
 function mod:OnUnitCreated(unit, sName)
     local sName = unit:GetName()
     if sName == self.L["Obsidian Outcropping"] and mod:GetSetting("LineObsidianOutcropping") then

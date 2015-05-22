@@ -1,12 +1,19 @@
---------------------------------------------------------------------------------
--- Module Declaration
+----------------------------------------------------------------------------------------------------
+-- Client Lua Script for RaidCore Addon on WildStar Game.
 --
-
+-- Copyright (C) 2015 RaidCore
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+-- Description:
+--   TODO
+----------------------------------------------------------------------------------------------------
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
-
 local mod = core:NewEncounter("DSFireWing", 52, 98, 110)
 if not mod then return end
 
+----------------------------------------------------------------------------------------------------
+-- Registering combat.
+----------------------------------------------------------------------------------------------------
 mod:RegisterTrigMob("ANY", { "Warmonger Agratha", "Warmonger Talarii", "Grand Warmonger Tar'gresh" })
 mod:RegisterEnglishLocale({
     -- Unit names.
@@ -15,8 +22,6 @@ mod:RegisterEnglishLocale({
     ["Warmonger Chuna"] = "Warmonger Chuna",
     ["Grand Warmonger Tar'gresh"] = "Grand Warmonger Tar'gresh",
     ["Conjured Fire Bomb"] = "Conjured Fire Bomb",
-    -- Datachron messages.
-    -- NPCSay messages.
     -- Cast.
     ["Incineration"] = "Incineration",
     ["Conjure Fire Elementals"] = "Conjure Fire Elementals",
@@ -40,8 +45,6 @@ mod:RegisterFrenchLocale({
     ["Grand Warmonger Tar'gresh"] = "Grand guerroyeur Tar'gresh",
     ["Conjured Fire Bomb"] = "Bombe incendiaire invoquée",
     ["Totem's Fire"] = "Totem de feu invoqué",
-    -- Datachron messages.
-    -- NPCSay messages.
     -- Cast.
     ["Incineration"] = "Incinération",
     ["Conjure Fire Elementals"] = "Invocation d'Élémentaires de feu",
@@ -64,8 +67,6 @@ mod:RegisterGermanLocale({
     ["Warmonger Chuna"] = "Kriegstreiberin Chuna",
     ["Grand Warmonger Tar'gresh"] = "Großer Kriegstreiber Tar’gresh",
     ["Conjured Fire Bomb"] = "Beschworene Feuerbombe",
-    -- Datachron messages.
-    -- NPCSay messages.
     -- Cast.
     ["Incineration"] = "Lodernde Flammen",
     ["Conjure Fire Elementals"] = "Feuerelementare beschwören",
@@ -82,19 +83,20 @@ mod:RegisterGermanLocale({
     --["BOMB"] = "BOMB", -- TODO: German translation missing !!!!
 })
 
---------------------------------------------------------------------------------
--- Locals
---
+----------------------------------------------------------------------------------------------------
+-- Constants.
+----------------------------------------------------------------------------------------------------
 
+----------------------------------------------------------------------------------------------------
+-- Locals.
+----------------------------------------------------------------------------------------------------
 local prev, first = 0, true
 local boss
 
---------------------------------------------------------------------------------
--- Initialization
---
-
+----------------------------------------------------------------------------------------------------
+-- Encounter description.
+----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Print(("Module %s loaded"):format(mod.ModuleName))
     Apollo.RegisterEventHandler("RC_UnitStateChanged", "OnUnitStateChanged", self)
     Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
     Apollo.RegisterEventHandler("DEBUFF_APPLIED", "OnDebuffApplied", self)
@@ -102,17 +104,12 @@ function mod:OnBossEnable()
     Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
 end
 
-
---------------------------------------------------------------------------------
--- Event Handlers
---
 function mod:OnUnitCreated(unit, sName)
     if sName == self.L["Conjured Fire Bomb"] then
         core:AddMsg("BOMB", self.L["BOMB"], 5, "Long", "Blue")
         core:AddBar("BOMB", self.L["BOMB"], first and 20 or 23)
     end
 end
-
 
 function mod:OnHealthChanged(unitName, health)
     if unitName == self.L["Warmonger Agratha"] and (health == 67 or health == 34) then
@@ -141,7 +138,6 @@ function mod:OnSpellCastStart(unitName, castName, unit)
         core:AddBar("STORM", self.L["METEOR STORM"], 43, 1)
     end
 end
-
 
 function mod:OnDebuffApplied(unitName, splId, unit)
     if splId == 49485 then

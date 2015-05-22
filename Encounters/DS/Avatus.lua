@@ -1,8 +1,19 @@
+----------------------------------------------------------------------------------------------------
+-- Client Lua Script for RaidCore Addon on WildStar Game.
+--
+-- Copyright (C) 2015 RaidCore
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+-- Description:
+--   TODO
+----------------------------------------------------------------------------------------------------
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
-
 local mod = core:NewEncounter("Avatus", 52, 98, 104)
 if not mod then return end
 
+----------------------------------------------------------------------------------------------------
+-- Registering combat.
+----------------------------------------------------------------------------------------------------
 mod:RegisterTrigMob("ANY", { "Avatus" })
 mod:RegisterEnglishLocale({
     -- Unit names.
@@ -101,6 +112,23 @@ mod:RegisterGermanLocale({
     ["MARKER South"] = "S",
 })
 
+----------------------------------------------------------------------------------------------------
+-- Constants.
+----------------------------------------------------------------------------------------------------
+local NO_BREAK_SPACE = string.char(194, 160)
+local handpos = {
+    ["hand1"] = {x = 608.70, y = -198.75, z = -191.62},
+    ["hand2"] = {x = 607.67, y = -198.75, z = -157.00},
+}
+
+local referencePos = {
+    ["north"] = { x = 618, y = -198, z = -235 },
+    ["south"] = { x = 618, y = -198, z = -114 }
+}
+
+----------------------------------------------------------------------------------------------------
+-- locals.
+----------------------------------------------------------------------------------------------------
 local phase2warn, phase2 = false, false
 local phase_blueroom = false
 local phase2_blueroom_rotation = {}
@@ -114,31 +142,6 @@ local gungrid_timer = 20
 local obliteration_beam_timer = 69
 local holo_hands = {}
 local strMyName
-local NO_BREAK_SPACE = string.char(194, 160)
-
-local handpos = {
-    ["hand1"] = {x = 608.70, y = -198.75, z = -191.62},
-    ["hand2"] = {x = 607.67, y = -198.75, z = -157.00},
-}
-
-local referencePos = {
-    ["north"] = { x = 618, y = -198, z = -235 },
-    ["south"] = { x = 618, y = -198, z = -114 }
-}
-
-function mod:OnBossEnable()
-    Print(("Module %s loaded"):format(mod.ModuleName))
-    Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
-    Apollo.RegisterEventHandler("RC_UnitDestroyed", "OnUnitDestroyed", self)
-    Apollo.RegisterEventHandler("RC_UnitStateChanged", "OnUnitStateChanged", self)
-    Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
-    Apollo.RegisterEventHandler("UNIT_HEALTH", "OnHealthChanged", self)
-    Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
-    Apollo.RegisterEventHandler("CHAT_NPCSAY", "OnChatNPCSay", self)
-    Apollo.RegisterEventHandler("RAID_WIPE", "OnReset", self)
-    Apollo.RegisterEventHandler("BUFF_APPLIED", "OnBuffApplied", self) -- temp disabled. Not finished.
-    Apollo.RegisterEventHandler("ChatMessage", "OnChatMessage", self) -- temp dissabled. Not finished
-end
 
 local function lowestKeyValue(tbl)
     local lowestValue = false
@@ -222,6 +225,22 @@ local function orderedPairs(t)
     -- Equivalent of the pairs() function on tables. Allows to iterate
     -- in order
     return orderedNext, t, nil
+end
+
+----------------------------------------------------------------------------------------------------
+-- Encounter description.
+----------------------------------------------------------------------------------------------------
+function mod:OnBossEnable()
+    Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
+    Apollo.RegisterEventHandler("RC_UnitDestroyed", "OnUnitDestroyed", self)
+    Apollo.RegisterEventHandler("RC_UnitStateChanged", "OnUnitStateChanged", self)
+    Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
+    Apollo.RegisterEventHandler("UNIT_HEALTH", "OnHealthChanged", self)
+    Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
+    Apollo.RegisterEventHandler("CHAT_NPCSAY", "OnChatNPCSay", self)
+    Apollo.RegisterEventHandler("RAID_WIPE", "OnReset", self)
+    Apollo.RegisterEventHandler("BUFF_APPLIED", "OnBuffApplied", self) -- temp disabled. Not finished.
+    Apollo.RegisterEventHandler("ChatMessage", "OnChatMessage", self) -- temp dissabled. Not finished
 end
 
 function mod:OnReset()

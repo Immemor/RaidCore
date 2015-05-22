@@ -1,12 +1,19 @@
---------------------------------------------------------------------------------
--- Module Declaration
+----------------------------------------------------------------------------------------------------
+-- Client Lua Script for RaidCore Addon on WildStar Game.
 --
-
+-- Copyright (C) 2015 RaidCore
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+-- Description:
+--   TODO
+----------------------------------------------------------------------------------------------------
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
-
 local mod = core:NewEncounter("Ohmna", 67, 147, 149)
 if not mod then return end
 
+----------------------------------------------------------------------------------------------------
+-- Registering combat.
+----------------------------------------------------------------------------------------------------
 mod:RegisterTrigMob("ANY", { "Dreadphage Ohmna" })
 mod:RegisterEnglishLocale({
     -- Unit names.
@@ -111,10 +118,13 @@ mod:RegisterGermanLocale({
     ["NEXT BIG SPEW"] = "NÄCHSTES GROßES BRECHEN",
 })
 
+----------------------------------------------------------------------------------------------------
+-- Constants.
+----------------------------------------------------------------------------------------------------
 
---------------------------------------------------------------------------------
--- Locals
---
+----------------------------------------------------------------------------------------------------
+-- Locals.
+----------------------------------------------------------------------------------------------------
 local pilarCount, boreCount, submergeCount = 0, 0, 0
 local firstPull, OhmnaP3, OhmnaP4 = true, false, false
 
@@ -143,22 +153,16 @@ local function getMin(t)
     return min_val, key
 end
 
---------------------------------------------------------------------------------
--- Initialization
---
-
+----------------------------------------------------------------------------------------------------
+-- Encounter description.
+----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Print(("Module %s loaded"):format(mod.ModuleName))
     Apollo.RegisterEventHandler("RC_UnitStateChanged", "OnUnitStateChanged", self)
     Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
     Apollo.RegisterEventHandler("UNIT_HEALTH", "OnHealthChanged", self)
     Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
     Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
 end
-
---------------------------------------------------------------------------------
--- Event Handlers
---
 
 function mod:OnUnitCreated(unit, sName)
     if sName == self.L["Tentacle of Ohmna"] then

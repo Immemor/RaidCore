@@ -1,12 +1,19 @@
---------------------------------------------------------------------------------
--- Module Declaration
+----------------------------------------------------------------------------------------------------
+-- Client Lua Script for RaidCore Addon on WildStar Game.
 --
-
+-- Copyright (C) 2015 RaidCore
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+-- Description:
+--   TODO
+----------------------------------------------------------------------------------------------------
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
-
 local mod = core:NewEncounter("ExperimentX89", 67, 147, 148)
 if not mod then return end
 
+----------------------------------------------------------------------------------------------------
+-- Registering combat.
+----------------------------------------------------------------------------------------------------
 mod:RegisterTrigMob("ANY", { "Experiment X-89" })
 mod:RegisterEnglishLocale({
     -- Unit names.
@@ -69,27 +76,24 @@ mod:RegisterGermanLocale({
     ["LITTLE BOMB"] = "KLEINE BOMBE",
 })
 
---------------------------------------------------------------------------------
--- Locals
---
+----------------------------------------------------------------------------------------------------
+-- Constants.
+----------------------------------------------------------------------------------------------------
 
+----------------------------------------------------------------------------------------------------
+-- Locals.
+----------------------------------------------------------------------------------------------------
 local playerName
 
---------------------------------------------------------------------------------
--- Initialization
---
-
+----------------------------------------------------------------------------------------------------
+-- Encounter description.
+----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Print(("Module %s loaded"):format(mod.ModuleName))
     Apollo.RegisterEventHandler("RC_UnitStateChanged", "OnUnitStateChanged", self)
     Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
     Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
     Apollo.RegisterEventHandler("DEBUFF_APPLIED", "OnDebuffApplied", self)
 end
-
---------------------------------------------------------------------------------
--- Event Handlers
---
 
 function mod:OnSpellCastStart(unitName, castName, unit)
     if unitName == self.L["Experiment X-89"] then

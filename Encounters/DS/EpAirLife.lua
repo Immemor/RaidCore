@@ -1,12 +1,19 @@
---------------------------------------------------------------------------------
--- Module Declaration
+----------------------------------------------------------------------------------------------------
+-- Client Lua Script for RaidCore Addon on WildStar Game.
 --
-
+-- Copyright (C) 2015 RaidCore
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+-- Description:
+--   TODO
+----------------------------------------------------------------------------------------------------
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
-
 local mod = core:NewEncounter("EpAirLife", 52, 98, 119)
 if not mod then return end
 
+----------------------------------------------------------------------------------------------------
+-- Registering combat.
+----------------------------------------------------------------------------------------------------
 mod:RegisterTrigMob("ALL", { "Aileron", "Visceralus" })
 mod:RegisterEnglishLocale({
     -- Unit names.
@@ -81,12 +88,13 @@ mod:RegisterGermanLocale({
     --["Recently Saved!"] = "Recently Saved!", -- TODO: German translation missing !!!!
 })
 
--- Tracking Blinding Light and Aileron knockback seems too random to display on timers.
+----------------------------------------------------------------------------------------------------
+-- Constants.
+----------------------------------------------------------------------------------------------------
 
---------------------------------------------------------------------------------
--- Locals
---
-
+----------------------------------------------------------------------------------------------------
+-- Locals.
+----------------------------------------------------------------------------------------------------
 local last_thorns = 0
 local last_twirl = 0
 local midphase = false
@@ -94,11 +102,11 @@ local myName
 local CheckTwirlTimer = nil
 local twirl_units = {}
 local twirlCount = 0
---------------------------------------------------------------------------------
--- Initialization
---
+
+----------------------------------------------------------------------------------------------------
+-- Encounter description.
+----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Print(("Module %s loaded"):format(mod.ModuleName))
     Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
     Apollo.RegisterEventHandler("RC_UnitDestroyed", "OnUnitDestroyed", self)
     Apollo.RegisterEventHandler("RC_UnitStateChanged", "OnUnitStateChanged", self)
@@ -107,10 +115,6 @@ function mod:OnBossEnable()
     Apollo.RegisterEventHandler("DEBUFF_REMOVED", "OnDebuffRemoved", self)
     Apollo.RegisterEventHandler("RAID_WIPE", "OnReset", self)
 end
-
---------------------------------------------------------------------------------
--- Event Handlers
---
 
 function mod:OnReset()
     last_thorns = 0

@@ -19,10 +19,12 @@
 --
 ----------------------------------------------------------------------------------------------------
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
-
 local mod = core:NewEncounter("PrimeEvolutionaryOperant", 91, 0, 475)
 if not mod then return end
 
+----------------------------------------------------------------------------------------------------
+-- Registering combat.
+----------------------------------------------------------------------------------------------------
 mod:RegisterTrigMob("ANY", { "Prime Evolutionary Operant", "Prime Phage Distributor" })
 mod:RegisterEnglishLocale({
     -- Unit names.
@@ -70,6 +72,10 @@ local DEBUFF_STRAIN_INCUBATION = 49303
 local BUFF_NANOSTRAIN_INFUSION = 50075
 -- Buff on bosses. The boss called "Prime Phage Distributor" have this buff, others not.
 local BUFF_COMPROMISED_CIRCUITRY = 48735
+
+----------------------------------------------------------------------------------------------------
+-- Locals.
+----------------------------------------------------------------------------------------------------
 
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.

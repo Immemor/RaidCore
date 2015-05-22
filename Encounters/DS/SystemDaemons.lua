@@ -1,12 +1,19 @@
---------------------------------------------------------------------------------
--- Module Declaration
+----------------------------------------------------------------------------------------------------
+-- Client Lua Script for RaidCore Addon on WildStar Game.
 --
-
+-- Copyright (C) 2015 RaidCore
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+-- Description:
+--   TODO
+----------------------------------------------------------------------------------------------------
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
-
 local mod = core:NewEncounter("SystemDaemons", 52, 98, 105)
 if not mod then return end
 
+----------------------------------------------------------------------------------------------------
+-- Registering combat.
+----------------------------------------------------------------------------------------------------
 mod:RegisterTrigMob("ANY", { "Binary System Daemon", "Null System Daemon" })
 mod:RegisterEnglishLocale({
     -- Unit names.
@@ -147,10 +154,9 @@ mod:RegisterGermanLocale({
     ["YOU ARE NEXT ON SOUTH !"] = "DU BIST DER NÄCHSTE IM SÜDEN !",
 })
 
---------------------------------------------------------------------------------
--- Locals
---
-
+----------------------------------------------------------------------------------------------------
+-- Constants.
+----------------------------------------------------------------------------------------------------
 local PILLARS_POSITIONS = {
     ["mid1"] = {
         ["N1"] = { x = 133.217, y = -225.94, z = -207.71 },
@@ -172,6 +178,9 @@ local PILLARS_POSITIONS = {
     },
 }
 
+----------------------------------------------------------------------------------------------------
+-- locals.
+----------------------------------------------------------------------------------------------------
 local discoCount, sdwaveCount, probeCount, sdSurgeCount, PurgeLast = 0, 0, 0, {}, {}
 local phase2warn, phase2 = false, false
 local phase2count = 0
@@ -180,12 +189,10 @@ local prev = 0
 local nbKick = 2
 local playerName
 
---------------------------------------------------------------------------------
--- Initialization
---
-
+----------------------------------------------------------------------------------------------------
+-- Encounter description.
+----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Print(("Module %s loaded"):format(mod.ModuleName))
     Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
     Apollo.RegisterEventHandler("RC_UnitDestroyed", "OnUnitDestroyed", self)
     Apollo.RegisterEventHandler("RC_UnitStateChanged", "OnUnitStateChanged", self)
@@ -199,10 +206,6 @@ function mod:OnBossEnable()
     Apollo.RegisterEventHandler("SubZoneChanged", "OnZoneChanged", self)
     Apollo.RegisterEventHandler("RAID_WIPE", "OnReset", self)
 end
-
---------------------------------------------------------------------------------
--- Event Handlers
---
 
 function mod:OnReset()
     core:ResetWorldMarkers()

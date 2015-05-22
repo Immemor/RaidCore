@@ -7,19 +7,13 @@
 -- Description:
 --   Elemental Pair after the Logic wings.
 ---------------------------------------------------------------------------------------------------
-
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local mod = core:NewEncounter("EpLogicLife", 52, 98, 119)
 if not mod then return end
 
----------------------------------------------------------------------------------------------------
--- Fast and local object.
----------------------------------------------------------------------------------------------------
-local GetPlayerUnit = GameLib.GetPlayerUnit
-
----------------------------------------------------------------------------------------------------
--- Languages.
----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+-- Registering combat.
+----------------------------------------------------------------------------------------------------
 mod:RegisterTrigMob("ALL", { "Mnemesis", "Visceralus" })
 mod:RegisterEnglishLocale({
     -- Unit names.
@@ -119,11 +113,15 @@ local MID_POSITIONS = {
     ["east"] = { x = 9791.53, y = -518, z = 17873.81 },
 }
 
+----------------------------------------------------------------------------------------------------
+-- Locals.
+----------------------------------------------------------------------------------------------------
+local GetPlayerUnit = GameLib.GetPlayerUnit
+local midphase = false
+
 ---------------------------------------------------------------------------------------------------
 -- Encounter description.
 ---------------------------------------------------------------------------------------------------
-local midphase = false
-
 function mod:OnBossEnable()
     Apollo.RegisterEventHandler("RC_UnitStateChanged", "OnUnitStateChanged", self)
     Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)

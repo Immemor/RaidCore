@@ -1,12 +1,19 @@
---------------------------------------------------------------------------------
--- Module Declaration
+----------------------------------------------------------------------------------------------------
+-- Client Lua Script for RaidCore Addon on WildStar Game.
 --
-
+-- Copyright (C) 2015 RaidCore
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+-- Description:
+--   TODO
+----------------------------------------------------------------------------------------------------
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
-
 local mod = core:NewEncounter("Lattice", 52, 98, 116)
 if not mod then return end
 
+----------------------------------------------------------------------------------------------------
+-- Registering combat.
+----------------------------------------------------------------------------------------------------
 mod:RegisterTrigMob("ANY", { "Avatus" })
 mod:RegisterEnglishLocale({
     -- Unit names.
@@ -78,31 +85,29 @@ mod:RegisterGermanLocale({
     --["BIG CAST"] = "BIG CAST", -- TODO: German translation missing !!!!
 })
 
---------------------------------------------------------------------------------
--- Locals
---
+----------------------------------------------------------------------------------------------------
+-- Constants.
+----------------------------------------------------------------------------------------------------
 local NO_BREAK_SPACE = string.char(194, 160)
 
+----------------------------------------------------------------------------------------------------
+-- Locals.
+----------------------------------------------------------------------------------------------------
 local prev = 0
 local waveCount, beamCount = 0, 0
 local playerName
 local phase2 = false
 
---------------------------------------------------------------------------------
--- Initialization
---
-
+----------------------------------------------------------------------------------------------------
+-- Encounter description.
+----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Print(("Module %s loaded"):format(mod.ModuleName))
     Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
     Apollo.RegisterEventHandler("RC_UnitDestroyed", "OnUnitDestroyed", self)
     Apollo.RegisterEventHandler("RC_UnitStateChanged", "OnUnitStateChanged", self)
     Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
 end
 
---------------------------------------------------------------------------------
--- Event Handlers
---
 function mod:OnUnitCreated(unit, sName)
     if sName == self.L["Data Devourer"] and self:GetDistanceBetweenUnits(unit, GameLib.GetPlayerUnit()) < 45 and mod:GetSetting("LineDataDevourers") then
         core:AddPixie(unit:GetId(), 1, GameLib.GetPlayerUnit(), unit, "Blue", 5, 10, 10)

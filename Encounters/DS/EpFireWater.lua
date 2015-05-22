@@ -1,12 +1,19 @@
---------------------------------------------------------------------------------
--- Module Declaration
+----------------------------------------------------------------------------------------------------
+-- Client Lua Script for RaidCore Addon on WildStar Game.
 --
-
+-- Copyright (C) 2015 RaidCore
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+-- Description:
+--   TODO
+----------------------------------------------------------------------------------------------------
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
-
 local mod = core:NewEncounter("EpFireWater", 52, 98, 118)
 if not mod then return end
 
+----------------------------------------------------------------------------------------------------
+-- Registering combat.
+----------------------------------------------------------------------------------------------------
 mod:RegisterTrigMob("ALL", { "Hydroflux", "Pyrobane" })
 mod:RegisterEnglishLocale({
     -- Unit names.
@@ -75,29 +82,29 @@ mod:RegisterGermanLocale({
     --["ICE TOMB"] = "ICE TOMB", -- TODO: German translation missing !!!!
 })
 
---------------------------------------------------------------------------------
--- Locals
---
+----------------------------------------------------------------------------------------------------
+-- Constants.
+----------------------------------------------------------------------------------------------------
 local DEBUFFID_ICE_TOMB = 74326
 local DEBUFFID_FROSTBOMB = 75058
 local DEBUFFID_FIREBOMB = 75059
 
+----------------------------------------------------------------------------------------------------
+-- Locals.
+----------------------------------------------------------------------------------------------------
 local GeminiGUI = Apollo.GetPackage("Gemini:GUI-1.0").tPackage
-
 local groupCount = 0
 local uPlayer = nil
 local strMyName = ""
 local prev = 0
 local prevBomb = 0
-
 local firebomb_players = {}
 local frostbomb_players = {}
 
---------------------------------------------------------------------------------
--- Initialization
---
+----------------------------------------------------------------------------------------------------
+-- Encounter description.
+----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Print(("Module %s loaded"):format(mod.ModuleName))
     Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
     Apollo.RegisterEventHandler("RC_UnitDestroyed", "OnUnitDestroyed", self)
     Apollo.RegisterEventHandler("RC_UnitStateChanged", "OnUnitStateChanged", self)
@@ -108,9 +115,6 @@ function mod:OnBossEnable()
     Apollo.RegisterEventHandler("RAID_WIPE", "OnReset", self)
 end
 
---------------------------------------------------------------------------------
--- Event Handlers
---
 function mod:OnReset()
     core:ResetMarks()
     firebomb_players = {}

@@ -1,30 +1,20 @@
---------------------------------------------------------------------------------
--- Module Declaration
+----------------------------------------------------------------------------------------------------
+-- Client Lua Script for RaidCore Addon on WildStar Game.
 --
-
+-- Copyright (C) 2015 RaidCore
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+-- Description:
+--   TODO
+----------------------------------------------------------------------------------------------------
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
-
 local mod = core:NewEncounter("DSFrostWing", 52, 98, 109)
 if not mod then return end
 
+----------------------------------------------------------------------------------------------------
+-- Registering combat.
+----------------------------------------------------------------------------------------------------
 mod:RegisterTrigMob("ANY", { "Frost-Boulder Avalanche", "Frostbringer Warlock" })
-
---------------------------------------------------------------------------------
--- Locals
---
-
-local icicleSpell = false
-
---------------------------------------------------------------------------------
--- Initialization
---
-
-function mod:OnBossEnable()
-    Print(("Module %s loaded"):format(mod.ModuleName))
-    Apollo.RegisterEventHandler("RC_UnitStateChanged", "OnUnitStateChanged", self)
-    Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
-    Apollo.RegisterEventHandler("UNIT_HEALTH", "OnHealthChanged", self)
-end
 mod:RegisterEnglishLocale({
     -- Unit names.
     ["Frost-Boulder Avalanche"] = "Frost-Boulder Avalanche",
@@ -80,10 +70,23 @@ mod:RegisterGermanLocale({
     --["RUNNNN"] = "RUNNNN", -- TODO: German translation missing !!!!
 })
 
+----------------------------------------------------------------------------------------------------
+-- Constants.
+----------------------------------------------------------------------------------------------------
 
---------------------------------------------------------------------------------
--- Event Handlers
---
+----------------------------------------------------------------------------------------------------
+-- Locals.
+----------------------------------------------------------------------------------------------------
+local icicleSpell = false
+
+----------------------------------------------------------------------------------------------------
+-- Encounter description.
+----------------------------------------------------------------------------------------------------
+function mod:OnBossEnable()
+    Apollo.RegisterEventHandler("RC_UnitStateChanged", "OnUnitStateChanged", self)
+    Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
+    Apollo.RegisterEventHandler("UNIT_HEALTH", "OnHealthChanged", self)
+end
 
 function mod:OnHealthChanged(unitName, health)
     if unitName == self.L["Frost-Boulder Avalanche"] and (health == 85 or health == 55 or health == 31) then

@@ -1,12 +1,19 @@
---------------------------------------------------------------------------------
--- Module Declaration
+----------------------------------------------------------------------------------------------------
+-- Client Lua Script for RaidCore Addon on WildStar Game.
 --
-
+-- Copyright (C) 2015 RaidCore
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+-- Description:
+--   TODO
+----------------------------------------------------------------------------------------------------
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
-
 local mod = core:NewEncounter("DSLogicWing", 52, 98, 111)
 if not mod then return end
 
+----------------------------------------------------------------------------------------------------
+-- Registering combat.
+----------------------------------------------------------------------------------------------------
 mod:RegisterTrigMob("ANY", {
     "Hyper-Accelerated Skeledroid", "Augmented Herald of Avatus", "Abstract Augmentation Algorithm",
 })
@@ -68,20 +75,21 @@ mod:RegisterGermanLocale({
     ["BERSERK"] = "BERSERK",
 })
 
---------------------------------------------------------------------------------
--- Locals
---
+----------------------------------------------------------------------------------------------------
+-- Constants.
+----------------------------------------------------------------------------------------------------
 
+----------------------------------------------------------------------------------------------------
+-- Locals.
+----------------------------------------------------------------------------------------------------
 local prevInt = ""
 local castCount = 0
 local nbKick = 28
 
---------------------------------------------------------------------------------
--- Initialization
---
-
+----------------------------------------------------------------------------------------------------
+-- Encounter description.
+----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Print(("Module %s loaded"):format(mod.ModuleName))
     Apollo.RegisterEventHandler("RC_UnitEnteredCombat", "OnUnitEnteredCombat", self)
     Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
     Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
@@ -90,16 +98,12 @@ function mod:OnBossEnable()
     Apollo.RegisterEventHandler("UNIT_HEALTH", "OnHealthChanged", self)
 end
 
---------------------------------------------------------------------------------
--- Event Handlers
---
 function mod:OnUnitCreated(unit, sName)
     if sName == self.L["Conjured Fire Bomb"] then
         core:AddMsg("BOMB", self.L["BOMB"], 5, "Long", "Blue")
         core:AddBar("BOMB", self.L["BOMB"], first and 20 or 23)
     end
 end
-
 
 function mod:OnHealthChanged(unitName, health)
     if unitName == self.L["Augmented Herald of Avatus"] and health == 25 then
