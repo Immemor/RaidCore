@@ -54,6 +54,9 @@ mod:RegisterFrenchLocale({
 })
 mod:RegisterGermanLocale({
 })
+mod:RegisterDefaultTimerBarConfigs({
+    ["NEXT_IRRADIATE"] = { sColor = "xkcdLightRed" },
+})
 
 ----------------------------------------------------------------------------------------------------
 -- Constants.
@@ -92,15 +95,15 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
             core:WatchUnit(unit)
             local tPosition = unit:GetPosition()
             if tPosition.x < ORGANIC_INCINERATOR.x then
-                core:MarkUnit(unit, 1, "L")
+                core:MarkUnit(unit, 51, "L")
             else
-                core:MarkUnit(unit, 1, "R")
+                core:MarkUnit(unit, 51, "R")
             end
         elseif sName == self.L["Prime Phage Distributor"] then
             core:AddUnit(unit)
-            core:MarkUnit(unit, 1, "M")
+            core:MarkUnit(unit, 51, "M")
             core:WatchUnit(unit)
-            core:AddBar("NEXT_IRRADIATE", self.L["~Next irradiate"], 27, true)
+            mod:AddTimerBar("NEXT_IRRADIATE", "~Next irradiate", 27, true)
         end
     end
 end
@@ -109,8 +112,8 @@ function mod:OnChatDC(message)
     local sPlayerNameIrradiate = message:match(self.L["(.*) is being irradiated"])
     if sPlayerNameIrradiate then
         -- Sometime it's 26s, sometime 27s or 28s.
-        core:AddBar("NEXT_IRRADIATE", self.L["~Next irradiate"], 26, true)
+        mod:AddTimerBar("NEXT_IRRADIATE", "~Next irradiate", 26, true)
     elseif message == self.L["ENGAGING TECHNOPHAGE TRASMISSION"] then
-        core:AddBar("NEXT_IRRADIATE", self.L["~Next irradiate"], 40, true)
+        mod:AddTimerBar("NEXT_IRRADIATE", "~Next irradiate", 40, true)
     end
 end

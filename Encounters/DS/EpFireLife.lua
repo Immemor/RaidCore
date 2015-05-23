@@ -57,6 +57,9 @@ mod:RegisterGermanLocale({
     --["You are rooted"] = "You are rooted", -- TODO: German translation missing !!!!
     --["MIDPHASE"] = "MIDPHASE", -- TODO: German translation missing !!!!
 })
+mod:RegisterDefaultTimerBarConfigs({
+    ["MID"] = { sColor = "xkcdLightOrange" },
+})
 
 ----------------------------------------------------------------------------------------------------
 -- Constants.
@@ -180,7 +183,7 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
             strMyName = uPlayer:GetName()
             core:AddUnit(unit)
             core:RaidDebuff()
-            core:AddBar("MID", self.L["MIDPHASE"], 90)
+            mod:AddTimerBar("MID", "MIDPHASE", 90)
         end
     end
 end

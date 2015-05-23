@@ -99,6 +99,11 @@ mod:RegisterGermanLocale({
     ["MARKER East"] = "O",
     ["MARKER West"] = "W",
 })
+mod:RegisterDefaultTimerBarConfigs({
+    ["DEFRAG"] = { sColor = "xkcdAlgaeGreen" },
+    ["DEFRAG_EXPLOSION"] = { sColor = "xkcdBluegreen" },
+    ["ENRAGE"] = { sColor = "xkcdBloodRed" },
+})
 
 ---------------------------------------------------------------------------------------------------
 -- Constants.
@@ -214,8 +219,8 @@ function mod:OnSpellCastStart(unitName, castName, unit)
         end
     elseif unitName == self.L["Mnemesis"] and castName == self.L["Defragment"] then
         core:StopBar("DEFRAG")
-        core:AddBar("DEFRAG", self.L["~DEFRAG CD"], 40, mod:GetSetting("SoundDefrag")) -- Defrag is unreliable, but seems to take at least this long.
-        core:AddBar("DEFRAG1", self.L["Defrag Explosion"], 9, mod:GetSetting("SoundDefrag"))
+        mod:AddTimerBar("DEFRAG", self.L["~DEFRAG CD"], 40, mod:GetSetting("SoundDefrag")) -- Defrag is unreliable, but seems to take at least this long.
+        mod:AddTimerBar("DEFRAG_EXPLOSION", self.L["Defrag Explosion"], 9, mod:GetSetting("SoundDefrag"))
         core:AddMsg("DEFRAG", self.L["DEFRAG"], 5, mod:GetSetting("SoundDefrag", "Beware"))
     end
 end
@@ -237,8 +242,8 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
             midphase = false
             core:AddUnit(unit)
             core:RaidDebuff()
-            core:AddBar("DEFRAG", self.L["~DEFRAG CD"], 21, mod:GetSetting("SoundDefrag"))
-            core:AddBar("ENRAGE", self.L["ENRAGE"], 480, mod:GetSetting("SoundEnrage"))
+            mod:AddTimerBar("DEFRAG", self.L["~DEFRAG CD"], 21, mod:GetSetting("SoundDefrag"))
+            mod:AddTimerBar("ENRAGE", self.L["ENRAGE"], 480, mod:GetSetting("SoundEnrage"))
         end
     end
 end

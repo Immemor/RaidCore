@@ -90,6 +90,10 @@ mod:RegisterGermanLocale({
     ["EAST"] = "E",
     ["WEST"] = "W",
 })
+mod:RegisterDefaultTimerBarConfigs({
+    ["STATION"] = { sColor = "xkcdOrangeYellow" },
+    ["JUMP"] = { sColor = "xkcdSunYellow" },
+})
 
 ----------------------------------------------------------------------------------------------------
 -- Constants.
@@ -141,7 +145,7 @@ function mod:OnSpellCastStart(unitName, castName, unit)
         if castName == self.L["Activate Weather Cycle"] then
             bossPos = unit:GetPosition()
             stationCount = 0
-            core:AddBar("STATION", self.L["[%u] STATION"]:format(stationCount + 1), 13)
+            mod:AddTimerBar("STATION", self.L["[%u] STATION"]:format(stationCount + 1), 13)
         elseif castName == self.L["Ice Breath"] then
             core:AddMsg("BREATH", self.L["ICE BREATH"], 5, mod:GetSetting("SoundIcyBreath", "RunAway"))
         elseif castName == self.L["Crystallize"] then
@@ -154,7 +158,7 @@ end
 
 function mod:OnChatDC(message)
     if message:find(self.L["The platform trembles"]) then
-        core:AddBar("JUMP", self.L["JUMP"], 7, 14)
+        mod:AddTimerBar("JUMP", "JUMP", 7, true)
     end
 end
 
@@ -185,7 +189,7 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
                 core:AddMsg(station_name, text, 5, mod:GetSetting("SoundWeatherStationSwitch", "Info"), "Blue")
             end
             local text = self.L["[%u] STATION"]:format(stationCount + 1)
-            core:AddBar(station_name, text, 10)
+            mod:AddTimerBar("STATION", text, 10)
         end
     end
 end

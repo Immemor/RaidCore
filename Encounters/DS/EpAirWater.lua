@@ -63,6 +63,12 @@ mod:RegisterGermanLocale({
     --["TWIRL ON YOU!"] = "TWIRL ON YOU!", -- TODO: German translation missing !!!!
     --["TWIRL"] = "TWIRL", -- TODO: German translation missing !!!!
 })
+mod:RegisterDefaultTimerBarConfigs({
+    ["MIDPHASE"] = { sColor = "xkcdLavenderBlue" },
+    ["TOMB"] = { sColor = "xkcdDarkishBlue" },
+    ["MOO"] = { sColor = "xkcdGreenishBlue" },
+    ["ICESTORM"] = { sColor = "xkcdTurquoiseBlue" },
+})
 
 ----------------------------------------------------------------------------------------------------
 -- Constants.
@@ -111,8 +117,8 @@ end
 
 function mod:OnSpellCastEnd(unitName, castName)
     if unitName == self.L["Hydroflux"] and castName == self.L["Tsunami"] then
-        core:AddBar("MIDPHASE", self.L["~Middle Phase"], 88, mod:GetSetting("SoundMidphase"))
-        core:AddBar("TOMB", self.L["~Frost Tombs"], 30, mod:GetSetting("SoundFrostTombs"))
+        mod:AddTimerBar("MIDPHASE", "~Middle Phase", 88, mod:GetSetting("SoundMidphase"))
+        mod:AddTimerBar("TOMB", "~Frost Tombs", 30, mod:GetSetting("SoundFrostTombs"))
     end
 end
 
@@ -120,10 +126,10 @@ function mod:OnBuffApplied(unitName, splId, unit)
     if phase2 and (splId == 69959 or splId == 47075) then
         phase2 = false
         core:AddMsg("MOO", self.L["MOO !"], 5, mod:GetSetting("SoundMoO", "Info"), "Blue")
-        core:AddBar("MOO", self.L["MOO PHASE"], 10, mod:GetSetting("SoundMoO"))
+        mod:AddTimerBar("MOO", "MOO PHASE", 10, mod:GetSetting("SoundMoO"))
         if mooCount == 2 then
             mooCount = 0
-            core:AddBar("ICESTORM", self.L["ICESTORM"], 15)
+            mod:AddTimerBar("ICESTORM", "ICESTORM", 15)
         end
     end
 end
@@ -184,8 +190,8 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
             core:UnitBuff(unit)
             core:UnitDebuff(playerUnit)
             core:RaidDebuff()
-            core:AddBar("MIDPHASE", self.L["Middle Phase"], 60, mod:GetSetting("SoundMidphase"))
-            core:AddBar("TOMB", self.L["~Frost Tombs"], 30, mod:GetSetting("SoundFrostTombs"))
+            mod:AddTimerBar("MIDPHASE", "Middle Phase", 60, mod:GetSetting("SoundMidphase"))
+            mod:AddTimerBar("TOMB", "~Frost Tombs", 30, mod:GetSetting("SoundFrostTombs"))
         end
     end
 end

@@ -51,6 +51,10 @@ mod:RegisterGermanLocale({
     --["ICICLE"] = "ICICLE%s" -- TODO: German translation missing !!!!
     --["SHATTER"] = "SHATTER%s" -- TODO: German translation missing !!!!
 })
+mod:RegisterDefaultTimerBarConfigs({
+    ["ICICLE"] = { sColor = "xkcdBrightSkyBlue" },
+    ["RUN"] = { sColor = "xkcdLavenderBlue" },
+})
 
 ----------------------------------------------------------------------------------------------------
 -- Constants.
@@ -82,16 +86,16 @@ function mod:OnSpellCastStart(unitName, castName, unit)
     if unitName == self.L["Frost-Boulder Avalanche"] then
         if castName == self.L["Icicle Storm"] then
             core:AddMsg("ICICLE", self.L["ICICLE"]:format(" !!"), 5, "Alert")
-            core:AddBar("ICICLE", self.L["ICICLE"]:format(""), 22)
+            mod:AddTimerBar("ICICLE", self.L["ICICLE"]:format(""), 22)
             icicleSpell = true
         elseif castName == self.L["Shatter"] then
             core:AddMsg("ICICLE", self.L["SHATTER"]:format(" !!"), 5, "Alert")
-            core:AddBar("ICICLE", self.L["SHATTER"]:format(""), 22)
+            mod:AddTimerBar("ICICLE", self.L["SHATTER"]:format(""), 22)
         elseif castName == self.L["Cyclone"] then
             core:AddMsg("CYCLONE", self.L["Cyclone"]:upper(), 5, "RunAway")
-            core:AddBar("RUN", self.L["Cyclone"]:upper(), 23)
+            mod:AddTimerBar("RUN", self.L["Cyclone"]:upper(), 23)
             local txt = icicleSpell and self.L["ICICLE"]:format("") or self.L["SHATTER"]:format("")
-            core:AddBar("ICICLE", txt, 48)
+            mod:AddTimerBar("ICICLE", txt, 48)
         end
     end
 end

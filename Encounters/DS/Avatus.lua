@@ -111,6 +111,12 @@ mod:RegisterGermanLocale({
     ["MARKER North"] = "N",
     ["MARKER South"] = "S",
 })
+mod:RegisterDefaultTimerBarConfigs({
+    ["OBBEAM"] = { sColor = "xkcdBloodRed" },
+    ["BLIND"] = { sColor = "xkcdBurntYellow" },
+    ["GGRID"] = { sColor = "xkcdBlue" },
+    ["HHAND"] = { sColor = "xkcdOrangeyRed" },
+})
 
 ----------------------------------------------------------------------------------------------------
 -- Constants.
@@ -380,10 +386,10 @@ function mod:OnSpellCastStart(unitName, castName, unit)
     local eventTime = GameLib.GetGameTime()
     if unitName == self.L["Avatus"] and castName == self.L["Obliteration Beam"] then
         core:AddMsg("BEAMS", self.L["GO TO SIDES !"], 5, mod:GetSetting("SoundObliterationBeam", "RunAway"))
-        core:StopBar("OBBEAM")
+        mod:RemoveTimerBar("OBBEAM")
         -- check if next ob beam in {obliteration_beam_timer} sec doesn't happen during a gungrid which takes 20 sec
         if gungrid_time + gungrid_timer + 20 < eventTime + obliteration_beam_timer then
-            core:AddBar("OBBEAM", self.L["Obliteration Beam"], obliteration_beam_timer, mod:GetSetting("SoundObliterationBeam"))
+            mod:AddTimerBar("OBBEAM", "Obliteration Beam", obliteration_beam_timer, mod:GetSetting("SoundObliterationBeam"))
         end
     elseif unitName == self.L["Holo Hand"] and castName == self.L["Crushing Blow"] then
         local playerUnit = GameLib.GetPlayerUnit()
@@ -403,7 +409,7 @@ function mod:OnSpellCastStart(unitName, castName, unit)
             core:AddMsg("CRBLOW", self.L["INTERRUPT CRUSHING BLOW!"], 5, mod:GetSetting("SoundHandInterrupt", "Inferno"))
         end
     elseif unitName == self.L["Mobius Physics Constructor"] and castName == self.L["Data Flare"] then
-        core:AddBar("BLIND", self.L["Blind"], 29, mod:GetSetting("SoundBlindYellowRoom"))
+        mod:AddTimerBar("BLIND", "Blind", 29, mod:GetSetting("SoundBlindYellowRoom"))
         core:AddMsg("BLIND", self.L["BLIND! TURN AWAY FROM BOSS"], 5, mod:GetSetting("SoundBlindYellowRoom", "Inferno"))
     end
 end
@@ -413,16 +419,14 @@ function mod:OnChatDC(message)
     if message:find(self.L["Gun Grid Activated"]) then
         gungrid_time = eventTime
         core:AddMsg("GGRIDMSG", self.L["Gun Grid NOW!"], 5, mod:GetSetting("SoundGunGrid", "Beware"))
-        core:StopBar("GGRID")
-        core:StopBar("HHAND")
-        core:AddBar("GGRID", self.L["~Gun Grid"], gungrid_timer, mod:GetSetting("SoundGunGrid"))
-        core:AddBar("HHAND", self.L["Holo Hands spawn"], 22)
+        mod:AddTimerBar("GGRID", "~Gun Grid", gungrid_timer, mod:GetSetting("SoundGunGrid"))
+        mod:AddTimerBar("HHAND", "Holo Hands spawn", 22)
     end
     if message:find(self.L["Portals have opened!"]) then
         phase2 = true
-        core:StopBar("GGRID")
-        core:StopBar("OBBEAM")
-        core:StopBar("HHAND")
+        mod:RemoveTimerBar("GGRID")
+        mod:RemoveTimerBar("OBBEAM")
+        mod:RemoveTimerBar("HHAND")
     end
 end
 
@@ -473,8 +477,8 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
                 core:AddPixie(unit:GetId(), 2, unit, nil, "Green", 10, 22, 0)
             end
 
-            core:AddBar("OBBEAM", self.L["Obliteration Beam"], obliteration_beam_timer, mod:GetSetting("SoundObliterationBeam"))
-            core:AddBar("GGRID", self.L["~Gun Grid"], gungrid_timer, mod:GetSetting("SoundGunGrid"))
+            mod:AddTimerBar("OBBEAM", "Obliteration Beam", obliteration_beam_timer, mod:GetSetting("SoundObliterationBeam"))
+            mod:AddTimerBar("GGRID", "~Gun Grid", gungrid_timer, mod:GetSetting("SoundGunGrid"))
             if mod:GetSetting("OtherHandSpawnMarkers") then
                 core:SetWorldMarker("HAND1", self.L["Hand %u"]:format(1), handpos["hand1"])
                 core:SetWorldMarker("HAND2", self.L["Hand %u"]:format(2), handpos["hand2"])

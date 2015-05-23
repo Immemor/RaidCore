@@ -63,6 +63,11 @@ mod:RegisterGermanLocale({
     --["EARTH"] = "EARTH", -- TODO: German translation missing !!!!
     --["~Tornado Spawn"] = "~Tornado Spawn", -- TODO: German translation missing !!!!
 })
+mod:RegisterDefaultTimerBarConfigs({
+    ["SUPERCELL"] = { sColor = "xkcdBlueBlue" },
+    ["TORNADO"] = { sColor = "xkcdBrightSkyBlue" },
+    ["RAWPOWER"] = { sColor = "xkcdBrownishRed" },
+})
 
 ----------------------------------------------------------------------------------------------------
 -- Constants.
@@ -93,8 +98,7 @@ function mod:OnUnitCreated(unit, sName)
             core:AddLine(unit:GetId(), 2, unit, nil, 3, 30, 0, 10)
         end
         if eventTime > startTime + 10 then
-            core:StopBar("TORNADO")
-            core:AddBar("TORNADO", self.L["~Tornado Spawn"], 17, mod:GetSetting("SoundTornadoCountdown"))
+            mod:AddTimerBar("TORNADO", "~Tornado Spawn", 17, mod:GetSetting("SoundTornadoCountdown"))
         end
     end
 end
@@ -114,8 +118,8 @@ function mod:OnSpellCastStart(unitName, castName, unit)
         local timeOfEvent = GameLib.GetGameTime()
         if timeOfEvent - prev > 30 then
             prev = timeOfEvent
-            core:AddMsg("CELL", self.L["Supercell"]:upper(), 5, mod:GetSetting("SoundSupercell", "Alarm"))
-            core:AddBar("CELL", self.L["Supercell"]:upper(), 80)
+            core:AddMsg("SUPERCELL", self.L["Supercell"]:upper(), 5, mod:GetSetting("SoundSupercell", "Alarm"))
+            mod:AddTimerBar("SUPERCELL", "Supercell", 80)
         end
     end
 end
@@ -126,7 +130,7 @@ function mod:OnChatDC(message)
     elseif message:find(self.L["fractured crust leaves it exposed"]) and midphase then
         midphase = false
         core:AddMsg("MOO", self.L["MOO !"], 5, "Info", mod:GetSetting("SoundMoO", "Blue"))
-        core:AddBar("RAW", self.L["Raw Power"]:upper(), 60, mod:GetSetting("SoundMidphase"))
+        mod:AddTimerBar("RAWPOWER", "Raw Power", 60, mod:GetSetting("SoundMidphase"))
     end
 end
 
@@ -145,8 +149,8 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
             if mod:GetSetting("LineCleaveAileron") then
                 core:AddPixie(unit:GetId(), 2, unit, nil, "Green", 10, 15, 0)
             end
-            core:AddBar("SCELL", self.L["Supercell"], 65, mod:GetSetting("SoundSupercell"))
-            core:AddBar("TORNADO", self.L["~Tornado Spawn"], 16, mod:GetSetting("SoundTornadoCountdown"))
+            mod:AddTimerBar("SUPERCELL", "Supercell", 65, mod:GetSetting("SoundSupercell"))
+            mod:AddTimerBar("TORNADO", "~Tornado Spawn", 16, mod:GetSetting("SoundTornadoCountdown"))
             core:AddUnit(unit)
             core:WatchUnit(unit)
         end

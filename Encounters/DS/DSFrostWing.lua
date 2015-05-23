@@ -69,6 +69,15 @@ mod:RegisterGermanLocale({
     --["FROST WAVE"] = "FROST WAVE", -- TODO: German translation missing !!!!
     --["RUNNNN"] = "RUNNNN", -- TODO: German translation missing !!!!
 })
+mod:RegisterDefaultTimerBarConfigs({
+    ["ICICLE"] = { sColor = "xkcdLightRed" },
+    ["SHATTER"] = { sColor = "xkcdBluegreen" },
+    ["RUN"] = { sColor = "xkcdBlue" },
+    ["1ST"] = { sColor = "xkcdLightPurple" },
+    ["2ND"] = { sColor = "xkcdLightPurple" },
+    ["3RD"] = { sColor = "xkcdLightPurple" },
+    ["WAVES"] = { sColor = "xkcdLightGreenBlue" },
+})
 
 ----------------------------------------------------------------------------------------------------
 -- Constants.
@@ -99,24 +108,24 @@ end
 function mod:OnSpellCastStart(unitName, castName, unit)
     if unitName == self.L["Frost-Boulder Avalanche"] then
         if castName == self.L["Icicle Storm"] then
-            core:StopBar("SHATTER")
+            mod:RemoveTimerBar("SHATTER")
             core:AddMsg("ICICLE", self.L["ICICLE"].." !!", 5, "Alert")
-            core:AddBar("ICICLE", self.L["ICICLE"], 22)
+            mod:AddTimerBar("ICICLE", "ICICLE", 22)
             icicleSpell = true
         elseif castName == self.L["Shatter"] then
             core:AddMsg("SHATTER", self.L["Shatter"]:upper().." !!", 5, "Alert")
-            core:AddBar("SHATTER", self.L["Shatter"]:upper(), 30)
+            mod:AddTimerBar("SHATTER", "Shatter", 30)
         elseif castName == self.L["Cyclone"] then
             core:AddMsg("CYCLONE", self.L["Cyclone"]:upper(), 5, "RunAway")
-            core:AddBar("RUN", self.L["RUNNNN"], 23, 1)
+            mod:AddTimerBar("RUN", "RUNNNN", 23, 1)
             if icicleSpell then
-                core:AddBar("1ST", self.L["1ST ABILITY"], 33)
-                core:AddBar("2ND", self.L["2ND ABILITY"], 40.5)
-                core:AddBar("3RD", self.L["3RD ABILITY"], 48)
+                mod:AddTimerBar("1ST", "1ST ABILITY", 33)
+                mod:AddTimerBar("2ND", "2ND ABILITY", 40.5)
+                mod:AddTimerBar("3RD", "3RD ABILITY", 48)
             else
-                core:AddBar("SHATTER", self.L["Shatter"]:upper(), 50)
+                mod:AddTimerBar("SHATTER", "Shatter", 30)
             end
-            core:AddBar("CYCLONE", self.L["Cyclone"]:upper(), 90, 1)
+            mod:AddTimerBar("CYCLONE", "Cyclone", 90, true)
         end
     end
 end
@@ -127,11 +136,11 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
             icicleSpell = false
             core:AddUnit(unit)
             core:WatchUnit(unit)
-            core:AddBar("ICICLE", "~" .. self.L["ICICLE"], 17)
-            core:AddBar("SHATTER", "~" .. self.L["Shatter"]:upper(), 30)
+            mod:AddTimerBar("ICICLE", "~" .. self.L["ICICLE"], 17)
+            mod:AddTimerBar("SHATTER", "~" .. self.L["Shatter"], 30)
         elseif sName == self.L["Frostbringer Warlock"] then
             core:AddUnit(unit)
-            core:AddBar("WAVES", self.L["FROST WAVE"], 30)
+            mod:AddTimerBar("WAVES", "FROST WAVE", 30)
         end
     end
 end

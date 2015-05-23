@@ -87,6 +87,13 @@ mod:RegisterGermanLocale({
     --["Lightning on YOU"] = "Lightning on YOU", -- TODO: German translation missing !!!!
     --["Recently Saved!"] = "Recently Saved!", -- TODO: German translation missing !!!!
 })
+mod:RegisterDefaultTimerBarConfigs({
+    ["THORN"] = { sColor = "xkcdBluegreen" },
+    ["MIDEND"] = { sColor = "xkcdDarkgreen" },
+    ["LIFEKEEP"] = { sColor = "xkcdAvocadoGreen" },
+    ["TWIRL"] = { sColor = "xkcdBluegreen" },
+    ["MIDPHASE"] = { sColor = "xkcdBluePurple" },
+})
 
 ----------------------------------------------------------------------------------------------------
 -- Constants.
@@ -125,10 +132,6 @@ function mod:OnReset()
     end
     twirl_units = {}
     twirlCount = 0
-    core:StopBar("THORN")
-    core:StopBar("MIDEND")
-    core:StopBar("MIDPHASE")
-    core:StopBar("TWIRL")
 end
 
 function mod:OnUnitCreated(unit, sName)
@@ -136,19 +139,19 @@ function mod:OnUnitCreated(unit, sName)
     if sName == self.L["Wild Brambles"] and eventTime > last_thorns + 1 and eventTime + 16 < midphase_start then
         last_thorns = eventTime
         twirlCount = twirlCount + 1
-        core:AddBar("THORN", self.L["Thorns"], 15)
+        mod:AddTimerBar("THORN", "Thorns", 15)
         if twirlCount == 1 then
-            core:AddBar("TWIRL", self.L["Twirl"], 15)
+            mod:AddTimerBar("TWIRL", "Twirl", 15)
         elseif twirlCount % 2 == 1 then
-            core:AddBar("TWIRL", self.L["Twirl"], 15)
+            mod:AddTimerBar("TWIRL", "Twirl", 15)
         end
     elseif not midphase and sName == self.L["[DS] e395 - Air - Tornado"] then
         midphase = true
         twirlCount = 0
         midphase_start = eventTime + 115
-        core:AddBar("MIDEND", self.L["Midphase ending"], 35)
-        core:AddBar("THORN", self.L["Thorns"], 35)
-        core:AddBar("Lifekeep", self.L["Next Healing Tree"], 35)
+        mod:AddTimerBar("MIDEND", "Midphase ending", 35)
+        mod:AddTimerBar("THORN", "Thorns", 35)
+        mod:AddTimerBar("LIFEKEEP", "Next Healing Tree", 35)
     elseif sName == self.L["Life Force"] and mod:GetSetting("LineLifeOrbs") then
         core:AddPixie(unit:GetId(), 2, unit, nil, "Blue", 10, 40, 0)
     elseif sName == self.L["Lifekeeper"] then
@@ -156,7 +159,7 @@ function mod:OnUnitCreated(unit, sName)
             core:AddPixie(unit:GetId(), 1, GameLib.GetPlayerUnit(), unit, "Yellow", 5, 10, 10)
         end
         core:AddUnit(unit)
-        core:AddBar("Lifekeep", self.L["Next Healing Tree"], 30, mod:GetSetting("SoundHealingTree"))
+        mod:AddTimerBar("LIFEKEEP", "Next Healing Tree", 30, mod:GetSetting("SoundHealingTree"))
     end
 end
 
@@ -164,7 +167,7 @@ function mod:OnUnitDestroyed(unit, sName)
     local eventTime = GameLib.GetGameTime()
     if midphase and sName == self.L["[DS] e395 - Air - Tornado"] then
         midphase = false
-        core:AddBar("MIDPHASE", self.L["Middle Phase"], 90, mod:GetSetting("SoundMidphase"))
+        mod:AddTimerBar("MIDPHASE", "Middle Phase", 90, mod:GetSetting("SoundMidphase"))
     elseif sName == self.L["Life Force"] then
         core:DropPixie(unit:GetId())
     elseif sName == self.L["Lifekeeper"] then
@@ -270,8 +273,8 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
             midphase_start = eventTime + 90
             twirlCount = 0
 
-            core:AddBar("MIDPHASE", self.L["Middle Phase"], 90, mod:GetSetting("SoundMidphase"))
-            core:AddBar("THORN", self.L["Thorns"], 20)
+            mod:AddTimerBar("MIDPHASE", "Middle Phase", 90, mod:GetSetting("SoundMidphase"))
+            mod:AddTimerBar("THORN", "Thorns", 20)
         end
     end
 end
