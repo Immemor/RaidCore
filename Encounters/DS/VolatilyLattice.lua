@@ -1,12 +1,19 @@
---------------------------------------------------------------------------------
--- Module Declaration
+----------------------------------------------------------------------------------------------------
+-- Client Lua Script for RaidCore Addon on WildStar Game.
 --
-
+-- Copyright (C) 2015 RaidCore
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+-- Description:
+--   TODO
+----------------------------------------------------------------------------------------------------
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
-
 local mod = core:NewEncounter("Lattice", 52, 98, 116)
 if not mod then return end
 
+----------------------------------------------------------------------------------------------------
+-- Registering combat.
+----------------------------------------------------------------------------------------------------
 mod:RegisterTrigMob("ANY", { "Avatus" })
 mod:RegisterEnglishLocale({
     -- Unit names.
@@ -77,32 +84,36 @@ mod:RegisterGermanLocale({
     --["[%u] BEAM on %s"] = "[%u] BEAM on %s", -- TODO: German translation missing !!!!
     --["BIG CAST"] = "BIG CAST", -- TODO: German translation missing !!!!
 })
+mod:RegisterDefaultTimerBarConfigs({
+    ["WAVE"] = { sColor = "xkcdOrangeYellow" },
+    ["BEAM"] = { sColor = "xkcdLipstickRed" },
+    ["BIGC"] = { sColor = "xkcdAppleGreen" },
+    ["P2"] = { sColor = "xkcdBabyPurple" },
+})
 
---------------------------------------------------------------------------------
--- Locals
---
+----------------------------------------------------------------------------------------------------
+-- Constants.
+----------------------------------------------------------------------------------------------------
 local NO_BREAK_SPACE = string.char(194, 160)
 
+----------------------------------------------------------------------------------------------------
+-- Locals.
+----------------------------------------------------------------------------------------------------
 local prev = 0
 local waveCount, beamCount = 0, 0
 local playerName
 local phase2 = false
 
---------------------------------------------------------------------------------
--- Initialization
---
-
+----------------------------------------------------------------------------------------------------
+-- Encounter description.
+----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Print(("Module %s loaded"):format(mod.ModuleName))
     Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
     Apollo.RegisterEventHandler("RC_UnitDestroyed", "OnUnitDestroyed", self)
     Apollo.RegisterEventHandler("RC_UnitStateChanged", "OnUnitStateChanged", self)
     Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
 end
 
---------------------------------------------------------------------------------
--- Event Handlers
---
 function mod:OnUnitCreated(unit, sName)
     if sName == self.L["Data Devourer"] and self:GetDistanceBetweenUnits(unit, GameLib.GetPlayerUnit()) < 45 and mod:GetSetting("LineDataDevourers") then
         core:AddPixie(unit:GetId(), 1, GameLib.GetPlayerUnit(), unit, "Blue", 5, 10, 10)
@@ -134,19 +145,19 @@ function mod:OnChatDC(message)
             core:AddMsg("BEAM", self.L["[%u] BEAM on %s"]:format(beamCount, playerFocus), 5, mod:GetSetting("SoundBeam", "Info"), "Blue")
         end
         if phase2 then
-            core:AddBar("WAVE", self.L["[%u] WAVE"]:format(waveCount + 1), 15, mod:GetSetting("SoundNewWave"))
+            mod:AddTimerBar("WAVE", self.L["[%u] WAVE"]:format(waveCount + 1), 15, mod:GetSetting("SoundNewWave"))
             phase2 = false
         else
-            core:AddBar("BEAM", self.L["[%u] BEAM on %s"]:format(beamCount, playerFocus), 15)
+            mod:AddTimerBar("BEAM", self.L["[%u] BEAM on %s"]:format(beamCount, playerFocus), 15)
             if beamCount == 3 then
-                core:AddBar("WAVE", self.L["[%u] WAVE"]:format(waveCount + 1), 15, mod:GetSetting("SoundNewWave"))
+                mod:AddTimerBar("WAVE", self.L["[%u] WAVE"]:format(waveCount + 1), 15, mod:GetSetting("SoundNewWave"))
             end
         end
     elseif message == self.L["Avatus prepares to delete all"] then
         core:StopBar("BEAM")
         core:StopBar("WAVE")
         core:AddMsg("BIGC", self.L["BIG CAST"] .. " !!", 5, mod:GetSetting("SoundBigCast", "Beware"))
-        core:AddBar("BIGC", self.L["BIG CAST"], 10)
+        mod:AddTimerBar("BIGC", "BIG CAST", 10)
         beamCount = 0
     elseif message == self.L["Secure Sector Enhancement"] then
         core:StopBar("BEAM")
@@ -154,16 +165,16 @@ function mod:OnChatDC(message)
         phase2 = true
         waveCount, beamCount = 0, 0
         core:AddMsg("P2", self.L["P2: SHIELD PHASE"], 5, mod:GetSetting("SoundShieldPhase", "Alert"))
-        core:AddBar("P2", self.L["LASER"], 15, mod:GetSetting("SoundLaser"))
-        core:AddBar("BEAM", self.L["NEXT BEAM"], 44)
+        mod:AddTimerBar("P2", "LASER", 15, mod:GetSetting("SoundLaser"))
+        mod:AddTimerBar("BEAM", "NEXT BEAM", 44)
     elseif message == self.L["Vertical Locomotion Enhancement"] then
         core:StopBar("BEAM")
         core:StopBar("WAVE")
         phase2 = true
         waveCount, beamCount = 0, 0
         core:AddMsg("P2", self.L["P2: JUMP PHASE"], 5, mod:GetSetting("SoundJumpPhase", "Alert"))
-        core:AddBar("P2", self.L["EXPLOSION"], 15, mod:GetSetting("SoundExplosion"))
-        core:AddBar("BEAM", self.L["NEXT BEAM"], 58)
+        mod:AddTimerBar("P2", "EXPLOSION", 15, mod:GetSetting("SoundExplosion"))
+        mod:AddTimerBar("BEAM", "NEXT BEAM", 58)
     end
 end
 

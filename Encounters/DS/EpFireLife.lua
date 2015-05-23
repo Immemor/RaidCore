@@ -1,12 +1,19 @@
---------------------------------------------------------------------------------
--- Module Declaration
+----------------------------------------------------------------------------------------------------
+-- Client Lua Script for RaidCore Addon on WildStar Game.
 --
-
+-- Copyright (C) 2015 RaidCore
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+-- Description:
+--   TODO
+----------------------------------------------------------------------------------------------------
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
-
 local mod = core:NewEncounter("EpFireLife", 52, 98, 119)
 if not mod then return end
 
+----------------------------------------------------------------------------------------------------
+-- Registering combat.
+----------------------------------------------------------------------------------------------------
 mod:RegisterTrigMob("ALL", { "Visceralus", "Pyrobane" })
 mod:RegisterEnglishLocale({
     -- Unit names.
@@ -50,24 +57,28 @@ mod:RegisterGermanLocale({
     --["You are rooted"] = "You are rooted", -- TODO: German translation missing !!!!
     --["MIDPHASE"] = "MIDPHASE", -- TODO: German translation missing !!!!
 })
+mod:RegisterDefaultTimerBarConfigs({
+    ["MID"] = { sColor = "xkcdLightOrange" },
+})
 
+----------------------------------------------------------------------------------------------------
+-- Constants.
+----------------------------------------------------------------------------------------------------
 local DEBUFFID_PRIMAL_ENTANGLEMENT = 73179 -- A root ability.
 local DEBUFFIF__TODO__ = 73177 -- TODO: set english debuff name as define name.
 
---------------------------------------------------------------------------------
--- Locals
---
-
+----------------------------------------------------------------------------------------------------
+-- Locals.
+----------------------------------------------------------------------------------------------------
 local rooted_units = {}
 local uPlayer = nil
 local strMyName = ""
 local CheckRootTimer = nil
 
---------------------------------------------------------------------------------
--- Initialization
---
+----------------------------------------------------------------------------------------------------
+-- Encounter description.
+----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Print(("Module %s loaded"):format(mod.ModuleName))
     Apollo.RegisterEventHandler("RC_UnitStateChanged", "OnUnitStateChanged", self)
     Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
     Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
@@ -77,9 +88,6 @@ function mod:OnBossEnable()
     Apollo.RegisterEventHandler("RAID_WIPE", "OnReset", self)
 end
 
---------------------------------------------------------------------------------
--- Event Handlers
---
 function mod:OnReset()
     if CheckRootTimer then
         self:CancelTimer(CheckRootTimer)
@@ -175,7 +183,7 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
             strMyName = uPlayer:GetName()
             core:AddUnit(unit)
             core:RaidDebuff()
-            core:AddBar("MID", self.L["MIDPHASE"], 90)
+            mod:AddTimerBar("MID", "MIDPHASE", 90)
         end
     end
 end

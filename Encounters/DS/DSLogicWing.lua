@@ -1,12 +1,19 @@
---------------------------------------------------------------------------------
--- Module Declaration
+----------------------------------------------------------------------------------------------------
+-- Client Lua Script for RaidCore Addon on WildStar Game.
 --
-
+-- Copyright (C) 2015 RaidCore
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+-- Description:
+--   TODO
+----------------------------------------------------------------------------------------------------
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
-
 local mod = core:NewEncounter("DSLogicWing", 52, 98, 111)
 if not mod then return end
 
+----------------------------------------------------------------------------------------------------
+-- Registering combat.
+----------------------------------------------------------------------------------------------------
 mod:RegisterTrigMob("ANY", {
     "Hyper-Accelerated Skeledroid", "Augmented Herald of Avatus", "Abstract Augmentation Algorithm",
 })
@@ -67,21 +74,29 @@ mod:RegisterGermanLocale({
     --["BOMB"] = "BOMB", -- TODO: German translation missing !!!!
     ["BERSERK"] = "BERSERK",
 })
+mod:RegisterDefaultTimerBarConfigs({
+    ["BOMB"] = { sColor = "xkcdAlgaeGreen" },
+    ["CUBE"] = { sColor = "xkcdArmyGreen" },
+    ["DATA"] = { sColor = "xkcdBluegreen" },
+    ["EMPOWER"] = { sColor = "xkcdBritishRacingGreen" },
+    ["BERSERK"] = { sColor = "xkcdBloodRed" },
+})
 
---------------------------------------------------------------------------------
--- Locals
---
+----------------------------------------------------------------------------------------------------
+-- Constants.
+----------------------------------------------------------------------------------------------------
 
+----------------------------------------------------------------------------------------------------
+-- Locals.
+----------------------------------------------------------------------------------------------------
 local prevInt = ""
 local castCount = 0
 local nbKick = 28
 
---------------------------------------------------------------------------------
--- Initialization
---
-
+----------------------------------------------------------------------------------------------------
+-- Encounter description.
+----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Print(("Module %s loaded"):format(mod.ModuleName))
     Apollo.RegisterEventHandler("RC_UnitEnteredCombat", "OnUnitEnteredCombat", self)
     Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
     Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
@@ -90,16 +105,12 @@ function mod:OnBossEnable()
     Apollo.RegisterEventHandler("UNIT_HEALTH", "OnHealthChanged", self)
 end
 
---------------------------------------------------------------------------------
--- Event Handlers
---
 function mod:OnUnitCreated(unit, sName)
     if sName == self.L["Conjured Fire Bomb"] then
         core:AddMsg("BOMB", self.L["BOMB"], 5, "Long", "Blue")
-        core:AddBar("BOMB", self.L["BOMB"], first and 20 or 23)
+        mod:AddTimerBar("BOMB", "BOMB", first and 20 or 23)
     end
 end
-
 
 function mod:OnHealthChanged(unitName, health)
     if unitName == self.L["Augmented Herald of Avatus"] and health == 25 then
@@ -109,18 +120,18 @@ end
 
 function mod:OnSpellCastStart(unitName, castName, unit)
     if unitName == self.L["Augmented Herald of Avatus"] and castName == "Cube Smash" then
-        core:AddBar("CUBE", self.L["CUBE SMASH"], 17)
+        mod:AddTimerBar("CUBE", "CUBE SMASH", 17)
     elseif unitName == self.L["Abstract Augmentation Algorithm"] and castName == self.L["Data Deconstruction"] then
         castCount = castCount + 1
         core:AddMsg("DATA", self.L["[%u] INTERRUPT"]:format(castCount), 3, "Long", "Blue")
-        core:AddBar("DATA", self.L["[%u] INTERRUPT"]:format(castCount), 7)
+        mod:AddTimerBar("DATA", self.L["[%u] INTERRUPT"]:format(castCount), 7)
     end
 end
 
 function mod:OnChatDC(message)
     if message:find(self.L["The Abstract Augmentation Algorithm has amplified a Quantum Processing Unit"]) then
         core:AddMsg("EMPOWER", self.L["EMPOWER"]:format(" !!"), 5, "Alert")
-        core:AddBar("EMPOWER", self.L["EMPOWER"]:format(""), 30, 1)
+        mod:AddTimerBar("EMPOWER", self.L["EMPOWER"]:format(""), 30, 1)
     end
 end
 
@@ -130,7 +141,7 @@ function mod:OnDebuffApplied(unitName, splId)
         prevInt = unitName
         castCount = castCount + 1
         if castCount > nbKick then castCount = 1 end
-        core:AddBar("DATA", self.L["[%u] INTERRUPT"]:format(castCount), 7)
+        mod:AddTimerBar("DATA", self.L["[%u] INTERRUPT"]:format(castCount), 7)
     end
 end
 
@@ -141,18 +152,18 @@ function mod:OnUnitEnteredCombat(unit, bInCombat, sName)
             castCount = 1
             core:AddUnit(unit)
             core:RaidDebuff()
-            core:AddBar("DATA", self.L["[%u] INTERRUPT"]:format(castCount), 7)
-            core:AddBar("EMPOWER", self.L["EMPOWER"]:format(""), 30, 1)
+            mod:AddTimerBar("DATA", self.L["[%u] INTERRUPT"]:format(castCount), 7)
+            mod:AddTimerBar("EMPOWER", self.L["EMPOWER"]:format(""), 30, 1)
         elseif sName == self.L["Quantum Processing Unit"] then
             core:AddUnit(unit)
             core:MarkUnit(unit)
         elseif sName == self.L["Hyper-Accelerated Skeledroid"] then
             core:AddUnit(unit)
-            core:AddBar("BERSERK", self.L["BERSERK"], 180, 1)
+            mod:AddTimerBar("BERSERK", "BERSERK", 180, 1)
         elseif sName == self.L["Augmented Herald of Avatus"] then
             core:AddUnit(unit)
             core:WatchUnit(unit)
-            core:AddBar("CUBE", self.L["CUBE SMASH"], 8)
+            mod:AddTimerBar("CUBE", "CUBE SMASH", 8)
         end
     end
 end

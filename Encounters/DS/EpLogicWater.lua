@@ -1,12 +1,19 @@
---------------------------------------------------------------------------------
--- Module Declaration
+----------------------------------------------------------------------------------------------------
+-- Client Lua Script for RaidCore Addon on WildStar Game.
 --
-
+-- Copyright (C) 2015 RaidCore
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+-- Description:
+--   TODO
+----------------------------------------------------------------------------------------------------
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
-
 local mod = core:NewEncounter("EpLogicWater", 52, 98, 118)
 if not mod then return end
 
+----------------------------------------------------------------------------------------------------
+-- Registering combat.
+----------------------------------------------------------------------------------------------------
 mod:RegisterTrigMob("ALL", { "Hydroflux", "Mnemesis" })
 mod:RegisterEnglishLocale({
     -- Unit names.
@@ -68,21 +75,29 @@ mod:RegisterGermanLocale({
     --["Stay away from boss with buff!"] = "Stay away from boss with buff!", -- TODO: German translation missing !!!!
     --["ORB"] = "ORB", -- TODO: German translation missing !!!!
 })
+mod:RegisterDefaultTimerBarConfigs({
+    ["MIDPHASE"] = { sColor = "xkcdAlgaeGreen" },
+    ["PRISON"] = { sColor = "xkcdBluegreen" },
+    ["GRAVE"] = { sColor = "xkcdBloodRed" },
+    ["DEFRAG"] = { sColor = "xkcdAlgaeGreen" },
+})
 
---------------------------------------------------------------------------------
--- Locals
---
+----------------------------------------------------------------------------------------------------
+-- Constants.
+----------------------------------------------------------------------------------------------------
 
+----------------------------------------------------------------------------------------------------
+-- Locals.
+----------------------------------------------------------------------------------------------------
 local uPlayer = nil
 local strMyName = ""
 local midphase = false
 local encounter_started = false
 
---------------------------------------------------------------------------------
--- Initialization
---
+----------------------------------------------------------------------------------------------------
+-- Encounter description.
+----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Print(("Module %s loaded"):format(mod.ModuleName))
     Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
     Apollo.RegisterEventHandler("RC_UnitDestroyed", "OnUnitDestroyed", self)
     Apollo.RegisterEventHandler("RC_UnitStateChanged", "OnUnitStateChanged", self)
@@ -90,40 +105,27 @@ function mod:OnBossEnable()
     Apollo.RegisterEventHandler("SPELL_CAST_END", "OnSpellCastEnd", self)
     Apollo.RegisterEventHandler("DEBUFF_APPLIED", "OnDebuffApplied", self)
     Apollo.RegisterEventHandler("DEBUFF_REMOVED", "OnDebuffRemoved", self)
-    Apollo.RegisterEventHandler("RAID_WIPE", "OnReset", self)
-end
-
---------------------------------------------------------------------------------
--- Event Handlers
---
-
-function mod:OnReset()
-    core:StopBar("MIDPHASE")
-    core:StopBar("GRAVE")
-    core:StopBar("PRISON")
-    core:StopBar("DEFRAG")
     midphase = false
     encounter_started = false
+
+    uPlayer = GameLib.GetPlayerUnit()
+    strMyName = uPlayer:GetName()
 end
 
 function mod:OnSpellCastStart(unitName, castName, unit)
     if unitName == self.L["Mnemesis"] then
         if castName == self.L["Circuit Breaker"] then
-            core:StopBar("MIDPHASE")
-            core:AddBar("MIDPHASE", self.L["Middle Phase"], 100, mod:GetSetting("SoundMidphase"))
+            mod:AddTimerBar("MIDPHASE", "Middle Phase", 100, mod:GetSetting("SoundMidphase"))
             midphase = true
         elseif castName == self.L["Imprison"] then
-            core:StopBar("PRISON")
-            core:AddBar("PRISON", self.L["Imprison"], 19)
+            mod:AddTimerBar("PRISON", "Imprison", 19)
         elseif castName == self.L["Defragment"] then
-            core:StopBar("DEFRAG")
             core:AddMsg("DEFRAG", self.L["SPREAD"], 5, mod:GetSetting("SoundDefrag", "Beware"))
-            core:AddBar("DEFRAG", self.L["~Defrag"], 40, mod:GetSetting("SoundDefrag"))
+            mod:AddTimerBar("DEFRAG", "~Defrag", 40, mod:GetSetting("SoundDefrag"))
         end
     elseif unitName == self.L["Hydroflux"] then
         if castName == self.L["Watery Grave"] and mod:GetSetting("OtherWateryGraveTimer") then
-            core:StopBar("GRAVE")
-            core:AddBar("GRAVE", self.L["Watery Grave"], 10)
+            mod:AddTimerBar("GRAVE", "Watery Grave", 10)
         end
     end
 end
@@ -194,19 +196,17 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
             core:AddUnit(unit)
             core:WatchUnit(unit)
         elseif sName == self.L["Mnemesis"] then
-            uPlayer = GameLib.GetPlayerUnit()
-            strMyName = uPlayer:GetName()
             midphase = false
             encounter_started = true
             core:RaidDebuff()
             core:AddUnit(unit)
             core:WatchUnit(unit)
-            core:AddBar("MIDPHASE", self.L["Middle Phase"], 75, mod:GetSetting("SoundMidphase"))
-            core:AddBar("PRISON", self.L["Imprison"], 16)
-            core:AddBar("DEFRAG", self.L["Defrag"], 20, mod:GetSetting("SoundDefrag"))
+            mod:AddTimerBar("MIDPHASE", "Middle Phase", 75, mod:GetSetting("SoundMidphase"))
+            mod:AddTimerBar("PRISON", "Imprison", 16)
+            mod:AddTimerBar("DEFRAG", "Defrag", 20, mod:GetSetting("SoundDefrag"))
 
             if mod:GetSetting("OtherWateryGraveTimer") then
-                core:AddBar("GRAVE", self.L["Watery Grave"], 10)
+                mod:AddTimerBar("GRAVE", "Watery Grave", 10)
             end
         end
     end

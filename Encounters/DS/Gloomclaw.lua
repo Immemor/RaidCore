@@ -1,12 +1,19 @@
---------------------------------------------------------------------------------
--- Module Declaration
+----------------------------------------------------------------------------------------------------
+-- Client Lua Script for RaidCore Addon on WildStar Game.
 --
-
+-- Copyright (C) 2015 RaidCore
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+-- Description:
+--   TODO
+----------------------------------------------------------------------------------------------------
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
-
 local mod = core:NewEncounter("Gloomclaw", 52, 98, 115)
 if not mod then return end
 
+----------------------------------------------------------------------------------------------------
+-- Registering combat.
+----------------------------------------------------------------------------------------------------
 mod:RegisterTrigMob("ANY", { "Gloomclaw" })
 mod:RegisterEnglishLocale({
     -- Unit names.
@@ -101,15 +108,16 @@ mod:RegisterGermanLocale({
     --["MOO PHASE"] = "MOO PHASE", -- TODO: German translation missing !!!!
     --["BURN HIM HARD"] = "BURN HIM HARD", -- TODO: German translation missing !!!!
 })
+mod:RegisterDefaultTimerBarConfigs({
+    ["RUPTURE"] = { sColor = "xkcdBrightRed" },
+    ["WAVE"] = { sColor = "xkcdBrightOrange" },
+    ["CORRUPTION"] = { sColor = "xkcdBrown" },
+    ["MOO"] = { sColor = "xkcdBurntYellow" },
+})
 
---------------------------------------------------------------------------------
--- Locals
---
-
-local prev = 0
-local waveCount, ruptCount, essenceUp = 0, 0, {}
-local first = true
-local section = 1
+----------------------------------------------------------------------------------------------------
+-- Constants.
+----------------------------------------------------------------------------------------------------
 local leftSpawn = {
     {x = 4288.5, y = -568.48095703125, z = -16765.66796875 },
     {x = 4288.5, y = -568.30078125, z = -16858.9765625 },
@@ -117,7 +125,6 @@ local leftSpawn = {
     {x = 4288.5, y = -568.95300292969, z = -17040.22265625 },
     {x = 4288.5, y = -568.95300292969, z = -17040.099609375 }
 }
-
 local rightSpawn = {
     {x = 4332.5, y = -568.4833984375, z = -16765.66796875 },
     {x = 4332.5, y = -568.45147705078, z = -16858.9765625 },
@@ -125,61 +132,33 @@ local rightSpawn = {
     {x = 4332.5, y = -568.95300292969, z = -17040.22265625 },
     {x = 4332.5, y = -568.95300292969, z = -17040.099609375 }
 }
-
-local spawnTimer = {
-    26,
-    33,
-    25,
-    14,
-    20.5
-}
-
-local spawnCount = {
-    4,
-    3,
-    4,
-    5,
-    5
-}
-
+local spawnTimer = { 26, 33, 25, 14, 20.5 }
+local spawnCount = { 4, 3, 4, 5, 5 }
 local maulerSpawn = {
     ["northwest"] = { x = 4288, y = -568, z = -17040 },
     ["northeast"] = { x = 4332, y = -568, z = -17040 },
     ["southwest"] = { x = 4288, y = -568, z = -16949 }, --todo check if these 2 are sw/se or other way around
     ["southeast"] = { x = 4332, y = -568, z = -16949 },
 }
---[[
-L1 : 4288.5, -568.48095703125, -16765.66796875
-R1 : 4332.5, -568.4833984375, -16765.66796875
 
-L2 : 4288.5, -568.30078125, -16858.9765625
-R2 : 4332.5, -568.45147705078, -16858.9765625
+----------------------------------------------------------------------------------------------------
+-- Locals.
+----------------------------------------------------------------------------------------------------
+local prev = 0
+local waveCount, ruptCount, essenceUp = 0, 0, {}
+local first = true
+local section = 1
 
-L3 : 4288.5, -568.95300292969, -16949.40234375
-R3 : 4332.5, -568.95300292969, -16949.40234375
-
-L4 : 4288.5, -568.95300292969, -17040.22265625
-R4 : 4332.5, -568.95300292969, -17040.22265625
-
-L5 : 4288.5, -568.95300292969, -17054.87109375
-R5 : 4332.5, -568.95300292969, -17054.87109375
-]]--
-
---------------------------------------------------------------------------------
--- Initialization
---
-
+----------------------------------------------------------------------------------------------------
+-- Encounter description.
+----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Print(("Module %s loaded"):format(mod.ModuleName))
     Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
     Apollo.RegisterEventHandler("RC_UnitStateChanged", "OnUnitStateChanged", self)
     Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
     Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
 end
 
---------------------------------------------------------------------------------
--- Event Handlers
---
 function mod:OnWipe()
     Apollo.RemoveEventHandler("CombatLogHeal", self)
     core:ResetWorldMarkers()
@@ -196,7 +175,7 @@ function mod:OnSpellCastStart(unitName, castName, unit)
         ruptCount = ruptCount + 1
         core:AddMsg("RUPTURE", self.L["INTERRUPT %s"]:format(unitName:upper()), 5, mod:GetSetting("SoundRuptureInterrupt", "Destruction"))
         if ruptCount == 1 then
-            core:AddBar("RUPTURE", self.L["NEXT RUPTURE"], 43, mod:GetSetting("SoundRuptureCountdown"))
+            mod:AddTimerBar("RUPTURE", "NEXT RUPTURE", 43, mod:GetSetting("SoundRuptureCountdown"))
         end
     elseif (unitName == self.L["Corrupted Ravager"] or unitName == self.L["Empowered Ravager"])
         and castName == self.L["Corrupting Rays"] then
@@ -216,9 +195,9 @@ function mod:OnChatDC(message)
     if isPushBack or isMoveForward then
         if not first then
             waveCount, ruptCount, prev = 0, 0, 0
-            core:StopBar("RUPTURE")
-            core:StopBar("CORRUPTION")
-            core:StopBar("WAVE")
+            mod:RemoveTimerBar("RUPTURE")
+            mod:RemoveTimerBar("CORRUPTION")
+            mod:RemoveTimerBar("WAVE")
             if isPushBack then
                 section = section + 1
             else
@@ -226,10 +205,10 @@ function mod:OnChatDC(message)
             end
             core:AddMsg("PHASE", self.L["SECTION %u"]:format(section), 5, mod:GetSetting("SoundSectionSwitch", "Info"), "Blue")
             if section ~= 4 then 
-                core:AddBar("WAVE", self.L["[%u] WAVE"]:format(waveCount + 1), 11)
-                core:AddBar("RUPTURE", self.L["NEXT RUPTURE"], 39, mod:GetSetting("SoundRuptureCountdown"))
+                mod:AddTimerBar("WAVE", self.L["[%u] WAVE"]:format(waveCount + 1), 11)
+                mod:AddTimerBar("RUPTURE", "NEXT RUPTURE", 39, mod:GetSetting("SoundRuptureCountdown"))
             end
-            core:AddBar("CORRUPTION", self.L["FULL CORRUPTION"], 111, mod:GetSetting("SoundCorruptionCountdown"))
+            mod:AddTimerBar("CORRUPTION", "FULL CORRUPTION", 111, mod:GetSetting("SoundCorruptionCountdown"))
         else
             first = false
         end
@@ -248,21 +227,21 @@ function mod:OnChatDC(message)
         end
         Apollo.RegisterEventHandler("CombatLogHeal", "OnCombatLogHeal", self)
     elseif message:find(self.L["Gloomclaw is reduced to a weakened state"]) then
-        core:StopBar("RUPTURE")
-        core:StopBar("CORRUPTION")
-        core:StopBar("WAVE")
+        mod:RemoveTimerBar("RUPTURE")
+        mod:RemoveTimerBar("CORRUPTION")
+        mod:RemoveTimerBar("WAVE")
         core:AddMsg("TRANSITION", self.L["TRANSITION"], 5, mod:GetSetting("SoundMoOWarning", "Alert"))
-        core:AddBar("MOO", self.L["MOO PHASE"], 15)
+        mod:AddTimerBar("MOO", "MOO PHASE", 15)
         for unitId, v in pairs(essenceUp) do
             core:RemoveUnit(unitId)
             essenceUp[unitId] = nil
         end
     elseif message:find(self.L["Gloomclaw is vulnerable"]) then
-        core:StopBar("RUPTURE")
-        core:StopBar("CORRUPTION")
-        core:StopBar("WAVE")
+        mod:RemoveTimerBar("RUPTURE")
+        mod:RemoveTimerBar("CORRUPTION")
+        mod:RemoveTimerBar("WAVE")
         core:AddMsg("TRANSITION", self.L["BURN HIM HARD"], 5, mod:GetSetting("SoundMoOWarning", "Alert"))
-        core:AddBar("MOO", self.L["MOO PHASE"], 20, mod:GetSetting("SoundMoOWarning"))
+        mod:AddTimerBar("MOO", "MOO PHASE", 20, mod:GetSetting("SoundMoOWarning"))
         for unitId, v in pairs(essenceUp) do
             core:RemoveUnit(unitId)
             essenceUp[unitId] = nil
@@ -301,8 +280,8 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
             end
             core:AddUnit(unit)
             core:WatchUnit(unit)
-            core:AddBar("RUPTURE", self.L["~NEXT RUPTURE"], 35, mod:GetSetting("SoundRuptureCountdown"))
-            core:AddBar("CORRUPTION", self.L["FULL CORRUPTION"], 106, mod:GetSetting("SoundCorruptionCountdown"))
+            mod:AddTimerBar("RUPTURE", "~NEXT RUPTURE", 35, mod:GetSetting("SoundRuptureCountdown"))
+            mod:AddTimerBar("CORRUPTION", "FULL CORRUPTION", 106, mod:GetSetting("SoundCorruptionCountdown"))
         elseif sName == self.L["Strain Parasite"]
             or sName == self.L["Gloomclaw Skurge"]
             or sName == self.L["Corrupted Fraz"] then
@@ -314,15 +293,16 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
                 core:AddMsg("WAVE", self.L["[%u] WAVE"]:format(waveCount), 5, mod:GetSetting("SoundWaveWarning", "Info"), "Blue")
                 if section < 5 then
                     if waveCount < spawnCount[section] then
-                        core:AddBar("WAVE", self.L["[%u] WAVE"]:format(waveCount + 1), spawnTimer[section])
+                        mod:AddTimerBar("WAVE", self.L["[%u] WAVE"]:format(waveCount + 1), spawnTimer[section])
                     end
                 else
+                    local sTimerText = self.L["[%u] WAVE"]:format(waveCount + 1)
                     if waveCount == 1 then
-                        core:AddBar("WAVE", self.L["[%u] WAVE"]:format(waveCount + 1), 20.5)
+                        mod:AddTimerBar("WAVE", sTimerText, 20.5)
                     elseif waveCount == 2 then
-                        core:AddBar("WAVE", self.L["[%u] WAVE"]:format(waveCount + 1), 30)
+                        mod:AddTimerBar("WAVE", sTimerText, 30)
                     elseif waveCount == 3 then
-                        core:AddBar("WAVE", self.L["[%u] WAVE"]:format(waveCount + 1), 15)
+                        mod:AddTimerBar("WAVE", sTimerText, 15)
                     end
                 end
             end

@@ -7,19 +7,13 @@
 -- Description:
 --   Elemental Pair after the Logic wings.
 ---------------------------------------------------------------------------------------------------
-
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local mod = core:NewEncounter("EpLogicLife", 52, 98, 119)
 if not mod then return end
 
----------------------------------------------------------------------------------------------------
--- Fast and local object.
----------------------------------------------------------------------------------------------------
-local GetPlayerUnit = GameLib.GetPlayerUnit
-
----------------------------------------------------------------------------------------------------
--- Languages.
----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+-- Registering combat.
+----------------------------------------------------------------------------------------------------
 mod:RegisterTrigMob("ALL", { "Mnemesis", "Visceralus" })
 mod:RegisterEnglishLocale({
     -- Unit names.
@@ -105,6 +99,11 @@ mod:RegisterGermanLocale({
     ["MARKER East"] = "O",
     ["MARKER West"] = "W",
 })
+mod:RegisterDefaultTimerBarConfigs({
+    ["DEFRAG"] = { sColor = "xkcdAlgaeGreen" },
+    ["DEFRAG_EXPLOSION"] = { sColor = "xkcdBluegreen" },
+    ["ENRAGE"] = { sColor = "xkcdBloodRed" },
+})
 
 ---------------------------------------------------------------------------------------------------
 -- Constants.
@@ -119,11 +118,15 @@ local MID_POSITIONS = {
     ["east"] = { x = 9791.53, y = -518, z = 17873.81 },
 }
 
+----------------------------------------------------------------------------------------------------
+-- Locals.
+----------------------------------------------------------------------------------------------------
+local GetPlayerUnit = GameLib.GetPlayerUnit
+local midphase = false
+
 ---------------------------------------------------------------------------------------------------
 -- Encounter description.
 ---------------------------------------------------------------------------------------------------
-local midphase = false
-
 function mod:OnBossEnable()
     Apollo.RegisterEventHandler("RC_UnitStateChanged", "OnUnitStateChanged", self)
     Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
@@ -216,8 +219,8 @@ function mod:OnSpellCastStart(unitName, castName, unit)
         end
     elseif unitName == self.L["Mnemesis"] and castName == self.L["Defragment"] then
         core:StopBar("DEFRAG")
-        core:AddBar("DEFRAG", self.L["~DEFRAG CD"], 40, mod:GetSetting("SoundDefrag")) -- Defrag is unreliable, but seems to take at least this long.
-        core:AddBar("DEFRAG1", self.L["Defrag Explosion"], 9, mod:GetSetting("SoundDefrag"))
+        mod:AddTimerBar("DEFRAG", self.L["~DEFRAG CD"], 40, mod:GetSetting("SoundDefrag")) -- Defrag is unreliable, but seems to take at least this long.
+        mod:AddTimerBar("DEFRAG_EXPLOSION", self.L["Defrag Explosion"], 9, mod:GetSetting("SoundDefrag"))
         core:AddMsg("DEFRAG", self.L["DEFRAG"], 5, mod:GetSetting("SoundDefrag", "Beware"))
     end
 end
@@ -239,8 +242,8 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
             midphase = false
             core:AddUnit(unit)
             core:RaidDebuff()
-            core:AddBar("DEFRAG", self.L["~DEFRAG CD"], 21, mod:GetSetting("SoundDefrag"))
-            core:AddBar("ENRAGE", self.L["ENRAGE"], 480, mod:GetSetting("SoundEnrage"))
+            mod:AddTimerBar("DEFRAG", self.L["~DEFRAG CD"], 21, mod:GetSetting("SoundDefrag"))
+            mod:AddTimerBar("ENRAGE", self.L["ENRAGE"], 480, mod:GetSetting("SoundEnrage"))
         end
     end
 end

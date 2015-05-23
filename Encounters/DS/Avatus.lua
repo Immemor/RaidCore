@@ -1,8 +1,19 @@
+----------------------------------------------------------------------------------------------------
+-- Client Lua Script for RaidCore Addon on WildStar Game.
+--
+-- Copyright (C) 2015 RaidCore
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+-- Description:
+--   TODO
+----------------------------------------------------------------------------------------------------
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
-
 local mod = core:NewEncounter("Avatus", 52, 98, 104)
 if not mod then return end
 
+----------------------------------------------------------------------------------------------------
+-- Registering combat.
+----------------------------------------------------------------------------------------------------
 mod:RegisterTrigMob("ANY", { "Avatus" })
 mod:RegisterEnglishLocale({
     -- Unit names.
@@ -100,7 +111,30 @@ mod:RegisterGermanLocale({
     ["MARKER North"] = "N",
     ["MARKER South"] = "S",
 })
+mod:RegisterDefaultTimerBarConfigs({
+    ["OBBEAM"] = { sColor = "xkcdBloodRed" },
+    ["BLIND"] = { sColor = "xkcdBurntYellow" },
+    ["GGRID"] = { sColor = "xkcdBlue" },
+    ["HHAND"] = { sColor = "xkcdOrangeyRed" },
+})
 
+----------------------------------------------------------------------------------------------------
+-- Constants.
+----------------------------------------------------------------------------------------------------
+local NO_BREAK_SPACE = string.char(194, 160)
+local handpos = {
+    ["hand1"] = {x = 608.70, y = -198.75, z = -191.62},
+    ["hand2"] = {x = 607.67, y = -198.75, z = -157.00},
+}
+
+local referencePos = {
+    ["north"] = { x = 618, y = -198, z = -235 },
+    ["south"] = { x = 618, y = -198, z = -114 }
+}
+
+----------------------------------------------------------------------------------------------------
+-- locals.
+----------------------------------------------------------------------------------------------------
 local phase2warn, phase2 = false, false
 local phase_blueroom = false
 local phase2_blueroom_rotation = {}
@@ -114,31 +148,6 @@ local gungrid_timer = 20
 local obliteration_beam_timer = 69
 local holo_hands = {}
 local strMyName
-local NO_BREAK_SPACE = string.char(194, 160)
-
-local handpos = {
-    ["hand1"] = {x = 608.70, y = -198.75, z = -191.62},
-    ["hand2"] = {x = 607.67, y = -198.75, z = -157.00},
-}
-
-local referencePos = {
-    ["north"] = { x = 618, y = -198, z = -235 },
-    ["south"] = { x = 618, y = -198, z = -114 }
-}
-
-function mod:OnBossEnable()
-    Print(("Module %s loaded"):format(mod.ModuleName))
-    Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
-    Apollo.RegisterEventHandler("RC_UnitDestroyed", "OnUnitDestroyed", self)
-    Apollo.RegisterEventHandler("RC_UnitStateChanged", "OnUnitStateChanged", self)
-    Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
-    Apollo.RegisterEventHandler("UNIT_HEALTH", "OnHealthChanged", self)
-    Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
-    Apollo.RegisterEventHandler("CHAT_NPCSAY", "OnChatNPCSay", self)
-    Apollo.RegisterEventHandler("RAID_WIPE", "OnReset", self)
-    Apollo.RegisterEventHandler("BUFF_APPLIED", "OnBuffApplied", self) -- temp disabled. Not finished.
-    Apollo.RegisterEventHandler("ChatMessage", "OnChatMessage", self) -- temp dissabled. Not finished
-end
 
 local function lowestKeyValue(tbl)
     local lowestValue = false
@@ -222,6 +231,22 @@ local function orderedPairs(t)
     -- Equivalent of the pairs() function on tables. Allows to iterate
     -- in order
     return orderedNext, t, nil
+end
+
+----------------------------------------------------------------------------------------------------
+-- Encounter description.
+----------------------------------------------------------------------------------------------------
+function mod:OnBossEnable()
+    Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
+    Apollo.RegisterEventHandler("RC_UnitDestroyed", "OnUnitDestroyed", self)
+    Apollo.RegisterEventHandler("RC_UnitStateChanged", "OnUnitStateChanged", self)
+    Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
+    Apollo.RegisterEventHandler("UNIT_HEALTH", "OnHealthChanged", self)
+    Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
+    Apollo.RegisterEventHandler("CHAT_NPCSAY", "OnChatNPCSay", self)
+    Apollo.RegisterEventHandler("RAID_WIPE", "OnReset", self)
+    Apollo.RegisterEventHandler("BUFF_APPLIED", "OnBuffApplied", self) -- temp disabled. Not finished.
+    Apollo.RegisterEventHandler("ChatMessage", "OnChatMessage", self) -- temp dissabled. Not finished
 end
 
 function mod:OnReset()
@@ -361,10 +386,10 @@ function mod:OnSpellCastStart(unitName, castName, unit)
     local eventTime = GameLib.GetGameTime()
     if unitName == self.L["Avatus"] and castName == self.L["Obliteration Beam"] then
         core:AddMsg("BEAMS", self.L["GO TO SIDES !"], 5, mod:GetSetting("SoundObliterationBeam", "RunAway"))
-        core:StopBar("OBBEAM")
+        mod:RemoveTimerBar("OBBEAM")
         -- check if next ob beam in {obliteration_beam_timer} sec doesn't happen during a gungrid which takes 20 sec
         if gungrid_time + gungrid_timer + 20 < eventTime + obliteration_beam_timer then
-            core:AddBar("OBBEAM", self.L["Obliteration Beam"], obliteration_beam_timer, mod:GetSetting("SoundObliterationBeam"))
+            mod:AddTimerBar("OBBEAM", "Obliteration Beam", obliteration_beam_timer, mod:GetSetting("SoundObliterationBeam"))
         end
     elseif unitName == self.L["Holo Hand"] and castName == self.L["Crushing Blow"] then
         local playerUnit = GameLib.GetPlayerUnit()
@@ -384,7 +409,7 @@ function mod:OnSpellCastStart(unitName, castName, unit)
             core:AddMsg("CRBLOW", self.L["INTERRUPT CRUSHING BLOW!"], 5, mod:GetSetting("SoundHandInterrupt", "Inferno"))
         end
     elseif unitName == self.L["Mobius Physics Constructor"] and castName == self.L["Data Flare"] then
-        core:AddBar("BLIND", self.L["Blind"], 29, mod:GetSetting("SoundBlindYellowRoom"))
+        mod:AddTimerBar("BLIND", "Blind", 29, mod:GetSetting("SoundBlindYellowRoom"))
         core:AddMsg("BLIND", self.L["BLIND! TURN AWAY FROM BOSS"], 5, mod:GetSetting("SoundBlindYellowRoom", "Inferno"))
     end
 end
@@ -394,16 +419,14 @@ function mod:OnChatDC(message)
     if message:find(self.L["Gun Grid Activated"]) then
         gungrid_time = eventTime
         core:AddMsg("GGRIDMSG", self.L["Gun Grid NOW!"], 5, mod:GetSetting("SoundGunGrid", "Beware"))
-        core:StopBar("GGRID")
-        core:StopBar("HHAND")
-        core:AddBar("GGRID", self.L["~Gun Grid"], gungrid_timer, mod:GetSetting("SoundGunGrid"))
-        core:AddBar("HHAND", self.L["Holo Hands spawn"], 22)
+        mod:AddTimerBar("GGRID", "~Gun Grid", gungrid_timer, mod:GetSetting("SoundGunGrid"))
+        mod:AddTimerBar("HHAND", "Holo Hands spawn", 22)
     end
     if message:find(self.L["Portals have opened!"]) then
         phase2 = true
-        core:StopBar("GGRID")
-        core:StopBar("OBBEAM")
-        core:StopBar("HHAND")
+        mod:RemoveTimerBar("GGRID")
+        mod:RemoveTimerBar("OBBEAM")
+        mod:RemoveTimerBar("HHAND")
     end
 end
 
@@ -454,8 +477,8 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
                 core:AddPixie(unit:GetId(), 2, unit, nil, "Green", 10, 22, 0)
             end
 
-            core:AddBar("OBBEAM", self.L["Obliteration Beam"], obliteration_beam_timer, mod:GetSetting("SoundObliterationBeam"))
-            core:AddBar("GGRID", self.L["~Gun Grid"], gungrid_timer, mod:GetSetting("SoundGunGrid"))
+            mod:AddTimerBar("OBBEAM", "Obliteration Beam", obliteration_beam_timer, mod:GetSetting("SoundObliterationBeam"))
+            mod:AddTimerBar("GGRID", "~Gun Grid", gungrid_timer, mod:GetSetting("SoundGunGrid"))
             if mod:GetSetting("OtherHandSpawnMarkers") then
                 core:SetWorldMarker("HAND1", self.L["Hand %u"]:format(1), handpos["hand1"])
                 core:SetWorldMarker("HAND2", self.L["Hand %u"]:format(2), handpos["hand2"])

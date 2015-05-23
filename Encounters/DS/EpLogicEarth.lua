@@ -8,12 +8,13 @@
 --
 --   The elemental Pair Megalith and Mnemesis juste after Maelstrom fight.
 ----------------------------------------------------------------------------------------------------
-
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
-
 local mod = core:NewEncounter("EpLogicEarth", 52, 98, 117)
 if not mod then return end
 
+----------------------------------------------------------------------------------------------------
+-- Registering combat.
+----------------------------------------------------------------------------------------------------
 mod:RegisterTrigMob("ALL", { "Megalith", "Mnemesis" })
 mod:RegisterEnglishLocale({
     -- Unit names.
@@ -72,28 +73,29 @@ mod:RegisterGermanLocale({
     --["JUMP !"] = "JUMP !", -- TODO: German translation missing !!!!
     --["STARS"] = "STARS%s" -- TODO: German translation missing !!!!
 })
+mod:RegisterDefaultTimerBarConfigs({
+    ["BOOM"] = { sColor = "xkcdBloodRed" },
+    ["DEFRAG"] = { sColor = "xkcdAlgaeGreen" },
+    ["STAR"] = { sColor = "xkcdBlue" },
+    ["SNAKE"] = { sColor = "xkcdBrickOrange" },
+})
 
 ----------------------------------------------------------------------------------------------------
--- Copy of few objects to reduce the cpu load.
--- Because all local objects are faster.
-----------------------------------------------------------------------------------------------------
-local GetPlayerUnit = GameLib.GetPlayerUnit
-local GetGameTime = GameLib.GetGameTime
-
-----------------------------------------------------------------------------------------------------
--- constants
+-- Constants.
 ----------------------------------------------------------------------------------------------------
 local BUFF_MNEMESIS_INFORMATIC_CLOUD = 52571
 local DEBUFF_SNAKE = 74570
 
 ----------------------------------------------------------------------------------------------------
--- Privates variables.
+-- Locals.
 ----------------------------------------------------------------------------------------------------
+local GetPlayerUnit = GameLib.GetPlayerUnit
+local GetGameTime = GameLib.GetGameTime
 local _Previous_Defragment_time = 0
 local pilarCount = 0
 
 ----------------------------------------------------------------------------------------------------
--- Initialization
+-- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
     Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
@@ -104,9 +106,6 @@ function mod:OnBossEnable()
     Apollo.RegisterEventHandler("DEBUFF_APPLIED", "OnDebuffApplied", self)
 end
 
-----------------------------------------------------------------------------------------------------
--- Event Handlers
-----------------------------------------------------------------------------------------------------
 function mod:OnUnitCreated(unit, sName)
     local sName = unit:GetName()
     if sName == self.L["Obsidian Outcropping"] and mod:GetSetting("LineObsidianOutcropping") then
@@ -126,8 +125,8 @@ function mod:OnSpellCastStart(unitName, castName, unit)
         if timeOfEvent - _Previous_Defragment_time > 10 then
             _Previous_Defragment_time = timeOfEvent
             core:AddMsg("DEFRAG", self.L["SPREAD"], 5, mod:GetSetting("SoundDefrag", "Alarm"))
-            core:AddBar("BOOM", self.L["BOOM"], 9)
-            core:AddBar("DEFRAG", self.L["DEFRAG"], 40)
+            mod:AddTimerBar("BOOM", "BOOM", 9)
+            mod:AddTimerBar("DEFRAG", "DEFRAG", 40)
         end
     end
 end
@@ -137,7 +136,7 @@ function mod:OnChatDC(message)
         core:AddMsg("QUAKE", self.L["JUMP !"], 3, mod:GetSetting("SoundQuakeJump", "Beware"))
     elseif message:find(self.L["Logic creates powerful data caches"]) then
         core:AddMsg("STAR", self.L["STARS"]:format(" !"), 5, mod:GetSetting("SoundStars", "Alert"))
-        core:AddBar("STAR", self.L["STARS"]:format(""), 60)
+        mod:AddTimerBar("STAR", self.L["STARS"]:format(""), 60)
     end
 end
 
@@ -146,7 +145,7 @@ function mod:OnDebuffApplied(unitName, splId, unit)
         if unit == GetPlayerUnit() then
             core:AddMsg("SNAKE", self.L["SNAKE ON %s"]:format(unitName), 5, mod:GetSetting("SoundSnake", "RunAway"), "Blue")
         end
-        core:AddBar("SNAKE", self.L["SNAKE ON %s"]:format(unitName), 20)
+        mod:AddTimerBar("SNAKE", self.L["SNAKE ON %s"]:format(unitName), 20)
     end
 end
 
@@ -157,8 +156,8 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
         elseif sName == self.L["Mnemesis"] then
             _Previous_Defragment_time = 0
             pilarCount = 0
-            core:AddBar("DEFRAG", self.L["DEFRAG"], 10)
-            core:AddBar("STAR", self.L["STARS"]:format(""), 60)
+            mod:AddTimerBar("DEFRAG", "DEFRAG", 10)
+            mod:AddTimerBar("STAR", self.L["STARS"]:format(""), 60)
             core:AddUnit(unit)
             core:WatchUnit(unit)
             core:RaidDebuff()

@@ -1,21 +1,20 @@
---------------------------------------------------------------------------------
--- Module Declaration
+----------------------------------------------------------------------------------------------------
+-- Client Lua Script for RaidCore Addon on WildStar Game.
 --
-
+-- Copyright (C) 2015 RaidCore
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+-- Description:
+--   TODO
+----------------------------------------------------------------------------------------------------
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
-
 local mod = core:NewEncounter("Maelstrom", 52, 98, 120)
 if not mod then return end
 
+----------------------------------------------------------------------------------------------------
+-- Registering combat.
+----------------------------------------------------------------------------------------------------
 mod:RegisterTrigMob("ANY", { "Maelstrom Authority" })
-
---------------------------------------------------------------------------------
--- Locals
---
-
-local prev = 0
-local stationCount = 0
-local bossPos = {}
 mod:RegisterEnglishLocale({
     -- Unit names.
     ["Wind Wall"] = "Wind Wall",
@@ -91,23 +90,32 @@ mod:RegisterGermanLocale({
     ["EAST"] = "E",
     ["WEST"] = "W",
 })
+mod:RegisterDefaultTimerBarConfigs({
+    ["STATION"] = { sColor = "xkcdOrangeYellow" },
+    ["JUMP"] = { sColor = "xkcdSunYellow" },
+})
 
---------------------------------------------------------------------------------
--- Initialization
---
+----------------------------------------------------------------------------------------------------
+-- Constants.
+----------------------------------------------------------------------------------------------------
 
+----------------------------------------------------------------------------------------------------
+-- Locals.
+----------------------------------------------------------------------------------------------------
+local prev = 0
+local stationCount = 0
+local bossPos = {}
+
+----------------------------------------------------------------------------------------------------
+-- Encounter description.
+----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Print(("Module %s loaded"):format(mod.ModuleName))
     Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
     Apollo.RegisterEventHandler("RC_UnitDestroyed", "OnUnitDestroyed", self)
     Apollo.RegisterEventHandler("RC_UnitStateChanged", "OnUnitStateChanged", self)
     Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
     Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
 end
-
---------------------------------------------------------------------------------
--- Event Handlers
---
 
 function mod:OnUnitCreated(unit, sName)
     if sName == self.L["Wind Wall"] and mod:GetSetting("LineWindWalls") then
@@ -124,7 +132,6 @@ function mod:OnUnitCreated(unit, sName)
 end
 
 function mod:OnUnitDestroyed(unit, sName)
-    --Print(sName)
     if sName == self.L["Wind Wall"] then
         core:DropPixie(unit:GetId().."_1")
         core:DropPixie(unit:GetId().."_2")
@@ -138,7 +145,7 @@ function mod:OnSpellCastStart(unitName, castName, unit)
         if castName == self.L["Activate Weather Cycle"] then
             bossPos = unit:GetPosition()
             stationCount = 0
-            core:AddBar("STATION", self.L["[%u] STATION"]:format(stationCount + 1), 13)
+            mod:AddTimerBar("STATION", self.L["[%u] STATION"]:format(stationCount + 1), 13)
         elseif castName == self.L["Ice Breath"] then
             core:AddMsg("BREATH", self.L["ICE BREATH"], 5, mod:GetSetting("SoundIcyBreath", "RunAway"))
         elseif castName == self.L["Crystallize"] then
@@ -151,7 +158,7 @@ end
 
 function mod:OnChatDC(message)
     if message:find(self.L["The platform trembles"]) then
-        core:AddBar("JUMP", self.L["JUMP"], 7, 14)
+        mod:AddTimerBar("JUMP", "JUMP", 7, true)
     end
 end
 
@@ -182,7 +189,7 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
                 core:AddMsg(station_name, text, 5, mod:GetSetting("SoundWeatherStationSwitch", "Info"), "Blue")
             end
             local text = self.L["[%u] STATION"]:format(stationCount + 1)
-            core:AddBar(station_name, text, 10)
+            mod:AddTimerBar("STATION", text, 10)
         end
     end
 end

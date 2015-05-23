@@ -1,12 +1,21 @@
---------------------------------------------------------------------------------
--- Module Declaration
+----------------------------------------------------------------------------------------------------
+-- Client Lua Script for RaidCore Addon on WildStar Game.
 --
-
+-- Copyright (C) 2015 RaidCore
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+-- Description:
+--   TODO
+--
+--   Note: Binary is the north boss, Null the south boss.
+----------------------------------------------------------------------------------------------------
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
-
 local mod = core:NewEncounter("SystemDaemons", 52, 98, 105)
 if not mod then return end
 
+----------------------------------------------------------------------------------------------------
+-- Registering combat.
+----------------------------------------------------------------------------------------------------
 mod:RegisterTrigMob("ANY", { "Binary System Daemon", "Null System Daemon" })
 mod:RegisterEnglishLocale({
     -- Unit names.
@@ -43,21 +52,22 @@ mod:RegisterEnglishLocale({
     ["INTERRUPT NORTH"] = "INTERRUPT NORTH",
     ["INTERRUPT SOUTH"] = "INTERRUPT SOUTH",
     ["AIDDDDDDDS !"] = "AIDDDDDDDS !",
-    ["PURGE - %s"] = "PURGE - %s",
+    ["PURGE - NULL"] = "PURGE - NULL",
+    ["PURGE - BINARY"] = "PURGE - BINARY",
     ["INTERRUPT !"] = "INTERRUPT !",
     ["INTERRUPT HEAL!"] = "INTERRUPT HEAL!",
     ["BLACK IC"] = "BLACK IC",
     ["HEAL"] = "HEAL",
     ["PURGE ON YOU"] = "PURGE ON YOU",
     ["Probe Spawn"] = "Probe Spawn",
-    ["DISCONNECT (%u)"] = "DISCONNECT (%u)",
+    ["Disconnect"] = "Disconnect",
     ["YOU ARE NEXT ON NORTH !"] = "YOU ARE NEXT ON NORTH !",
     ["YOU ARE NEXT ON SOUTH !"] = "YOU ARE NEXT ON SOUTH !",
 })
 mod:RegisterFrenchLocale({
     -- Unit names.
-    ["Binary System Daemon"] = "Daemon 2.0",
-    ["Null System Daemon"] = "Daemon 1.0",
+    ["Binary System Daemon"] = "Daemon 2.0",
+    ["Null System Daemon"] = "Daemon 1.0",
     ["Brute Force Algorithm"] = "Algorithme de force brute",
     ["Encryption Program"] = "Programme de cryptage",
     ["Radiation Dispersion Unit"] = "Unité de dispersion de radiations",
@@ -68,12 +78,12 @@ mod:RegisterFrenchLocale({
     ["Enhancement Module"] = "Module d'amélioration",
     ["Conduction Unit Mk. I"]  = "Unité de conductivité v1",
     ["Conduction Unit Mk. II"]  = "Unité de conductivité v2",
-    --["Conduction Unit Mk. III"]  = "Conduction Unit Mk. III", -- TODO: French translation missing !!!!
+    ["Conduction Unit Mk. III"]  = "Unité de conductivité v3",
     ["Infinite Generator Core"] = "Noyau du générateur d'infinité",
     ["Recovery Protocol"] = "Protocole de récupération",
     -- Datachron messages.
     ["INVALID SIGNAL. DISCONNECTING"] = "SIGNAL INCORRECT.",
-    ["COMMENCING ENHANCEMENT SEQUENCE"] = "DÉBUT DE LA SEQUENCE D'AMÉLIORATION",
+    ["COMMENCING ENHANCEMENT SEQUENCE"] = "ACTIVATION DE LA SÉQUENCE D'AMÉLIORATION.",
     -- Cast.
     ["Repair Sequence"] = "Séquence de réparation",
     ["Power Surge"] = "Afflux d'énergie",
@@ -89,14 +99,15 @@ mod:RegisterFrenchLocale({
     --["INTERRUPT NORTH"] = "INTERRUPT NORTH", -- TODO: French translation missing !!!!
     --["INTERRUPT SOUTH"] = "INTERRUPT SOUTH", -- TODO: French translation missing !!!!
     --["AIDDDDDDDS !"] = "AIDDDDDDDS !", -- TODO: French translation missing !!!!
-    --["PURGE - %s"] = "PURGE - %s", -- TODO: French translation missing !!!!
+    ["PURGE - NULL"] = "PURGE - 1.0",
+    ["PURGE - BINARY"] = "PURGE - 2.0",
     --["INTERRUPT !"] = "INTERRUPT !", -- TODO: French translation missing !!!!
     --["INTERRUPT HEAL!"] = "INTERRUPT HEAL!", -- TODO: French translation missing !!!!
     --["BLACK IC"] = "BLACK IC", -- TODO: French translation missing !!!!
     --["HEAL"] = "HEAL", -- TODO: French translation missing !!!!
     --["PURGE ON YOU"] = "PURGE ON YOU", -- TODO: French translation missing !!!!
     --["Probe Spawn"] = "Probe Spawn", -- TODO: French translation missing !!!!
-    --["DISCONNECT (%u)"] = "DISCONNECT (%u)", -- TODO: French translation missing !!!!
+    ["Disconnect"] = "Déconnexion",
     --["YOU ARE NEXT ON NORTH !"] = "YOU ARE NEXT ON NORTH !", -- TODO: French translation missing !!!!
     --["YOU ARE NEXT ON SOUTH !"] = "YOU ARE NEXT ON SOUTH !", -- TODO: French translation missing !!!!
 })
@@ -135,22 +146,31 @@ mod:RegisterGermanLocale({
     ["INTERRUPT NORTH"] = "UNTERBRECHE NORDEN",
     ["INTERRUPT SOUTH"] = "UNTERBRECHE SÜDEN",
     ["AIDDDDDDDS !"] = "AIDDDDDDDS !",
-    ["PURGE - %s"] = "SÄUBERN - %s",
+    ["PURGE - NULL"] = "SÄUBERN - NULL",
+    ["PURGE - BINARY"] = "SÄUBERN - BINÄR",
     ["INTERRUPT !"] = "UNTERBRECHEN !",
     ["INTERRUPT HEAL!"] = "HEILUNG UNTERBRECHEN !",
     ["BLACK IC"] = "GLATTEIS",
     ["HEAL"] = "HEILUNG",
     ["PURGE ON YOU"] = "STEHEN BLEIBEN !!!",
     ["Probe Spawn"] = "Sonde Spawn",
-    ["DISCONNECT (%u)"] = "TRENNUNG (%u)",
+    ["Disconnect"] = "Trennung",
     ["YOU ARE NEXT ON NORTH !"] = "DU BIST DER NÄCHSTE IM NORDEN !",
     ["YOU ARE NEXT ON SOUTH !"] = "DU BIST DER NÄCHSTE IM SÜDEN !",
 })
+mod:RegisterDefaultTimerBarConfigs({
+    ["SDWAVE"] = { sColor = "xkcdOrangeYellow" },
+    ["PROBES"] = { sColor = "xkcdSunYellow" },
+    ["DISCONNECT"] = { sColor = "xkcdBlueyPurple"},
+    ["PURGE_NULL"] = { sColor = "xkcdBrickOrange" },
+    ["PURGE_BINARY"] = { sColor = "xkcdBrickOrange" },
+    ["BLACKIC"] = { sColor = "vdarkgray" },
+})
 
---------------------------------------------------------------------------------
--- Locals
---
-
+----------------------------------------------------------------------------------------------------
+-- Constants.
+----------------------------------------------------------------------------------------------------
+local probesouth = { x = 95.89, y = -337.19, z = 211.26 }
 local PILLARS_POSITIONS = {
     ["mid1"] = {
         ["N1"] = { x = 133.217, y = -225.94, z = -207.71 },
@@ -172,7 +192,10 @@ local PILLARS_POSITIONS = {
     },
 }
 
-local discoCount, sdwaveCount, probeCount, sdSurgeCount, PurgeLast = 0, 0, 0, {}, {}
+----------------------------------------------------------------------------------------------------
+-- locals.
+----------------------------------------------------------------------------------------------------
+local sdwaveCount, probeCount, sdSurgeCount, PurgeLast = 0, 0, {}, {}
 local phase2warn, phase2 = false, false
 local phase2count = 0
 local intNorth, intSouth = nil, nil
@@ -180,12 +203,10 @@ local prev = 0
 local nbKick = 2
 local playerName
 
---------------------------------------------------------------------------------
--- Initialization
---
-
+----------------------------------------------------------------------------------------------------
+-- Encounter description.
+----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Print(("Module %s loaded"):format(mod.ModuleName))
     Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
     Apollo.RegisterEventHandler("RC_UnitDestroyed", "OnUnitDestroyed", self)
     Apollo.RegisterEventHandler("RC_UnitStateChanged", "OnUnitStateChanged", self)
@@ -199,10 +220,6 @@ function mod:OnBossEnable()
     Apollo.RegisterEventHandler("SubZoneChanged", "OnZoneChanged", self)
     Apollo.RegisterEventHandler("RAID_WIPE", "OnReset", self)
 end
-
---------------------------------------------------------------------------------
--- Event Handlers
---
 
 function mod:OnReset()
     core:ResetWorldMarkers()
@@ -226,24 +243,24 @@ function mod:OnUnitCreated(unit, sName)
             probeCount = 0
             if sdwaveCount == 1 then
                 core:AddMsg("SDWAVE", self.L["[%u] WAVE"]:format(sdwaveCount), 5, mod:GetSetting("SoundWave", "Info"), "Blue")
-                core:AddBar("SDWAVE", self.L["[%u] WAVE"]:format(sdwaveCount + 1), 50, mod:GetSetting("SoundWave"))
+                mod:AddTimerBar("SDWAVE", self.L["[%u] WAVE"]:format(sdwaveCount + 1), 50, mod:GetSetting("SoundWave"))
             elseif sdwaveCount % 2 == 0 then
                 core:AddMsg("SDWAVE", self.L["[%u] WAVE"]:format(sdwaveCount), 5, mod:GetSetting("SoundWave", "Info"), "Blue")
-                core:AddBar("SDWAVE", self.L["[%u] MINIBOSS"]:format(sdwaveCount + 1), 50, mod:GetSetting("SoundWave"))
+                mod:AddTimerBar("SDWAVE", self.L["[%u] MINIBOSS"]:format(sdwaveCount + 1), 50, mod:GetSetting("SoundWave"))
             else
                 core:AddMsg("SDWAVE", self.L["[%u] MINIBOSS"]:format(sdwaveCount), 5, mod:GetSetting("SoundWave", "Info"), "Blue")
-                core:AddBar("SDWAVE", self.L["[%u] WAVE"]:format(sdwaveCount + 1), 50, mod:GetSetting("SoundWave"))
+                mod:AddTimerBar("SDWAVE", self.L["[%u] WAVE"]:format(sdwaveCount + 1), 50, mod:GetSetting("SoundWave"))
             end
-            core:AddBar("PROBES", self.L["[%u] Probe"]:format(1), 10)
+            mod:AddTimerBar("PROBES", self.L["[%u] Probe"]:format(1), 10)
         end
     elseif sName == self.L["Conduction Unit Mk. I"] then
         if probeCount == 0 then probeCount = 1 end
         if GetCurrentSubZoneName():find(self.L["Infinite Generator Core"]) then core:MarkUnit(unit, 1, 1) end
-        core:AddBar("PROBES", self.L["[%u] Probe"]:format(2), 10)
+        mod:AddTimerBar("PROBES", self.L["[%u] Probe"]:format(2), 10)
     elseif sName == self.L["Conduction Unit Mk. II"] then
         if probeCount == 1 then probeCount = 2 end
         if GetCurrentSubZoneName():find(self.L["Infinite Generator Core"]) then core:MarkUnit(unit, 1, 2) end
-        core:AddBar("PROBES", self.L["[%u] Probe"]:format(3), 10)
+        mod:AddTimerBar("PROBES", self.L["[%u] Probe"]:format(3), 10)
     elseif sName == self.L["Conduction Unit Mk. III"] then
         if probeCount == 2 then probeCount = 3 end
         if GetCurrentSubZoneName():find(self.L["Infinite Generator Core"]) then core:MarkUnit(unit, 1, 3) end
@@ -297,20 +314,20 @@ function mod:OnSpellCastStart(unitName, castName, unit)
         if self:GetDistanceBetweenUnits(GameLib.GetPlayerUnit(), unit) < 40 then
             core:AddMsg("PURGE", self.L["AIDDDDDDDS !"], 5, mod:GetSetting("SoundPurge", "Beware"))
             if unitName == self.L["Null System Daemon"] then
-                core:AddBar("PURGE_"..unit:GetId(), self.L["PURGE - %s"]:format("NULL"), 27)
+                mod:AddTimerBar("PURGE_NULL", "PURGE - NULL", 27)
             elseif unitName == self.L["Binary System Daemon"] then
-                core:AddBar("PURGE_"..unit:GetId(), self.L["PURGE - %s"]:format("BINARY"), 27)
+                mod:AddTimerBar("PURGE_BINARY", "PURGE - BINARY", 27)
             end
         elseif phase2 then
             if unitName == self.L["Null System Daemon"] then
-                core:AddBar("PURGE_"..unit:GetId(), self.L["PURGE - %s"]:format("NULL"), 27)
+                mod:AddTimerBar("PURGE_NULL", "PURGE - NULL", 27)
             elseif unitName == self.L["Binary System Daemon"] then
-                core:AddBar("PURGE_"..unit:GetId(), self.L["PURGE - %s"]:format("BINARY"), 27)
+                mod:AddTimerBar("PURGE_BINARY", "PURGE - BINARY", 27)
             end
         end
     elseif unitName == self.L["Defragmentation Unit"] and castName == self.L["Black IC"] then
         core:AddMsg("BLACKIC", self.L["INTERRUPT !"], 5, "Alert")
-        core:AddBar("BLACKIC", self.L["BLACK IC"], 30)
+        mod:AddTimerBar("BLACKIC", "BLACK IC", 30)
     elseif unitName == self.L["Recovery Protocol"] and castName == self.L["Repair Sequence"] then
         if self:GetDistanceBetweenUnits(GameLib.GetPlayerUnit(), unit) < 50 then
             core:AddMsg("HEAL", self.L["INTERRUPT HEAL!"], 5, mod:GetSetting("SoundRepairSequence", "Inferno"))
@@ -366,18 +383,16 @@ function mod:OnZoneChanged(zoneId, zoneName)
                     local NO_BREAK_SPACE = string.char(194, 160)
                     local unitName = unit:GetName():gsub(NO_BREAK_SPACE, " ")
                     if unitName == self.L["Null System Daemon"] then
-                        core:AddBar("PURGE_".. id, self.L["PURGE - %s"]:format("NULL"), timer + 27 - timeOfEvent)
+                        mod:AddTimerBar("PURGE_NULL", "PURGE - NULL", timer + 27 - timeOfEvent)
                     elseif unitName == self.L["Binary System Daemon"] then
-                        core:AddBar("PURGE_".. id, self.L["PURGE - %s"]:format("BINARY"), timer + 27 - timeOfEvent)
+                        mod:AddTimerBar("PURGE_BINARY", "PURGE - BINARY", timer + 27 - timeOfEvent)
                     end
                 end
             end
         end
     elseif zoneName:find("Infinite Generator Core") then
-        for id, timer in pairs(PurgeLast) do
-            core:StopBar("PURGE_" .. id)
-        end
-        local probesouth = { x = 95.89, y = -337.19, z = 211.26 }
+        mod:RemoveTimerBar("PURGE_NULL")
+        mod:RemoveTimerBar("PURGE_BINARY")
         core:SetWorldMarker("PROBE_SOUTH", self.L["Probe Spawn"], probesouth)
     end
 end
@@ -385,15 +400,15 @@ end
 function mod:NextWave()
     if probeCount == 3 then
         if sdwaveCount % 2 == 0 then
-            core:AddBar("SDWAVE", self.L["[%u] MINIBOSS"]:format(sdwaveCount + 1), 90, mod:GetSetting("SoundWave"))
+            mod:AddTimerBar("SDWAVE", self.L["[%u] MINIBOSS"]:format(sdwaveCount + 1), 90, mod:GetSetting("SoundWave"))
         else
-            core:AddBar("SDWAVE", self.L["[%u] WAVE"]:format(sdwaveCount + 1), 90, mod:GetSetting("SoundWave"))
+            mod:AddTimerBar("SDWAVE", self.L["[%u] WAVE"]:format(sdwaveCount + 1), 90, mod:GetSetting("SoundWave"))
         end
     else
         if sdwaveCount % 2 == 0 then
-            core:AddBar("SDWAVE", self.L["[%u] MINIBOSS"]:format(sdwaveCount + 1), 110 + (2 - probeCount) * 10, mod:GetSetting("SoundWave"))
+            mod:AddTimerBar("SDWAVE", self.L["[%u] MINIBOSS"]:format(sdwaveCount + 1), 110 + (2 - probeCount) * 10, mod:GetSetting("SoundWave"))
         else
-            core:AddBar("SDWAVE", self.L["[%u] WAVE"]:format(sdwaveCount + 1), 110 + (2 - probeCount) * 10, mod:GetSetting("SoundWave"))
+            mod:AddTimerBar("SDWAVE", self.L["[%u] WAVE"]:format(sdwaveCount + 1), 110 + (2 - probeCount) * 10, mod:GetSetting("SoundWave"))
         end
     end
 end
@@ -405,18 +420,17 @@ function mod:OnChatDC(message)
             phase2 = false
             phase2warn = false
         end
-        discoCount = discoCount + 1
         if mod:GetSetting("OtherDisconnectTimer") then
-            core:AddBar("DISC", self.L["DISCONNECT (%u)"]:format(discoCount + 1), 60)
+            mod:AddTimerBar("DISCONNECT", "Disconnect", 60)
         end
     elseif message:find(self.L["COMMENCING ENHANCEMENT SEQUENCE"]) then
         phase2, phase2warn = true, false
         phase2count = phase2count + 1
-        core:StopBar("DISC")
+        core:StopBar("DISCONNECT")
         core:StopBar("SDWAVE")
         core:AddMsg("SDP2", self.L["PHASE 2 !"], 5, mod:GetSetting("SoundPhase2", "Alarm"))
         if mod:GetSetting("OtherDisconnectTimer") then
-            core:AddBar("DISC", self.L["DISCONNECT (%u)"]:format(discoCount + 1), 85)
+            mod:AddTimerBar("DISCONNECT", "Disconnect", 85)
         end
         if mod:GetSetting("OtherPillarMarkers") and phase2count == 1 then
             for key, value in pairs(PILLARS_POSITIONS["mid1"]) do
@@ -465,7 +479,7 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
             else
                 core:MarkUnit(unit, 0, self.L["MARKER north"])
             end
-            discoCount, sdwaveCount, probeCount = 0, 0, 0
+            sdwaveCount, probeCount = 0, 0
             phase2warn, phase2 = false, false
             phase2count = 0
             sdSurgeCount[unit:GetId()] = 1
@@ -477,9 +491,9 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
             core:AddSync("NORTH_SURGE", 5)
             core:AddSync("SOUTH_SURGE", 5)
             if mod:GetSetting("OtherDisconnectTimer") then
-                core:AddBar("DISC", self.L["DISCONNECT (%u)"]:format(discoCount + 1), 41)
+                mod:AddTimerBar("DISCONNECT", "Disconnect", 41)
             end
-            core:AddBar("SDWAVE", self.L["[%u] WAVE"]:format(sdwaveCount + 1), 15, mod:GetSetting("SoundWave"))
+            mod:AddTimerBar("SDWAVE", self.L["[%u] WAVE"]:format(sdwaveCount + 1), 15, mod:GetSetting("SoundWave"))
         elseif sName == self.L["Defragmentation Unit"] then
             if GetCurrentSubZoneName():find("Infinite Generator Core") then
                 core:WatchUnit(unit)

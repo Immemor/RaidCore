@@ -34,12 +34,16 @@ local GetCurrentZoneMap = GameLib.GetCurrentZoneMap
 -- Behavior seen with French language. This problem is not present in English.
 local NO_BREAK_SPACE = string.char(194, 160)
 
+local MYCOLORS = {
+    ["Blue"] = "FF0066FF",
+    ["Green"] = "FF00CC00",
+}
+
 ----------------------------------------------------------------------------------------------------
 -- Privates variables.
 ----------------------------------------------------------------------------------------------------
 local _wndrclog = nil
 local _tWipeTimer
-local _tHUDtimer
 local _tTrigPerZone = {}
 local _tEncountersPerZone = {}
 local _tDelayedUnits = {}
@@ -304,6 +308,7 @@ function RaidCore:OnInitialize()
     self.xmlDoc:RegisterCallback("OnDocLoaded", self)
     Apollo.LoadSprites("BarTextures.xml")
     Apollo.LoadSprites("Textures_GUI.xml")
+    Apollo.LoadSprites("Textures_Bars.xml")
 
     local GeminiLocale = Apollo.GetPackage("Gemini:Locale-1.0").tPackage
     self.L = GeminiLocale:GetLocale("RaidCore")
@@ -314,6 +319,7 @@ end
 ----------------------------------------------------------------------------------------------------
 function RaidCore:OnDocLoaded()
     self:CombatInterface_Init(self)
+    self:BarManagersInit()
 
     self.settings = self.settings or self:recursiveCopyTable(DefaultSettings)
 
@@ -347,27 +353,12 @@ function RaidCore:OnDocLoaded()
         },
     }
 
-    self.raidbars = RaidCoreLibs.DisplayBlock.new(self.xmlDoc)
-    self.raidbars:SetName("Raid Bars")
-    self.raidbars:SetPosition(0.3, 0.5)
-    self.raidbars:AnchorFromTop(true)
-
-    self.unitmoni = RaidCoreLibs.DisplayBlock.new(self.xmlDoc)
-    self.unitmoni:SetName("Unit Monitor")
-    self.unitmoni:SetPosition(0.7, 0.5)
-    self.unitmoni:AnchorFromTop(true)
-
-    self.message = RaidCoreLibs.DisplayBlock.new(self.xmlDoc)
-    self.message:SetName("Messages")
-    self.message:SetPosition(0.5, 0.5)
-    self.message:AnchorFromTop(true)
-
     self.drawline = RaidCoreLibs.DisplayLine.new(self.xmlDoc)
 
     self.GeminiColor = Apollo.GetPackage("GeminiColor").tPackage
 
     if self.settings ~= nil then
-        self:LoadSaveData()
+        self:BarsLoadConfig()
     end
 
     -- Register handlers for events, slash commands and timer, etc.
@@ -382,8 +373,6 @@ function RaidCore:OnDocLoaded()
     self.worldmarker = {}
     self.buffs = {}
     self.debuffs = {}
-    self.emphasize = {}
-    self.delayedmsg = {}
     self.berserk = false
 
     self.syncRegister = {}
@@ -391,8 +380,6 @@ function RaidCore:OnDocLoaded()
 
     _tWipeTimer = ApolloTimer.Create(0.5, true, "WipeCheck", self)
     _tWipeTimer:Stop()
-    _tHUDtimer = ApolloTimer.Create(0.1, true, "OnTimer", self)
-    _tHUDtimer:Stop()
 
     self.lines = {}
 
@@ -432,6 +419,7 @@ function RaidCore:OnDocLoaded()
         end
     end
     self:LogGUI_init()
+
     self:OnCheckMapZone()
 end
 
@@ -467,9 +455,7 @@ function RaidCore:OnSave(eLevel)
     if eLevel ~= GameLib.CodeEnumAddonSaveLevel.Character then
         return nil
     end
-    self.settings["General"]["raidbars"] = self.raidbars:GetSaveData()
-    self.settings["General"]["unitmoni"] = self.unitmoni:GetSaveData()
-    self.settings["General"]["message"] = self.message:GetSaveData()
+    self:BarsSaveConfig()
     local saveData = {}
 
     self:recursiveCopyTable(self.settings, saveData)
@@ -484,12 +470,6 @@ function RaidCore:OnRestore(eLevel, tData)
 
     self.settings = self:recursiveCopyTable(DefaultSettings, self.settings)
     self.settings = self:recursiveCopyTable(tData, self.settings)
-end
-
-function RaidCore:LoadSaveData()
-    self.raidbars:Load(self.settings["General"]["raidbars"])
-    self.unitmoni:Load(self.settings["General"]["unitmoni"])
-    self.message:Load(self.settings["General"]["message"])
 end
 
 function RaidCore:OnGeneralCheckBoxChecked(wndHandler, wndControl, eMouseButton )
@@ -511,7 +491,7 @@ function RaidCore:OnBarSettingChecked(wndHandler, wndControl, eMouseButton )
     local identifier = self:SplitString(wndControl:GetName(), "_")
     self.settings[settingType][identifier[2]][identifier[3]] = true
 
-    self[identifier[2]]:Load(self.settings[settingType][identifier[2]])
+    self:BarsLoadConfig()
 end
 
 function RaidCore:OnBarSettingUnchecked(wndHandler, wndControl, eMouseButton )
@@ -519,15 +499,17 @@ function RaidCore:OnBarSettingUnchecked(wndHandler, wndControl, eMouseButton )
     local identifier = self:SplitString(wndControl:GetName(), "_")
     self.settings[settingType][identifier[2]][identifier[3]] = false
 
-    self[identifier[2]]:Load(self.settings[settingType][identifier[2]])
+    self:BarsLoadConfig()
 end
 
-function RaidCore:OnSliderBarChanged( wndHandler, wndControl, fNewValue, fOldValue )
+function RaidCore:OnSliderBarChanged( wndHandler, wndControl, nNewValue, fOldValue )
     local settingType = self:SplitString(wndControl:GetParent():GetParent():GetParent():GetName(), "_")[2]
     local identifier = self:SplitString(wndControl:GetName(), "_")
-    self.settings[settingType][identifier[2]][identifier[3]][identifier[4]] = fNewValue
-    wndHandler:GetParent():GetParent():FindChild("Label_".. identifier[2] .. "_" .. identifier[3] .. "_" .. identifier[4]):SetText(string.format("%.fpx", fNewValue))
-    self[identifier[2]]:Load(self.settings[settingType][identifier[2]])
+    nNewValue = math.floor(nNewValue)
+    self.settings[settingType][identifier[2]][identifier[3]][identifier[4]] = nNewValue
+    wndHandler:GetParent():GetParent():FindChild("Label_".. identifier[2] .. "_" .. identifier[3] .. "_" .. identifier[4]):SetText(string.format("%.fpx", nNewValue))
+
+    self:BarsLoadConfig()
 end
 
 function RaidCore:EditBarColor( wndHandler, wndControl, eMouseButton )
@@ -539,7 +521,7 @@ end
 
 function RaidCore:OnGeminiColor(strColor, identifier, settingType)
     self.settings[settingType][identifier[2]][identifier[3]] = strColor
-    self[identifier[2]]:Load(self.settings[settingType][identifier[2]])
+    self:BarsLoadConfig()
 end
 
 function RaidCore:OnBossSettingChecked(wndHandler, wndControl, eMouseButton )
@@ -650,10 +632,10 @@ function RaidCore:OnRaidCoreOn(cmd, args)
         self:OnConfigOn()
     elseif (tAllParams[1] == "bar") then
         if tAllParams[2] ~= nil and tAllParams[3] ~= nil then
-            self:AddBar(tAllParams[2], tAllParams[2], tAllParams[3])
+            self:AddBar(tAllParams[2], tAllParams[2], tonumber(tAllParams[3]))
         else
             self:AddBar("truc", "OVERDRIVE", 10, true)
-            self:AddMsg("mtruc2", "OVERDRIVE", 5, "Alarm", "Blue")
+            self:AddMsg("mtruc2", "OVERDRIVE", 5, "Alarm", MYCOLORS["Blue"])
         end
     elseif (tAllParams[1] == "unit") then
         local unit = GameLib.GetTargetUnit()
@@ -786,13 +768,6 @@ function RaidCore:OnRaidCoreOn(cmd, args)
     end
 end
 
--- on timer
-function RaidCore:OnTimer()
-    self.raidbars:RefreshBars()
-    self.unitmoni:RefreshUnits()
-    self.message:RefreshMsg()
-end
-
 function RaidCore:isPublicEventObjectiveActive(objectiveString)
     local activeEvents = PublicEvent:GetActiveEvents()
     if activeEvents == nil then
@@ -838,11 +813,8 @@ function RaidCore:OnCheckMapZone()
             end
             if bSearching then
                 self:CombatInterface_Activate("DetectCombat")
-                _tHUDtimer:Start()
             else
-                _tHUDtimer:Stop()
                 self:CombatInterface_Activate("Disable")
-                self:ResetAll()
             end
         else
             self:ScheduleTimer("OnCheckMapZone", 5)
@@ -850,88 +822,11 @@ function RaidCore:OnCheckMapZone()
     end
 end
 
-function RaidCore:AddBar(key, message, duration, emphasize)
-    self.raidbars:AddBar(key, message, duration)
-    if emphasize then
-        self:AddEmphasize(key, duration)
+function RaidCore:PlaySound(sFilename)
+    assert(type(sFilename) == "string")
+    if self.settings["General"]["bSoundEnabled"] then
+        Sound.PlayFile("Sounds\\".. sFilename .. ".wav")
     end
-end
-
-function RaidCore:StopBar(key)
-    self.raidbars:ClearBar(key)
-    self:StopEmphasize(key)
-end
-
-function RaidCore:AddMsg(key, message, duration, sound, color)
-    self.message:AddMsg(key, message, duration, sound, color)
-end
-
-function RaidCore:StopDelayedMsg(key)
-    if self.delayedmsg[key] then
-        self:CancelTimer(self.delayedmsg[key])
-        self.delayedmsg[key] = nil
-    end
-end
-
-function RaidCore:AddDelayedMsg(key, delay, message, duration, sound, color)
-    self:StopDelayedMsg(key)
-    self.delayedmsg[key] = self:ScheduleTimer("AddMsg", delay, key, message, duration, sound, color)
-end
-
-function RaidCore:PrintEmphasize(key, num)
-    self:AddMsg("EMP"..key..num, num, 0.9, num, "Green")
-    self.emphasize[key][num] = nil
-    if num == 1 then
-        self.emphasize[key] = nil
-    end
-end
-
-function RaidCore:StopEmphasize(key)
-    if self.emphasize[key] then
-        for k, v in pairs(self.emphasize[key]) do
-            self:CancelTimer(v)
-        end
-        self.emphasize[key] = nil
-    end
-end
-
-function RaidCore:AddEmphasize(key, delay)
-    self:StopEmphasize(key)
-    if not self.emphasize[key] then self.emphasize[key] = {} end
-    if delay >= 1 then
-        self.emphasize[key][1] = self:ScheduleTimer("PrintEmphasize", delay - 1, key, 1)
-        if delay >= 2 then
-            self.emphasize[key][2] = self:ScheduleTimer("PrintEmphasize", delay - 2, key, 2)
-            if delay >= 3 then
-                self.emphasize[key][3] = self:ScheduleTimer("PrintEmphasize", delay - 3, key, 3)
-                if delay >= 4 then
-                    self.emphasize[key][4] = self:ScheduleTimer("PrintEmphasize", delay - 4, key, 4)
-                    if delay >= 5 then
-                        self.emphasize[key][5] = self:ScheduleTimer("PrintEmphasize", delay - 5, key, 5)
-                    end
-                end
-            end
-        end
-    end
-end
-
-function RaidCore:AddUnit(unit)
-    local marked = nil
-    if self.mark[unit:GetId()] then
-        marked = self.mark[unit:GetId()].number
-    end
-    self.unitmoni:AddUnit(unit, marked)
-end
-
-function RaidCore:RemoveUnit(unitId)
-    self.unitmoni:RemoveUnit(unitId)
-end
-
-function RaidCore:SetMarkToUnit(unit, marked)
-    if not marked then
-        marked = self.mark[unit:GetId()].number
-    end
-    self.unitmoni:SetMarkUnit(unit, marked)
 end
 
 function RaidCore:StartScan()
@@ -990,28 +885,28 @@ end
 
 function RaidCore:MarkUnit(unit, location, mark)
     if unit and not unit:IsDead() then
-        local key = unit:GetId()
-        if not self.mark[key] then
-            self.mark[key] = {}
-            self.mark[key]["unit"] = unit
+        local nId = unit:GetId()
+        if not self.mark[nId] then
+            self.mark[nId] = {}
+            self.mark[nId]["unit"] = unit
             if not mark then
                 markCount = markCount + 1
-                self.mark[key].number = markCount
+                self.mark[nId].number = tostring(markCount)
             else
-                self.mark[key].number = mark
+                self.mark[nId].number = tostring(mark)
             end
 
             local markFrame = Apollo.LoadForm(self.xmlDoc, "MarkFrame", "InWorldHudStratum", self)
             markFrame:SetUnit(unit, location)
-            markFrame:FindChild("Name"):SetText(self.mark[key].number)
+            markFrame:FindChild("Name"):SetText(self.mark[nId].number)
             self:MarkerVisibilityHandler(markFrame)
 
-            self.mark[key].frame = markFrame
+            self.mark[nId].frame = markFrame
         elseif mark then
-            self.mark[key].number = mark
-            self.mark[key].frame:FindChild("Name"):SetText(self.mark[key].number)
+            self.mark[nId].number = tostring(mark)
+            self.mark[nId].frame:FindChild("Name"):SetText(self.mark[nId].number)
         end
-        self:SetMarkToUnit(unit, mark)
+        self:SetMark2UnitBar(nId, self.mark[nId].number)
     end
 end
 
@@ -1092,22 +987,23 @@ function RaidCore:DropLine(key)
     self.drawline:DropLine(key)
 end
 
-function RaidCore:OnUnitDestroyed(key, unit, unitName)
+function RaidCore:OnUnitDestroyed(nId, unit, unitName)
     Event_FireGenericEvent("RC_UnitDestroyed", unit, unitName)
-    if self.watch[key] then
-        self.watch[key] = nil
+    self:RemoveUnit(nId)
+    if self.watch[nId] then
+        self.watch[nId] = nil
     end
-    if self.mark[key] then
-        local markFrame = self.mark[key].frame
+    if self.mark[nId] then
+        local markFrame = self.mark[nId].frame
         markFrame:SetUnit(nil)
         markFrame:Destroy()
-        self.mark[key] = nil
+        self.mark[nId] = nil
     end
-    if self.debuffs[key] and unit:IsDead() then
-        self.debuffs[key] = nil
+    if self.debuffs[nId] and unit:IsDead() then
+        self.debuffs[nId] = nil
     end
-    if self.buffs[key] then
-        self.buffs[key] = nil
+    if self.buffs[nId] then
+        self.buffs[nId] = nil
     end
 end
 
@@ -1225,18 +1121,6 @@ function RaidCore:ResetDebuff()
     wipe(self.debuffs)
 end
 
-function RaidCore:ResetEmphasize()
-    for key, emp in pairs(self.emphasize) do
-        self:StopEmphasize(key)
-    end
-end
-
-function RaidCore:ResetDelayedMsg()
-    for key, timer in pairs(self.delayedmsg) do
-        self:StopDelayedMsg(key)
-    end
-end
-
 function RaidCore:ResetSync()
     wipe(self.syncTimer)
     wipe(self.syncRegister)
@@ -1288,7 +1172,7 @@ function RaidCore:OnDatachron(sMessage)
 end
 
 function RaidCore:PrintBerserk()
-    self:AddMsg("BERSERK", "BERSERK IN 1MIN", 5, nil, "Green")
+    self:AddMsg("BERSERK", "BERSERK IN 1MIN", 5, false, MYCOLORS["Green"])
     self:AddBar("BERSERK", "BERSERK", 60)
     self.berserk = false
 end
@@ -1305,33 +1189,22 @@ function RaidCore:ResetAll()
         self:CancelTimer(self.berserk)
         self.berserk = nil
     end
-    self.raidbars:ClearAll()
-    self.unitmoni:ClearAll()
-    self.message:ClearAll()
+    self:BarsRemoveAll()
     self:ResetWatch()
     self:ResetDebuff()
     self:ResetBuff()
     self:ResetMarks()
     self:ResetWorldMarkers()
-    self:ResetEmphasize()
-    self:ResetDelayedMsg()
     self:ResetSync()
     self:ResetLines()
 end
 
 function RaidCore:WipeCheck()
     for i = 1, GroupLib.GetMemberCount() do
-        local unit = GroupLib.GetUnitForGroupMember(i)
-        if unit then
-            if unit:IsInCombat() then
-                return
-            end
+        local tUnit = GroupLib.GetUnitForGroupMember(i)
+        if tUnit and tUnit:IsInCombat() then
+            return
         end
-    end
-    _tWipeTimer:Stop()
-    if self.berserk then
-        self:CancelTimer(self.berserk)
-        self.berserk = nil
     end
     Log:Add("Encounter no more in progress")
     _bIsEncounterInProgress = false
@@ -1340,20 +1213,8 @@ function RaidCore:WipeCheck()
         _tCurrentEncounter:Disable()
         _tCurrentEncounter = nil
     end
-    self.raidbars:ClearAll()
-    self.unitmoni:ClearAll()
-    self.message:ClearAll()
-    self:ResetWatch()
-    self:ResetDebuff()
-    self:ResetBuff()
-    self:ResetMarks()
-    self:ResetWorldMarkers()
-    self:ResetEmphasize()
-    self:ResetDelayedMsg()
-    self:ResetSync()
-    self:ResetLines()
-
     self:CombatInterface_Activate("DetectCombat")
+    self:ResetAll()
 end
 
 function RaidCore:OnUnitCreated(nId, tUnit, sName)
@@ -1421,10 +1282,11 @@ function RaidCore:OnComMessage(channel, strMessage, strSender)
         end
     elseif tMessage.action == "LaunchPull" and IsPartyMemberByName(tMessage.sender) and tMessage.cooldown then
         self:AddBar("PULL", "PULL", tMessage.cooldown, true)
-        self:AddMsg("PULL", ("PULL in %s"):format(tMessage.cooldown), 5, nil, "Green")
+        self:AddMsg("PULL", ("PULL in %s"):format(tMessage.cooldown), 5, MYCOLORS["Green"])
     elseif tMessage.action == "LaunchBreak" and IsPartyMemberByName(tMessage.sender) and tMessage.cooldown then
         self:AddBar("BREAK", "BREAK", tMessage.cooldown)
-        self:AddMsg("BREAK", ("BREAK for %s sec"):format(tMessage.cooldown), 5, "Long", "Green")
+        self:AddMsg("BREAK", ("BREAK for %s sec"):format(tMessage.cooldown), 5, MYCOLORS["Green"])
+        self:PlaySound("Long")
     elseif tMessage.action == "Sync" and tMessage.sync and self.syncRegister[tMessage.sync] then
         local timeOfEvent = GameLib.GetGameTime()
         if timeOfEvent - self.syncTimer[tMessage.sync] >= self.syncRegister[tMessage.sync] then
@@ -1506,10 +1368,15 @@ function RaidCore:LaunchPull(time)
 end
 
 function RaidCore:LaunchBreak(time)
-    if time and time > 5 then
-        local msg = {action = "LaunchBreak", sender = GameLib.GetPlayerUnit():GetName(), cooldown = time}
-        self:SendMessage(msg)
-        self:OnComMessage(nil, JSON.encode(msg))
+    local sPlayerName = GetPlayerUnit():GetName()
+    if not self:isRaidManagement(sPlayerName) then
+        Print("You must be a raid leader or assistant to use this command!")
+    else
+        if time and time > 5 then
+            local msg = {action = "LaunchBreak", sender = sPlayerName, cooldown = time}
+            self:SendMessage(msg)
+            self:OnComMessage(nil, JSON.encode(msg))
+        end
     end
 end
 
@@ -1594,23 +1461,19 @@ end
 
 -- when the Reset button is clicked
 function RaidCore:OnResetBarPositions( wndHandler, wndControl, eMouseButton )
-    self.raidbars:ResetPosition()
-    self.unitmoni:ResetPosition()
-    self.message:ResetPosition()
+    self:ResetPosition()
+    self:BarsSaveConfig()
 end
 
 -- when the Move button is clicked
 function RaidCore:OnMoveBars( wndHandler, wndControl, eMouseButton )
     if wndHandler:GetText() == "Move Bars" then
         wndHandler:SetText("Lock Bars")
-        self.raidbars:SetMovable(true)
-        self.unitmoni:SetMovable(true)
-        self.message:SetMovable(true)
+        self:BarsAnchorUnlock(true)
     else
         wndHandler:SetText("Move Bars")
-        self.raidbars:SetMovable(false)
-        self.unitmoni:SetMovable(false)
-        self.message:SetMovable(false)
+        self:BarsAnchorUnlock(false)
+        self:BarsSaveConfig()
     end
 end
 
@@ -1650,4 +1513,3 @@ function RaidCore:OnModuleSettingsUncheck(wndHandler, wndControl, eMouseButton )
     local identifier = self:SplitString(wndControl:GetName(), "_")
     self.wndSettings[raidInstance[2]][identifier[3]]:Show(false)
 end
-
