@@ -41,6 +41,7 @@ local TemplateManager = {}
 ----------------------------------------------------------------------------------------------------
 local TEMPLATE_MANAGER_META = { __index = TemplateManager }
 local BAR_UPDATE_PERIOD = 0.1
+local NO_BREAK_SPACE = string.char(194, 160)
 local DEFAULT_BLOCK_CONFIG = {
     bEnabled = true,
     bAnchorFromTop = true,
@@ -129,6 +130,7 @@ local function UpdateUnitBar(tBar)
     if tUnit and tUnit:IsValid() then
         local MaxHealth = tUnit:GetMaxHealth()
         local Health = tUnit:GetHealth()
+        local sName = tUnit:GetName():gsub(NO_BREAK_SPACE, " ")
         if Health and MaxHealth then
             local nPourcent = 100.0 * Health / MaxHealth
             -- Update progress bar.
@@ -138,12 +140,18 @@ local function UpdateUnitBar(tBar)
             tBar.wndUnitHPPercent:SetText(("%.1f%%"):format(nPourcent))
             -- Update the short health text.
             tBar.wndUnitHPValue:SetText(Number2ShortString(Health))
+
+            nPourcent = math.floor(nPourcent)
+            if tBar.nPreviousPourcent ~= nPourcent then
+                tBar.nPreviousPourcent = nPourcent
+                Event_FireGenericEvent("UNIT_HEALTH", sName, nPourcent)
+            end
         else
             tBar.wndUnitHPPercent:SetText("")
             tBar.wndUnitHPValue:SetText("")
         end
         -- Update the name.
-        tBar.wndUnitName:SetText(tUnit:GetName())
+        tBar.wndUnitName:SetText(sName)
         -- Update the marker indication.
         if tBar.sMark then
             tBar.wndMarkValue:SetText(tBar.sMark:sub(1,4))
