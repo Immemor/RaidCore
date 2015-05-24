@@ -125,17 +125,15 @@ end
 ----------------------------------------------------------------------------------------------------
 function Lib:CreateNamespace(sNamespace)
     local tLog = nil
-    if NB_BUFFERS > 0 then
-        tLog = {
-            sNamespace = sNamespace,
-            tBuffers = {},
-        }
-        for i = 1, NB_BUFFERS do
-            ResetBuffer(tLog, i)
-        end
-        setmetatable(tLog, LOGGER_MT)
-        tinsert(_tAllLog, tLog)
+    tLog = {
+        sNamespace = sNamespace,
+        tBuffers = {},
+    }
+    for i = 1, NB_BUFFERS do
+        ResetBuffer(tLog, i)
     end
+    setmetatable(tLog, LOGGER_MT)
+    tinsert(_tAllLog, tLog)
     return tLog
 end
 
