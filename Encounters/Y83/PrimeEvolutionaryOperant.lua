@@ -41,6 +41,7 @@ mod:RegisterEnglishLocale({
     ["Corruption Spike"] = "Corruption Spike",
     -- Bars messages.
     ["~Next irradiate"] = "~Next irradiate",
+    ["SWITCH SOON"] = "SWITCH SOON",
 })
 mod:RegisterFrenchLocale({
     -- Unit names.
@@ -51,6 +52,7 @@ mod:RegisterFrenchLocale({
     ["ENGAGING TECHNOPHAGE TRASMISSION"] = "ENCLENCHEMENT DE LA TRANSMISSION DU TECHNOPHAGE",
     -- Bars messages.
     ["~Next irradiate"] = "~Prochaine irradiation",
+    ["SWITCH SOON"] = "SWITCH SOON",
 })
 mod:RegisterGermanLocale({
 })
@@ -86,6 +88,7 @@ local BUFF_COMPROMISED_CIRCUITRY = 48735
 function mod:OnBossEnable()
     Apollo.RegisterEventHandler("RC_UnitStateChanged", "OnUnitStateChanged", self)
     Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
+    Apollo.RegisterEventHandler("UNIT_HEALTH", "OnHealthChanged", self)
 end
 
 function mod:OnUnitStateChanged(unit, bInCombat, sName)
@@ -104,6 +107,14 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
             core:MarkUnit(unit, 51, "M")
             core:WatchUnit(unit)
             mod:AddTimerBar("NEXT_IRRADIATE", "~Next irradiate", 27, true)
+        end
+    end
+end
+
+function mod:OnHealthChanged(sName, nHealth)
+    if sName == self.L["Prime Phage Distributor"] then
+        if nHealth >= 62 and nHealth > 60 or nHealth >= 22 and nHealth > 20 then
+            core:AddMsg("SWITCH_SOON", self.L["SWITCH SOON"], 5, nil, "red")
         end
     end
 end
