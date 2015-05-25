@@ -27,6 +27,7 @@ local Log = LogPackage:CreateNamespace("BarsManager")
 local next, pcall, assert = next, pcall, assert
 local GetGameTime = GameLib.GetGameTime
 local GetUnitById = GameLib.GetUnitById
+local Vulnerability = Unit.CodeEnumCCState.Vulnerability
 
 ----------------------------------------------------------------------------------------------------
 -- local data.
@@ -136,6 +137,11 @@ local function UpdateUnitBar(tBar)
             -- Update progress bar.
             tBar.wndUnitHPProgressBar:SetMax(MaxHealth)
             tBar.wndUnitHPProgressBar:SetProgress(Health)
+            if tUnit:IsInCCState(Vulnerability) then
+                tBar.wndUnitHPProgressBar:SetBarColor("FF7E00FF")
+            else
+                tBar.wndUnitHPProgressBar:SetBarColor("FF004000")
+            end
             -- Update the percent text.
             tBar.wndUnitHPPercent:SetText(("%.1f%%"):format(nPourcent))
             -- Update the short health text.
