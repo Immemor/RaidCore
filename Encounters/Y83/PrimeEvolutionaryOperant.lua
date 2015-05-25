@@ -13,7 +13,6 @@
 --   - Bosses don't move, their positions are constants so.
 --   - The boss call "Prime Phage Distributor" have a debuff called "Compromised Circuitry".
 --   - And switch boss occur at 60% and 20% of health.
---   - The player which will be irradied is the last connected in the game (probability: 95%).
 --
 --   So be careful, with code based on name, as bosses are renamed many times during the combat.
 --
@@ -41,6 +40,8 @@ mod:RegisterEnglishLocale({
     ["Corruption Spike"] = "Corruption Spike",
     -- Bars messages.
     ["~Next irradiate"] = "~Next irradiate",
+    ["SWITCH_SOON"] = "SWITCH SOON",
+    ["Incubation: PlayerName"] = "Incubation: %s",
 })
 mod:RegisterFrenchLocale({
     -- Unit names.
@@ -51,6 +52,8 @@ mod:RegisterFrenchLocale({
     ["ENGAGING TECHNOPHAGE TRASMISSION"] = "ENCLENCHEMENT DE LA TRANSMISSION DU TECHNOPHAGE",
     -- Bars messages.
     ["~Next irradiate"] = "~Prochaine irradiation",
+    ["SWITCH_SOON"] = "CHANGEMENT BIENTÔT",
+    ["Incubation: PlayerName"] = "Incubation: %s",
 })
 mod:RegisterGermanLocale({
 })
@@ -79,6 +82,11 @@ local BUFF_COMPROMISED_CIRCUITRY = 48735
 ----------------------------------------------------------------------------------------------------
 -- Locals.
 ----------------------------------------------------------------------------------------------------
+local GetGameTime = GameLib.GetGameTime
+local GetUnitById = GameLib.GetUnitById
+local GetUnitByName = GameLib.GetUnitByName
+local GetPlayerUnit = GameLib.GetPlayerUnit
+local nNoRefreshIrradiate
 
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
@@ -86,6 +94,10 @@ local BUFF_COMPROMISED_CIRCUITRY = 48735
 function mod:OnBossEnable()
     Apollo.RegisterEventHandler("RC_UnitStateChanged", "OnUnitStateChanged", self)
     Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
+    Apollo.RegisterEventHandler("UNIT_HEALTH", "OnHealthChanged", self)
+    Apollo.RegisterEventHandler("DEBUFF_ADD", "OnDebuffAdded", self)
+    Apollo.RegisterEventHandler("DEBUFF_DEL", "OnDebuffRemoved", self)
+    nNoRefreshIrradiate = 0
 end
 
 function mod:OnUnitStateChanged(unit, bInCombat, sName)
@@ -108,12 +120,47 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
     end
 end
 
+function mod:OnHealthChanged(sName, nHealth)
+    if sName == self.L["Prime Phage Distributor"] then
+        if nHealth >= 62 and nHealth > 60 or nHealth >= 22 and nHealth > 20 then
+            core:AddMsg("SWITCH_SOON", self.L["SWITCH_SOON"], 5, nil, "xkcdCeruleanBlue")
+        end
+    end
+end
+
 function mod:OnChatDC(message)
     local sPlayerNameIrradiate = message:match(self.L["(.*) is being irradiated"])
     if sPlayerNameIrradiate then
-        -- Sometime it's 26s, sometime 27s or 28s.
-        mod:AddTimerBar("NEXT_IRRADIATE", "~Next irradiate", 26, true)
+        -- Don't refresh the Irradiate timer.
+        -- Sometime the encounter will restart his timer and the action to do.
+        -- Sometime the encounter will restart his timer but not the action programmed before.
+        if nNoRefreshIrradiate > GetGameTime() then
+            -- Sometime it's 26s, sometime 27s or 28s.
+            mod:AddTimerBar("NEXT_IRRADIATE", "~Next irradiate", 26, true)
+        end
+        local tPlayerUnit = GetUnitByName(sPlayerNameIrradiate)
+        if tPlayerUnit then
+            core:AddPixie("IRRADIATE_LINE", 1, tPlayerUnit, GetPlayerUnit(), "Blue")
+        end
     elseif message == self.L["ENGAGING TECHNOPHAGE TRASMISSION"] then
+        -- 12s is the switch duration or cast of "Transmission".
+        nNoRefreshIrradiate = GetGameTime() + 12
         mod:AddTimerBar("NEXT_IRRADIATE", "~Next irradiate", 40, true)
+    end
+end
+
+function mod:OnDebuffAdded(nId, nSpellId, nStack, fTimeRemaining)
+    if DEBUFF_STRAIN_INCUBATION == nSpellId then
+        local sName = GetUnitById(nId):GetName() or "Unknown"
+        local sText = self.L["Incubation: PlayerName"]:format(sName:upper())
+        mod:AddTimerBar("STRAIN_INCUBATION:" .. nId, self.L["%s countdown"], fTimeRemaining)
+    end
+end
+
+function mod:OnDebuffRemoved(nId, nSpellId)
+    if DEBUFF_STRAIN_INCUBATION == nSpellId then
+        mod:RemoveTimerBar("STRAIN_INCUBATION:" .. nId)
+    elseif DEBUFF_RADIATION_BATH == nSpellId then
+        core:DropPixie("IRRADIATE_LINE")
     end
 end
