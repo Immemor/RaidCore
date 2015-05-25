@@ -110,16 +110,16 @@ local function ExtraLog2Text(k, nRefTime, tParam)
         sResult = tParam[1]
     elseif k == "OnDebuffAdd" or k == "OnBuffAdd" then
         local sSpellName = GetSpell(tParam[2]):GetName():gsub(NO_BREAK_SPACE, " ")
-        local sFormat = "Id=%u SpellName='%s' SpellId=%u Stack=%d"
-        sResult = sFormat:format(tParam[1], sSpellName, tParam[2], tParam[3])
+        local sFormat = "Id=%u SpellName='%s' SpellId=%u Stack=%d fTimeRemaining=%.2f"
+        sResult = sFormat:format(tParam[1], sSpellName, tParam[2], tParam[3], tParam[4])
     elseif k == "OnDebuffRemove" or k == "OnBuffRemove" then
         local sSpellName = GetSpell(tParam[2]):GetName():gsub(NO_BREAK_SPACE, " ")
         local sFormat = "Id=%u SpellName='%s' SpellId=%u"
         sResult = sFormat:format(tParam[1], sSpellName, tParam[2])
     elseif k == "OnDebuffUpdate" or k == "OnBuffUpdate" then
         local sSpellName = GetSpell(tParam[2]):GetName():gsub(NO_BREAK_SPACE, " ")
-        local sFormat = "Id=%u SpellName='%s' SpellId=%u OldStack=%d NewStack=%d"
-        sResult = sFormat:format(tParam[1], sSpellName, tParam[2], tParam[3], tParam[4])
+        local sFormat = "Id=%u SpellName='%s' SpellId=%u OldStack=%d NewStack=%d fTimeRemaining=%.2f"
+        sResult = sFormat:format(tParam[1], sSpellName, tParam[2], tParam[3], tParam[4], tParam[5])
     elseif k == "OnCastStart" then
         local nCastEndTime = tParam[3] - nRefTime
         local sFormat = "Id=%u CastName='%s' CastEndTime=%.3f"
@@ -165,6 +165,7 @@ local function GetAllBuffs(tUnit)
                         r[sType][obj.idBuff] = {
                             nCount = obj.nCount,
                             nSpellId = nSpellId,
+                            fTimeRemaining = obj.fTimeRemaining,
                         }
                     end
                 end
@@ -219,7 +220,8 @@ local function ProcessAllBuffs(tMyUnit)
                 if tNew.nCount ~= current.nCount then
                     local nOld = current.nCount
                     tDebuffs[nIdBuff].nCount = tNew.nCount
-                    ManagerCall("OnDebuffUpdate", nId, current.nSpellId, nOld, tNew.nCount)
+                    tDebuffs[nIdBuff].fTimeRemaining = tNew.fTimeRemaining
+                    ManagerCall("OnDebuffUpdate", nId, current.nSpellId, nOld, tNew.nCount, tNew.fTimeRemaining)
                 end
                 -- Remove this entry for second loop.
                 tNewDebuffs[nIdBuff] = nil
@@ -230,7 +232,7 @@ local function ProcessAllBuffs(tMyUnit)
         end
         for nIdBuff,tNew in next, tNewDebuffs do
             tDebuffs[nIdBuff] = tNew
-            ManagerCall("OnDebuffAdd", nId, tNew.nSpellId, tNew.nCount)
+            ManagerCall("OnDebuffAdd", nId, tNew.nSpellId, tNew.nCount, tNew.fTimeRemaining)
         end
     end
 
@@ -243,7 +245,8 @@ local function ProcessAllBuffs(tMyUnit)
                 if tNew.nCount ~= current.nCount then
                     local nOld = current.nCount
                     tBuffs[nIdBuff].nCount = tNew.nCount
-                    ManagerCall("OnBuffUpdate", nId, current.nSpellId, nOld, tNew.nCount)
+                    tBuffs[nIdBuff].fTimeRemaining = tNew.fTimeRemaining
+                    ManagerCall("OnBuffUpdate", nId, current.nSpellId, nOld, tNew.nCount, tNew.fTimeRemaining)
                 end
                 -- Remove this entry for second loop.
                 tNewBuffs[nIdBuff] = nil
@@ -254,7 +257,7 @@ local function ProcessAllBuffs(tMyUnit)
         end
         for nIdBuff, tNew in next, tNewBuffs do
             tBuffs[nIdBuff] = tNew
-            ManagerCall("OnBuffAdd", nId, tNew.nSpellId, tNew.nCount)
+            ManagerCall("OnBuffAdd", nId, tNew.nSpellId, tNew.nCount, tNew.fTimeRemaining)
         end
     end
 end

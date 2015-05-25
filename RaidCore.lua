@@ -1029,39 +1029,51 @@ function RaidCore:OnCastEnd(nId, sCastName, bInterrupted)
     end
 end
 
-function RaidCore:OnBuffAdd(nId, nSpellId, nStack)
+function RaidCore:OnBuffAdd(nId, nSpellId, nStack, fTimeRemaining)
     local buffs = self.buffs[nId]
     if buffs then
         unit = buffs.unit
         local unitName = unit:GetName():gsub(NO_BREAK_SPACE, " ")
+        -- Keep Old event for compatibility.
         Event_FireGenericEvent("BUFF_APPLIED", unitName, nSpellId, unit)
+        -- New event not based on the name.
+        Event_FireGenericEvent("BUFF_ADD", nId, nSpellId, nStack, fTimeRemaining)
     end
 end
 
-function RaidCore:OnBuffRemove(nId, nSpellId, nStack)
+function RaidCore:OnBuffRemove(nId, nSpellId)
     local buffs = self.buffs[nId]
     if buffs then
         unit = buffs.unit
         local unitName = unit:GetName():gsub(NO_BREAK_SPACE, " ")
+        -- Keep Old event for compatibility.
         Event_FireGenericEvent("BUFF_REMOVED", unitName, nSpellId, unit)
+        -- New event not based on the name.
+        Event_FireGenericEvent("BUFF_DEL", nId, nSpellId)
     end
 end
 
-function RaidCore:OnBuffUpdate(nId, nSpellId, nOldStack, nNewStack)
+function RaidCore:OnBuffUpdate(nId, nSpellId, nOldStack, nNewStack, fTimeRemaining)
     local buffs = self.buffs[nId]
     if buffs then
         unit = buffs.unit
         local unitName = unit:GetName():gsub(NO_BREAK_SPACE, " ")
+        -- Keep Old event for compatibility.
         Event_FireGenericEvent("BUFF_APPLIED_DOSE", unitName, nSpellId, nStack)
+        -- New event not based on the name.
+        Event_FireGenericEvent("BUFF_UPDATE", nId, nSpellId, nStack, fTimeRemaining)
     end
 end
 
-function RaidCore:OnDebuffAdd(nId, nSpellId, nStack)
+function RaidCore:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
     local debuffs = self.debuffs[nId]
     if debuffs then
         unit = debuffs.unit
         local unitName = unit:GetName():gsub(NO_BREAK_SPACE, " ")
+        -- Keep Old event for compatibility.
         Event_FireGenericEvent("DEBUFF_APPLIED", unitName, nSpellId, unit)
+        -- New event not based on the name.
+        Event_FireGenericEvent("DEBUFF_ADD", nId, nSpellId, nStack, fTimeRemaining)
     end
 end
 
@@ -1070,16 +1082,22 @@ function RaidCore:OnDebuffRemove(nId, nSpellId)
     if debuffs then
         unit = debuffs.unit
         local unitName = unit:GetName():gsub(NO_BREAK_SPACE, " ")
+        -- Keep Old event for compatibility.
         Event_FireGenericEvent("DEBUFF_REMOVED", unitName, nSpellId, unit)
+        -- New event not based on the name.
+        Event_FireGenericEvent("DEBUFF_DEL", nId, nSpellId)
     end
 end
 
-function RaidCore:OnDebuffUpdate(nId, nSpellId, nOldStack, nNewStack)
+function RaidCore:OnDebuffUpdate(nId, nSpellId, nOldStack, nNewStack, fTimeRemaining)
     local debuffs = self.debuffs[nId]
     if debuffs then
         unit = debuffs.unit
         local unitName = unit:GetName():gsub(NO_BREAK_SPACE, " ")
+        -- Keep Old event for compatibility.
         Event_FireGenericEvent("DEBUFF_APPLIED_DOSE", unitName, nSpellId, nStack)
+        -- New event not based on the name.
+        Event_FireGenericEvent("DEBUFF_UPDATE", nId, nSpellId, nStack, fTimeRemaining)
     end
 end
 
