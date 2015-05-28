@@ -27,7 +27,6 @@ local Log = LogPackage:CreateNamespace("BarsManager")
 local next, pcall, assert = next, pcall, assert
 local GetGameTime = GameLib.GetGameTime
 local GetUnitById = GameLib.GetUnitById
-local Vulnerability = Unit.CodeEnumCCState.Vulnerability
 
 ----------------------------------------------------------------------------------------------------
 -- local data.
@@ -41,6 +40,7 @@ local TemplateManager = {}
 -- Constants.
 ----------------------------------------------------------------------------------------------------
 local TEMPLATE_MANAGER_META = { __index = TemplateManager }
+local VULNERABILITY = Unit.CodeEnumCCState.Vulnerability
 local BAR_UPDATE_PERIOD = 0.1
 local NO_BREAK_SPACE = string.char(194, 160)
 local DEFAULT_BLOCK_CONFIG = {
@@ -132,15 +132,18 @@ local function UpdateUnitBar(tBar)
         local MaxHealth = tUnit:GetMaxHealth()
         local Health = tUnit:GetHealth()
         local sName = tUnit:GetName():gsub(NO_BREAK_SPACE, " ")
+        local bVunerable = tUnit:IsInCCState(VULNERABILITY)
         if Health and MaxHealth then
             local nPourcent = 100.0 * Health / MaxHealth
             -- Update progress bar.
             tBar.wndUnitHPProgressBar:SetMax(MaxHealth)
             tBar.wndUnitHPProgressBar:SetProgress(Health)
-            if tUnit:IsInCCState(Vulnerability) then
+            if bVunerable then
                 tBar.wndUnitHPProgressBar:SetBarColor("FF7E00FF")
+                tBar.wndUnit:SetBGColor("A0300062")
             else
                 tBar.wndUnitHPProgressBar:SetBarColor("FF004000")
+                tBar.wndUnit:SetBGColor("A0131313")
             end
             -- Update the percent text.
             tBar.wndUnitHPPercent:SetText(("%.1f%%"):format(nPourcent))
@@ -166,21 +169,28 @@ local function UpdateUnitBar(tBar)
             tBar.wndMark:Show(false)
         end
 
-        -- Process cast bar
-        local bProcessCast = false
-        local nCastDuration, nCastElapsed, sCastName
-        if tUnit:IsCasting() then
-            nCastDuration = tUnit:GetCastDuration() / 1000.0
-            nCastElapsed = tUnit:GetCastElapsed() / 1000.0
-            sCastName = tUnit:GetCastName()
-            if tUnit:IsCasting() and nCastElapsed < nCastDuration then
-                bProcessCast = true
+        local bProcessMiddleBar = false
+        local nMidDuration, nMidElapsed, sMidName
+        if bVunerable then
+            bProcessMiddleBar = true
+            nMidDuration = tUnit:GetCCStateTotalTime(VULNERABILITY)
+            nMidElapsed = nMidDuration - tUnit:GetCCStateTimeRemaining(VULNERABILITY)
+            tBar.wndCastProgressBar:SetBarColor("xkcdVeryLightPurple")
+            sMidName = "Vunerable"
+        elseif tUnit:IsCasting() then
+            -- Process cast bar
+            nMidDuration = tUnit:GetCastDuration()
+            nMidElapsed = tUnit:GetCastElapsed()
+            sMidName = tUnit:GetCastName()
+            tBar.wndCastProgressBar:SetBarColor("darkgray")
+            if tUnit:IsCasting() and nMidElapsed < nMidDuration then
+                bProcessMiddleBar = true
             end
         end
-        if bProcessCast then
-            tBar.wndCastProgressBar:SetProgress(nCastElapsed)
-            tBar.wndCastProgressBar:SetMax(nCastDuration)
-            tBar.wndCastText:SetText(sCastName)
+        if bProcessMiddleBar then
+            tBar.wndCastProgressBar:SetProgress(nMidElapsed)
+            tBar.wndCastProgressBar:SetMax(nMidDuration)
+            tBar.wndCastText:SetText(sMidName)
             tBar.wndCast:Show(true)
         else
             tBar.wndCast:Show(false)
@@ -396,6 +406,7 @@ function UnitManager:_AddBar(nId)
             sMark = sMark,
             -- Windows objects.
             wndMain = wndMain,
+            wndUnit = wndUnit,
             wndUnitHPProgressBar = wndUnit:FindChild("HP_ProgressBar"),
             wndUnitHPPercent = wndUnit:FindChild("HP_Percent"),
             wndUnitHPValue = wndUnit:FindChild("HP_Value"),
