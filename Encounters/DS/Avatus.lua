@@ -268,7 +268,13 @@ end
 
 function mod:OnUnitCreated(unit, sName)
     local eventTime = GameLib.GetGameTime()
-    if sName == self.L["Holo Hand"] then
+    if sName == self.L["Avatus"] then
+        core:AddUnit(unit)
+        core:WatchUnit(unit)
+        if mod:GetSetting("LineCleaveBoss") then
+            core:AddPixie(unit:GetId(), 2, unit, nil, "Green", 10, 22, 0)
+        end
+    elseif sName == self.L["Holo Hand"] then
         local unitId = unit:GetId()
         core:AddUnit(unit)
         core:WatchUnit(unit)
