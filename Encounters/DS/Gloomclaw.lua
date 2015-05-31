@@ -64,7 +64,7 @@ mod:RegisterFrenchLocale({
     ["Rupture"] = "Rupture",
     ["Corrupting Rays"] = "Rayons de corruption",
     -- Bar and messages.
-    ["INTERRUPT %s"] = "INTÉRROMPRE %s",
+    ["INTERRUPT %s"] = "INTERROMPRE %s",
     ["NEXT RUPTURE"] = "PROCHAINE RUPTURE",
     ["~NEXT RUPTURE"] = "~PROCHAINE RUPTURE",
     ["FULL CORRUPTION"] = "100% CORROMPU",
