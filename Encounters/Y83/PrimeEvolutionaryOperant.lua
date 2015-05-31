@@ -30,6 +30,7 @@ mod:RegisterEnglishLocale({
     ["Prime Evolutionary Operant"] = "Prime Evolutionary Operant",
     ["Prime Phage Distributor"] = "Prime Phage Distributor",
     ["Sternum Buster"] = "Sternum Buster",
+	["Organic Incinerator"] = "Organic Incinerator",
     -- Datachron messages.
     ["(.*) is being irradiated"] = "(.*) is being irradiated",
     ["ENGAGING TECHNOPHAGE TRASMISSION"] = "ENGAGING TECHNOPHAGE TRASMISSION",
@@ -84,7 +85,7 @@ local BUFF_COMPROMISED_CIRCUITRY = 48735
 ----------------------------------------------------------------------------------------------------
 local GetGameTime = GameLib.GetGameTime
 local GetUnitById = GameLib.GetUnitById
-local GetUnitByName = GameLib.GetUnitByName
+local GetUnitByName = GameLib.GetPlayerUnitByName
 local GetPlayerUnit = GameLib.GetPlayerUnit
 local nNoRefreshIrradiate
 
@@ -97,10 +98,13 @@ function mod:OnBossEnable()
     Apollo.RegisterEventHandler("UNIT_HEALTH", "OnHealthChanged", self)
     Apollo.RegisterEventHandler("DEBUFF_ADD", "OnDebuffAdded", self)
     Apollo.RegisterEventHandler("DEBUFF_DEL", "OnDebuffRemoved", self)
+
     nNoRefreshIrradiate = 0
 end
 
 function mod:OnUnitStateChanged(unit, bInCombat, sName)
+	core:RaidDebuff()
+
     if bInCombat then
         if sName == self.L["Prime Evolutionary Operant"] then
             core:AddUnit(unit)
@@ -116,6 +120,10 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
             core:MarkUnit(unit, 51, "M")
             core:WatchUnit(unit)
             mod:AddTimerBar("NEXT_IRRADIATE", "~Next irradiate", 27, true)
+        elseif sName == self.L["Organic Incinerator"] then
+            core:AddPixie(unit:GetId() .. "_0", 2, unit, nil, "Red", 10, 60, 0)
+            core:AddPixie(unit:GetId() .. "_120", 2, unit, nil, "Green", 3, 60, 120)
+            core:AddPixie(unit:GetId() .. "_240", 2, unit, nil, "Green", 3, 60, 240)
         end
     end
 end
@@ -129,7 +137,7 @@ function mod:OnHealthChanged(sName, nHealth)
 end
 
 function mod:OnChatDC(message)
-    local sPlayerNameIrradiate = message:match(self.L["(.*) is being irradiated"])
+	local sPlayerNameIrradiate = message:match(self.L["(.*) is being irradiated"])
     if sPlayerNameIrradiate then
         -- Don't refresh the Irradiate timer.
         -- Sometime the encounter will restart his timer and the action to do.
@@ -140,6 +148,7 @@ function mod:OnChatDC(message)
         end
         local tPlayerUnit = GetUnitByName(sPlayerNameIrradiate)
         if tPlayerUnit then
+			core:WatchUnit(tPlayerUnit)
             core:AddPixie("IRRADIATE_LINE", 1, tPlayerUnit, GetPlayerUnit(), "Blue")
         end
     elseif message == self.L["ENGAGING TECHNOPHAGE TRASMISSION"] then
@@ -151,16 +160,15 @@ end
 
 function mod:OnDebuffAdded(nId, nSpellId, nStack, fTimeRemaining)
     if DEBUFF_STRAIN_INCUBATION == nSpellId then
-        local sName = GetUnitById(nId):GetName() or "Unknown"
-        local sText = self.L["Incubation: PlayerName"]:format(sName:upper())
-        mod:AddTimerBar("STRAIN_INCUBATION:" .. nId, self.L["%s countdown"], fTimeRemaining)
+		core:MarkUnit(GetUnitById(nId), 0, "!")
     end
 end
 
 function mod:OnDebuffRemoved(nId, nSpellId)
     if DEBUFF_STRAIN_INCUBATION == nSpellId then
-        mod:RemoveTimerBar("STRAIN_INCUBATION:" .. nId)
+        core:DropMark(nId)
     elseif DEBUFF_RADIATION_BATH == nSpellId then
         core:DropPixie("IRRADIATE_LINE")
     end
 end
+
