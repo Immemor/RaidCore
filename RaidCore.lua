@@ -50,6 +50,7 @@ local _tEncountersPerZone = {}
 local _tDelayedUnits = {}
 local _bIsEncounterInProgress = false
 local _tCurrentEncounter = nil
+local _tRaidCoreChannel = nil
 
 
 local trackMaster = Apollo.GetAddon("TrackMaster")
@@ -612,12 +613,6 @@ function RaidCore:LoadGeneralSliders(wndHandler, wndControl )
     end
 end
 
-local function wipe(t)
-    for k,v in pairs(t) do
-        t[k] = nil
-    end
-end
-
 -- on SlashCommand "/raidcore"
 function RaidCore:OnRaidCoreOn(cmd, args)
     local tAllParams = {}
@@ -667,14 +662,14 @@ function RaidCore:OnRaidCoreOn(cmd, args)
     elseif (tAllParams[1] == "summon") then
         self:SyncSummon()
     elseif (tAllParams[1] == "testline") then
-        local uPlayer = GameLib.GetPlayerUnit()
+        local uPlayer = GetPlayerUnit()
         local unit = GameLib.GetTargetUnit()
         self.drawline:AddLine("Ohmna1", 2, unit, nil, 3, 25, 0, 10)
         self.drawline:AddLine("Ohmna2", 2, unit, nil, 1, 25, 120)
         self.drawline:AddLine("Ohmna3", 2, unit, nil, 1, 25, -120)
         self.drawline:AddLine("Ohmna4", 1, uPlayer, unit, 2)
     elseif (tAllParams[1] == "testpixie") then
-        local uPlayer = GameLib.GetPlayerUnit()
+        local uPlayer = GetPlayerUnit()
         local unit = GameLib.GetTargetUnit()
         self.drawline:AddPixie("Ohmna1", 2, unit, nil, "Blue", 10, 25, 0)
         self.drawline:AddPixie("Ohmna2", 2, unit, nil, "Green", 10, 25, 120)
@@ -1043,8 +1038,8 @@ function RaidCore:ResetMarks()
 end
 
 function RaidCore:ResetSync()
-    wipe(self.syncTimer)
-    wipe(self.syncRegister)
+    self.syncTimer = {}
+    self.syncRegister = {}
 end
 
 function RaidCore:ResetLines()
@@ -1190,7 +1185,7 @@ function RaidCore:OnComMessage(channel, strMessage, strSender)
     local msg = {}
 
     if tMessage.action == "VersionCheckRequest" and IsPartyMemberByName(tMessage.sender) then
-        msg = {action = "VersionCheckReply", sender = GameLib.GetPlayerUnit():GetName(), version = AddonVersion}
+        msg = {action = "VersionCheckReply", sender = GetPlayerUnit():GetName(), version = AddonVersion}
         self:SendMessage(msg)
     elseif tMessage.action == "VersionCheckReply" and tMessage.sender and tMessage.version and VCtimer then
         VCReply[tMessage.sender] = tMessage.version
@@ -1290,7 +1285,7 @@ end
 
 function RaidCore:LaunchPull(time)
     if time and time > 2 then
-        local msg = {action = "LaunchPull", sender = GameLib.GetPlayerUnit():GetName(), cooldown = time}
+        local msg = {action = "LaunchPull", sender = GetPlayerUnit():GetName(), cooldown = time}
         self:SendMessage(msg)
         self:OnComMessage(nil, JSON.encode(msg))
     end
@@ -1310,7 +1305,7 @@ function RaidCore:LaunchBreak(time)
 end
 
 function RaidCore:SyncSummon()
-    local myName = GameLib.GetPlayerUnit():GetName()
+    local myName = GetPlayerUnit():GetName()
     if not self:isRaidManagement(myName) then
         Print("You must be a raid leader or assistant to use this command!")
         return false
@@ -1332,7 +1327,7 @@ function RaidCore:SendSync(syncName, param)
             Event_FireGenericEvent("RAID_SYNC", syncName, param)
         end
     end
-    local msg = {action = "Sync", sender = GameLib.GetPlayerUnit():GetName(), sync = syncName, parameter = param}
+    local msg = {action = "Sync", sender = GetPlayerUnit():GetName(), sync = syncName, parameter = param}
     self:SendMessage(msg)
 end
 
