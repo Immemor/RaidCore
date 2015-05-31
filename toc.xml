@@ -2,6 +2,7 @@
 <Addon Author="RaidCore Team" APIVersion="10" Name="RaidCore" Description="Boss Encounters" Version="1.0">
     <!-- Libraries -->
     <Script Name="Libs/GeminiLocale/GeminiLocale.lua"/>
+    <Script Name="Libs/GeminiDB/GeminiDB-1.0.lua"/>
     <Script Name="Libs/GeminiAddon/GeminiAddon.lua"/>
     <Script Name="Libs/GeminiTimer/GeminiTimer-1.0.lua"/>
     <Script Name="Libs/GeminiGUI/GeminiGUI.lua"/>

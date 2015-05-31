@@ -14,6 +14,7 @@ require "ICCommLib"
 require "ICComm"
 
 local GeminiAddon = Apollo.GetPackage("Gemini:Addon-1.1").tPackage
+local GeminiDB = Apollo.GetPackage("Gemini:DB-1.0").tPackage
 local LogPackage = Apollo.GetPackage("Log-1.0").tPackage
 local JSON = Apollo.GetPackage("Lib:dkJSON-2.5").tPackage
 local RaidCore = GeminiAddon:NewAddon("RaidCore", false, {}, "Gemini:Timer-1.0")
