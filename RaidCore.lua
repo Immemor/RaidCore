@@ -307,7 +307,6 @@ end
 function RaidCore:OnInitialize()
     self.xmlDoc = XmlDoc.CreateFromFile("RaidCore.xml")
     self.xmlDoc:RegisterCallback("OnDocLoaded", self)
-    Apollo.LoadSprites("BarTextures.xml")
     Apollo.LoadSprites("Textures_GUI.xml")
     Apollo.LoadSprites("Textures_Bars.xml")
 
