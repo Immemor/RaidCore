@@ -1228,53 +1228,64 @@ function RaidCore:OnComMessage(channel, strMessage, strSender)
 end
 
 function RaidCore:VersionCheckResults()
-    local maxver = 0
-    local outdatedList = ""
-    VCtimer = nil
-
-    for k,v in pairs(VCReply) do
-        if v > maxver then
-            maxver = v
+    local nMaxVersion = AddonVersion
+    for _, v in next, VCReply do
+        if v > nMaxVersion then
+            nMaxVersion = v
         end
     end
 
-    local count = 0
-    for i=1, GroupLib.GetMemberCount() do
-        local unit = GroupLib.GetGroupMember(i)
-        if unit then
-            local playerName = unit.strCharacterName
-            if not VCReply[playerName] or VCReply[playerName] < maxver then
-                count = count + 1
-                if count == 1 then
-                    outdatedList = playerName
-                else
-                    outdatedList = playerName .. ", " .. outdatedList
+    local tNotInstalled = {}
+    local tOutdated = {}
+    local nMemberWithLasted = 0
+    for i = 1, GroupLib.GetMemberCount() do
+        local tMember = GroupLib.GetGroupMember(i)
+        if tMember then
+            local sPlayerName = tMember.strCharacterName
+            local sPlayerVersion = VCReply[sPlayerName]
+            if not sPlayerVersion then
+                table.insert(tNotInstalled, sPlayerName)
+            elseif sPlayerVersion < nMaxVersion then
+                if tOutdated[sPlayerVersion] == nil then
+                    tOutdated[sPlayerVersion] = {}
                 end
+                table.insert(tOutdated[sPlayerVersion], sPlayerName)
+            else
+                nMemberWithLasted = nMemberWithLasted + 1
             end
         end
     end
 
-    if string.len(outdatedList) > 0 then
-        Print(("Outdated (%s) : %s"):format(count,outdatedList))
-    else
-        Print("Outdated : None ! Congrats")
+    if next(tNotInstalled) then
+        Print(self.L["Not installed: %s"]:format(table.concat(tNotInstalled, ", ")))
     end
+    if next(tOutdated) then
+        Print("Outdated RaidCore Version:")
+        for sPlayerVersion, tList in next, tOutdated do
+            Print((" - '%s': %s"):format(sPlayerVersion, table.concat(tList, ", ")))
+        end
+    end
+    Print(self.L["%d members are up to date."]:format(nMemberWithLasted))
+    -- Send Msg to oudated players.
     local msg = {action = "NewestVersion", version = maxver}
     self:SendMessage(msg)
     self:OnComMessage(nil, JSON.encode(msg))
+    VCtimer = nil
 end
 
 function RaidCore:VersionCheck()
     if VCtimer then
-        Print("VersionCheck already running ...")
-        return
+        Print(self.L["VersionCheck already running ..."])
+    elseif GroupLib.GetMemberCount() == 0 then
+        Print(self.L["Command available only in group."])
+    else
+        Print(self.L["Checking version on group member."])
+        VCReply = {}
+        VCReply[GetPlayerUnit():GetName()] = AddonVersion
+        local msg = {action = "VersionCheckRequest", sender = GetPlayerUnit():GetName()}
+        VCtimer = ApolloTimer.Create(5, false, "VersionCheckResults", self)
+        self:SendMessage(msg)
     end
-    Print("Running VersionCheck")
-    wipe(VCReply)
-    VCReply[GameLib.GetPlayerUnit():GetName()] = AddonVersion
-    local msg = {action = "VersionCheckRequest", sender = GameLib.GetPlayerUnit():GetName()}
-    VCtimer = ApolloTimer.Create(5, false, "VersionCheckResults", self)
-    self:SendMessage(msg)
 end
 
 function RaidCore:LaunchPull(time)
