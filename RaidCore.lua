@@ -31,6 +31,10 @@ local GetCurrentZoneMap = GameLib.GetCurrentZoneMap
 ----------------------------------------------------------------------------------------------------
 -- Constants.
 ----------------------------------------------------------------------------------------------------
+-- Should be @project-version@ when replacement tokens will works (see #88 issue).
+local RAIDCORE_CURRENT_VERSION = "3.2-alpha"
+-- Should be deleted.
+local ADDON_DATE_VERSION = 15052601
 -- Sometimes Carbine have inserted some no-break-space, for fun.
 -- Behavior seen with French language. This problem is not present in English.
 local NO_BREAK_SPACE = string.char(194, 160)
@@ -55,7 +59,6 @@ local _tRaidCoreChannel = nil
 
 local trackMaster = Apollo.GetAddon("TrackMaster")
 local markCount = 0
-local AddonVersion = 15052601
 local VCReply, VCtimer = {}, nil
 local CommChannelTimer = nil
 local empCD, empTimer = 5, nil
@@ -418,6 +421,14 @@ function RaidCore:OnDocLoaded()
     end
     self:LogGUI_init()
 
+    -- Send version information to OneVersion Addon.
+    local fNumber = RAIDCORE_CURRENT_VERSION:gmatch("%d+")
+    local sPatch = RAIDCORE_CURRENT_VERSION:gmatch("%a+")()
+    local nMajor, nMinor = fNumber(), fNumber()
+    local nPatch = sPatch == "alpha" and 0 or sPatch == "beta" and 1 or 2
+    Event_FireGenericEvent("OneVersion_ReportAddonInfo", "RaidCore", nMajor, nMinor, nPatch)
+
+    -- Initialize the Zone Detection.
     self:OnCheckMapZone()
 end
 
@@ -644,7 +655,7 @@ function RaidCore:OnRaidCoreOn(cmd, args)
             self:AddMsg(tAllParams[2], tAllParams[3], 5)
         end
     elseif (tAllParams[1] == "version") then
-        Print("RaidCore version : " .. AddonVersion)
+        Print("RaidCore version : " .. ADDON_DATE_VERSION)
     elseif (tAllParams[1] == "versioncheck") then
         self:VersionCheck()
     elseif (tAllParams[1] == "pull") then
@@ -1189,12 +1200,12 @@ function RaidCore:OnComMessage(channel, strMessage, strSender)
     local msg = {}
 
     if tMessage.action == "VersionCheckRequest" and IsPartyMemberByName(tMessage.sender) then
-        msg = {action = "VersionCheckReply", sender = GetPlayerUnit():GetName(), version = AddonVersion}
+        msg = {action = "VersionCheckReply", sender = GetPlayerUnit():GetName(), version = ADDON_DATE_VERSION}
         self:SendMessage(msg)
     elseif tMessage.action == "VersionCheckReply" and tMessage.sender and tMessage.version and VCtimer then
         VCReply[tMessage.sender] = tMessage.version
     elseif tMessage.action == "NewestVersion" and tMessage.version then
-        if AddonVersion < tMessage.version then
+        if ADDON_DATE_VERSION < tMessage.version then
             Print("Your RaidCore version is outdated. Please get " .. tMessage.version)
         end
     elseif tMessage.action == "LaunchPull" and IsPartyMemberByName(tMessage.sender) and tMessage.cooldown then
@@ -1227,7 +1238,7 @@ function RaidCore:OnComMessage(channel, strMessage, strSender)
 end
 
 function RaidCore:VersionCheckResults()
-    local nMaxVersion = AddonVersion
+    local nMaxVersion = ADDON_DATE_VERSION
     for _, v in next, VCReply do
         if v > nMaxVersion then
             nMaxVersion = v
@@ -1280,7 +1291,7 @@ function RaidCore:VersionCheck()
     else
         Print(self.L["Checking version on group member."])
         VCReply = {}
-        VCReply[GetPlayerUnit():GetName()] = AddonVersion
+        VCReply[GetPlayerUnit():GetName()] = ADDON_DATE_VERSION
         local msg = {action = "VersionCheckRequest", sender = GetPlayerUnit():GetName()}
         VCtimer = ApolloTimer.Create(5, false, "VersionCheckResults", self)
         self:SendMessage(msg)
