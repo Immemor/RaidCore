@@ -154,9 +154,6 @@ function mod:OnChatDC(message)
         if outbreakCount <= 5 then
             core:AddBar("OUTBREAK", (self.L["Outbreak (%s)"]):format(outbreakCount + 1), 45)
         end
-        if outbreakCount == 4 then
-            core:StopScan()
-        end
     elseif message:find(self.L["The corruption begins to fester"]) then
         if eggsCount < 2 then eggsCount = 2 end
         core:AddMsg("EGGS", (self.L["EGGS (%s)"]):format(math.pow(2, eggsCount-1)), 5, "Alert")
@@ -202,7 +199,6 @@ function mod:OnChatNPCSay(message)
         core:SetWorldMarker("WEST", self.L["MARKER west"], ouestpos)
         local nordpos = { x = 175.00, y = -110.80034637451, z = -513.31 }
         core:SetWorldMarker("NORTH", self.L["MARKER north"], nordpos)
-        core:RaidDebuff()
     end
 end
 

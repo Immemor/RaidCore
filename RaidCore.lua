@@ -369,11 +369,8 @@ function RaidCore:OnDocLoaded()
 
     -- Do additional Addon initialization here
 
-    self.watch = {}
     self.mark = {}
     self.worldmarker = {}
-    self.buffs = {}
-    self.debuffs = {}
     self.berserk = false
 
     self.syncRegister = {}
@@ -670,26 +667,6 @@ function RaidCore:OnRaidCoreOn(cmd, args)
         end
     elseif (tAllParams[1] == "summon") then
         self:SyncSummon()
-    elseif (tAllParams[1] == "buff") then
-        local unit = GameLib.GetTargetUnit()
-        if unit ~= nil then
-            local id = unit:GetId()
-            self:CombatInterface_Track(id)
-            self.buffs[id] = {
-                ["unit"] = unit,
-                ["aura"] = {},
-            }
-        end
-    elseif (tAllParams[1] == "debuff") then
-        local unit = GameLib.GetTargetUnit()
-        if unit ~= nil then
-            local id = unit:GetId()
-            self:CombatInterface_Track(id)
-            self.debuffs[id] = {
-                ["unit"] = unit,
-                ["aura"] = {},
-            }
-        end
     elseif (tAllParams[1] == "testline") then
         local uPlayer = GameLib.GetPlayerUnit()
         local unit = GameLib.GetTargetUnit()
@@ -830,58 +807,11 @@ function RaidCore:PlaySound(sFilename)
     end
 end
 
-function RaidCore:StartScan()
-    -- Deprecated function
-end
-
-function RaidCore:StopScan()
-    -- Deprecated function
-end
-
+-- Track buff and cast of this unit.
+-- @param unit  userdata object related to an unit in game.
 function RaidCore:WatchUnit(unit)
-    if unit then
-        local id = unit:GetId()
-        if id and not unit:IsDead() and not self.watch[id] then
-            self:CombatInterface_Track(id)
-            self.watch[id] = {
-                ["unit"] = unit,
-            }
-        end
-    end
-end
-
-function RaidCore:UnitBuff(unit)
-    if unit then
-        local id = unit:GetId()
-        if id and not unit:IsDead() and not self.buffs[id] then
-            self:CombatInterface_Track(id)
-            self.buffs[id] = {
-                ["unit"] = unit,
-                ["aura"] = {},
-            }
-        end
-    end
-end
-
-function RaidCore:UnitDebuff(unit)
-    if unit then
-        local id = unit:GetId()
-        if id and not unit:IsDead() and not self.debuffs[id] then
-            self.debuffs[id] = {
-                ["unit"] = unit,
-                ["aura"] = {},
-            }
-        end
-    end
-end
-
-function RaidCore:RaidDebuff()
-    for i = 1, GroupLib.GetMemberCount() do
-        local unit = GroupLib.GetUnitForGroupMember(i)
-        if unit then
-            self:UnitDebuff(unit)
-        end
-    end
+    local id = unit:GetId()
+    self:CombatInterface_Track(id)
 end
 
 function RaidCore:MarkUnit(unit, location, mark)
@@ -991,20 +921,11 @@ end
 function RaidCore:OnUnitDestroyed(nId, unit, unitName)
     Event_FireGenericEvent("RC_UnitDestroyed", unit, unitName)
     self:RemoveUnit(nId)
-    if self.watch[nId] then
-        self.watch[nId] = nil
-    end
     if self.mark[nId] then
         local markFrame = self.mark[nId].frame
         markFrame:SetUnit(nil)
         markFrame:Destroy()
         self.mark[nId] = nil
-    end
-    if self.debuffs[nId] and unit:IsDead() then
-        self.debuffs[nId] = nil
-    end
-    if self.buffs[nId] then
-        self.buffs[nId] = nil
     end
 end
 
@@ -1015,91 +936,85 @@ function RaidCore:SetTarget(position)
 end
 
 function RaidCore:OnCastStart(nId, sCastName)
-    local v = self.watch[nId]
-    if v then
-        local unitName = v.unit:GetName():gsub(NO_BREAK_SPACE, " ")
-        Event_FireGenericEvent("SPELL_CAST_START", unitName, sCastName, v.unit)
+    local tUnit = GetUnitById(nId)
+    if tUnit then
+        local unitName = tUnit:GetName():gsub(NO_BREAK_SPACE, " ")
+        Event_FireGenericEvent("SPELL_CAST_START", unitName, sCastName, tUnit)
     end
 end
 
 function RaidCore:OnCastEnd(nId, sCastName, bInterrupted)
-    local v = self.watch[nId]
-    if v then
-        local unitName = v.unit:GetName():gsub(NO_BREAK_SPACE, " ")
-        Event_FireGenericEvent("SPELL_CAST_END", unitName, sCastName, v.unit)
+    local tUnit = GetUnitById(nId)
+    if tUnit then
+        local unitName = tUnit:GetName():gsub(NO_BREAK_SPACE, " ")
+        Event_FireGenericEvent("SPELL_CAST_END", unitName, sCastName, tUnit)
     end
 end
 
 function RaidCore:OnBuffAdd(nId, nSpellId, nStack, fTimeRemaining)
-    local buffs = self.buffs[nId]
-    if buffs then
-        unit = buffs.unit
-        local unitName = unit:GetName():gsub(NO_BREAK_SPACE, " ")
+    local tUnit = GetUnitById(nId)
+    if tUnit then
+        local unitName = tUnit:GetName():gsub(NO_BREAK_SPACE, " ")
         -- Keep Old event for compatibility.
-        Event_FireGenericEvent("BUFF_APPLIED", unitName, nSpellId, unit)
-        -- New event not based on the name.
-        Event_FireGenericEvent("BUFF_ADD", nId, nSpellId, nStack, fTimeRemaining)
+        Event_FireGenericEvent("BUFF_APPLIED", unitName, nSpellId, tUnit)
     end
+    -- New event not based on the name.
+    Event_FireGenericEvent("BUFF_ADD", nId, nSpellId, nStack, fTimeRemaining)
 end
 
 function RaidCore:OnBuffRemove(nId, nSpellId)
-    local buffs = self.buffs[nId]
-    if buffs then
-        unit = buffs.unit
-        local unitName = unit:GetName():gsub(NO_BREAK_SPACE, " ")
+    local tUnit = GetUnitById(nId)
+    if tUnit then
+        local unitName = tUnit:GetName():gsub(NO_BREAK_SPACE, " ")
         -- Keep Old event for compatibility.
-        Event_FireGenericEvent("BUFF_REMOVED", unitName, nSpellId, unit)
-        -- New event not based on the name.
-        Event_FireGenericEvent("BUFF_DEL", nId, nSpellId)
+        Event_FireGenericEvent("BUFF_REMOVED", unitName, nSpellId, GetUnitById(nId))
     end
+    -- New event not based on the name.
+    Event_FireGenericEvent("BUFF_DEL", nId, nSpellId)
 end
 
 function RaidCore:OnBuffUpdate(nId, nSpellId, nOldStack, nNewStack, fTimeRemaining)
-    local buffs = self.buffs[nId]
-    if buffs then
-        unit = buffs.unit
-        local unitName = unit:GetName():gsub(NO_BREAK_SPACE, " ")
+    local tUnit = GetUnitById(nId)
+    if tUnit then
+        local unitName = tUnit:GetName():gsub(NO_BREAK_SPACE, " ")
         -- Keep Old event for compatibility.
         Event_FireGenericEvent("BUFF_APPLIED_DOSE", unitName, nSpellId, nStack)
-        -- New event not based on the name.
-        Event_FireGenericEvent("BUFF_UPDATE", nId, nSpellId, nStack, fTimeRemaining)
     end
+    -- New event not based on the name.
+    Event_FireGenericEvent("BUFF_UPDATE", nId, nSpellId, nStack, fTimeRemaining)
 end
 
 function RaidCore:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
-    local debuffs = self.debuffs[nId]
-    if debuffs then
-        unit = debuffs.unit
-        local unitName = unit:GetName():gsub(NO_BREAK_SPACE, " ")
+    local tUnit = GetUnitById(nId)
+    if tUnit then
+        local unitName = tUnit:GetName():gsub(NO_BREAK_SPACE, " ")
         -- Keep Old event for compatibility.
-        Event_FireGenericEvent("DEBUFF_APPLIED", unitName, nSpellId, unit)
-        -- New event not based on the name.
-        Event_FireGenericEvent("DEBUFF_ADD", nId, nSpellId, nStack, fTimeRemaining)
+        Event_FireGenericEvent("DEBUFF_APPLIED", unitName, nSpellId, tUnit)
     end
+    -- New event not based on the name.
+    Event_FireGenericEvent("DEBUFF_ADD", nId, nSpellId, nStack, fTimeRemaining)
 end
 
 function RaidCore:OnDebuffRemove(nId, nSpellId)
-    local debuffs = self.debuffs[nId]
-    if debuffs then
-        unit = debuffs.unit
-        local unitName = unit:GetName():gsub(NO_BREAK_SPACE, " ")
+    local tUnit = GetUnitById(nId)
+    if tUnit then
+        local unitName = tUnit:GetName():gsub(NO_BREAK_SPACE, " ")
         -- Keep Old event for compatibility.
-        Event_FireGenericEvent("DEBUFF_REMOVED", unitName, nSpellId, unit)
-        -- New event not based on the name.
-        Event_FireGenericEvent("DEBUFF_DEL", nId, nSpellId)
+        Event_FireGenericEvent("DEBUFF_REMOVED", unitName, nSpellId, tUnit)
     end
+    -- New event not based on the name.
+    Event_FireGenericEvent("DEBUFF_DEL", nId, nSpellId)
 end
 
 function RaidCore:OnDebuffUpdate(nId, nSpellId, nOldStack, nNewStack, fTimeRemaining)
-    local debuffs = self.debuffs[nId]
-    if debuffs then
-        unit = debuffs.unit
-        local unitName = unit:GetName():gsub(NO_BREAK_SPACE, " ")
+    local tUnit = GetUnitById(nId)
+    if tUnit then
+        local unitName = tUnit:GetName():gsub(NO_BREAK_SPACE, " ")
         -- Keep Old event for compatibility.
         Event_FireGenericEvent("DEBUFF_APPLIED_DOSE", unitName, nSpellId, nStack)
-        -- New event not based on the name.
-        Event_FireGenericEvent("DEBUFF_UPDATE", nId, nSpellId, nStack, fTimeRemaining)
     end
+    -- New event not based on the name.
+    Event_FireGenericEvent("DEBUFF_UPDATE", nId, nSpellId, nStack, fTimeRemaining)
 end
 
 function RaidCore:OnMarkUpdate()
@@ -1126,18 +1041,6 @@ function RaidCore:ResetMarks()
         self.mark[k] = nil
     end
     markCount = 0
-end
-
-function RaidCore:ResetWatch()
-    wipe(self.watch)
-end
-
-function RaidCore:ResetBuff()
-    wipe(self.buffs)
-end
-
-function RaidCore:ResetDebuff()
-    wipe(self.debuffs)
 end
 
 function RaidCore:ResetSync()
@@ -1209,9 +1112,6 @@ function RaidCore:ResetAll()
         self.berserk = nil
     end
     self:BarsRemoveAll()
-    self:ResetWatch()
-    self:ResetDebuff()
-    self:ResetBuff()
     self:ResetMarks()
     self:ResetWorldMarkers()
     self:ResetSync()

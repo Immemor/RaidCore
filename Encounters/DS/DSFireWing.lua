@@ -166,14 +166,12 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
             boss = sName
             core:AddUnit(unit)
             core:WatchUnit(unit)
-            core:RaidDebuff()
             mod:AddTimerBar("BOMB", "BOMB", 23)
         elseif sName == self.L["Warmonger Talarii"] then
             prev = 0
             boss = sName
             core:AddUnit(unit)
             core:WatchUnit(unit)
-            core:RaidDebuff()
             mod:AddTimerBar("KNOCK", "KNOCKBACK", 23)
         elseif sName == self.L["Grand Warmonger Tar'gresh"] then
             core:AddUnit(unit)

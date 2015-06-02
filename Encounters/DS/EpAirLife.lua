@@ -263,7 +263,6 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
         elseif sName == self.L["Visceralus"] then
             core:AddUnit(unit)
             core:WatchUnit(unit)
-            core:RaidDebuff()
 
             last_thorns = 0
             last_twirl = 0

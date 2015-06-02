@@ -297,7 +297,7 @@ function mod:OnUnitCreated(unit, sName)
     elseif sName == self.L["Infinite Logic Loop"] then -- blue
         -- TESTING BLUE ROOM:
         core:AddUnit(unit)
-        core:UnitBuff(unit)
+        core:WatchUnit(unit)
         phase2_blueroom = true
     end
 end

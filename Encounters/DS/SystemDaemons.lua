@@ -487,7 +487,6 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
             playerName = GameLib.GetPlayerUnit():GetName()
             core:AddUnit(unit)
             core:WatchUnit(unit)
-            core:RaidDebuff()
             core:AddSync("NORTH_SURGE", 5)
             core:AddSync("SOUTH_SURGE", 5)
             if mod:GetSetting("OtherDisconnectTimer") then

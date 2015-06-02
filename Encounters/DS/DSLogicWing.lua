@@ -151,7 +151,6 @@ function mod:OnUnitEnteredCombat(unit, bInCombat, sName)
             prevInt = ""
             castCount = 1
             core:AddUnit(unit)
-            core:RaidDebuff()
             mod:AddTimerBar("DATA", self.L["[%u] INTERRUPT"]:format(castCount), 7)
             mod:AddTimerBar("EMPOWER", self.L["EMPOWER"]:format(""), 30, 1)
         elseif sName == self.L["Quantum Processing Unit"] then

@@ -182,7 +182,6 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
             uPlayer = GameLib.GetPlayerUnit()
             strMyName = uPlayer:GetName()
             core:AddUnit(unit)
-            core:RaidDebuff()
             mod:AddTimerBar("MID", "MIDPHASE", 90)
         end
     end
