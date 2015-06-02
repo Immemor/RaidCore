@@ -43,6 +43,7 @@ local SCAN_PERIOD = 0.1 -- in seconds.
 -- Array with chat permission.
 local CHANNEL_HANDLERS = {
     [ChatSystemLib.ChatChannel_Say] = nil,
+    [ChatSystemLib.ChatChannel_Party] = "OnParty",
     [ChatSystemLib.ChatChannel_NPCSay] = "OnNPCSay",
     [ChatSystemLib.ChatChannel_NPCYell] = "OnNPCYell",
     [ChatSystemLib.ChatChannel_NPCWhisper] = "OnNPCWhisper",
@@ -137,9 +138,10 @@ local function ExtraLog2Text(k, nRefTime, tParam)
     elseif k == "OnEnteredCombat" then
         local sFormat = "Id=%u Unit='%s' InCombat=%s"
         sResult = sFormat:format(tParam[1], tParam[3], tostring(tParam[4]))
-    elseif k == "OnNPCSay" or k == "OnNPCYell" or k == "OnNPCWhisper" or k == "OnDatachron" then
-        local sFormat = "sMessage='%s'"
-        sResult = sFormat:format(tParam[1])
+    elseif k == "OnNPCSay" or k == "OnNPCYell" or k == "OnNPCWhisper" or k == "OnDatachron"
+        or k == "OnParty" then
+        local sFormat = "sMessage='%s' sSender='%s'"
+        sResult = sFormat:format(tParam[1], tParam[2])
     elseif k == "TrackThisUnit" or k == "UnTrackThisUnit" then
         sResult = ("Id='%s'"):format(tParam[1])
     elseif k == "WARNING tUnit reference changed" then
@@ -529,10 +531,12 @@ function RaidCore:CI_OnChatMessage(tChannelCurrent, tMessage)
     local nChannelType = tChannelCurrent:GetType()
     local sHandler = CHANNEL_HANDLERS[nChannelType]
     if sHandler then
+        local sSender = tMessage.strSender or ""
+        sSender:gsub(NO_BREAK_SPACE, " ")
         local sMessage = ""
         for _, tSegment in next, tMessage.arMessageSegments do
             sMessage = sMessage .. tSegment.strText:gsub(NO_BREAK_SPACE, " ")
         end
-        ManagerCall(sHandler, sMessage)
+        ManagerCall(sHandler, sMessage, sSender)
     end
 end

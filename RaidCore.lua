@@ -1067,24 +1067,28 @@ function RaidCore:TestPE()
     end
 end
 
-function RaidCore:OnSay(sMessage)
-    Event_FireGenericEvent('CHAT_SAY', sMessage)
+function RaidCore:OnSay(sMessage, sSender)
+    Event_FireGenericEvent('CHAT_SAY', sMessage, sSender)
 end
 
-function RaidCore:OnNPCSay(sMessage)
-    Event_FireGenericEvent('CHAT_NPCSAY', sMessage)
+function RaidCore:OnNPCSay(sMessage, sSender)
+    Event_FireGenericEvent('CHAT_NPCSAY', sMessage, sSender)
 end
 
-function RaidCore:OnNPCYell(sMessage)
-    Event_FireGenericEvent('CHAT_NPCYELL', sMessage)
+function RaidCore:OnNPCYell(sMessage, sSender)
+    Event_FireGenericEvent('CHAT_NPCYELL', sMessage, sSender)
 end
 
-function RaidCore:OnNPCWisper(sMessage)
-    Event_FireGenericEvent('CHAT_NPCWHISPER', sMessage)
+function RaidCore:OnNPCWisper(sMessage, sSender)
+    Event_FireGenericEvent('CHAT_NPCWHISPER', sMessage, sSender)
 end
 
-function RaidCore:OnDatachron(sMessage)
-    Event_FireGenericEvent('CHAT_DATACHRON', sMessage)
+function RaidCore:OnDatachron(sMessage, sSender)
+    Event_FireGenericEvent('CHAT_DATACHRON', sMessage, sSender)
+end
+
+function RaidCore:OnParty(sMessage, sSender)
+    Event_FireGenericEvent('CHAT_PARTY', sMessage, sSender)
 end
 
 function RaidCore:PrintBerserk()
