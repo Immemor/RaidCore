@@ -705,6 +705,10 @@ function RaidCore:OnRaidCoreOn(cmd, args)
         self.drawline:AddPixie("Ohmna4", 1, uPlayer, unit, "Yellow", 5)
     elseif (tAllParams[1] == "stopline") then
         self.drawline:ResetLines()
+    elseif tAllParams[1] == "testworldline" then
+	local uPlayer = GameLib.GetPlayerUnit()
+        local unit = GameLib.GetTargetUnit()
+        self.drawline:AddWorldLine("wl1", uPlayer:GetPosition(), unit:GetPosition(), "Blue", 2)
     elseif (tAllParams[1] == "sysdm") then
         if tAllParams[2] ~= nil and tAllParams[3] ~= nil then
             local mod = self:GetModule("SystemDaemons", 1)
@@ -975,6 +979,18 @@ function RaidCore:AddLine(... )
     self.drawline:AddLine(...)
 end
 
+function RaidCore:DropLine(key)
+    self.drawline:DropLine(key)
+end
+
+function RaidCore:AddWorldLine(... )
+    self.drawline:AddWorldLine(...)
+end
+
+function RaidCore:DropWorldLine(key)
+    self.drawline:DropWorldLine(key)
+end
+
 function RaidCore:AddPixie(... )
     self.drawline:AddPixie(...)
 end
@@ -983,9 +999,6 @@ function RaidCore:DropPixie(key)
     self.drawline:DropPixie(key)
 end
 
-function RaidCore:DropLine(key)
-    self.drawline:DropLine(key)
-end
 
 function RaidCore:OnUnitDestroyed(nId, unit, unitName)
     Event_FireGenericEvent("RC_UnitDestroyed", unit, unitName)
@@ -1075,6 +1088,7 @@ function RaidCore:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
         -- New event not based on the name.
         Event_FireGenericEvent("DEBUFF_ADD", nId, nSpellId, nStack, fTimeRemaining)
     end
+
 end
 
 function RaidCore:OnDebuffRemove(nId, nSpellId)
@@ -1085,7 +1099,7 @@ function RaidCore:OnDebuffRemove(nId, nSpellId)
         -- Keep Old event for compatibility.
         Event_FireGenericEvent("DEBUFF_REMOVED", unitName, nSpellId, unit)
         -- New event not based on the name.
-        Event_FireGenericEvent("DEBUFF_DEL", nId, nSpellId)
+   		Event_FireGenericEvent("DEBUFF_DEL", nId, nSpellId)
     end
 end
 
@@ -1146,6 +1160,10 @@ end
 
 function RaidCore:ResetLines()
     self.drawline:ResetLines()
+end
+
+function RaidCore:ResetLines2()
+    self.drawline:ResetLines2()
 end
 
 function RaidCore:TestPE()
@@ -1225,8 +1243,10 @@ function RaidCore:WipeCheck()
         end
     end
     Log:Add("Encounter no more in progress")
+    Print("Encounter no more in progress")
     _bIsEncounterInProgress = false
     if _tCurrentEncounter then
+	Print("fire event RAID_WIPE")
         Event_FireGenericEvent("RAID_WIPE")
         _tCurrentEncounter:Disable()
         _tCurrentEncounter = nil
