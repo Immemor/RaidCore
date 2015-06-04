@@ -31,6 +31,10 @@ local GetCurrentZoneMap = GameLib.GetCurrentZoneMap
 ----------------------------------------------------------------------------------------------------
 -- Constants.
 ----------------------------------------------------------------------------------------------------
+-- Should be @project-version@ when replacement tokens will works (see #88 issue).
+local RAIDCORE_CURRENT_VERSION = "3.2-alpha"
+-- Should be deleted.
+local ADDON_DATE_VERSION = 15052601
 -- Sometimes Carbine have inserted some no-break-space, for fun.
 -- Behavior seen with French language. This problem is not present in English.
 local NO_BREAK_SPACE = string.char(194, 160)
@@ -50,11 +54,11 @@ local _tEncountersPerZone = {}
 local _tDelayedUnits = {}
 local _bIsEncounterInProgress = false
 local _tCurrentEncounter = nil
+local _tRaidCoreChannel = nil
 
 
 local trackMaster = Apollo.GetAddon("TrackMaster")
 local markCount = 0
-local AddonVersion = 15052601
 local VCReply, VCtimer = {}, nil
 local CommChannelTimer = nil
 local empCD, empTimer = 5, nil
@@ -307,7 +311,6 @@ end
 function RaidCore:OnInitialize()
     self.xmlDoc = XmlDoc.CreateFromFile("RaidCore.xml")
     self.xmlDoc:RegisterCallback("OnDocLoaded", self)
-    Apollo.LoadSprites("BarTextures.xml")
     Apollo.LoadSprites("Textures_GUI.xml")
     Apollo.LoadSprites("Textures_Bars.xml")
 
@@ -369,11 +372,8 @@ function RaidCore:OnDocLoaded()
 
     -- Do additional Addon initialization here
 
-    self.watch = {}
     self.mark = {}
     self.worldmarker = {}
-    self.buffs = {}
-    self.debuffs = {}
     self.berserk = false
 
     self.syncRegister = {}
@@ -421,6 +421,14 @@ function RaidCore:OnDocLoaded()
     end
     self:LogGUI_init()
 
+    -- Send version information to OneVersion Addon.
+    local fNumber = RAIDCORE_CURRENT_VERSION:gmatch("%d+")
+    local sPatch = RAIDCORE_CURRENT_VERSION:gmatch("%a+")()
+    local nMajor, nMinor = fNumber(), fNumber()
+    local nPatch = sPatch == "alpha" and 0 or sPatch == "beta" and 1 or 2
+    Event_FireGenericEvent("OneVersion_ReportAddonInfo", "RaidCore", nMajor, nMinor, nPatch)
+
+    -- Initialize the Zone Detection.
     self:OnCheckMapZone()
 end
 
@@ -616,12 +624,6 @@ function RaidCore:LoadGeneralSliders(wndHandler, wndControl )
     end
 end
 
-local function wipe(t)
-    for k,v in pairs(t) do
-        t[k] = nil
-    end
-end
-
 -- on SlashCommand "/raidcore"
 function RaidCore:OnRaidCoreOn(cmd, args)
     local tAllParams = {}
@@ -653,7 +655,7 @@ function RaidCore:OnRaidCoreOn(cmd, args)
             self:AddMsg(tAllParams[2], tAllParams[3], 5)
         end
     elseif (tAllParams[1] == "version") then
-        Print("RaidCore version : " .. AddonVersion)
+        Print("RaidCore version : " .. ADDON_DATE_VERSION)
     elseif (tAllParams[1] == "versioncheck") then
         self:VersionCheck()
     elseif (tAllParams[1] == "pull") then
@@ -670,35 +672,15 @@ function RaidCore:OnRaidCoreOn(cmd, args)
         end
     elseif (tAllParams[1] == "summon") then
         self:SyncSummon()
-    elseif (tAllParams[1] == "buff") then
-        local unit = GameLib.GetTargetUnit()
-        if unit ~= nil then
-            local id = unit:GetId()
-            self:CombatInterface_Track(id)
-            self.buffs[id] = {
-                ["unit"] = unit,
-                ["aura"] = {},
-            }
-        end
-    elseif (tAllParams[1] == "debuff") then
-        local unit = GameLib.GetTargetUnit()
-        if unit ~= nil then
-            local id = unit:GetId()
-            self:CombatInterface_Track(id)
-            self.debuffs[id] = {
-                ["unit"] = unit,
-                ["aura"] = {},
-            }
-        end
     elseif (tAllParams[1] == "testline") then
-        local uPlayer = GameLib.GetPlayerUnit()
+        local uPlayer = GetPlayerUnit()
         local unit = GameLib.GetTargetUnit()
         self.drawline:AddLine("Ohmna1", 2, unit, nil, 3, 25, 0, 10)
         self.drawline:AddLine("Ohmna2", 2, unit, nil, 1, 25, 120)
         self.drawline:AddLine("Ohmna3", 2, unit, nil, 1, 25, -120)
         self.drawline:AddLine("Ohmna4", 1, uPlayer, unit, 2)
     elseif (tAllParams[1] == "testpixie") then
-        local uPlayer = GameLib.GetPlayerUnit()
+        local uPlayer = GetPlayerUnit()
         local unit = GameLib.GetTargetUnit()
         self.drawline:AddPixie("Ohmna1", 2, unit, nil, "Blue", 10, 25, 0)
         self.drawline:AddPixie("Ohmna2", 2, unit, nil, "Green", 10, 25, 120)
@@ -830,58 +812,11 @@ function RaidCore:PlaySound(sFilename)
     end
 end
 
-function RaidCore:StartScan()
-    -- Deprecated function
-end
-
-function RaidCore:StopScan()
-    -- Deprecated function
-end
-
+-- Track buff and cast of this unit.
+-- @param unit  userdata object related to an unit in game.
 function RaidCore:WatchUnit(unit)
-    if unit then
-        local id = unit:GetId()
-        if id and not unit:IsDead() and not self.watch[id] then
-            self:CombatInterface_Track(id)
-            self.watch[id] = {
-                ["unit"] = unit,
-            }
-        end
-    end
-end
-
-function RaidCore:UnitBuff(unit)
-    if unit then
-        local id = unit:GetId()
-        if id and not unit:IsDead() and not self.buffs[id] then
-            self:CombatInterface_Track(id)
-            self.buffs[id] = {
-                ["unit"] = unit,
-                ["aura"] = {},
-            }
-        end
-    end
-end
-
-function RaidCore:UnitDebuff(unit)
-    if unit then
-        local id = unit:GetId()
-        if id and not unit:IsDead() and not self.debuffs[id] then
-            self.debuffs[id] = {
-                ["unit"] = unit,
-                ["aura"] = {},
-            }
-        end
-    end
-end
-
-function RaidCore:RaidDebuff()
-    for i = 1, GroupLib.GetMemberCount() do
-        local unit = GroupLib.GetUnitForGroupMember(i)
-        if unit then
-            self:UnitDebuff(unit)
-        end
-    end
+    local id = unit:GetId()
+    self:CombatInterface_Track(id)
 end
 
 function RaidCore:MarkUnit(unit, location, mark)
@@ -991,20 +926,11 @@ end
 function RaidCore:OnUnitDestroyed(nId, unit, unitName)
     Event_FireGenericEvent("RC_UnitDestroyed", unit, unitName)
     self:RemoveUnit(nId)
-    if self.watch[nId] then
-        self.watch[nId] = nil
-    end
     if self.mark[nId] then
         local markFrame = self.mark[nId].frame
         markFrame:SetUnit(nil)
         markFrame:Destroy()
         self.mark[nId] = nil
-    end
-    if self.debuffs[nId] and unit:IsDead() then
-        self.debuffs[nId] = nil
-    end
-    if self.buffs[nId] then
-        self.buffs[nId] = nil
     end
 end
 
@@ -1015,91 +941,85 @@ function RaidCore:SetTarget(position)
 end
 
 function RaidCore:OnCastStart(nId, sCastName)
-    local v = self.watch[nId]
-    if v then
-        local unitName = v.unit:GetName():gsub(NO_BREAK_SPACE, " ")
-        Event_FireGenericEvent("SPELL_CAST_START", unitName, sCastName, v.unit)
+    local tUnit = GetUnitById(nId)
+    if tUnit then
+        local unitName = tUnit:GetName():gsub(NO_BREAK_SPACE, " ")
+        Event_FireGenericEvent("SPELL_CAST_START", unitName, sCastName, tUnit)
     end
 end
 
 function RaidCore:OnCastEnd(nId, sCastName, bInterrupted)
-    local v = self.watch[nId]
-    if v then
-        local unitName = v.unit:GetName():gsub(NO_BREAK_SPACE, " ")
-        Event_FireGenericEvent("SPELL_CAST_END", unitName, sCastName, v.unit)
+    local tUnit = GetUnitById(nId)
+    if tUnit then
+        local unitName = tUnit:GetName():gsub(NO_BREAK_SPACE, " ")
+        Event_FireGenericEvent("SPELL_CAST_END", unitName, sCastName, tUnit)
     end
 end
 
 function RaidCore:OnBuffAdd(nId, nSpellId, nStack, fTimeRemaining)
-    local buffs = self.buffs[nId]
-    if buffs then
-        unit = buffs.unit
-        local unitName = unit:GetName():gsub(NO_BREAK_SPACE, " ")
+    local tUnit = GetUnitById(nId)
+    if tUnit then
+        local unitName = tUnit:GetName():gsub(NO_BREAK_SPACE, " ")
         -- Keep Old event for compatibility.
-        Event_FireGenericEvent("BUFF_APPLIED", unitName, nSpellId, unit)
-        -- New event not based on the name.
-        Event_FireGenericEvent("BUFF_ADD", nId, nSpellId, nStack, fTimeRemaining)
+        Event_FireGenericEvent("BUFF_APPLIED", unitName, nSpellId, tUnit)
     end
+    -- New event not based on the name.
+    Event_FireGenericEvent("BUFF_ADD", nId, nSpellId, nStack, fTimeRemaining)
 end
 
 function RaidCore:OnBuffRemove(nId, nSpellId)
-    local buffs = self.buffs[nId]
-    if buffs then
-        unit = buffs.unit
-        local unitName = unit:GetName():gsub(NO_BREAK_SPACE, " ")
+    local tUnit = GetUnitById(nId)
+    if tUnit then
+        local unitName = tUnit:GetName():gsub(NO_BREAK_SPACE, " ")
         -- Keep Old event for compatibility.
-        Event_FireGenericEvent("BUFF_REMOVED", unitName, nSpellId, unit)
-        -- New event not based on the name.
-        Event_FireGenericEvent("BUFF_DEL", nId, nSpellId)
+        Event_FireGenericEvent("BUFF_REMOVED", unitName, nSpellId, GetUnitById(nId))
     end
+    -- New event not based on the name.
+    Event_FireGenericEvent("BUFF_DEL", nId, nSpellId)
 end
 
 function RaidCore:OnBuffUpdate(nId, nSpellId, nOldStack, nNewStack, fTimeRemaining)
-    local buffs = self.buffs[nId]
-    if buffs then
-        unit = buffs.unit
-        local unitName = unit:GetName():gsub(NO_BREAK_SPACE, " ")
+    local tUnit = GetUnitById(nId)
+    if tUnit then
+        local unitName = tUnit:GetName():gsub(NO_BREAK_SPACE, " ")
         -- Keep Old event for compatibility.
         Event_FireGenericEvent("BUFF_APPLIED_DOSE", unitName, nSpellId, nStack)
-        -- New event not based on the name.
-        Event_FireGenericEvent("BUFF_UPDATE", nId, nSpellId, nStack, fTimeRemaining)
     end
+    -- New event not based on the name.
+    Event_FireGenericEvent("BUFF_UPDATE", nId, nSpellId, nStack, fTimeRemaining)
 end
 
 function RaidCore:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
-    local debuffs = self.debuffs[nId]
-    if debuffs then
-        unit = debuffs.unit
-        local unitName = unit:GetName():gsub(NO_BREAK_SPACE, " ")
+    local tUnit = GetUnitById(nId)
+    if tUnit then
+        local unitName = tUnit:GetName():gsub(NO_BREAK_SPACE, " ")
         -- Keep Old event for compatibility.
-        Event_FireGenericEvent("DEBUFF_APPLIED", unitName, nSpellId, unit)
-        -- New event not based on the name.
-        Event_FireGenericEvent("DEBUFF_ADD", nId, nSpellId, nStack, fTimeRemaining)
+        Event_FireGenericEvent("DEBUFF_APPLIED", unitName, nSpellId, tUnit)
     end
+    -- New event not based on the name.
+    Event_FireGenericEvent("DEBUFF_ADD", nId, nSpellId, nStack, fTimeRemaining)
 end
 
 function RaidCore:OnDebuffRemove(nId, nSpellId)
-    local debuffs = self.debuffs[nId]
-    if debuffs then
-        unit = debuffs.unit
-        local unitName = unit:GetName():gsub(NO_BREAK_SPACE, " ")
+    local tUnit = GetUnitById(nId)
+    if tUnit then
+        local unitName = tUnit:GetName():gsub(NO_BREAK_SPACE, " ")
         -- Keep Old event for compatibility.
-        Event_FireGenericEvent("DEBUFF_REMOVED", unitName, nSpellId, unit)
-        -- New event not based on the name.
-        Event_FireGenericEvent("DEBUFF_DEL", nId, nSpellId)
+        Event_FireGenericEvent("DEBUFF_REMOVED", unitName, nSpellId, tUnit)
     end
+    -- New event not based on the name.
+    Event_FireGenericEvent("DEBUFF_DEL", nId, nSpellId)
 end
 
 function RaidCore:OnDebuffUpdate(nId, nSpellId, nOldStack, nNewStack, fTimeRemaining)
-    local debuffs = self.debuffs[nId]
-    if debuffs then
-        unit = debuffs.unit
-        local unitName = unit:GetName():gsub(NO_BREAK_SPACE, " ")
+    local tUnit = GetUnitById(nId)
+    if tUnit then
+        local unitName = tUnit:GetName():gsub(NO_BREAK_SPACE, " ")
         -- Keep Old event for compatibility.
         Event_FireGenericEvent("DEBUFF_APPLIED_DOSE", unitName, nSpellId, nStack)
-        -- New event not based on the name.
-        Event_FireGenericEvent("DEBUFF_UPDATE", nId, nSpellId, nStack, fTimeRemaining)
     end
+    -- New event not based on the name.
+    Event_FireGenericEvent("DEBUFF_UPDATE", nId, nSpellId, nStack, fTimeRemaining)
 end
 
 function RaidCore:OnMarkUpdate()
@@ -1128,21 +1048,9 @@ function RaidCore:ResetMarks()
     markCount = 0
 end
 
-function RaidCore:ResetWatch()
-    wipe(self.watch)
-end
-
-function RaidCore:ResetBuff()
-    wipe(self.buffs)
-end
-
-function RaidCore:ResetDebuff()
-    wipe(self.debuffs)
-end
-
 function RaidCore:ResetSync()
-    wipe(self.syncTimer)
-    wipe(self.syncRegister)
+    self.syncTimer = {}
+    self.syncRegister = {}
 end
 
 function RaidCore:ResetLines()
@@ -1170,24 +1078,28 @@ function RaidCore:TestPE()
     end
 end
 
-function RaidCore:OnSay(sMessage)
-    Event_FireGenericEvent('CHAT_SAY', sMessage)
+function RaidCore:OnSay(sMessage, sSender)
+    Event_FireGenericEvent('CHAT_SAY', sMessage, sSender)
 end
 
-function RaidCore:OnNPCSay(sMessage)
-    Event_FireGenericEvent('CHAT_NPCSAY', sMessage)
+function RaidCore:OnNPCSay(sMessage, sSender)
+    Event_FireGenericEvent('CHAT_NPCSAY', sMessage, sSender)
 end
 
-function RaidCore:OnNPCYell(sMessage)
-    Event_FireGenericEvent('CHAT_NPCYELL', sMessage)
+function RaidCore:OnNPCYell(sMessage, sSender)
+    Event_FireGenericEvent('CHAT_NPCYELL', sMessage, sSender)
 end
 
-function RaidCore:OnNPCWisper(sMessage)
-    Event_FireGenericEvent('CHAT_NPCWHISPER', sMessage)
+function RaidCore:OnNPCWisper(sMessage, sSender)
+    Event_FireGenericEvent('CHAT_NPCWHISPER', sMessage, sSender)
 end
 
-function RaidCore:OnDatachron(sMessage)
-    Event_FireGenericEvent('CHAT_DATACHRON', sMessage)
+function RaidCore:OnDatachron(sMessage, sSender)
+    Event_FireGenericEvent('CHAT_DATACHRON', sMessage, sSender)
+end
+
+function RaidCore:OnParty(sMessage, sSender)
+    Event_FireGenericEvent('CHAT_PARTY', sMessage, sSender)
 end
 
 function RaidCore:PrintBerserk()
@@ -1209,9 +1121,6 @@ function RaidCore:ResetAll()
         self.berserk = nil
     end
     self:BarsRemoveAll()
-    self:ResetWatch()
-    self:ResetDebuff()
-    self:ResetBuff()
     self:ResetMarks()
     self:ResetWorldMarkers()
     self:ResetSync()
@@ -1291,12 +1200,12 @@ function RaidCore:OnComMessage(channel, strMessage, strSender)
     local msg = {}
 
     if tMessage.action == "VersionCheckRequest" and IsPartyMemberByName(tMessage.sender) then
-        msg = {action = "VersionCheckReply", sender = GameLib.GetPlayerUnit():GetName(), version = AddonVersion}
+        msg = {action = "VersionCheckReply", sender = GetPlayerUnit():GetName(), version = ADDON_DATE_VERSION}
         self:SendMessage(msg)
     elseif tMessage.action == "VersionCheckReply" and tMessage.sender and tMessage.version and VCtimer then
         VCReply[tMessage.sender] = tMessage.version
     elseif tMessage.action == "NewestVersion" and tMessage.version then
-        if AddonVersion < tMessage.version then
+        if ADDON_DATE_VERSION < tMessage.version then
             Print("Your RaidCore version is outdated. Please get " .. tMessage.version)
         end
     elseif tMessage.action == "LaunchPull" and IsPartyMemberByName(tMessage.sender) and tMessage.cooldown then
@@ -1329,58 +1238,69 @@ function RaidCore:OnComMessage(channel, strMessage, strSender)
 end
 
 function RaidCore:VersionCheckResults()
-    local maxver = 0
-    local outdatedList = ""
-    VCtimer = nil
-
-    for k,v in pairs(VCReply) do
-        if v > maxver then
-            maxver = v
+    local nMaxVersion = ADDON_DATE_VERSION
+    for _, v in next, VCReply do
+        if v > nMaxVersion then
+            nMaxVersion = v
         end
     end
 
-    local count = 0
-    for i=1, GroupLib.GetMemberCount() do
-        local unit = GroupLib.GetGroupMember(i)
-        if unit then
-            local playerName = unit.strCharacterName
-            if not VCReply[playerName] or VCReply[playerName] < maxver then
-                count = count + 1
-                if count == 1 then
-                    outdatedList = playerName
-                else
-                    outdatedList = playerName .. ", " .. outdatedList
+    local tNotInstalled = {}
+    local tOutdated = {}
+    local nMemberWithLasted = 0
+    for i = 1, GroupLib.GetMemberCount() do
+        local tMember = GroupLib.GetGroupMember(i)
+        if tMember then
+            local sPlayerName = tMember.strCharacterName
+            local sPlayerVersion = VCReply[sPlayerName]
+            if not sPlayerVersion then
+                table.insert(tNotInstalled, sPlayerName)
+            elseif sPlayerVersion < nMaxVersion then
+                if tOutdated[sPlayerVersion] == nil then
+                    tOutdated[sPlayerVersion] = {}
                 end
+                table.insert(tOutdated[sPlayerVersion], sPlayerName)
+            else
+                nMemberWithLasted = nMemberWithLasted + 1
             end
         end
     end
 
-    if string.len(outdatedList) > 0 then
-        Print(("Outdated (%s) : %s"):format(count,outdatedList))
-    else
-        Print("Outdated : None ! Congrats")
+    if next(tNotInstalled) then
+        Print(self.L["Not installed: %s"]:format(table.concat(tNotInstalled, ", ")))
     end
+    if next(tOutdated) then
+        Print("Outdated RaidCore Version:")
+        for sPlayerVersion, tList in next, tOutdated do
+            Print((" - '%s': %s"):format(sPlayerVersion, table.concat(tList, ", ")))
+        end
+    end
+    Print(self.L["%d members are up to date."]:format(nMemberWithLasted))
+    -- Send Msg to oudated players.
     local msg = {action = "NewestVersion", version = maxver}
     self:SendMessage(msg)
     self:OnComMessage(nil, JSON.encode(msg))
+    VCtimer = nil
 end
 
 function RaidCore:VersionCheck()
     if VCtimer then
-        Print("VersionCheck already running ...")
-        return
+        Print(self.L["VersionCheck already running ..."])
+    elseif GroupLib.GetMemberCount() == 0 then
+        Print(self.L["Command available only in group."])
+    else
+        Print(self.L["Checking version on group member."])
+        VCReply = {}
+        VCReply[GetPlayerUnit():GetName()] = ADDON_DATE_VERSION
+        local msg = {action = "VersionCheckRequest", sender = GetPlayerUnit():GetName()}
+        VCtimer = ApolloTimer.Create(5, false, "VersionCheckResults", self)
+        self:SendMessage(msg)
     end
-    Print("Running VersionCheck")
-    wipe(VCReply)
-    VCReply[GameLib.GetPlayerUnit():GetName()] = AddonVersion
-    local msg = {action = "VersionCheckRequest", sender = GameLib.GetPlayerUnit():GetName()}
-    VCtimer = ApolloTimer.Create(5, false, "VersionCheckResults", self)
-    self:SendMessage(msg)
 end
 
 function RaidCore:LaunchPull(time)
     if time and time > 2 then
-        local msg = {action = "LaunchPull", sender = GameLib.GetPlayerUnit():GetName(), cooldown = time}
+        local msg = {action = "LaunchPull", sender = GetPlayerUnit():GetName(), cooldown = time}
         self:SendMessage(msg)
         self:OnComMessage(nil, JSON.encode(msg))
     end
@@ -1400,7 +1320,7 @@ function RaidCore:LaunchBreak(time)
 end
 
 function RaidCore:SyncSummon()
-    local myName = GameLib.GetPlayerUnit():GetName()
+    local myName = GetPlayerUnit():GetName()
     if not self:isRaidManagement(myName) then
         Print("You must be a raid leader or assistant to use this command!")
         return false
@@ -1422,7 +1342,7 @@ function RaidCore:SendSync(syncName, param)
             Event_FireGenericEvent("RAID_SYNC", syncName, param)
         end
     end
-    local msg = {action = "Sync", sender = GameLib.GetPlayerUnit():GetName(), sync = syncName, parameter = param}
+    local msg = {action = "Sync", sender = GetPlayerUnit():GetName(), sync = syncName, parameter = param}
     self:SendMessage(msg)
 end
 

@@ -198,7 +198,6 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
         elseif sName == self.L["Mnemesis"] then
             midphase = false
             encounter_started = true
-            core:RaidDebuff()
             core:AddUnit(unit)
             core:WatchUnit(unit)
             mod:AddTimerBar("MIDPHASE", "Middle Phase", 75, mod:GetSetting("SoundMidphase"))

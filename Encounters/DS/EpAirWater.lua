@@ -180,16 +180,13 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
         if sName == self.L["Hydroflux"] then
             core:AddUnit(unit)
             core:WatchUnit(unit)
-            core:UnitBuff(unit)
         elseif sName == self.L["Aileron"] then
             mooCount = 0
             phase2 = false
             twirl_units = {}
             CheckTwirlTimer = nil
             core:AddUnit(unit)
-            core:UnitBuff(unit)
-            core:UnitDebuff(playerUnit)
-            core:RaidDebuff()
+            core:WatchUnit(unit)
             mod:AddTimerBar("MIDPHASE", "Middle Phase", 60, mod:GetSetting("SoundMidphase"))
             mod:AddTimerBar("TOMB", "~Frost Tombs", 30, mod:GetSetting("SoundFrostTombs"))
         end

@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <Forms>
-    <SpriteFile Name="BarTextures.xml"/>
-    <SpriteFile Name="Sprites.xml"/>
     <SpriteFile Name="Textures_GUI.xml"/>
     <SpriteFile Name="Textures_Bars.xml"/>
     <Form Class="Window" LAnchorPoint="0.5" LAnchorOffset="-150" TAnchorPoint="0.5" TAnchorOffset="-200" RAnchorPoint="0.5" RAnchorOffset="150" BAnchorPoint="0.5" BAnchorOffset="200" RelativeToClient="1" Font="CRB_HeaderHuge_O" Text="" BGColor="UI_WindowBGDefault" TextColor="UI_WindowTextDefault" Template="Default" TooltipType="OnCursor" Name="BarContainer" Border="0" Picture="0" SwallowMouseClicks="1" Moveable="0" Escapable="0" Overlapped="0" TooltipColor="" Tooltip="" IgnoreMouse="1" Sprite="Textures_GUI:BarContainer" NoClip="0" DoNotBlockTooltip="1" TextId="" DT_RIGHT="0" DT_CENTER="1" DT_VCENTER="1" Sizable="0" Visible="1"/>

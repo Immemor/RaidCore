@@ -5,7 +5,57 @@
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
 -- Description:
---   TODO
+--
+-- Avatus fight is split in 3 major phases, they start on threshold healh pourcent of Avatus:
+--  * From 100% to 75%: Avatus itself, with all players.
+--  * At 75%, there is the small labyrinth and green and blue teleporter.
+--  * From 75% to 50: Avatus itself, with all players.
+--  * At 50%, again the labyrinth with red and yellow teleporter.
+--  * From 50% to 25%: Avatus itself, with all players.
+--  * From 25% to death: Enrage phase.
+--
+-- In "Green" phase, there are 24 pillars. An number will be add between two pillars.
+-- So 12 numbers will be displayed like this:
+--
+--        9
+--     A     8
+--   B         7
+--  .     +     6
+--   1         5
+--     2     4
+--        3
+--
+-- The center is { x = 618.21, z =-174.2 }, and the unit called "Unstoppable Object Simulation"
+-- start on West, on the dot so. The dot Pillars are unusable.
+--
+-- With n from 1 to 12, coordonates are:
+-- {{{
+--   Angle(n) = PI + (n - 1) * PI / 6
+--   Position(n) = {
+--       x = 618.21 + 70 * cos(Angle(n)),
+--       z = -174.2 + 70 * sin(Angle(n))
+--   }
+-- }}}
+-- Results are stored in GREEN_ROOM_MARKERS constant.
+--
+-- Extra Informations. Few pillars positions collected:
+-- {
+--     { x = 671.276489, z = -174.475327 },
+--     { x = 565.161865, z = -174.289658 },
+--     { x = 618.183533, z = -227.125458 },
+--     { x = 661.742126, z = -249.719589 },
+--     { x = 574.576834, z = -98.386374 },
+--     { x = 530.910645, z = -174.166290 },
+--     { x = 645.375183, z = -128.802170 },
+--     { x = 663.878540, z = -201.568573 },
+--     { x = 591.531921, z = -128.216736 },
+--     { x = 693.861572, z = -218.121765 },
+--     { x = 705.460144, z = -174.510483 },
+--     { x = 618.322693, z = -86.674301 },
+--     { x = 618.349182, z = -121.058273 },
+--     { x = 644.759949, z = -220.22229 },
+--     { x = 542.987549, z = -129.588684 },
+-- }
 ----------------------------------------------------------------------------------------------------
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local mod = core:NewEncounter("Avatus", 52, 98, 104)
@@ -19,30 +69,34 @@ mod:RegisterEnglishLocale({
     -- Unit names.
     ["Avatus"] = "Avatus",
     ["Holo Hand"] = "Holo Hand",
-    ["Holo Hand Spawned"] = "Holo Hand Spawned",
     ["Mobius Physics Constructor"] = "Mobius Physics Constructor",
     ["Unstoppable Object Simulation"] = "Unstoppable Object Simulation",
     ["Holo Cannon"] = "Holo Cannon",
     ["Shock Sphere"] = "Shock Sphere",
     ["Support Cannon"] = "Support Cannon",
     ["Infinite Logic Loop"] = "Infinite Logic Loop",
+    ["Tower Platform"] = "Tower Platform",
+    ["Augmented Rowsdower"] = "Augmented Rowsdower",
     -- Datachron messages.
-    ["Portals have opened!"] = "Portals have opened!",
-    ["Gun Grid Activated"] = "Gun Grid Activated",
+    ["Portals have opened!"] = "Avatus' power begins to surge! Portals have opened!",
+    ["Gun Grid Activated"] = "SECURITY PROTOCOL: Gun Grid Activated.",
     -- Cast.
     ["Crushing Blow"] = "Crushing Blow",
     ["Data Flare"] = "Data Flare",
     ["Obliteration Beam"] = "Obliteration Beam",
+    -- BuffName with many ID.
+    ["Red Empowerment Matrix"] = "Red Empowerment Matrix",
+    ["Blue Disruption Matrix"] = "Blue Disruption Matrix",
+    ["Green Reconstitution Matrix"] = "Green Reconstitution Matrix",
     -- Bar and messages.
+    ["Holo Hand Spawned"] = "Holo Hand Spawned",
     ["PURGE BLUE BOSS"] = "PURGE BLUE BOSS",
     ["P2 SOON !"] = "P2 SOON !",
-    ["GO TO SIDES !"] = "GO TO SIDES !",
     ["INTERRUPT CRUSHING BLOW!"] = "INTERRUPT CRUSHING BLOW!",
     ["BLIND! TURN AWAY FROM BOSS"] = "BLIND! TURN AWAY FROM BOSS",
     ["Blind"] = "Blind",
     ["Gun Grid NOW!"] = "Gun Grid NOW!",
     ["~Gun Grid"] = "~Gun Grid",
-    ["Holo Hands spawn"] = "Holo Hands spawn",
     ["Hand %u"] = "Hand %u",
     ["MARKER North"] = "North",
     ["MARKER South"] = "South",
@@ -51,45 +105,50 @@ mod:RegisterFrenchLocale({
     -- Unit names.
     ["Avatus"] = "Avatus",
     ["Holo Hand"] = "Holo-main",
-    --["Holo Hand Spawned"] = "Holo Hand Spawned", -- TODO: French translation missing !!!!
     ["Mobius Physics Constructor"] = "Constructeur de physique de Möbius",
     ["Unstoppable Object Simulation"] = "Simulacre invincible",
     ["Holo Cannon"] = "Holocanon",
     ["Shock Sphere"] = "Sphère de choc",
     ["Support Cannon"] = "Canon d'appui",
     ["Infinite Logic Loop"] = "Boucle de logique infinie",
+    ["Tower Platform"] = "Plateforme de la tour",
+    ["Augmented Rowsdower"] = "Tamarou augmenté",
     -- Datachron messages.
-    --["Portals have opened!"] = "Portals have opened!", -- TODO: French translation missing !!!!
-    --["Gun Grid Activated"] = "Gun Grid Activated", -- TODO: French translation missing !!!!
+    ["Portals have opened!"] = "L'énergie d'Avatus commence à déferler ! Des portails se sont ouverts !",
+    ["Gun Grid Activated"] = "PROTOCOLE DE SÉCURITÉ : pétoires activées.",
     -- Cast.
     ["Crushing Blow"] = "Coup écrasant",
     ["Data Flare"] = "Signal de données",
     ["Obliteration Beam"] = "Rayon de suppression",
+    -- BuffName with many ID.
+    ["Holo Hand Spawned"] = "Holo-main Apparition",
+    -- ["Red Empowerment Matrix"] = "Red Empowerment Matrix",
+    -- ["Blue Disruption Matrix"] = "Blue Disruption Matrix",
+    -- ["Green Reconstitution Matrix"] = "Green Reconstitution Matrix",
     -- Bar and messages.
-    --["PURGE BLUE BOSS"] = "PURGE BLUE BOSS", -- TODO: French translation missing !!!!
-    ["P2 SOON !"] = "P2 SOON !",
-    --["GO TO SIDES !"] = "GO TO SIDES !", -- TODO: French translation missing !!!!
-    --["INTERRUPT CRUSHING BLOW!"] = "INTERRUPT CRUSHING BLOW!", -- TODO: French translation missing !!!!
-    --["BLIND! TURN AWAY FROM BOSS"] = "BLIND! TURN AWAY FROM BOSS", -- TODO: French translation missing !!!!
+    ["PURGE BLUE BOSS"] = "PURGE BOSS BLEUE",
+    ["P2 SOON !"] = "P2 BIENTÔT !",
+    ["INTERRUPT CRUSHING BLOW!"] = "INTERROMPRE COUP ÉCRASANT!",
+    ["BLIND! TURN AWAY FROM BOSS"] = "AVEUGLER! DOS AU BOSS",
     ["Blind"] = "Aveugler",
-    --["Gun Grid NOW!"] = "Gun Grid NOW!", -- TODO: French translation missing !!!!
-    --["~Gun Grid"] = "~Gun Grid", -- TODO: French translation missing !!!!
-    --["Holo Hands spawn"] = "Holo Hands spawn", -- TODO: French translation missing !!!!
-    --["Hand %u"] = "Hand %u", -- TODO: French translation missing !!!!
-    ["MARKER North"] = "N",
-    ["MARKER South"] = "S",
+    ["Gun Grid NOW!"] = "pétoires MAINTENANT!",
+    ["~Gun Grid"] = "~Pétoires Grille",
+    ["Hand %u"] = "Main %u",
+    ["MARKER North"] = "Nord",
+    ["MARKER South"] = "Sud",
 })
 mod:RegisterGermanLocale({
     -- Unit names.
     ["Avatus"] = "Avatus",
     ["Holo Hand"] = "Holohand",
-    --["Holo Hand Spawned"] = "Holo Hand Spawned", -- TODO: German translation missing !!!!
     ["Mobius Physics Constructor"] = "Mobius Physikkonstrukteur",
     ["Unstoppable Object Simulation"] = "Unaufhaltbare Objektsimulation",
     ["Holo Cannon"] = "Holokanone",
     ["Shock Sphere"] = "Schocksphäre",
     ["Support Cannon"] = "Hilfskanone",
     ["Infinite Logic Loop"] = "Unendliche Logikschleife",
+    --["Tower Platform"] = "Tower Platform", -- TODO: German translation missing !!!!
+    --["Augmented Rowsdower"] = "Augmented Rowsdower", -- TODO: German translation missing !!!!
     -- Datachron messages.
     --["Portals have opened!"] = "Portals have opened!", -- TODO: German translation missing !!!!
     --["Gun Grid Activated"] = "Gun Grid Activated", -- TODO: German translation missing !!!!
@@ -98,15 +157,14 @@ mod:RegisterGermanLocale({
     ["Data Flare"] = "Daten-Leuchtsignal",
     ["Obliteration Beam"] = "Vernichtungsstrahl",
     -- Bar and messages.
+    --["Holo Hand Spawned"] = "Holo Hand Spawned", -- TODO: German translation missing !!!!
     --["PURGE BLUE BOSS"] = "PURGE BLUE BOSS", -- TODO: German translation missing !!!!
     ["P2 SOON !"] = "GLEICH PHASE 2 !",
-    --["GO TO SIDES !"] = "GO TO SIDES !", -- TODO: German translation missing !!!!
     --["INTERRUPT CRUSHING BLOW!"] = "INTERRUPT CRUSHING BLOW!", -- TODO: German translation missing !!!!
     --["BLIND! TURN AWAY FROM BOSS"] = "BLIND! TURN AWAY FROM BOSS", -- TODO: German translation missing !!!!
     ["Blind"] = "Geblendet",
     --["Gun Grid NOW!"] = "Gun Grid NOW!", -- TODO: German translation missing !!!!
     --["~Gun Grid"] = "~Gun Grid", -- TODO: German translation missing !!!!
-    --["Holo Hands spawn"] = "Holo Hands spawn", -- TODO: German translation missing !!!!
     --["Hand %u"] = "Hand %u", -- TODO: German translation missing !!!!
     ["MARKER North"] = "N",
     ["MARKER South"] = "S",
@@ -121,20 +179,37 @@ mod:RegisterDefaultTimerBarConfigs({
 ----------------------------------------------------------------------------------------------------
 -- Constants.
 ----------------------------------------------------------------------------------------------------
+local next = next
 local NO_BREAK_SPACE = string.char(194, 160)
-local handpos = {
+local HAND_MAKERS = {
     ["hand1"] = {x = 608.70, y = -198.75, z = -191.62},
     ["hand2"] = {x = 607.67, y = -198.75, z = -157.00},
 }
 
-local referencePos = {
+local CARDINAL_MARKERS = {
     ["north"] = { x = 618, y = -198, z = -235 },
     ["south"] = { x = 618, y = -198, z = -114 }
+}
+local GREEN_ROOM_MARKERS = {
+   ["1"] = { y = -198, x = 557.58, z = -139.2 },
+   ["2"] = { y = -198, x = 583.21, z = -113.5 },
+   ["3"] = { y = -198, x = 618.21, z = -104.2 },
+   ["4"] = { y = -198, x = 653.21, z = -113.5 },
+   ["5"] = { y = -198, x = 678.83, z = -139.2 },
+   ["6"] = { y = -198, x = 688.21, z = -174.2 },
+   ["7"] = { y = -198, x = 678.83, z = -209.2 },
+   ["8"] = { y = -198, x = 653.21, z = -234.8 },
+   ["9"] = { y = -198, x = 618.21, z = -244.2 },
+   ["10"] = { y = -198, x = 583.21, z = -234.8 },
+   ["11"] = { y = -198, x = 557.58, z = -209.2 },
 }
 
 ----------------------------------------------------------------------------------------------------
 -- locals.
 ----------------------------------------------------------------------------------------------------
+local GetGameTime = GameLib.GetGameTime
+local GetPlayerUnit = GameLib.GetPlayerUnit
+local SetTargetUnit = GameLib.SetTargetUnit
 local phase2warn, phase2 = false, false
 local phase_blueroom = false
 local phase2_blueroom_rotation = {}
@@ -142,10 +217,6 @@ local encounter_started = false
 local redBuffCount, greenBuffCount, blueBuffCount = 1
 local buffCountTimer = false
 local gungrid_time = nil
--- 40man: first after 46sec - 20m: first after 20sec, after that every 112 sec
-local gungrid_timer = 20
--- 40man: first after 93sec, after that every 37 sec. - 20m: first after 69sec, after that every 37 sec
-local obliteration_beam_timer = 69
 local holo_hands = {}
 local strMyName
 
@@ -244,12 +315,9 @@ function mod:OnBossEnable()
     Apollo.RegisterEventHandler("UNIT_HEALTH", "OnHealthChanged", self)
     Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
     Apollo.RegisterEventHandler("CHAT_NPCSAY", "OnChatNPCSay", self)
-    Apollo.RegisterEventHandler("RAID_WIPE", "OnReset", self)
-    Apollo.RegisterEventHandler("BUFF_APPLIED", "OnBuffApplied", self) -- temp disabled. Not finished.
-    Apollo.RegisterEventHandler("ChatMessage", "OnChatMessage", self) -- temp dissabled. Not finished
-end
+    Apollo.RegisterEventHandler("BUFF_APPLIED", "OnBuffApplied", self)
+    Apollo.RegisterEventHandler("CHAT_PARTY", "OnPartyMessage", self)
 
-function mod:OnReset()
     phase2warn, phase2 = false, false
     phase_blueroom = false
     phase2_blueroom_rotation = {}
@@ -258,17 +326,17 @@ function mod:OnReset()
     blueBuffCount = 1
     buffCountTimer = false
     encounter_started = false
-    gungrid_time = nil
-    gungrid_timer = 20
-    obliteration_beam_timer = 69
     holo_hands = {}
-    core:ResetMarks()
-    core:ResetWorldMarkers()
+    strMyName = GetPlayerUnit():GetName()
+    bGreenRoomMarkerDisplayed = false
 end
 
 function mod:OnUnitCreated(unit, sName)
     local eventTime = GameLib.GetGameTime()
-    if sName == self.L["Holo Hand"] then
+    if sName == self.L["Augmented Rowsdower"] then
+        core:AddMsg("HHAND", self.L["Augmented Rowsdower"], 3)
+        SetTargetUnit(unit)
+    elseif sName == self.L["Holo Hand"] then
         local unitId = unit:GetId()
         core:AddUnit(unit)
         core:WatchUnit(unit)
@@ -297,15 +365,21 @@ function mod:OnUnitCreated(unit, sName)
     elseif sName == self.L["Infinite Logic Loop"] then -- blue
         -- TESTING BLUE ROOM:
         core:AddUnit(unit)
-        core:UnitBuff(unit)
+        core:WatchUnit(unit)
         phase2_blueroom = true
+    elseif sName == self.L["Tower Platform"] then
+        if not bGreenRoomMarkerDisplayed then
+            bGreenRoomMarkerDisplayed = true
+            for k, tPosition in next, GREEN_ROOM_MARKERS do
+                core:SetWorldMarker("GREEN_ROOM_MARKERS_" .. k, k, tPosition)
+            end
+        end
     end
 end
 
 function mod:OnUnitDestroyed(unit, sName)
-    local unitId = unit:GetId()
-
     if sName == self.L["Holo Hand"] then
+        local unitId = unit:GetId()
         if unitId then
             core:DropPixie(unitId .. "_1")
         end
@@ -322,22 +396,22 @@ function mod:OnUnitDestroyed(unit, sName)
         phase2_blueroom = false
     elseif sName == self.L["Mobius Physics Constructor"] then
         core:DropPixie(unit:GetId())
+    elseif sName == self.L["Tower Platform"] then
+        if bGreenRoomMarkerDisplayed then
+            bGreenRoomMarkerDisplayed = false
+            for k, tPosition in next, GREEN_ROOM_MARKERS do
+                core:DropWorldMarker("GREEN_ROOM_MARKERS_" .. k)
+            end
+        end
     end
 end
 
 function mod:OnBuffApplied(unitName, splId, unit)
-    local eventTime = GameLib.GetGameTime()
     if phase2_blueroom and unitName == self.L["Infinite Logic Loop"] then
-        local tSpell = GameLib.GetSpell(splId)
-        local strSpellName
-        if tSpell then
-            strSpellName = tostring(tSpell:GetName())
-        else
-            Print("Unknown tSpell")
-        end
+        local sSpellName = GameLib.GetSpell(splId):GetName()
 
         -- Todo change to SplId instead of name to reduce API calls
-        if strSpellName == "Green Reconstitution Matrix" then
+        if sSpellName == self.L["Green Reconstitution Matrix"] then
             local playerAssigned = getPlayerAssignment(phase2_blueroom_rotation["green"])
             if playerAssigned == strMyName then
                 core:AddMsg("BLUEPURGE", self.L["PURGE BLUE BOSS"], 5, mod:GetSetting("SoundBlueInterrupt", "Inferno"))
@@ -346,7 +420,7 @@ function mod:OnBuffApplied(unitName, splId, unit)
             greenBuffCount = greenBuffCount + 1
             phase2_blueroom_rotation["green"][playerAssigned] = phase2_blueroom_rotation["green"][playerAssigned] + 1
             if not buffCountTimer then buffCountTimer = true self:ScheduleTimer("ResetBuffCount", 13) end
-        elseif strSpellName == "Blue Disruption Matrix" then
+        elseif sSpellName == self.L["Blue Disruption Matrix"] then
             local playerAssigned = getPlayerAssignment(phase2_blueroom_rotation["blue"])
             if playerAssigned == strMyName then
                 core:AddMsg("BLUEPURGE", self.L["PURGE BLUE BOSS"], 5, mod:GetSetting("SoundBlueInterrupt", "Inferno"))
@@ -355,7 +429,7 @@ function mod:OnBuffApplied(unitName, splId, unit)
             phase2_blueroom_rotation["blue"][playerAssigned] = phase2_blueroom_rotation["blue"][playerAssigned] + 1
             blueBuffCount = blueBuffCount + 1
             if not buffCountTimer then buffCountTimer = true self:ScheduleTimer("ResetBuffCount", 13) end
-        elseif strSpellName == "Red Empowerment Matrix" then
+        elseif sSpellName == self.L["Red Empowerment Matrix"] then
             local playerAssigned = getPlayerAssignment(phase2_blueroom_rotation["red"])
             if playerAssigned == strMyName then
                 core:AddMsg("BLUEPURGE", self.L["PURGE BLUE BOSS"], 5, mod:GetSetting("SoundBlueInterrupt", "Inferno"))
@@ -383,16 +457,14 @@ function mod:OnHealthChanged(unitName, health)
 end
 
 function mod:OnSpellCastStart(unitName, castName, unit)
-    local eventTime = GameLib.GetGameTime()
     if unitName == self.L["Avatus"] and castName == self.L["Obliteration Beam"] then
-        core:AddMsg("BEAMS", self.L["GO TO SIDES !"], 5, mod:GetSetting("SoundObliterationBeam", "RunAway"))
         mod:RemoveTimerBar("OBBEAM")
-        -- check if next ob beam in {obliteration_beam_timer} sec doesn't happen during a gungrid which takes 20 sec
-        if gungrid_time + gungrid_timer + 20 < eventTime + obliteration_beam_timer then
-            mod:AddTimerBar("OBBEAM", "Obliteration Beam", obliteration_beam_timer, mod:GetSetting("SoundObliterationBeam"))
+        -- check if next ob beam in sec doesn't happen during a gungrid which takes 20 sec
+        if gungrid_time + 132 < GetGameTime() + 37 then
+            mod:AddTimerBar("OBBEAM", "Obliteration Beam", 37, mod:GetSetting("SoundObliterationBeam"))
         end
     elseif unitName == self.L["Holo Hand"] and castName == self.L["Crushing Blow"] then
-        local playerUnit = GameLib.GetPlayerUnit()
+        local playerUnit = GetPlayerUnit()
         for _, hand in pairs(holo_hands) do
             local distance_to_hand = self:GetDistanceBetweenUnits(playerUnit, hand["unit"])
             hand["distance"] = distance_to_hand
@@ -415,12 +487,11 @@ function mod:OnSpellCastStart(unitName, castName, unit)
 end
 
 function mod:OnChatDC(message)
-    local eventTime = GameLib.GetGameTime()
     if message:find(self.L["Gun Grid Activated"]) then
-        gungrid_time = eventTime
+        gungrid_time = GetGameTime()
         core:AddMsg("GGRIDMSG", self.L["Gun Grid NOW!"], 5, mod:GetSetting("SoundGunGrid", "Beware"))
-        mod:AddTimerBar("GGRID", "~Gun Grid", gungrid_timer, mod:GetSetting("SoundGunGrid"))
-        mod:AddTimerBar("HHAND", "Holo Hands spawn", 22)
+        mod:AddTimerBar("GGRID", "~Gun Grid", 112, mod:GetSetting("SoundGunGrid"))
+        mod:AddTimerBar("HHAND", "Holo Hand", 22)
     end
     if message:find(self.L["Portals have opened!"]) then
         phase2 = true
@@ -430,21 +501,14 @@ function mod:OnChatDC(message)
     end
 end
 
-function mod:OnChatMessage(channelCurrent, tMessage)
-    local strChannelName = channelCurrent:GetName()
-    if strChannelName == "Party" and phase2 then
-        local msg = tMessage.arMessageSegments[1].strText:lower()
-        local strSender = tMessage["strSender"]:gsub(NO_BREAK_SPACE, " ")
-
-        if msg == "red" then
-            if not phase2_blueroom_rotation["red"] then phase2_blueroom_rotation["red"] = {} end
-            phase2_blueroom_rotation["red"][strSender] = 1
-        elseif msg == "green" then
-            if not phase2_blueroom_rotation["green"] then phase2_blueroom_rotation["green"] = {} end
-            phase2_blueroom_rotation["green"][strSender] = 1
-        elseif msg == "blue" then
-            if not phase2_blueroom_rotation["blue"] then phase2_blueroom_rotation["blue"] = {} end
-            phase2_blueroom_rotation["blue"][strSender] = 1
+function mod:OnPartyMessage(sMessage, sSender)
+    if phase2 then
+        sMessage = sMessage:lower()
+        if sMessage == "red" or sMessage == "green" or sMessage == "blue" then
+            if not phase2_blueroom_rotation[sMessage] then
+                phase2_blueroom_rotation[sMessage] = {}
+            end
+            phase2_blueroom_rotation[sMessage][sSender] = 1
         end
     end
 end
@@ -458,37 +522,28 @@ end
 
 function mod:OnUnitStateChanged(unit, bInCombat, sName)
     if unit:GetType() == "NonPlayer" and bInCombat then
-        if sName == self.L["Avatus"] and not encounter_started then
-            local eventTime = GameLib.GetGameTime()
-            encounter_started = true
-            phase2warn, phase2 = false, false
-            phase2_blueroom = false
-            phase2_blueroom_rotation = {}
-            redBuffCount = 1
-            greenBuffCount = 1
-            blueBuffCount = 1
-            buffCountTimer = false
-            gungrid_time = eventTime + gungrid_timer
-            holo_hands = {}
-            strMyName = GameLib.GetPlayerUnit():GetName()
+        if sName == self.L["Avatus"] then
             core:AddUnit(unit)
             core:WatchUnit(unit)
             if mod:GetSetting("LineCleaveBoss") then
                 core:AddPixie(unit:GetId(), 2, unit, nil, "Green", 10, 22, 0)
             end
 
-            mod:AddTimerBar("OBBEAM", "Obliteration Beam", obliteration_beam_timer, mod:GetSetting("SoundObliterationBeam"))
-            mod:AddTimerBar("GGRID", "~Gun Grid", gungrid_timer, mod:GetSetting("SoundGunGrid"))
-            if mod:GetSetting("OtherHandSpawnMarkers") then
-                core:SetWorldMarker("HAND1", self.L["Hand %u"]:format(1), handpos["hand1"])
-                core:SetWorldMarker("HAND2", self.L["Hand %u"]:format(2), handpos["hand2"])
+            if not encounter_started then
+                encounter_started = true
+                gungrid_time = GetGameTime() + 20
+
+                mod:AddTimerBar("OBBEAM", "Obliteration Beam", 69, mod:GetSetting("SoundObliterationBeam"))
+                mod:AddTimerBar("GGRID", "~Gun Grid", 20, mod:GetSetting("SoundGunGrid"))
+                if mod:GetSetting("OtherHandSpawnMarkers") then
+                    core:SetWorldMarker("HAND1", self.L["Hand %u"]:format(1), HAND_MAKERS["hand1"])
+                    core:SetWorldMarker("HAND2", self.L["Hand %u"]:format(2), HAND_MAKERS["hand2"])
+                end
+                if mod:GetSetting("OtherDirectionMarkers") then
+                    core:SetWorldMarker("NORTH", self.L["MARKER North"], CARDINAL_MARKERS["north"])
+                    core:SetWorldMarker("SOUTH", self.L["MARKER South"], CARDINAL_MARKERS["south"])
+                end
             end
-            if mod:GetSetting("OtherDirectionMarkers") then
-                core:SetWorldMarker("NORTH", self.L["MARKER North"], referencePos["north"])
-                core:SetWorldMarker("SOUTH", self.L["MARKER South"], referencePos["south"])
-            end
-            gungrid_timer = 112
-            obliteration_beam_timer = 37
         elseif sName == self.L["Infinite Logic Loop"] then
             local strRedBuffs = "Red Buffs:"
             local strGreenBuffs = "Green Buffs:"

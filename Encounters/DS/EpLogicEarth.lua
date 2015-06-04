@@ -160,7 +160,6 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
             mod:AddTimerBar("STAR", self.L["STARS"]:format(""), 60)
             core:AddUnit(unit)
             core:WatchUnit(unit)
-            core:RaidDebuff()
         elseif sName == self.L["Crystalline Matrix"] then
             pilarCount = pilarCount + 1
         end

@@ -237,7 +237,6 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
             end
         elseif sName == self.L["Pyrobane"] then
             core:AddUnit(unit)
-            core:RaidDebuff()
             mod:AddTimerBar("BOMBS", "BOMBS", 30)
             mod:AddTimerBar("TOMB", "ICE TOMB", 26)
         end
