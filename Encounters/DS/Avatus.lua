@@ -122,9 +122,9 @@ mod:RegisterFrenchLocale({
     ["Obliteration Beam"] = "Rayon de suppression",
     -- BuffName with many ID.
     ["Holo Hand Spawned"] = "Holo-main Apparition",
-    -- ["Red Empowerment Matrix"] = "Red Empowerment Matrix",
-    -- ["Blue Disruption Matrix"] = "Blue Disruption Matrix",
-    -- ["Green Reconstitution Matrix"] = "Green Reconstitution Matrix",
+    ["Red Empowerment Matrix"] = "Matrice de renforcement rouge",
+    ["Blue Disruption Matrix"] = "Matrice disruptive bleue",
+    ["Green Reconstitution Matrix"] = "Matrice de reconstitution verte",
     -- Bar and messages.
     ["PURGE BLUE BOSS"] = "PURGE BOSS BLEUE",
     ["P2 SOON !"] = "P2 BIENTÔT !",
