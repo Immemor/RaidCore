@@ -423,10 +423,10 @@ function RaidCore:OnDocLoaded()
 
     -- Send version information to OneVersion Addon.
     local fNumber = RAIDCORE_CURRENT_VERSION:gmatch("%d+")
-    local sPatch = RAIDCORE_CURRENT_VERSION:gmatch("%a+")()
+    local sSuffix = RAIDCORE_CURRENT_VERSION:gmatch("%a+")()
     local nMajor, nMinor = fNumber(), fNumber()
-    local nPatch = sPatch == "alpha" and 0 or sPatch == "beta" and 1 or 2
-    Event_FireGenericEvent("OneVersion_ReportAddonInfo", "RaidCore", nMajor, nMinor, nPatch)
+    local nSuffix = sSuffix == "alpha" and -2 or sSuffix == "beta" and -1 or 0
+    Event_FireGenericEvent("OneVersion_ReportAddonInfo", "RaidCore", nMajor, nMinor, 0, nSuffix)
 
     -- Initialize the Zone Detection.
     self:OnCheckMapZone()
