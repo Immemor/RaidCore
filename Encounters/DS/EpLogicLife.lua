@@ -47,7 +47,7 @@ mod:RegisterFrenchLocale({
     -- Unit names.
     ["Essence of Life"] = "Essence de vie",
     ["Essence of Logic"] = "Essence de logique",
-    ["Alphanumeric Hash"] = "Hachis alphanumérique",
+    ["Alphanumeric Hash"] = "Alphanumeric Hash",
     ["Life Force"] = "Force vitale",
     ["Mnemesis"] = "Mnémésis",
     ["Visceralus"] = "Visceralus",
