@@ -48,6 +48,10 @@ mod:RegisterGermanLocale({
     ["Bomb %u"] = "Bombe %u",
     ["BOOOM !"] = "BOOOM !",
 })
+-- Default settings.
+-- Timers default configs.
+mod:RegisterDefaultTimerBarConfigs({
+})
 
 ----------------------------------------------------------------------------------------------------
 -- Constants.

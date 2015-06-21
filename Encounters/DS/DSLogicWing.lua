@@ -74,6 +74,7 @@ mod:RegisterGermanLocale({
     --["BOMB"] = "BOMB", -- TODO: German translation missing !!!!
     ["BERSERK"] = "BERSERK",
 })
+-- Timers default configs.
 mod:RegisterDefaultTimerBarConfigs({
     ["BOMB"] = { sColor = "xkcdAlgaeGreen" },
     ["CUBE"] = { sColor = "xkcdArmyGreen" },

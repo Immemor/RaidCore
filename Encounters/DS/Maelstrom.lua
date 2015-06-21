@@ -90,6 +90,15 @@ mod:RegisterGermanLocale({
     ["EAST"] = "E",
     ["WEST"] = "W",
 })
+-- Default settings.
+mod:RegisterDefaultSetting("LineWindWalls")
+mod:RegisterDefaultSetting("LineWeatherStations")
+mod:RegisterDefaultSetting("LineCleaveBoss")
+mod:RegisterDefaultSetting("SoundIceBreath")
+mod:RegisterDefaultSetting("SoundCrystallize")
+mod:RegisterDefaultSetting("SoundTyphoon")
+mod:RegisterDefaultSetting("SoundWeatherStationSwitch")
+-- Timers default configs.
 mod:RegisterDefaultTimerBarConfigs({
     ["STATION"] = { sColor = "xkcdOrangeYellow" },
     ["JUMP"] = { sColor = "xkcdSunYellow" },
@@ -118,9 +127,11 @@ function mod:OnBossEnable()
 end
 
 function mod:OnUnitCreated(unit, sName)
-    if sName == self.L["Wind Wall"] and mod:GetSetting("LineWindWalls") then
-        core:AddPixie(unit:GetId().."_1", 2, unit, nil, "Green", 10, 20, 0)
-        core:AddPixie(unit:GetId().."_2", 2, unit, nil, "Green", 10, 20, 180)
+    if sName == self.L["Wind Wall"] then
+        if mod:GetSetting("LineWindWalls") then
+            core:AddPixie(unit:GetId().."_1", 2, unit, nil, "Green", 10, 20, 0)
+            core:AddPixie(unit:GetId().."_2", 2, unit, nil, "Green", 10, 20, 180)
+        end
     elseif sName == self.L["Weather Station"] then
         local stationPos = unit:GetPosition()
         core:AddUnit(unit)
@@ -147,11 +158,11 @@ function mod:OnSpellCastStart(unitName, castName, unit)
             stationCount = 0
             mod:AddTimerBar("STATION", self.L["[%u] STATION"]:format(stationCount + 1), 13)
         elseif castName == self.L["Ice Breath"] then
-            core:AddMsg("BREATH", self.L["ICE BREATH"], 5, mod:GetSetting("SoundIcyBreath", "RunAway"))
+            core:AddMsg("BREATH", self.L["ICE BREATH"], 5, mod:GetSetting("SoundIceBreath") and "RunAway")
         elseif castName == self.L["Crystallize"] then
-            core:AddMsg("BREATH", self.L["ICE BREATH"], 5, mod:GetSetting("SoundCrystallize", "Beware"))
+            core:AddMsg("BREATH", self.L["ICE BREATH"], 5, mod:GetSetting("SoundCrystallize") and "Beware")
         elseif castName == self.L["Typhoon"] then
-            core:AddMsg("BREATH", self.L["TYPHOON"], 5, mod:GetSetting("SoundTyphoon", "Beware"))
+            core:AddMsg("BREATH", self.L["TYPHOON"], 5, mod:GetSetting("SoundTyphoon") and "Beware")
         end
     end
 end
@@ -183,10 +194,10 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
                 stationCount,
                 (stationPos.z > bossPos.z) and self.L["SOUTH"] or self.L["NORTH"],
                 (stationPos.x > bossPos.x) and self.L["EAST"] or self.L["WEST"])
-                core:AddMsg(station_name, text, 5, mod:GetSetting("SoundWeatherStationSwitch", "Info"), "Blue")
+                core:AddMsg(station_name, text, 5, mod:GetSetting("SoundWeatherStationSwitch") and "Info", "Blue")
             else
                 local text = self.L["[%u] STATION"]:format(stationCount)
-                core:AddMsg(station_name, text, 5, mod:GetSetting("SoundWeatherStationSwitch", "Info"), "Blue")
+                core:AddMsg(station_name, text, 5, mod:GetSetting("SoundWeatherStationSwitch") and "Info", "Blue")
             end
             local text = self.L["[%u] STATION"]:format(stationCount + 1)
             mod:AddTimerBar("STATION", text, 10)

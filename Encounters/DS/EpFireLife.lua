@@ -57,6 +57,14 @@ mod:RegisterGermanLocale({
     --["You are rooted"] = "You are rooted", -- TODO: German translation missing !!!!
     --["MIDPHASE"] = "MIDPHASE", -- TODO: German translation missing !!!!
 })
+-- Default settings.
+mod:RegisterDefaultSetting("SoundRooted")
+mod:RegisterDefaultSetting("SoundNoHealDebuff")
+mod:RegisterDefaultSetting("SoundBlindingLight")
+mod:RegisterDefaultSetting("OtherRootedPlayersMarkers")
+mod:RegisterDefaultSetting("LineLifeOrbs")
+mod:RegisterDefaultSetting("LineFlameWaves")
+-- Timers default configs.
 mod:RegisterDefaultTimerBarConfigs({
     ["MID"] = { sColor = "xkcdLightOrange" },
 })
@@ -123,7 +131,7 @@ function mod:OnDebuffApplied(unitName, splId, unit)
 
     if splId == DEBUFFID_PRIMAL_ENTANGLEMENT or splId == DEBUFFIF__TODO__ then
         if unitName == strMyName then
-            core:AddMsg("ROOT", self.L["You are rooted"], 5, mod:GetSetting("SoundRooted", "Info"))
+            core:AddMsg("ROOT", self.L["You are rooted"], 5, mod:GetSetting("SoundRooted") and "Info")
         end
         if mod:GetSetting("OtherRootedPlayersMarkers") then
             core:MarkUnit(unit, nil, "ROOT")
@@ -134,7 +142,7 @@ function mod:OnDebuffApplied(unitName, splId, unit)
             CheckRootTimer = self:ScheduleRepeatingTimer("CheckRootTracker", 1)
         end
     elseif strSpellName == "Life Force Shackle" and unitName == strMyName then
-        core:AddMsg("NOHEAL", "No-Healing Debuff!", 5, mod:GetSetting("SoundNoHealDebuff", "Alarm"))
+        core:AddMsg("NOHEAL", "No-Healing Debuff!", 5, mod:GetSetting("SoundNoHealDebuff") and "Alarm")
     end
 end
 
@@ -166,7 +174,7 @@ function mod:OnSpellCastStart(unitName, castName, unit)
     if unitName == self.L["Visceralus"] and castName == self.L["Blinding Light"] then
         local playerUnit = GameLib.GetPlayerUnit()
         if self:GetDistanceBetweenUnits(unit, playerUnit) < 33 then
-            core:AddMsg("BLIND", self.L["Blinding Light"], 5, mod:GetSetting("SoundBlindingLight", "Beware"))
+            core:AddMsg("BLIND", self.L["Blinding Light"], 5, mod:GetSetting("SoundBlindingLight") and "Beware")
         end
     end
 end

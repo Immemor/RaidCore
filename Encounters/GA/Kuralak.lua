@@ -117,6 +117,10 @@ mod:RegisterGermanLocale({
     ["MARKER east"] = "O",
     ["MARKER west"] = "W",
 })
+-- Default settings.
+-- Timers default configs.
+mod:RegisterDefaultTimerBarConfigs({
+})
 
 ----------------------------------------------------------------------------------------------------
 -- Constants.

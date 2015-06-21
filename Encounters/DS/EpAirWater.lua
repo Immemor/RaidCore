@@ -63,6 +63,15 @@ mod:RegisterGermanLocale({
     --["TWIRL ON YOU!"] = "TWIRL ON YOU!", -- TODO: German translation missing !!!!
     --["TWIRL"] = "TWIRL", -- TODO: German translation missing !!!!
 })
+-- Default settings.
+mod:RegisterDefaultSetting("SoundMidphase")
+mod:RegisterDefaultSetting("SoundIcestorm")
+mod:RegisterDefaultSetting("SoundTwirl")
+mod:RegisterDefaultSetting("SoundMoO")
+mod:RegisterDefaultSetting("SoundFrostTombsCountDown")
+mod:RegisterDefaultSetting("OtherTwirlWarning")
+mod:RegisterDefaultSetting("OtherTwirlPlayerMarkers")
+-- Timers default configs.
 mod:RegisterDefaultTimerBarConfigs({
     ["MIDPHASE"] = { sColor = "xkcdLavenderBlue" },
     ["TOMB"] = { sColor = "xkcdDarkishBlue" },
@@ -108,9 +117,9 @@ function mod:OnSpellCastStart(unitName, castName, unit)
         if castName == self.L["Tsunami"] then
             phase2 = true
             mooCount = mooCount + 1
-            core:AddMsg("PHASE2", self.L["Tsunami"]:upper(), 5, mod:GetSetting("SoundMidphase", "Alert"))
+            core:AddMsg("PHASE2", self.L["Tsunami"]:upper(), 5, mod:GetSetting("SoundMidphase") and "Alert")
         elseif castName == self.L["Glacial Icestorm"] then
-            core:AddMsg("ICESTORM", self.L["ICESTORM"], 5, mod:GetSetting("SoundIcestorm", "RunAway"))
+            core:AddMsg("ICESTORM", self.L["ICESTORM"], 5, mod:GetSetting("SoundIcestorm") and "RunAway")
         end
     end
 end
@@ -118,14 +127,14 @@ end
 function mod:OnSpellCastEnd(unitName, castName)
     if unitName == self.L["Hydroflux"] and castName == self.L["Tsunami"] then
         mod:AddTimerBar("MIDPHASE", "~Middle Phase", 88, mod:GetSetting("SoundMidphase"))
-        mod:AddTimerBar("TOMB", "~Frost Tombs", 30, mod:GetSetting("SoundFrostTombs"))
+        mod:AddTimerBar("TOMB", "~Frost Tombs", 30, mod:GetSetting("SoundFrostTombsCountDown"))
     end
 end
 
 function mod:OnBuffApplied(unitName, splId, unit)
     if phase2 and (splId == 69959 or splId == 47075) then
         phase2 = false
-        core:AddMsg("MOO", self.L["MOO !"], 5, mod:GetSetting("SoundMoO", "Info"), "Blue")
+        core:AddMsg("MOO", self.L["MOO !"], 5, mod:GetSetting("SoundMoO") and "Info", "Blue")
         mod:AddTimerBar("MOO", "MOO PHASE", 10, mod:GetSetting("SoundMoO"))
         if mooCount == 2 then
             mooCount = 0
@@ -138,7 +147,7 @@ function mod:OnDebuffApplied(unitName, splId, unit)
     local eventTime = GameLib.GetGameTime()
     if splId == 70440 then -- Twirl ability
         if unitName == myName and mod:GetSetting("OtherTwirlWarning") then
-            core:AddMsg("TWIRL", self.L["TWIRL ON YOU!"], 5, mod:GetSetting("SoundTwirl", "Inferno"))
+            core:AddMsg("TWIRL", self.L["TWIRL ON YOU!"], 5, mod:GetSetting("SoundTwirl") and "Inferno")
         end
         if mod:GetSetting("OtherTwirlPlayerMarkers") then
             core:MarkUnit(unit, nil, self.L["TWIRL"])
@@ -188,7 +197,7 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
             core:AddUnit(unit)
             core:WatchUnit(unit)
             mod:AddTimerBar("MIDPHASE", "Middle Phase", 60, mod:GetSetting("SoundMidphase"))
-            mod:AddTimerBar("TOMB", "~Frost Tombs", 30, mod:GetSetting("SoundFrostTombs"))
+            mod:AddTimerBar("TOMB", "~Frost Tombs", 30, mod:GetSetting("SoundFrostTombsCountDown"))
         end
     end
 end

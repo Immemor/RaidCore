@@ -117,6 +117,10 @@ mod:RegisterGermanLocale({
     ["BIG SPEW"] = "GROßES BRECHEN",
     ["NEXT BIG SPEW"] = "NÄCHSTES GROßES BRECHEN",
 })
+-- Default settings.
+-- Timers default configs.
+mod:RegisterDefaultTimerBarConfigs({
+})
 
 ----------------------------------------------------------------------------------------------------
 -- Constants.

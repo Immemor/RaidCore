@@ -99,6 +99,21 @@ mod:RegisterGermanLocale({
     ["MARKER East"] = "O",
     ["MARKER West"] = "W",
 })
+-- Default settings.
+mod:RegisterDefaultSetting("SoundSnakeOnYou")
+mod:RegisterDefaultSetting("SoundSnakeOnOther")
+mod:RegisterDefaultSetting("SoundNoHealDebuff")
+mod:RegisterDefaultSetting("SoundBlindingLight")
+mod:RegisterDefaultSetting("SoundDefrag")
+mod:RegisterDefaultSetting("SoundEnrageCountDown")
+mod:RegisterDefaultSetting("OtherSnakePlayerMarkers")
+mod:RegisterDefaultSetting("OtherNoHealDebuffPlayerMarkers")
+mod:RegisterDefaultSetting("OtherRootedPlayersMarkers")
+mod:RegisterDefaultSetting("OtherDirectionMarkers")
+mod:RegisterDefaultSetting("LineTetrisBlocks")
+mod:RegisterDefaultSetting("LineLifeOrbs")
+mod:RegisterDefaultSetting("LineCleaveVisceralus")
+-- Timers default configs.
 mod:RegisterDefaultTimerBarConfigs({
     ["DEFRAG"] = { sColor = "xkcdAlgaeGreen" },
     ["DEFRAG_EXPLOSION"] = { sColor = "xkcdBluegreen" },
@@ -139,9 +154,9 @@ end
 function mod:OnDebuffApplied(unitName, splId, unit)
     if DEBUFF__SNAKE_SNACK == splId then
         if unit == GetPlayerUnit() then
-            core:AddMsg("SNAKE", self.L["SNAKE ON YOU!"], 5, mod:GetSetting("SoundSnake", "RunAway"))
+            core:AddMsg("SNAKE", self.L["SNAKE ON YOU!"], 5, mod:GetSetting("SoundSnakeOnYou") and "RunAway")
         else
-            core:AddMsg("SNAKE", self.L["SNAKE ON %s!"]:format(unitName), 5, mod:GetSetting("SoundSnake", "Info"))
+            core:AddMsg("SNAKE", self.L["SNAKE ON %s!"]:format(unitName), 5, mod:GetSetting("SoundSnakeOnOther") and "Info")
         end
         if mod:GetSetting("OtherSnakePlayerMarkers") then
             core:MarkUnit(unit, nil, self.L["SNAKE"]) 
@@ -151,7 +166,7 @@ function mod:OnDebuffApplied(unitName, splId, unit)
             core:MarkUnit(unit, nil, self.L["NO HEAL DEBUFF"])
         end
         if unit == GetPlayerUnit() then
-            core:AddMsg("NOHEAL", self.L["No-Healing Debuff!"], 5, mod:GetSetting("SoundNoHealDebuff", "Alarm"))
+            core:AddMsg("NOHEAL", self.L["No-Healing Debuff!"], 5, mod:GetSetting("SoundNoHealDebuff") and "Alarm")
         end
     elseif DEBUFF__THORNS == splId then
         if mod:GetSetting("OtherRootedPlayersMarkers") then
@@ -215,13 +230,13 @@ function mod:OnSpellCastStart(unitName, castName, unit)
     local eventTime = GameLib.GetGameTime()
     if unitName == self.L["Visceralus"] and castName == self.L["Blinding Light"] then
         if self:GetDistanceBetweenUnits(unit, GetPlayerUnit()) < 33 then
-            core:AddMsg("BLIND", self.L["Blinding Light"], 5, mod:GetSetting("SoundBlindingLight", "Beware"))
+            core:AddMsg("BLIND", self.L["Blinding Light"], 5, mod:GetSetting("SoundBlindingLight") and "Beware")
         end
     elseif unitName == self.L["Mnemesis"] and castName == self.L["Defragment"] then
-        core:StopBar("DEFRAG")
-        mod:AddTimerBar("DEFRAG", self.L["~DEFRAG CD"], 40, mod:GetSetting("SoundDefrag")) -- Defrag is unreliable, but seems to take at least this long.
+        -- Defrag is unreliable, but seems to take at least this long.
+        mod:AddTimerBar("DEFRAG", self.L["~DEFRAG CD"], 40, mod:GetSetting("SoundDefrag"))
         mod:AddTimerBar("DEFRAG_EXPLOSION", self.L["Defrag Explosion"], 9, mod:GetSetting("SoundDefrag"))
-        core:AddMsg("DEFRAG", self.L["DEFRAG"], 5, mod:GetSetting("SoundDefrag", "Beware"))
+        core:AddMsg("DEFRAG", self.L["DEFRAG"], 5, mod:GetSetting("SoundDefrag") and "Beware")
     end
 end
 
@@ -242,7 +257,7 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
             midphase = false
             core:AddUnit(unit)
             mod:AddTimerBar("DEFRAG", self.L["~DEFRAG CD"], 21, mod:GetSetting("SoundDefrag"))
-            mod:AddTimerBar("ENRAGE", self.L["ENRAGE"], 480, mod:GetSetting("SoundEnrage"))
+            mod:AddTimerBar("ENRAGE", self.L["ENRAGE"], 480, mod:GetSetting("SoundEnrageCountDown"))
         end
     end
 end

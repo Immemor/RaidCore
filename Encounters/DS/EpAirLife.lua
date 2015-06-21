@@ -87,6 +87,23 @@ mod:RegisterGermanLocale({
     --["Lightning on YOU"] = "Lightning on YOU", -- TODO: German translation missing !!!!
     --["Recently Saved!"] = "Recently Saved!", -- TODO: German translation missing !!!!
 })
+-- Default settings.
+mod:RegisterDefaultSetting("LineLifeOrbs")
+mod:RegisterDefaultSetting("LineHealingTrees")
+mod:RegisterDefaultSetting("LineCleaveAileron")
+mod:RegisterDefaultSetting("SoundHealingTreeCountDown")
+mod:RegisterDefaultSetting("SoundMidphaseCountDown")
+mod:RegisterDefaultSetting("SoundNoHealDebuff")
+mod:RegisterDefaultSetting("SoundLightning")
+mod:RegisterDefaultSetting("SoundTwirl")
+mod:RegisterDefaultSetting("SoundBlindingLight")
+mod:RegisterDefaultSetting("OtherTwirlWarning")
+mod:RegisterDefaultSetting("OtherTwirlPlayerMarkers")
+mod:RegisterDefaultSetting("OtherNoHealDebuffPlayerMarkers")
+mod:RegisterDefaultSetting("OtherNoHealDebuff")
+mod:RegisterDefaultSetting("OtherLightningMarkers")
+mod:RegisterDefaultSetting("OtherBlindingLight")
+-- Timers default configs.
 mod:RegisterDefaultTimerBarConfigs({
     ["THORN"] = { sColor = "xkcdBluegreen" },
     ["MIDEND"] = { sColor = "xkcdDarkgreen" },
@@ -159,7 +176,7 @@ function mod:OnUnitCreated(unit, sName)
             core:AddPixie(unit:GetId(), 1, GameLib.GetPlayerUnit(), unit, "Yellow", 5, 10, 10)
         end
         core:AddUnit(unit)
-        mod:AddTimerBar("LIFEKEEP", "Next Healing Tree", 30, mod:GetSetting("SoundHealingTree"))
+        mod:AddTimerBar("LIFEKEEP", "Next Healing Tree", 30, mod:GetSetting("SoundHealingTreeCountDown"))
     end
 end
 
@@ -167,7 +184,7 @@ function mod:OnUnitDestroyed(unit, sName)
     local eventTime = GameLib.GetGameTime()
     if midphase and sName == self.L["[DS] e395 - Air - Tornado"] then
         midphase = false
-        mod:AddTimerBar("MIDPHASE", "Middle Phase", 90, mod:GetSetting("SoundMidphase"))
+        mod:AddTimerBar("MIDPHASE", "Middle Phase", 90, mod:GetSetting("SoundMidphaseCountDown"))
     elseif sName == self.L["Life Force"] then
         core:DropPixie(unit:GetId())
     elseif sName == self.L["Lifekeeper"] then
@@ -180,7 +197,7 @@ function mod:OnDebuffApplied(unitName, splId, unit)
     local splName = GameLib.GetSpell(splId):GetName()
     if splId == 70440 then -- Twirl
         if unitName == myName and mod:GetSetting("OtherTwirlWarning") then
-            core:AddMsg("TWIRL", self.L["TWIRL ON YOU!"], 5, mod:GetSetting("SoundTwirl", "Inferno"))
+            core:AddMsg("TWIRL", self.L["TWIRL ON YOU!"], 5, mod:GetSetting("SoundTwirl") and "Inferno")
         end
 
         if mod:GetSetting("OtherTwirlPlayerMarkers") then
@@ -196,14 +213,14 @@ function mod:OnDebuffApplied(unitName, splId, unit)
             core:MarkUnit(unit, nil, self.L["NO HEAL DEBUFF"])
         end
         if unitName == strMyName and mod:GetSetting("OtherNoHealDebuff") then
-            core:AddMsg("NOHEAL", self.L["No-Healing Debuff!"], 5, mod:GetSetting("SoundNoHealDebuff", "Alarm"))
+            core:AddMsg("NOHEAL", self.L["No-Healing Debuff!"], 5, mod:GetSetting("SoundNoHealDebuff") and "Alarm")
         end
     elseif splName == "Lightning Strike" then
         if mod:GetSetting("OtherLightningMarkers") then
             core:MarkUnit(unit, nil, self.L["Lightning"])
         end
         if unitName == strMyName then
-            core:AddMsg("LIGHTNING", self.L["Lightning on YOU"], 5, mod:GetSetting("SoundLightning", "RunAway"))
+            core:AddMsg("LIGHTNING", self.L["Lightning on YOU"], 5, mod:GetSetting("SoundLightning") and "RunAway")
         end
     end
 end
@@ -224,7 +241,7 @@ function mod:OnSpellCastStart(unitName, castName, unit)
     if unitName == self.L["Visceralus"] and castName == self.L["Blinding Light"] and mod:GetSetting("OtherBlindingLight") then
         local playerUnit = GameLib.GetPlayerUnit()
         if self:GetDistanceBetweenUnits(unit, playerUnit) < 33 then
-            core:AddMsg("BLIND", self.L["Blinding Light"], 5, mod:GetSetting("SoundBlindingLight", "Beware"))
+            core:AddMsg("BLIND", self.L["Blinding Light"], 5, mod:GetSetting("SoundBlindingLight") and "Beware")
         end
     end
 end
@@ -272,7 +289,7 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
             midphase_start = eventTime + 90
             twirlCount = 0
 
-            mod:AddTimerBar("MIDPHASE", "Middle Phase", 90, mod:GetSetting("SoundMidphase"))
+            mod:AddTimerBar("MIDPHASE", "Middle Phase", 90, mod:GetSetting("SoundMidphaseCountDown"))
             mod:AddTimerBar("THORN", "Thorns", 20)
         end
     end

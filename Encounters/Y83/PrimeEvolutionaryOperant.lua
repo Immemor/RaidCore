@@ -54,6 +54,8 @@ mod:RegisterFrenchLocale({
 })
 mod:RegisterGermanLocale({
 })
+-- Default settings.
+-- Timers default configs.
 mod:RegisterDefaultTimerBarConfigs({
     ["NEXT_IRRADIATE"] = { sColor = "xkcdLightRed" },
 })

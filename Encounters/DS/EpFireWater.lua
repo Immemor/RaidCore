@@ -63,6 +63,16 @@ mod:RegisterGermanLocale({
     ["ICE TOMB"] = "EISGRAB",
     ["%d STACKS!"] = "%d STACKS!",
 })
+-- Default settings.
+mod:RegisterDefaultSetting("SoundBomb")
+mod:RegisterDefaultSetting("SoundIceTomb")
+mod:RegisterDefaultSetting("SoundHighDebuffStacks")
+mod:RegisterDefaultSetting("OtherBombPlayerMarkers")
+mod:RegisterDefaultSetting("LineBombPlayers")
+mod:RegisterDefaultSetting("LineIceTomb")
+mod:RegisterDefaultSetting("LineFlameWaves")
+mod:RegisterDefaultSetting("LineCleaveHydroflux")
+-- Timers default configs.
 mod:RegisterDefaultTimerBarConfigs({
     ["TOMB"] = { sColor = "xkcdBrightLightBlue" },
     ["BOMBS"] = { sColor = "xkcdRed" },
@@ -162,7 +172,7 @@ function mod:OnDebuffApplied(unitName, splId, unit)
         core:AddUnit(unit)
         firebomb_players[unitName] = unit
         if unit == GetPlayerUnit() then
-            core:AddMsg("BOMB", self.L["BOMBS UP !"], 5, mod:GetSetting("SoundBomb", "RunAway"))
+            core:AddMsg("BOMB", self.L["BOMBS UP !"], 5, mod:GetSetting("SoundBomb") and "RunAway")
             if mod:GetSetting("LineBombPlayers") then
                 self:ScheduleTimer("ApplyBombLines", 1, "fire")
             end
@@ -175,7 +185,7 @@ function mod:OnDebuffApplied(unitName, splId, unit)
         core:AddUnit(unit)
         frostbomb_players[unitName] = unit
         if unit == GetPlayerUnit() then
-            core:AddMsg("BOMB", self.L["BOMBS UP !"], 5, mod:GetSetting("SoundBomb", "RunAway"))
+            core:AddMsg("BOMB", self.L["BOMBS UP !"], 5, mod:GetSetting("SoundBomb") and "RunAway")
             if mod:GetSetting("LineBombPlayers") then
                 self:ScheduleTimer("ApplyBombLines", 1, "frost")
             end
@@ -201,7 +211,7 @@ function mod:OnUnitCreated(unit, sName)
         local timeOfEvent = GameLib.GetGameTime()
         if timeOfEvent - prev > 13 then
             prev = timeOfEvent
-            core:AddMsg("TOMB", self.L["ICE TOMB"], 5, mod:GetSetting("SoundIceTomb", "Alert"), "Blue")
+            core:AddMsg("TOMB", self.L["ICE TOMB"], 5, mod:GetSetting("SoundIceTomb") and "Alert", "Blue")
             mod:AddTimerBar("TOMB", "ICE TOMB", 15)
         end
         core:AddUnit(unit)
@@ -227,7 +237,7 @@ function mod:OnDebuffAppliedDose(unitName, splId, stack)
         if (self:Tank() and stack == 13) or (not self:Tank() and stack == 10) then
             if unitName == GetPlayerUnit():GetName() then
                 local sMessage = self.L["%d STACKS!"]:format(stack)
-                core:AddMsg("STACK", sMessage, 5, mod:GetSetting("SoundHighDebuffStacks", "Beware"))
+                core:AddMsg("STACK", sMessage, 5, mod:GetSetting("SoundHighDebuffStacks") and "Beware")
             end
         end
     end

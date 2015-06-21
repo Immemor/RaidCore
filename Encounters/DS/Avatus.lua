@@ -169,6 +169,22 @@ mod:RegisterGermanLocale({
     ["MARKER North"] = "N",
     ["MARKER South"] = "S",
 })
+-- Default settings.
+mod:RegisterDefaultSetting("LineCleaveBoss")
+mod:RegisterDefaultSetting("LineCleaveHands")
+mod:RegisterDefaultSetting("LineCleaveYellowRoomBoss")
+mod:RegisterDefaultSetting("LineCannons")
+mod:RegisterDefaultSetting("LineOrbsYellowRoom")
+mod:RegisterDefaultSetting("SoundObliterationBeam")
+mod:RegisterDefaultSetting("SoundBlueInterrupt")
+mod:RegisterDefaultSetting("SoundPortalPhase")
+mod:RegisterDefaultSetting("SoundHandInterrupt")
+mod:RegisterDefaultSetting("SoundBlindYellowRoom")
+mod:RegisterDefaultSetting("SoundGunGrid")
+mod:RegisterDefaultSetting("OtherHandSpawnMarkers")
+mod:RegisterDefaultSetting("OtherDirectionMarkers")
+mod:RegisterDefaultSetting("OtherGreenRoomMarkers")
+-- Timers default configs.
 mod:RegisterDefaultTimerBarConfigs({
     ["OBBEAM"] = { sColor = "xkcdBloodRed" },
     ["BLIND"] = { sColor = "xkcdBurntYellow" },
@@ -368,7 +384,7 @@ function mod:OnUnitCreated(unit, sName)
         core:WatchUnit(unit)
         phase2_blueroom = true
     elseif sName == self.L["Tower Platform"] then
-        if not bGreenRoomMarkerDisplayed then
+        if not bGreenRoomMarkerDisplayed and mod:GetSetting("OtherGreenRoomMarkers") then
             bGreenRoomMarkerDisplayed = true
             for k, tPosition in next, GREEN_ROOM_MARKERS do
                 core:SetWorldMarker("GREEN_ROOM_MARKERS_" .. k, k, tPosition)
@@ -414,7 +430,7 @@ function mod:OnBuffApplied(unitName, splId, unit)
         if sSpellName == self.L["Green Reconstitution Matrix"] then
             local playerAssigned = getPlayerAssignment(phase2_blueroom_rotation["green"])
             if playerAssigned == strMyName then
-                core:AddMsg("BLUEPURGE", self.L["PURGE BLUE BOSS"], 5, mod:GetSetting("SoundBlueInterrupt", "Inferno"))
+                core:AddMsg("BLUEPURGE", self.L["PURGE BLUE BOSS"], 5, mod:GetSetting("SoundBlueInterrupt") and "Inferno")
             end
             Print('[#' .. tostring(greenBuffCount) .. '] ' .. unitName .. " has GREEN buff - assigned to: " .. playerAssigned)
             greenBuffCount = greenBuffCount + 1
@@ -423,7 +439,7 @@ function mod:OnBuffApplied(unitName, splId, unit)
         elseif sSpellName == self.L["Blue Disruption Matrix"] then
             local playerAssigned = getPlayerAssignment(phase2_blueroom_rotation["blue"])
             if playerAssigned == strMyName then
-                core:AddMsg("BLUEPURGE", self.L["PURGE BLUE BOSS"], 5, mod:GetSetting("SoundBlueInterrupt", "Inferno"))
+                core:AddMsg("BLUEPURGE", self.L["PURGE BLUE BOSS"], 5, mod:GetSetting("SoundBlueInterrupt") and "Inferno")
             end
             Print('[#' .. tostring(blueBuffCount) .. '] ' .. unitName .. " has BLUE buff - assigned to: " .. playerAssigned)
             phase2_blueroom_rotation["blue"][playerAssigned] = phase2_blueroom_rotation["blue"][playerAssigned] + 1
@@ -432,7 +448,7 @@ function mod:OnBuffApplied(unitName, splId, unit)
         elseif sSpellName == self.L["Red Empowerment Matrix"] then
             local playerAssigned = getPlayerAssignment(phase2_blueroom_rotation["red"])
             if playerAssigned == strMyName then
-                core:AddMsg("BLUEPURGE", self.L["PURGE BLUE BOSS"], 5, mod:GetSetting("SoundBlueInterrupt", "Inferno"))
+                core:AddMsg("BLUEPURGE", self.L["PURGE BLUE BOSS"], 5, mod:GetSetting("SoundBlueInterrupt") and "Inferno")
             end
             Print('[#' .. tostring(redBuffCount) .. '] ' .. unitName .. " has RED buff - assigned to: " .. playerAssigned)
             phase2_blueroom_rotation["red"][playerAssigned] = phase2_blueroom_rotation["red"][playerAssigned] + 1
@@ -446,10 +462,10 @@ function mod:OnHealthChanged(unitName, health)
     if unitName == self.L["Avatus"] then
         if health >= 75 and health <= 77 and not phase2warn then
             phase2warn = true
-            core:AddMsg("AVAP2", self.L["P2 SOON !"], 5, mod:GetSetting("SoundPortalPhase", "Info"))
+            core:AddMsg("AVAP2", self.L["P2 SOON !"], 5, mod:GetSetting("SoundPortalPhase") and "Info")
         elseif health >= 50 and health <= 52 and not phase2warn then
             phase2warn = true
-            core:AddMsg("AVAP2", self.L["P2 SOON!"], 5, mod:GetSetting("SoundPortalPhase", "Info"))
+            core:AddMsg("AVAP2", self.L["P2 SOON!"], 5, mod:GetSetting("SoundPortalPhase") and "Info")
         elseif health >= 70 and health <= 72 and phase2warn then
             phase2warn = false
         end
@@ -478,18 +494,18 @@ function mod:OnSpellCastStart(unitName, castName, unit)
         end
         local sSpellName = closest_holo_hand["unit"]:GetCastName():gsub(NO_BREAK_SPACE, " ")
         if sSpellName == self.L["Crushing Blow"] then
-            core:AddMsg("CRBLOW", self.L["INTERRUPT CRUSHING BLOW!"], 5, mod:GetSetting("SoundHandInterrupt", "Inferno"))
+            core:AddMsg("CRBLOW", self.L["INTERRUPT CRUSHING BLOW!"], 5, mod:GetSetting("SoundHandInterrupt") and "Inferno")
         end
     elseif unitName == self.L["Mobius Physics Constructor"] and castName == self.L["Data Flare"] then
         mod:AddTimerBar("BLIND", "Blind", 29, mod:GetSetting("SoundBlindYellowRoom"))
-        core:AddMsg("BLIND", self.L["BLIND! TURN AWAY FROM BOSS"], 5, mod:GetSetting("SoundBlindYellowRoom", "Inferno"))
+        core:AddMsg("BLIND", self.L["BLIND! TURN AWAY FROM BOSS"], 5, mod:GetSetting("SoundBlindYellowRoom") and "Inferno")
     end
 end
 
 function mod:OnChatDC(message)
     if message:find(self.L["Gun Grid Activated"]) then
         gungrid_time = GetGameTime()
-        core:AddMsg("GGRIDMSG", self.L["Gun Grid NOW!"], 5, mod:GetSetting("SoundGunGrid", "Beware"))
+        core:AddMsg("GGRIDMSG", self.L["Gun Grid NOW!"], 5, mod:GetSetting("SoundGunGrid") and "Beware")
         mod:AddTimerBar("GGRID", "~Gun Grid", 112, mod:GetSetting("SoundGunGrid"))
         mod:AddTimerBar("HHAND", "Holo Hand", 22)
     end

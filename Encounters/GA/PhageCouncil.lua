@@ -77,6 +77,10 @@ mod:RegisterGermanLocale({
     ["P2 : SUBDUE"] = "P2 : ENTWAFFNEN",
     ["P2 : PILLARS"] = "P2 : GENERATOREN",
 })
+-- Default settings.
+-- Timers default configs.
+mod:RegisterDefaultTimerBarConfigs({
+})
 
 ----------------------------------------------------------------------------------------------------
 -- Constants.

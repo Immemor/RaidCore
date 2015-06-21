@@ -55,6 +55,14 @@ function EncounterPrototype:RegisterDefaultTimerBarConfigs(tConfig)
     self.tDefaultTimerBarsOptions = tConfig
 end
 
+-- Register a default setting which will be saved in user profile file.
+-- @param sKey  key to save/restore and use a setting.
+function EncounterPrototype:RegisterDefaultSetting(sKey)
+    assert(sKey)
+    assert(self.tDefaultSettings[sKey] == nil)
+    self.tDefaultSettings[sKey] = true
+end
+
 -- Create a timer bar.
 -- @param sKey  Index which will be used to match on AddTimerBar.
 -- @param sEnglishText  English text to search in language dictionnary.
@@ -74,7 +82,7 @@ function EncounterPrototype:AddTimerBar(sKey, sEnglishText, nDuration, bEmphasiz
         tOptions = {}
     end
     if bEmphasize ~= nil then
-        tOptions["bEmphasize"] = bEmphasize
+        tOptions["bEmphasize"] = bEmphasize and true
     end
     local tCallback = nil
     if type(fHandler) == "function" then
@@ -106,8 +114,18 @@ function EncounterPrototype:PrepareEncounter()
 end
 
 function EncounterPrototype:OnEnable()
+    -- Copy settings for fast and secure access.
+    self.tSettings = {}
+    local tSettings = RaidCore.db.profile.Encounters[self:GetName()]
+    if tSettings then
+        for k,v in next, tSettings do
+            self.tSettings[k] = v
+        end
+    end
+    -- TODO: Redefine this part.
     if self.SetupOptions then self:SetupOptions() end
     if type(self.OnBossEnable) == "function" then self:OnBossEnable() end
+
     Apollo.RegisterEventHandler("RAID_WIPE", "OnRaidWipe", self)
 end
 
@@ -147,14 +165,15 @@ function EncounterPrototype:RegisterFrenchLocale(Locales)
     RegisterLocale(self, "frFR", Locales)
 end
 
-function EncounterPrototype:GetSetting(setting, returnString)
-    if not setting then return false end
-    local settingValue = RaidCore.settings[self:GetName() ..  "_" .. setting]
-    if returnString and settingValue then
-        return returnString
-    else
-        return settingValue
+-- Get setting value through the key.
+-- @param sKey  index in the array.
+-- @return  the key itself or false.
+function EncounterPrototype:GetSetting(sKey)
+    if self.tSettings[sKey] == nil then
+        Print(("RaidCore warning: In '%s', setting \"%s\" don't exist."):format(self:GetName(), tostring(sKey)))
+        self.tSettings[sKey] = false
     end
+    return self.tSettings[sKey]
 end
 
 function EncounterPrototype:OnRaidWipe()
@@ -247,5 +266,7 @@ function RaidCore:NewEncounter(name, continentId, parentMapId, mapId)
     -- Retrieve Locale.
     local GeminiLocale = Apollo.GetPackage("Gemini:Locale-1.0").tPackage
     new.L = GeminiLocale:GetLocale("RaidCore_" .. name)
+    -- Create a empty array for settings.
+    new.tDefaultSettings = {}
     return new
 end

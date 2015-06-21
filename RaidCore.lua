@@ -14,7 +14,6 @@ require "ICCommLib"
 require "ICComm"
 
 local GeminiAddon = Apollo.GetPackage("Gemini:Addon-1.1").tPackage
-local GeminiDB = Apollo.GetPackage("Gemini:DB-1.0").tPackage
 local LogPackage = Apollo.GetPackage("Log-1.0").tPackage
 local JSON = Apollo.GetPackage("Lib:dkJSON-2.5").tPackage
 local RaidCore = GeminiAddon:NewAddon("RaidCore", false, {}, "Gemini:Timer-1.0")
@@ -63,189 +62,23 @@ local VCReply, VCtimer = {}, nil
 local CommChannelTimer = nil
 local empCD, empTimer = 5, nil
 
-local DefaultSettings = {
-    General = {
-        raidbars = {
-            isEnabled = true,
-            barSize = {
-                Width = 300,
-                Height = 25,
-            },
-            anchorFromTop = true,
-            barColor = "ff00007f",
-        },
-        message = {
-            isEnabled = true,
-            barSize = {
-                Width = 300,
-                Height = 25,
-            },
-            anchorFromTop = true,
-        },
-        unitmoni = {
-            isEnabled = true,
-            barSize = {
-                Width = 300,
-                Height = 25,
-            },
-            anchorFromTop = true,
-            barColor = "ff00007f",
-        },
-        bSoundEnabled = true,
-        bAcceptSummons = true,
-    },
-    -- Datascape Settings
-
-    -- System Daemons
-    SystemDaemons_LineOnModulesMidphase = true,
-    SystemDaemons_SoundPhase2 = true,
-    SystemDaemons_SoundPurge = true,
-    SystemDaemons_SoundWave = true,
-    SystemDaemons_SoundRepairSequence = true,
-    SystemDaemons_SoundPowerSurge = true,
-    SystemDaemons_OtherPillarMarkers = true,
-    SystemDaemons_OtherPurgePlayerMarkers = true,
-    SystemDaemons_OtherOverloadMarkers = true,
-    SystemDaemons_OtherDisconnectTimer = true,
-
-    -- Gloomclaw
-    Gloomclaw_SoundRuptureInterrupt = true,
-    Gloomclaw_SoundRuptureCountdown = true,
-    Gloomclaw_SoundCorruptingRays = true,
-    Gloomclaw_SoundSectionSwitch = true,
-    Gloomclaw_SoundCorruptionCountdown = true,
-    Gloomclaw_SoundMoOWarning = true,
-    Gloomclaw_SoundWaveWarning = true,
-    Gloomclaw_OtherLeftRightMarkers = true,
-    Gloomclaw_OtherMaulerMarkers = true,
-
-    -- Maelstrom
-    Maelstrom_LineWeatherStations = true,
-    Maelstrom_LineCleaveBoss = true,
-    Maelstrom_LineWindWalls = true,
-    Maelstrom_SoundIcyBreath = true,
-    Maelstrom_SoundTyphoon = true,
-    Maelstrom_SoundCrystallize = true,
-    Maelstrom_SoundWeatherStationSwitch = true,
-
-    -- Avatus
-    Avatus_LineCleaveBoss = true,
-    Avatus_LineCleaveHands = true,
-    Avatus_LineCannons = true,
-    Avatus_LineCleaveYellowRoomBoss = true,
-    Avatus_LineOrbsYellowRoom = true,
-    Avatus_SoundHandInterrupt = true,
-    Avatus_SoundObliterationBeam = true,
-    Avatus_SoundBlindYellowRoom = true,
-    Avatus_SoundPortalPhase = true,
-    Avatus_SoundBlueInterrupt = true,
-    Avatus_SoundGunGrid = true,
-    Avatus_OtherDirectionMarkers = true,
-    Avatus_OtherHandSpawnMarkers = true,
-
-    -- Limbo
-
-    -- Lattice
-    Lattice_LineDataDevourers = true,
-    Lattice_SoundBeam = true,
-    Lattice_SoundBigCast = true,
-    Lattice_SoundShieldPhase = true,
-    Lattice_SoundJumpPhase = true,
-    Lattice_SoundNewWave = true,
-    Lattice_SoundLaser = true,
-    Lattice_SoundExplosion = true,
-    Lattice_OtherPlayerBeamMarkers = true,
-    Lattice_OtherLogicWallMarkers = true,
-
-    -- Air/Earth
-    EpAirEarth_LineTornado = true,
-    EpAirEarth_LineCleaveAileron = true,
-    EpAirEarth_SoundMidphase = true,
-    EpAirEarth_SoundQuakeJump = true,
-    EpAirEarth_SoundSupercell = true,
-    EpAirEarth_SoundTornadoCountdown = true,
-    EpAirEarth_SoundMoO = true,
-
-    -- Air/Water
-    EpAirWater_SoundTwirl = true,
-    EpAirWater_SoundMoO = true,
-    EpAirWater_SoundIcestorm = true,
-    EpAirWater_SoundMidphase = true,
-    EpAirWater_SoundFrostTombs = true,
-    EpAirWater_OtherTwirlWarning = true,
-    EpAirWater_OtherTwirlPlayerMarkers = true,
-
-    -- Air/Life
-    EpAirLife_LineLifeOrbs = true,
-    EpAirLife_LineHealingTrees = true,
-    EpAirLife_LineCleaveAileron = true,
-    EpAirLife_SoundTwirl = true,
-    EpAirLife_SoundNoHealDebuff = true,
-    EpAirLife_SoundBlindingLight = true,
-    EpAirLife_SoundHealingTree = true,
-    EpAirLife_SoundMidphase = true,
-    EpAirLife_SoundLightning = true,
-    EpAirLife_OtherTwirlWarning = true,
-    EpAirLife_OtherNoHealDebuff = true,
-    EpAirLife_OtherBlindingLight = true,
-    EpAirLife_OtherTwirlPlayerMarkers = true,
-    EpAirLife_OtherNoHealDebuffPlayerMarkers = true,
-    EpAirLife_OtherLightningMarkers = true,
-
-    -- Fire/Water
-    EpFireWater_LineFlameWaves = true,
-    EpFireWater_LineCleaveHydroflux = true,
-    EpFireWater_LineBombPlayers = true,
-    EpFireWater_LineIceTomb = true,
-    EpFireWater_SoundBomb = true,
-    EpFireWater_SoundHighDebuffStacks = true,
-    EpFireWater_SoundIceTomb = true,
-    EpFireWater_OtherBombPlayerMarkers = true,
-
-    -- Fire/Life
-    EpFireLife_LineLifeOrbs = true,
-    EpFireLife_LineFlameWaves = true,
-    EpFireLife_SoundRooted = true,
-    EpFireLife_SoundBlindingLight = true,
-    EpFireLife_SoundNoHealDebuff = true,
-    EpFireLife_OtherRootedPlayersMarkers = true,
-
-    -- Fire/Earth
-
-    -- Logic/Earth
-    EpLogicEarth_LineObsidianOutcropping = true,
-    EpLogicEarth_SoundDefrag = true,
-    EpLogicEarth_SoundStars = true,
-    EpLogicEarth_SoundQuakeJump = true,
-    EpLogicEarth_SoundSnake = true,
-
-    -- Logic/Water
-    EpLogicWater_LineTetrisBlocks = true,
-    EpLogicWater_LineOrbs = true,
-    EpLogicWater_SoundDefrag = true,
-    EpLogicWater_SoundDataDisruptorDebuff = true,
-    EpLogicWater_SoundMidphase = true,
-    EpLogicWater_OtherWateryGraveTimer = true,
-    EpLogicWater_OtherOrbMarkers = true,
-
-    -- Logic/Life
-    EpLogicLife_LineTetrisBlocks = true,
-    EpLogicLife_LineLifeOrbs = true,
-    EpLogicLife_LineCleaveVisceralus = true,
-    EpLogicLife_SoundSnake = true,
-    EpLogicLife_SoundNoHealDebuff = true,
-    EpLogicLife_SoundBlindingLight = true,
-    EpLogicLife_SoundDefrag = true,
-    EpLogicLife_SoundEnrage = true,
-    EpLogicLife_OtherSnakePlayerMarkers = true,
-    EpLogicLife_OtherNoHealDebuffPlayerMarkers = true,
-    EpLogicLife_OtherRootedPlayersMarkers = true,
-    EpLogicLife_OtherDirectionMarkers = true,
-}
-
 ----------------------------------------------------------------------------------------------------
 -- Privates functions
 ----------------------------------------------------------------------------------------------------
+local function PrintErr(sMessage)
+    ChatSystemLib.PostOnChannel(ChatSystemLib.ChatChannel_Debug, sMessage, "RaidCore")
+end
+
+local function Split(str, sep)
+    assert(str)
+    sep = sep or "%s"
+    local r = {}
+    for str in string.gmatch(str, "([^"..sep.."]+)") do
+        table.insert(r, str)
+    end
+    return r
+end
+
 local function ManageDelayedUnit(nId, sName, bInCombat)
     local tMap = GetCurrentZoneMap()
     local id1 = tMap.continentId
@@ -316,82 +149,37 @@ function RaidCore:OnInitialize()
 
     local GeminiLocale = Apollo.GetPackage("Gemini:Locale-1.0").tPackage
     self.L = GeminiLocale:GetLocale("RaidCore")
+    local GeminiDB = Apollo.GetPackage("Gemini:DB-1.0").tPackage
+    self.db = GeminiDB:New(self, nil, true)
 end
 
 ----------------------------------------------------------------------------------------------------
 -- RaidCore OnDocLoaded
 ----------------------------------------------------------------------------------------------------
 function RaidCore:OnDocLoaded()
-    self:CombatInterface_Init(self)
-    self:BarManagersInit()
+    -- Send version information to OneVersion Addon.
+    local fNumber = RAIDCORE_CURRENT_VERSION:gmatch("%d+")
+    local sSuffix = RAIDCORE_CURRENT_VERSION:gmatch("%a+")()
+    local nMajor, nMinor = fNumber(), fNumber()
+    local nSuffix = sSuffix == "alpha" and -2 or sSuffix == "beta" and -1 or 0
+    Event_FireGenericEvent("OneVersion_ReportAddonInfo", "RaidCore", nMajor, nMinor, 0, nSuffix)
 
-    self.settings = self.settings or self:recursiveCopyTable(DefaultSettings)
-
-    self.wndConfig = Apollo.LoadForm(self.xmlDoc, "ConfigForm", nil, self)
-    self.wndConfig:Show(false)
-
-    self.wndTargetFrame = self.wndConfig:FindChild("TargetFrame")
-    self.wndConfigOptionsTargetFrame = self.wndConfig:FindChild("ConfigOptionsTargetFrame")
-    self.wndModuleList = {
-        DS = Apollo.LoadForm(self.xmlDoc, "ModuleList_DS", self.wndConfigOptionsTargetFrame, self),
+    -- Create default settings to provide to GeminiDB.
+    local tDefaultSettings = {
+        profile = {
+            version = RAIDCORE_CURRENT_VERSION,
+            Encounters = {},
+            BarsManagers = self:GetBarsDefaultSettings(),
+            -- Simple and general settings.
+            bSoundEnabled = true,
+            bAcceptSummons = true,
+        }
     }
-
-    self.wndSettings = {
-        General = Apollo.LoadForm(self.xmlDoc, "ConfigForm_General", self.wndTargetFrame, self),
-        DS = {
-            SystemDaemons = Apollo.LoadForm(self.xmlDoc, "ConfigForm_SystemDaemons", self.wndTargetFrame, self),
-            Gloomclaw = Apollo.LoadForm(self.xmlDoc, "ConfigForm_Gloomclaw", self.wndTargetFrame, self),
-            Maelstrom = Apollo.LoadForm(self.xmlDoc, "ConfigForm_Maelstrom", self.wndTargetFrame, self),
-            Lattice = Apollo.LoadForm(self.xmlDoc, "ConfigForm_Lattice", self.wndTargetFrame, self),
-            Limbo = Apollo.LoadForm(self.xmlDoc, "ConfigForm_Limbo", self.wndTargetFrame, self),
-            AirEarth = Apollo.LoadForm(self.xmlDoc, "ConfigForm_EpAirEarth", self.wndTargetFrame, self),
-            AirLife = Apollo.LoadForm(self.xmlDoc, "ConfigForm_EpAirLife", self.wndTargetFrame, self),
-            AirWater = Apollo.LoadForm(self.xmlDoc, "ConfigForm_EpAirWater", self.wndTargetFrame, self),
-            FireEarth = Apollo.LoadForm(self.xmlDoc, "ConfigForm_EpFireEarth", self.wndTargetFrame, self),
-            FireLife = Apollo.LoadForm(self.xmlDoc, "ConfigForm_EpFireLife", self.wndTargetFrame, self),
-            FireWater = Apollo.LoadForm(self.xmlDoc, "ConfigForm_EpFireWater", self.wndTargetFrame, self),
-            LogicEarth = Apollo.LoadForm(self.xmlDoc, "ConfigForm_EpLogicEarth", self.wndTargetFrame, self),
-            LogicLife = Apollo.LoadForm(self.xmlDoc, "ConfigForm_EpLogicLife", self.wndTargetFrame, self),
-            LogicWater = Apollo.LoadForm(self.xmlDoc, "ConfigForm_EpLogicWater", self.wndTargetFrame, self),
-            Avatus = Apollo.LoadForm(self.xmlDoc, "ConfigForm_Avatus", self.wndTargetFrame, self),
-        },
-    }
-
-    self.drawline = RaidCoreLibs.DisplayLine.new(self.xmlDoc)
-
-    self.GeminiColor = Apollo.GetPackage("GeminiColor").tPackage
-
-    if self.settings ~= nil then
-        self:BarsLoadConfig()
-    end
-
-    -- Register handlers for events, slash commands and timer, etc.
-    Apollo.RegisterSlashCommand("raidc", "OnRaidCoreOn", self)
-    Apollo.RegisterEventHandler("ChangeWorld", "OnCheckMapZone", self)
-    Apollo.RegisterEventHandler("SubZoneChanged", "OnCheckMapZone", self)
-
-    -- Do additional Addon initialization here
-
-    self.mark = {}
-    self.worldmarker = {}
-    self.berserk = false
-
-    self.syncRegister = {}
-    self.syncTimer = {}
-
-    _tWipeTimer = ApolloTimer.Create(0.5, true, "WipeCheck", self)
-    _tWipeTimer:Stop()
-
-    self.lines = {}
-
-    self.chanCom = nil
-    CommChannelTimer = ApolloTimer.Create(5, false, "UpdateCommChannel", self) -- make sure everything is loaded, so after 5sec
-
     -- Final parsing about encounters.
     for name, module in self:IterateModules() do
         local r, e = pcall(module.PrepareEncounter, module)
         if not r then
-            Print(e)
+            PrintErr(e)
         else
             for _, id1 in next, module.continentIdList do
                 if _tTrigPerZone[id1] == nil then
@@ -418,18 +206,69 @@ function RaidCore:OnDocLoaded()
                 end
             end
         end
-    end
-    self:LogGUI_init()
 
-    -- Send version information to OneVersion Addon.
-    local fNumber = RAIDCORE_CURRENT_VERSION:gmatch("%d+")
-    local sSuffix = RAIDCORE_CURRENT_VERSION:gmatch("%a+")()
-    local nMajor, nMinor = fNumber(), fNumber()
-    local nSuffix = sSuffix == "alpha" and -2 or sSuffix == "beta" and -1 or 0
-    Event_FireGenericEvent("OneVersion_ReportAddonInfo", "RaidCore", nMajor, nMinor, 0, nSuffix)
+        -- Fill Default setting with encounters definitions.
+        tDefaultSettings.profile.Encounters[name] = module.tDefaultSettings or {}
+    end
+    -- Initialize GeminiDB with the default table.
+    self.db:RegisterDefaults(tDefaultSettings)
+
+    -- Load every software block.
+    self:CombatInterface_Init(self)
+    self:BarManagersInit(self.db.profile.BarsManagers)
+    self:LogGUI_init()
+    -- Do additional initialization.
+    self.mark = {}
+    self.worldmarker = {}
+    self.berserk = false
+    self.syncRegister = {}
+    self.syncTimer = {}
+    _tWipeTimer = ApolloTimer.Create(0.5, true, "WipeCheck", self)
+    _tWipeTimer:Stop()
+    self.lines = {}
+    self.chanCom = nil
+    CommChannelTimer = ApolloTimer.Create(5, false, "UpdateCommChannel", self) -- make sure everything is loaded, so after 5sec
 
     -- Initialize the Zone Detection.
     self:OnCheckMapZone()
+
+    -- Load Forms.
+    self.wndConfig = Apollo.LoadForm(self.xmlDoc, "ConfigForm", nil, self)
+    self.wndConfig:FindChild("Tag"):SetText(RAIDCORE_CURRENT_VERSION)
+    self.wndConfig:SetSizingMinimum(950, 500)
+    self.wndTargetFrame = self.wndConfig:FindChild("BodyTarget")
+    self.wndConfigOptionsTargetFrame = self.wndConfig:FindChild("SubMenuLeft")
+    self.wndModuleList = {
+        DS = Apollo.LoadForm(self.xmlDoc, "ModuleList_DS", self.wndConfigOptionsTargetFrame, self),
+    }
+    self.wndSettings = {
+        General = Apollo.LoadForm(self.xmlDoc, "ConfigForm_General", self.wndTargetFrame, self),
+        DS = {
+            SystemDaemons = Apollo.LoadForm(self.xmlDoc, "ConfigForm_SystemDaemons", self.wndTargetFrame, self),
+            Gloomclaw = Apollo.LoadForm(self.xmlDoc, "ConfigForm_Gloomclaw", self.wndTargetFrame, self),
+            Maelstrom = Apollo.LoadForm(self.xmlDoc, "ConfigForm_Maelstrom", self.wndTargetFrame, self),
+            Lattice = Apollo.LoadForm(self.xmlDoc, "ConfigForm_Lattice", self.wndTargetFrame, self),
+            Limbo = Apollo.LoadForm(self.xmlDoc, "ConfigForm_Limbo", self.wndTargetFrame, self),
+            AirEarth = Apollo.LoadForm(self.xmlDoc, "ConfigForm_EpAirEarth", self.wndTargetFrame, self),
+            AirLife = Apollo.LoadForm(self.xmlDoc, "ConfigForm_EpAirLife", self.wndTargetFrame, self),
+            AirWater = Apollo.LoadForm(self.xmlDoc, "ConfigForm_EpAirWater", self.wndTargetFrame, self),
+            FireEarth = Apollo.LoadForm(self.xmlDoc, "ConfigForm_EpFireEarth", self.wndTargetFrame, self),
+            FireLife = Apollo.LoadForm(self.xmlDoc, "ConfigForm_EpFireLife", self.wndTargetFrame, self),
+            FireWater = Apollo.LoadForm(self.xmlDoc, "ConfigForm_EpFireWater", self.wndTargetFrame, self),
+            LogicEarth = Apollo.LoadForm(self.xmlDoc, "ConfigForm_EpLogicEarth", self.wndTargetFrame, self),
+            LogicLife = Apollo.LoadForm(self.xmlDoc, "ConfigForm_EpLogicLife", self.wndTargetFrame, self),
+            LogicWater = Apollo.LoadForm(self.xmlDoc, "ConfigForm_EpLogicWater", self.wndTargetFrame, self),
+            Avatus = Apollo.LoadForm(self.xmlDoc, "ConfigForm_Avatus", self.wndTargetFrame, self),
+        },
+    }
+    self.drawline = RaidCoreLibs.DisplayLine.new(self.xmlDoc)
+    self.GeminiColor = Apollo.GetPackage("GeminiColor").tPackage
+    Apollo.RegisterEventHandler("WindowManagementReady", "OnWindowManagementReady", self)
+
+    -- Register handlers for events, slash commands and timer, etc.
+    Apollo.RegisterSlashCommand("raidc", "OnRaidCoreOn", self)
+    Apollo.RegisterEventHandler("ChangeWorld", "OnCheckMapZone", self)
+    Apollo.RegisterEventHandler("SubZoneChanged", "OnCheckMapZone", self)
 end
 
 ----------------------------------------------------------------------------------------------------
@@ -451,7 +290,7 @@ end
 
 function RaidCore:SendMessage(msg)
     if not self.chanCom then
-        Print("[RaidCore] Error sending Sync Message. Attempting to fix this now. If this issue persists, contact the developers")
+        PrintErr("Error sending Sync Message. Attempting to fix this now. If this issue persists, contact the developers")
         self:UpdateCommChannel()
         return false
     else
@@ -460,167 +299,60 @@ function RaidCore:SendMessage(msg)
     end
 end
 
-function RaidCore:OnSave(eLevel)
-    if eLevel ~= GameLib.CodeEnumAddonSaveLevel.Character then
-        return nil
+---------------------------------------------------------------------------------------------------
+---- ConfigForm_General Functions
+-----------------------------------------------------------------------------------------------------
+function RaidCore:OnWindowManagementReady()
+    local param = {wnd = self.wndConfig, strName = "RaidCore"}
+    Event_FireGenericEvent('WindowManagementAdd', param)
+end
+
+function RaidCore:OnWindowLoad(wndHandler, wndControl)
+    local a, b, c = unpack(Split(wndControl:GetName(), '_'))
+    local val = nil
+    if c then
+        val = self.db.profile[a][b][c]
+    elseif b then
+        val = self.db.profile[a][b]
+    elseif a then
+        val = self.db.profile[a]
     end
-    self:BarsSaveConfig()
-    local saveData = {}
-
-    self:recursiveCopyTable(self.settings, saveData)
-
-    return saveData
-end
-
-function RaidCore:OnRestore(eLevel, tData)
-    if eLevel ~= GameLib.CodeEnumAddonSaveLevel.Character then
-        return nil
+    assert(val ~= nil)
+    if wndControl.SetCheck then
+        wndControl:SetCheck(val)
     end
-
-    self.settings = self:recursiveCopyTable(DefaultSettings, self.settings)
-    self.settings = self:recursiveCopyTable(tData, self.settings)
+    if type(val) == "boolean"  or a == "Encounters" then
+        wndControl:SetCheck(val)
+    elseif type(val) == "number" or type(val) == "string" then
+        wndControl:SetText(val)
+        if wndControl.SetValue and type(val) == "number" then
+            wndControl:SetValue(val)
+        end
+    end
 end
 
-function RaidCore:OnGeneralCheckBoxChecked(wndHandler, wndControl, eMouseButton )
-    local settingType = self:SplitString(wndControl:GetParent():GetParent():GetName(), "_")[2]
-    local settingKey = self:SplitString(wndControl:GetName(), "_")[2]
-
-    self.settings[settingType][settingKey] = true
+function RaidCore:OnButtonCheckBoxSwitched(wndHandler, wndControl, eMouseButton)
+    local a, b, c = unpack(Split(wndControl:GetName(), '_'))
+    if c then
+        self.db.profile[a][b][c] = wndControl:IsChecked()
+    elseif b then
+        self.db.profile[a][b] = wndControl:IsChecked()
+    else
+        self.db.profile[a] = wndControl:IsChecked()
+    end
 end
 
-function RaidCore:OnGeneralCheckBoxUnchecked(wndHandler, wndControl, eMouseButton )
-    local settingType = self:SplitString(wndControl:GetParent():GetParent():GetName(), "_")[2]
-    local settingKey = self:SplitString(wndControl:GetName(), "_")[2]
-
-    self.settings[settingType][settingKey] = false
-end
-
-function RaidCore:OnBarSettingChecked(wndHandler, wndControl, eMouseButton )
-    local settingType = self:SplitString(wndControl:GetParent():GetParent():GetName(), "_")[2]
-    local identifier = self:SplitString(wndControl:GetName(), "_")
-    self.settings[settingType][identifier[2]][identifier[3]] = true
-
-    self:BarsLoadConfig()
-end
-
-function RaidCore:OnBarSettingUnchecked(wndHandler, wndControl, eMouseButton )
-    local settingType = self:SplitString(wndControl:GetParent():GetParent():GetName(), "_")[2]
-    local identifier = self:SplitString(wndControl:GetName(), "_")
-    self.settings[settingType][identifier[2]][identifier[3]] = false
-
-    self:BarsLoadConfig()
-end
-
-function RaidCore:OnSliderBarChanged( wndHandler, wndControl, nNewValue, fOldValue )
-    local settingType = self:SplitString(wndControl:GetParent():GetParent():GetParent():GetName(), "_")[2]
-    local identifier = self:SplitString(wndControl:GetName(), "_")
+function RaidCore:OnGeneralSliderBarChanged(wndHandler, wndControl, nNewValue, fOldValue)
+    local sName = wndControl:GetName()
+    local a, b, c = unpack(Split(sName, '_'))
     nNewValue = math.floor(nNewValue)
-    self.settings[settingType][identifier[2]][identifier[3]][identifier[4]] = nNewValue
-    wndHandler:GetParent():GetParent():FindChild("Label_".. identifier[2] .. "_" .. identifier[3] .. "_" .. identifier[4]):SetText(string.format("%.fpx", nNewValue))
-
-    self:BarsLoadConfig()
-end
-
-function RaidCore:EditBarColor( wndHandler, wndControl, eMouseButton )
-    if wndHandler ~= wndControl or eMouseButton ~= GameLib.CodeEnumInputMouse.Left then return end
-    local settingType = self:SplitString(wndControl:GetParent():GetParent():GetName(), "_")[2]
-    local identifier = self:SplitString(wndControl:GetName(), "_")
-    self.GeminiColor:ShowColorPicker(self, {callback = "OnGeminiColor", bCustomColor = true, strInitialColor = self.settings[settingType][identifier[2]][identifier[3]]}, identifier, settingType)
-end
-
-function RaidCore:OnGeminiColor(strColor, identifier, settingType)
-    self.settings[settingType][identifier[2]][identifier[3]] = strColor
-    self:BarsLoadConfig()
-end
-
-function RaidCore:OnBossSettingChecked(wndHandler, wndControl, eMouseButton )
-    local bossModule = self:SplitString(wndControl:GetParent():GetParent():GetName(), "_")[2]
-    local setting = self:SplitString(wndControl:GetName(), "_")[2]
-    local settingString = bossModule .. "_" .. setting
-    self.settings[settingString] = true
-end
-
-function RaidCore:OnBossSettingUnchecked(wndHandler, wndControl, eMouseButton )
-    local bossModule = self:SplitString(wndControl:GetParent():GetParent():GetName(), "_")[2]
-    local setting = self:SplitString(wndControl:GetName(), "_")[2]
-    local settingString = bossModule .. "_" .. setting
-    self.settings[settingString] = false
-end
-
-function RaidCore:OnWindowLoad(wndHandler, wndControl )
-    local bossModule = self:SplitString(wndControl:GetParent():GetParent():GetName(), "_")[2]
-    local setting = self:SplitString(wndControl:GetName(), "_")[2]
-    local settingString = bossModule .. "_" .. setting
-    local val = self.settings[settingString]
-
-    if val ~= nil then
-        if type(val) == "boolean" then
-            wndControl:SetCheck(val)
-        elseif type(val) == "number" then
-            wndControl:SetText(val)
-        elseif type(val) == "string" then
-            wndControl:SetText(val)
-        end
-    end
-end
-
--- Custom handler for general settings, since they are not specific to a bossinstance it'll be saved
--- differently in the settings table
-function RaidCore:OnWindowLoadGeneral(wndHandler, wndControl )
-    local settingType = self:SplitString(wndControl:GetParent():GetParent():GetName(), "_")[2]
-    local settingKey = self:SplitString(wndControl:GetName(), "_")[2]
-    local val = self.settings[settingType][settingKey]
-
-    if val ~= nil then
-        if type(val) == "boolean" then
-            wndControl:SetCheck(val)
-        elseif type(val) == "number" then
-            wndControl:SetText(val)
-        elseif type(val) == "string" then
-            wndControl:SetText(val)
-        end
-    end
-end
-
--- Custom handler for the bar settings, they are in separate tables so we can call
--- DisplayBlock with these specific settings
-function RaidCore:OnWindowLoadGeneralBars(wndhandler, wndControl )
-    local settingType = self:SplitString(wndControl:GetParent():GetParent():GetName(), "_")[2]
-    local setting = self:SplitString(wndControl:GetName(), "_")
-    local barType = setting[2]
-    local settingKey = setting[3]
-    local val = self.settings[settingType][barType][settingKey]
-
-    if val ~= nil then
-        if type(val) == "boolean" then
-            wndControl:SetCheck(val)
-        elseif type(val) == "number" then
-            wndControl:SetText(val)
-        elseif type(val) == "string" then
-            wndControl:SetText(val)
-        end
-    end
-end
-
--- (Hopefully!) last custom handler for setting save & restore stuff
--- This one for the sliders in general, since we use them in DisplayBlock
--- and have some extra tables for width/height!
-function RaidCore:LoadGeneralSliders(wndHandler, wndControl )
-    local settingType = self:SplitString(wndControl:GetParent():GetParent():GetName(), "_")[2]
-    local setting = self:SplitString(wndControl:GetName(), "_")
-    local val = self.settings[settingType][setting[2]][setting[3]][setting[4]]
-
-    if val ~= nil then
-        if type(val) == "boolean" then
-            wndControl:SetCheck(val)
-        elseif type(val) == "number" then
-            wndControl:SetText(string.format("%.fpx", val))
-            if wndControl.SetValue then
-                wndControl:SetValue(val)
-            end
-        elseif type(val) == "string" then
-            wndControl:SetText(val)
-        end
+    wndControl:GetChildren()[1]:SetText(nNewValue)
+    if c then
+        self.db.profile[a][b][c] = nNewValue
+    elseif b then
+        self.db.profile[a][b] = nNewValue
+    else
+        self.db.profile[a] = nNewValue
     end
 end
 
@@ -655,7 +387,7 @@ function RaidCore:OnRaidCoreOn(cmd, args)
             self:AddMsg(tAllParams[2], tAllParams[3], 5)
         end
     elseif (tAllParams[1] == "version") then
-        Print("RaidCore version : " .. ADDON_DATE_VERSION)
+        PrintErr("Version : " .. ADDON_DATE_VERSION)
     elseif (tAllParams[1] == "versioncheck") then
         self:VersionCheck()
     elseif (tAllParams[1] == "pull") then
@@ -694,7 +426,7 @@ function RaidCore:OnRaidCoreOn(cmd, args)
             if mod then
                 mod:SetInterrupter(tAllParams[2], tonumber(tAllParams[3]))
             else
-                Print("Module SystemDaemons not loaded")
+                PrintErr("Module SystemDaemons not loaded")
             end
         end
     elseif (tAllParams[1] == "sysdm") then
@@ -703,7 +435,7 @@ function RaidCore:OnRaidCoreOn(cmd, args)
             if mod then
                 mod:SetInterrupter(tAllParams[2], tonumber(tAllParams[3]))
             else
-                Print("Module SystemDaemons not loaded")
+                PrintErr("Module SystemDaemons not loaded")
             end
         end
     elseif (tAllParams[1] == "testdm") then
@@ -712,14 +444,14 @@ function RaidCore:OnRaidCoreOn(cmd, args)
             mod:NextWave()
             mod:OnChatDC("COMMENCING ENHANCEMENT SEQUENCE")
         else
-            Print("Module SystemDaemons not loaded")
+            PrintErr("Module SystemDaemons not loaded")
         end
     elseif (tAllParams[1] == "testel") then
         local mod = self:GetModule("EpLogicEarth", 1)
         if mod then
             mod:PlaceSpawnPos()
         else
-            Print("Module EpLogicEarth not loaded")
+            PrintErr("Module EpLogicEarth not loaded")
         end
     elseif (tAllParams[1] == "wm") then
         local estpos = {
@@ -807,7 +539,7 @@ end
 
 function RaidCore:PlaySound(sFilename)
     assert(type(sFilename) == "string")
-    if self.settings["General"]["bSoundEnabled"] then
+    if self.db.profile.bSoundEnabled then
         Sound.PlayFile("Sounds\\".. sFilename .. ".wav")
     end
 end
@@ -1060,19 +792,19 @@ end
 function RaidCore:TestPE()
     local tActiveEvents = PublicEvent.GetActiveEvents()
     local i = RaidCore:isPublicEventObjectiveActive("Talk to Captain Tero")
-    Print("result ".. tostring(i))
+    PrintErr("result ".. tostring(i))
     i = RaidCore:isPublicEventObjectiveActive("Talk to Captain Teroxx")
-    Print("result ".. tostring(i))
+    PrintErr("result ".. tostring(i))
     for idx, peEvent in pairs(tActiveEvents) do
         local test = peEvent:GetName()
         local truc
-        Print(test)
+        PrintErr(test)
         for idObjective, peObjective in pairs(peEvent:GetObjectives()) do
             test = peObjective:GetShortDescription()
             if test == "North Power Core Energy" then
                 truc = peObjective:GetCount()
-                Print(test)
-                Print(truc)
+                PrintErr(test)
+                PrintErr(truc)
             end
         end
     end
@@ -1206,7 +938,7 @@ function RaidCore:OnComMessage(channel, strMessage, strSender)
         VCReply[tMessage.sender] = tMessage.version
     elseif tMessage.action == "NewestVersion" and tMessage.version then
         if ADDON_DATE_VERSION < tMessage.version then
-            Print("Your RaidCore version is outdated. Please get " .. tMessage.version)
+            PrintErr("Your RaidCore version is outdated. Please get " .. tMessage.version)
         end
     elseif tMessage.action == "LaunchPull" and IsPartyMemberByName(tMessage.sender) and tMessage.cooldown then
         self:AddBar("PULL", "PULL", tMessage.cooldown, true)
@@ -1222,10 +954,10 @@ function RaidCore:OnComMessage(channel, strMessage, strSender)
             Event_FireGenericEvent("RAID_SYNC", tMessage.sync, tMessage.parameter)
         end
     elseif tMessage.action == "SyncSummon" then
-        if not self.settings["General"]["bAcceptSummons"] or not self:isRaidManagement(strSender) then
+        if not self.db.profile.bAcceptSummons or not self:isRaidManagement(strSender) then
             return false
         end
-        Print(tMessage.sender .. " requested that you accept a summon. Attempting to accept now.")
+        PrintErr(tMessage.sender .. " requested that you accept a summon. Attempting to accept now.")
         local CSImsg = CSIsLib.GetActiveCSI()
         if not CSImsg or not CSImsg["strContext"] then return end
 
@@ -1267,15 +999,15 @@ function RaidCore:VersionCheckResults()
     end
 
     if next(tNotInstalled) then
-        Print(self.L["Not installed: %s"]:format(table.concat(tNotInstalled, ", ")))
+        PrintErr(self.L["Not installed: %s"]:format(table.concat(tNotInstalled, ", ")))
     end
     if next(tOutdated) then
-        Print("Outdated RaidCore Version:")
+        PrintErr("Outdated RaidCore Version:")
         for sPlayerVersion, tList in next, tOutdated do
-            Print((" - '%s': %s"):format(sPlayerVersion, table.concat(tList, ", ")))
+            PrintErr((" - '%s': %s"):format(sPlayerVersion, table.concat(tList, ", ")))
         end
     end
-    Print(self.L["%d members are up to date."]:format(nMemberWithLasted))
+    PrintErr(self.L["%d members are up to date."]:format(nMemberWithLasted))
     -- Send Msg to oudated players.
     local msg = {action = "NewestVersion", version = maxver}
     self:SendMessage(msg)
@@ -1285,11 +1017,11 @@ end
 
 function RaidCore:VersionCheck()
     if VCtimer then
-        Print(self.L["VersionCheck already running ..."])
+        PrintErr(self.L["VersionCheck already running ..."])
     elseif GroupLib.GetMemberCount() == 0 then
-        Print(self.L["Command available only in group."])
+        PrintErr(self.L["Command available only in group."])
     else
-        Print(self.L["Checking version on group member."])
+        PrintErr(self.L["Checking version on group member."])
         VCReply = {}
         VCReply[GetPlayerUnit():GetName()] = ADDON_DATE_VERSION
         local msg = {action = "VersionCheckRequest", sender = GetPlayerUnit():GetName()}
@@ -1309,7 +1041,7 @@ end
 function RaidCore:LaunchBreak(time)
     local sPlayerName = GetPlayerUnit():GetName()
     if not self:isRaidManagement(sPlayerName) then
-        Print("You must be a raid leader or assistant to use this command!")
+        PrintErr("You must be a raid leader or assistant to use this command!")
     else
         if time and time > 5 then
             local msg = {action = "LaunchBreak", sender = sPlayerName, cooldown = time}
@@ -1322,7 +1054,7 @@ end
 function RaidCore:SyncSummon()
     local myName = GetPlayerUnit():GetName()
     if not self:isRaidManagement(myName) then
-        Print("You must be a raid leader or assistant to use this command!")
+        PrintErr("You must be a raid leader or assistant to use this command!")
         return false
     end
     local msg = {action = "SyncSummon", sender = myName}
@@ -1364,47 +1096,18 @@ end
 ----------------------------------------------------------------------------------------------------
 -- RaidCoreForm Functions
 ----------------------------------------------------------------------------------------------------
-function RaidCore:recursiveCopyTable(from, to)
-    to = to or {}
-    for k,v in pairs(from) do
-        if type(v) == "table" then
-            to[k] = self:recursiveCopyTable(v, to[k])
-        else
-            to[k] = v
-        end
-    end
-    return to
-end
-
-function RaidCore:SplitString(inputstr, sep)
-    if sep == nil then
-        sep = "%s"
-    end
-    local t={} ; i=1
-    for str in string.gmatch(inputstr, "([^"..sep.."]+)") do
-        t[i] = str
-        i = i + 1
-    end
-    return t
-end
-
-function RaidCore:GetSettings()
-    return self.settings
-end
-
 function RaidCore:HideChildWindows(wndParent)
     for key, value in pairs(wndParent:GetChildren()) do
         value:Show(false)
     end
 end
 
--- when the Reset button is clicked
+-- When the Reset button is clicked
 function RaidCore:OnResetBarPositions( wndHandler, wndControl, eMouseButton )
-    self:ResetPosition()
-    self:BarsSaveConfig()
+    self:BarsResetAnchors()
 end
 
--- when the Move button is clicked
+-- When the Move button is clicked
 function RaidCore:OnMoveBars( wndHandler, wndControl, eMouseButton )
     if wndHandler:GetText() == "Move Bars" then
         wndHandler:SetText("Lock Bars")
@@ -1412,7 +1115,6 @@ function RaidCore:OnMoveBars( wndHandler, wndControl, eMouseButton )
     else
         wndHandler:SetText("Move Bars")
         self:BarsAnchorUnlock(false)
-        self:BarsSaveConfig()
     end
 end
 
@@ -1442,13 +1144,13 @@ function RaidCore:Button_SettingsGeneralUncheck( wndHandler, wndControl, eMouseB
 end
 
 function RaidCore:OnModuleSettingsCheck(wndHandler, wndControl, eMouseButton )
-    local raidInstance = self:SplitString(wndControl:GetParent():GetName(), "_")
-    local identifier = self:SplitString(wndControl:GetName(), "_")
+    local raidInstance = Split(wndControl:GetParent():GetName(), "_")
+    local identifier = Split(wndControl:GetName(), "_")
     self.wndSettings[raidInstance[2]][identifier[3]]:Show(true)
 end
 
 function RaidCore:OnModuleSettingsUncheck(wndHandler, wndControl, eMouseButton )
-    local raidInstance = self:SplitString(wndControl:GetParent():GetName(), "_")
-    local identifier = self:SplitString(wndControl:GetName(), "_")
+    local raidInstance = Split(wndControl:GetParent():GetName(), "_")
+    local identifier = Split(wndControl:GetName(), "_")
     self.wndSettings[raidInstance[2]][identifier[3]]:Show(false)
 end

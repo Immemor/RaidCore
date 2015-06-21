@@ -75,6 +75,15 @@ mod:RegisterGermanLocale({
     --["Stay away from boss with buff!"] = "Stay away from boss with buff!", -- TODO: German translation missing !!!!
     --["ORB"] = "ORB", -- TODO: German translation missing !!!!
 })
+-- Default settings.
+mod:RegisterDefaultSetting("SoundDefrag")
+mod:RegisterDefaultSetting("SoundDataDisruptorDebuff")
+mod:RegisterDefaultSetting("SoundMidphaseCountDown")
+mod:RegisterDefaultSetting("OtherWateryGraveTimer")
+mod:RegisterDefaultSetting("OtherOrbMarkers")
+mod:RegisterDefaultSetting("LineTetrisBlocks")
+mod:RegisterDefaultSetting("LineOrbs")
+-- Timers default configs.
 mod:RegisterDefaultTimerBarConfigs({
     ["MIDPHASE"] = { sColor = "xkcdAlgaeGreen" },
     ["PRISON"] = { sColor = "xkcdBluegreen" },
@@ -115,12 +124,12 @@ end
 function mod:OnSpellCastStart(unitName, castName, unit)
     if unitName == self.L["Mnemesis"] then
         if castName == self.L["Circuit Breaker"] then
-            mod:AddTimerBar("MIDPHASE", "Middle Phase", 100, mod:GetSetting("SoundMidphase"))
+            mod:AddTimerBar("MIDPHASE", "Middle Phase", 100, mod:GetSetting("SoundMidphaseCountDown"))
             midphase = true
         elseif castName == self.L["Imprison"] then
             mod:AddTimerBar("PRISON", "Imprison", 19)
         elseif castName == self.L["Defragment"] then
-            core:AddMsg("DEFRAG", self.L["SPREAD"], 5, mod:GetSetting("SoundDefrag", "Beware"))
+            core:AddMsg("DEFRAG", self.L["SPREAD"], 5, mod:GetSetting("SoundDefrag") and "Beware")
             mod:AddTimerBar("DEFRAG", "~Defrag", 40, mod:GetSetting("SoundDefrag"))
         end
     elseif unitName == self.L["Hydroflux"] then
@@ -140,7 +149,7 @@ function mod:OnDebuffApplied(unitName, splId, unit)
     local splName = GameLib.GetSpell(splId):GetName()
     if splName == "Data Disruptor" then
         if unitName == strMyName then
-            core:AddMsg("DISRUPTOR", self.L["Stay away from boss with buff!"], 5, mod:GetSetting("SoundDataDisruptorDebuff", "Beware"))
+            core:AddMsg("DISRUPTOR", self.L["Stay away from boss with buff!"], 5, mod:GetSetting("SoundDataDisruptorDebuff") and "Beware")
         end
         if mod:GetSetting("OtherOrbMarkers") then
             core:MarkUnit(unit, nil, self.L["ORB"])
@@ -200,7 +209,7 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
             encounter_started = true
             core:AddUnit(unit)
             core:WatchUnit(unit)
-            mod:AddTimerBar("MIDPHASE", "Middle Phase", 75, mod:GetSetting("SoundMidphase"))
+            mod:AddTimerBar("MIDPHASE", "Middle Phase", 75, mod:GetSetting("SoundMidphaseCountDown"))
             mod:AddTimerBar("PRISON", "Imprison", 16)
             mod:AddTimerBar("DEFRAG", "Defrag", 20, mod:GetSetting("SoundDefrag"))
 

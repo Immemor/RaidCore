@@ -86,6 +86,10 @@ mod:RegisterGermanLocale({
     ["BERSERK"] = "BERSERK",
     ["Singularity"] = "SINGULARITÄT",
 })
+-- Default settings.
+-- Timers default configs.
+mod:RegisterDefaultTimerBarConfigs({
+})
 
 ----------------------------------------------------------------------------------------------------
 -- Constants.

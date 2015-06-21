@@ -75,6 +75,10 @@ mod:RegisterGermanLocale({
     ["LITTLE BOMB on YOU !!!"] = "KLEINE BOMBE auf DIR !!!",
     ["LITTLE BOMB"] = "KLEINE BOMBE",
 })
+-- Default settings.
+-- Timers default configs.
+mod:RegisterDefaultTimerBarConfigs({
+})
 
 ----------------------------------------------------------------------------------------------------
 -- Constants.

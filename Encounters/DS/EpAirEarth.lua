@@ -63,6 +63,15 @@ mod:RegisterGermanLocale({
     --["EARTH"] = "EARTH", -- TODO: German translation missing !!!!
     --["~Tornado Spawn"] = "~Tornado Spawn", -- TODO: German translation missing !!!!
 })
+-- Default settings.
+mod:RegisterDefaultSetting("LineTornado")
+mod:RegisterDefaultSetting("LineCleaveAileron")
+mod:RegisterDefaultSetting("SoundTornadoCountDown")
+mod:RegisterDefaultSetting("SoundMidphase")
+mod:RegisterDefaultSetting("SoundSupercell")
+mod:RegisterDefaultSetting("SoundQuakeJump")
+mod:RegisterDefaultSetting("SoundMoO")
+-- Timers default configs.
 mod:RegisterDefaultTimerBarConfigs({
     ["SUPERCELL"] = { sColor = "xkcdBlueBlue" },
     ["TORNADO"] = { sColor = "xkcdBrightSkyBlue" },
@@ -98,7 +107,7 @@ function mod:OnUnitCreated(unit, sName)
             core:AddLine(unit:GetId(), 2, unit, nil, 3, 30, 0, 10)
         end
         if eventTime > startTime + 10 then
-            mod:AddTimerBar("TORNADO", "~Tornado Spawn", 17, mod:GetSetting("SoundTornadoCountdown"))
+            mod:AddTimerBar("TORNADO", "~Tornado Spawn", 17, mod:GetSetting("SoundTornadoCountDown"))
         end
     end
 end
@@ -113,12 +122,12 @@ end
 function mod:OnSpellCastStart(unitName, castName, unit)
     if unitName == self.L["Megalith"] and castName == self.L["Raw Power"] then
         midphase = true
-        core:AddMsg("RAW", self.L["Raw Power"]:upper(), 5, mod:GetSetting("SoundMidphase", "Alert"))
+        core:AddMsg("RAW", self.L["Raw Power"]:upper(), 5, mod:GetSetting("SoundMidphase") and "Alert")
     elseif unitName == self.L["Aileron"] and castName == self.L["Supercell"] then
         local timeOfEvent = GameLib.GetGameTime()
         if timeOfEvent - prev > 30 then
             prev = timeOfEvent
-            core:AddMsg("SUPERCELL", self.L["Supercell"]:upper(), 5, mod:GetSetting("SoundSupercell", "Alarm"))
+            core:AddMsg("SUPERCELL", self.L["Supercell"]:upper(), 5, mod:GetSetting("SoundSupercell") and "Alarm")
             mod:AddTimerBar("SUPERCELL", "Supercell", 80)
         end
     end
@@ -126,10 +135,10 @@ end
 
 function mod:OnChatDC(message)
     if message:find(self.L["The ground shudders beneath Megalith"]) then
-        core:AddMsg("QUAKE", "JUMP !", 3, mod:GetSetting("SoundQuakeJump", "Beware"))
+        core:AddMsg("QUAKE", "JUMP !", 3, mod:GetSetting("SoundQuakeJump") and "Beware")
     elseif message:find(self.L["fractured crust leaves it exposed"]) and midphase then
         midphase = false
-        core:AddMsg("MOO", self.L["MOO !"], 5, "Info", mod:GetSetting("SoundMoO", "Blue"))
+        core:AddMsg("MOO", self.L["MOO !"], 5, mod:GetSetting("SoundMoO") and "Info", "Blue")
         mod:AddTimerBar("RAWPOWER", "Raw Power", 60, mod:GetSetting("SoundMidphase"))
     end
 end
@@ -150,7 +159,7 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
                 core:AddPixie(unit:GetId(), 2, unit, nil, "Green", 10, 15, 0)
             end
             mod:AddTimerBar("SUPERCELL", "Supercell", 65, mod:GetSetting("SoundSupercell"))
-            mod:AddTimerBar("TORNADO", "~Tornado Spawn", 16, mod:GetSetting("SoundTornadoCountdown"))
+            mod:AddTimerBar("TORNADO", "~Tornado Spawn", 16, mod:GetSetting("SoundTornadoCountDown"))
             core:AddUnit(unit)
             core:WatchUnit(unit)
         end

@@ -84,6 +84,19 @@ mod:RegisterGermanLocale({
     --["[%u] BEAM on %s"] = "[%u] BEAM on %s", -- TODO: German translation missing !!!!
     --["BIG CAST"] = "BIG CAST", -- TODO: German translation missing !!!!
 })
+-- Default settings.
+mod:RegisterDefaultSetting("LineDataDevourers")
+mod:RegisterDefaultSetting("SoundBeamOnYou")
+mod:RegisterDefaultSetting("SoundBeamOnOther")
+mod:RegisterDefaultSetting("SoundNewWave")
+mod:RegisterDefaultSetting("SoundBigCast")
+mod:RegisterDefaultSetting("SoundShieldPhase")
+mod:RegisterDefaultSetting("SoundJumpPhase")
+mod:RegisterDefaultSetting("SoundLaserCountDown")
+mod:RegisterDefaultSetting("SoundExplosionCountDown")
+mod:RegisterDefaultSetting("OtherPlayerBeamMarkers")
+mod:RegisterDefaultSetting("OtherLogicWallMarkers")
+-- Timers default configs.
 mod:RegisterDefaultTimerBarConfigs({
     ["WAVE"] = { sColor = "xkcdOrangeYellow" },
     ["BEAM"] = { sColor = "xkcdLipstickRed" },
@@ -140,9 +153,9 @@ function mod:OnChatDC(message)
             self:ScheduleTimer("RemoveLaserMark", 15, pUnit)
         end
         if playerFocus == playerName then
-            core:AddMsg("BEAM", self.L["BEAM on YOU !!!"], 5, mod:GetSetting("SoundBeam", "RunAway"))
+            core:AddMsg("BEAM", self.L["BEAM on YOU !!!"], 5, mod:GetSetting("SoundBeamOnYou") and "RunAway")
         else
-            core:AddMsg("BEAM", self.L["[%u] BEAM on %s"]:format(beamCount, playerFocus), 5, mod:GetSetting("SoundBeam", "Info"), "Blue")
+            core:AddMsg("BEAM", self.L["[%u] BEAM on %s"]:format(beamCount, playerFocus), 5, mod:GetSetting("SoundBeamOnOther") and "Info", "Blue")
         end
         if phase2 then
             mod:AddTimerBar("WAVE", self.L["[%u] WAVE"]:format(waveCount + 1), 15, mod:GetSetting("SoundNewWave"))
@@ -156,7 +169,7 @@ function mod:OnChatDC(message)
     elseif message == self.L["Avatus prepares to delete all"] then
         core:StopBar("BEAM")
         core:StopBar("WAVE")
-        core:AddMsg("BIGC", self.L["BIG CAST"] .. " !!", 5, mod:GetSetting("SoundBigCast", "Beware"))
+        core:AddMsg("BIGC", self.L["BIG CAST"] .. " !!", 5, mod:GetSetting("SoundBigCast") and "Beware")
         mod:AddTimerBar("BIGC", "BIG CAST", 10)
         beamCount = 0
     elseif message == self.L["Secure Sector Enhancement"] then
@@ -164,16 +177,16 @@ function mod:OnChatDC(message)
         core:StopBar("WAVE")
         phase2 = true
         waveCount, beamCount = 0, 0
-        core:AddMsg("P2", self.L["P2: SHIELD PHASE"], 5, mod:GetSetting("SoundShieldPhase", "Alert"))
-        mod:AddTimerBar("P2", "LASER", 15, mod:GetSetting("SoundLaser"))
+        core:AddMsg("P2", self.L["P2: SHIELD PHASE"], 5, mod:GetSetting("SoundShieldPhase") and "Alert")
+        mod:AddTimerBar("P2", "LASER", 15, mod:GetSetting("SoundLaserCountDown"))
         mod:AddTimerBar("BEAM", "NEXT BEAM", 44)
     elseif message == self.L["Vertical Locomotion Enhancement"] then
         core:StopBar("BEAM")
         core:StopBar("WAVE")
         phase2 = true
         waveCount, beamCount = 0, 0
-        core:AddMsg("P2", self.L["P2: JUMP PHASE"], 5, mod:GetSetting("SoundJumpPhase", "Alert"))
-        mod:AddTimerBar("P2", "EXPLOSION", 15, mod:GetSetting("SoundExplosion"))
+        core:AddMsg("P2", self.L["P2: JUMP PHASE"], 5, mod:GetSetting("SoundJumpPhase") and "Alert")
+        mod:AddTimerBar("P2", "EXPLOSION", 15, mod:GetSetting("SoundExplosionCountDown"))
         mod:AddTimerBar("BEAM", "NEXT BEAM", 58)
     end
 end
@@ -189,7 +202,7 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
             if timeOfEvent - prev > 20 and not phase2 then
                 prev = timeOfEvent
                 waveCount = waveCount + 1
-                core:AddMsg("WAVE", self.L["[%u] WAVE"]:format(waveCount), 5, mod:GetSetting("SoundNewWave", "Alert"))
+                core:AddMsg("WAVE", self.L["[%u] WAVE"]:format(waveCount), 5, mod:GetSetting("SoundNewWave") and "Alert")
             end
         elseif sName == self.L["Avatus"] then
             playerName = GameLib.GetPlayerUnit():GetName():gsub(NO_BREAK_SPACE, " ")

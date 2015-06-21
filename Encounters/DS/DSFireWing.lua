@@ -86,6 +86,7 @@ mod:RegisterGermanLocale({
     ["KNOCKBACK"] = "RÜCKSTOß",
     --["BOMB"] = "BOMB", -- TODO: German translation missing !!!!
 })
+-- Timers default configs.
 mod:RegisterDefaultTimerBarConfigs({
     ["BOMB"] = { sColor = "xkcdLightRed" },
     ["KNOCK"] = { sColor = "xkcdLightOrange" },

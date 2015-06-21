@@ -158,6 +158,19 @@ mod:RegisterGermanLocale({
     ["YOU ARE NEXT ON NORTH !"] = "DU BIST DER NÄCHSTE IM NORDEN !",
     ["YOU ARE NEXT ON SOUTH !"] = "DU BIST DER NÄCHSTE IM SÜDEN !",
 })
+-- Default settings.
+mod:RegisterDefaultSetting("LineOnModulesMidphase")
+mod:RegisterDefaultSetting("SoundWave")
+mod:RegisterDefaultSetting("SoundPhase2Soon")
+mod:RegisterDefaultSetting("SoundPhase2")
+mod:RegisterDefaultSetting("SoundPowerSurge")
+mod:RegisterDefaultSetting("SoundPurge")
+mod:RegisterDefaultSetting("SoundRepairSequence")
+mod:RegisterDefaultSetting("OtherOverloadMarkers")
+mod:RegisterDefaultSetting("OtherPurgePlayerMarkers")
+mod:RegisterDefaultSetting("OtherDisconnectTimer")
+mod:RegisterDefaultSetting("OtherPillarMarkers")
+-- Timers default configs.
 mod:RegisterDefaultTimerBarConfigs({
     ["SDWAVE"] = { sColor = "xkcdOrangeYellow" },
     ["PROBES"] = { sColor = "xkcdSunYellow" },
@@ -242,13 +255,13 @@ function mod:OnUnitCreated(unit, sName)
             sdwaveCount = sdwaveCount + 1
             probeCount = 0
             if sdwaveCount == 1 then
-                core:AddMsg("SDWAVE", self.L["[%u] WAVE"]:format(sdwaveCount), 5, mod:GetSetting("SoundWave", "Info"), "Blue")
+                core:AddMsg("SDWAVE", self.L["[%u] WAVE"]:format(sdwaveCount), 5, mod:GetSetting("SoundWave") and "Info", "Blue")
                 mod:AddTimerBar("SDWAVE", self.L["[%u] WAVE"]:format(sdwaveCount + 1), 50, mod:GetSetting("SoundWave"))
             elseif sdwaveCount % 2 == 0 then
-                core:AddMsg("SDWAVE", self.L["[%u] WAVE"]:format(sdwaveCount), 5, mod:GetSetting("SoundWave", "Info"), "Blue")
+                core:AddMsg("SDWAVE", self.L["[%u] WAVE"]:format(sdwaveCount), 5, mod:GetSetting("SoundWave") and "Info", "Blue")
                 mod:AddTimerBar("SDWAVE", self.L["[%u] MINIBOSS"]:format(sdwaveCount + 1), 50, mod:GetSetting("SoundWave"))
             else
-                core:AddMsg("SDWAVE", self.L["[%u] MINIBOSS"]:format(sdwaveCount), 5, mod:GetSetting("SoundWave", "Info"), "Blue")
+                core:AddMsg("SDWAVE", self.L["[%u] MINIBOSS"]:format(sdwaveCount), 5, mod:GetSetting("SoundWave") and "Info", "Blue")
                 mod:AddTimerBar("SDWAVE", self.L["[%u] WAVE"]:format(sdwaveCount + 1), 50, mod:GetSetting("SoundWave"))
             end
             mod:AddTimerBar("PROBES", self.L["[%u] Probe"]:format(1), 10)
@@ -285,10 +298,10 @@ end
 function mod:OnHealthChanged(unitName, health)
     if health >= 70 and health <= 72 and not phase2warn and not phase2 then
         phase2warn = true
-        core:AddMsg("SDP2", self.L["P2 SOON !"], 5, mod:GetSetting("SoundPhase2", "Algalon"))
+        core:AddMsg("SDP2", self.L["P2 SOON !"], 5, mod:GetSetting("SoundPhase2Soon") and "Algalon")
     elseif health >= 30 and health <= 32 and not phase2warn and not phase2 then
         phase2warn = true
-        core:AddMsg("SDP2", self.L["P2 SOON !"], 5, mod:GetSetting("SoundPhase2", "Algalon"))
+        core:AddMsg("SDP2", self.L["P2 SOON !"], 5, mod:GetSetting("SoundPhase2Soon") and "Algalon")
     end
 end
 
@@ -302,17 +315,17 @@ function mod:OnSpellCastStart(unitName, castName, unit)
     if unitName == self.L["Binary System Daemon"] and castName == self.L["Power Surge"] then
         core:SendSync("NORTH_SURGE", unit:GetId())
         if phase2 and self:GetDistanceBetweenUnits(GameLib.GetPlayerUnit(), unit) < 40 then
-            core:AddMsg("SURGE", self.L["INTERRUPT NORTH"], 5, mod:GetSetting("SoundPowerSurge", "Alert"))
+            core:AddMsg("SURGE", self.L["INTERRUPT NORTH"], 5, mod:GetSetting("SoundPowerSurge") and "Alert")
         end
     elseif unitName == self.L["Null System Daemon"] and castName == self.L["Power Surge"] then
         core:SendSync("SOUTH_SURGE", unit:GetId())
         if phase2 and self:GetDistanceBetweenUnits(GameLib.GetPlayerUnit(), unit) < 40 then
-            core:AddMsg("SURGE", self.L["INTERRUPT SOUTH"], 5, mod:GetSetting("SoundPowerSurge", "Alert"))
+            core:AddMsg("SURGE", self.L["INTERRUPT SOUTH"], 5, mod:GetSetting("SoundPowerSurge") and "Alert")
         end
     elseif castName == "Purge" then
         PurgeLast[unit:GetId()] = GameLib.GetGameTime()
         if self:GetDistanceBetweenUnits(GameLib.GetPlayerUnit(), unit) < 40 then
-            core:AddMsg("PURGE", self.L["AIDDDDDDDS !"], 5, mod:GetSetting("SoundPurge", "Beware"))
+            core:AddMsg("PURGE", self.L["AIDDDDDDDS !"], 5, mod:GetSetting("SoundPurge") and "Beware")
             if unitName == self.L["Null System Daemon"] then
                 mod:AddTimerBar("PURGE_NULL", "PURGE - NULL", 27)
             elseif unitName == self.L["Binary System Daemon"] then
@@ -330,7 +343,7 @@ function mod:OnSpellCastStart(unitName, castName, unit)
         mod:AddTimerBar("BLACKIC", "BLACK IC", 30)
     elseif unitName == self.L["Recovery Protocol"] and castName == self.L["Repair Sequence"] then
         if self:GetDistanceBetweenUnits(GameLib.GetPlayerUnit(), unit) < 50 then
-            core:AddMsg("HEAL", self.L["INTERRUPT HEAL!"], 5, mod:GetSetting("SoundRepairSequence", "Inferno"))
+            core:AddMsg("HEAL", self.L["INTERRUPT HEAL!"], 5, mod:GetSetting("SoundRepairSequence") and "Inferno")
             core:MarkUnit(unit, nil, self.L["HEAL"])
             self:ScheduleTimer("RemoveHealMarker", 5, unit)
         end
@@ -355,7 +368,7 @@ function mod:OnDebuffApplied(unitName, splId, unit)
             core:MarkUnit(unit, nil, "PURGE")
         end
         if unitName == playerName then
-            core:AddMsg("PURGEDEBUFF", self.L["PURGE ON YOU"], 5, mod:GetSetting("SoundPurge", "Beware"))
+            core:AddMsg("PURGEDEBUFF", self.L["PURGE ON YOU"], 5, mod:GetSetting("SoundPurge") and "Beware")
         end
     end
 end
@@ -428,17 +441,19 @@ function mod:OnChatDC(message)
         phase2count = phase2count + 1
         core:StopBar("DISCONNECT")
         core:StopBar("SDWAVE")
-        core:AddMsg("SDP2", self.L["PHASE 2 !"], 5, mod:GetSetting("SoundPhase2", "Alarm"))
+        core:AddMsg("SDP2", self.L["PHASE 2 !"], 5, mod:GetSetting("SoundPhase2") and "Alarm")
         if mod:GetSetting("OtherDisconnectTimer") then
             mod:AddTimerBar("DISCONNECT", "Disconnect", 85)
         end
-        if mod:GetSetting("OtherPillarMarkers") and phase2count == 1 then
-            for key, value in pairs(PILLARS_POSITIONS["mid1"]) do
-                core:SetWorldMarker(key, key, value)
-            end
-        elseif mod:GetSetting("OtherPillarMarkers") and phase2count == 2 then
-            for key, value in pairs(PILLARS_POSITIONS["mid2"]) do
-                core:SetWorldMarker(key, key, value)
+        if mod:GetSetting("OtherPillarMarkers") then
+            if phase2count == 1 then
+                for key, value in pairs(PILLARS_POSITIONS["mid1"]) do
+                    core:SetWorldMarker(key, key, value)
+                end
+            elseif phase2count == 2 then
+                for key, value in pairs(PILLARS_POSITIONS["mid2"]) do
+                    core:SetWorldMarker(key, key, value)
+                end
             end
         end
         self:ScheduleTimer("NextWave", 5)

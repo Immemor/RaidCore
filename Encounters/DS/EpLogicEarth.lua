@@ -73,6 +73,13 @@ mod:RegisterGermanLocale({
     --["JUMP !"] = "JUMP !", -- TODO: German translation missing !!!!
     --["STARS"] = "STARS%s" -- TODO: German translation missing !!!!
 })
+-- Default settings.
+mod:RegisterDefaultSetting("LineObsidianOutcropping")
+mod:RegisterDefaultSetting("SoundDefrag")
+mod:RegisterDefaultSetting("SoundQuakeJump")
+mod:RegisterDefaultSetting("SoundStars")
+mod:RegisterDefaultSetting("SoundSnake")
+-- Timers default configs.
 mod:RegisterDefaultTimerBarConfigs({
     ["BOOM"] = { sColor = "xkcdBloodRed" },
     ["DEFRAG"] = { sColor = "xkcdAlgaeGreen" },
@@ -124,7 +131,7 @@ function mod:OnSpellCastStart(unitName, castName, unit)
         local timeOfEvent = GetGameTime()
         if timeOfEvent - _Previous_Defragment_time > 10 then
             _Previous_Defragment_time = timeOfEvent
-            core:AddMsg("DEFRAG", self.L["SPREAD"], 5, mod:GetSetting("SoundDefrag", "Alarm"))
+            core:AddMsg("DEFRAG", self.L["SPREAD"], 5, mod:GetSetting("SoundDefrag") and "Alarm")
             mod:AddTimerBar("BOOM", "BOOM", 9)
             mod:AddTimerBar("DEFRAG", "DEFRAG", 40)
         end
@@ -133,9 +140,9 @@ end
 
 function mod:OnChatDC(message)
     if message:find(self.L["The ground shudders beneath Megalith"]) then
-        core:AddMsg("QUAKE", self.L["JUMP !"], 3, mod:GetSetting("SoundQuakeJump", "Beware"))
+        core:AddMsg("QUAKE", self.L["JUMP !"], 3, mod:GetSetting("SoundQuakeJump") and "Beware")
     elseif message:find(self.L["Logic creates powerful data caches"]) then
-        core:AddMsg("STAR", self.L["STARS"]:format(" !"), 5, mod:GetSetting("SoundStars", "Alert"))
+        core:AddMsg("STAR", self.L["STARS"]:format(" !"), 5, mod:GetSetting("SoundStars") and "Alert")
         mod:AddTimerBar("STAR", self.L["STARS"]:format(""), 60)
     end
 end
@@ -143,7 +150,7 @@ end
 function mod:OnDebuffApplied(unitName, splId, unit)
     if splId == DEBUFF_SNAKE then
         if unit == GetPlayerUnit() then
-            core:AddMsg("SNAKE", self.L["SNAKE ON %s"]:format(unitName), 5, mod:GetSetting("SoundSnake", "RunAway"), "Blue")
+            core:AddMsg("SNAKE", self.L["SNAKE ON %s"]:format(unitName), 5, mod:GetSetting("SoundSnake") and "RunAway", "Blue")
         end
         mod:AddTimerBar("SNAKE", self.L["SNAKE ON %s"]:format(unitName), 20)
     end

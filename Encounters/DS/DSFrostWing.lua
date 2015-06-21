@@ -69,6 +69,7 @@ mod:RegisterGermanLocale({
     --["FROST WAVE"] = "FROST WAVE", -- TODO: German translation missing !!!!
     --["RUNNNN"] = "RUNNNN", -- TODO: German translation missing !!!!
 })
+-- Timers default configs.
 mod:RegisterDefaultTimerBarConfigs({
     ["ICICLE"] = { sColor = "xkcdLightRed" },
     ["SHATTER"] = { sColor = "xkcdBluegreen" },
