@@ -334,7 +334,7 @@ end
 function mod:OnUnitCreated(unit, sName)
     local eventTime = GameLib.GetGameTime()
     if sName == self.L["Augmented Rowsdower"] then
-        core:AddMsg("HHAND", self.L["Augmented Rowsdower"], 3)
+        core:AddMsg("Rowsdower", self.L["Augmented Rowsdower"], 3)
         SetTargetUnit(unit)
     elseif sName == self.L["Holo Hand"] then
         local unitId = unit:GetId()
