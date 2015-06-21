@@ -983,10 +983,10 @@ function RaidCore:OnBuffUpdate(nId, nSpellId, nOldStack, nNewStack, fTimeRemaini
     if tUnit then
         local unitName = tUnit:GetName():gsub(NO_BREAK_SPACE, " ")
         -- Keep Old event for compatibility.
-        Event_FireGenericEvent("BUFF_APPLIED_DOSE", unitName, nSpellId, nStack)
+        Event_FireGenericEvent("BUFF_APPLIED_DOSE", unitName, nSpellId, nNewStack)
     end
     -- New event not based on the name.
-    Event_FireGenericEvent("BUFF_UPDATE", nId, nSpellId, nStack, fTimeRemaining)
+    Event_FireGenericEvent("BUFF_UPDATE", nId, nSpellId, nNewStack, fTimeRemaining)
 end
 
 function RaidCore:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
@@ -1016,10 +1016,10 @@ function RaidCore:OnDebuffUpdate(nId, nSpellId, nOldStack, nNewStack, fTimeRemai
     if tUnit then
         local unitName = tUnit:GetName():gsub(NO_BREAK_SPACE, " ")
         -- Keep Old event for compatibility.
-        Event_FireGenericEvent("DEBUFF_APPLIED_DOSE", unitName, nSpellId, nStack)
+        Event_FireGenericEvent("DEBUFF_APPLIED_DOSE", unitName, nSpellId, nNewStack)
     end
     -- New event not based on the name.
-    Event_FireGenericEvent("DEBUFF_UPDATE", nId, nSpellId, nStack, fTimeRemaining)
+    Event_FireGenericEvent("DEBUFF_UPDATE", nId, nSpellId, nNewStack, fTimeRemaining)
 end
 
 function RaidCore:OnMarkUpdate()
