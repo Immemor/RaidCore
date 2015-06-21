@@ -29,6 +29,7 @@ mod:RegisterEnglishLocale({
     ["BOMBS UP !"] = "BOMBS UP !",
     ["Bomb Explosion"] = "Bomb Explosion",
     ["ICE TOMB"] = "ICE TOMB",
+    ["%d STACKS!"] = "%d STACKS!",
 })
 mod:RegisterFrenchLocale({
     -- Unit names.
@@ -44,6 +45,7 @@ mod:RegisterFrenchLocale({
     --["BOMBS UP !"] = "BOMBS UP !", -- TODO: French translation missing !!!!
     ["Bomb Explosion"] = "Bombe Explosion",
     ["ICE TOMB"] = "TOMBEAU DE GLACE",
+    ["%d STACKS!"] = "%d STACKS!",
 })
 mod:RegisterGermanLocale({
     -- Unit names.
@@ -59,6 +61,7 @@ mod:RegisterGermanLocale({
     --["BOMBS UP !"] = "BOMBS UP !", -- TODO: German translation missing !!!!
     ["Bomb Explosion"] = "Bomb Explosion",
     ["ICE TOMB"] = "EISGRAB",
+    ["%d STACKS!"] = "%d STACKS!",
 })
 mod:RegisterDefaultTimerBarConfigs({
     ["TOMB"] = { sColor = "xkcdBrightLightBlue" },
@@ -72,6 +75,8 @@ mod:RegisterDefaultTimerBarConfigs({
 local DEBUFFID_ICE_TOMB = 74326
 local DEBUFFID_FROSTBOMB = 75058
 local DEBUFFID_FIREBOMB = 75059
+local DEBUFFID_DRENCHED = 52874
+local DEBUFFID_ENGULFED = 52876
 
 ----------------------------------------------------------------------------------------------------
 -- Locals.
@@ -218,10 +223,12 @@ function mod:OnUnitDestroyed(unit, sName)
 end
 
 function mod:OnDebuffAppliedDose(unitName, splId, stack)
-    if (splId == 52874 or splId == 52876) and ((self:Tank() and stack == 13) or (not self:Tank() and stack == 10)) then
-        if unitName == GetPlayerUnit():GetName() then
-            local msgString = stack .. " STACKS!"
-            core:AddMsg("STACK", msgString, 5, mod:GetSetting("SoundHighDebuffStacks", "Beware"))
+    if splId == DEBUFFID_DRENCHED or splId == DEBUFFID_ENGULFED then
+        if (self:Tank() and stack == 13) or (not self:Tank() and stack == 10) then
+            if unitName == GetPlayerUnit():GetName() then
+                local sMessage = self.L["%d STACKS!"]:format(stack)
+                core:AddMsg("STACK", sMessage, 5, mod:GetSetting("SoundHighDebuffStacks", "Beware"))
+            end
         end
     end
 end
