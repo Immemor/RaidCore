@@ -51,8 +51,9 @@ local CHANNEL_HANDLERS = {
 }
 local SPELLID_BLACKLISTED = {
     [60883] = "Irradiate", -- On war class.
-    [76652] = "Surge Focus Drain", -- On arcanero class.
+    [79671] = "Empower", -- On war class.
     [72651] = "Surge Focus Drain", -- On arcanero class.
+    [72652] = "Surge Focus Drain", -- On arcanero class.
 }
 -- State Machine.
 local INTERFACE__DISABLE = 1
