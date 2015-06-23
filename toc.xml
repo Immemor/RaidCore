@@ -40,6 +40,7 @@
     <Script Name="Encounters/DS/DSLogicWing.lua"/>
     <Script Name="Encounters/DS/Gloomclaw.lua"/>
     <Script Name="Encounters/DS/VolatilyLattice.lua"/>
+    <Script Name="Encounters/DS/LimboInfomatrix.lua"/>
     <Script Name="Encounters/DS/Maelstrom.lua"/>
     <Script Name="Encounters/DS/EpAirWater.lua"/>
     <Script Name="Encounters/DS/EpFireWater.lua"/>
