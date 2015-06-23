@@ -42,14 +42,15 @@
     <Script Name="Encounters/DS/VolatilyLattice.lua"/>
     <Script Name="Encounters/DS/LimboInfomatrix.lua"/>
     <Script Name="Encounters/DS/Maelstrom.lua"/>
-    <Script Name="Encounters/DS/EpAirWater.lua"/>
-    <Script Name="Encounters/DS/EpFireWater.lua"/>
-    <Script Name="Encounters/DS/EpLogicWater.lua"/>
-    <Script Name="Encounters/DS/EpLogicEarth.lua"/>
     <Script Name="Encounters/DS/EpAirEarth.lua"/>
-    <Script Name="Encounters/DS/EpFireLife.lua"/>
-    <Script Name="Encounters/DS/EpLogicLife.lua"/>
     <Script Name="Encounters/DS/EpAirLife.lua"/>
+    <Script Name="Encounters/DS/EpAirWater.lua"/>
+    <Script Name="Encounters/DS/EpFireEarth.lua"/>
+    <Script Name="Encounters/DS/EpFireWater.lua"/>
+    <Script Name="Encounters/DS/EpFireLife.lua"/>
+    <Script Name="Encounters/DS/EpLogicEarth.lua"/>
+    <Script Name="Encounters/DS/EpLogicLife.lua"/>
+    <Script Name="Encounters/DS/EpLogicWater.lua"/>
     <Script Name="Encounters/DS/Avatus.lua"/>
     <!-- Encounters: Core-Y83 -->
     <Script Name="Encounters/Y83/PrimeEvolutionaryOperant.lua"/>
