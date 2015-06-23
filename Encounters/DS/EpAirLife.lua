@@ -30,11 +30,11 @@ mod:RegisterEnglishLocale({
     ["TWIRL ON YOU!"] = "TWIRL ON YOU!",
     ["Thorns"] = "Thorns",
     ["Twirl"] = "Twirl",
-    ["Midphase ending"] = "Midphase ending",
+    ["Midphase Ending"] = "Midphase Ending",
     ["Middle Phase"] = "Middle Phase",
     ["Next Healing Tree"] = "Next Healing Tree",
     ["No-Healing Debuff!"] = "No-Healing Debuff!",
-    ["NO HEAL DEBUFF"] = "NO HEAL\nDEBUFF",
+    ["NO HEAL DEBUFF"] = "NO HEAL",
     ["Lightning"] = "Lightning",
     ["Lightning on YOU"] = "Lightning on YOU",
     ["Recently Saved!"] = "Recently Saved!",
@@ -44,21 +44,21 @@ mod:RegisterFrenchLocale({
     ["Visceralus"] = "Visceralus",
     ["Aileron"] = "Ventemort",
     ["Wild Brambles"] = "Ronces sauvages",
-    --["[DS] e395 - Air - Tornado"] = "[DS] e395 - Air - Tornado", -- TODO: French translation missing !!!!
+    ["[DS] e395 - Air - Tornado"] = "[DS] e395 - Air - Tornado",
     ["Life Force"] = "Force vitale",
     ["Lifekeeper"] = "Garde-vie",
     -- Datachron messages.
     -- Cast.
     ["Blinding Light"] = "Lumière aveuglante",
     -- Bar and messages.
-    --["TWIRL ON YOU!"] = "TWIRL ON YOU!", -- TODO: French translation missing !!!!
+    ["TWIRL ON YOU!"] = "TOURNOIEMENT SUR VOUS!",
     ["Thorns"] = "Épines",
     ["Twirl"] = "Tournoiement",
-    --["Midphase ending"] = "Midphase ending", -- TODO: French translation missing !!!!
-    --["Middle Phase"] = "Middle Phase", -- TODO: French translation missing !!!!
+    ["Midphase Ending"] = "Phase Milieu Fin",
+    ["Middle Phase"] = "Phase Milieu",
     --["Next Healing Tree"] = "Next Healing Tree", -- TODO: French translation missing !!!!
     --["No-Healing Debuff!"] = "No-Healing Debuff!", -- TODO: French translation missing !!!!
-    --["NO HEAL DEBUFF"] = "NO HEAL\nDEBUFF", -- TODO: French translation missing !!!!
+    ["NO HEAL DEBUFF"] = "NO HEAL",
     ["Lightning"] = "Foudre",
     --["Lightning on YOU"] = "Lightning on YOU", -- TODO: French translation missing !!!!
     --["Recently Saved!"] = "Recently Saved!", -- TODO: French translation missing !!!!
@@ -78,11 +78,11 @@ mod:RegisterGermanLocale({
     --["TWIRL ON YOU!"] = "TWIRL ON YOU!", -- TODO: German translation missing !!!!
     ["Thorns"] = "Dornen",
     ["Twirl"] = "Wirbel",
-    --["Midphase ending"] = "Midphase ending", -- TODO: German translation missing !!!!
+    --["Midphase Ending"] = "Midphase Ending", -- TODO: German translation missing !!!!
     --["Middle Phase"] = "Middle Phase", -- TODO: German translation missing !!!!
     --["Next Healing Tree"] = "Next Healing Tree", -- TODO: German translation missing !!!!
     --["No-Healing Debuff!"] = "No-Healing Debuff!", -- TODO: German translation missing !!!!
-    --["NO HEAL DEBUFF"] = "NO HEAL\nDEBUFF", -- TODO: German translation missing !!!!
+    --["NO HEAL DEBUFF"] = "NO HEAL", -- TODO: German translation missing !!!!
     ["Lightning"] = "Blitz",
     --["Lightning on YOU"] = "Lightning on YOU", -- TODO: German translation missing !!!!
     --["Recently Saved!"] = "Recently Saved!", -- TODO: German translation missing !!!!
@@ -115,6 +115,9 @@ mod:RegisterDefaultTimerBarConfigs({
 ----------------------------------------------------------------------------------------------------
 -- Constants.
 ----------------------------------------------------------------------------------------------------
+local DEBUFFID_TWIRL = 70440
+local DEBUFFID_LIFE_FORCE_SHACKLE = 74366
+local DEBUFFID_LIGHTNING_STRIKE = 74485
 
 ----------------------------------------------------------------------------------------------------
 -- Locals.
@@ -166,7 +169,7 @@ function mod:OnUnitCreated(unit, sName)
         midphase = true
         twirlCount = 0
         midphase_start = eventTime + 115
-        mod:AddTimerBar("MIDEND", "Midphase ending", 35)
+        mod:AddTimerBar("MIDEND", "Midphase Ending", 35)
         mod:AddTimerBar("THORN", "Thorns", 35)
         mod:AddTimerBar("LIFEKEEP", "Next Healing Tree", 35)
     elseif sName == self.L["Life Force"] and mod:GetSetting("LineLifeOrbs") then
@@ -195,7 +198,7 @@ end
 function mod:OnDebuffApplied(unitName, splId, unit)
     local eventTime = GameLib.GetGameTime()
     local splName = GameLib.GetSpell(splId):GetName()
-    if splId == 70440 then -- Twirl
+    if splId == DEBUFFID_TWIRL then
         if unitName == myName and mod:GetSetting("OtherTwirlWarning") then
             core:AddMsg("TWIRL", self.L["TWIRL ON YOU!"], 5, mod:GetSetting("SoundTwirl") and "Inferno")
         end
@@ -208,14 +211,14 @@ function mod:OnDebuffApplied(unitName, splId, unit)
         if not CheckTwirlTimer then
             CheckTwirlTimer = self:ScheduleRepeatingTimer("CheckTwirlTimer", 1)
         end
-    elseif splName == "Life Force Shackle" then
+    elseif splId == DEBUFFID_LIFE_FORCE_SHACKLE then
         if mod:GetSetting("OtherNoHealDebuffPlayerMarkers") then
             core:MarkUnit(unit, nil, self.L["NO HEAL DEBUFF"])
         end
         if unitName == strMyName and mod:GetSetting("OtherNoHealDebuff") then
             core:AddMsg("NOHEAL", self.L["No-Healing Debuff!"], 5, mod:GetSetting("SoundNoHealDebuff") and "Alarm")
         end
-    elseif splName == "Lightning Strike" then
+    elseif splId == DEBUFFID_LIGHTNING_STRIKE then
         if mod:GetSetting("OtherLightningMarkers") then
             core:MarkUnit(unit, nil, self.L["Lightning"])
         end
@@ -227,11 +230,11 @@ end
 
 function mod:OnDebuffRemoved(unitName, splId, unit)
     local splName = GameLib.GetSpell(splId):GetName()
-    if splId == 70440 then
+    if splId == DEBUFFID_TWIRL then
         core:RemoveUnit(unit:GetId())
-    elseif splName == "Life Force Shackle" then
+    elseif splId == DEBUFFID_LIFE_FORCE_SHACKLE then
         core:DropMark(unit:GetId())
-    elseif splName == "Lightning Strike" then
+    elseif splId == DEBUFFID_LIGHTNING_STRIKE then
         core:DropMark(unit:GetId())
     end
 end
@@ -252,7 +255,7 @@ function mod:CheckTwirlTimer()
             local bUnitHasTwirl = false
             local debuffs = unit:GetBuffs().arHarmful
             for _, debuff in pairs(debuffs) do
-                if debuff.splEffect:GetId() == 70440 then -- the Twirl ability
+                if debuff.splEffect:GetId() == DEBUFFID_TWIRL then
                     bUnitHasTwirl = true
                 end
             end
