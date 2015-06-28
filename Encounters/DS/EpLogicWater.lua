@@ -94,14 +94,15 @@ mod:RegisterDefaultTimerBarConfigs({
 ----------------------------------------------------------------------------------------------------
 -- Constants.
 ----------------------------------------------------------------------------------------------------
+local DEBUFFID_DATA_DISRUPTOR = 78407
 
 ----------------------------------------------------------------------------------------------------
 -- Locals.
 ----------------------------------------------------------------------------------------------------
+local GetPlayerUnit = GameLib.GetPlayerUnit
 local uPlayer = nil
 local strMyName = ""
 local midphase = false
-local encounter_started = false
 
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
@@ -115,7 +116,6 @@ function mod:OnBossEnable()
     Apollo.RegisterEventHandler("DEBUFF_APPLIED", "OnDebuffApplied", self)
     Apollo.RegisterEventHandler("DEBUFF_REMOVED", "OnDebuffRemoved", self)
     midphase = false
-    encounter_started = false
 
     uPlayer = GameLib.GetPlayerUnit()
     strMyName = uPlayer:GetName()
@@ -146,9 +146,8 @@ function mod:OnSpellCastEnd(unitName, castName)
 end
 
 function mod:OnDebuffApplied(unitName, splId, unit)
-    local splName = GameLib.GetSpell(splId):GetName()
-    if splName == "Data Disruptor" then
-        if unitName == strMyName then
+    if splId == DEBUFFID_DATA_DISRUPTOR then
+        if unit == GetPlayerUnit() then
             core:AddMsg("DISRUPTOR", self.L["Stay away from boss with buff!"], 5, mod:GetSetting("SoundDataDisruptorDebuff") and "Beware")
         end
         if mod:GetSetting("OtherOrbMarkers") then
