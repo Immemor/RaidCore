@@ -34,6 +34,9 @@
     <Script Name="Encounters/GA/PhageCouncil.lua"/>
     <Script Name="Encounters/GA/Ohmna.lua"/>
     <!-- Encounters: Datascape -->
+    <Script Name="Encounters/DS/miniboss/Earth_Bio_Enhanced_Broodmother.lua"/>
+    <Script Name="Encounters/DS/miniboss/Earth_Fully_Optimized_Canimid.lua"/>
+    <Script Name="Encounters/DS/miniboss/Earth_Logic_Guided_Rockslide.lua"/>
     <Script Name="Encounters/DS/SystemDaemons.lua"/>
     <Script Name="Encounters/DS/DSFireWing.lua"/>
     <Script Name="Encounters/DS/DSFrostWing.lua"/>
