@@ -222,7 +222,6 @@ local playerName
 function mod:OnBossEnable()
     Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
     Apollo.RegisterEventHandler("RC_UnitDestroyed", "OnUnitDestroyed", self)
-    Apollo.RegisterEventHandler("RC_UnitStateChanged", "OnUnitStateChanged", self)
     Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
     Apollo.RegisterEventHandler("SPELL_CAST_END", "OnSpellCastEnd", self)
     Apollo.RegisterEventHandler("DEBUFF_APPLIED", "OnDebuffApplied", self)
@@ -231,12 +230,18 @@ function mod:OnBossEnable()
     Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
     Apollo.RegisterEventHandler("RAID_SYNC", "OnSyncRcv", self)
     Apollo.RegisterEventHandler("SubZoneChanged", "OnZoneChanged", self)
-    Apollo.RegisterEventHandler("RAID_WIPE", "OnReset", self)
-end
 
-function mod:OnReset()
-    core:ResetWorldMarkers()
+    sdwaveCount, probeCount = 0, 0
+    phase2warn, phase2 = false, false
     phase2count = 0
+    playerName = GameLib.GetPlayerUnit():GetName()
+    core:AddSync("NORTH_SURGE", 5)
+    core:AddSync("SOUTH_SURGE", 5)
+
+    if mod:GetSetting("OtherDisconnectTimer") then
+        mod:AddTimerBar("DISCONNECT", "Disconnect", 41)
+    end
+    mod:AddTimerBar("SDWAVE", self.L["[%u] WAVE"]:format(1), 15, mod:GetSetting("SoundWave"))
 end
 
 function mod:OnUnitCreated(unit, sName)
@@ -247,6 +252,11 @@ function mod:OnUnitCreated(unit, sName)
         or sName == self.L["Extermination Sequence"]
         or sName == self.L["Data Compiler"]
         or sName == self.L["Viral Diffusion Inhibitor"] then
+
+        if sName == self.L["Defragmentation Unit"] or sName == self.L["Radiation Dispersion Unit"] then
+            core:AddUnit(unit)
+            core:WatchUnit(unit)
+        end
 
         if phase2 then return end
         local timeOfEvent = GameLib.GetGameTime()
@@ -285,6 +295,18 @@ function mod:OnUnitCreated(unit, sName)
         end
     elseif sName == self.L["Recovery Protocol"] then
         core:WatchUnit(unit)
+    elseif sName == self.L["Null System Daemon"] then
+        core:AddUnit(unit)
+        core:WatchUnit(unit)
+        core:MarkUnit(unit, 0, self.L["MARKER south"])
+        sdSurgeCount[unit:GetId()] = 1
+        PurgeLast[unit:GetId()] = 0
+    elseif sName == self.L["Binary System Daemon"] then
+        core:AddUnit(unit)
+        core:WatchUnit(unit)
+        core:MarkUnit(unit, 0, self.L["MARKER north"])
+        sdSurgeCount[unit:GetId()] = 1
+        PurgeLast[unit:GetId()] = 0
     end
 end
 
@@ -338,9 +360,11 @@ function mod:OnSpellCastStart(unitName, castName, unit)
                 mod:AddTimerBar("PURGE_BINARY", "PURGE - BINARY", 27)
             end
         end
-    elseif unitName == self.L["Defragmentation Unit"] and castName == self.L["Black IC"] then
-        core:AddMsg("BLACKIC", self.L["INTERRUPT !"], 5, "Alert")
-        mod:AddTimerBar("BLACKIC", "BLACK IC", 30)
+    elseif unitName == self.L["Defragmentation Unit"] then
+            if GetCurrentSubZoneName():find("Infinite Generator Core") and castName == self.L["Black IC"] then
+                core:AddMsg("BLACKIC", self.L["INTERRUPT !"], 5, "Alert")
+                mod:AddTimerBar("BLACKIC", "BLACK IC", 30)
+            end
     elseif unitName == self.L["Recovery Protocol"] and castName == self.L["Repair Sequence"] then
         if self:GetDistanceBetweenUnits(GameLib.GetPlayerUnit(), unit) < 50 then
             core:AddMsg("HEAL", self.L["INTERRUPT HEAL!"], 5, mod:GetSetting("SoundRepairSequence") and "Inferno")
@@ -482,36 +506,6 @@ function mod:OnSyncRcv(sync, parameter)
 
         if intSouth and intSouth == sdSurgeCount[parameter] then
             core:AddMsg("SURGE", self.L["YOU ARE NEXT ON SOUTH !"], 5, "Long", "Blue")
-        end
-    end
-end
-
-function mod:OnUnitStateChanged(unit, bInCombat, sName)
-    if unit:GetType() == "NonPlayer" and bInCombat then
-        if sName == self.L["Null System Daemon"] or sName == self.L["Binary System Daemon"] then
-            if sName == self.L["Null System Daemon"] then
-                core:MarkUnit(unit, 0, self.L["MARKER south"])
-            else
-                core:MarkUnit(unit, 0, self.L["MARKER north"])
-            end
-            sdwaveCount, probeCount = 0, 0
-            phase2warn, phase2 = false, false
-            phase2count = 0
-            sdSurgeCount[unit:GetId()] = 1
-            PurgeLast[unit:GetId()] = 0
-            playerName = GameLib.GetPlayerUnit():GetName()
-            core:AddUnit(unit)
-            core:WatchUnit(unit)
-            core:AddSync("NORTH_SURGE", 5)
-            core:AddSync("SOUTH_SURGE", 5)
-            if mod:GetSetting("OtherDisconnectTimer") then
-                mod:AddTimerBar("DISCONNECT", "Disconnect", 41)
-            end
-            mod:AddTimerBar("SDWAVE", self.L["[%u] WAVE"]:format(sdwaveCount + 1), 15, mod:GetSetting("SoundWave"))
-        elseif sName == self.L["Defragmentation Unit"] then
-            if GetCurrentSubZoneName():find("Infinite Generator Core") then
-                core:WatchUnit(unit)
-            end
         end
     end
 end
