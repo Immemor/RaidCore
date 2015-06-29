@@ -21,18 +21,17 @@ mod:RegisterEnglishLocale({
     ["Hydroflux"] = "Hydroflux",
     ["Alphanumeric Hash"] = "Alphanumeric Hash",
     ["Hydro Disrupter - DNT"] = "Hydro Disrupter - DNT",
-    -- Datachron messages.
     -- Cast.
     ["Circuit Breaker"] = "Circuit Breaker",
-    ["Imprison"] = "Imprison",
+    ["Imprison"] = "~Imprison",
     ["Defragment"] = "Defragment",
     ["Watery Grave"] = "Watery Grave",
+    ["Tsunami"] = "Tsunami",
     -- Bar and messages.
     ["Middle Phase"] = "Middle Phase",
     ["SPREAD"] = "SPREAD",
     ["~Defrag"] = "~Defrag",
     ["Defrag"] = "Defrag",
-    ["Stay away from boss with buff!"] = "Stay away from boss with buff!",
     ["ORB"] = "ORB",
 })
 mod:RegisterFrenchLocale({
@@ -40,20 +39,19 @@ mod:RegisterFrenchLocale({
     ["Mnemesis"] = "Mnémésis",
     ["Hydroflux"] = "Hydroflux",
     ["Alphanumeric Hash"] = "Hachis alphanumérique",
-    --["Hydro Disrupter - DNT"] = "Hydro Disrupter - DNT", -- TODO: French translation missing !!!!
-    -- Datachron messages.
+    ["Hydro Disrupter - DNT"] = "Hydro-disrupteur - DNT",
     -- Cast.
     ["Circuit Breaker"] = "Coupe-circuit",
-    ["Imprison"] = "Emprisonner",
+    ["Imprison"] = "~Emprisonner",
     ["Defragment"] = "Défragmentation",
     ["Watery Grave"] = "Tombe aqueuse",
+    ["Tsunami"] = "Tsunami",
     -- Bar and messages.
-    --["Middle Phase"] = "Middle Phase", -- TODO: French translation missing !!!!
-    --["SPREAD"] = "SPREAD", -- TODO: French translation missing !!!!
-    --["~Defrag"] = "~Defrag", -- TODO: French translation missing !!!!
+    ["Middle Phase"] = "Phase du Milieu",
+    ["SPREAD"] = "ECARTÉ",
+    ["~Defrag"] = "~Defrag",
     ["Defrag"] = "Défragmentation",
-    --["Stay away from boss with buff!"] = "Stay away from boss with buff!", -- TODO: French translation missing !!!!
-    --["ORB"] = "ORB", -- TODO: French translation missing !!!!
+    ["ORB"] = "ORB",
 })
 mod:RegisterGermanLocale({
     -- Unit names.
@@ -61,10 +59,9 @@ mod:RegisterGermanLocale({
     ["Hydroflux"] = "Hydroflux",
     ["Alphanumeric Hash"] = "Alphanumerische Raute",
     --["Hydro Disrupter - DNT"] = "Hydro Disrupter - DNT", -- TODO: German translation missing !!!!
-    -- Datachron messages.
     -- Cast.
     ["Circuit Breaker"] = "Schaltkreiszerstörer",
-    ["Imprison"] = "Einsperren",
+    ["Imprison"] = "~Einsperren",
     ["Defragment"] = "Defragmentieren",
     ["Watery Grave"] = "Seemannsgrab",
     -- Bar and messages.
@@ -72,7 +69,6 @@ mod:RegisterGermanLocale({
     --["SPREAD"] = "SPREAD", -- TODO: German translation missing !!!!
     --["~Defrag"] = "~Defrag", -- TODO: German translation missing !!!!
     ["Defrag"] = "Defrag",
-    --["Stay away from boss with buff!"] = "Stay away from boss with buff!", -- TODO: German translation missing !!!!
     --["ORB"] = "ORB", -- TODO: German translation missing !!!!
 })
 -- Default settings.
@@ -100,8 +96,7 @@ local DEBUFFID_DATA_DISRUPTOR = 78407
 -- Locals.
 ----------------------------------------------------------------------------------------------------
 local GetPlayerUnit = GameLib.GetPlayerUnit
-local uPlayer = nil
-local strMyName = ""
+local nMnemesisId
 local midphase = false
 
 ----------------------------------------------------------------------------------------------------
@@ -110,45 +105,57 @@ local midphase = false
 function mod:OnBossEnable()
     Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
     Apollo.RegisterEventHandler("RC_UnitDestroyed", "OnUnitDestroyed", self)
-    Apollo.RegisterEventHandler("RC_UnitStateChanged", "OnUnitStateChanged", self)
     Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
     Apollo.RegisterEventHandler("SPELL_CAST_END", "OnSpellCastEnd", self)
     Apollo.RegisterEventHandler("DEBUFF_APPLIED", "OnDebuffApplied", self)
     Apollo.RegisterEventHandler("DEBUFF_REMOVED", "OnDebuffRemoved", self)
-    midphase = false
 
-    uPlayer = GameLib.GetPlayerUnit()
-    strMyName = uPlayer:GetName()
+    midphase = false
+    nMnemesisId = nil
+    mod:AddTimerBar("MIDPHASE", "Middle Phase", 75, mod:GetSetting("SoundMidphaseCountDown"))
+    mod:AddTimerBar("PRISON", "Imprison", 33)
+    mod:AddTimerBar("DEFRAG", "Defrag", 18, mod:GetSetting("SoundDefrag"))
+    if mod:GetSetting("OtherWateryGraveTimer") then
+        mod:AddTimerBar("GRAVE", "Watery Grave", 10)
+    end
 end
 
 function mod:OnSpellCastStart(unitName, castName, unit)
     if unitName == self.L["Mnemesis"] then
         if castName == self.L["Circuit Breaker"] then
-            mod:AddTimerBar("MIDPHASE", "Middle Phase", 100, mod:GetSetting("SoundMidphaseCountDown"))
             midphase = true
+            mod:AddTimerBar("MIDPHASE", "Circuit Breaker", 25, mod:GetSetting("SoundMidphaseCountDown"))
         elseif castName == self.L["Imprison"] then
-            mod:AddTimerBar("PRISON", "Imprison", 19)
+            mod:RemoveTimerBar("PRISON")
         elseif castName == self.L["Defragment"] then
             core:AddMsg("DEFRAG", self.L["SPREAD"], 5, mod:GetSetting("SoundDefrag") and "Beware")
             mod:AddTimerBar("DEFRAG", "~Defrag", 40, mod:GetSetting("SoundDefrag"))
         end
     elseif unitName == self.L["Hydroflux"] then
-        if castName == self.L["Watery Grave"] and mod:GetSetting("OtherWateryGraveTimer") then
-            mod:AddTimerBar("GRAVE", "Watery Grave", 10)
+        if castName == self.L["Watery Grave"] then
+            if mod:GetSetting("OtherWateryGraveTimer") then
+                mod:AddTimerBar("GRAVE", "Watery Grave", 10)
+            end
         end
     end
 end
 
 function mod:OnSpellCastEnd(unitName, castName)
-    if unitName == self.L["Mnemesis"] and castName == self.L["Circuit Breaker"] then
-        midphase = false
+    if unitName == self.L["Mnemesis"] then
+        if castName == self.L["Circuit Breaker"] then
+            midphase = false
+            mod:AddTimerBar("MIDPHASE", "Middle Phase", 90, mod:GetSetting("SoundMidphaseCountDown"))
+            mod:AddTimerBar("PRISON", "Imprison", 25)
+        end
     end
 end
 
 function mod:OnDebuffApplied(unitName, splId, unit)
     if splId == DEBUFFID_DATA_DISRUPTOR then
         if unit == GetPlayerUnit() then
-            core:AddMsg("DISRUPTOR", self.L["Stay away from boss with buff!"], 5, mod:GetSetting("SoundDataDisruptorDebuff") and "Beware")
+            if mod:GetSetting("SoundDataDisruptorDebuff") then
+               core:PlaySound("Beware")
+           end
         end
         if mod:GetSetting("OtherOrbMarkers") then
             core:MarkUnit(unit, nil, self.L["ORB"])
@@ -157,9 +164,7 @@ function mod:OnDebuffApplied(unitName, splId, unit)
 end
 
 function mod:OnDebuffRemoved(unitName, splId, unit)
-    local tSpell = GameLib.GetSpell(splId)
-    local strSpellName = tSpell:GetName()
-    if strSpellName == "Data Disruptor" then
+    if splId == DEBUFFID_DATA_DISRUPTOR then
         local unitId = unit:GetId()
         if unitId then
             core:DropMark(unit:GetId())
@@ -168,53 +173,39 @@ function mod:OnDebuffRemoved(unitName, splId, unit)
 end
 
 function mod:OnUnitCreated(unit, sName)
+    local nUnitId = unit:GetId()
+
     if sName == self.L["Alphanumeric Hash"] then
-        local unitId = unit:GetId()
-        if unitId and mod:GetSetting("LineTetrisBlocks") then
-            core:AddPixie(unitId, 2, unit, nil, "Red", 10, 20, 0)
+        if nUnitId and mod:GetSetting("LineTetrisBlocks") then
+            core:AddPixie(nUnitId, 2, unit, nil, "Red", 10, 20, 0)
         end
-    elseif sName == self.L["Hydro Disrupter - DNT"] and not midphase and mod:GetSetting("LineOrbs") then
-        local unitId = unit:GetId()
-        if unitId then
-            core:AddPixie(unitId, 1, unit, uPlayer, "Blue", 5, 10, 10)
+    elseif sName == self.L["Hydro Disrupter - DNT"] then
+        if nUnitId and not midphase and mod:GetSetting("LineOrbs") then
+            core:AddPixie(nUnitId, 1, unit, GetPlayerUnit(), "Blue", 5, 10, 10)
         end
-    elseif sName == self.L["Hydroflux"] or sName == self.L["Mnemesis"] then
+    elseif sName == self.L["Hydroflux"] then
         core:AddUnit(unit)
         core:WatchUnit(unit)
+    elseif sName == self.L["Mnemesis"] then
+        if nUnitId and (nMnemesisId == nil or nMnemesisId == nUnitId) then
+            -- A filter is needed, because there is many unit called Mnemesis.
+            -- Only the first is the good.
+            nMnemesisId = nUnitId
+            core:AddUnit(unit)
+            core:WatchUnit(unit)
+        end
     end
 end
 
 function mod:OnUnitDestroyed(unit, sName)
+    local nUnitId = unit:GetId()
     if sName == self.L["Alphanumeric Hash"] then
-        local unitId = unit:GetId()
-        if unitId then
-            core:DropPixie(unitId)
+        if nUnitId then
+            core:DropPixie(nUnitId)
         end
     elseif sName == self.L["Hydro Disrupter - DNT"] then
-        local unitId = unit:GetId()
-        if unitId then
-            core:DropPixie(unitId)
-        end
-    end
-end
-
-function mod:OnUnitStateChanged(unit, bInCombat, sName)
-    if unit:GetType() == "NonPlayer" and bInCombat then
-        if sName == self.L["Hydroflux"] then
-            core:AddUnit(unit)
-            core:WatchUnit(unit)
-        elseif sName == self.L["Mnemesis"] then
-            midphase = false
-            encounter_started = true
-            core:AddUnit(unit)
-            core:WatchUnit(unit)
-            mod:AddTimerBar("MIDPHASE", "Middle Phase", 75, mod:GetSetting("SoundMidphaseCountDown"))
-            mod:AddTimerBar("PRISON", "Imprison", 16)
-            mod:AddTimerBar("DEFRAG", "Defrag", 20, mod:GetSetting("SoundDefrag"))
-
-            if mod:GetSetting("OtherWateryGraveTimer") then
-                mod:AddTimerBar("GRAVE", "Watery Grave", 10)
-            end
+        if nUnitId then
+            core:DropPixie(nUnitId)
         end
     end
 end
