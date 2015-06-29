@@ -129,7 +129,10 @@ local function ProcessDelayedUnit()
             local tUnit = GetUnitById(nDelayedId)
             if tUnit then
                 local bInCombat = tUnit:IsInCombat()
-                Event_FireGenericEvent("RC_UnitStateChanged", tUnit, bInCombat, nDelayedName)
+                Event_FireGenericEvent("RC_UnitCreated", tUnit, nDelayedName)
+                if bInCombat then
+                    Event_FireGenericEvent("RC_UnitStateChanged", tUnit, bInCombat, nDelayedName)
+                end
             else
                 Log:Add("Error Invalid tUnit not found", nDelayedName, nDelayedId)
             end

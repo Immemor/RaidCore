@@ -402,6 +402,9 @@ function RaidCore:CI_OnEnteredCombat(tUnit, bInCombat)
         local nId = tUnit:GetId()
         local sName = string.gsub(tUnit:GetName(), NO_BREAK_SPACE, " ")
         if not tUnit:IsInYourGroup() and nId ~= GetPlayerUnit():GetId() then
+            if not _tAllUnits[nId] then
+                ManagerCall("OnUnitCreated", nId, tUnit, sName)
+            end
             _tAllUnits[nId] = true
         end
         ManagerCall("OnEnteredCombat", nId, tUnit, sName, bInCombat)
