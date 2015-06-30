@@ -29,8 +29,8 @@ mod:RegisterEnglishLocale({
     ["Crystallize"] = "Crystallize",
     ["Typhoon"] = "Typhoon",
     -- Bar and messages.
-    ["[%u] STATION: %s %s"] = "[%u] STATION: %s %s",
-    ["[%u] STATION"] = "[%u] STATION",
+    ["STATION: %s %s"] = "STATION: %s %s",
+    ["STATION"] = "STATION",
     ["ICE BREATH"] = "ICE BREATH",
     ["TYPHOON"] = "TYPHOON",
     ["JUMP"] = "JUMP",
@@ -54,8 +54,8 @@ mod:RegisterFrenchLocale({
     ["Crystallize"] = "Cristalliser",
     ["Typhoon"] = "Typhon",
     -- Bar and messages.
-    ["[%u] STATION: %s %s"] = "[%u] STATION: %s %s",
-    ["[%u] STATION"] = "[%u] STATION",
+    ["STATION: %s %s"] = "STATION: %s %s",
+    ["STATION"] = "STATION",
     ["ICE BREATH"] = "SOUFFLE DE GLACE",
     ["TYPHOON"] = "TYPHON",
     ["JUMP"] = "SAUTER",
@@ -79,8 +79,8 @@ mod:RegisterGermanLocale({
     ["Crystallize"] = "Kristallisieren",
     ["Typhoon"] = "Taifun",
     -- Bar and messages.
-    --["[%u] STATION: %s %s"] = "[%u] STATION: %s %s", -- TODO: German translation missing !!!!
-    --["[%u] STATION"] = "[%u] STATION", -- TODO: German translation missing !!!!
+    --["STATION: %s %s"] = "STATION: %s %s", -- TODO: German translation missing !!!!
+    --["STATION"] = "STATION", -- TODO: German translation missing !!!!
     --["ICE BREATH"] = "ICE BREATH", -- TODO: German translation missing !!!!
     --["TYPHOON"] = "TYPHOON", -- TODO: German translation missing !!!!
     --["JUMP"] = "JUMP", -- TODO: German translation missing !!!!
@@ -111,9 +111,10 @@ mod:RegisterDefaultTimerBarConfigs({
 ----------------------------------------------------------------------------------------------------
 -- Locals.
 ----------------------------------------------------------------------------------------------------
+local GetPlayerUnit = GameLib.GetPlayerUnit
 local prev = 0
 local stationCount = 0
-local bossPos = {}
+local bossPos
 
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
@@ -124,20 +125,41 @@ function mod:OnBossEnable()
     Apollo.RegisterEventHandler("RC_UnitStateChanged", "OnUnitStateChanged", self)
     Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
     Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
+
+    bossPos = {}
+    stationCount = 0
 end
 
 function mod:OnUnitCreated(unit, sName)
-    if sName == self.L["Wind Wall"] then
+    if sName == self.L["Maelstrom Authority"] then
+        core:AddUnit(unit)
+        core:WatchUnit(unit)
+        if mod:GetSetting("LineCleaveBoss") then
+            core:AddPixie(unit:GetId(), 2, unit, nil, "Red", 10, 15, 0)
+        end
+    elseif sName == self.L["Weather Station"] then
+        core:AddUnit(unit)
+        if mod:GetSetting("LineWeatherStations") then
+            core:AddPixie(unit:GetId(), 1, GetPlayerUnit(), unit, "Blue", 5, 10, 10)
+        end
+        stationCount = stationCount + 1
+        local stationPos = unit:GetPosition()
+        mod:AddTimerBar("STATION", "STATION", 25)
+
+        local station_name = "STATION" .. tostring(stationCount)
+        if stationPos and bossPos then
+            local text = self.L["STATION: %s %s"]:format(
+                (stationPos.z > bossPos.z) and self.L["SOUTH"] or self.L["NORTH"],
+                (stationPos.x > bossPos.x) and self.L["EAST"] or self.L["WEST"])
+
+            core:AddMsg(station_name, text, 5, mod:GetSetting("SoundWeatherStationSwitch") and "Info", "Blue")
+        else
+            core:AddMsg(station_name, "STATION", 5, mod:GetSetting("SoundWeatherStationSwitch") and "Info", "Blue")
+        end
+    elseif sName == self.L["Wind Wall"] then
         if mod:GetSetting("LineWindWalls") then
             core:AddPixie(unit:GetId().."_1", 2, unit, nil, "Green", 10, 20, 0)
             core:AddPixie(unit:GetId().."_2", 2, unit, nil, "Green", 10, 20, 180)
-        end
-    elseif sName == self.L["Weather Station"] then
-        local stationPos = unit:GetPosition()
-        core:AddUnit(unit)
-        if mod:GetSetting("LineWeatherStations") then
-            local playerUnit = GameLib.GetPlayerUnit()
-            core:AddPixie(unit:GetId(), 1, playerUnit, unit, "Blue", 5, 10, 10)
         end
     end
 end
@@ -156,7 +178,7 @@ function mod:OnSpellCastStart(unitName, castName, unit)
         if castName == self.L["Activate Weather Cycle"] then
             bossPos = unit:GetPosition()
             stationCount = 0
-            mod:AddTimerBar("STATION", self.L["[%u] STATION"]:format(stationCount + 1), 13)
+            mod:AddTimerBar("STATION", "STATION", 13)
         elseif castName == self.L["Ice Breath"] then
             core:AddMsg("BREATH", self.L["ICE BREATH"], 5, mod:GetSetting("SoundIceBreath") and "RunAway")
         elseif castName == self.L["Crystallize"] then
@@ -170,37 +192,5 @@ end
 function mod:OnChatDC(message)
     if message:find(self.L["The platform trembles"]) then
         mod:AddTimerBar("JUMP", "JUMP", 7, true)
-    end
-end
-
-function mod:OnUnitStateChanged(unit, bInCombat, sName)
-    if unit:GetType() == "NonPlayer" and bInCombat then
-        if sName == self.L["Maelstrom Authority"] then
-            bossPos = {}
-            stationCount = 0
-            core:AddUnit(unit)
-            core:WatchUnit(unit)
-            if mod:GetSetting("LineCleaveBoss") then
-                core:AddPixie(unit:GetId(), 2, unit, nil, "Red", 10, 15, 0)
-            end
-        elseif sName == self.L["Weather Station"] then
-            stationCount = stationCount + 1
-            local station_name = "STATION" .. tostring(stationCount)
-
-            local posStr = ""
-            local stationPos = unit:GetPosition()
-            if stationPos and bossPos then
-                local text = self.L["[%u] STATION: %s %s"]:format(
-                stationCount,
-                (stationPos.z > bossPos.z) and self.L["SOUTH"] or self.L["NORTH"],
-                (stationPos.x > bossPos.x) and self.L["EAST"] or self.L["WEST"])
-                core:AddMsg(station_name, text, 5, mod:GetSetting("SoundWeatherStationSwitch") and "Info", "Blue")
-            else
-                local text = self.L["[%u] STATION"]:format(stationCount)
-                core:AddMsg(station_name, text, 5, mod:GetSetting("SoundWeatherStationSwitch") and "Info", "Blue")
-            end
-            local text = self.L["[%u] STATION"]:format(stationCount + 1)
-            mod:AddTimerBar("STATION", text, 10)
-        end
     end
 end
