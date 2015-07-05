@@ -143,12 +143,12 @@ local midphase = false
 -- Encounter description.
 ---------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("RC_UnitStateChanged", "OnUnitStateChanged", self)
-    Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
     Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
     Apollo.RegisterEventHandler("RC_UnitDestroyed", "OnUnitDestroyed", self)
+    Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
     Apollo.RegisterEventHandler("DEBUFF_APPLIED", "OnDebuffApplied", self)
     Apollo.RegisterEventHandler("DEBUFF_REMOVED", "OnDebuffRemoved", self)
+    midphase = false
 end
 
 function mod:OnDebuffApplied(unitName, splId, unit)
@@ -186,7 +186,22 @@ function mod:OnDebuffRemoved(unitName, splId, unit)
 end
 
 function mod:OnUnitCreated(unit, sName)
-    if sName == self.L["Essence of Life"] then
+    if sName == self.L["Visceralus"] then
+        core:AddUnit(unit)
+        core:WatchUnit(unit)
+        if mod:GetSetting("LineCleaveVisceralus") then
+            core:AddLine("Visc1", 2, unit, nil, 3, 25, 0, 10)
+            core:AddLine("Visc2", 2, unit, nil, 1, 25, 72)
+            core:AddLine("Visc3", 2, unit, nil, 1, 25, 144)
+            core:AddLine("Visc4", 2, unit, nil, 1, 25, 216)
+            core:AddLine("Visc5", 2, unit, nil, 1, 25, 288)
+        end
+    elseif sName == self.L["Mnemesis"] then
+        core:WatchUnit(unit)
+        core:AddUnit(unit)
+        mod:AddTimerBar("DEFRAG", self.L["~DEFRAG CD"], 21, mod:GetSetting("SoundDefrag"))
+        mod:AddTimerBar("ENRAGE", self.L["ENRAGE"], 480, mod:GetSetting("SoundEnrageCountDown"))
+    elseif sName == self.L["Essence of Life"] then
         core:AddUnit(unit)
         if not midphase then
             midphase = true
@@ -237,27 +252,5 @@ function mod:OnSpellCastStart(unitName, castName, unit)
         mod:AddTimerBar("DEFRAG", self.L["~DEFRAG CD"], 40, mod:GetSetting("SoundDefrag"))
         mod:AddTimerBar("DEFRAG_EXPLOSION", self.L["Defrag Explosion"], 9, mod:GetSetting("SoundDefrag"))
         core:AddMsg("DEFRAG", self.L["DEFRAG"], 5, mod:GetSetting("SoundDefrag") and "Beware")
-    end
-end
-
-function mod:OnUnitStateChanged(unit, bInCombat, sName)
-    if unit:GetType() == "NonPlayer" and bInCombat then
-        if sName == self.L["Visceralus"] then
-            core:AddUnit(unit)
-            core:WatchUnit(unit)
-            if mod:GetSetting("LineCleaveVisceralus") then
-                core:AddLine("Visc1", 2, unit, nil, 3, 25, 0, 10)
-                core:AddLine("Visc2", 2, unit, nil, 1, 25, 72)
-                core:AddLine("Visc3", 2, unit, nil, 1, 25, 144)
-                core:AddLine("Visc4", 2, unit, nil, 1, 25, 216)
-                core:AddLine("Visc5", 2, unit, nil, 1, 25, 288)
-            end
-        elseif sName == self.L["Mnemesis"] then
-            core:WatchUnit(unit)
-            midphase = false
-            core:AddUnit(unit)
-            mod:AddTimerBar("DEFRAG", self.L["~DEFRAG CD"], 21, mod:GetSetting("SoundDefrag"))
-            mod:AddTimerBar("ENRAGE", self.L["ENRAGE"], 480, mod:GetSetting("SoundEnrageCountDown"))
-        end
     end
 end
