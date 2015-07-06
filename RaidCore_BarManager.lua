@@ -48,23 +48,23 @@ local DEFAULT_SETTINGS = {
         bSortInversed = false,
         nBarHeight = 35,
         tAnchorOffsets = { -150, -200, 150, 200 },
-        SizingMinimum = { 200, 100 },
+        tSizingMinimum = { 200, 100 },
     },
     ["Timer"] = {
         nBarHeight = 25,
         tAnchorPoints = { 0.25, 0.5, 0.25, 0.5 },
-        SizingMinimum = { 150, 250 },
+        tSizingMinimum = { 150, 250 },
     },
     ["Message"] = {
         bAutofadeEnable = true,
         tAnchorPoints = { 0.5, 0.5, 0.5, 0.5 },
         tAnchorOffsets = { -250, 0, 250, 100 },
-        SizingMinimum = { 300, 100 },
+        tSizingMinimum = { 300, 100 },
     },
     ["Health"] = {
         nBarHeight = 32,
         tAnchorPoints = { 0.75, 0.5, 0.75, 0.5 },
-        SizingMinimum = { 300, 200 },
+        tSizingMinimum = { 300, 200 },
     },
 }
 
@@ -225,7 +225,7 @@ function TemplateManager:Init(tSettings)
     self.tSettings = tSettings
     self.wndParent = Apollo.LoadForm(RaidCore.xmlDoc, "BarContainer", nil, self)
     self.wndParent:SetText(self.sText)
-    local MinX, MinY = unpack(tSettings.SizingMinimum)
+    local MinX, MinY = unpack(tSettings.tSizingMinimum)
     self.wndParent:SetSizingMinimum(MinX, MinY)
 
     if tSettings.tAnchorOffsets then
