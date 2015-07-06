@@ -249,7 +249,9 @@ function TemplateManager:RemoveBar(key)
     local tBar = self.tBars[key]
     if tBar then
         self.tBars[key] = nil
-        tBar.wndMain:Destroy()
+        if tBar.wndMain then
+            tBar.wndMain:Destroy()
+        end
         ArrangeBar(self)
     end
 end
