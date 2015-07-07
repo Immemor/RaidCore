@@ -38,7 +38,7 @@ mod:RegisterFrenchLocale({
     -- Unit names.
     ["Mnemesis"] = "Mnémésis",
     ["Hydroflux"] = "Hydroflux",
-    ["Alphanumeric Hash"] = "Hachis alphanumérique",
+    ["Alphanumeric Hash"] = "Alphanumeric Hash",
     ["Hydro Disrupter - DNT"] = "Hydro-disrupteur - DNT",
     -- Cast.
     ["Circuit Breaker"] = "Coupe-circuit",
@@ -48,7 +48,7 @@ mod:RegisterFrenchLocale({
     ["Tsunami"] = "Tsunami",
     -- Bar and messages.
     ["Middle Phase"] = "Phase du Milieu",
-    ["SPREAD"] = "ECARTÉ",
+    ["SPREAD"] = "SEPAREZ-VOUS",
     ["~Defrag"] = "~Defrag",
     ["Defrag"] = "Défragmentation",
     ["ORB"] = "ORB",
@@ -84,7 +84,7 @@ mod:RegisterDefaultTimerBarConfigs({
     ["MIDPHASE"] = { sColor = "xkcdAlgaeGreen" },
     ["PRISON"] = { sColor = "xkcdBluegreen" },
     ["GRAVE"] = { sColor = "xkcdBloodRed" },
-    ["DEFRAG"] = { sColor = "xkcdAlgaeGreen" },
+    ["DEFRAG"] = { sColor = "xkcdBarneyPurple" },
 })
 
 ----------------------------------------------------------------------------------------------------
@@ -96,8 +96,10 @@ local DEBUFFID_DATA_DISRUPTOR = 78407
 -- Locals.
 ----------------------------------------------------------------------------------------------------
 local GetPlayerUnit = GameLib.GetPlayerUnit
+local GetGameTime = GameLib.GetGameTime
 local nMnemesisId
 local midphase = false
+local nPhase2BeginDate
 
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
@@ -112,6 +114,7 @@ function mod:OnBossEnable()
 
     midphase = false
     nMnemesisId = nil
+    nPhase2BeginDate = GetGameTime() + 75
     mod:AddTimerBar("MIDPHASE", "Middle Phase", 75, mod:GetSetting("SoundMidphaseCountDown"))
     mod:AddTimerBar("PRISON", "Imprison", 33)
     mod:AddTimerBar("DEFRAG", "Defrag", 18, mod:GetSetting("SoundDefrag"))
@@ -129,7 +132,9 @@ function mod:OnSpellCastStart(unitName, castName, unit)
             mod:RemoveTimerBar("PRISON")
         elseif castName == self.L["Defragment"] then
             core:AddMsg("DEFRAG", self.L["SPREAD"], 5, mod:GetSetting("SoundDefrag") and "Beware")
-            mod:AddTimerBar("DEFRAG", "~Defrag", 40, mod:GetSetting("SoundDefrag"))
+            if GetGameTime() + 40 < nPhase2BeginDate then
+                mod:AddTimerBar("DEFRAG", "~Defrag", 40, mod:GetSetting("SoundDefrag"))
+            end
         end
     elseif unitName == self.L["Hydroflux"] then
         if castName == self.L["Watery Grave"] then
@@ -144,6 +149,7 @@ function mod:OnSpellCastEnd(unitName, castName)
     if unitName == self.L["Mnemesis"] then
         if castName == self.L["Circuit Breaker"] then
             midphase = false
+            nPhase2BeginDate = GetGameTime() + 90
             mod:AddTimerBar("MIDPHASE", "Middle Phase", 90, mod:GetSetting("SoundMidphaseCountDown"))
             mod:AddTimerBar("PRISON", "Imprison", 25)
         end
