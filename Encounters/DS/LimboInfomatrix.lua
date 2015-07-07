@@ -44,7 +44,7 @@ mod:RegisterGermanLocale({
 -- Default settings.
 mod:RegisterDefaultSetting("LinePathOfInvisibleUnit")
 mod:RegisterDefaultSetting("SoundDessicateInterrupt")
-mod:RegisterDefaultSetting("OtherAntlionMarker")
+mod:RegisterDefaultSetting("OtherMarkerAntlion")
 
 ----------------------------------------------------------------------------------------------------
 -- Constants.
