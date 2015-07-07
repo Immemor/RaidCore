@@ -113,7 +113,7 @@ mod:RegisterDefaultTimerBarConfigs({
 ----------------------------------------------------------------------------------------------------
 local GetPlayerUnit = GameLib.GetPlayerUnit
 local prev = 0
-local stationCount = 0
+local nStationCount = 0
 local bossPos
 
 ----------------------------------------------------------------------------------------------------
@@ -122,12 +122,12 @@ local bossPos
 function mod:OnBossEnable()
     Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
     Apollo.RegisterEventHandler("RC_UnitDestroyed", "OnUnitDestroyed", self)
-    Apollo.RegisterEventHandler("RC_UnitStateChanged", "OnUnitStateChanged", self)
+    Apollo.RegisterEventHandler("RC_UnitStateChanged", "OnEnteredCombat", self)
     Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
     Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
 
     bossPos = {}
-    stationCount = 0
+    nStationCount = 0
 end
 
 function mod:OnUnitCreated(unit, sName)
@@ -142,24 +142,29 @@ function mod:OnUnitCreated(unit, sName)
         if mod:GetSetting("LineWeatherStations") then
             core:AddPixie(unit:GetId(), 1, GetPlayerUnit(), unit, "Blue", 5, 10, 10)
         end
-        stationCount = stationCount + 1
-        local stationPos = unit:GetPosition()
-        mod:AddTimerBar("STATION", "STATION", 25)
-
-        local station_name = "STATION" .. tostring(stationCount)
-        if stationPos and bossPos then
-            local text = self.L["STATION: %s %s"]:format(
-                (stationPos.z > bossPos.z) and self.L["SOUTH"] or self.L["NORTH"],
-                (stationPos.x > bossPos.x) and self.L["EAST"] or self.L["WEST"])
-
-            core:AddMsg(station_name, text, 5, mod:GetSetting("SoundWeatherStationSwitch") and "Info", "Blue")
-        else
-            core:AddMsg(station_name, "STATION", 5, mod:GetSetting("SoundWeatherStationSwitch") and "Info", "Blue")
-        end
     elseif sName == self.L["Wind Wall"] then
         if mod:GetSetting("LineWindWalls") then
             core:AddPixie(unit:GetId().."_1", 2, unit, nil, "Green", 10, 20, 0)
             core:AddPixie(unit:GetId().."_2", 2, unit, nil, "Green", 10, 20, 180)
+        end
+    end
+end
+
+function mod:OnEnteredCombat(tUnit, bInCombat, sName)
+    if bInCombat then
+        if sName == self.L["Weather Station"] then
+            mod:AddTimerBar("STATION", "STATION", 25)
+            nStationCount = nStationCount + 1
+            local tStationPos = tUnit:GetPosition()
+            local sMessage = "STATION"
+            if tStationPos and bossPos then
+                local sAxeZ = tStationPos.z > bossPos.z and self.L["SOUTH"] or self.L["NORTH"]
+                local sAxeX = tStationPos.x > bossPos.x and self.L["EAST"] or self.L["WEST"]
+                sMessage = self.L["STATION: %s %s"]:format(sAxeZ, sAxeX)
+            end
+            local sKey = "STATION" .. tostring(nStationCount)
+            local sSoundFile = mod:GetSetting("SoundWeatherStationSwitch") and "Info"
+            core:AddMsg(sKey, sMessage, 5, sSoundFile, "Blue")
         end
     end
 end
@@ -177,7 +182,7 @@ function mod:OnSpellCastStart(unitName, castName, unit)
     if unitName == self.L["Maelstrom Authority"] then
         if castName == self.L["Activate Weather Cycle"] then
             bossPos = unit:GetPosition()
-            stationCount = 0
+            nStationCount = 0
             mod:AddTimerBar("STATION", "STATION", 13)
         elseif castName == self.L["Ice Breath"] then
             core:AddMsg("BREATH", self.L["ICE BREATH"], 5, mod:GetSetting("SoundIceBreath") and "RunAway")
