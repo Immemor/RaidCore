@@ -19,7 +19,7 @@ local LogGUI = {}
 -- Constants.
 ------------------------------------------------------------------------------
 local COPY_TO_CLIPBOARD = GameLib.CodeEnumConfirmButtonType.CopyToClipboard
-local COPY_SIZE = 200000 -- 200Ko max per action
+local COPY_SIZE = 800000 -- 800Ko max per action
 
 ------------------------------------------------------------------------------
 -- Privates data.

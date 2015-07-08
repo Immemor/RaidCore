@@ -107,15 +107,6 @@ function mod:OnChatDC(message)
     if message == self.L["The lava begins to rise through the floor!"] then
         mod:RemoveTimerBar("LAVA_MINE")
         mod:AddTimerBar("LAVA_FLOOR", "End of Lava Floor", 28)
-        nObsidianPopCount = 1
-        if nObsidianPopMax > 2 then
-            nObsidianPopMax = nObsidianPopMax - 2
-        else
-            nObsidianPopMax = 2
-        end
-        local text = self.L["Next Obsidian"]:format(nObsidianPopCount, nObsidianPopMax)
-        local nTimeOffset = (6 - nObsidianPopMax) * OBSIDIAN_POP_INTERVAL + 8
-        mod:AddTimerBar("OBSIDIAN", text, nTimeOffset)
     end
 end
 
@@ -142,6 +133,15 @@ function mod:OnUnitDestroyed(unit, sName)
     if sName == self.L["Flame Wave"] then
         core:DropPixie(unit:GetId())
     elseif sName == self.L["Lava Floor (invis unit)"] then
-        mod:AddTimerBar("LAVA_FLOOR", "Lava Floor Phase", 116)
+        mod:AddTimerBar("LAVA_FLOOR", "Lava Floor Phase", 89)
+        nObsidianPopCount = 1
+        if nObsidianPopMax > 2 then
+            nObsidianPopMax = nObsidianPopMax - 2
+        else
+            nObsidianPopMax = 2
+        end
+        local text = self.L["Next Obsidian"]:format(nObsidianPopCount, nObsidianPopMax)
+        local nTimeOffset = (6 - nObsidianPopMax) * OBSIDIAN_POP_INTERVAL + 8
+        mod:AddTimerBar("OBSIDIAN", text, nTimeOffset)
     end
 end
