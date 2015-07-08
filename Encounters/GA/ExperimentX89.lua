@@ -119,16 +119,16 @@ end
 function mod:OnChatDC(message)
     -- The dash in X-89 needs to be escaped, by adding a % in front of it.
     -- The value returned is the player name targeted by the boss.
-    local pName = message:match(self.L["Experiment X-89 has placed a bomb"])
-    if pName then
-        core:AddMsg("BIGB", string.format(self.L["BIG BOMB on %s"], pName), 5, "Destruction", "Blue")
+    local sPlayerName = message:match(self.L["Experiment X-89 has placed a bomb"])
+    if sPlayerName then
+        core:AddMsg("BIGB", self.L["BIG BOMB on %s"]:format(sPlayerName), 5, "Destruction", "Blue")
     end
 end
 
 function mod:OnDebuffApplied(nId, nSpellId, nStack, fTimeRemaining)
     if nSpellId == DEBUFF_LITTLE_BOMB then
         local unit = GetUnitById(nId)
-        core:AddMsg("LITTLEB", string.format(self.L["LITTLE BOMB on %s"], unit:GetName()) , 5, "RunAway", "Blue")
+        core:AddMsg("LITTLEB", self.L["LITTLE BOMB on %s"]:format(unit:GetName()), fTimeRemaining, "RunAway", "Blue")
         core:AddBar("LITTLEB", self.L["LITTLE BOMB"], 5, 1)
     end
 end
