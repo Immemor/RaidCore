@@ -37,10 +37,12 @@
     <Script Name="Encounters/DS/miniboss/Earth_Bio_Enhanced_Broodmother.lua"/>
     <Script Name="Encounters/DS/miniboss/Earth_Fully_Optimized_Canimid.lua"/>
     <Script Name="Encounters/DS/miniboss/Earth_Logic_Guided_Rockslide.lua"/>
+    <Script Name="Encounters/DS/miniboss/Logic_Abstract_Augmentation_Algorithm.lua"/>
+    <Script Name="Encounters/DS/miniboss/Logic_Augmented_Herald_of_Avatus.lua"/>
+    <Script Name="Encounters/DS/miniboss/Logic_Hyper_Accelerated_Skeledroid.lua"/>
     <Script Name="Encounters/DS/SystemDaemons.lua"/>
     <Script Name="Encounters/DS/DSFireWing.lua"/>
     <Script Name="Encounters/DS/DSFrostWing.lua"/>
-    <Script Name="Encounters/DS/DSLogicWing.lua"/>
     <Script Name="Encounters/DS/Gloomclaw.lua"/>
     <Script Name="Encounters/DS/VolatilyLattice.lua"/>
     <Script Name="Encounters/DS/LimboInfomatrix.lua"/>
