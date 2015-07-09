@@ -19,12 +19,11 @@ mod:RegisterEnglishLocale({
     -- Unit names.
     ["Logic Guided Rockslide"] = "Logic Guided Rockslide",
     -- Cast
-    ["Terra-forme"] = "Terra-forme",
     ["Logic Guided Rockslide focuses on (.*)!"] = "Logic Guided Rockslide focuses on (.*)!",
 })
 mod:RegisterFrenchLocale({
     -- Unit names.
-    ["Logic Guided Rockslide"] = "Fully-Optimized Canimid",
+    ["Logic Guided Rockslide"] = "Éboulement guidé par la logique",
     -- Cast
     ["Logic Guided Rockslide focuses on (.*)!"] = "L'Éboulement guidé par la logique est focalisé sur (.*) !",
 })
@@ -49,10 +48,9 @@ local tRockslideUnit
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
-    Apollo.RegisterEventHandler("SPELL_CAST_END", "OnSpellCastEnd", self)
     Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
     Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
+    Apollo.RegisterEventHandler("UNIT_HEALTH", "OnHealthChanged", self)
     tRockslideUnit = nil
 end
 
@@ -64,11 +62,10 @@ function mod:OnUnitCreated(unit, sName)
     end
 end
 
-function mod:OnSpellCastStart(unitName, castName, unit)
-end
-
-function mod:OnSpellCastEnd(unitName, castName, unit)
-    core:DropPixie("FOCUS")
+function mod:OnHealthChanged(sName, nHealth)
+    if sName == self.L["Logic Guided Rockslide"] then
+        core:DropPixie("FOCUS")
+    end
 end
 
 function mod:OnChatDC(message)
@@ -76,7 +73,7 @@ function mod:OnChatDC(message)
     if sPlayerFocus then
         local tUnit = GetPlayerUnitByName(sPlayerFocus)
         if tUnit == GetPlayerUnit() then
-            self:PlaySound("Alarm")
+            core:PlaySound("Alarm")
         end
         if tRockslideUnit then
             core:DropPixie("FOCUS")
