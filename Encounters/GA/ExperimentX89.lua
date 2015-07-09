@@ -128,8 +128,8 @@ end
 function mod:OnDebuffApplied(nId, nSpellId, nStack, fTimeRemaining)
     if nSpellId == DEBUFF_LITTLE_BOMB then
         local unit = GetUnitById(nId)
-        core:AddMsg("LITTLEB", self.L["LITTLE BOMB on %s"]:format(unit:GetName()), fTimeRemaining, "RunAway", "Blue")
-        core:AddBar("LITTLEB", self.L["LITTLE BOMB"], 5, 1)
+        core:AddMsg("LITTLEB", self.L["LITTLE BOMB on %s"]:format(unit:GetName()), 5, "RunAway", "Blue")
+        core:AddBar("LITTLEB", self.L["LITTLE BOMB"], fTimeRemaining, 1)
     end
 end
 
