@@ -23,7 +23,7 @@ mod:RegisterEnglishLocale({
     ["Hydro Disrupter - DNT"] = "Hydro Disrupter - DNT",
     -- Cast.
     ["Circuit Breaker"] = "Circuit Breaker",
-    ["Imprison"] = "~Imprison",
+    ["Imprison"] = "Imprison",
     ["Defragment"] = "Defragment",
     ["Watery Grave"] = "Watery Grave",
     ["Tsunami"] = "Tsunami",
@@ -31,7 +31,7 @@ mod:RegisterEnglishLocale({
     ["Middle Phase"] = "Middle Phase",
     ["SPREAD"] = "SPREAD",
     ["~Defrag"] = "~Defrag",
-    ["Defrag"] = "Defrag",
+    ["~Imprison"] = "~Imprison",
     ["ORB"] = "ORB",
 })
 mod:RegisterFrenchLocale({
@@ -42,7 +42,7 @@ mod:RegisterFrenchLocale({
     ["Hydro Disrupter - DNT"] = "Hydro-disrupteur - DNT",
     -- Cast.
     ["Circuit Breaker"] = "Coupe-circuit",
-    ["Imprison"] = "~Emprisonner",
+    ["Imprison"] = "Emprisonner",
     ["Defragment"] = "Défragmentation",
     ["Watery Grave"] = "Tombe aqueuse",
     ["Tsunami"] = "Tsunami",
@@ -50,7 +50,7 @@ mod:RegisterFrenchLocale({
     ["Middle Phase"] = "Phase du Milieu",
     ["SPREAD"] = "SEPAREZ-VOUS",
     ["~Defrag"] = "~Defrag",
-    ["Defrag"] = "Défragmentation",
+    ["~Imprison"] = "~Emprisonner",
     ["ORB"] = "ORB",
 })
 mod:RegisterGermanLocale({
@@ -61,14 +61,14 @@ mod:RegisterGermanLocale({
     --["Hydro Disrupter - DNT"] = "Hydro Disrupter - DNT", -- TODO: German translation missing !!!!
     -- Cast.
     ["Circuit Breaker"] = "Schaltkreiszerstörer",
-    ["Imprison"] = "~Einsperren",
+    ["Imprison"] = "Einsperren",
     ["Defragment"] = "Defragmentieren",
     ["Watery Grave"] = "Seemannsgrab",
     -- Bar and messages.
     --["Middle Phase"] = "Middle Phase", -- TODO: German translation missing !!!!
     --["SPREAD"] = "SPREAD", -- TODO: German translation missing !!!!
     --["~Defrag"] = "~Defrag", -- TODO: German translation missing !!!!
-    ["Defrag"] = "Defrag",
+    ["~Imprison"] = "~Einsperren",
     --["ORB"] = "ORB", -- TODO: German translation missing !!!!
 })
 -- Default settings.
@@ -79,6 +79,7 @@ mod:RegisterDefaultSetting("OtherWateryGraveTimer")
 mod:RegisterDefaultSetting("OtherOrbMarkers")
 mod:RegisterDefaultSetting("LineTetrisBlocks")
 mod:RegisterDefaultSetting("LineOrbs")
+mod:RegisterDefaultSetting("LineCleaveHydroflux")
 -- Timers default configs.
 mod:RegisterDefaultTimerBarConfigs({
     ["MIDPHASE"] = { sColor = "xkcdAlgaeGreen" },
@@ -99,7 +100,6 @@ local GetPlayerUnit = GameLib.GetPlayerUnit
 local GetGameTime = GameLib.GetGameTime
 local nMnemesisId
 local midphase = false
-local nPhase2BeginDate
 
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
@@ -114,10 +114,9 @@ function mod:OnBossEnable()
 
     midphase = false
     nMnemesisId = nil
-    nPhase2BeginDate = GetGameTime() + 75
     mod:AddTimerBar("MIDPHASE", "Middle Phase", 75, mod:GetSetting("SoundMidphaseCountDown"))
     mod:AddTimerBar("PRISON", "Imprison", 33)
-    mod:AddTimerBar("DEFRAG", "Defrag", 18, mod:GetSetting("SoundDefrag"))
+    mod:AddTimerBar("DEFRAG", "~Defrag", 16, mod:GetSetting("SoundDefrag"))
     if mod:GetSetting("OtherWateryGraveTimer") then
         mod:AddTimerBar("GRAVE", "Watery Grave", 10)
     end
@@ -127,20 +126,22 @@ function mod:OnSpellCastStart(unitName, castName, unit)
     if unitName == self.L["Mnemesis"] then
         if castName == self.L["Circuit Breaker"] then
             midphase = true
+            mod:RemoveTimerBar("PRISON")
+            mod:RemoveTimerBar("DEFRAG")
             mod:AddTimerBar("MIDPHASE", "Circuit Breaker", 25, mod:GetSetting("SoundMidphaseCountDown"))
         elseif castName == self.L["Imprison"] then
             mod:RemoveTimerBar("PRISON")
         elseif castName == self.L["Defragment"] then
             core:AddMsg("DEFRAG", self.L["SPREAD"], 5, mod:GetSetting("SoundDefrag") and "Beware")
-            if GetGameTime() + 40 < nPhase2BeginDate then
-                mod:AddTimerBar("DEFRAG", "~Defrag", 40, mod:GetSetting("SoundDefrag"))
-            end
+            mod:AddTimerBar("DEFRAG", "~Defrag", 36, mod:GetSetting("SoundDefrag"))
         end
     elseif unitName == self.L["Hydroflux"] then
         if castName == self.L["Watery Grave"] then
             if mod:GetSetting("OtherWateryGraveTimer") then
                 mod:AddTimerBar("GRAVE", "Watery Grave", 10)
             end
+        elseif self.L["Tsunami"] == castName then
+            mod:RemoveTimerBar("GRAVE")
         end
     end
 end
@@ -149,7 +150,6 @@ function mod:OnSpellCastEnd(unitName, castName)
     if unitName == self.L["Mnemesis"] then
         if castName == self.L["Circuit Breaker"] then
             midphase = false
-            nPhase2BeginDate = GetGameTime() + 90
             mod:AddTimerBar("MIDPHASE", "Middle Phase", 90, mod:GetSetting("SoundMidphaseCountDown"))
             mod:AddTimerBar("PRISON", "Imprison", 25)
         end
@@ -192,6 +192,10 @@ function mod:OnUnitCreated(unit, sName)
     elseif sName == self.L["Hydroflux"] then
         core:AddUnit(unit)
         core:WatchUnit(unit)
+        if mod:GetSetting("LineCleaveHydroflux") then
+            core:AddPixie("Hydro_1", 2, unit, nil, "Yellow", 3, 7, 0)
+            core:AddPixie("Hydro_2", 2, unit, nil, "Yellow", 3, 7, 180)
+        end
     elseif sName == self.L["Mnemesis"] then
         if nUnitId and (nMnemesisId == nil or nMnemesisId == nUnitId) then
             -- A filter is needed, because there is many unit called Mnemesis.
