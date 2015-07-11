@@ -178,6 +178,10 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
             core:AddUnit(unit)
             core:WatchUnit(unit)
             mod:AddTimerBar("STORM", "METEOR STORM", 26, true)
+        elseif sName == self.L["Warmonger Chuna"] then
+            core:AddUnit(unit)
+            core:WatchUnit(unit)
+            mod:AddTimerBar("BOMB", "BOMB", 23)
         end
     end
 end
