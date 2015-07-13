@@ -41,11 +41,12 @@
     <Script Name="Encounters/DS/miniboss/Fire_Warmonger_Agratha.lua"/>
     <Script Name="Encounters/DS/miniboss/Fire_Warmonger_Chuna.lua"/>
     <Script Name="Encounters/DS/miniboss/Fire_Warmonger_Talarii.lua"/>
+    <Script Name="Encounters/DS/miniboss/Frost_Frost_Boulder_Avalanche.lua"/>
+    <Script Name="Encounters/DS/miniboss/Frost_Frostbringer_Warlock.lua"/>
     <Script Name="Encounters/DS/miniboss/Logic_Abstract_Augmentation_Algorithm.lua"/>
     <Script Name="Encounters/DS/miniboss/Logic_Augmented_Herald_of_Avatus.lua"/>
     <Script Name="Encounters/DS/miniboss/Logic_Hyper_Accelerated_Skeledroid.lua"/>
     <Script Name="Encounters/DS/SystemDaemons.lua"/>
-    <Script Name="Encounters/DS/DSFrostWing.lua"/>
     <Script Name="Encounters/DS/Gloomclaw.lua"/>
     <Script Name="Encounters/DS/VolatilyLattice.lua"/>
     <Script Name="Encounters/DS/LimboInfomatrix.lua"/>
