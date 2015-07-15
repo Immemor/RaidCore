@@ -196,6 +196,7 @@ end
 
 function mod:OnChatDC(message)
     if message:find(self.L["The platform trembles"]) then
+        mod:RemoveTimerBar("STATION")
         mod:AddTimerBar("JUMP", "JUMP", 7, true)
     end
 end
