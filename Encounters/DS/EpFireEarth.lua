@@ -27,7 +27,10 @@ mod:RegisterEnglishLocale({
     ["Lava Floor (invis unit)"] = "e395- [Datascape] Fire Elemental - Lava Floor (invis unit)",
     -- Datachron.
     ["The lava begins to rise through the floor!"] = "The lava begins to rise through the floor!",
+    ["Time to die, sapients!"] = "Time to die, sapients!",
     -- Bar and messages.
+    ["Enrage"] = "Enrage",
+    ["RAID WIPE"] = "RAID WIPE",
     ["Lava Floor Phase"] = "Lava Floor Phase",
     ["End of Lava Floor"] = "End of Lava Floor",
     ["Next Obsidian"] = "Next Obsidian %d/%d",
@@ -42,7 +45,10 @@ mod:RegisterFrenchLocale({
     ["Lava Floor (invis unit)"] = "e395- [Datascape] Fire Elemental - Lava Floor (invis unit)",
     -- Datachron.
     ["The lava begins to rise through the floor!"] = "La lave apparaît par les fissures du sol !",
+    ["Time to die, sapients!"] = "Maintenant c'est l'heure de mourir, misérables !",
     -- Bar and messages.
+    ["Enrage"] = "Enrage",
+    ["RAID WIPE"] = "MORT DU RAID",
     ["Lava Floor Phase"] = "Phase Lave",
     ["End of Lava Floor"] = "Fin de la lave",
     ["Next Obsidian"] = "Prochaine Obsidienne %d/%d",
@@ -59,7 +65,7 @@ mod:RegisterDefaultSetting("LineFlameWaves")
 mod:RegisterDefaultTimerBarConfigs({
     ["ENRAGE"] = { sColor = "xkcdAmethyst" },
     ["LAVA_FLOOR"] = { sColor = "xkcdBloodRed" },
-    ["LAVA_MINE"] = { sColor = "xkcdOrangered" },
+    ["RAID_WIPE"] = { sColor = "xkcdBloodRed" },
     ["OBSIDIAN"] = { sColor = "xkcdMediumBrown" },
 })
 ----------------------------------------------------------------------------------------------------
@@ -73,6 +79,7 @@ local LAVA_MINE_POP_INTERVAL = 11.2
 ----------------------------------------------------------------------------------------------------
 local GetPlayerUnit = GameLib.GetPlayerUnit
 local nObsidianPopMax, nObsidianPopCount
+local nLavaFloorCount
 
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
@@ -87,10 +94,10 @@ function mod:OnBossEnable()
 
     nObsidianPopMax = 6
     nObsidianPopCount = 1
+    nLavaFloorCount = 0
     local text = self.L["Next Obsidian"]:format(nObsidianPopCount, nObsidianPopMax)
     mod:AddTimerBar("OBSIDIAN", text, OBSIDIAN_POP_INTERVAL)
     mod:AddTimerBar("LAVA_FLOOR", "Lava Floor Phase", 94)
-    mod:AddTimerBar("LAVA_MINE", "Lava Mine", 14)
     mod:AddTimerBar("ENRAGE", "Enrage", 425)
 end
 
@@ -105,8 +112,10 @@ end
 
 function mod:OnChatDC(message)
     if message == self.L["The lava begins to rise through the floor!"] then
-        mod:RemoveTimerBar("LAVA_MINE")
         mod:AddTimerBar("LAVA_FLOOR", "End of Lava Floor", 28)
+        nLavaFloorCount = nLavaFloorCount + 1
+    elseif self.L["Time to die, sapients!"] == message then
+        mod:AddTimerBar("RAID_WIPE", "RAID WIPE", 34)
     end
 end
 
@@ -124,8 +133,6 @@ function mod:OnUnitCreated(unit, sName)
             local text = self.L["Next Obsidian"]:format(nObsidianPopCount, nObsidianPopMax)
             mod:AddTimerBar("OBSIDIAN", text, OBSIDIAN_POP_INTERVAL)
         end
-    elseif sName == self.L["Lava Mine"] then
-        mod:AddTimerBar("LAVA_MINE", "Lava Mine", LAVA_MINE_POP_INTERVAL)
     end
 end
 
@@ -133,7 +140,9 @@ function mod:OnUnitDestroyed(unit, sName)
     if sName == self.L["Flame Wave"] then
         core:DropPixie(unit:GetId())
     elseif sName == self.L["Lava Floor (invis unit)"] then
-        mod:AddTimerBar("LAVA_FLOOR", "Lava Floor Phase", 89)
+        if nLavaFloorCount < 3 then
+            mod:AddTimerBar("LAVA_FLOOR", "Lava Floor Phase", 89)
+        end
         nObsidianPopCount = 1
         if nObsidianPopMax > 2 then
             nObsidianPopMax = nObsidianPopMax - 2
@@ -143,5 +152,7 @@ function mod:OnUnitDestroyed(unit, sName)
         local text = self.L["Next Obsidian"]:format(nObsidianPopCount, nObsidianPopMax)
         local nTimeOffset = (6 - nObsidianPopMax) * OBSIDIAN_POP_INTERVAL + 8
         mod:AddTimerBar("OBSIDIAN", text, nTimeOffset)
+    elseif self.L["Pyrobane"] == sName then
+        mod:RemoveTimerBar("LAVA_FLOOR")
     end
 end
