@@ -892,6 +892,7 @@ function RaidCore:OnEnteredCombat(nId, tUnit, sName, bInCombat)
             Log:Add("Player In Combat")
             _bIsEncounterInProgress = true
             self:CombatInterface_Activate("FullEnable")
+            SearchEncounter()
             if _tCurrentEncounter and not _tCurrentEncounter:IsEnabled() then
                 _tCurrentEncounter:Enable()
                 ProcessDelayedUnit()
