@@ -788,6 +788,10 @@ function RaidCore:OnDebuffUpdate(nId, nSpellId, nOldStack, nNewStack, fTimeRemai
     Event_FireGenericEvent("DEBUFF_UPDATE", nId, nSpellId, nNewStack, fTimeRemaining)
 end
 
+function RaidCore:OnShowShortcutBar(tIconFloatingSpellBar)
+    Event_FireGenericEvent("SHORTCUT_BAR", tIconFloatingSpellBar)
+end
+
 function RaidCore:OnMarkUpdate()
     for k, v in pairs(self.mark) do
         if v.unit:GetPosition() then

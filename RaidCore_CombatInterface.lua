@@ -13,6 +13,7 @@ require "Apollo"
 require "GameLib"
 require "ApolloTimer"
 require "ChatSystemLib"
+require "ActionSetLib"
 require "Spell"
 require "GroupLib"
 require "ICCommLib"
@@ -151,6 +152,8 @@ local function ExtraLog2Text(k, nRefTime, tParam)
         sResult = ("Id='%s'"):format(tParam[1])
     elseif k == "WARNING tUnit reference changed" then
         sResult = ("OldId=%u NewId=%u"):format(tParam[1], tParam[2])
+    elseif k == "OnShowShortcutBar" then
+        sResult = "sIcon=" .. table.concat(tParam[1], ", ")
     elseif k == "SendMessage" then
         local sFormat = "sMsg=\"%s\" to=\"%s\""
         sResult = sFormat:format(tParam[1], tostring(tParam[2]))
@@ -335,10 +338,12 @@ local function FullActivate(bEnable)
     if _bRunning == false and bEnable == true then
         Log:SetRefTime(GetGameTime())
         RegisterEventHandler("ChatMessage", "CI_OnChatMessage", RaidCore)
+        RegisterEventHandler("ShowActionBarShortcut", "CI_ShowShortcutBar", RaidCore)
         _tScanTimer:Start()
     elseif _bRunning == true and bEnable == false then
         _tScanTimer:Stop()
         RemoveEventHandler("ChatMessage", RaidCore)
+        RemoveEventHandler("ShowActionBarShortcut", RaidCore)
         Log:NextBuffer()
         -- Clear private data.
         _tTrackedUnits = {}
@@ -420,6 +425,8 @@ function RaidCore:CombatInterface_Init(class)
     self:CI_JoinRaidCoreChannel()
 
     InterfaceSwitch(INTERFACE__DISABLE)
+    self.wndBarItem = Apollo.LoadForm(self.xmlDoc, "ActionBarShortcutItem", "FixedHudStratum", self)
+    self.ActionBarShortcutBtn = self.wndBarItem:FindChild("ActionBarShortcutBtn")
 end
 
 function RaidCore:CombatInterface_Activate(sState)
@@ -629,4 +636,23 @@ function RaidCore:CI_OnSendMessageResult(iccomm, eResult, nMessageId)
         end
     end
     Log:Add("SendMessageResult", sResult, nMessageId)
+end
+
+function RaidCore:CI_ShowShortcutBar(eWhichBar, bIsVisible, nNumShortcuts)
+    if eWhichBar == ActionSetLib.CodeEnumShortcutSet.FloatingSpellBar then
+        local tIconFloatingSpellBar = {}
+        if nNumShortcuts == 0 then
+            nNumShortcuts = 7
+        end
+        for iBar = 0, nNumShortcuts do
+            self.ActionBarShortcutBtn:SetContentId(eWhichBar * 12 + iBar)
+            local tButtonContent = self.ActionBarShortcutBtn:GetContent()
+            local strIcon = tButtonContent and tButtonContent.strIcon
+            if strIcon == nil or strIcon == "" then
+                break
+            end
+            table.insert(tIconFloatingSpellBar, strIcon)
+        end
+        ManagerCall("OnShowShortcutBar", tIconFloatingSpellBar)
+    end
 end
