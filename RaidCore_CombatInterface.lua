@@ -485,8 +485,7 @@ function RaidCore:CI_OnScanUpdate()
                     if sCastName ~= data.tCast.sCastName then
                         -- New cast just after a previous one.
                         if data.tCast.bSuccess == false then
-                            ManagerCall("OnCastEnd", nId, data.tCast.sCastName, false,
-                            data.tCast.nCastEndTime)
+                            ManagerCall("OnCastEnd", nId, data.tCast.sCastName, false, data.tCast.nCastEndTime)
                         end
                         data.tCast = {
                             bCasting = true,
@@ -497,8 +496,7 @@ function RaidCore:CI_OnScanUpdate()
                         ManagerCall("OnCastStart", nId, sCastName, nCastEndTime)
                     elseif not data.tCast.bSuccess and nCastElapsed >= nCastDuration then
                         -- The have reached the end.
-                        ManagerCall("OnCastEnd", nId, data.tCast.sCastName, false,
-                        data.tCast.nCastEndTime)
+                        ManagerCall("OnCastEnd", nId, data.tCast.sCastName, false, data.tCast.nCastEndTime)
                         data.tCast = {
                             bCasting = true,
                             sCastName = sCastName,
@@ -517,8 +515,7 @@ function RaidCore:CI_OnScanUpdate()
                     else
                         bIsInterrupted = false
                     end
-                    ManagerCall("OnCastEnd", nId, data.tCast.sCastName, bIsInterrupted,
-                    data.tCast.nCastEndTime)
+                    ManagerCall("OnCastEnd", nId, data.tCast.sCastName, bIsInterrupted, data.tCast.nCastEndTime)
                 end
                 data.tCast = {
                     bCasting = false,
