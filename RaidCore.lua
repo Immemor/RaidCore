@@ -10,8 +10,6 @@ require "Apollo"
 require "Window"
 require "GameLib"
 require "ChatSystemLib"
-require "ICCommLib"
-require "ICComm"
 
 local GeminiAddon = Apollo.GetPackage("Gemini:Addon-1.1").tPackage
 local JSON = Apollo.GetPackage("Lib:dkJSON-2.5").tPackage
@@ -51,13 +49,9 @@ local _tEncountersPerZone = {}
 local _tDelayedUnits = {}
 local _bIsEncounterInProgress = false
 local _tCurrentEncounter = nil
-local _tRaidCoreChannel = nil
-
-
 local trackMaster = Apollo.GetAddon("TrackMaster")
 local markCount = 0
 local VCReply, VCtimer = {}, nil
-local CommChannelTimer = nil
 local empCD, empTimer = 5, nil
 
 ----------------------------------------------------------------------------------------------------
@@ -222,8 +216,6 @@ function RaidCore:OnDocLoaded()
     _tWipeTimer = ApolloTimer.Create(0.5, true, "WipeCheck", self)
     _tWipeTimer:Stop()
     self.lines = {}
-    self.chanCom = nil
-    CommChannelTimer = ApolloTimer.Create(5, false, "UpdateCommChannel", self) -- make sure everything is loaded, so after 5sec
 
     -- Initialize the Zone Detection.
     self:OnCheckMapZone()
@@ -268,30 +260,76 @@ function RaidCore:OnDocLoaded()
 end
 
 ----------------------------------------------------------------------------------------------------
--- RaidCore Functions
+-- RaidCore Channel Communication functions.
 ----------------------------------------------------------------------------------------------------
-function RaidCore:UpdateCommChannel()
-    if not self.chanCom then
-        self.chanCom = ICCommLib.JoinChannel("RaidCore", ICCommLib.CodeEnumICCommChannelType.Group)
-    end
-
-    if self.chanCom:IsReady() then
-        -- Set handler for messages only if ready
-        self.chanCom:SetReceivedMessageFunction("OnComMessage", self)
-    else
-        -- Channel not ready yet, repeat in a few seconds
-        self:ScheduleTimer("UpdateCommChannel", 1)
-    end
+function RaidCore:SendMessage(tMessage, tDPlayerId)
+    assert(type(tMessage) == "table")
+    tMessage.sender = GetPlayerUnit():GetName()
+    self:CombatInterface_SendMessage(JSON.encode(tMessage), tDPlayerId)
 end
 
-function RaidCore:SendMessage(msg)
-    if not self.chanCom then
-        PrintErr("Error sending Sync Message. Attempting to fix this now. If this issue persists, contact the developers")
-        self:UpdateCommChannel()
-        return false
-    else
-        local msg_encoded = JSON.encode(msg)
-        self.chanCom:SendMessage(msg_encoded)
+function RaidCore:OnReceivedMessage(sMessage, sSender)
+    local tMessage = JSON.decode(sMessage)
+    self:ProcessMessage(tMessage, sSender)
+end
+
+function RaidCore:ProcessMessage(tMessage, sSender)
+    if type(tMessage) ~= "table" or type(tMessage.action) ~= "string" then
+        -- Silent error.
+        return
+    end
+
+    if tMessage.action == "VersionCheckRequest" then
+        local msg = {
+            action = "VersionCheckReply",
+            version = ADDON_DATE_VERSION,
+            tag = RAIDCORE_CURRENT_VERSION,
+        }
+        self:SendMessage(msg)
+    elseif tMessage.action == "VersionCheckReply" then
+        if tMessage.sender and tMessage.version and VCtimer then
+            VCReply[tMessage.sender] = tMessage.version
+        end
+    elseif tMessage.action == "NewestVersion" then
+        if tMessage.version and ADDON_DATE_VERSION < tMessage.version then
+            PrintErr("Your RaidCore version is outdated. Please get " .. tMessage.version)
+        end
+    elseif tMessage.action == "LaunchPull" then
+        if tMessage.cooldown then
+            self:AddBar("PULL", "PULL", tMessage.cooldown, true)
+            self:AddMsg("PULL", ("PULL in %s"):format(tMessage.cooldown), 5, MYCOLORS["Green"])
+        end
+    elseif tMessage.action == "LaunchBreak" then
+        if tMessage.cooldown then
+            self:AddBar("BREAK", "BREAK", tMessage.cooldown)
+            self:AddMsg("BREAK", ("BREAK for %s sec"):format(tMessage.cooldown), 5, MYCOLORS["Green"])
+            self:PlaySound("Long")
+        end
+    elseif tMessage.action == "Sync" then
+        if tMessage.sync and self.syncRegister[tMessage.sync] then
+            local timeOfEvent = GameLib.GetGameTime()
+            if timeOfEvent - self.syncTimer[tMessage.sync] >= self.syncRegister[tMessage.sync] then
+                self.syncTimer[tMessage.sync] = timeOfEvent
+                Event_FireGenericEvent("RAID_SYNC", tMessage.sync, tMessage.parameter)
+            end
+        end
+    elseif tMessage.action == "SyncSummon" then
+        if not self.db.profile.bAcceptSummons or not self:isRaidManagement(strSender) then
+            return false
+        end
+        PrintErr(tMessage.sender .. " requested that you accept a summon. Attempting to accept now.")
+        local CSImsg = CSIsLib.GetActiveCSI()
+        if not CSImsg or not CSImsg["strContext"] then return end
+
+        if CSImsg["strContext"] == "Teleport to your group member?" then
+            if CSIsLib.IsCSIRunning() then
+                CSIsLib.CSIProcessInteraction(true)
+            end
+        end
+    elseif tMessage.action == "Encounter_IND" then
+        if _tCurrentEncounter and _tCurrentEncounter.ReceiveIndMessage then
+            _tCurrentEncounter:ReceiveIndMessage(tMessage.sender, tMessage.reason, tMessage.data)
+        end
     end
 end
 
@@ -909,61 +947,6 @@ function RaidCore:OnEnteredCombat(nId, tUnit, sName, bInCombat)
     end
 end
 
-local function IsPartyMemberByName(sName)
-    for i=1, GroupLib.GetMemberCount() do
-        local unit = GroupLib.GetGroupMember(i)
-        if unit then
-            if unit.strCharacterName == sName then
-                return true
-            end
-        end
-    end
-    return false
-end
-
-function RaidCore:OnComMessage(channel, strMessage, strSender)
-    local tMessage = JSON.decode(strMessage)
-    if type(tMessage.action) ~= "string" then return end
-    local msg = {}
-
-    if tMessage.action == "VersionCheckRequest" and IsPartyMemberByName(tMessage.sender) then
-        msg = {action = "VersionCheckReply", sender = GetPlayerUnit():GetName(), version = ADDON_DATE_VERSION}
-        self:SendMessage(msg)
-    elseif tMessage.action == "VersionCheckReply" and tMessage.sender and tMessage.version and VCtimer then
-        VCReply[tMessage.sender] = tMessage.version
-    elseif tMessage.action == "NewestVersion" and tMessage.version then
-        if ADDON_DATE_VERSION < tMessage.version then
-            PrintErr("Your RaidCore version is outdated. Please get " .. tMessage.version)
-        end
-    elseif tMessage.action == "LaunchPull" and IsPartyMemberByName(tMessage.sender) and tMessage.cooldown then
-        self:AddBar("PULL", "PULL", tMessage.cooldown, true)
-        self:AddMsg("PULL", ("PULL in %s"):format(tMessage.cooldown), 5, MYCOLORS["Green"])
-    elseif tMessage.action == "LaunchBreak" and IsPartyMemberByName(tMessage.sender) and tMessage.cooldown then
-        self:AddBar("BREAK", "BREAK", tMessage.cooldown)
-        self:AddMsg("BREAK", ("BREAK for %s sec"):format(tMessage.cooldown), 5, MYCOLORS["Green"])
-        self:PlaySound("Long")
-    elseif tMessage.action == "Sync" and tMessage.sync and self.syncRegister[tMessage.sync] then
-        local timeOfEvent = GameLib.GetGameTime()
-        if timeOfEvent - self.syncTimer[tMessage.sync] >= self.syncRegister[tMessage.sync] then
-            self.syncTimer[tMessage.sync] = timeOfEvent
-            Event_FireGenericEvent("RAID_SYNC", tMessage.sync, tMessage.parameter)
-        end
-    elseif tMessage.action == "SyncSummon" then
-        if not self.db.profile.bAcceptSummons or not self:isRaidManagement(strSender) then
-            return false
-        end
-        PrintErr(tMessage.sender .. " requested that you accept a summon. Attempting to accept now.")
-        local CSImsg = CSIsLib.GetActiveCSI()
-        if not CSImsg or not CSImsg["strContext"] then return end
-
-        if CSImsg["strContext"] == "Teleport to your group member?" then
-            if CSIsLib.IsCSIRunning() then
-                CSIsLib.CSIProcessInteraction(true)
-            end
-        end
-    end
-end
-
 function RaidCore:VersionCheckResults()
     local nMaxVersion = ADDON_DATE_VERSION
     for _, v in next, VCReply do
@@ -1006,7 +989,7 @@ function RaidCore:VersionCheckResults()
     -- Send Msg to oudated players.
     local msg = {action = "NewestVersion", version = maxver}
     self:SendMessage(msg)
-    self:OnComMessage(nil, JSON.encode(msg))
+    self:ProcessMessage(msg)
     VCtimer = nil
 end
 
@@ -1017,9 +1000,10 @@ function RaidCore:VersionCheck()
         PrintErr(self.L["Command available only in group."])
     else
         PrintErr(self.L["Checking version on group member."])
-        VCReply = {}
         VCReply[GetPlayerUnit():GetName()] = ADDON_DATE_VERSION
-        local msg = {action = "VersionCheckRequest", sender = GetPlayerUnit():GetName()}
+        local msg = {
+            action = "VersionCheckRequest",
+        }
         VCtimer = ApolloTimer.Create(5, false, "VersionCheckResults", self)
         self:SendMessage(msg)
     end
@@ -1027,9 +1011,12 @@ end
 
 function RaidCore:LaunchPull(time)
     if time and time > 2 then
-        local msg = {action = "LaunchPull", sender = GetPlayerUnit():GetName(), cooldown = time}
+        local msg = {
+            action = "LaunchPull",
+            cooldown = time,
+        }
         self:SendMessage(msg)
-        self:OnComMessage(nil, JSON.encode(msg))
+        self:ProcessMessage(msg)
     end
 end
 
@@ -1039,9 +1026,12 @@ function RaidCore:LaunchBreak(time)
         PrintErr("You must be a raid leader or assistant to use this command!")
     else
         if time and time > 5 then
-            local msg = {action = "LaunchBreak", sender = sPlayerName, cooldown = time}
+            local msg = {
+                action = "LaunchBreak",
+                cooldown = time
+            }
             self:SendMessage(msg)
-            self:OnComMessage(nil, JSON.encode(msg))
+            self:ProcessMessage(msg)
         end
     end
 end
@@ -1052,7 +1042,9 @@ function RaidCore:SyncSummon()
         PrintErr("You must be a raid leader or assistant to use this command!")
         return false
     end
-    local msg = {action = "SyncSummon", sender = myName}
+    local msg = {
+        action = "SyncSummon",
+    }
     self:SendMessage(msg)
 end
 
@@ -1069,7 +1061,11 @@ function RaidCore:SendSync(syncName, param)
             Event_FireGenericEvent("RAID_SYNC", syncName, param)
         end
     end
-    local msg = {action = "Sync", sender = GetPlayerUnit():GetName(), sync = syncName, parameter = param}
+    local msg = {
+        action = "Sync",
+        sync = syncName,
+        parameter = param,
+    }
     self:SendMessage(msg)
 end
 

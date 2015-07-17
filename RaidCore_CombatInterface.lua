@@ -15,6 +15,8 @@ require "ApolloTimer"
 require "ChatSystemLib"
 require "Spell"
 require "GroupLib"
+require "ICCommLib"
+require "ICComm"
 
 local RaidCore = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local Log = Apollo.GetPackage("Log-1.0").tPackage
@@ -76,9 +78,12 @@ local _bDetectAllEnable = false
 local _bUnitInCombatEnable = false
 local _bRunning = false
 local _tScanTimer = nil
+local _CommChannelTimer = nil
+local _nCommChannelRetry = 1
 local _tAllUnits = {}
 local _tTrackedUnits = {}
 local _tMembers = {}
+local _RaidCoreChannelComm = nil
 
 ----------------------------------------------------------------------------------------------------
 -- Privates functions: Log
@@ -146,6 +151,18 @@ local function ExtraLog2Text(k, nRefTime, tParam)
         sResult = ("Id='%s'"):format(tParam[1])
     elseif k == "WARNING tUnit reference changed" then
         sResult = ("OldId=%u NewId=%u"):format(tParam[1], tParam[2])
+    elseif k == "SendMessage" then
+        local sFormat = "sMsg=\"%s\" to=\"%s\""
+        sResult = sFormat:format(tParam[1], tostring(tParam[2]))
+    elseif k == "OnReceivedMessage" then
+        local sFormat = "sMsg=\"%s\" Sender=%s"
+        sResult = sFormat:format(tParam[1], tostring(tParam[2]))
+    elseif k == "ChannelCommStatus" then
+        sResult = tParam[1]
+    elseif k == "SendMessageResult" then
+        sResult = ("sResult=\"%s\" MsgId=%d"):format(tParam[1], tParam[2])
+    elseif k == "JoinResult" then
+        sResult = ("Result=\"%s\""):format(tParam[1])
     end
     return sResult
 end
@@ -356,6 +373,37 @@ local function InterfaceSwitch(to)
 end
 
 ----------------------------------------------------------------------------------------------------
+-- ICCom functions.
+----------------------------------------------------------------------------------------------------
+local function RetryJoinRaidCoreChannel()
+    -- Invalid previous try.
+    _RaidCoreChannelComm = nil
+    -- Start a timer to retry to join.
+    _CommChannelTimer = ApolloTimer.Create(_nCommChannelRetry, false, "CI_JoinRaidCoreChannel", RaidCore)
+    _nCommChannelRetry = _nCommChannelRetry + 1
+    if _nCommChannelRetry > 30 then
+        _nCommChannelRetry = 30
+    end
+end
+
+function RaidCore:CI_JoinRaidCoreChannel()
+    if _RaidCoreChannelComm == nil then
+        Log:Add("JoinRaidCoreChannel")
+        local eChannelType = ICCommLib.CodeEnumICCommChannelType.Group
+        _RaidCoreChannelComm = ICCommLib.JoinChannel("RaidCore", eChannelType)
+        if _RaidCoreChannelComm:IsReady() then
+            Log:Add("ChannelCommStatus", "Join success")
+            _RaidCoreChannelComm:SetReceivedMessageFunction("CI_OnReceivedMessage", RaidCore)
+            _RaidCoreChannelComm:SetSendMessageResultFunction("CI_OnSendMessageResult", RaidCore)
+        else
+            Log:Add("ChannelCommStatus", "Join failed")
+            -- Retry Join Channel later.
+            RetryJoinRaidCoreChannel()
+        end
+    end
+end
+
+----------------------------------------------------------------------------------------------------
 -- Relations between RaidCore and CombatInterface.
 ----------------------------------------------------------------------------------------------------
 function RaidCore:CombatInterface_Init(class)
@@ -367,6 +415,9 @@ function RaidCore:CombatInterface_Init(class)
     _tMembers = {}
     _tScanTimer = ApolloTimer.Create(SCAN_PERIOD, true, "CI_OnScanUpdate", self)
     _tScanTimer:Stop()
+    _nCommChannelRetry = 1
+
+    self:CI_JoinRaidCoreChannel()
 
     InterfaceSwitch(INTERFACE__DISABLE)
 end
@@ -389,6 +440,30 @@ end
 
 function RaidCore:CombatInterface_GetTrackedById(nId)
     return _tTrackedUnits[nId]
+end
+
+function RaidCore:CombatInterface_SendMessage(sMessage, tDPlayerId)
+    assert(type(sMessage) == "string")
+    assert(type(tDPlayerId) == "number" or tDPlayerId == nil)
+
+    if not _RaidCoreChannelComm then
+        Log:Add("ChannelCommStatus", "Channel not found")
+    elseif tDPlayerId == nil then
+        -- Broadcast the message on RaidCore Channel (type: Group).
+        _RaidCoreChannelComm:SendMessage(sMessage)
+        Log:Add("SendMessage", sMessage, tDPlayerId)
+    else
+        -- Send the message to this player.
+        local tPlayerUnit = GetUnitById(tDPlayerId)
+        if not tPlayerUnit then
+            Log:Add("ChannelCommStatus", "Send aborded by Unknown ID")
+        elseif not tPlayerUnit:IsInYourGroup() then
+            Log:Add("ChannelCommStatus", "Send aborded by invalid PlayerUnit")
+        else
+            _RaidCoreChannelComm:SendPrivateMessage(tPlayerUnit:GetName(), sMessage)
+            Log:Add("SendMessage", sMessage, tDPlayerId)
+        end
+    end
 end
 
 ----------------------------------------------------------------------------------------------------
@@ -539,4 +614,19 @@ function RaidCore:CI_OnChatMessage(tChannelCurrent, tMessage)
         end
         ManagerCall(sHandler, sMessage, sSender)
     end
+end
+
+function RaidCore:CI_OnReceivedMessage(sChannel, sMessage, sSender)
+    ManagerCall("OnReceivedMessage", sMessage, sSender)
+end
+
+function RaidCore:CI_OnSendMessageResult(iccomm, eResult, nMessageId)
+    local sResult = tostring(eResult)
+    for stext, key in next, ICCommLib.CodeEnumICCommMessageResult do
+        if eResult == key then
+            sResult = stext
+            break
+        end
+    end
+    Log:Add("SendMessageResult", sResult, nMessageId)
 end
