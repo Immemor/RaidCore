@@ -24,8 +24,10 @@ local TRIG_STATES = {
 }
 
 ------------------------------------------------------------------------------
--- Privates
+-- Locals
 ------------------------------------------------------------------------------
+local GetPlayerUnit = GameLib.GetPlayerUnit
+
 local function RegisterLocale(tBoss, sLanguage, Locales)
     local GeminiLocale = Apollo.GetPackage("Gemini:Locale-1.0").tPackage
     local sName = "RaidCore_" .. tBoss:GetName()
@@ -203,6 +205,15 @@ function EncounterPrototype:GetDistanceBetweenUnits(tUnitFrom, tUnitTo)
         end
     end
     return r
+end
+
+function EncounterPrototype:SendIndMessage(sReason, tData)
+    local msg = {
+        action = "Encounter_IND",
+        reason = sReason,
+        data = tData,
+    }
+    RaidCore:SendMessage(msg)
 end
 
 --- Default trigger function to start an encounter.

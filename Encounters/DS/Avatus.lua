@@ -77,6 +77,10 @@ mod:RegisterEnglishLocale({
     ["Infinite Logic Loop"] = "Infinite Logic Loop",
     ["Tower Platform"] = "Tower Platform",
     ["Augmented Rowsdower"] = "Augmented Rowsdower",
+    ["Excessive Force Protocol"] = "Excessive Force Protocol",
+    ["Augmented Triage Specialist"] = "Augmented Triage Specialist",
+    ["Augmented Juggernaut"] = "Augmented Juggernaut",
+    ["Augmented Predator"] = "Augmented Predator",
     -- Datachron messages.
     ["Portals have opened!"] = "Avatus' power begins to surge! Portals have opened!",
     ["Gun Grid Activated"] = "SECURITY PROTOCOL: Gun Grid Activated.",
@@ -121,11 +125,11 @@ mod:RegisterFrenchLocale({
     ["Data Flare"] = "Signal de données",
     ["Obliteration Beam"] = "Rayon de suppression",
     -- BuffName with many ID.
-    ["Holo Hand Spawned"] = "Holo-main Apparition",
     ["Red Empowerment Matrix"] = "Matrice de renforcement rouge",
     ["Blue Disruption Matrix"] = "Matrice disruptive bleue",
     ["Green Reconstitution Matrix"] = "Matrice de reconstitution verte",
     -- Bar and messages.
+    ["Holo Hand Spawned"] = "Holo-main Apparition",
     ["PURGE BLUE BOSS"] = "PURGE BOSS BLEUE",
     ["P2 SOON !"] = "P2 BIENTÔT !",
     ["INTERRUPT CRUSHING BLOW!"] = "INTERROMPRE COUP ÉCRASANT!",
@@ -192,11 +196,27 @@ mod:RegisterDefaultTimerBarConfigs({
     ["HHAND"] = { sColor = "xkcdOrangeyRed" },
 })
 
+local PURGE_BLUE = 1
+local PURGE_RED = 2
+local PURGE_GREEN = 3
+local PURGE_LIST_IN_BLUE_ROOM = {
+    ["Icon_SkillEnergy_UI_srcr_shckcntrp"] = PURGE_BLUE,
+    ["Icon_SkillEnergy_UI_srcr_XXXX"] = PURGE_RED,
+    ["Icon_SkillEnergy_UI_srcr_surgeengine"] = PURGE_GREEN,
+}
+local PURGE_COOLDOWNS = 16
+
 ----------------------------------------------------------------------------------------------------
 -- Constants.
 ----------------------------------------------------------------------------------------------------
 local next = next
 local NO_BREAK_SPACE = string.char(194, 160)
+local MAIN_PHASE = 1
+local LABYRINTH_PHASE = 2
+local GREEN_PHASE = 3
+local YELLOW_PHASE = 4
+local RED_PHASE = 5
+local BLUE_PHASE = 6
 local HAND_MAKERS = {
     ["hand1"] = {x = 608.70, y = -198.75, z = -191.62},
     ["hand2"] = {x = 607.67, y = -198.75, z = -157.00},
@@ -226,99 +246,12 @@ local GREEN_ROOM_MARKERS = {
 local GetGameTime = GameLib.GetGameTime
 local GetPlayerUnit = GameLib.GetPlayerUnit
 local SetTargetUnit = GameLib.SetTargetUnit
-local phase2warn, phase2 = false, false
-local phase_blueroom = false
-local phase2_blueroom_rotation = {}
-local encounter_started = false
-local redBuffCount, greenBuffCount, blueBuffCount = 1
-local buffCountTimer = false
-local gungrid_time = nil
-local holo_hands = {}
-local strMyName
-
-local function lowestKeyValue(tbl)
-    local lowestValue = false
-    local tmp_table = {}
-    for key, value in pairs(tbl) do
-        if not lowestValue or (value < lowestValue) then
-            lowestValue = value
-            tmp_table = {}
-            tmp_table[key] = value
-        elseif value == lowestValue then
-            tmp_table[key] = value
-        end
-    end
-    -- Now that we only have the keys with the lowest values left, order alphabetically
-    local lowest_key = nil
-    for key, value in pairs(tmp_table) do
-        if not lowest_key or (key < lowest_key) then
-            lowest_key = key
-        end
-    end
-    return lowest_key
-end
-
-local function isAlive(strPlayerName)
-    local unit = GameLib.GetPlayerUnitByName(strPlayerName)
-    if not unit or unit:IsDead() then
-        return false
-    else
-        return true
-    end
-end
-
-local function getPlayerAssignment(tbl)
-    local playerAssigned = lowestKeyValue(tbl)
-    if not playerAssigned then return "<unknown>" end
-    while not isAlive(playerAssigned) do
-        tbl[playerAssigned] = nil
-        playerAssigned = lowestKeyValue(tbl)
-    end
-    return playerAssigned
-end
-
-local function __genOrderedIndex( t )
-    local orderedIndex = {}
-    for key in pairs(t) do
-        table.insert( orderedIndex, key )
-    end
-    table.sort( orderedIndex )
-    return orderedIndex
-end
-
-local function orderedNext(t, state)
-    -- Equivalent of the next function, but returns the keys in the alphabetic
-    -- order. We use a temporary ordered key table that is stored in the
-    -- table being iterated.
-
-    if state == nil then
-        -- the first time, generate the index
-        t.__orderedIndex = __genOrderedIndex( t )
-        key = t.__orderedIndex[1]
-        return key, t[key]
-    end
-    -- fetch the next value
-    key = nil
-    for i = 1,table.getn(t.__orderedIndex) do
-        if t.__orderedIndex[i] == state then
-            key = t.__orderedIndex[i+1]
-        end
-    end
-
-    if key then
-        return key, t[key]
-    end
-
-    -- no more value to return, cleanup
-    t.__orderedIndex = nil
-    return
-end
-
-local function orderedPairs(t)
-    -- Equivalent of the pairs() function on tables. Allows to iterate
-    -- in order
-    return orderedNext, t, nil
-end
+local GetPlayerUnitByName = GameLib.GetPlayerUnitByName
+local nCurrentPhase
+local tBlueRoomPurgeList
+local nGunGridLastPopTime
+local tHoloHandsList
+local phase2warn, phase2
 
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
@@ -326,63 +259,105 @@ end
 function mod:OnBossEnable()
     Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
     Apollo.RegisterEventHandler("RC_UnitDestroyed", "OnUnitDestroyed", self)
-    Apollo.RegisterEventHandler("RC_UnitStateChanged", "OnUnitStateChanged", self)
     Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
     Apollo.RegisterEventHandler("UNIT_HEALTH", "OnHealthChanged", self)
     Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
     Apollo.RegisterEventHandler("CHAT_NPCSAY", "OnChatNPCSay", self)
     Apollo.RegisterEventHandler("BUFF_APPLIED", "OnBuffApplied", self)
-    Apollo.RegisterEventHandler("CHAT_PARTY", "OnPartyMessage", self)
+    Apollo.RegisterEventHandler("SHORTCUT_BAR", "OnShowShortcutBar", self)
 
+    nCurrentPhase = MAIN_PHASE
     phase2warn, phase2 = false, false
-    phase_blueroom = false
-    phase2_blueroom_rotation = {}
-    redBuffCount = 1
-    greenBuffCount = 1
-    blueBuffCount = 1
-    buffCountTimer = false
-    encounter_started = false
-    holo_hands = {}
-    strMyName = GetPlayerUnit():GetName()
+    tBlueRoomPurgeList = {
+        [PURGE_BLUE] = {},
+        [PURGE_RED] = {},
+        [PURGE_GREEN] = {},
+    }
+    tHoloHandsList = {}
     bGreenRoomMarkerDisplayed = false
+
+    nGunGridLastPopTime = GetGameTime() + 20
+
+    mod:AddTimerBar("OBBEAM", "Obliteration Beam", 69, mod:GetSetting("SoundObliterationBeam"))
+    mod:AddTimerBar("GGRID", "~Gun Grid", 20, mod:GetSetting("SoundGunGrid"))
+    if mod:GetSetting("OtherHandSpawnMarkers") then
+        core:SetWorldMarker("HAND1", self.L["Hand %u"]:format(1), HAND_MAKERS["hand1"])
+        core:SetWorldMarker("HAND2", self.L["Hand %u"]:format(2), HAND_MAKERS["hand2"])
+    end
+    if mod:GetSetting("OtherDirectionMarkers") then
+        core:SetWorldMarker("NORTH", self.L["MARKER North"], CARDINAL_MARKERS["north"])
+        core:SetWorldMarker("SOUTH", self.L["MARKER South"], CARDINAL_MARKERS["south"])
+    end
 end
 
 function mod:OnUnitCreated(unit, sName)
-    local eventTime = GameLib.GetGameTime()
-    if sName == self.L["Augmented Rowsdower"] then
+    local nUnitId = unit:GetId()
+    local nHealth = unit:GetHealth()
+
+    if self.L["Avatus"] == sName then
+        nCurrentPhase = MAIN_PHASE
+        core:AddUnit(unit)
+        core:WatchUnit(unit)
+        if mod:GetSetting("LineCleaveBoss") then
+            core:AddPixie(unit:GetId(), 2, unit, nil, "Green", 10, 22, 0)
+        end
+    elseif self.L["Augmented Rowsdower"] == sName then
+        nCurrentPhase = LABYRINTH_PHASE
         core:AddMsg("Rowsdower", self.L["Augmented Rowsdower"], 3)
         SetTargetUnit(unit)
-    elseif sName == self.L["Holo Hand"] then
-        local unitId = unit:GetId()
-        core:AddUnit(unit)
-        core:WatchUnit(unit)
-        table.insert(holo_hands, unitId, {["unit"] = unit})
-        core:AddMsg("HHAND", self.L["Holo Hand Spawned"], 5, "Info")
-        if unitId and mod:GetSetting("LineCleaveHands") then
-            core:AddPixie(unitId .. "_1", 2, unit, nil, "Blue", 7, 20, 0)
-        end
-    elseif sName == self.L["Mobius Physics Constructor"] then -- yellow room
-        core:AddUnit(unit)
-        core:WatchUnit(unit)
-        local unitId = unit:GetId()
-        if unitId then
-            if unit:GetHealth() and mod:GetSetting("LineCleaveYellowRoomBoss") then -- Portals have same name, actual boss has HP, portals have nilvalue
-                core:AddPixie(unitId, 2, unit, nil, "Red", 5, 35, 0)
+    elseif sName == self.L["Mobius Physics Constructor"] then
+        -- Portals have same name, actual boss has HP, portals have nil value.
+        if nHealth then
+            nCurrentPhase = YELLOW_PHASE
+            core:AddUnit(unit)
+            core:WatchUnit(unit)
+            if mod:GetSetting("LineCleaveYellowRoomBoss") then
+                core:AddPixie(nUnitId, 2, unit, nil, "Red", 5, 35, 0)
             end
+        else
+            -- Draw a line to the yellow portal.
+            core:AddPixie(nUnitId, 1, unit, GetPlayerUnit(), "xkcdBananaYellow")
         end
-    elseif sName == self.L["Unstoppable Object Simulation"] then --green
+    elseif sName == self.L["Unstoppable Object Simulation"] then
+        -- Portals have same name, actual boss has HP, portals have nil value.
+        if nHealth then
+            nCurrentPhase = GREEN_PHASE
+            core:AddUnit(unit)
+            core:WatchUnit(unit)
+        else
+            -- Draw a line to the green portal.
+            core:AddPixie(nUnitId, 1, unit, GetPlayerUnit(), "green")
+        end
+    elseif sName == self.L["Infinite Logic Loop"] then
+        if nHealth then
+            -- Blue room.
+            nCurrentPhase = BLUE_PHASE
+            core:AddUnit(unit)
+            core:WatchUnit(unit)
+        else
+            -- Draw a line to the blue portal.
+            core:AddPixie(nUnitId, 1, unit, GetPlayerUnit(), "blue")
+        end
+    elseif sName == self.L["Holo Hand"] then
         core:AddUnit(unit)
+        core:WatchUnit(unit)
+        table.insert(tHoloHandsList, nUnitId, { ["unit"] = unit} )
+        core:AddMsg("HHAND", self.L["Holo Hand Spawned"], 5, "Info")
+        if mod:GetSetting("LineCleaveHands") then
+            core:AddPixie(nUnitId .. "_1", 2, unit, nil, "Blue", 7, 20, 0)
+        end
+    elseif self.L["Excessive Force Protocol"] == sName then
+        if nHealth == nil then
+            -- Draw a line to the red portal.
+            core:AddPixie(nUnitId, 1, unit, GetPlayerUnit(), "red")
+        end
     elseif sName == self.L["Holo Cannon"] and mod:GetSetting("LineCannons") then
         core:AddPixie(unit:GetId(), 2, unit, nil, "Blue", 5, 100, 0)
-    elseif sName == self.L["Shock Sphere"] and mod:GetSetting("LineOrbsYellowRoom") then -- yellow room orbs
+    elseif sName == self.L["Shock Sphere"] and mod:GetSetting("LineOrbsYellowRoom") then
+        -- Yellow room orbs.
         core:AddPixie(unit:GetId(), 2, unit, nil, "Blue", 5, -7, 0)
     elseif sName == self.L["Support Cannon"] then
         core:AddUnit(unit)
-    elseif sName == self.L["Infinite Logic Loop"] then -- blue
-        -- TESTING BLUE ROOM:
-        core:AddUnit(unit)
-        core:WatchUnit(unit)
-        phase2_blueroom = true
     elseif sName == self.L["Tower Platform"] then
         if not bGreenRoomMarkerDisplayed and mod:GetSetting("OtherGreenRoomMarkers") then
             bGreenRoomMarkerDisplayed = true
@@ -394,24 +369,27 @@ function mod:OnUnitCreated(unit, sName)
 end
 
 function mod:OnUnitDestroyed(unit, sName)
+    local nUnitId = unit:GetId()
+
     if sName == self.L["Holo Hand"] then
-        local unitId = unit:GetId()
-        if unitId then
-            core:DropPixie(unitId .. "_1")
-        end
-        if holo_hands[unitId] then
-            holo_hands[unitId] = nil
+        core:DropPixie(nUnitId .. "_1")
+        if tHoloHandsList[nUnitId] then
+            tHoloHandsList[nUnitId] = nil
         end
     elseif sName == self.L["Holo Cannon"] then
-        core:DropPixie(unit:GetId())
+        core:DropPixie(nUnitId)
     elseif sName == self.L["Avatus"] then
-        core:DropPixie(unit:GetId())
+        core:DropPixie(nUnitId)
     elseif sName == self.L["Shock Sphere"] then
-        core:DropPixie(unit:GetId())
+        core:DropPixie(nUnitId)
     elseif sName == self.L["Infinite Logic Loop"] then
-        phase2_blueroom = false
+        core:DropPixie(nUnitId)
     elseif sName == self.L["Mobius Physics Constructor"] then
-        core:DropPixie(unit:GetId())
+        core:DropPixie(nUnitId)
+    elseif self.L["Unstoppable Object Simulation"] == sName then
+        core:DropPixie(nUnitId)
+    elseif self.L["Excessive Force Protocol"] == sName then
+        core:DropPixie(nUnitId)
     elseif sName == self.L["Tower Platform"] then
         if bGreenRoomMarkerDisplayed then
             bGreenRoomMarkerDisplayed = false
@@ -423,44 +401,53 @@ function mod:OnUnitDestroyed(unit, sName)
 end
 
 function mod:OnBuffApplied(unitName, splId, unit)
-    if phase2_blueroom and unitName == self.L["Infinite Logic Loop"] then
+    if unitName == self.L["Infinite Logic Loop"] then
         local sSpellName = GameLib.GetSpell(splId):GetName()
 
-        -- Todo change to SplId instead of name to reduce API calls
+        local ePurgeType = nil
         if sSpellName == self.L["Green Reconstitution Matrix"] then
-            local playerAssigned = getPlayerAssignment(phase2_blueroom_rotation["green"])
-            if playerAssigned == strMyName then
-                core:AddMsg("BLUEPURGE", self.L["PURGE BLUE BOSS"], 5, mod:GetSetting("SoundBlueInterrupt") and "Inferno")
-            end
-            Print('[#' .. tostring(greenBuffCount) .. '] ' .. unitName .. " has GREEN buff - assigned to: " .. playerAssigned)
-            greenBuffCount = greenBuffCount + 1
-            phase2_blueroom_rotation["green"][playerAssigned] = phase2_blueroom_rotation["green"][playerAssigned] + 1
-            if not buffCountTimer then buffCountTimer = true self:ScheduleTimer("ResetBuffCount", 13) end
+            ePurgeType = PURGE_GREEN
         elseif sSpellName == self.L["Blue Disruption Matrix"] then
-            local playerAssigned = getPlayerAssignment(phase2_blueroom_rotation["blue"])
-            if playerAssigned == strMyName then
-                core:AddMsg("BLUEPURGE", self.L["PURGE BLUE BOSS"], 5, mod:GetSetting("SoundBlueInterrupt") and "Inferno")
-            end
-            Print('[#' .. tostring(blueBuffCount) .. '] ' .. unitName .. " has BLUE buff - assigned to: " .. playerAssigned)
-            phase2_blueroom_rotation["blue"][playerAssigned] = phase2_blueroom_rotation["blue"][playerAssigned] + 1
-            blueBuffCount = blueBuffCount + 1
-            if not buffCountTimer then buffCountTimer = true self:ScheduleTimer("ResetBuffCount", 13) end
+            ePurgeType = PURGE_BLUE
         elseif sSpellName == self.L["Red Empowerment Matrix"] then
-            local playerAssigned = getPlayerAssignment(phase2_blueroom_rotation["red"])
-            if playerAssigned == strMyName then
-                core:AddMsg("BLUEPURGE", self.L["PURGE BLUE BOSS"], 5, mod:GetSetting("SoundBlueInterrupt") and "Inferno")
+            ePurgeType = PURGE_RED
+        end
+
+        if ePurgeType then
+            local nCurrentTime = GetGameTime()
+            local sCandidate = nil
+            local tList = tBlueRoomPurgeList[DispelType]
+            for sPlayerName, nTimeout in pairs(tList) do
+                local tPlayerUnit = GetPlayerUnitByName(sPlayerName)
+                if tPlayerUnit == nil or tPlayerUnit:IsDead() or tPlayerUnit:GetHealth() == 0 then
+                    -- Player is dead.
+                    tList[sPlayerName] = nil
+                elseif sCandidate == nil and nTimeout < nCurrentTime then
+                    sCandidate = sPlayerName
+                end
             end
-            Print('[#' .. tostring(redBuffCount) .. '] ' .. unitName .. " has RED buff - assigned to: " .. playerAssigned)
-            phase2_blueroom_rotation["red"][playerAssigned] = phase2_blueroom_rotation["red"][playerAssigned] + 1
-            redBuffCount = redBuffCount + 1
-            if not buffCountTimer then buffCountTimer = true self:ScheduleTimer("ResetBuffCount", 13) end
+
+            if sCandidate then
+                tList[sCandidate] = nCurrentTime + PURGE_COOLDOWNS
+            else
+                sCandidate = "..."
+            end
+            if nCurrentPhase == BLUE_PHASE then 
+                if ePurgeType == PURGE_GREEN then
+                    core:AddMsg("PURGE", self.L["PURGE GREEN BY '%s'"]:format(sCandidate), 6, "green")
+                elseif ePurgeType == PURGE_BLUE then
+                    core:AddMsg("PURGE", self.L["PURGE BLUE BY '%s'"]:format(sCandidate), 6, "blue")
+                elseif ePurgeType == PURGE_RED then
+                    core:AddMsg("PURGE", self.L["PURGE RED BY '%s'"]:format(sCandidate), 6, "red")
+                end
+            end
         end
     end
 end
 
 function mod:OnHealthChanged(unitName, health)
     if unitName == self.L["Avatus"] then
-        if health >= 75 and health <= 77 and not phase2warn then
+        if health >= 75 and health <= 76 and not phase2warn then
             phase2warn = true
             core:AddMsg("AVAP2", self.L["P2 SOON !"], 5, mod:GetSetting("SoundPortalPhase") and "Info")
         elseif health >= 50 and health <= 52 and not phase2warn then
@@ -475,19 +462,19 @@ end
 function mod:OnSpellCastStart(unitName, castName, unit)
     if unitName == self.L["Avatus"] and castName == self.L["Obliteration Beam"] then
         mod:RemoveTimerBar("OBBEAM")
-        -- check if next ob beam in sec doesn't happen during a gungrid which takes 20 sec
-        if gungrid_time + 132 < GetGameTime() + 37 then
+        -- Check if next ob beam in sec doesn't happen during a gungrid which takes 20 sec.
+        if nGunGridLastPopTime + 132 < GetGameTime() + 37 then
             mod:AddTimerBar("OBBEAM", "Obliteration Beam", 37, mod:GetSetting("SoundObliterationBeam"))
         end
     elseif unitName == self.L["Holo Hand"] and castName == self.L["Crushing Blow"] then
         local playerUnit = GetPlayerUnit()
-        for _, hand in pairs(holo_hands) do
+        for _, hand in pairs(tHoloHandsList) do
             local distance_to_hand = self:GetDistanceBetweenUnits(playerUnit, hand["unit"])
             hand["distance"] = distance_to_hand
         end
 
-        local closest_holo_hand = holo_hands[next(holo_hands)]
-        for _, hand in pairs(holo_hands) do
+        local closest_holo_hand = tHoloHandsList[next(tHoloHandsList)]
+        for _, hand in pairs(tHoloHandsList) do
             if hand["distance"] < closest_holo_hand["distance"] then
                 closest_holo_hand = hand
             end
@@ -504,7 +491,7 @@ end
 
 function mod:OnChatDC(message)
     if message:find(self.L["Gun Grid Activated"]) then
-        gungrid_time = GetGameTime()
+        nGunGridLastPopTime = GetGameTime()
         core:AddMsg("GGRIDMSG", self.L["Gun Grid NOW!"], 5, mod:GetSetting("SoundGunGrid") and "Beware")
         mod:AddTimerBar("GGRID", "~Gun Grid", 112, mod:GetSetting("SoundGunGrid"))
         mod:AddTimerBar("HHAND", "Holo Hand", 22)
@@ -517,73 +504,22 @@ function mod:OnChatDC(message)
     end
 end
 
-function mod:OnPartyMessage(sMessage, sSender)
-    if phase2 then
-        sMessage = sMessage:lower()
-        if sMessage == "red" or sMessage == "green" or sMessage == "blue" then
-            if not phase2_blueroom_rotation[sMessage] then
-                phase2_blueroom_rotation[sMessage] = {}
-            end
-            phase2_blueroom_rotation[sMessage][sSender] = 1
+function mod:OnShowShortcutBar(tIconFloatingSpellBar)
+    if #tIconFloatingSpellBar > 0 then
+        local sIcon1 = tIconFloatingSpellBar[1]
+        Print(("Name of the spell bar icon = '%s'"):format(sIcon1))
+        local ePurgeType = PURGE_LIST_IN_BLUE_ROOM[sIcon1]
+        if ePurgeType then
+            tBlueRoomPurgeList[ePurgeType][GetPlayerUnit():GetName()] = GetGameTime()
+            mod:SendIndMessage("PURGE_TYPE", ePurgeType)
+            Print(("PurgeType=%d detected on you"):format(ePurgeType))
         end
     end
 end
 
-function mod:ResetBuffCount()
-    redBuffCount = 1
-    greenBuffCount = 1
-    blueBuffCount = 1
-    buffCountTimer = false
-end
-
-function mod:OnUnitStateChanged(unit, bInCombat, sName)
-    if unit:GetType() == "NonPlayer" and bInCombat then
-        if sName == self.L["Avatus"] then
-            core:AddUnit(unit)
-            core:WatchUnit(unit)
-            if mod:GetSetting("LineCleaveBoss") then
-                core:AddPixie(unit:GetId(), 2, unit, nil, "Green", 10, 22, 0)
-            end
-
-            if not encounter_started then
-                encounter_started = true
-                gungrid_time = GetGameTime() + 20
-
-                mod:AddTimerBar("OBBEAM", "Obliteration Beam", 69, mod:GetSetting("SoundObliterationBeam"))
-                mod:AddTimerBar("GGRID", "~Gun Grid", 20, mod:GetSetting("SoundGunGrid"))
-                if mod:GetSetting("OtherHandSpawnMarkers") then
-                    core:SetWorldMarker("HAND1", self.L["Hand %u"]:format(1), HAND_MAKERS["hand1"])
-                    core:SetWorldMarker("HAND2", self.L["Hand %u"]:format(2), HAND_MAKERS["hand2"])
-                end
-                if mod:GetSetting("OtherDirectionMarkers") then
-                    core:SetWorldMarker("NORTH", self.L["MARKER North"], CARDINAL_MARKERS["north"])
-                    core:SetWorldMarker("SOUTH", self.L["MARKER South"], CARDINAL_MARKERS["south"])
-                end
-            end
-        elseif sName == self.L["Infinite Logic Loop"] then
-            local strRedBuffs = "Red Buffs:"
-            local strGreenBuffs = "Green Buffs:"
-            local strBlueBuffs = "Blue Buffs:"
-
-            local redPlayerCount = 1
-            local greenPlayerCount = 1
-            local bluePlayerCount = 1
-
-            for key, value in orderedPairs(phase2_blueroom_rotation["red"]) do
-                strRedBuffs = strRedBuffs .. " - " .. tostring(redPlayerCount) .. ". " .. key
-                redPlayerCount = redPlayerCount + 1
-            end
-            for key, value in orderedPairs(phase2_blueroom_rotation["green"]) do
-                strGreenBuffs = strGreenBuffs .. " - " .. tostring(greenPlayerCount) .. ". " .. key
-                greenPlayerCount = greenPlayerCount + 1
-            end
-            for key, value in orderedPairs(phase2_blueroom_rotation["blue"]) do
-                strBlueBuffs = strBlueBuffs .. " - " .. tostring(bluePlayerCount) .. ". " .. key
-                bluePlayerCount = bluePlayerCount + 1
-            end
-            Print(strRedBuffs)
-            Print(strGreenBuffs)
-            Print(strBlueBuffs)
-        end
+function mod:ReceiveIndMessage(sFrom, sReason, data)
+    if sReason == "PURGE_TYPE" then
+        tBlueRoomPurgeList[data][sFrom] = GetGameTime()
+        Print(("PurgeType=%s detected on %s"):format(tostring(data), sFrom))
     end
 end
