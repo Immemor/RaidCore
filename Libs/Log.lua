@@ -32,14 +32,8 @@ local tinsert = table.insert
 local GetGameTime = GameLib.GetGameTime
 
 ----------------------------------------------------------------------------------------------------
--- Class declaration.
-----------------------------------------------------------------------------------------------------
-local LogClass = {}
-
-----------------------------------------------------------------------------------------------------
 -- Constants.
 ----------------------------------------------------------------------------------------------------
-local LOGGER_MT = { __index = LogClass }
 local NB_BUFFERS = 2
 -- Description of an entry log.
 local LOG_ENTRY__TIME = 1
@@ -57,6 +51,7 @@ local LOG_ENTRIES = {
 local _tAllLog = {}
 local _nBufferIdx = 1
 local _tRefTime = {}
+local _tBuffers = {}
 
 ----------------------------------------------------------------------------------------------------
 -- Privates functions
@@ -73,18 +68,16 @@ local function LogGetLastBufferIndex()
     return 0
 end
 
-local function ResetBuffer(tLog, nIndex)
-    tLog.tBuffers[nIndex] = {}
+local function ResetBuffer(nIndex)
+    _tBuffers[nIndex] = {}
 end
 
 ----------------------------------------------------------------------------------------------------
--- Logger class itself.
+-- Library itself.
 ----------------------------------------------------------------------------------------------------
-LogClass.REFS = LOG_ENTRIES
-
-function LogClass:Add(sText, ...)
+function Lib:Add(sText, ...)
     if NB_BUFFERS > 0 then
-        local tBuffer = self.tBuffers[_nBufferIdx]
+        local tBuffer = _tBuffers[_nBufferIdx]
         local tExtraInfo = { ... }
         -- Add an entry in current buffer.
         tinsert(tBuffer, {
@@ -95,15 +88,15 @@ function LogClass:Add(sText, ...)
     end
 end
 
-function LogClass:SetExtra2String(fCallback)
+function Lib:SetExtra2String(fCallback)
     assert(type(fCallback) == "function")
     self.fExtra2String = fCallback
 end
 
-function LogClass:Dump()
+function Lib:Dump()
     local fExtra2String = self.fExtra2String
     local nBufferIdx = LogGetLastBufferIndex()
-    local tBuffer = self.tBuffers[nBufferIdx]
+    local tBuffer = _tBuffers[nBufferIdx]
     local tDump = {}
     local nRefTime = _tRefTime[nBufferIdx]
 
@@ -120,32 +113,6 @@ function LogClass:Dump()
     return tDump
 end
 
-----------------------------------------------------------------------------------------------------
----- Lib functions.
-----------------------------------------------------------------------------------------------------
-function Lib:CreateNamespace(sNamespace)
-    local tLog = nil
-    tLog = {
-        sNamespace = sNamespace,
-        tBuffers = {},
-    }
-    for i = 1, NB_BUFFERS do
-        ResetBuffer(tLog, i)
-    end
-    setmetatable(tLog, LOGGER_MT)
-    tinsert(_tAllLog, tLog)
-    return tLog
-end
-
-function Lib:GetNamespace(sNamespace)
-    for _, tLog in next,_tAllLog do
-        if tLog.sNamespace == sNamespace then
-            return tLog
-        end
-    end
-    return nil
-end
-
 function Lib:NextBuffer()
     if NB_BUFFERS > 0 then
         -- Increase current index.
@@ -155,9 +122,7 @@ function Lib:NextBuffer()
             _nBufferIdx = 1
         end
         -- Reset buffers pointed by current index.
-        for _, tLog in next,_tAllLog do
-            ResetBuffer(tLog, _nBufferIdx)
-        end
+        ResetBuffer(_nBufferIdx)
     end
 end
 
@@ -170,6 +135,7 @@ end
 function Lib:OnLoad()
     for i = 1, NB_BUFFERS do
         _tRefTime[i] = 0
+        ResetBuffer(i)
     end
 end
 

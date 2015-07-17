@@ -17,8 +17,7 @@ require "Spell"
 require "GroupLib"
 
 local RaidCore = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
-local LogPackage = Apollo.GetPackage("Log-1.0").tPackage
-local Log = LogPackage:CreateNamespace("CombatInterface")
+local Log = Apollo.GetPackage("Log-1.0").tPackage
 
 ----------------------------------------------------------------------------------------------------
 -- Copy of few objects to reduce the cpu load.
@@ -317,13 +316,13 @@ end
 
 local function FullActivate(bEnable)
     if _bRunning == false and bEnable == true then
-        LogPackage:SetRefTime(GetGameTime())
+        Log:SetRefTime(GetGameTime())
         RegisterEventHandler("ChatMessage", "CI_OnChatMessage", RaidCore)
         _tScanTimer:Start()
     elseif _bRunning == true and bEnable == false then
         _tScanTimer:Stop()
         RemoveEventHandler("ChatMessage", RaidCore)
-        LogPackage:NextBuffer()
+        Log:NextBuffer()
         -- Clear private data.
         _tTrackedUnits = {}
         _tAllUnits = {}

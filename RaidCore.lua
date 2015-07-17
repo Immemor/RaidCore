@@ -14,10 +14,8 @@ require "ICCommLib"
 require "ICComm"
 
 local GeminiAddon = Apollo.GetPackage("Gemini:Addon-1.1").tPackage
-local LogPackage = Apollo.GetPackage("Log-1.0").tPackage
 local JSON = Apollo.GetPackage("Lib:dkJSON-2.5").tPackage
 local RaidCore = GeminiAddon:NewAddon("RaidCore", false, {}, "Gemini:Timer-1.0")
-local Log = LogPackage:CreateNamespace("CombatManager")
 
 ----------------------------------------------------------------------------------------------------
 -- Copy of few objects to reduce the cpu load.
@@ -87,7 +85,6 @@ local function ManageDelayedUnit(nId, sName, bInCombat)
     local tTrig = _tTrigPerZone[id1] and _tTrigPerZone[id1][id2] and _tTrigPerZone[id1][id2][id3]
     if tTrig and tTrig[sName] then
         if bInCombat then
-            Log:Add("Add2DelayedUnit", nId, sName)
             if not _tDelayedUnits[sName] then
                 _tDelayedUnits[sName] = {}
             end
@@ -95,7 +92,6 @@ local function ManageDelayedUnit(nId, sName, bInCombat)
         else
             if _tDelayedUnits[sName] then
                 if _tDelayedUnits[sName][nId] then
-                    Log:Add("Remove2DelayedUnit", nId, sName)
                     _tDelayedUnits[sName][nId] = nil
                 end
                 if next(_tDelayedUnits[sName]) == nil then
@@ -116,7 +112,6 @@ local function SearchEncounter()
         for _, tEncounter in next, tEncounters do
             if tEncounter:OnTrig(_tDelayedUnits) then
                 _tCurrentEncounter = tEncounter
-                Log:Add("Encounter Found", _tCurrentEncounter:GetName())
                 break
             end
         end
@@ -133,8 +128,6 @@ local function ProcessDelayedUnit()
                 if bInCombat then
                     Event_FireGenericEvent("RC_UnitStateChanged", tUnit, bInCombat, nDelayedName)
                 end
-            else
-                Log:Add("Error Invalid tUnit not found", nDelayedName, nDelayedId)
             end
         end
     end
@@ -869,7 +862,6 @@ function RaidCore:WipeCheck()
             return
         end
     end
-    Log:Add("Encounter no more in progress")
     _bIsEncounterInProgress = false
     if _tCurrentEncounter then
         Event_FireGenericEvent("RAID_WIPE")
@@ -889,7 +881,6 @@ function RaidCore:OnEnteredCombat(nId, tUnit, sName, bInCombat)
     if tUnit == GetPlayerUnit() then
         if bInCombat then
             -- Player entering in combat.
-            Log:Add("Player In Combat")
             _bIsEncounterInProgress = true
             self:CombatInterface_Activate("FullEnable")
             SearchEncounter()

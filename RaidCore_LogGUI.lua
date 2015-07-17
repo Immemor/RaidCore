@@ -11,7 +11,7 @@
 require "Apollo"
 
 local GeminiAddon = Apollo.GetPackage("Gemini:Addon-1.1").tPackage
-local LogPackage = Apollo.GetPackage("Log-1.0").tPackage
+local Log = Apollo.GetPackage("Log-1.0").tPackage
 local RaidCore = GeminiAddon:GetAddon("RaidCore")
 local LogGUI = {}
 
@@ -67,8 +67,6 @@ end
 
 function LogGUI:RCLogGet(wndHandler, wndControl, eMouseButton)
     local wndGrid = _wndRCLog:FindChild("Grid")
-    local Log = LogPackage:GetNamespace("CombatInterface")
-    assert(Log)
     local tDumpLog = Log:Dump()
 
     if wndGrid then
