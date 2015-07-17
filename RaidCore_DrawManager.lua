@@ -215,7 +215,7 @@ end
 
 function addon:DrawPixie(vectorStart, vectorEnd, color, width)
 
-    local hexColor = ColorStringToHex[color]
+    local hexColor = ColorStringToHex[color] or color
 
     if not Vector3.Is(vectorStart) then
         vectorStart = Vector3.New(vectorStart.x, vectorStart.y, vectorStart.z)
