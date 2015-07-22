@@ -80,11 +80,13 @@ local _bUnitInCombatEnable = false
 local _bRunning = false
 local _tScanTimer = nil
 local _CommChannelTimer = nil
+local _DelayShowShortcutBar = nil
 local _nCommChannelRetry = 1
 local _tAllUnits = {}
 local _tTrackedUnits = {}
 local _tMembers = {}
 local _RaidCoreChannelComm = nil
+local _nNumShortcuts
 
 ----------------------------------------------------------------------------------------------------
 -- Privates functions: Log
@@ -640,19 +642,23 @@ end
 
 function RaidCore:CI_ShowShortcutBar(eWhichBar, bIsVisible, nNumShortcuts)
     if eWhichBar == ActionSetLib.CodeEnumShortcutSet.FloatingSpellBar then
-        local tIconFloatingSpellBar = {}
-        if nNumShortcuts == 0 then
-            nNumShortcuts = 7
-        end
-        for iBar = 0, nNumShortcuts do
-            self.ActionBarShortcutBtn:SetContentId(eWhichBar * 12 + iBar)
-            local tButtonContent = self.ActionBarShortcutBtn:GetContent()
-            local strIcon = tButtonContent and tButtonContent.strIcon
-            if strIcon == nil or strIcon == "" then
-                break
-            end
-            table.insert(tIconFloatingSpellBar, strIcon)
-        end
-        ManagerCall("OnShowShortcutBar", tIconFloatingSpellBar)
+        -- The GetContent function is not ready... A delay must be added.
+        _nNumShortcuts = nNumShortcuts
+        _DelayShowShortcutBar = ApolloTimer.Create(1, false, "CI_ShowShortcutBarDelayed", RaidCore)
     end
+end
+
+function RaidCore:CI_ShowShortcutBarDelayed()
+    local eWhichBar = ActionSetLib.CodeEnumShortcutSet.FloatingSpellBar
+    local tIconFloatingSpellBar = {}
+    for iBar = 0, _nNumShortcuts do
+        self.ActionBarShortcutBtn:SetContentId(eWhichBar * 12 + iBar)
+        local tButtonContent = self.ActionBarShortcutBtn:GetContent()
+        local strIcon = tButtonContent and tButtonContent.strIcon
+        if strIcon == nil or strIcon == "" then
+            break
+        end
+        table.insert(tIconFloatingSpellBar, strIcon)
+    end
+    ManagerCall("OnShowShortcutBar", tIconFloatingSpellBar)
 end
