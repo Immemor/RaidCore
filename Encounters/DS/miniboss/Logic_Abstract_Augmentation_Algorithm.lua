@@ -58,7 +58,6 @@ mod:RegisterDefaultTimerBarConfigs({
     ["NEXT_QUANTUM_AMPLIFIED"] = { sColor = "xkcdBloodOrange" },
 })
 mod:RegisterDefaultSetting("OtherKickerAnnounce")
-mod:RegisterDefaultSetting("OtherNextKickerAnnounce")
 
 ----------------------------------------------------------------------------------------------------
 -- Constants.
@@ -130,7 +129,6 @@ function mod:OnDebuffAddedOrUpdated(nId, nSpellId, nStack, fTimeRemaining)
             end
 
             local nCandidateId = nil
-            local nNextCandidateId = nil
             -- Remove players who are dead or no more available.
             for nPlayerId, nTimeout in next, tKickerList do
                 local tPlayerUnit = GetUnitById(nPlayerId)
@@ -144,27 +142,19 @@ function mod:OnDebuffAddedOrUpdated(nId, nSpellId, nStack, fTimeRemaining)
                     if nCandidateId == nil then
                         nCandidateId = nPlayerId
                     elseif nTimeout < tKickerList[nCandidateId] then
-                        nNextCandidateId = nCandidateId
                         nCandidateId = nPlayerId
-                    elseif nNextCandidateId == nil or nTimeout < tKickerList[nNextCandidateId] then
-                        nNextCandidateId = nPlayerId
                     end
                 end
             end
 
             nExpectedKickerId = nCandidateId
             local sCandidateName = nCandidateId and GetUnitById(nCandidateId):GetName()
-            local sNextCandidateName = nNextCandidateId and GetUnitById(nNextCandidateId):GetName()
             if sCandidateName then
                 local bIsCountDown = nCandidateId == GetPlayerUnit():GetId()
                 local sMessage = self.L["%s is candidate to interrupt"]:format(sCandidateName)
                 mod:AddTimerBar("NEXT_INTERRUPT", sMessage, INTERRUPT_INTERVAL, bIsCountDown)
                 if mod:GetSetting("OtherKickerAnnounce") then
                     core:AddMsg("KICKER", sMessage, INTERRUPT_INTERVAL, nil, "red")
-                end
-                if mod:GetSetting("OtherNextKickerAnnounce") and sNextCandidateName then
-                    sMessage = self.L["Next candidate is %s"]:format(sNextCandidateName)
-                    core:AddMsg("NEXT_KICKER", sMessage, INTERRUPT_INTERVAL, nil, "blue")
                 end
             else
                 mod:AddTimerBar("NEXT_INTERRUPT", "Next interrupt", INTERRUPT_INTERVAL)
