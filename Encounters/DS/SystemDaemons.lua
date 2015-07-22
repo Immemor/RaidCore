@@ -51,7 +51,7 @@ mod:RegisterEnglishLocale({
     ["PHASE 2 !"] = "PHASE 2 !",
     ["INTERRUPT NORTH"] = "INTERRUPT NORTH",
     ["INTERRUPT SOUTH"] = "INTERRUPT SOUTH",
-    ["AIDDDDDDDS !"] = "AIDDDDDDDS !",
+    ["PURGE NEAR YOU!"] = "PURGE NEAR YOU!",
     ["PURGE - NULL"] = "PURGE - NULL",
     ["PURGE - BINARY"] = "PURGE - BINARY",
     ["INTERRUPT !"] = "INTERRUPT !",
@@ -96,9 +96,9 @@ mod:RegisterFrenchLocale({
     ["MARKER south"] = "S",
     ["P2 SOON !"] = "P2 SOON !",
     ["PHASE 2 !"] = "PHASE 2 !",
-    --["INTERRUPT NORTH"] = "INTERRUPT NORTH", -- TODO: French translation missing !!!!
-    --["INTERRUPT SOUTH"] = "INTERRUPT SOUTH", -- TODO: French translation missing !!!!
-    --["AIDDDDDDDS !"] = "AIDDDDDDDS !", -- TODO: French translation missing !!!!
+    ["INTERRUPT NORTH"] = "INTÉRROMPRE NORD",
+    ["INTERRUPT SOUTH"] = "INTÉRROMPRE SUD",
+    ["PURGE NEAR YOU!"] = "PURGE PROCHE DE VOUS !",
     ["PURGE - NULL"] = "PURGE - 1.0",
     ["PURGE - BINARY"] = "PURGE - 2.0",
     --["INTERRUPT !"] = "INTERRUPT !", -- TODO: French translation missing !!!!
@@ -145,7 +145,7 @@ mod:RegisterGermanLocale({
     ["PHASE 2 !"] = "PHASE 2 !",
     ["INTERRUPT NORTH"] = "UNTERBRECHE NORDEN",
     ["INTERRUPT SOUTH"] = "UNTERBRECHE SÜDEN",
-    ["AIDDDDDDDS !"] = "AIDDDDDDDS !",
+    --["PURGE NEAR YOU!"] = "PURGE NEAR YOU!",
     ["PURGE - NULL"] = "SÄUBERN - NULL",
     ["PURGE - BINARY"] = "SÄUBERN - BINÄR",
     ["INTERRUPT !"] = "UNTERBRECHEN !",
@@ -347,7 +347,7 @@ function mod:OnSpellCastStart(unitName, castName, unit)
     elseif castName == "Purge" then
         PurgeLast[unit:GetId()] = GameLib.GetGameTime()
         if self:GetDistanceBetweenUnits(GameLib.GetPlayerUnit(), unit) < 40 then
-            core:AddMsg("PURGE", self.L["AIDDDDDDDS !"], 5, mod:GetSetting("SoundPurge") and "Beware")
+            core:AddMsg("PURGE", self.L["PURGE NEAR YOU!"], 5, mod:GetSetting("SoundPurge") and "Beware")
             if unitName == self.L["Null System Daemon"] then
                 mod:AddTimerBar("PURGE_NULL", "PURGE - NULL", 27)
             elseif unitName == self.L["Binary System Daemon"] then
