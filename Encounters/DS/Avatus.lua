@@ -251,6 +251,7 @@ local nCurrentPhase
 local tBlueRoomPurgeList
 local nGunGridLastPopTime
 local tHoloHandsList
+local bIsHoloHand
 local phase2warn, phase2
 
 ----------------------------------------------------------------------------------------------------
@@ -275,6 +276,7 @@ function mod:OnBossEnable()
     }
     tHoloHandsList = {}
     bGreenRoomMarkerDisplayed = false
+    bIsHoloHand = true
 
     nGunGridLastPopTime = GetGameTime() + 20
 
@@ -494,13 +496,18 @@ function mod:OnChatDC(message)
         nGunGridLastPopTime = GetGameTime()
         core:AddMsg("GGRIDMSG", self.L["Gun Grid NOW!"], 5, mod:GetSetting("SoundGunGrid") and "Beware")
         mod:AddTimerBar("GGRID", "~Gun Grid", 112, mod:GetSetting("SoundGunGrid"))
-        mod:AddTimerBar("HHAND", "Holo Hand", 22)
+        if bIsHoloHand then
+            mod:AddTimerBar("HOLO", "Holo Hand", 22)
+        else
+            mod:AddTimerBar("HOLO", "Holo Cannon", 22)
+        end
+        bIsHoloHand = not bIsHoloHand
     end
     if message:find(self.L["Portals have opened!"]) then
         phase2 = true
         mod:RemoveTimerBar("GGRID")
         mod:RemoveTimerBar("OBBEAM")
-        mod:RemoveTimerBar("HHAND")
+        mod:RemoveTimerBar("HOLO")
     end
 end
 
