@@ -129,17 +129,27 @@ mod:RegisterDefaultTimerBarConfigs({
 ----------------------------------------------------------------------------------------------------
 -- Locals.
 ----------------------------------------------------------------------------------------------------
+local GetUnitById = GameLib.GetUnitById
 local eggsCount, siphonCount, outbreakCount = 0, 0, 0
 
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("RC_UnitStateChanged", "OnUnitStateChanged", self)
+    Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
     Apollo.RegisterEventHandler("UNIT_HEALTH", "OnHealthChanged", self)
     Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
     Apollo.RegisterEventHandler("CHAT_NPCSAY", "OnChatNPCSay", self)
-    Apollo.RegisterEventHandler("DEBUFF_APPLIED", "OnDebuffApplied", self)
+    Apollo.RegisterEventHandler("DEBUFF_ADD", "OnDebuffAdd", self)
+
+    eggsCount, siphonCount, outbreakCount = 2, 1, 0
+end
+
+function mod:OnUnitCreated(tUnit, sName)
+    if sName == self.L["Kuralak the Defiler"] then
+        core:AddUnit(tUnit)
+        core:WatchUnit(tUnit)
+    end
 end
 
 function mod:OnHealthChanged(unitName, health)
@@ -151,22 +161,22 @@ end
 function mod:OnChatDC(message)
     if message:find(self.L["Kuralak the Defiler returns to the Archive Core"]) then
         core:AddMsg("VANISH", self.L["VANISH"], 5, "Alert")
-        core:AddBar("VANISH", self.L["Vanish"], 47, 1)
+        core:AddTimerBar("VANISH", "Vanish", 47)
     elseif message:find(self.L["Kuralak the Defiler causes a violent outbreak of corruption"]) then
         core:AddMsg("OUTBREAK", self.L["OUTBREAK"], 5, "RunAway")
         outbreakCount = outbreakCount + 1
         if outbreakCount <= 5 then
-            core:AddBar("OUTBREAK", (self.L["Outbreak (%s)"]):format(outbreakCount + 1), 45)
+            core:AddTimerBar("OUTBREAK", self.L["Outbreak (%s)"]:format(outbreakCount + 1), 45)
         end
     elseif message:find(self.L["The corruption begins to fester"]) then
         if eggsCount < 2 then eggsCount = 2 end
         core:AddMsg("EGGS", (self.L["EGGS (%s)"]):format(math.pow(2, eggsCount-1)), 5, "Alert")
         eggsCount = eggsCount + 1
         if eggsCount == 5 then
-            core:AddBar("EGGS", self.L["BERSERK !!"], 66)
+            core:AddTimerBar("EGGS", "BERSERK !!", 66)
             eggsCount = 2
         else
-            core:AddBar("EGGS", (self.L["Eggs (%s)"]):format(math.pow(2, eggsCount-1)), 66)
+            core:AddTimerBar("EGGS", self.L["Eggs (%s)"]:format(math.pow(2, eggsCount-1)), 66)
         end
     elseif message:find(self.L["has been anesthetized"]) then
         if siphonCount == 0 then siphonCount = 1 end
@@ -174,7 +184,7 @@ function mod:OnChatDC(message)
         if self:Tank() then
             core:AddMsg("SIPHON", self.L["SWITCH TANK"], 5, "Alarm")
             if siphonCount < 4 then
-                core:AddBar("SIPHON", (self.L["Switch Tank (%s)"]):format(siphonCount), 88)
+                core:AddTimerBar("SIPHON", self.L["Switch Tank (%s)"]:format(siphonCount), 88)
             end
         end
     end
@@ -190,10 +200,10 @@ function mod:OnChatNPCSay(message)
         eggsCount, siphonCount, outbreakCount = 2, 1, 0
         core:StopBar("VANISH")
         core:AddMsg("KP2", self.L["PHASE 2 !"], 5, "Alert")
-        core:AddBar("OUTBREAK", (self.L["Outbreak (%s)"]):format(outbreakCount + 1), 15)
-        core:AddBar("EGGS", (self.L["Eggs (%s)"]):format(eggsCount), 73)
+        core:AddTimerBar("OUTBREAK", self.L["Outbreak (%s)"]:format(outbreakCount + 1), 15)
+        core:AddTimerBar("EGGS", self.L["Eggs (%s)"]:format(eggsCount), 73)
         if self:Tank() then
-            core:AddBar("SIPHON", (self.L["Switch Tank (%s)"]):format(siphonCount), 37)
+            core:AddTimerBar("SIPHON", self.L["Switch Tank (%s)"]:format(siphonCount), 37)
         end
         local estpos = { x = 194.44, y = -110.80034637451, z = -483.20 }
         core:SetWorldMarker("EAST", self.L["MARKER east"], estpos)
@@ -206,18 +216,12 @@ function mod:OnChatNPCSay(message)
     end
 end
 
-function mod:OnDebuffApplied(unitName, splId, unit)
-    if splId == 56652 then
-        core:MarkUnit(unit)
-        core:AddUnit(unit)
-    end
-end
-
-function mod:OnUnitStateChanged(unit, bInCombat, sName)
-    if unit:GetType() == "NonPlayer" and bInCombat then
-        if sName == self.L["Kuralak the Defiler"] then
-            core:AddUnit(unit)
-            eggsCount, siphonCount, outbreakCount = 2, 1, 0
+function mod:OnDebuffApplied(nId, nSpellId, nStack, fTimeRemaining)
+    if nSpellId == 56652 then
+        local tUnit = GetUnitById(nId)
+        if tUnit then
+            core:MarkUnit(tUnit)
+            core:AddUnit(tUnit)
         end
     end
 end

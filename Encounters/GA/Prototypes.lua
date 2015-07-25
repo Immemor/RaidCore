@@ -104,10 +104,19 @@ local protoFirst = true
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("RC_UnitStateChanged", "OnUnitStateChanged", self)
+    Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
     Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
     Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
-    Apollo.RegisterEventHandler("RAID_WIPE", "OnReset", self)
+
+    protoFirst = true
+end
+
+function mod:OnUnitCreated(tUnit, sName)
+    if sName == self.L["Phagetech Commander"] or sName == self.L["Phagetech Augmentor"]
+        or sName == self.L["Phagetech Protector"] or sName == self.L["Phagetech Fabricator"] then
+        core:AddUnit(tUnit)
+        core:WatchUnit(tUnit)
+    end
 end
 
 function mod:OnSpellCastStart(unitName, castName, unit)
@@ -120,30 +129,17 @@ end
 
 function mod:OnChatDC(message)
     if message:find(self.L["Phagetech Commander is now active!"]) then
-        core:AddBar("PROTO", self.L["[2] TP + CROIX + BOTS"], protoFirst and 20 or 60)
+        core:AddTimerBar("PROTO", "[2] TP + CROIX + BOTS", protoFirst and 20 or 60)
         if protoFirst then 
             protoFirst = nil
-            core:AddBar("BERSERK", self.L["BERSERK"], 585)
+            core:AddTimerBar("BERSERK", "BERSERK", 585)
         end
     elseif message:find(self.L["Phagetech Augmentor is now active!"]) then
-        core:AddBar("PROTO", self.L["[3] SINGULARITY + VAGUE"], 60)
+        core:AddTimerBar("PROTO", "[3] SINGULARITY + VAGUE", 60)
     elseif message:find(self.L["Phagetech Protector is now active!"]) then
-        core:AddBar("SINGU", self.L["Singularity"], 5)
-        core:AddBar("PROTO", self.L["[4] SOAK + BOTS"], 60)
+        core:AddTimerBar("SINGU", "Singularity", 5)
+        core:AddTimerBar("PROTO", "[4] SOAK + BOTS", 60)
     elseif message:find(self.L["Phagetech Fabricator is now active!"]) then
-        core:AddBar("PROTO", self.L["[1] LINK + KICK"], 60)
-    end
-end
-
-function mod:OnReset()
-    protoFirst = true
-end
-
-function mod:OnUnitStateChanged(unit, bInCombat, sName)
-    if unit:GetType() == "NonPlayer" and bInCombat then
-        if sName == self.L["Phagetech Commander"] then
-        elseif sName == self.L["Phagetech Augmentor"] or sName == self.L["Phagetech Fabricator"] then
-            core:WatchUnit(unit)
-        end
+        core:AddTimerBar("PROTO", "[1] LINK + KICK", 60)
     end
 end

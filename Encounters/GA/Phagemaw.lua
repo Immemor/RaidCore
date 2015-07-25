@@ -67,11 +67,13 @@ mod:RegisterDefaultTimerBarConfigs({
 function mod:OnBossEnable()
     Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
     Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
-    Apollo.RegisterEventHandler("RC_UnitStateChanged", "OnUnitStateChanged", self)
 end
 
 function mod:OnUnitCreated(unit, sName)
-    if sName == self.L["Detonation Bomb"] then
+    if sName == self.L["Phage Maw"] then
+        core:AddUnit(unit)
+        core:WatchUnit(unit)
+    elseif sName == self.L["Detonation Bomb"] then
         core:MarkUnit(unit, 1)
         core:AddUnit(unit)
     end
@@ -79,19 +81,11 @@ end
 
 function mod:OnChatDC(message)
     if message:find(self.L["The augmented shield has been destroyed"]) then
-        core:AddBar("MAW1", self.L["Bomb %u"]:format(1), 20)
-        core:AddBar("MAW2", self.L["Bomb %u"]:format(2), 49)
-        core:AddBar("MAW3", self.L["Bomb %u"]:format(3), 78)
-        core:AddBar("PHAGEMAW", self.L["BOOOM !"], 104, 1)
+        core:AddTimerBar("MAW1", self.L["Bomb %u"]:format(1), 20)
+        core:AddTimerBar("MAW2", self.L["Bomb %u"]:format(2), 49)
+        core:AddTimerBar("MAW3", self.L["Bomb %u"]:format(3), 78)
+        core:AddTimerBar("PHAGEMAW", "BOOOM !", 104)
     elseif message:find(self.L["Phage Maw begins charging an orbital strike"]) then
         core:ResetMarks()
-    end
-end
-
-function mod:OnUnitStateChanged(unit, bInCombat, sName)
-    if unit:GetType() == "NonPlayer" and bInCombat then
-        if sName == self.L["Phage Maw"] then
-            core:AddUnit(unit)
-        end
     end
 end

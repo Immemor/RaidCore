@@ -166,13 +166,26 @@ function mod:OnBossEnable()
     Apollo.RegisterEventHandler("UNIT_HEALTH", "OnHealthChanged", self)
     Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
     Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
+
+    pilarCount, boreCount, submergeCount = 1, 0, 0
+    firstPull, OhmnaP3, OhmnaP4 = true, false, false
+    core:AddTimerBar("OPILAR", self.L["PILLAR %u"]:format(pilarCount), 25)
+    if self:Tank() then
+        core:AddTimerBar("OBORE", "SWITCH TANK", 45)
+    end
 end
 
 function mod:OnUnitCreated(unit, sName)
-    if sName == self.L["Tentacle of Ohmna"] then
+    if sName == self.L["Dreadphage Ohmna"] then
+        core:AddUnit(unit)
+        core:WatchUnit(unit)
+        core:AddLine("Ohmna1", 2, unit, nil, 3, 25, 0)
+        core:AddLine("Ohmna2", 2, unit, nil, 1, 25, 120)
+        core:AddLine("Ohmna3", 2, unit, nil, 1, 25, -120)
+    elseif sName == self.L["Tentacle of Ohmna"] then
         if not OhmnaP4 then
             core:AddMsg("OTENT", self.L["Tentacles"], 5, "Info", "Blue")
-            core:AddBar("OTENT", self.L["Next Tentacles"], 20)
+            core:AddTimerBar("OTENT", "Next Tentacles", 20)
         end
     elseif sName == self.L["Ravenous Maw of the Dreadphage"] then
         core:MarkUnit(unit, 0)
@@ -197,13 +210,13 @@ function mod:OnSpellCastStart(unitName, castName, unit)
         if castName == self.L["Erupt"] then
             if OhmnaP3 then return end
             local pilarActivated = self:OhmnaPE(pilarCount % 2)
-            core:AddBar("OPILAR", self.L["PILLAR %u : %u"]:format(pilarCount, pilarActivated), 32, 1)
+            core:AddTimerBar("OPILAR", self.L["PILLAR %u : %u"]:format(pilarCount, pilarActivated), 32)
             if self:Tank() then
-                core:AddBar("OBORE", self.L["SWITCH TANK"], 45)
+                core:AddTimerBar("OBORE", "SWITCH TANK", 45)
             end
         elseif castName == self.L["Genetic Torrent"] then
             core:AddMsg("SPEW", self.L["BIG SPEW"], 5, "RunAway")
-            core:AddBar("OSPEW", self.L["NEXT BIG SPEW"], OhmnaP4 and 40 or 60, 1)
+            core:AddTimerBar("OSPEW", "NEXT BIG SPEW", OhmnaP4 and 40 or 60)
         end
     end
 end
@@ -241,11 +254,11 @@ function mod:OnChatDC(message)
         if OhmnaP3 then return end
         pilarCount = pilarCount + 1
         if submergeCount < 2 and pilarCount > 4 then
-            core:AddBar("OPILAR", self.L["PHASE 2"], firstPull and 27 or 22)
+            core:AddTimerBar("OPILAR", "PHASE 2", firstPull and 27 or 22)
             firstPull = false
         else
             local pilarActivated = self:OhmnaPE(pilarCount % 2)
-            core:AddBar("OPILAR", self.L["PILLAR %u : %u"]:format(pilarCount, pilarActivated), 25, 1)
+            core:AddTimerBar("OPILAR", self.L["PILLAR %u : %u"]:format(pilarCount, pilarActivated), 25)
         end
     elseif message:find(self.L["Dreadphage Ohmna submerges"]) then
         pilarCount, boreCount = 1, 0
@@ -254,7 +267,7 @@ function mod:OnChatDC(message)
     elseif message:find(self.L["Dreadphage Ohmna is bored"]) then
         boreCount = boreCount + 1
         if boreCount < 2 and self:Tank() then
-            core:AddBar("OBORE", self.L["SWITCH TANK"], 42)
+            core:AddTimerBar("OBORE", "SWITCH TANK", 42)
         end
     elseif message:find(self.L["The Archives tremble as Dreadphage Ohmna"]) then
         core:AddMsg("OP2", self.L["P2: TENTACLES"], 5, "Alert")
@@ -263,24 +276,6 @@ function mod:OnChatDC(message)
         OhmnaP3 = true
         core:StopBar("OPILAR")
         core:StopBar("OBORE")
-        core:AddBar("OSPEW", self.L["NEXT BIG SPEW"], 45, 1)
-    end
-end
-
-function mod:OnUnitStateChanged(unit, bInCombat, sName)
-    if unit:GetType() == "NonPlayer" and bInCombat then
-        if sName == self.L["Dreadphage Ohmna"] then
-            pilarCount, boreCount, submergeCount = 1, 0, 0
-            firstPull, OhmnaP3, OhmnaP4 = true, false, false
-            core:AddUnit(unit)
-            core:WatchUnit(unit)
-            core:AddBar("OPILAR", self.L["PILLAR %u"]:format(pilarCount), 25, 1)
-            core:AddLine("Ohmna1", 2, unit, nil, 3, 25, 0)
-            core:AddLine("Ohmna2", 2, unit, nil, 1, 25, 120)
-            core:AddLine("Ohmna3", 2, unit, nil, 1, 25, -120)
-            if self:Tank() then
-                core:AddBar("OBORE", self.L["SWITCH TANK"], 45)
-            end
-        end
+        core:AddTimerBar("OSPEW", "NEXT BIG SPEW", 45)
     end
 end
