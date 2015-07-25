@@ -128,6 +128,27 @@ local function ProcessDelayedUnit()
     _tDelayedUnits = {}
 end
 
+local function OnMenuLeft_CheckUncheck(wndButton, bIsChecked)
+    local sButtonName = wndButton:GetName()
+    if not bIsChecked then
+        local wnd = RaidCore.wndTargetFrame:GetData()
+        if wnd then
+            wnd:Show(false)
+            RaidCore.wndTargetFrame:SetData(nil)
+        end
+    else
+        if sButtonName ~= "Datascape" then
+            local wnd = RaidCore.wndSettings[sButtonName]
+            wnd:Show(true)
+            RaidCore.wndTargetFrame:SetData(wnd)
+        end
+    end
+
+    if sButtonName == "Datascape" then
+        RaidCore.wndModuleList["DS"]:Show(bIsChecked)
+    end
+end
+
 ----------------------------------------------------------------------------------------------------
 -- RaidCore Initialization
 ----------------------------------------------------------------------------------------------------
@@ -231,6 +252,9 @@ function RaidCore:OnDocLoaded()
     }
     self.wndSettings = {
         General = Apollo.LoadForm(self.xmlDoc, "ConfigForm_General", self.wndTargetFrame, self),
+        Datascape = Apollo.LoadForm(self.xmlDoc, "ConfigForm_Datascape", self.wndTargetFrame, self),
+        Genetic_Archives = Apollo.LoadForm(self.xmlDoc, "ConfigForm_Genetic_Archives", self.wndTargetFrame, self),
+        About_Us = Apollo.LoadForm(self.xmlDoc, "ConfigForm_About_Us", self.wndTargetFrame, self),
         DS = {
             Minibosses = Apollo.LoadForm(self.xmlDoc, "ConfigForm_Minibosses", self.wndTargetFrame, self),
             SystemDaemons = Apollo.LoadForm(self.xmlDoc, "ConfigForm_SystemDaemons", self.wndTargetFrame, self),
@@ -253,6 +277,11 @@ function RaidCore:OnDocLoaded()
     self.drawline = RaidCoreLibs.DisplayLine.new(self.xmlDoc)
     self.GeminiColor = Apollo.GetPackage("GeminiColor").tPackage
     Apollo.RegisterEventHandler("WindowManagementReady", "OnWindowManagementReady", self)
+
+    -- Initialize Left Menu in Main RaidCore window.
+    local wndGeneralButton = self.wndConfig:FindChild("Static"):FindChild("General")
+    wndGeneralButton:SetCheck(true)
+    OnMenuLeft_CheckUncheck(wndGeneralButton, true)
 
     -- Register handlers for events, slash commands and timer, etc.
     Apollo.RegisterSlashCommand("raidc", "OnRaidCoreOn", self)
@@ -1092,19 +1121,13 @@ end
 ----------------------------------------------------------------------------------------------------
 -- RaidCoreForm Functions
 ----------------------------------------------------------------------------------------------------
-function RaidCore:HideChildWindows(wndParent)
-    for key, value in pairs(wndParent:GetChildren()) do
-        value:Show(false)
-    end
-end
-
 -- When the Reset button is clicked
-function RaidCore:OnResetBarPositions( wndHandler, wndControl, eMouseButton )
+function RaidCore:OnResetBarPositions(wndHandler, wndControl, eMouseButton)
     self:BarsResetAnchors()
 end
 
 -- When the Move button is clicked
-function RaidCore:OnMoveBars( wndHandler, wndControl, eMouseButton )
+function RaidCore:OnMoveBars(wndHandler, wndControl, eMouseButton)
     if wndHandler:GetText() == "Move Bars" then
         wndHandler:SetText("Lock Bars")
         self:BarsAnchorUnlock(true)
@@ -1122,31 +1145,22 @@ function RaidCore:OnConfigCloseButton()
     self.wndConfig:Close()
 end
 
-function RaidCore:Button_DSSettingsCheck(wndHandler, wndControl, eMouseButton)
-    self.wndModuleList["DS"]:Show(true)
+function RaidCore:OnMenuLeft_Check(wndHandler, wndControl, eMouseButton)
+    OnMenuLeft_CheckUncheck(wndControl, true)
 end
 
-function RaidCore:Button_DSSettingsUncheck(wndHandler, wndControl, eMouseButton)
-    self.wndModuleList["DS"]:Show(false)
+function RaidCore:OnMenuLeft_Uncheck(wndHandler, wndControl, eMouseButton)
+    OnMenuLeft_CheckUncheck(wndControl, false)
 end
 
-function RaidCore:Button_SettingsGeneralCheck( wndHandler, wndControl, eMouseButton )
-    self:HideChildWindows(self.wndTargetFrame)
-    self.wndSettings["General"]:Show(true)
-end
-
-function RaidCore:Button_SettingsGeneralUncheck( wndHandler, wndControl, eMouseButton )
-    self.wndSettings["General"]:Show(false)
-end
-
-function RaidCore:OnModuleSettingsCheck(wndHandler, wndControl, eMouseButton )
+function RaidCore:OnModuleSettingsCheck(wndHandler, wndControl, eMouseButton)
     local raidInstance = Split(wndControl:GetParent():GetName(), "_")
     local identifier = Split(wndControl:GetName(), "_")
-    self.wndSettings[raidInstance[2]][identifier[3]]:Show(true)
+    local wnd = self.wndSettings[raidInstance[2]][identifier[3]]
+    wnd:Show(true)
+    self.wndTargetFrame:SetData(wnd)
 end
 
-function RaidCore:OnModuleSettingsUncheck(wndHandler, wndControl, eMouseButton )
-    local raidInstance = Split(wndControl:GetParent():GetName(), "_")
-    local identifier = Split(wndControl:GetName(), "_")
-    self.wndSettings[raidInstance[2]][identifier[3]]:Show(false)
+function RaidCore:OnModuleSettingsUncheck(wndHandler, wndControl, eMouseButton)
+    OnMenuLeft_CheckUncheck(wndControl, false)
 end
