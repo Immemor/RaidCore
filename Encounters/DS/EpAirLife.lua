@@ -122,13 +122,17 @@ local DEBUFFID_LIGHTNING_STRIKE = 74485
 ----------------------------------------------------------------------------------------------------
 -- Locals.
 ----------------------------------------------------------------------------------------------------
-local last_thorns = 0
-local last_twirl = 0
-local midphase = false
-local myName
-local CheckTwirlTimer = nil
-local twirl_units = {}
-local twirlCount = 0
+local GetUnitById = GameLib.GetUnitById
+local GetGameTime = GameLib.GetGameTime
+local GetPlayerUnit= GameLib.GetPlayerUnit
+
+local nLightningStrikeCount
+local nTreeKeeperCount
+local tTreeKeeperList
+local nLastThornsTime = 0
+local bIsMidPhase
+local nMidPhaseTime
+local nTwirlCount
 
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
@@ -136,164 +140,165 @@ local twirlCount = 0
 function mod:OnBossEnable()
     Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
     Apollo.RegisterEventHandler("RC_UnitDestroyed", "OnUnitDestroyed", self)
-    Apollo.RegisterEventHandler("RC_UnitStateChanged", "OnUnitStateChanged", self)
     Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
-    Apollo.RegisterEventHandler("DEBUFF_APPLIED", "OnDebuffApplied", self)
-    Apollo.RegisterEventHandler("DEBUFF_REMOVED", "OnDebuffRemoved", self)
-    Apollo.RegisterEventHandler("RAID_WIPE", "OnReset", self)
+    Apollo.RegisterEventHandler("DEBUFF_ADD", "OnDebuffAdd", self)
+    Apollo.RegisterEventHandler("DEBUFF_DEL", "OnDebuffDel", self)
+
+    nLastThornsTime = 0
+    bIsMidPhase = false
+    nMidPhaseTime = GetGameTime() + 90
+    nTwirlCount = 0
+    nTreeKeeperCount = 0
+    tTreeKeeperList = {}
+
+    mod:AddTimerBar("MIDPHASE", "Middle Phase", 90, mod:GetSetting("SoundMidphaseCountDown"))
+    mod:AddTimerBar("THORN", "Thorns", 20)
 end
 
-function mod:OnReset()
-    last_thorns = 0
-    last_twirl = 0
-    midphase = false
-    if CheckTwirlTimer then
-        self:CancelTimer(CheckTwirlTimer)
-    end
-    twirl_units = {}
-    twirlCount = 0
-end
+function mod:OnUnitCreated(tUnit, sName)
+    local nId = tUnit:GetId()
+    local nCurrentTime = GetGameTime()
 
-function mod:OnUnitCreated(unit, sName)
-    local eventTime = GameLib.GetGameTime()
-    if sName == self.L["Wild Brambles"] and eventTime > last_thorns + 1 and eventTime + 16 < midphase_start then
-        last_thorns = eventTime
-        twirlCount = twirlCount + 1
-        mod:AddTimerBar("THORN", "Thorns", 15)
-        if twirlCount == 1 then
-            mod:AddTimerBar("TWIRL", "Twirl", 15)
-        elseif twirlCount % 2 == 1 then
-            mod:AddTimerBar("TWIRL", "Twirl", 15)
+    if sName == self.L["Wild Brambles"] then
+        if nLastThornsTime + 5 < nCurrentTime and nCurrentTime + 16 < nMidPhaseTime then
+            nLastThornsTime = nCurrentTime
+            nTwirlCount = nTwirlCount + 1
+            mod:AddTimerBar("THORN", "Thorns", 15)
+            if nTwirlCount % 2 == 1 then
+                mod:AddTimerBar("TWIRL", "Twirl", 15)
+            end
         end
-    elseif not midphase and sName == self.L["[DS] e395 - Air - Tornado"] then
-        midphase = true
-        twirlCount = 0
-        midphase_start = eventTime + 115
-        mod:AddTimerBar("MIDEND", "Midphase Ending", 35)
-        mod:AddTimerBar("THORN", "Thorns", 35)
-        mod:AddTimerBar("LIFEKEEP", "Next Healing Tree", 35)
-    elseif sName == self.L["Life Force"] and mod:GetSetting("LineLifeOrbs") then
-        core:AddPixie(unit:GetId(), 2, unit, nil, "Blue", 10, 40, 0)
+    elseif sName == self.L["[DS] e395 - Air - Tornado"] then
+        if not bIsMidPhase then
+            bIsMidPhase = true
+            nTreeKeeperCount = 0
+            nLightningStrikeCount = 0
+            nTwirlCount = 0
+            nMidPhaseTime = nCurrentTime + 115
+            mod:AddTimerBar("MIDEND", "Midphase Ending", 35)
+            mod:AddTimerBar("THORN", "Thorns", 35)
+            mod:AddTimerBar("LIFEKEEP", "Next Healing Tree", 35)
+        end
+    elseif sName == self.L["Life Force"] then
+        if mod:GetSetting("LineLifeOrbs") then
+            core:AddPixie(nId, 2, tUnit, nil, "Blue", 10, 40, 0)
+        end
     elseif sName == self.L["Lifekeeper"] then
+        core:AddUnit(tUnit)
+        nTreeKeeperCount = nTreeKeeperCount + 1
+        tTreeKeeperList[nTreeKeeperCount] = nId
         if mod:GetSetting("LineHealingTrees") then
-            core:AddPixie(unit:GetId(), 1, GameLib.GetPlayerUnit(), unit, "Yellow", 5, 10, 10)
+            core:AddPixie(nId, 1, GetPlayerUnit(), tUnit, "Yellow", 2)
         end
-        core:AddUnit(unit)
-        mod:AddTimerBar("LIFEKEEP", "Next Healing Tree", 30, mod:GetSetting("SoundHealingTreeCountDown"))
+        if nTreeKeeperCount % 2 == 0 then
+            local Tree1_Pos = GetUnitById(tTreeKeeperList[nTreeKeeperCount - 1]):GetPosition()
+            local Tree2_Pos = GetUnitById(tTreeKeeperList[nTreeKeeperCount]):GetPosition()
+            -- Let's say the first will be the always the north.
+            -- So we have only to compare the Z axis.
+
+            if Tree1_Pos.z > Tree2_Pos.z then
+                -- Tree2 is more on north than Tree1.
+                -- Inverse the order so.
+                local copy_id = tTreeKeeperList[nTreeKeeperCount - 1]
+                tTreeKeeperList[nTreeKeeperCount - 1] = tTreeKeeperList[nTreeKeeperCount]
+                tTreeKeeperList[nTreeKeeperCount] = copy_id
+            end
+            core:MarkUnit(GetUnitById(tTreeKeeperList[nTreeKeeperCount - 1]), nil, nTreeKeeperCount - 1)
+            core:MarkUnit(GetUnitById(tTreeKeeperList[nTreeKeeperCount]), nil, nTreeKeeperCount)
+            if nTreeKeeperCount == 2 then
+                mod:AddTimerBar("LIFEKEEP", "Next Healing Tree", 30, mod:GetSetting("SoundHealingTreeCountDown"))
+            end
+        end
+    elseif sName == self.L["Aileron"] then
+        core:AddUnit(tUnit)
+        if mod:GetSetting("LineCleaveAileron") then
+            core:AddPixie(tUnit:GetId(), 2, tUnit, nil, "Red", 10, 30, 0)
+        end
+    elseif sName == self.L["Visceralus"] then
+        core:AddUnit(tUnit)
+        core:WatchUnit(tUnit)
     end
 end
 
 function mod:OnUnitDestroyed(unit, sName)
-    local eventTime = GameLib.GetGameTime()
-    if midphase and sName == self.L["[DS] e395 - Air - Tornado"] then
-        midphase = false
+    local nId = unit:GetId()
+    if bIsMidPhase and sName == self.L["[DS] e395 - Air - Tornado"] then
+        bIsMidPhase = false
         mod:AddTimerBar("MIDPHASE", "Middle Phase", 90, mod:GetSetting("SoundMidphaseCountDown"))
     elseif sName == self.L["Life Force"] then
-        core:DropPixie(unit:GetId())
+        core:DropPixie(nId)
     elseif sName == self.L["Lifekeeper"] then
-        core:DropPixie(unit:GetId())
+        core:DropPixie(nId)
+        for i, nTreeId in next, tTreeKeeperList do
+            if nTreeId == nId then
+                tTreeKeeperList[i] = nil
+                break
+            end
+        end
     end
 end
 
-function mod:OnDebuffApplied(unitName, splId, unit)
-    local eventTime = GameLib.GetGameTime()
-    local splName = GameLib.GetSpell(splId):GetName()
-    if splId == DEBUFFID_TWIRL then
-        if unitName == myName and mod:GetSetting("OtherTwirlWarning") then
-            core:AddMsg("TWIRL", self.L["TWIRL ON YOU!"], 5, mod:GetSetting("SoundTwirl") and "Inferno")
+function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
+    local nPlayerId = GetPlayerUnit():GetId()
+    local tUnit = GetUnitById(nId)
+
+    if nSpellId == DEBUFFID_TWIRL then
+        if nId == nPlayerId and mod:GetSetting("OtherTwirlWarning") then
+            local sSound = mod:GetSetting("SoundTwirl") and "Inferno"
+            core:AddMsg("TWIRL", self.L["TWIRL ON YOU!"], 5, sSound)
         end
 
         if mod:GetSetting("OtherTwirlPlayerMarkers") then
-            core:MarkUnit(unit, nil, self.L["Twirl"]:upper())
+            core:MarkUnit(tUnit, nil, self.L["Twirl"]:upper())
         end
-        core:AddUnit(unit)
-        twirl_units[unitName] = unit
-        if not CheckTwirlTimer then
-            CheckTwirlTimer = self:ScheduleRepeatingTimer("CheckTwirlTimer", 1)
-        end
-    elseif splId == DEBUFFID_LIFE_FORCE_SHACKLE then
+        core:AddUnit(tUnit)
+    elseif nSpellId == DEBUFFID_LIFE_FORCE_SHACKLE then
         if mod:GetSetting("OtherNoHealDebuffPlayerMarkers") then
-            core:MarkUnit(unit, nil, self.L["NO HEAL DEBUFF"])
+            core:MarkUnit(tUnit, nil, self.L["NO HEAL DEBUFF"])
         end
-        if unitName == strMyName and mod:GetSetting("OtherNoHealDebuff") then
-            core:AddMsg("NOHEAL", self.L["No-Healing Debuff!"], 5, mod:GetSetting("SoundNoHealDebuff") and "Alarm")
+        if nId == nPlayerId and mod:GetSetting("OtherNoHealDebuff") then
+            local sSound = mod:GetSetting("SoundNoHealDebuff") and "Alarm"
+            core:AddMsg("NOHEAL", self.L["No-Healing Debuff!"], 5, sSound)
         end
-    elseif splId == DEBUFFID_LIGHTNING_STRIKE then
+    elseif nSpellId == DEBUFFID_LIGHTNING_STRIKE then
         if mod:GetSetting("OtherLightningMarkers") then
-            core:MarkUnit(unit, nil, self.L["Lightning"])
+            core:MarkUnit(tUnit, nil, self.L["Lightning"])
         end
-        if unitName == strMyName then
-            core:AddMsg("LIGHTNING", self.L["Lightning on YOU"], 5, mod:GetSetting("SoundLightning") and "RunAway")
+        nLightningStrikeCount = nLightningStrikeCount + 1
+        if mod:GetSetting("LineHealingTrees") then
+            local nTreeTarget = math.floor((nLightningStrikeCount + 1) / 2)
+            local sKey = ("LIGHTNING %d"):format(nId)
+            core:AddPixie(sKey, 1, tUnit, GetUnitById(tTreeKeeperList[nTreeTarget]), "xkcdBrightPurple", 5)
+        end
+        if nId == nPlayerId then
+            local sSound = mod:GetSetting("SoundLightning") and "RunAway"
+            core:AddMsg("LIGHTNING", self.L["Lightning on YOU"], 5, sSound)
         end
     end
 end
 
-function mod:OnDebuffRemoved(unitName, splId, unit)
-    local splName = GameLib.GetSpell(splId):GetName()
-    if splId == DEBUFFID_TWIRL then
-        core:RemoveUnit(unit:GetId())
-    elseif splId == DEBUFFID_LIFE_FORCE_SHACKLE then
-        core:DropMark(unit:GetId())
-    elseif splId == DEBUFFID_LIGHTNING_STRIKE then
-        core:DropMark(unit:GetId())
+function mod:OnDebuffDel(nId, nSpellId)
+    if nSpellId == DEBUFFID_TWIRL then
+        core:DropMark(nId)
+        core:RemoveUnit(nId)
+    elseif nSpellId == DEBUFFID_LIFE_FORCE_SHACKLE then
+        core:DropMark(nId)
+    elseif nSpellId == DEBUFFID_LIGHTNING_STRIKE then
+        local sKey = ("LIGHTNING %d"):format(nId)
+        core:DropPixie(sKey)
+        core:DropMark(nId)
     end
 end
 
 function mod:OnSpellCastStart(unitName, castName, unit)
-    local eventTime = GameLib.GetGameTime()
-    if unitName == self.L["Visceralus"] and castName == self.L["Blinding Light"] and mod:GetSetting("OtherBlindingLight") then
-        local playerUnit = GameLib.GetPlayerUnit()
-        if self:GetDistanceBetweenUnits(unit, playerUnit) < 33 then
-            core:AddMsg("BLIND", self.L["Blinding Light"], 5, mod:GetSetting("SoundBlindingLight") and "Beware")
-        end
-    end
-end
-
-function mod:CheckTwirlTimer()
-    for unitName, unit in pairs(twirl_units) do
-        if unit and unit:GetBuffs() then
-            local bUnitHasTwirl = false
-            local debuffs = unit:GetBuffs().arHarmful
-            for _, debuff in pairs(debuffs) do
-                if debuff.splEffect:GetId() == DEBUFFID_TWIRL then
-                    bUnitHasTwirl = true
+    if unitName == self.L["Visceralus"] then
+        if castName == self.L["Blinding Light"] then
+            if mod:GetSetting("OtherBlindingLight") then
+                if self:GetDistanceBetweenUnits(unit, GetPlayerUnit()) < 33 then
+                    local sSound = mod:GetSetting("SoundBlindingLight") and "Beware"
+                    core:AddMsg("BLIND", self.L["Blinding Light"], 5, sSound)
                 end
             end
-            if not bUnitHasTwirl then
-                -- else, if the debuff is no longer present, no need to track anymore.
-                core:DropMark(unit:GetId())
-                core:RemoveUnit(unit:GetId())
-                twirl_units[unitName] = nil
-            end
-        end
-    end
-end
-
-function mod:OnUnitStateChanged(unit, bInCombat, sName)
-    if unit:GetType() == "NonPlayer" and bInCombat then
-        local eventTime = GameLib.GetGameTime()
-        local playerUnit = GameLib.GetPlayerUnit()
-        myName = playerUnit:GetName()
-
-        if sName == self.L["Aileron"] then
-            core:AddUnit(unit)
-            if mod:GetSetting("LineCleaveAileron") then
-                core:AddPixie(unit:GetId(), 2, unit, nil, "Red", 10, 30, 0)
-            end
-        elseif sName == self.L["Visceralus"] then
-            core:AddUnit(unit)
-            core:WatchUnit(unit)
-
-            last_thorns = 0
-            last_twirl = 0
-            twirl_units = {}
-            CheckTwirlTimer = nil
-            midphase = false
-            midphase_start = eventTime + 90
-            twirlCount = 0
-
-            mod:AddTimerBar("MIDPHASE", "Middle Phase", 90, mod:GetSetting("SoundMidphaseCountDown"))
-            mod:AddTimerBar("THORN", "Thorns", 20)
         end
     end
 end
