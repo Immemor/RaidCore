@@ -31,8 +31,8 @@ mod:RegisterEnglishLocale({
     ["BEAM !!"] = "BEAM !!",
     ["BEAM"] = "BEAM",
     ["SHOCKWAVE"] = "SHOCKWAVE",
-    ["BIG BOMB on YOU !!!"] = "BIG BOMB on YOU !!!",
-    ["LITTLE BOMB on YOU !!!"] = "LITTLE BOMB on YOU !!!",
+    ["BIG BOMB on %s !!!"] = "BIG BOMB on %s !!!",
+    ["LITTLE BOMB on %s !!!"] = "LITTLE BOMB on %s !!!",
     ["LITTLE BOMB"] = "LITTLE BOMB",
 })
 mod:RegisterFrenchLocale({
@@ -51,8 +51,8 @@ mod:RegisterFrenchLocale({
     ["BEAM !!"] = "LASER !!",
     ["BEAM"] = "LASER",
     ["SHOCKWAVE"] = "ONDE DE CHOC",
-    ["BIG BOMB on YOU !!!"] = "GROSSE BOMBE sur VOUS !!!",
-    ["LITTLE BOMB on YOU !!!"] = "PETITE BOMBE sur VOUS !!!",
+    ["BIG BOMB on %s !!!"] = "GROSSE BOMBE sur %s !!!",
+    ["LITTLE BOMB on %s !!!"] = "PETITE BOMBE sur %s !!!",
     ["LITTLE BOMB"] = "PETITE BOMBE",
 })
 mod:RegisterGermanLocale({
@@ -71,8 +71,8 @@ mod:RegisterGermanLocale({
     ["BEAM !!"] = "LASER !!",
     ["BEAM"] = "LASER",
     ["SHOCKWAVE"] = "SCHOCKWELLE",
-    ["BIG BOMB on YOU !!!"] = "GROßE BOMBE auf DIR !!!",
-    ["LITTLE BOMB on YOU !!!"] = "KLEINE BOMBE auf DIR !!!",
+    ["BIG BOMB on %s !!!"] = "GROßE BOMBE auf %s !!!",
+    ["LITTLE BOMB on %s !!!"] = "KLEINE BOMBE auf %s !!!",
     ["LITTLE BOMB"] = "KLEINE BOMBE",
 })
 -- Default settings.
@@ -87,28 +87,40 @@ mod:RegisterDefaultTimerBarConfigs({
 ----------------------------------------------------------------------------------------------------
 -- Locals.
 ----------------------------------------------------------------------------------------------------
-local playerName
+local GetPlayerUnit = GameLib.GetPlayerUnit
+local DEBUFF_LITTLE_BOMB = 47316
 
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("RC_UnitStateChanged", "OnUnitStateChanged", self)
+    Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
     Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
     Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
-    Apollo.RegisterEventHandler("DEBUFF_APPLIED", "OnDebuffApplied", self)
+    Apollo.RegisterEventHandler("DEBUFF_ADD", "OnDebuffAdd", self)
+
+    core:AddTimerBar("KNOCKBACK", "KNOCKBACK", 6)
+    core:AddTimerBar("SHOCKWAVE", "SHOCKWAVE", 17)
+    core:AddTimerBar("BEAM", "BEAM", 36)
+end
+
+function mod:OnUnitCreated(tUnit, sName)
+    if sName == self.L["Experiment X-89"] then
+        core:AddUnit(unit)
+        core:WatchUnit(unit)
+    end
 end
 
 function mod:OnSpellCastStart(unitName, castName, unit)
     if unitName == self.L["Experiment X-89"] then
         if castName == self.L["Resounding Shout"] then
             core:AddMsg("KNOCKBACK", self.L["KNOCKBACK !!"], 5, "Alert")
-            core:AddBar("KNOCKBACK", self.L["KNOCKBACK"], 23)
+            core:AddTimerBar("KNOCKBACK", "KNOCKBACK", 23)
         elseif castName == self.L["Repugnant Spew"] then
             core:AddMsg("BEAM", self.L["BEAM !!"], 5, "Alarm")
-            core:AddBar("BEAM", self.L["BEAM"], 40)
+            core:AddTimerBar("BEAM", "BEAM", 40)
         elseif castName == self.L["Shattering Shockwave"] then
-            core:AddBar("SHOCKWAVE", self.L["SHOCKWAVE"], 19)
+            core:AddTimerBar("SHOCKWAVE", "SHOCKWAVE", 19)
         end
     end
 end
@@ -117,28 +129,16 @@ function mod:OnChatDC(message)
     -- The dash in X-89 needs to be escaped, by adding a % in front of it.
     -- The value returned is the player name targeted by the boss.
     local pName = message:match(self.L["Experiment X-89 has placed a bomb"])
-    if pName and pName == playerName then
-        core:AddMsg("BIGB", self.L["BIG BOMB on YOU !!!"], 5, "Destruction", "Blue")
+    if pName then
+        local sSound = pName == GetPlayerUnit():GetName() and "Destruction"
+        core:AddMsg("BIGB", self.L["BIG BOMB on %s !!!"]:format(pName), 5, sSound, "Blue")
     end
 end
 
-function mod:OnDebuffApplied(unitName, splId, unit)
-    if splId == 47316 then
-        core:AddMsg("LITTLEB", self.L["LITTLE BOMB on YOU !!!"], 5, "RunAway", "Blue")
-        core:AddBar("LITTLEB", self.L["LITTLE BOMB"], 5, 1)
-    end
-end
-
-function mod:OnUnitStateChanged(unit, bInCombat, sName)
-    if unit:GetType() == "NonPlayer" and bInCombat then
-        if sName == self.L["Experiment X-89"] then
-            local playerUnit = GameLib.GetPlayerUnit()
-            playerName = playerUnit:GetName()
-            core:AddUnit(unit)
-            core:WatchUnit(unit)
-            core:AddBar("KNOCKBACK", self.L["KNOCKBACK"], 6)
-            core:AddBar("SHOCKWAVE", self.L["SHOCKWAVE"], 17)
-            core:AddBar("BEAM", self.L["BEAM"], 36)
-        end
+function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
+    if nSpellId == DEBUFF_LITTLE_BOMB then
+        local sSound = nId == GetPlayerUnit():GetId() and "RunAway"
+        core:AddMsg("LITTLEB", self.L["LITTLE BOMB on %s !!!"], 5, sSound, "Blue")
+        core:AddTimerBar("LITTLEB", "LITTLE BOMB", fTimeRemaining)
     end
 end
