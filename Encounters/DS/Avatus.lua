@@ -94,7 +94,6 @@ mod:RegisterEnglishLocale({
     ["Green Reconstitution Matrix"] = "Green Reconstitution Matrix",
     -- Bar and messages.
     ["Holo Hand Spawned"] = "Holo Hand Spawned",
-    ["PURGE BLUE BOSS"] = "PURGE BLUE BOSS",
     ["P2 SOON !"] = "P2 SOON !",
     ["INTERRUPT CRUSHING BLOW!"] = "INTERRUPT CRUSHING BLOW!",
     ["BLIND! TURN AWAY FROM BOSS"] = "BLIND! TURN AWAY FROM BOSS",
@@ -104,6 +103,9 @@ mod:RegisterEnglishLocale({
     ["Hand %u"] = "Hand %u",
     ["MARKER North"] = "North",
     ["MARKER South"] = "South",
+    ["PURGE BLUE"] = "PURGE BLUE",
+    ["PURGE RED"] = "PURGE RED",
+    ["PURGE GREEN"] = "PURGE GREEN",
 })
 mod:RegisterFrenchLocale({
     -- Unit names.
@@ -130,7 +132,6 @@ mod:RegisterFrenchLocale({
     ["Green Reconstitution Matrix"] = "Matrice de reconstitution verte",
     -- Bar and messages.
     ["Holo Hand Spawned"] = "Holo-main Apparition",
-    ["PURGE BLUE BOSS"] = "PURGE BOSS BLEUE",
     ["P2 SOON !"] = "P2 BIENTÔT !",
     ["INTERRUPT CRUSHING BLOW!"] = "INTERROMPRE COUP ÉCRASANT!",
     ["BLIND! TURN AWAY FROM BOSS"] = "AVEUGLER! DOS AU BOSS",
@@ -140,6 +141,9 @@ mod:RegisterFrenchLocale({
     ["Hand %u"] = "Main %u",
     ["MARKER North"] = "Nord",
     ["MARKER South"] = "Sud",
+    ["PURGE BLUE"] = "PURGE BLEUE",
+    ["PURGE RED"] = "PURGE ROUGE",
+    ["PURGE GREEN"] = "PURGE VERT",
 })
 mod:RegisterGermanLocale({
     -- Unit names.
@@ -162,7 +166,6 @@ mod:RegisterGermanLocale({
     ["Obliteration Beam"] = "Vernichtungsstrahl",
     -- Bar and messages.
     --["Holo Hand Spawned"] = "Holo Hand Spawned", -- TODO: German translation missing !!!!
-    --["PURGE BLUE BOSS"] = "PURGE BLUE BOSS", -- TODO: German translation missing !!!!
     ["P2 SOON !"] = "GLEICH PHASE 2 !",
     --["INTERRUPT CRUSHING BLOW!"] = "INTERRUPT CRUSHING BLOW!", -- TODO: German translation missing !!!!
     --["BLIND! TURN AWAY FROM BOSS"] = "BLIND! TURN AWAY FROM BOSS", -- TODO: German translation missing !!!!
@@ -188,6 +191,8 @@ mod:RegisterDefaultSetting("SoundGunGrid")
 mod:RegisterDefaultSetting("OtherHandSpawnMarkers")
 mod:RegisterDefaultSetting("OtherDirectionMarkers")
 mod:RegisterDefaultSetting("OtherGreenRoomMarkers")
+mod:RegisterDefaultSetting("OtherPurgeList")
+mod:RegisterDefaultSetting("OtherPurgeMessages")
 -- Timers default configs.
 mod:RegisterDefaultTimerBarConfigs({
     ["OBBEAM"] = { sColor = "xkcdBloodRed" },
@@ -201,10 +206,10 @@ local PURGE_RED = 2
 local PURGE_GREEN = 3
 local PURGE_LIST_IN_BLUE_ROOM = {
     ["Icon_SkillEnergy_UI_srcr_shckcntrp"] = PURGE_BLUE,
-    ["Icon_SkillEnergy_UI_srcr_XXXX"] = PURGE_RED,
+    ["Icon_SkillFire_UI_ss_srngblst"] = PURGE_RED,
     ["Icon_SkillEnergy_UI_srcr_surgeengine"] = PURGE_GREEN,
 }
-local PURGE_COOLDOWNS = 16
+local PURGE_COOLDOWNS = 15
 
 ----------------------------------------------------------------------------------------------------
 -- Constants.
@@ -252,6 +257,7 @@ local tBlueRoomPurgeList
 local nGunGridLastPopTime
 local tHoloHandsList
 local bIsHoloHand
+local nPurgeCount
 local phase2warn, phase2
 
 ----------------------------------------------------------------------------------------------------
@@ -260,6 +266,7 @@ local phase2warn, phase2
 function mod:OnBossEnable()
     Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
     Apollo.RegisterEventHandler("RC_UnitDestroyed", "OnUnitDestroyed", self)
+    Apollo.RegisterEventHandler("RC_UnitStateChanged", "OnEnteredCombat", self)
     Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
     Apollo.RegisterEventHandler("UNIT_HEALTH", "OnHealthChanged", self)
     Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
@@ -277,7 +284,7 @@ function mod:OnBossEnable()
     tHoloHandsList = {}
     bGreenRoomMarkerDisplayed = false
     bIsHoloHand = true
-
+    nPurgeCount = 0
     nGunGridLastPopTime = GetGameTime() + 20
 
     mod:AddTimerBar("OBBEAM", "Obliteration Beam", 69, mod:GetSetting("SoundObliterationBeam"))
@@ -402,6 +409,40 @@ function mod:OnUnitDestroyed(unit, sName)
     end
 end
 
+function mod:OnEnteredCombat(tUnit, bInCombat, sName)
+    if unitName == self.L["Infinite Logic Loop"] then
+        if bInCombat and mod:GetSetting("OtherPurgeList") then
+            for ePurgeType = PURGE_BLUE, PURGE_GREEN do
+                local tCopy = {}
+                for k, v in next, tBlueRoomPurgeList[ePurgeType] do
+                    tCopy[k] = v
+                end
+
+                local tOrdered = {}
+                while next(tCopy) do
+                    local f = nil
+                    for key, val in next, tCopy do
+                        if f == nil or tCopy[f] > val then
+                            f = key
+                        end
+                    end
+                    table.insert(tOrdered, f:gmatch("%a+")())
+                    tCopy[f] = nil
+                end
+
+                local sPlayers = table.concat(tOrdered, ", ")
+                if ePurgeType == PURGE_BLUE then
+                    core:Print(self.L["PURGE BLUE"] .. (": %s"):format(sPlayers))
+                elseif ePurgeType == PURGE_RED then
+                    core:Print(self.L["PURGE RED"] .. (": %s"):format(sPlayers))
+                elseif ePurgeType == PURGE_GREEN then
+                    core:Print(self.L["PURGE GREEN"] .. (": %s"):format(sPlayers))
+                end
+            end
+        end
+    end
+end
+
 function mod:OnBuffApplied(unitName, splId, unit)
     if unitName == self.L["Infinite Logic Loop"] then
         local sSpellName = GameLib.GetSpell(splId):GetName()
@@ -416,31 +457,15 @@ function mod:OnBuffApplied(unitName, splId, unit)
         end
 
         if ePurgeType then
-            local nCurrentTime = GetGameTime()
-            local sCandidate = nil
-            local tList = tBlueRoomPurgeList[DispelType]
-            for sPlayerName, nTimeout in pairs(tList) do
-                local tPlayerUnit = GetPlayerUnitByName(sPlayerName)
-                if tPlayerUnit == nil or tPlayerUnit:IsDead() or tPlayerUnit:GetHealth() == 0 then
-                    -- Player is dead.
-                    tList[sPlayerName] = nil
-                elseif sCandidate == nil and nTimeout < nCurrentTime then
-                    sCandidate = sPlayerName
-                end
-            end
-
-            if sCandidate then
-                tList[sCandidate] = nCurrentTime + PURGE_COOLDOWNS
-            else
-                sCandidate = "..."
-            end
-            if nCurrentPhase == BLUE_PHASE then 
+            nPurgeCount = nPurgeCount + 1
+            local sSuffix = ("(%d)"):format(nPurgeCount)
+            if nCurrentPhase == BLUE_PHASE and mod:GetSetting("OtherPurgeMessages") then
                 if ePurgeType == PURGE_GREEN then
-                    core:AddMsg("PURGE", self.L["PURGE GREEN BY '%s'"]:format(sCandidate), 6, "green")
+                    core:AddMsg("PURGE", self.L["PURGE GREEN"] .. sSuffix, 3, "green")
                 elseif ePurgeType == PURGE_BLUE then
-                    core:AddMsg("PURGE", self.L["PURGE BLUE BY '%s'"]:format(sCandidate), 6, "blue")
+                    core:AddMsg("PURGE", self.L["PURGE BLUE"] .. sSuffix, 3, "blue")
                 elseif ePurgeType == PURGE_RED then
-                    core:AddMsg("PURGE", self.L["PURGE RED BY '%s'"]:format(sCandidate), 6, "red")
+                    core:AddMsg("PURGE", self.L["PURGE RED"] .. sSuffix, 3, "red")
                 end
             end
         end
@@ -514,12 +539,10 @@ end
 function mod:OnShowShortcutBar(tIconFloatingSpellBar)
     if #tIconFloatingSpellBar > 0 then
         local sIcon1 = tIconFloatingSpellBar[1]
-        Print(("Name of the spell bar icon = '%s'"):format(sIcon1))
         local ePurgeType = PURGE_LIST_IN_BLUE_ROOM[sIcon1]
         if ePurgeType then
             tBlueRoomPurgeList[ePurgeType][GetPlayerUnit():GetName()] = GetGameTime()
             mod:SendIndMessage("PURGE_TYPE", ePurgeType)
-            Print(("PurgeType=%d detected on you"):format(ePurgeType))
         end
     end
 end
@@ -527,6 +550,5 @@ end
 function mod:ReceiveIndMessage(sFrom, sReason, data)
     if sReason == "PURGE_TYPE" then
         tBlueRoomPurgeList[data][sFrom] = GetGameTime()
-        Print(("PurgeType=%s detected on %s"):format(tostring(data), sFrom))
     end
 end

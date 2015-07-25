@@ -57,10 +57,6 @@ local empCD, empTimer = 5, nil
 ----------------------------------------------------------------------------------------------------
 -- Privates functions
 ----------------------------------------------------------------------------------------------------
-local function PrintErr(sMessage)
-    ChatSystemLib.PostOnChannel(ChatSystemLib.ChatChannel_Debug, sMessage, "RaidCore")
-end
-
 local function Split(str, sep)
     assert(str)
     sep = sep or "%s"
@@ -152,6 +148,10 @@ end
 ----------------------------------------------------------------------------------------------------
 -- RaidCore Initialization
 ----------------------------------------------------------------------------------------------------
+function RaidCore:Print(sMessage)
+    ChatSystemLib.PostOnChannel(ChatSystemLib.ChatChannel_Debug, sMessage, "RaidCore")
+end
+
 function RaidCore:OnInitialize()
     self.xmlDoc = XmlDoc.CreateFromFile("RaidCore.xml")
     self.xmlDoc:RegisterCallback("OnDocLoaded", self)
@@ -190,7 +190,7 @@ function RaidCore:OnDocLoaded()
     for name, module in self:IterateModules() do
         local r, e = pcall(module.PrepareEncounter, module)
         if not r then
-            PrintErr(e)
+            self:Print(e)
         else
             for _, id1 in next, module.continentIdList do
                 if _tTrigPerZone[id1] == nil then
@@ -322,7 +322,7 @@ function RaidCore:ProcessMessage(tMessage, sSender)
         end
     elseif tMessage.action == "NewestVersion" then
         if tMessage.version and ADDON_DATE_VERSION < tMessage.version then
-            PrintErr("Your RaidCore version is outdated. Please get " .. tMessage.version)
+            self:Print("Your RaidCore version is outdated. Please get " .. tMessage.version)
         end
     elseif tMessage.action == "LaunchPull" then
         if tMessage.cooldown then
@@ -347,7 +347,7 @@ function RaidCore:ProcessMessage(tMessage, sSender)
         if not self.db.profile.bAcceptSummons or not self:isRaidManagement(strSender) then
             return false
         end
-        PrintErr(tMessage.sender .. " requested that you accept a summon. Attempting to accept now.")
+        self:Print(tMessage.sender .. " requested that you accept a summon. Attempting to accept now.")
         local CSImsg = CSIsLib.GetActiveCSI()
         if not CSImsg or not CSImsg["strContext"] then return end
 
@@ -451,7 +451,7 @@ function RaidCore:OnRaidCoreOn(cmd, args)
             self:AddMsg(tAllParams[2], tAllParams[3], 5)
         end
     elseif (tAllParams[1] == "version") then
-        PrintErr("Version : " .. ADDON_DATE_VERSION)
+        self:Print("Version : " .. ADDON_DATE_VERSION)
     elseif (tAllParams[1] == "versioncheck") then
         self:VersionCheck()
     elseif (tAllParams[1] == "pull") then
@@ -490,7 +490,7 @@ function RaidCore:OnRaidCoreOn(cmd, args)
             if mod then
                 mod:SetInterrupter(tAllParams[2], tonumber(tAllParams[3]))
             else
-                PrintErr("Module SystemDaemons not loaded")
+                self:Print("Module SystemDaemons not loaded")
             end
         end
     elseif (tAllParams[1] == "sysdm") then
@@ -499,7 +499,7 @@ function RaidCore:OnRaidCoreOn(cmd, args)
             if mod then
                 mod:SetInterrupter(tAllParams[2], tonumber(tAllParams[3]))
             else
-                PrintErr("Module SystemDaemons not loaded")
+                self:Print("Module SystemDaemons not loaded")
             end
         end
     elseif (tAllParams[1] == "testdm") then
@@ -508,14 +508,14 @@ function RaidCore:OnRaidCoreOn(cmd, args)
             mod:NextWave()
             mod:OnChatDC("COMMENCING ENHANCEMENT SEQUENCE")
         else
-            PrintErr("Module SystemDaemons not loaded")
+            self:Print("Module SystemDaemons not loaded")
         end
     elseif (tAllParams[1] == "testel") then
         local mod = self:GetModule("EpLogicEarth", 1)
         if mod then
             mod:PlaceSpawnPos()
         else
-            PrintErr("Module EpLogicEarth not loaded")
+            self:Print("Module EpLogicEarth not loaded")
         end
     elseif (tAllParams[1] == "wm") then
         local estpos = {
@@ -860,19 +860,19 @@ end
 function RaidCore:TestPE()
     local tActiveEvents = PublicEvent.GetActiveEvents()
     local i = RaidCore:isPublicEventObjectiveActive("Talk to Captain Tero")
-    PrintErr("result ".. tostring(i))
+    self:Print("result ".. tostring(i))
     i = RaidCore:isPublicEventObjectiveActive("Talk to Captain Teroxx")
-    PrintErr("result ".. tostring(i))
+    self:Print("result ".. tostring(i))
     for idx, peEvent in pairs(tActiveEvents) do
         local test = peEvent:GetName()
         local truc
-        PrintErr(test)
+        self:Print(test)
         for idObjective, peObjective in pairs(peEvent:GetObjectives()) do
             test = peObjective:GetShortDescription()
             if test == "North Power Core Energy" then
                 truc = peObjective:GetCount()
-                PrintErr(test)
-                PrintErr(truc)
+                self:Print(test)
+                self:Print(truc)
             end
         end
     end
@@ -1011,15 +1011,15 @@ function RaidCore:VersionCheckResults()
     end
 
     if next(tNotInstalled) then
-        PrintErr(self.L["Not installed: %s"]:format(table.concat(tNotInstalled, ", ")))
+        self:Print(self.L["Not installed: %s"]:format(table.concat(tNotInstalled, ", ")))
     end
     if next(tOutdated) then
-        PrintErr("Outdated RaidCore Version:")
+        self:Print("Outdated RaidCore Version:")
         for sPlayerVersion, tList in next, tOutdated do
-            PrintErr((" - '%s': %s"):format(sPlayerVersion, table.concat(tList, ", ")))
+            self:Print((" - '%s': %s"):format(sPlayerVersion, table.concat(tList, ", ")))
         end
     end
-    PrintErr(self.L["%d members are up to date."]:format(nMemberWithLasted))
+    self:Print(self.L["%d members are up to date."]:format(nMemberWithLasted))
     -- Send Msg to oudated players.
     local msg = {action = "NewestVersion", version = maxver}
     self:SendMessage(msg)
@@ -1029,11 +1029,11 @@ end
 
 function RaidCore:VersionCheck()
     if VCtimer then
-        PrintErr(self.L["VersionCheck already running ..."])
+        self:Print(self.L["VersionCheck already running ..."])
     elseif GroupLib.GetMemberCount() == 0 then
-        PrintErr(self.L["Command available only in group."])
+        self:Print(self.L["Command available only in group."])
     else
-        PrintErr(self.L["Checking version on group member."])
+        self:Print(self.L["Checking version on group member."])
         VCReply[GetPlayerUnit():GetName()] = ADDON_DATE_VERSION
         local msg = {
             action = "VersionCheckRequest",
@@ -1057,7 +1057,7 @@ end
 function RaidCore:LaunchBreak(time)
     local sPlayerName = GetPlayerUnit():GetName()
     if not self:isRaidManagement(sPlayerName) then
-        PrintErr("You must be a raid leader or assistant to use this command!")
+        self:Print("You must be a raid leader or assistant to use this command!")
     else
         if time and time > 5 then
             local msg = {
@@ -1073,7 +1073,7 @@ end
 function RaidCore:SyncSummon()
     local myName = GetPlayerUnit():GetName()
     if not self:isRaidManagement(myName) then
-        PrintErr("You must be a raid leader or assistant to use this command!")
+        self:Print("You must be a raid leader or assistant to use this command!")
         return false
     end
     local msg = {
