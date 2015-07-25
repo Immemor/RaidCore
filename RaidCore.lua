@@ -326,12 +326,12 @@ function RaidCore:ProcessMessage(tMessage, sSender)
         end
     elseif tMessage.action == "LaunchPull" then
         if tMessage.cooldown then
-            self:AddBar("PULL", "PULL", tMessage.cooldown, true)
+            self:AddTimerBar("PULL", "PULL", tMessage.cooldown)
             self:AddMsg("PULL", ("PULL in %s"):format(tMessage.cooldown), 5, MYCOLORS["Green"])
         end
     elseif tMessage.action == "LaunchBreak" then
         if tMessage.cooldown then
-            self:AddBar("BREAK", "BREAK", tMessage.cooldown)
+            self:AddTimerBar("BREAK", "BREAK", tMessage.cooldown)
             self:AddMsg("BREAK", ("BREAK for %s sec"):format(tMessage.cooldown), 5, MYCOLORS["Green"])
             self:PlaySound("Long")
         end
@@ -431,9 +431,9 @@ function RaidCore:OnRaidCoreOn(cmd, args)
         self:OnConfigOn()
     elseif (tAllParams[1] == "bar") then
         if tAllParams[2] ~= nil and tAllParams[3] ~= nil then
-            self:AddBar(tAllParams[2], tAllParams[2], tonumber(tAllParams[3]))
+            self:AddTimerBar(tAllParams[2], tAllParams[2], tonumber(tAllParams[3]))
         else
-            self:AddBar("truc", "OVERDRIVE", 10, true)
+            self:AddTimerBar("truc", "OVERDRIVE", 10)
             self:AddMsg("mtruc2", "OVERDRIVE", 5, "Alarm", MYCOLORS["Blue"])
         end
     elseif (tAllParams[1] == "unit") then
@@ -904,7 +904,7 @@ end
 
 function RaidCore:PrintBerserk()
     self:AddMsg("BERSERK", "BERSERK IN 1MIN", 5, false, MYCOLORS["Green"])
-    self:AddBar("BERSERK", "BERSERK", 60)
+    self:AddTimerBar("BERSERK", "BERSERK", 60)
     self.berserk = false
 end
 
