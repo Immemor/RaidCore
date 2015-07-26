@@ -82,41 +82,49 @@ mod:RegisterDefaultTimerBarConfigs({
 ----------------------------------------------------------------------------------------------------
 -- Constants.
 ----------------------------------------------------------------------------------------------------
+local BUFFID_MOO1 = 69959
+local BUFFID_MOO2 = 47075
+local DEBUFFID_TWIRL = 70440
 
 ----------------------------------------------------------------------------------------------------
 -- Locals.
 ----------------------------------------------------------------------------------------------------
-local prev = 0
-local mooCount = 0
-local phase2 = false
-local myName
-local CheckTwirlTimer = nil
+local GetUnitById = GameLib.GetUnitById
+local GetGameTime = GameLib.GetGameTime
+local GetPlayerUnit= GameLib.GetPlayerUnit
+
+local nMOOCount = 0
+local bIsPhase2 = false
 
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("RC_UnitStateChanged", "OnUnitStateChanged", self)
+    Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
     Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
     Apollo.RegisterEventHandler("SPELL_CAST_END", "OnSpellCastEnd", self)
-    Apollo.RegisterEventHandler("BUFF_APPLIED", "OnBuffApplied", self)
-    Apollo.RegisterEventHandler("DEBUFF_APPLIED", "OnDebuffApplied", self)
-    Apollo.RegisterEventHandler("RAID_WIPE", "OnReset", self)
+    Apollo.RegisterEventHandler("BUFF_ADD", "OnBuffAdd", self)
+    Apollo.RegisterEventHandler("DEBUFF_ADD", "OnDebuffAdd", self)
+    Apollo.RegisterEventHandler("DEBUFF_DEL", "OnDebuffDel", self)
+
+    nMOOCount = 0
+    bIsPhase2 = false
+    mod:AddTimerBar("MIDPHASE", "Middle Phase", 60, mod:GetSetting("SoundMidphase"))
+    mod:AddTimerBar("TOMB", "~Frost Tombs", 30, mod:GetSetting("SoundFrostTombsCountDown"))
 end
 
-function mod:OnReset()
-    if CheckTwirlTimer then
-        self:CancelTimer(CheckTwirlTimer)
+function mod:OnUnitCreated(tUnit, sName)
+    if sName == self.L["Hydroflux"] or sName == self.L["Aileron"] then
+        core:AddUnit(tUnit)
+        core:WatchUnit(tUnit)
     end
-    core:ResetMarks()
-    twirl_units = {}
 end
 
 function mod:OnSpellCastStart(unitName, castName, unit)
     if unitName == self.L["Hydroflux"] then
         if castName == self.L["Tsunami"] then
-            phase2 = true
-            mooCount = mooCount + 1
+            bIsPhase2 = true
+            nMOOCount = nMOOCount + 1
             core:AddMsg("PHASE2", self.L["Tsunami"]:upper(), 5, mod:GetSetting("SoundMidphase") and "Alert")
         elseif castName == self.L["Glacial Icestorm"] then
             core:AddMsg("ICESTORM", self.L["ICESTORM"], 5, mod:GetSetting("SoundIcestorm") and "RunAway")
@@ -125,79 +133,42 @@ function mod:OnSpellCastStart(unitName, castName, unit)
 end
 
 function mod:OnSpellCastEnd(unitName, castName)
-    if unitName == self.L["Hydroflux"] and castName == self.L["Tsunami"] then
-        mod:AddTimerBar("MIDPHASE", "~Middle Phase", 88, mod:GetSetting("SoundMidphase"))
-        mod:AddTimerBar("TOMB", "~Frost Tombs", 30, mod:GetSetting("SoundFrostTombsCountDown"))
+    if unitName == self.L["Hydroflux"] then
+        if castName == self.L["Tsunami"] then
+            mod:AddTimerBar("MIDPHASE", "~Middle Phase", 88, mod:GetSetting("SoundMidphase"))
+            mod:AddTimerBar("TOMB", "~Frost Tombs", 30, mod:GetSetting("SoundFrostTombsCountDown"))
+        end
     end
 end
 
-function mod:OnBuffApplied(unitName, splId, unit)
-    if phase2 and (splId == 69959 or splId == 47075) then
-        phase2 = false
+function mod:OnBuffAdd(nId, nSpellId, nStack, fTimeRemaining)
+    if bIsPhase2 and (nSpellId == BUFFID_MOO1 or nSpellId == BUFFID_MOO2) then
+        bIsPhase2 = false
         core:AddMsg("MOO", self.L["MOO !"], 5, mod:GetSetting("SoundMoO") and "Info", "Blue")
         mod:AddTimerBar("MOO", "MOO PHASE", 10, mod:GetSetting("SoundMoO"))
-        if mooCount == 2 then
-            mooCount = 0
+        if nMOOCount == 2 then
+            nMOOCount = 0
             mod:AddTimerBar("ICESTORM", "ICESTORM", 15)
         end
     end
 end
 
-function mod:OnDebuffApplied(unitName, splId, unit)
-    local eventTime = GameLib.GetGameTime()
-    if splId == 70440 then -- Twirl ability
-        if unitName == myName and mod:GetSetting("OtherTwirlWarning") then
+function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
+    local tUnit = GetUnitById(nId)
+    if nSpellId == DEBUFFID_TWIRL then
+        if mod:GetSetting("OtherTwirlWarning") and GetPlayerUnit():GetId() == nId then
             core:AddMsg("TWIRL", self.L["TWIRL ON YOU!"], 5, mod:GetSetting("SoundTwirl") and "Inferno")
         end
         if mod:GetSetting("OtherTwirlPlayerMarkers") then
-            core:MarkUnit(unit, nil, self.L["TWIRL"])
+            core:MarkUnit(tUnit, nil, self.L["TWIRL"])
         end
-        core:AddUnit(unit)
-        twirl_units[unitName] = unit
-        if not CheckTwirlTimer then
-            CheckTwirlTimer = self:ScheduleRepeatingTimer("CheckTwirlTimer", 1)
-        end
+        core:AddUnit(tUnit)
     end
 end
 
-function mod:CheckTwirlTimer()
-    for unitName, unit in pairs(twirl_units) do
-        if unit and unit:GetBuffs() then
-            local bUnitHasTwirl = false
-            local debuffs = unit:GetBuffs().arHarmful
-            for _, debuff in pairs(debuffs) do
-                if debuff.splEffect:GetId() == 70440 then -- the Twirl ability
-                    bUnitHasTwirl = true
-                end
-            end
-            if not bUnitHasTwirl then
-                -- else, if the debuff is no longer present, no need to track anymore.
-                core:DropMark(unit:GetId())
-                core:RemoveUnit(unit:GetId())
-                twirl_units[unitName] = nil
-            end
-        end
-    end
-end
-
-function mod:OnUnitStateChanged(unit, bInCombat, sName)
-    if unit:GetType() == "NonPlayer" and bInCombat then
-        local eventTime = GameLib.GetGameTime()
-        local playerUnit = GameLib.GetPlayerUnit()
-        myName = playerUnit:GetName()
-
-        if sName == self.L["Hydroflux"] then
-            core:AddUnit(unit)
-            core:WatchUnit(unit)
-        elseif sName == self.L["Aileron"] then
-            mooCount = 0
-            phase2 = false
-            twirl_units = {}
-            CheckTwirlTimer = nil
-            core:AddUnit(unit)
-            core:WatchUnit(unit)
-            mod:AddTimerBar("MIDPHASE", "Middle Phase", 60, mod:GetSetting("SoundMidphase"))
-            mod:AddTimerBar("TOMB", "~Frost Tombs", 30, mod:GetSetting("SoundFrostTombsCountDown"))
-        end
+function mod:OnDebuffDel(nId, nSpellId)
+    if nSpellId == DEBUFFID_TWIRL then
+        core:DropMark(nId)
+        core:RemoveUnit(nId)
     end
 end
