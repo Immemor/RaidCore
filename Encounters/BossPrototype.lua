@@ -147,6 +147,12 @@ function EncounterPrototype:OnDisable()
     Apollo.RemoveEventHandler("RAID_WIPE", self)
     Apollo.RemoveEventHandler("RAID_SYNC", self)
     Apollo.RemoveEventHandler("DEBUFF_APPLIED", self)
+    Apollo.RemoveEventHandler("DEBUFF_ADD", self)
+    Apollo.RemoveEventHandler("DEBUFF_DEL", self)
+    Apollo.RemoveEventHandler("DEBUFF_UPDATE", self)
+    Apollo.RemoveEventHandler("BUFF_ADD", self)
+    Apollo.RemoveEventHandler("BUFF_DEL", self)
+    Apollo.RemoveEventHandler("BUFF_UPDATE", self)
 end
 
 function EncounterPrototype:Reboot(isWipe)
