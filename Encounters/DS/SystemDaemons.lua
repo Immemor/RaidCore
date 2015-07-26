@@ -463,8 +463,7 @@ function mod:OnChatDC(message)
     elseif message:find(self.L["COMMENCING ENHANCEMENT SEQUENCE"]) then
         phase2, phase2warn = true, false
         phase2count = phase2count + 1
-        core:StopBar("DISCONNECT")
-        core:StopBar("SDWAVE")
+        core:RemoveTimerBar("SDWAVE")
         core:AddMsg("SDP2", self.L["PHASE 2 !"], 5, mod:GetSetting("SoundPhase2") and "Alarm")
         if mod:GetSetting("OtherDisconnectTimer") then
             mod:AddTimerBar("DISCONNECT", "Disconnect", 85)

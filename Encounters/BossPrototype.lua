@@ -100,7 +100,7 @@ end
 -- Remove a timer bar if exist.
 -- @param sKey  Index to remove.
 function EncounterPrototype:RemoveTimerBar(sKey)
-    RaidCore:StopBar(sKey)
+    RaidCore:RemoveTimerBar(sKey)
 end
 
 function EncounterPrototype:PrepareEncounter()

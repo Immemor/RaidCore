@@ -211,7 +211,7 @@ function mod:OnUnitCreated(unit, sName)
                 core:SetWorldMarker("SOUTH", self.L["MARKER South"], MID_POSITIONS["south"])
                 core:SetWorldMarker("WEST", self.L["MARKER West"], MID_POSITIONS["west"])
             end
-            core:StopBar("DEFRAG")
+            core:RemoveTimerBar("DEFRAG")
         end
     elseif sName == self.L["Essence of Logic"] then
         core:AddUnit(unit)

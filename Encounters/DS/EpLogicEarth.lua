@@ -98,8 +98,7 @@ local DEBUFF_SNAKE = 74570
 ----------------------------------------------------------------------------------------------------
 local GetPlayerUnit = GameLib.GetPlayerUnit
 local GetGameTime = GameLib.GetGameTime
-local _Previous_Defragment_time = 0
-local pilarCount = 0
+local nPreviousDefragmentTime
 
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
@@ -107,16 +106,21 @@ local pilarCount = 0
 function mod:OnBossEnable()
     Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
     Apollo.RegisterEventHandler("RC_UnitDestroyed", "OnUnitDestroyed", self)
-    Apollo.RegisterEventHandler("RC_UnitStateChanged", "OnUnitStateChanged", self)
     Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
     Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
-    Apollo.RegisterEventHandler("DEBUFF_APPLIED", "OnDebuffApplied", self)
+    Apollo.RegisterEventHandler("DEBUFF_ADD", "OnDebuffAdd", self)
+
+    nPreviousDefragmentTime = 0
+    mod:AddTimerBar("DEFRAG", "DEFRAG", 10)
+    mod:AddTimerBar("STAR", self.L["STARS"]:format(""), 60)
 end
 
 function mod:OnUnitCreated(unit, sName)
-    local sName = unit:GetName()
-    if sName == self.L["Obsidian Outcropping"] and mod:GetSetting("LineObsidianOutcropping") then
-        core:AddPixie(unit:GetId().."_1", 1, GameLib.GetPlayerUnit(), unit, "Blue", 10)
+    if self.L["Megalith"] == sName or self.L["Mnemesis"] == sName then
+        core:AddUnit(unit)
+        core:WatchUnit(unit)
+    elseif sName == self.L["Obsidian Outcropping"] and mod:GetSetting("LineObsidianOutcropping") then
+        core:AddPixie(unit:GetId().."_1", 1, GetPlayerUnit(), unit, "Blue", 10)
     end
 end
 
@@ -127,13 +131,15 @@ function mod:OnUnitDestroyed(unit, sName)
 end
 
 function mod:OnSpellCastStart(unitName, castName, unit)
-    if unitName == self.L["Mnemesis"] and castName == self.L["Defragment"] then
-        local timeOfEvent = GetGameTime()
-        if timeOfEvent - _Previous_Defragment_time > 10 then
-            _Previous_Defragment_time = timeOfEvent
-            core:AddMsg("DEFRAG", self.L["SPREAD"], 5, mod:GetSetting("SoundDefrag") and "Alarm")
-            mod:AddTimerBar("BOOM", "BOOM", 9)
-            mod:AddTimerBar("DEFRAG", "DEFRAG", 40)
+    if unitName == self.L["Mnemesis"] then
+        if castName == self.L["Defragment"] then
+            local timeOfEvent = GetGameTime()
+            if timeOfEvent - nPreviousDefragmentTime > 10 then
+                nPreviousDefragmentTime = timeOfEvent
+                core:AddMsg("DEFRAG", self.L["SPREAD"], 5, mod:GetSetting("SoundDefrag") and "Alarm")
+                mod:AddTimerBar("BOOM", "BOOM", 9)
+                mod:AddTimerBar("DEFRAG", "DEFRAG", 40)
+            end
         end
     end
 end
@@ -147,33 +153,14 @@ function mod:OnChatDC(message)
     end
 end
 
-function mod:OnDebuffApplied(unitName, splId, unit)
-    if splId == DEBUFF_SNAKE then
-        if unit == GetPlayerUnit() then
-            core:AddMsg("SNAKE", self.L["SNAKE ON %s"]:format(unitName), 5, mod:GetSetting("SoundSnake") and "RunAway", "Blue")
-        end
-        mod:AddTimerBar("SNAKE", self.L["SNAKE ON %s"]:format(unitName), 20)
-    end
-end
+function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
+    local tUnit = GetUnitById(nId)
+    local sUnitName = tUnit:GetName()
 
-function mod:OnUnitStateChanged(unit, bInCombat, sName)
-    if unit:GetType() == "NonPlayer" and bInCombat then
-        if sName == self.L["Megalith"] then
-            core:AddUnit(unit)
-        elseif sName == self.L["Mnemesis"] then
-            _Previous_Defragment_time = 0
-            pilarCount = 0
-            mod:AddTimerBar("DEFRAG", "DEFRAG", 10)
-            mod:AddTimerBar("STAR", self.L["STARS"]:format(""), 60)
-            core:AddUnit(unit)
-            core:WatchUnit(unit)
-        elseif sName == self.L["Crystalline Matrix"] then
-            pilarCount = pilarCount + 1
-        end
-    elseif unit:GetType() == "NonPlayer" and not bInCombat then
-        if sName == self.L["Mnemesis"] then
-            Apollo.RemoveEventHandler("RC_UnitCreated", self)
-            core:ResetLines()
-        end
+    if nSpellId == DEBUFF_SNAKE then
+        local sSnakeOnX = self.L["SNAKE ON %s"]:format(sUnitName)
+        local sSound = tUnit == GetPlayerUnit() and mod:GetSetting("SoundSnake") and "RunAway"
+        core:AddMsg("SNAKE", sSnakeOnX, 5, sSound, "Blue")
+        mod:AddTimerBar("SNAKE", sSnakeOnX, 20)
     end
 end

@@ -150,7 +150,7 @@ end
 
 function mod:OnSpellCastEnd(unitName, castName)
     if castName == self.L["Channeling Energy"] then
-        core:StopBar("CONVP2")
+        core:RemoveTimerBar("CONVP2")
         core:AddTimerBar("CONVP1", self.L["[%u] NEXT P2"]:format(p2Count + 1), 60)
     end
 end

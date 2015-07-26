@@ -263,7 +263,7 @@ function mod:OnChatDC(message)
     elseif message:find(self.L["Dreadphage Ohmna submerges"]) then
         pilarCount, boreCount = 1, 0
         submergeCount = submergeCount + 1
-        core:StopBar("OTENT")
+        core:RemoveTimerBar("OTENT")
     elseif message:find(self.L["Dreadphage Ohmna is bored"]) then
         boreCount = boreCount + 1
         if boreCount < 2 and self:Tank() then
@@ -274,8 +274,8 @@ function mod:OnChatDC(message)
     elseif message:find(self.L["The Archives quake with the furious might"]) then
         core:AddMsg("OP3", self.L["P3: RAVENOUS"], 5, "Alert")
         OhmnaP3 = true
-        core:StopBar("OPILAR")
-        core:StopBar("OBORE")
+        core:RemoveTimerBar("OPILAR")
+        core:RemoveTimerBar("OBORE")
         core:AddTimerBar("OSPEW", "NEXT BIG SPEW", 45)
     end
 end

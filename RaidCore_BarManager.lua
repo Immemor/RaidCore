@@ -559,7 +559,7 @@ function RaidCore:AddTimerBar(sKey, sText, nDuration, tCallBack, tOptions)
     TimerManager:_AddBar(sKey, sText, nDuration, tCallBack, tOptions)
 end
 
-function RaidCore:StopBar(sKey)
+function RaidCore:RemoveTimerBar(sKey)
     TimerManager:RemoveBar(sKey)
 end
 
