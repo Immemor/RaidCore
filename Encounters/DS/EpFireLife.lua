@@ -72,125 +72,83 @@ mod:RegisterDefaultTimerBarConfigs({
 ----------------------------------------------------------------------------------------------------
 -- Constants.
 ----------------------------------------------------------------------------------------------------
-local DEBUFFID_PRIMAL_ENTANGLEMENT = 73179 -- A root ability.
-local DEBUFFIF__TODO__ = 73177 -- TODO: set english debuff name as define name.
+local DEBUFFID_PRIMAL_ENTANGLEMENT1 = 73179 -- A root ability.
+local DEBUFFID_PRIMAL_ENTANGLEMENT2 = 73177 -- A root ability.
 
 ----------------------------------------------------------------------------------------------------
 -- Locals.
 ----------------------------------------------------------------------------------------------------
-local rooted_units = {}
-local uPlayer = nil
-local strMyName = ""
-local CheckRootTimer = nil
+local GetPlayerUnit = GameLib.GetPlayerUnit
+local GetUnitById = GameLib.GetUnitById
 
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("RC_UnitStateChanged", "OnUnitStateChanged", self)
-    Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
     Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
     Apollo.RegisterEventHandler("RC_UnitDestroyed", "OnUnitDestroyed", self)
-    Apollo.RegisterEventHandler("DEBUFF_APPLIED", "OnDebuffApplied", self)
-    Apollo.RegisterEventHandler("DEBUFF_APPLIED_DOSE", "OnDebuffAppliedDose", self)
-    Apollo.RegisterEventHandler("RAID_WIPE", "OnReset", self)
+    Apollo.RegisterEventHandler("DEBUFF_ADD", "OnDebuffAdd", self)
+    Apollo.RegisterEventHandler("DEBUFF_DEL", "OnDebuffDel", self)
+    Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
 end
 
-function mod:OnReset()
-    if CheckRootTimer then
-        self:CancelTimer(CheckRootTimer)
-    end
-    core:ResetMarks()
-    rooted_units = {}
-end
-
-function mod:CheckRootTracker()
-    for unitName, unit in pairs(rooted_units) do
-        if unit and unit:GetBuffs() then
-            local bUnitIsRooted = false
-            local debuffs = unit:GetBuffs().arHarmful
-            for _, debuff in pairs(debuffs) do
-                if debuff.splEffect:GetId() == DEBUFFID_PRIMAL_ENTANGLEMENT then
-                    bUnitIsRooted = true
-                end
-            end
-            if not bUnitIsRooted then
-                -- else, if the debuff is no longer present, no need to track anymore.
-                core:DropMark(unit:GetId())
-                core:RemoveUnit(unit:GetId())
-                rooted_units[unitName] = nil
-            end
+function mod:OnUnitCreated(tUnit, sName)
+    local nId = tUnit:GetId()
+    if sName == self.L["Visceralus"] or sName == self.L["Pyrobane"] then
+        core:AddUnit(tUnit)
+        core:WatchUnit(tUnit)
+    elseif sName == self.L["Life Force"] then
+        if mod:GetSetting("LineLifeOrbs") and nId then
+            core:AddPixie(nId, 2, tUnit, nil, "Blue", 10, -40, 0)
+        end
+    elseif sName == self.L["Flame Wave"] then
+        if mod:GetSetting("LineFlameWaves") and nId then
+            core:AddPixie(nId, 2, tUnit, nil, "Green", 10, 20, 0)
         end
     end
 end
 
-function mod:OnDebuffApplied(unitName, splId, unit)
-    local eventTime = GameLib.GetGameTime()
+function mod:OnUnitDestroyed(tUnit, sName)
+    local nId = tUnit:GetId()
+    if sName == self.L["Life Force"] then
+        core:DropPixie(nId)
+    elseif sName == self.L["Flame Wave"] then
+        core:DropPixie(nId)
+    end
+end
+
+function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
+    local tUnit = GetUnitById(nId)
     local tSpell = GameLib.GetSpell(splId)
     local strSpellName = tSpell:GetName()
 
-    if splId == DEBUFFID_PRIMAL_ENTANGLEMENT or splId == DEBUFFIF__TODO__ then
-        if unitName == strMyName then
+    if nSpellId == DEBUFFID_PRIMAL_ENTANGLEMENT1 or nSpellId == DEBUFFID_PRIMAL_ENTANGLEMENT2 then
+        if GetPlayerUnit():GetId() == nId then
             core:AddMsg("ROOT", self.L["You are rooted"], 5, mod:GetSetting("SoundRooted") and "Info")
         end
         if mod:GetSetting("OtherRootedPlayersMarkers") then
-            core:MarkUnit(unit, nil, "ROOT")
-            core:AddUnit(unit)
-            rooted_units[unitName] = unit
+            core:MarkUnit(tUnit, nil, "ROOT")
+            core:AddUnit(tUnit)
         end
-        if not CheckRootTimer and mod:GetSetting("OtherRootedPlayersMarkers") then
-            CheckRootTimer = self:ScheduleRepeatingTimer("CheckRootTracker", 1)
-        end
-    elseif strSpellName == "Life Force Shackle" and unitName == strMyName then
-        core:AddMsg("NOHEAL", "No-Healing Debuff!", 5, mod:GetSetting("SoundNoHealDebuff") and "Alarm")
-    end
-end
-
-function mod:OnUnitCreated(unit, sName)
-    if sName == self.L["Life Force"] and mod:GetSetting("LineLifeOrbs") then
-        core:AddPixie(unit:GetId(), 2, unit, nil, "Blue", 10, -40, 0)
-    elseif sName == self.L["Essence of Life"] then
-    elseif sName == self.L["Flame Wave"] and mod:GetSetting("LineFlameWaves") then
-        local unitId = unit:GetId()
-        if unitId then
-            core:AddPixie(unitId, 2, unit, nil, "Green", 10, 20, 0)
+    elseif strSpellName == "Life Force Shackle" then
+        if GetPlayerUnit():GetId() == nId then
+            core:AddMsg("NOHEAL", "No-Healing Debuff!", 5, mod:GetSetting("SoundNoHealDebuff") and "Alarm")
         end
     end
 end
 
-function mod:OnUnitDestroyed(unit, sName)
-    if sName == self.L["Life Force"] then
-        core:DropPixie(unit:GetId())
-    elseif sName == self.L["Flame Wave"] then
-        local unitId = unit:GetId()
-        if unitId then
-            core:DropPixie(unitId)
-        end
+function mod:OnDebuffDel(nId, nSpellId)
+    if nSpellId == DEBUFFID_PRIMAL_ENTANGLEMENT1 or nSpellId == DEBUFFID_PRIMAL_ENTANGLEMENT2 then
+        core:DropMark(nId)
+        core:RemoveUnit(nId)
     end
 end
 
 function mod:OnSpellCastStart(unitName, castName, unit)
-    local eventTime = GameLib.GetGameTime()
-    if unitName == self.L["Visceralus"] and castName == self.L["Blinding Light"] then
-        local playerUnit = GameLib.GetPlayerUnit()
-        if self:GetDistanceBetweenUnits(unit, playerUnit) < 33 then
+    if unitName == self.L["Visceralus"] then
+        if castName == self.L["Blinding Light"]
+            and self:GetDistanceBetweenUnits(unit, GetPlayerUnit()) < 33 then
             core:AddMsg("BLIND", self.L["Blinding Light"], 5, mod:GetSetting("SoundBlindingLight") and "Beware")
-        end
-    end
-end
-
-function mod:OnUnitStateChanged(unit, bInCombat, sName)
-    if unit:GetType() == "NonPlayer" and bInCombat then
-        if sName == self.L["Visceralus"] then
-            core:AddUnit(unit)
-            core:WatchUnit(unit)
-        elseif sName == self.L["Pyrobane"] then
-            rooted_units = {}
-            CheckRootTimer = nil
-            uPlayer = GameLib.GetPlayerUnit()
-            strMyName = uPlayer:GetName()
-            core:AddUnit(unit)
-            mod:AddTimerBar("MID", "MIDPHASE", 90)
         end
     end
 end
