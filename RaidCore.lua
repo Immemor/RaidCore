@@ -253,6 +253,7 @@ function RaidCore:OnDocLoaded()
     self.wndSettings = {
         General = Apollo.LoadForm(self.xmlDoc, "ConfigForm_General", self.wndTargetFrame, self),
         Datascape = Apollo.LoadForm(self.xmlDoc, "ConfigForm_Datascape", self.wndTargetFrame, self),
+        CoreY83 = Apollo.LoadForm(self.xmlDoc, "ConfigForm_CoreY83", self.wndTargetFrame, self),
         Genetic_Archives = Apollo.LoadForm(self.xmlDoc, "ConfigForm_Genetic_Archives", self.wndTargetFrame, self),
         About_Us = Apollo.LoadForm(self.xmlDoc, "ConfigForm_About_Us", self.wndTargetFrame, self),
         DS = {
