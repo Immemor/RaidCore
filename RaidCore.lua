@@ -27,9 +27,9 @@ local GetCurrentZoneMap = GameLib.GetCurrentZoneMap
 -- Constants.
 ----------------------------------------------------------------------------------------------------
 -- Should be @project-version@ when replacement tokens will works (see #88 issue).
-local RAIDCORE_CURRENT_VERSION = "3.8-alpha"
+local RAIDCORE_CURRENT_VERSION = "3.9-alpha"
 -- Should be deleted.
-local ADDON_DATE_VERSION = 15072602
+local ADDON_DATE_VERSION = 15073001
 -- Sometimes Carbine have inserted some no-break-space, for fun.
 -- Behavior seen with French language. This problem is not present in English.
 local NO_BREAK_SPACE = string.char(194, 160)
