@@ -53,17 +53,17 @@ mod:RegisterFrenchLocale({
     -- Unit names.
     ["Kuralak the Defiler"] = "Kuralak la Profanatrice",
     -- Datachron messages.
-    --["Kuralak the Defiler returns to the Archive Core"] = "Kuralak the Defiler returns to the Archive Core", -- TODO: French translation missing !!!!
-    --["Kuralak the Defiler causes a violent outbreak of corruption"] = "Kuralak the Defiler causes a violent outbreak of corruption", -- TODO: French translation missing !!!!
-    --["The corruption begins to fester"] = "The corruption begins to fester", -- TODO: French translation missing !!!!
-    --["has been anesthetized"] = "has been anesthetized", -- TODO: French translation missing !!!!
+    ["Kuralak the Defiler returns to the Archive Core"] = "Kuralak la Profanatrice retourne au Noyau d'accès aux archives pour reprendre des forces",
+    ["Kuralak the Defiler causes a violent outbreak of corruption"] = "Kuralak la Profanatrice provoque une violente éruption de Corruption",
+    ["The corruption begins to fester"] = "La Corruption commence à se répandre",
+    ["has been anesthetized"] = "est sous anesthésie",
     -- NPCSay messages.
     --["Through the Strain you will be transformed"] = "Through the Strain you will be transformed", -- TODO: French translation missing !!!!
     --["Your form is flawed, but I will make you beautiful"] = "Your form is flawed, but I will make you beautiful", -- TODO: French translation missing !!!!
-    --["Let the Strain perfect you"] = "Let the Strain perfect you", -- TODO: French translation missing !!!!
-    --["The Experiment has failed"] = "The Experiment has failed", -- TODO: French translation missing !!!!
-    --["Join us... become one with the Strain"] = "Join us... become one with the Strain", -- TODO: French translation missing !!!!
-    --["One of us... you will become one of us"] = "One of us... you will become one of us", -- TODO: French translation missing !!!!
+    ["Let the Strain perfect you"] = "Embrasse la perfection de la Souillure...",
+    ["The Experiment has failed"] = "L'expérience a échoué",
+    ["Join us... become one with the Strain"] = "Livrez-vous corps et âme à la Souillure...",
+    ["One of us... you will become one of us"] = "Des nôtres... Tu seras bientôt des nôtres...",
     -- Cast.
     ["Vanish into Darkness"] = "Disparaître dans les ténèbres",
     -- Bar and messages.
