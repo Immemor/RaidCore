@@ -91,6 +91,7 @@ mod:RegisterGermanLocale({
 mod:RegisterDefaultSetting("LineLifeOrbs")
 mod:RegisterDefaultSetting("LineHealingTrees")
 mod:RegisterDefaultSetting("LineCleaveAileron")
+mod:RegisterDefaultSetting("LineVisceralus")
 mod:RegisterDefaultSetting("SoundHealingTreeCountDown")
 mod:RegisterDefaultSetting("SoundMidphaseCountDown")
 mod:RegisterDefaultSetting("SoundNoHealDebuff")
@@ -217,6 +218,13 @@ function mod:OnUnitCreated(tUnit, sName)
     elseif sName == self.L["Visceralus"] then
         core:AddUnit(tUnit)
         core:WatchUnit(tUnit)
+        if mod:GetSetting("LineVisceralus") then
+            core:AddPixie("Visceralus_1", 2, tUnit, nil, "red", 5, 30, 0)
+            core:AddPixie("Visceralus_2", 2, tUnit, nil, "xkcdBarbiePink", 5, 30, 72)
+            core:AddPixie("Visceralus_3", 2, tUnit, nil, "xkcdBarbiePink", 5, 30, 144)
+            core:AddPixie("Visceralus_4", 2, tUnit, nil, "xkcdBarbiePink", 5, 30, 216)
+            core:AddPixie("Visceralus_5", 2, tUnit, nil, "xkcdBarbiePink", 5, 30, 288)
+        end
     end
 end
 
