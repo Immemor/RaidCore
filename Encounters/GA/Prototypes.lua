@@ -47,10 +47,10 @@ mod:RegisterFrenchLocale({
     ["Phagetech Protector"] = "Protecteur technophage",
     ["Phagetech Fabricator"] = "Fabricant technophage",
     -- Datachron messages.
-    --["Phagetech Commander is now active!"] = "Phagetech Commander is now active!", -- TODO: French translation missing !!!!
-    --["Phagetech Augmentor is now active!"] = "Phagetech Augmentor is now active!", -- TODO: French translation missing !!!!
-    --["Phagetech Protector is now active!"] = "Phagetech Protector is now active!", -- TODO: French translation missing !!!!
-    --["Phagetech Fabricator is now active!"] = "Phagetech Fabricator is now active!", -- TODO: French translation missing !!!!
+    ["Phagetech Commander is now active!"] = "Commandant technophage est désormais en activité !"
+    ["Phagetech Augmentor is now active!"] = "Augmenteur technophage est désormais en activité !"
+    ["Phagetech Protector is now active!"] = "Protecteur technophage est désormais en activité !"
+    ["Phagetech Fabricator is now active!"] = "Fabricant technophage est désormais en activité !"
     -- Cast.
     ["Summon Repairbot"] = "Déployer Bricobot",
     ["Summon Destructobot"] = "Déployer Destructobot",
