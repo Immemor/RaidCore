@@ -47,7 +47,7 @@ mod:RegisterFrenchLocale({
     ["Noxmind the Insidious"] = "Toxultime l'Insidieux",
     ["Ersoth Curseform"] = "Ersoth le Maudisseur",
     -- Datachron messages.
-    --["The Phageborn Convergence begins gathering its power"] = "The Phageborn Convergence begins gathering its power", -- TODO: French translation missing !!!!
+    ["The Phageborn Convergence begins gathering its power"] = "La Convergence néophage commence à rassembler son énergie !",
     -- Cast.
     ["Teleport"] = "Se téléporter",
     ["Channeling Energy"] = "Canalisation d'énergie",
