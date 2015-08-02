@@ -62,6 +62,7 @@ local DEFAULT_SETTINGS = {
         tSizingMinimum = { 300, 100 },
     },
     ["Health"] = {
+        bPourcentWith2Digits = false,
         nBarHeight = 32,
         tAnchorPoints = { 0.75, 0.5, 0.75, 0.5 },
         tSizingMinimum = { 300, 200 },
@@ -119,7 +120,7 @@ local function Number2ShortString(val)
     return r
 end
 
-local function UpdateUnitBar(tBar)
+local function UpdateUnitBar(tUnitManager, tBar)
     local tUnit = GetUnitById(tBar.nId)
     if tUnit and tUnit:IsValid() then
         local MaxHealth = tUnit:GetMaxHealth()
@@ -140,7 +141,11 @@ local function UpdateUnitBar(tBar)
                     tBar.wndUnit:SetBGColor("A0131313")
                 end
                 -- Update the percent text.
-                tBar.wndUnitHPPercent:SetText(("%.1f%%"):format(nPourcent))
+                local sPourcentFormat = "%.1f%%"
+                if tUnitManager.tSettings.bPourcentWith2Digits then
+                    sPourcentFormat = "%.2f%%"
+                end
+                tBar.wndUnitHPPercent:SetText(sPourcentFormat:format(nPourcent))
                 -- Update the short health text.
                 tBar.wndUnitHPValue:SetText(Number2ShortString(Health))
             end
@@ -414,7 +419,7 @@ function UnitManager:AddBar(nId)
             }
             wndMain:SetData(GetGameTime())
             wndMain:SetAnchorOffsets(0, 0, 0, self.tSettings.nBarHeight)
-            UpdateUnitBar(self.tBars[nId])
+            UpdateUnitBar(self, self.tBars[nId])
             ArrangeBar(self)
         else
             self.tBars[nId] = {
@@ -428,7 +433,7 @@ end
 
 function UnitManager:OnTimerUpdate()
     for _, Bar in next, self.tBars do
-        UpdateUnitBar(Bar)
+        UpdateUnitBar(self, Bar)
     end
 end
 
