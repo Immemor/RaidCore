@@ -28,7 +28,7 @@ mod:RegisterEnglishLocale({
     -- Cast.
     ["Supercell"] = "Supercell",
     ["Raw Power"] = "Raw Power",
-    ["Fierce Swipe"] = "Baffe féroce",
+    ["Fierce Swipe"] = "Fierce Swipe",
     -- Bar and messages.
     ["EARTH"] = "EARTH",
     ["~Tornado Spawn"] = "~Tornado Spawn",
