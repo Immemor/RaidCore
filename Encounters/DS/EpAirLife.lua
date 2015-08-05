@@ -47,6 +47,7 @@ mod:RegisterEnglishLocale({
     ["NO HEAL DEBUFF"] = "NO HEAL",
     ["Lightning"] = "Lightning",
     ["Lightning on YOU"] = "Lightning on YOU",
+    ["Enrage"] = "Enrage",
 })
 mod:RegisterFrenchLocale({
     -- Unit names.
@@ -70,6 +71,7 @@ mod:RegisterFrenchLocale({
     ["NO HEAL DEBUFF"] = "NO HEAL",
     ["Lightning"] = "Foudre",
     ["Lightning on YOU"] = "Foudre sur VOUS",
+    ["Enrage"] = "Enrage",
 })
 mod:RegisterGermanLocale({
     -- Unit names.
@@ -163,6 +165,7 @@ function mod:OnBossEnable()
 
     mod:AddTimerBar("MIDPHASE", "Middle Phase", 90, mod:GetSetting("SoundMidphaseCountDown"))
     mod:AddTimerBar("THORN", "Thorns", 20)
+    mod:AddTimerBar("ENRAGE", "Enrage", 500)
 end
 
 function mod:OnUnitCreated(tUnit, sName)
