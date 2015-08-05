@@ -133,7 +133,7 @@ local function OnMenuLeft_CheckUncheck(wndButton, bIsChecked)
             RaidCore.wndTargetFrame:SetData(nil)
         end
     else
-        if sButtonName ~= "Datascape" then
+        if sButtonName ~= "Datascape" or sButtonName ~= "Genetic_Archives" then
             local wnd = RaidCore.wndSettings[sButtonName]
             wnd:Show(true)
             RaidCore.wndTargetFrame:SetData(wnd)
@@ -142,6 +142,8 @@ local function OnMenuLeft_CheckUncheck(wndButton, bIsChecked)
 
     if sButtonName == "Datascape" then
         RaidCore.wndModuleList["DS"]:Show(bIsChecked)
+    elseif sButtonName ~= "Genetic_Archives" then
+        RaidCore.wndModuleList["GA"]:Show(bIsChecked)
     end
 end
 
@@ -248,6 +250,7 @@ function RaidCore:OnDocLoaded()
     self.wndTargetFrame = self.wndConfig:FindChild("BodyTarget")
     self.wndConfigOptionsTargetFrame = self.wndConfig:FindChild("SubMenuLeft")
     self.wndModuleList = {
+        GA = Apollo.LoadForm(self.xmlDoc, "ModuleList_GA", self.wndConfigOptionsTargetFrame, self),
         DS = Apollo.LoadForm(self.xmlDoc, "ModuleList_DS", self.wndConfigOptionsTargetFrame, self),
     }
     self.wndSettings = {
@@ -256,6 +259,9 @@ function RaidCore:OnDocLoaded()
         CoreY83 = Apollo.LoadForm(self.xmlDoc, "ConfigForm_CoreY83", self.wndTargetFrame, self),
         Genetic_Archives = Apollo.LoadForm(self.xmlDoc, "ConfigForm_Genetic_Archives", self.wndTargetFrame, self),
         About_Us = Apollo.LoadForm(self.xmlDoc, "ConfigForm_About_Us", self.wndTargetFrame, self),
+        GA = {
+            ExperimentX89 = Apollo.LoadForm(self.xmlDoc, "ConfigForm_ExperimentX89", self.wndTargetFrame, self),
+        },
         DS = {
             Minibosses = Apollo.LoadForm(self.xmlDoc, "ConfigForm_Minibosses", self.wndTargetFrame, self),
             SystemDaemons = Apollo.LoadForm(self.xmlDoc, "ConfigForm_SystemDaemons", self.wndTargetFrame, self),
