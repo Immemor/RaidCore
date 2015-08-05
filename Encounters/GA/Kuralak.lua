@@ -216,7 +216,7 @@ function mod:OnChatNPCSay(message)
     end
 end
 
-function mod:OnDebuffApplied(nId, nSpellId, nStack, fTimeRemaining)
+function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
     if nSpellId == 56652 then
         local tUnit = GetUnitById(nId)
         if tUnit then
