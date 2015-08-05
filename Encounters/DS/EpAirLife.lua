@@ -47,7 +47,6 @@ mod:RegisterEnglishLocale({
     ["NO HEAL DEBUFF"] = "NO HEAL",
     ["Lightning"] = "Lightning",
     ["Lightning on YOU"] = "Lightning on YOU",
-    ["Recently Saved!"] = "Recently Saved!",
 })
 mod:RegisterFrenchLocale({
     -- Unit names.
@@ -66,12 +65,11 @@ mod:RegisterFrenchLocale({
     ["Twirl"] = "Tournoiement",
     ["Midphase Ending"] = "Phase Milieu Fin",
     ["Middle Phase"] = "Phase Milieu",
-    --["Next Healing Tree"] = "Next Healing Tree", -- TODO: French translation missing !!!!
-    --["No-Healing Debuff!"] = "No-Healing Debuff!", -- TODO: French translation missing !!!!
+    ["Next Healing Tree"] = "Prochain Arbres à Soigner",
+    ["No-Healing Debuff!"] = "Aucun-Soin Debuff!",
     ["NO HEAL DEBUFF"] = "NO HEAL",
     ["Lightning"] = "Foudre",
-    --["Lightning on YOU"] = "Lightning on YOU", -- TODO: French translation missing !!!!
-    --["Recently Saved!"] = "Recently Saved!", -- TODO: French translation missing !!!!
+    ["Lightning on YOU"] = "Foudre sur VOUS",
 })
 mod:RegisterGermanLocale({
     -- Unit names.
@@ -95,7 +93,6 @@ mod:RegisterGermanLocale({
     --["NO HEAL DEBUFF"] = "NO HEAL", -- TODO: German translation missing !!!!
     ["Lightning"] = "Blitz",
     --["Lightning on YOU"] = "Lightning on YOU", -- TODO: German translation missing !!!!
-    --["Recently Saved!"] = "Recently Saved!", -- TODO: German translation missing !!!!
 })
 -- Default settings.
 mod:RegisterDefaultSetting("LineLifeOrbs")
