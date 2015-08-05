@@ -5,7 +5,17 @@
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
 -- Description:
---   TODO
+--   There is 2 phases in this combat, which are repeated many times.
+--
+--   In phase 1:
+--     - Players have to avoid Wild Brambles and destroyed them with the Twirl.
+--     - From second phase 1, players with thunder debuff must go under a tree which have been
+--       healed.
+--
+--   In phase 2:
+--    - Players have to jump on lights in the sky, to fall them and kill them.
+--    - At the end of this phase, all light not destroyed will do some global dommage.
+--
 ----------------------------------------------------------------------------------------------------
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local mod = core:NewEncounter("EpAirLife", 52, 98, 119)
@@ -130,6 +140,7 @@ local GetPlayerUnit= GameLib.GetPlayerUnit
 local nLightningStrikeCount
 local nTreeKeeperCount
 local tTreeKeeperList
+local nFirstTreeId
 local nLastThornsTime = 0
 local bIsMidPhase
 local nMidPhaseTime
@@ -151,6 +162,7 @@ function mod:OnBossEnable()
     nTwirlCount = 0
     nTreeKeeperCount = 0
     tTreeKeeperList = {}
+    nFirstTreeId = nil
 
     mod:AddTimerBar("MIDPHASE", "Middle Phase", 90, mod:GetSetting("SoundMidphaseCountDown"))
     mod:AddTimerBar("THORN", "Thorns", 20)
@@ -172,8 +184,6 @@ function mod:OnUnitCreated(tUnit, sName)
     elseif sName == self.L["[DS] e395 - Air - Tornado"] then
         if not bIsMidPhase then
             bIsMidPhase = true
-            nTreeKeeperCount = 0
-            nLightningStrikeCount = 0
             nTwirlCount = 0
             nMidPhaseTime = nCurrentTime + 115
             mod:AddTimerBar("MIDEND", "Midphase Ending", 35)
@@ -187,25 +197,28 @@ function mod:OnUnitCreated(tUnit, sName)
     elseif sName == self.L["Lifekeeper"] then
         core:AddUnit(tUnit)
         nTreeKeeperCount = nTreeKeeperCount + 1
-        tTreeKeeperList[nTreeKeeperCount] = nId
         if nTreeKeeperCount % 2 == 0 then
-            local Tree1_Pos = GetUnitById(tTreeKeeperList[nTreeKeeperCount - 1]):GetPosition()
-            local Tree2_Pos = GetUnitById(tTreeKeeperList[nTreeKeeperCount]):GetPosition()
+            local FirstTree_Pos = GetUnitById(nFirstTreeId):GetPosition()
+            local SecondTree_Pos = GetUnitById(nId):GetPosition()
             -- Let's say the first will be the always the north.
             -- So we have only to compare the Z axis.
 
-            if Tree1_Pos.z > Tree2_Pos.z then
-                -- Tree2 is more on north than Tree1.
-                -- Inverse the order so.
-                local copy_id = tTreeKeeperList[nTreeKeeperCount - 1]
-                tTreeKeeperList[nTreeKeeperCount - 1] = tTreeKeeperList[nTreeKeeperCount]
-                tTreeKeeperList[nTreeKeeperCount] = copy_id
+            local nNorthTreeId, nSouthTreeId = nFirstTreeId, nId
+            if FirstTree_Pos.z > SecondTree_Pos.z then
+                -- Second Tree is more on north than First Tree. Inverse them so.
+                nNorthTreeId = nId
+                nSouthTreeId = nFirstTreeId
             end
-            core:MarkUnit(GetUnitById(tTreeKeeperList[nTreeKeeperCount - 1]), nil, nTreeKeeperCount - 1)
-            core:MarkUnit(GetUnitById(tTreeKeeperList[nTreeKeeperCount]), nil, nTreeKeeperCount)
-            if nTreeKeeperCount == 2 then
-                mod:AddTimerBar("LIFEKEEP", "Next Healing Tree", 30, mod:GetSetting("SoundHealingTreeCountDown"))
+            table.insert(tTreeKeeperList, nNorthTreeId)
+            table.insert(tTreeKeeperList, nSouthTreeId)
+            core:MarkUnit(GetUnitById(nNorthTreeId), nil, nTreeKeeperCount - 1)
+            core:MarkUnit(GetUnitById(nSouthTreeId), nil, nTreeKeeperCount)
+            if (nTreeKeeperCount + 2) % 4 == 0 then
+                local bCountDownEnable = mod:GetSetting("SoundHealingTreeCountDown")
+                mod:AddTimerBar("LIFEKEEP", "Next Healing Tree", 30, bCountDownEnable)
             end
+        else
+            nFirstTreeId = nId
         end
     elseif sName == self.L["Aileron"] then
         core:AddUnit(tUnit)
@@ -235,7 +248,7 @@ function mod:OnUnitDestroyed(unit, sName)
     elseif sName == self.L["Lifekeeper"] then
         for i, nTreeId in next, tTreeKeeperList do
             if nTreeId == nId then
-                tTreeKeeperList[i] = nil
+                table.remove(tTreeKeeperList, i)
                 break
             end
         end
@@ -269,10 +282,9 @@ function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
             core:MarkUnit(tUnit, nil, self.L["Lightning"])
         end
         nLightningStrikeCount = nLightningStrikeCount + 1
-        if mod:GetSetting("LineHealingTrees") then
-            local nTreeTarget = math.floor((nLightningStrikeCount + 1) / 2)
+        if mod:GetSetting("LineHealingTrees") and #tTreeKeeperList > 0 then
             local sKey = ("LIGHTNING %d"):format(nId)
-            core:AddPixie(sKey, 1, tUnit, GetUnitById(tTreeKeeperList[nTreeTarget]), "xkcdBrightPurple", 5)
+            core:AddPixie(sKey, 1, tUnit, GetUnitById(tTreeKeeperList[1]), "xkcdBrightPurple", 5)
         end
         if nId == nPlayerId then
             local sSound = mod:GetSetting("SoundLightning") and "RunAway"
