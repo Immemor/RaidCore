@@ -186,7 +186,7 @@ function mod:OnSpellCastStart(unitName, castName, unit)
         ruptCount = ruptCount + 1
         core:AddMsg("RUPTURE", self.L["INTERRUPT %s"]:format(unitName:upper()), 5, mod:GetSetting("SoundRuptureInterrupt") and "Destruction")
         if ruptCount == 1 then
-            mod:AddTimerBar("RUPTURE", "NEXT RUPTURE", 43, mod:GetSetting("SoundRuptureCountDown"))
+            mod:AddTimerBar("RUPTURE", self.L["NEXT RUPTURE"], 43, mod:GetSetting("SoundRuptureCountDown"))
         end
     elseif (unitName == self.L["Corrupted Ravager"] or unitName == self.L["Empowered Ravager"])
         and castName == self.L["Corrupting Rays"] then
@@ -217,9 +217,9 @@ function mod:OnChatDC(message)
             core:AddMsg("PHASE", self.L["SECTION %u"]:format(section), 5, mod:GetSetting("SoundSectionSwitch") and "Info", "Blue")
             if section ~= 4 then 
                 mod:AddTimerBar("WAVE", self.L["[%u] WAVE"]:format(waveCount + 1), 11)
-                mod:AddTimerBar("RUPTURE", "NEXT RUPTURE", 39, mod:GetSetting("SoundRuptureCountDown"))
+                mod:AddTimerBar("RUPTURE", self.L["NEXT RUPTURE"], 39, mod:GetSetting("SoundRuptureCountDown"))
             end
-            mod:AddTimerBar("CORRUPTION", "FULL CORRUPTION", 111, mod:GetSetting("SoundCorruptionCountDown"))
+            mod:AddTimerBar("CORRUPTION", self.L["FULL CORRUPTION"], 111, mod:GetSetting("SoundCorruptionCountDown"))
         else
             first = false
         end
@@ -244,7 +244,7 @@ function mod:OnChatDC(message)
         mod:RemoveTimerBar("CORRUPTION")
         mod:RemoveTimerBar("WAVE")
         core:AddMsg("TRANSITION", self.L["TRANSITION"], 5, mod:GetSetting("SoundMoOWarning") and "Alert")
-        mod:AddTimerBar("MOO", "MOO PHASE", 15)
+        mod:AddTimerBar("MOO", self.L["MOO PHASE"], 15)
         for unitId, v in pairs(essenceUp) do
             core:RemoveUnit(unitId)
             essenceUp[unitId] = nil
@@ -254,7 +254,7 @@ function mod:OnChatDC(message)
         mod:RemoveTimerBar("CORRUPTION")
         mod:RemoveTimerBar("WAVE")
         core:AddMsg("TRANSITION", self.L["BURN HIM HARD"], 5, mod:GetSetting("SoundMoOWarning") and "Alert")
-        mod:AddTimerBar("MOO", "MOO PHASE", 20, mod:GetSetting("SoundMoOWarning"))
+        mod:AddTimerBar("MOO", self.L["MOO PHASE"], 20, mod:GetSetting("SoundMoOWarning"))
         for unitId, v in pairs(essenceUp) do
             core:RemoveUnit(unitId)
             essenceUp[unitId] = nil
@@ -293,8 +293,8 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
             end
             core:AddUnit(unit)
             core:WatchUnit(unit)
-            mod:AddTimerBar("RUPTURE", "~NEXT RUPTURE", 35, mod:GetSetting("SoundRuptureCountDown"))
-            mod:AddTimerBar("CORRUPTION", "FULL CORRUPTION", 106, mod:GetSetting("SoundCorruptionCountDown"))
+            mod:AddTimerBar("RUPTURE", self.L["~NEXT RUPTURE"], 35, mod:GetSetting("SoundRuptureCountDown"))
+            mod:AddTimerBar("CORRUPTION", self.L["FULL CORRUPTION"], 106, mod:GetSetting("SoundCorruptionCountDown"))
         elseif sName == self.L["Strain Parasite"]
             or sName == self.L["Gloomclaw Skurge"]
             or sName == self.L["Corrupted Fraz"] then

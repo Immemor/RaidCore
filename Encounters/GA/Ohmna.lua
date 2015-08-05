@@ -171,7 +171,7 @@ function mod:OnBossEnable()
     firstPull, OhmnaP3, OhmnaP4 = true, false, false
     core:AddTimerBar("OPILAR", self.L["PILLAR %u"]:format(pilarCount), 25)
     if self:Tank() then
-        core:AddTimerBar("OBORE", "SWITCH TANK", 45)
+        core:AddTimerBar("OBORE", self.L["SWITCH TANK"], 45)
     end
 end
 
@@ -185,7 +185,7 @@ function mod:OnUnitCreated(unit, sName)
     elseif sName == self.L["Tentacle of Ohmna"] then
         if not OhmnaP4 then
             core:AddMsg("OTENT", self.L["Tentacles"], 5, "Info", "Blue")
-            core:AddTimerBar("OTENT", "Next Tentacles", 20)
+            core:AddTimerBar("OTENT", self.L["Next Tentacles"], 20)
         end
     elseif sName == self.L["Ravenous Maw of the Dreadphage"] then
         core:MarkUnit(unit, 0)
@@ -212,11 +212,11 @@ function mod:OnSpellCastStart(unitName, castName, unit)
             local pilarActivated = self:OhmnaPE(pilarCount % 2)
             core:AddTimerBar("OPILAR", self.L["PILLAR %u : %u"]:format(pilarCount, pilarActivated), 32)
             if self:Tank() then
-                core:AddTimerBar("OBORE", "SWITCH TANK", 45)
+                core:AddTimerBar("OBORE", self.L["SWITCH TANK"], 45)
             end
         elseif castName == self.L["Genetic Torrent"] then
             core:AddMsg("SPEW", self.L["BIG SPEW"], 5, "RunAway")
-            core:AddTimerBar("OSPEW", "NEXT BIG SPEW", OhmnaP4 and 40 or 60)
+            core:AddTimerBar("OSPEW", self.L["NEXT BIG SPEW"], OhmnaP4 and 40 or 60)
         end
     end
 end
@@ -254,7 +254,7 @@ function mod:OnChatDC(message)
         if OhmnaP3 then return end
         pilarCount = pilarCount + 1
         if submergeCount < 2 and pilarCount > 4 then
-            core:AddTimerBar("OPILAR", "PHASE 2", firstPull and 27 or 22)
+            core:AddTimerBar("OPILAR", self.L["PHASE 2"], firstPull and 27 or 22)
             firstPull = false
         else
             local pilarActivated = self:OhmnaPE(pilarCount % 2)
@@ -267,7 +267,7 @@ function mod:OnChatDC(message)
     elseif message:find(self.L["Dreadphage Ohmna is bored"]) then
         boreCount = boreCount + 1
         if boreCount < 2 and self:Tank() then
-            core:AddTimerBar("OBORE", "SWITCH TANK", 42)
+            core:AddTimerBar("OBORE", self.L["SWITCH TANK"], 42)
         end
     elseif message:find(self.L["The Archives tremble as Dreadphage Ohmna"]) then
         core:AddMsg("OP2", self.L["P2: TENTACLES"], 5, "Alert")
@@ -276,6 +276,6 @@ function mod:OnChatDC(message)
         OhmnaP3 = true
         core:RemoveTimerBar("OPILAR")
         core:RemoveTimerBar("OBORE")
-        core:AddTimerBar("OSPEW", "NEXT BIG SPEW", 45)
+        core:AddTimerBar("OSPEW", self.L["NEXT BIG SPEW"], 45)
     end
 end

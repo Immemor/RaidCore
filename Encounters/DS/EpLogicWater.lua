@@ -114,11 +114,11 @@ function mod:OnBossEnable()
 
     midphase = false
     nMnemesisId = nil
-    mod:AddTimerBar("MIDPHASE", "Middle Phase", 75, mod:GetSetting("SoundMidphaseCountDown"))
-    mod:AddTimerBar("PRISON", "Imprison", 33)
-    mod:AddTimerBar("DEFRAG", "~Defrag", 16, mod:GetSetting("SoundDefrag"))
+    mod:AddTimerBar("MIDPHASE", self.L["Middle Phase"], 75, mod:GetSetting("SoundMidphaseCountDown"))
+    mod:AddTimerBar("PRISON", self.L["Imprison"], 33)
+    mod:AddTimerBar("DEFRAG", self.L["~Defrag"], 16, mod:GetSetting("SoundDefrag"))
     if mod:GetSetting("OtherWateryGraveTimer") then
-        mod:AddTimerBar("GRAVE", "Watery Grave", 10)
+        mod:AddTimerBar("GRAVE", self.L["Watery Grave"], 10)
     end
 end
 
@@ -128,17 +128,17 @@ function mod:OnSpellCastStart(unitName, castName, unit)
             midphase = true
             mod:RemoveTimerBar("PRISON")
             mod:RemoveTimerBar("DEFRAG")
-            mod:AddTimerBar("MIDPHASE", "Circuit Breaker", 25, mod:GetSetting("SoundMidphaseCountDown"))
+            mod:AddTimerBar("MIDPHASE", self.L["Circuit Breaker"], 25, mod:GetSetting("SoundMidphaseCountDown"))
         elseif castName == self.L["Imprison"] then
             mod:RemoveTimerBar("PRISON")
         elseif castName == self.L["Defragment"] then
             core:AddMsg("DEFRAG", self.L["SPREAD"], 5, mod:GetSetting("SoundDefrag") and "Beware")
-            mod:AddTimerBar("DEFRAG", "~Defrag", 36, mod:GetSetting("SoundDefrag"))
+            mod:AddTimerBar("DEFRAG", self.L["~Defrag"], 36, mod:GetSetting("SoundDefrag"))
         end
     elseif unitName == self.L["Hydroflux"] then
         if castName == self.L["Watery Grave"] then
             if mod:GetSetting("OtherWateryGraveTimer") then
-                mod:AddTimerBar("GRAVE", "Watery Grave", 10)
+                mod:AddTimerBar("GRAVE", self.L["Watery Grave"], 10)
             end
         elseif self.L["Tsunami"] == castName then
             mod:RemoveTimerBar("GRAVE")
@@ -150,8 +150,8 @@ function mod:OnSpellCastEnd(unitName, castName)
     if unitName == self.L["Mnemesis"] then
         if castName == self.L["Circuit Breaker"] then
             midphase = false
-            mod:AddTimerBar("MIDPHASE", "Middle Phase", 90, mod:GetSetting("SoundMidphaseCountDown"))
-            mod:AddTimerBar("PRISON", "Imprison", 25)
+            mod:AddTimerBar("MIDPHASE", self.L["Middle Phase"], 90, mod:GetSetting("SoundMidphaseCountDown"))
+            mod:AddTimerBar("PRISON", self.L["Imprison"], 25)
         end
     end
 end

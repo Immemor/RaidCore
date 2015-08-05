@@ -90,12 +90,12 @@ function mod:OnUnitCreated(tUnit, sUnitName)
         core:WatchUnit(tUnit)
     elseif self.L["Conjured Fire Bomb"] == sUnitName then
         if nPreviousBombPopDate + 8 < nCurrentTime then
-            mod:AddTimerBar("BOMBS", "Bombs", 22.5)
+            mod:AddTimerBar("BOMBS", self.L["Bombs"], 22.5)
             nPreviousBombPopDate = nCurrentTime
         end
     elseif self.L["Conjured Fire Totem"] == sUnitName then
         if nPreviousTotemPopDate + 8 < nCurrentTime then
-            mod:AddTimerBar("TOTEM", "Conjured Fire Totem", 26)
+            mod:AddTimerBar("TOTEM", self.L["Conjured Fire Totem"], 26)
             nPreviousTotemPopDate = nCurrentTime
         end
     end
@@ -125,7 +125,7 @@ end
 function mod:OnSpellCastEnd(sUnitName, sCastName, tUnit)
     if self.L["Warmonger Chuna"] == sUnitName then
         if self.L["Fire Room"] == sCastName then
-            mod:AddTimerBar("BUBBLE", "Safe Bubble", 50, true)
+            mod:AddTimerBar("BUBBLE", self.L["Safe Bubble"], 50, true)
         end
     end
 end

@@ -130,7 +130,7 @@ function mod:OnBossEnable()
 
     nDataDevourerLastPopTime = 0
     nObstinateLogicWallLastPopTime = 0
-    mod:AddTimerBar("ENRAGE", "Enrage", 576)
+    mod:AddTimerBar("ENRAGE", self.L["Enrage"], 576)
 end
 
 function mod:OnUnitCreated(unit, sName)
@@ -141,7 +141,7 @@ function mod:OnUnitCreated(unit, sName)
         local nCurrentTime = GetGameTime()
         if nDataDevourerLastPopTime + 13 < nCurrentTime then
             nDataDevourerLastPopTime = nCurrentTime
-            mod:AddTimerBar("DATA_DEVOURER", "Next Data Devourer", 15)
+            mod:AddTimerBar("DATA_DEVOURER", self.L["Next Data Devourer"], 15)
         end
     elseif self.L["Obstinate Logic Wall"] == sName then
         mod:RemoveTimerBar("PILLAR_TIMEOUT")
@@ -180,19 +180,19 @@ function mod:OnChatDC(message)
         mod:AddTimerBar("BEAM", sText, 15)
     elseif message == self.L["Avatus prepares to delete all"] then
         core:AddMsg("PILLAR_TIMEOUT", self.L["PILLAR TIMEOUT"], 5, mod:GetSetting("SoundBigCast") and "Beware")
-        mod:AddTimerBar("PILLAR_TIMEOUT", "PILLAR TIMEOUT", 10)
-        mod:AddTimerBar("NEXT_PILLAR", "NEXT PILLAR", 50)
+        mod:AddTimerBar("PILLAR_TIMEOUT", self.L["PILLAR TIMEOUT"], 10)
+        mod:AddTimerBar("NEXT_PILLAR", self.L["NEXT PILLAR"], 50)
     elseif message == self.L["Secure Sector Enhancement"] then
         core:AddMsg("P2", self.L["P2: SHIELD PHASE"], 5, mod:GetSetting("SoundShieldPhase") and "Alert")
-        mod:AddTimerBar("P2", "EXPLOSION", 15, mod:GetSetting("SoundLaserCountDown"))
-        mod:AddTimerBar("BEAM", "NEXT BEAM", 44)
-        mod:AddTimerBar("DATA_DEVOURER", "Next Data Devourer", 53)
-        mod:AddTimerBar("NEXT_PILLAR", "NEXT PILLAR", 58)
+        mod:AddTimerBar("P2", self.L["EXPLOSION"], 15, mod:GetSetting("SoundLaserCountDown"))
+        mod:AddTimerBar("BEAM", self.L["NEXT BEAM"], 44)
+        mod:AddTimerBar("DATA_DEVOURER", self.L["Next Data Devourer"], 53)
+        mod:AddTimerBar("NEXT_PILLAR", self.L["NEXT PILLAR"], 58)
     elseif message == self.L["Vertical Locomotion Enhancement"] then
         core:AddMsg("P2", self.L["P2: JUMP PHASE"], 5, mod:GetSetting("SoundJumpPhase") and "Alert")
-        mod:AddTimerBar("P2", "BEGIN OF SCANNING LASER", 15, mod:GetSetting("SoundExplosionCountDown"))
-        mod:AddTimerBar("BEAM", "NEXT BEAM", 58)
-        mod:AddTimerBar("DATA_DEVOURER", "Next Data Devourer", 68)
-        mod:AddTimerBar("NEXT_PILLAR", "NEXT PILLAR", 75)
+        mod:AddTimerBar("P2", self.L["BEGIN OF SCANNING LASER"], 15, mod:GetSetting("SoundExplosionCountDown"))
+        mod:AddTimerBar("BEAM", self.L["NEXT BEAM"], 58)
+        mod:AddTimerBar("DATA_DEVOURER", self.L["Next Data Devourer"], 68)
+        mod:AddTimerBar("NEXT_PILLAR", self.L["NEXT PILLAR"], 75)
     end
 end

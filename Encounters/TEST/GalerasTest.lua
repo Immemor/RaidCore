@@ -46,7 +46,7 @@ mod:RegisterDefaultTimerBarConfigs({
 -- Locals.
 ----------------------------------------------------------------------------------------------------
 local function InfiniteTimer2()
-    mod:AddTimerBar("INFINITE2", "Loop Timer outside", 10, nil, InfiniteTimer2)
+    mod:AddTimerBar("INFINITE2", self.L["Loop Timer outside"], 10, nil, InfiniteTimer2)
 end
 
 ----------------------------------------------------------------------------------------------------
@@ -58,13 +58,13 @@ function mod:OnBossEnable()
     Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
     Apollo.RegisterEventHandler("SPELL_CAST_END", "OnSpellCastEnd", self)
 
-    mod:AddTimerBar("INFINITE", "Timer in class", 12, false, mod.InfiniteTimer, mod)
-    mod:AddTimerBar("INFINITE2", "Timer outside", 12, nil, InfiniteTimer2)
-    mod:AddTimerBar("LONG", "Long long timer...", 1000)
+    mod:AddTimerBar("INFINITE", self.L["Timer in class"], 12, false, mod.InfiniteTimer, mod)
+    mod:AddTimerBar("INFINITE2", self.L["Timer outside"], 12, nil, InfiniteTimer2)
+    mod:AddTimerBar("LONG", self.L["Long long timer..."], 1000)
 end
 
 function mod:InfiniteTimer()
-    mod:AddTimerBar("INFINITE", "Loop Timer in class", 10, false, mod.InfiniteTimer, mod)
+    mod:AddTimerBar("INFINITE", self.L["Loop Timer in class"], 10, false, mod.InfiniteTimer, mod)
 end
 
 function mod:OnUnitCreated(unit, sName)
@@ -85,12 +85,12 @@ end
 
 function mod:OnSpellCastStart(unitName, castName, unit)
     if castName == self.L["Phaser Combo"] then
-        mod:AddTimerBar("UNIT", "End of Combo Phaser", 3)
+        mod:AddTimerBar("UNIT", self.L["End of Combo Phaser"], 3)
     end
 end
 
 function mod:OnSpellCastEnd(unitName, castName, unit)
     if castName == self.L["Phaser Combo"] then
-        mod:AddTimerBar("UNIT", "Next Combo Phaser", 5)
+        mod:AddTimerBar("UNIT", self.L["Next Combo Phaser"], 5)
     end
 end

@@ -84,7 +84,7 @@ function mod:OnChatDC(message)
         core:AddTimerBar("MAW1", self.L["Bomb %u"]:format(1), 20)
         core:AddTimerBar("MAW2", self.L["Bomb %u"]:format(2), 49)
         core:AddTimerBar("MAW3", self.L["Bomb %u"]:format(3), 78)
-        core:AddTimerBar("PHAGEMAW", "BOOOM !", 104)
+        core:AddTimerBar("PHAGEMAW", self.L["BOOOM !"], 104)
     elseif message:find(self.L["Phage Maw begins charging an orbital strike"]) then
         core:ResetMarks()
     end

@@ -113,8 +113,8 @@ function mod:OnBossEnable()
     nLastBombTime = 0
     tFireBombPlayersList = {}
     tFrostBombPlayersList = {}
-    mod:AddTimerBar("BOMBS", "BOMBS", 30)
-    mod:AddTimerBar("TOMB", "ICE TOMB", 26)
+    mod:AddTimerBar("BOMBS", self.L["BOMBS"], 30)
+    mod:AddTimerBar("TOMB", self.L["ICE TOMB"], 26)
 end
 
 function mod:RemoveBombMarker(bomb_type, unit)
@@ -169,7 +169,7 @@ function mod:OnUnitCreated(unit, sName)
         if nCurrentTime - nLastIceTombTime > 13 then
             nLastIceTombTime = nCurrentTime
             core:AddMsg("TOMB", self.L["ICE TOMB"], 5, mod:GetSetting("SoundIceTomb") and "Alert", "Blue")
-            mod:AddTimerBar("TOMB", "ICE TOMB", 15)
+            mod:AddTimerBar("TOMB", self.L["ICE TOMB"], 15)
         end
         core:AddUnit(unit)
     elseif sName == self.L["Flame Wave"] and mod:GetSetting("LineFlameWaves") then
@@ -226,8 +226,8 @@ function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
         local nCurrentTime = GetGameTime()
         if nCurrentTime - nLastBombTime > 10 then
             nLastBombTime = nCurrentTime
-            mod:AddTimerBar("BOMBS", "BOMBS", 30)
-            mod:AddTimerBar("BEXPLODE", "Bomb Explosion", 10, mod:GetSetting("SoundBomb"))
+            mod:AddTimerBar("BOMBS", self.L["BOMBS"], 30)
+            mod:AddTimerBar("BEXPLODE", self.L["Bomb Explosion"], 10, mod:GetSetting("SoundBomb"))
         end
     end
 end

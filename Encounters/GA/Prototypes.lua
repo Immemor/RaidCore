@@ -129,17 +129,17 @@ end
 
 function mod:OnChatDC(message)
     if message:find(self.L["Phagetech Commander is now active!"]) then
-        core:AddTimerBar("PROTO", "[2] TP + CROIX + BOTS", protoFirst and 20 or 60)
+        core:AddTimerBar("PROTO", self.L["[2] TP + CROIX + BOTS"], protoFirst and 20 or 60)
         if protoFirst then 
             protoFirst = nil
-            core:AddTimerBar("BERSERK", "BERSERK", 585)
+            core:AddTimerBar("BERSERK", self.L["BERSERK"], 585)
         end
     elseif message:find(self.L["Phagetech Augmentor is now active!"]) then
-        core:AddTimerBar("PROTO", "[3] SINGULARITY + VAGUE", 60)
+        core:AddTimerBar("PROTO", self.L["[3] SINGULARITY + VAGUE"], 60)
     elseif message:find(self.L["Phagetech Protector is now active!"]) then
-        core:AddTimerBar("SINGU", "Singularity", 5)
-        core:AddTimerBar("PROTO", "[4] SOAK + BOTS", 60)
+        core:AddTimerBar("SINGU", self.L["Singularity"], 5)
+        core:AddTimerBar("PROTO", self.L["[4] SOAK + BOTS"], 60)
     elseif message:find(self.L["Phagetech Fabricator is now active!"]) then
-        core:AddTimerBar("PROTO", "[1] LINK + KICK", 60)
+        core:AddTimerBar("PROTO", self.L["[1] LINK + KICK"], 60)
     end
 end

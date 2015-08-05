@@ -71,8 +71,8 @@ function mod:OnBossEnable()
 
     nGrandWarmongerTarGreshId = nil
     nPreviousWarmongerTime = 0
-    mod:AddTimerBar("STORM", "~METEOR STORM", 26)
-    mod:AddTimerBar("NEXT_KILL", "Next flame of Tar'gresh to kill", 45)
+    mod:AddTimerBar("STORM", self.L["~METEOR STORM"], 26)
+    mod:AddTimerBar("NEXT_KILL", self.L["Next flame of Tar'gresh to kill"], 45)
 end
 
 function mod:OnUnitCreated(tUnit, sUnitName)
@@ -90,7 +90,7 @@ function mod:OnUnitCreated(tUnit, sUnitName)
         local nCurrentTime = GetGameTime()
         if nPreviousWarmongerTime + 10 < nCurrentTime then
             nPreviousWarmongerTime = nCurrentTime
-            mod:AddTimerBar("NEXT_KILL", "Next flame of Tar'gresh to kill", 55)
+            mod:AddTimerBar("NEXT_KILL", self.L["Next flame of Tar'gresh to kill"], 55)
         end
     end
 end
@@ -106,7 +106,7 @@ end
 function mod:OnSpellCastEnd(sUnitName, sCastName, tUnit)
     if self.L["Grand Warmonger Tar'gresh"]  == sUnitName then
         if self.L["Meteor Storm"] == sCastName then
-            mod:AddTimerBar("STORM", "~METEOR STORM", 43)
+            mod:AddTimerBar("STORM", self.L["~METEOR STORM"], 43)
         end
     end
 end

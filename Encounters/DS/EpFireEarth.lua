@@ -97,8 +97,8 @@ function mod:OnBossEnable()
     nLavaFloorCount = 0
     local text = self.L["Next Obsidian"]:format(nObsidianPopCount, nObsidianPopMax)
     mod:AddTimerBar("OBSIDIAN", text, OBSIDIAN_POP_INTERVAL)
-    mod:AddTimerBar("LAVA_FLOOR", "Lava Floor Phase", 94)
-    mod:AddTimerBar("ENRAGE", "Enrage", 425)
+    mod:AddTimerBar("LAVA_FLOOR", self.L["Lava Floor Phase"], 94)
+    mod:AddTimerBar("ENRAGE", self.L["Enrage"], 425)
 end
 
 function mod:OnBuffAdded(nId, nSpellId, nStack, fTimeRemaining)
@@ -112,10 +112,10 @@ end
 
 function mod:OnChatDC(message)
     if message == self.L["The lava begins to rise through the floor!"] then
-        mod:AddTimerBar("LAVA_FLOOR", "End of Lava Floor", 28)
+        mod:AddTimerBar("LAVA_FLOOR", self.L["End of Lava Floor"], 28)
         nLavaFloorCount = nLavaFloorCount + 1
     elseif self.L["Time to die, sapients!"] == message then
-        mod:AddTimerBar("RAID_WIPE", "RAID WIPE", 34)
+        mod:AddTimerBar("RAID_WIPE", self.L["RAID WIPE"], 34)
     end
 end
 
@@ -141,7 +141,7 @@ function mod:OnUnitDestroyed(unit, sName)
         core:DropPixie(unit:GetId())
     elseif sName == self.L["Lava Floor (invis unit)"] then
         if nLavaFloorCount < 3 then
-            mod:AddTimerBar("LAVA_FLOOR", "Lava Floor Phase", 89)
+            mod:AddTimerBar("LAVA_FLOOR", self.L["Lava Floor Phase"], 89)
         end
         nObsidianPopCount = 1
         if nObsidianPopMax > 2 then

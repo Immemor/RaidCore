@@ -55,7 +55,7 @@ function mod:OnUnitCreated(unit, sName)
     if sName == self.L["Bio-Enhanced Broodmother"] then
         core:AddUnit(unit)
         core:WatchUnit(unit)
-        mod:AddTimerBar("BIOWEB", "Augmented Bio-Web", 46)
+        mod:AddTimerBar("BIOWEB", self.L["Augmented Bio-Web"], 46)
     end
 end
 
@@ -68,6 +68,6 @@ end
 
 function mod:OnSpellCastEnd(unitName, castName, unit)
     if castName == self.L["Augmented Bio-Web"] then
-        mod:AddTimerBar("BIOWEB", "Augmented Bio-Web", 44)
+        mod:AddTimerBar("BIOWEB", self.L["Augmented Bio-Web"], 44)
     end
 end

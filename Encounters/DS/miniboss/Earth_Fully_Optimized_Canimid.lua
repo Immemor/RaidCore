@@ -57,8 +57,8 @@ function mod:OnBossEnable()
     Apollo.RegisterEventHandler("SPELL_CAST_END", "OnSpellCastEnd", self)
     Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
 
-    mod:AddTimerBar("Terra-forme", "Terra-forme", 59.5)
-    mod:AddTimerBar("Undermine", "5 x undermine", 31.7)
+    mod:AddTimerBar("Terra-forme", self.L["Terra-forme"], 59.5)
+    mod:AddTimerBar("Undermine", self.L["5 x undermine"], 31.7)
 end
 
 function mod:OnUnitCreated(tUnit, sName)
@@ -83,8 +83,8 @@ function mod:OnSpellCastEnd(sName, sSpellName, tUnit)
        if self.L["Terra-forme"] == sSpellName then
            -- Timings are corrects only if the absorb have been broken.
            -- The MOO duration is 10s.
-           mod:AddTimerBar("Undermine", "5 x undermine", 28.8)
-           mod:AddTimerBar("Terra-forme", "Terra-forme", 66)
+           mod:AddTimerBar("Undermine", self.L["5 x undermine"], 28.8)
+           mod:AddTimerBar("Terra-forme", self.L["Terra-forme"], 66)
        end
    end
 end

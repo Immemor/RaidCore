@@ -79,7 +79,7 @@ function mod:OnBossEnable()
     nPreviousBombPopDate = 0
     bIsFirstBomb = true
     bIsFirstFireRoom = true
-    mod:AddTimerBar("BOMBS", "Bombs", 8)
+    mod:AddTimerBar("BOMBS", self.L["Bombs"], 8)
 end
 
 function mod:OnUnitCreated(tUnit, sUnitName)
@@ -89,7 +89,7 @@ function mod:OnUnitCreated(tUnit, sUnitName)
     elseif self.L["Conjured Fire Bomb"] == sUnitName then
         if nPreviousBombPopDate + 8 < GetGameTime() then
             -- Second bomb have huge chance to be delayed by elemental cast.
-            mod:AddTimerBar("BOMBS", "Bombs", bIsFirstBomb and 44 or 23)
+            mod:AddTimerBar("BOMBS", self.L["Bombs"], bIsFirstBomb and 44 or 23)
             core:AddMsg("BOMBS", self.L["Bombs"], 5, nil, "Blue")
             nPreviousBombPopDate = GetGameTime()
             bIsFirstBomb = false
@@ -121,7 +121,7 @@ end
 function mod:OnSpellCastEnd(sUnitName, sCastName, tUnit)
     if self.L["Warmonger Agratha"] == sUnitName then
         if self.L["Fire Room"] == sCastName then
-            mod:AddTimerBar("BUBBLE", "Safe Bubble", 50, true)
+            mod:AddTimerBar("BUBBLE", self.L["Safe Bubble"], 50, true)
         end
     end
 end

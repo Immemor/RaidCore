@@ -109,8 +109,8 @@ function mod:OnBossEnable()
 
     nMOOCount = 0
     bIsPhase2 = false
-    mod:AddTimerBar("MIDPHASE", "Middle Phase", 60, mod:GetSetting("SoundMidphase"))
-    mod:AddTimerBar("TOMB", "~Frost Tombs", 30, mod:GetSetting("SoundFrostTombsCountDown"))
+    mod:AddTimerBar("MIDPHASE", self.L["Middle Phase"], 60, mod:GetSetting("SoundMidphase"))
+    mod:AddTimerBar("TOMB", self.L["~Frost Tombs"], 30, mod:GetSetting("SoundFrostTombsCountDown"))
 end
 
 function mod:OnUnitCreated(tUnit, sName)
@@ -135,8 +135,8 @@ end
 function mod:OnSpellCastEnd(unitName, castName)
     if unitName == self.L["Hydroflux"] then
         if castName == self.L["Tsunami"] then
-            mod:AddTimerBar("MIDPHASE", "~Middle Phase", 88, mod:GetSetting("SoundMidphase"))
-            mod:AddTimerBar("TOMB", "~Frost Tombs", 30, mod:GetSetting("SoundFrostTombsCountDown"))
+            mod:AddTimerBar("MIDPHASE", self.L["~Middle Phase"], 88, mod:GetSetting("SoundMidphase"))
+            mod:AddTimerBar("TOMB", self.L["~Frost Tombs"], 30, mod:GetSetting("SoundFrostTombsCountDown"))
         end
     end
 end
@@ -145,10 +145,10 @@ function mod:OnBuffAdd(nId, nSpellId, nStack, fTimeRemaining)
     if bIsPhase2 and (nSpellId == BUFFID_MOO1 or nSpellId == BUFFID_MOO2) then
         bIsPhase2 = false
         core:AddMsg("MOO", self.L["MOO !"], 5, mod:GetSetting("SoundMoO") and "Info", "Blue")
-        mod:AddTimerBar("MOO", "MOO PHASE", 10, mod:GetSetting("SoundMoO"))
+        mod:AddTimerBar("MOO", self.L["MOO PHASE"], 10, mod:GetSetting("SoundMoO"))
         if nMOOCount == 2 then
             nMOOCount = 0
-            mod:AddTimerBar("ICESTORM", "ICESTORM", 15)
+            mod:AddTimerBar("ICESTORM", self.L["ICESTORM"], 15)
         end
     end
 end

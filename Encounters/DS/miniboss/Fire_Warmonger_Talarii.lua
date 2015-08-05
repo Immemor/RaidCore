@@ -85,7 +85,7 @@ function mod:OnBossEnable()
 
     nPreviousBombPopTime = 0
     bIsFirstFireRoom = true
-    mod:AddTimerBar("KNOCK", "KNOCKBACK", 23)
+    mod:AddTimerBar("KNOCK", self.L["KNOCKBACK"], 23)
 end
 
 function mod:OnUnitCreated(tUnit, sUnitName)
@@ -96,7 +96,7 @@ function mod:OnUnitCreated(tUnit, sUnitName)
         local nCurrentTime = GetGameTime()
         if nPreviousBombPopTime + 8 < nCurrentTime then
             core:AddMsg("BOMB", self.L["BOMB"], 5, nil, "Blue")
-            mod:AddTimerBar("BOMB", "BOMB", 23)
+            mod:AddTimerBar("BOMB", self.L["BOMB"], 23)
             nPreviousBombPopTime = nCurrentTime
         end
     end
@@ -114,7 +114,7 @@ function mod:OnSpellCastStart(sUnitName, sCastName, tUnit)
     if self.L["Warmonger Talarii"] == sUnitName then
         if self.L["Incineration"] == sCastName then
             core:AddMsg("KNOCK", self.L["INTERRUPT !"], 5, "Alert")
-            mod:AddTimerBar("KNOCK", "KNOCKBACK", 29)
+            mod:AddTimerBar("KNOCK", self.L["KNOCKBACK"], 29)
         elseif self.L["Conjure Fire Elementals"] == sCastName then
             core:AddMsg("ELEMENTALS", self.L["ELEMENTALS"], 5)
         elseif self.L["Fire Room"] == sCastName then
@@ -129,7 +129,7 @@ end
 function mod:OnSpellCastEnd(sUnitName, sCastName, tUnit)
     if self.L["Warmonger Talarii"] == sUnitName then
         if self.L["Fire Room"] == sCastName then
-            mod:AddTimerBar("BUBBLE", "Safe Bubble", 50, true)
+            mod:AddTimerBar("BUBBLE", self.L["Safe Bubble"], 50, true)
         end
     end
 end
