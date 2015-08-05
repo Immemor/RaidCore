@@ -125,6 +125,7 @@ mod:RegisterDefaultTimerBarConfigs({
 ----------------------------------------------------------------------------------------------------
 -- Constants.
 ----------------------------------------------------------------------------------------------------
+local DEBUFFID_CHROMOSOME_CORRUPTION = 56652
 
 ----------------------------------------------------------------------------------------------------
 -- Locals.
@@ -217,7 +218,7 @@ function mod:OnChatNPCSay(message)
 end
 
 function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
-    if nSpellId == 56652 then
+    if nSpellId == DEBUFFID_CHROMOSOME_CORRUPTION then
         local tUnit = GetUnitById(nId)
         if tUnit then
             core:MarkUnit(tUnit)
