@@ -111,7 +111,7 @@ function mod:OnBossEnable()
     Apollo.RegisterEventHandler("DEBUFF_ADD", "OnDebuffAdd", self)
 
     nPreviousDefragmentTime = 0
-    mod:AddTimerBar("DEFRAG", "DEFRAG", 10)
+    mod:AddTimerBar("DEFRAG", self.L["DEFRAG"], 10)
     mod:AddTimerBar("STAR", self.L["STARS"]:format(""), 60)
 end
 
@@ -137,8 +137,8 @@ function mod:OnSpellCastStart(unitName, castName, unit)
             if timeOfEvent - nPreviousDefragmentTime > 10 then
                 nPreviousDefragmentTime = timeOfEvent
                 core:AddMsg("DEFRAG", self.L["SPREAD"], 5, mod:GetSetting("SoundDefrag") and "Alarm")
-                mod:AddTimerBar("BOOM", "BOOM", 9)
-                mod:AddTimerBar("DEFRAG", "DEFRAG", 40)
+                mod:AddTimerBar("BOOM", self.L["BOOM"], 9)
+                mod:AddTimerBar("DEFRAG", self.L["DEFRAG"], 40)
             end
         end
     end

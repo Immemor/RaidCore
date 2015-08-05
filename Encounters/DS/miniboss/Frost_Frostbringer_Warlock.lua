@@ -75,8 +75,8 @@ function mod:OnBossEnable()
     nFrostbringerWarlockId = nil
     nGlacierPopTime = 0
     bIsPhase2 = false
-    mod:AddTimerBar("WAVES", "Frost Waves", 36)
-    mod:AddTimerBar("EXPLODING_ICE", "Exploding Ice", 17)
+    mod:AddTimerBar("WAVES", self.L["Frost Waves"], 36)
+    mod:AddTimerBar("EXPLODING_ICE", self.L["Exploding Ice"], 17)
 end
 
 function mod:OnUnitCreated(tUnit, sUnitName)
@@ -119,9 +119,9 @@ end
 function mod:OnSpellCastEnd(sUnitName, sCastName, tUnit)
     if self.L["Frostbringer Warlock"] == sUnitName then
         if self.L["Frost Waves"] == sCastName then
-            mod:AddTimerBar("WAVES", "Frost Waves", 36)
-            mod:AddTimerBar("EXPLODING_ICE", "Exploding Ice", 36.5)
-            mod:AddTimerBar("GLACIER", "Glacier", 12)
+            mod:AddTimerBar("WAVES", self.L["Frost Waves"], 36)
+            mod:AddTimerBar("EXPLODING_ICE", self.L["Exploding Ice"], 36.5)
+            mod:AddTimerBar("GLACIER", self.L["Glacier"], 12)
         end
     end
 end
@@ -131,7 +131,7 @@ function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
         local nCurrentTime = GetGameTime()
         if nGlacierPopTime + 5 < nCurrentTime then
             nGlacierPopTime = nCurrentTime
-            mod:AddTimerBar("GLACIER", "Glacier", 51)
+            mod:AddTimerBar("GLACIER", self.L["Glacier"], 51)
         end
     end
 end

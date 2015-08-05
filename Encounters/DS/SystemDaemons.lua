@@ -239,7 +239,7 @@ function mod:OnBossEnable()
     core:AddSync("SOUTH_SURGE", 5)
 
     if mod:GetSetting("OtherDisconnectTimer") then
-        mod:AddTimerBar("DISCONNECT", "Disconnect", 41)
+        mod:AddTimerBar("DISCONNECT", self.L["Disconnect"], 41)
     end
     mod:AddTimerBar("SDWAVE", self.L["[%u] WAVE"]:format(1), 15, mod:GetSetting("SoundWave"))
 end
@@ -349,21 +349,21 @@ function mod:OnSpellCastStart(unitName, castName, unit)
         if self:GetDistanceBetweenUnits(GameLib.GetPlayerUnit(), unit) < 40 then
             core:AddMsg("PURGE", self.L["PURGE NEAR YOU!"], 5, mod:GetSetting("SoundPurge") and "Beware")
             if unitName == self.L["Null System Daemon"] then
-                mod:AddTimerBar("PURGE_NULL", "PURGE - NULL", 27)
+                mod:AddTimerBar("PURGE_NULL", self.L["PURGE - NULL"], 27)
             elseif unitName == self.L["Binary System Daemon"] then
-                mod:AddTimerBar("PURGE_BINARY", "PURGE - BINARY", 27)
+                mod:AddTimerBar("PURGE_BINARY", self.L["PURGE - BINARY"], 27)
             end
         elseif phase2 then
             if unitName == self.L["Null System Daemon"] then
-                mod:AddTimerBar("PURGE_NULL", "PURGE - NULL", 27)
+                mod:AddTimerBar("PURGE_NULL", self.L["PURGE - NULL"], 27)
             elseif unitName == self.L["Binary System Daemon"] then
-                mod:AddTimerBar("PURGE_BINARY", "PURGE - BINARY", 27)
+                mod:AddTimerBar("PURGE_BINARY", self.L["PURGE - BINARY"], 27)
             end
         end
     elseif unitName == self.L["Defragmentation Unit"] then
             if GetCurrentSubZoneName():find("Infinite Generator Core") and castName == self.L["Black IC"] then
                 core:AddMsg("BLACKIC", self.L["INTERRUPT !"], 5, "Alert")
-                mod:AddTimerBar("BLACKIC", "BLACK IC", 30)
+                mod:AddTimerBar("BLACKIC", self.L["BLACK IC"], 30)
             end
     elseif unitName == self.L["Recovery Protocol"] and castName == self.L["Repair Sequence"] then
         if self:GetDistanceBetweenUnits(GameLib.GetPlayerUnit(), unit) < 50 then
@@ -420,9 +420,9 @@ function mod:OnZoneChanged(zoneId, zoneName)
                     local NO_BREAK_SPACE = string.char(194, 160)
                     local unitName = unit:GetName():gsub(NO_BREAK_SPACE, " ")
                     if unitName == self.L["Null System Daemon"] then
-                        mod:AddTimerBar("PURGE_NULL", "PURGE - NULL", timer + 27 - timeOfEvent)
+                        mod:AddTimerBar("PURGE_NULL", self.L["PURGE - NULL"], timer + 27 - timeOfEvent)
                     elseif unitName == self.L["Binary System Daemon"] then
-                        mod:AddTimerBar("PURGE_BINARY", "PURGE - BINARY", timer + 27 - timeOfEvent)
+                        mod:AddTimerBar("PURGE_BINARY", self.L["PURGE - BINARY"], timer + 27 - timeOfEvent)
                     end
                 end
             end
@@ -458,7 +458,7 @@ function mod:OnChatDC(message)
             phase2warn = false
         end
         if mod:GetSetting("OtherDisconnectTimer") then
-            mod:AddTimerBar("DISCONNECT", "Disconnect", 60)
+            mod:AddTimerBar("DISCONNECT", self.L["Disconnect"], 60)
         end
     elseif message:find(self.L["COMMENCING ENHANCEMENT SEQUENCE"]) then
         phase2, phase2warn = true, false
@@ -466,7 +466,7 @@ function mod:OnChatDC(message)
         core:RemoveTimerBar("SDWAVE")
         core:AddMsg("SDP2", self.L["PHASE 2 !"], 5, mod:GetSetting("SoundPhase2") and "Alarm")
         if mod:GetSetting("OtherDisconnectTimer") then
-            mod:AddTimerBar("DISCONNECT", "Disconnect", 85)
+            mod:AddTimerBar("DISCONNECT", self.L["Disconnect"], 85)
         end
         if mod:GetSetting("OtherPillarMarkers") then
             if phase2count == 1 then

@@ -49,7 +49,7 @@ function mod:OnBossEnable()
     Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
     Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
 
-    mod:AddTimerBar("CUBE", "CUBE SMASH", 8)
+    mod:AddTimerBar("CUBE", self.L["CUBE SMASH"], 8)
 end
 
 function mod:OnUnitCreated(unit, sName)
@@ -62,7 +62,7 @@ end
 function mod:OnSpellCastStart(sName, sSpellName, tUnit)
     if self.L["Augmented Herald of Avatus"] == sName then
         if self.L["Cube Smash"] == sSpellName then
-            mod:AddTimerBar("CUBE", "CUBE SMASH", 17)
+            mod:AddTimerBar("CUBE", self.L["CUBE SMASH"], 17)
         end
     end
 end

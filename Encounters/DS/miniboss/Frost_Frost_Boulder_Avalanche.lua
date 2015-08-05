@@ -91,8 +91,8 @@ function mod:OnBossEnable()
     Apollo.RegisterEventHandler("UNIT_HEALTH", "OnHealthChanged", self)
 
     icicleSpell = false
-    mod:AddTimerBar("ICICLE", "~" .. self.L["ICICLE"], 17)
-    mod:AddTimerBar("SHATTER", "~" .. self.L["Shatter"], 30)
+    mod:AddTimerBar("ICICLE", self.L["~"] .. self.L["ICICLE"], 17)
+    mod:AddTimerBar("SHATTER", self.L["~"] .. self.L["Shatter"], 30)
 end
 
 function mod:OnUnitCreated(tUnit, sName)
@@ -117,22 +117,22 @@ function mod:OnSpellCastStart(sUnitName, sCastName, unit)
         if self.L["Icicle Storm"] == sCastName then
             mod:RemoveTimerBar("SHATTER")
             core:AddMsg("ICICLE", self.L["ICICLE"].." !!", 5, "Alert")
-            mod:AddTimerBar("ICICLE", "ICICLE", 22)
+            mod:AddTimerBar("ICICLE", self.L["ICICLE"], 22)
             icicleSpell = true
         elseif self.L["Shatter"] == sCastName then
             core:AddMsg("SHATTER", self.L["Shatter"]:upper().." !!", 5, "Alert")
-            mod:AddTimerBar("SHATTER", "Shatter", 30)
+            mod:AddTimerBar("SHATTER", self.L["Shatter"], 30)
         elseif self.L["Cyclone"] == sCastName then
             core:AddMsg("CYCLONE", self.L["Cyclone"]:upper(), 5, "RunAway")
-            mod:AddTimerBar("RUN", "RUNNNN", 23, 1)
+            mod:AddTimerBar("RUN", self.L["RUNNNN"], 23, 1)
             if icicleSpell then
-                mod:AddTimerBar("1ST", "1ST ABILITY", 33)
-                mod:AddTimerBar("2ND", "2ND ABILITY", 40.5)
-                mod:AddTimerBar("3RD", "3RD ABILITY", 48)
+                mod:AddTimerBar("1ST", self.L["1ST ABILITY"], 33)
+                mod:AddTimerBar("2ND", self.L["2ND ABILITY"], 40.5)
+                mod:AddTimerBar("3RD", self.L["3RD ABILITY"], 48)
             else
-                mod:AddTimerBar("SHATTER", "Shatter", 30)
+                mod:AddTimerBar("SHATTER", self.L["Shatter"], 30)
             end
-            mod:AddTimerBar("CYCLONE", "Cyclone", 90, true)
+            mod:AddTimerBar("CYCLONE", self.L["Cyclone"], 90, true)
         end
     end
 end

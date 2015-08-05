@@ -287,8 +287,8 @@ function mod:OnBossEnable()
     nPurgeCount = 0
     nGunGridLastPopTime = GetGameTime() + 20
 
-    mod:AddTimerBar("OBBEAM", "Obliteration Beam", 69, mod:GetSetting("SoundObliterationBeam"))
-    mod:AddTimerBar("GGRID", "~Gun Grid", 20, mod:GetSetting("SoundGunGrid"))
+    mod:AddTimerBar("OBBEAM", self.L["Obliteration Beam"], 69, mod:GetSetting("SoundObliterationBeam"))
+    mod:AddTimerBar("GGRID", self.L["~Gun Grid"], 20, mod:GetSetting("SoundGunGrid"))
     if mod:GetSetting("OtherHandSpawnMarkers") then
         core:SetWorldMarker("HAND1", self.L["Hand %u"]:format(1), HAND_MAKERS["hand1"])
         core:SetWorldMarker("HAND2", self.L["Hand %u"]:format(2), HAND_MAKERS["hand2"])
@@ -491,7 +491,7 @@ function mod:OnSpellCastStart(unitName, castName, unit)
         mod:RemoveTimerBar("OBBEAM")
         -- Check if next ob beam in sec doesn't happen during a gungrid which takes 20 sec.
         if nGunGridLastPopTime + 132 < GetGameTime() + 37 then
-            mod:AddTimerBar("OBBEAM", "Obliteration Beam", 37, mod:GetSetting("SoundObliterationBeam"))
+            mod:AddTimerBar("OBBEAM", self.L["Obliteration Beam"], 37, mod:GetSetting("SoundObliterationBeam"))
         end
     elseif unitName == self.L["Holo Hand"] and castName == self.L["Crushing Blow"] then
         local playerUnit = GetPlayerUnit()
@@ -511,7 +511,7 @@ function mod:OnSpellCastStart(unitName, castName, unit)
             core:AddMsg("CRBLOW", self.L["INTERRUPT CRUSHING BLOW!"], 5, mod:GetSetting("SoundHandInterrupt") and "Inferno")
         end
     elseif unitName == self.L["Mobius Physics Constructor"] and castName == self.L["Data Flare"] then
-        mod:AddTimerBar("BLIND", "Blind", 29, mod:GetSetting("SoundBlindYellowRoom"))
+        mod:AddTimerBar("BLIND", self.L["Blind"], 29, mod:GetSetting("SoundBlindYellowRoom"))
         core:AddMsg("BLIND", self.L["BLIND! TURN AWAY FROM BOSS"], 5, mod:GetSetting("SoundBlindYellowRoom") and "Inferno")
     end
 end
@@ -520,11 +520,11 @@ function mod:OnChatDC(message)
     if message:find(self.L["Gun Grid Activated"]) then
         nGunGridLastPopTime = GetGameTime()
         core:AddMsg("GGRIDMSG", self.L["Gun Grid NOW!"], 5, mod:GetSetting("SoundGunGrid") and "Beware")
-        mod:AddTimerBar("GGRID", "~Gun Grid", 112, mod:GetSetting("SoundGunGrid"))
+        mod:AddTimerBar("GGRID", self.L["~Gun Grid"], 112, mod:GetSetting("SoundGunGrid"))
         if bIsHoloHand then
-            mod:AddTimerBar("HOLO", "Holo Hand", 22)
+            mod:AddTimerBar("HOLO", self.L["Holo Hand"], 22)
         else
-            mod:AddTimerBar("HOLO", "Holo Cannon", 22)
+            mod:AddTimerBar("HOLO", self.L["Holo Cannon"], 22)
         end
         bIsHoloHand = not bIsHoloHand
     end

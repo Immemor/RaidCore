@@ -86,8 +86,8 @@ function mod:OnBossEnable()
     tKickerList = {}
     nLastKickerId = nil
     nExpectedKickerId = nil
-    mod:AddTimerBar("NEXT_INTERRUPT", "Next interrupt", INTERRUPT_INTERVAL)
-    mod:AddTimerBar("NEXT_QUANTUM_AMPLIFIED", "Next quantum amplified", 30)
+    mod:AddTimerBar("NEXT_INTERRUPT", self.L["Next interrupt"], INTERRUPT_INTERVAL)
+    mod:AddTimerBar("NEXT_QUANTUM_AMPLIFIED", self.L["Next quantum amplified"], 30)
 
     for i = 1, GroupLib.GetMemberCount() do
         local tMember = GroupLib.GetGroupMember(i)
@@ -106,7 +106,7 @@ function mod:OnUnitCreated(unit, sName)
     elseif self.L["Quantum Processing Unit"] == sName then
         core:AddUnit(unit)
         core:MarkUnit(unit)
-        mod:AddTimerBar("NEXT_QUANTUM_AMPLIFIED", "Next quantum amplified", 35)
+        mod:AddTimerBar("NEXT_QUANTUM_AMPLIFIED", self.L["Next quantum amplified"], 35)
     end
 end
 
@@ -157,7 +157,7 @@ function mod:OnDebuffAddedOrUpdated(nId, nSpellId, nStack, fTimeRemaining)
                     core:AddMsg("KICKER", sMessage, INTERRUPT_INTERVAL, nil, "red")
                 end
             else
-                mod:AddTimerBar("NEXT_INTERRUPT", "Next interrupt", INTERRUPT_INTERVAL)
+                mod:AddTimerBar("NEXT_INTERRUPT", self.L["Next interrupt"], INTERRUPT_INTERVAL)
             end
         end
     end

@@ -153,7 +153,7 @@ end
 function mod:OnEnteredCombat(tUnit, bInCombat, sName)
     if bInCombat then
         if sName == self.L["Weather Station"] then
-            mod:AddTimerBar("STATION", "STATION", 25)
+            mod:AddTimerBar("STATION", self.L["STATION"], 25)
             nStationCount = nStationCount + 1
             local tStationPos = tUnit:GetPosition()
             local sMessage = "STATION"
@@ -183,7 +183,7 @@ function mod:OnSpellCastStart(unitName, castName, unit)
         if castName == self.L["Activate Weather Cycle"] then
             bossPos = unit:GetPosition()
             nStationCount = 0
-            mod:AddTimerBar("STATION", "STATION", 13)
+            mod:AddTimerBar("STATION", self.L["STATION"], 13)
         elseif castName == self.L["Ice Breath"] then
             core:AddMsg("BREATH", self.L["ICE BREATH"], 5, mod:GetSetting("SoundIceBreath") and "RunAway")
         elseif castName == self.L["Crystallize"] then
@@ -197,6 +197,6 @@ end
 function mod:OnChatDC(message)
     if message:find(self.L["The platform trembles"]) then
         mod:RemoveTimerBar("STATION")
-        mod:AddTimerBar("JUMP", "JUMP", 7, true)
+        mod:AddTimerBar("JUMP", self.L["JUMP"], 7, true)
     end
 end

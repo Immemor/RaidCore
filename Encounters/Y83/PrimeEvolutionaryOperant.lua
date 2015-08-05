@@ -105,7 +105,7 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
             core:AddUnit(unit)
             core:MarkUnit(unit, 51, "M")
             core:WatchUnit(unit)
-            mod:AddTimerBar("NEXT_IRRADIATE", "~Next irradiate", 27, true)
+            mod:AddTimerBar("NEXT_IRRADIATE", self.L["~Next irradiate"], 27, true)
         end
     end
 end
@@ -114,8 +114,8 @@ function mod:OnChatDC(message)
     local sPlayerNameIrradiate = message:match(self.L["(.*) is being irradiated"])
     if sPlayerNameIrradiate then
         -- Sometime it's 26s, sometime 27s or 28s.
-        mod:AddTimerBar("NEXT_IRRADIATE", "~Next irradiate", 26, true)
+        mod:AddTimerBar("NEXT_IRRADIATE", self.L["~Next irradiate"], 26, true)
     elseif message == self.L["ENGAGING TECHNOPHAGE TRASMISSION"] then
-        mod:AddTimerBar("NEXT_IRRADIATE", "~Next irradiate", 40, true)
+        mod:AddTimerBar("NEXT_IRRADIATE", self.L["~Next irradiate"], 40, true)
     end
 end

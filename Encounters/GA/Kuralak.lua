@@ -161,7 +161,7 @@ end
 function mod:OnChatDC(message)
     if message:find(self.L["Kuralak the Defiler returns to the Archive Core"]) then
         core:AddMsg("VANISH", self.L["VANISH"], 5, "Alert")
-        core:AddTimerBar("VANISH", "Vanish", 47)
+        core:AddTimerBar("VANISH", self.L["Vanish"], 47)
     elseif message:find(self.L["Kuralak the Defiler causes a violent outbreak of corruption"]) then
         core:AddMsg("OUTBREAK", self.L["OUTBREAK"], 5, "RunAway")
         outbreakCount = outbreakCount + 1
@@ -173,7 +173,7 @@ function mod:OnChatDC(message)
         core:AddMsg("EGGS", (self.L["EGGS (%s)"]):format(math.pow(2, eggsCount-1)), 5, "Alert")
         eggsCount = eggsCount + 1
         if eggsCount == 5 then
-            core:AddTimerBar("EGGS", "BERSERK !!", 66)
+            core:AddTimerBar("EGGS", self.L["BERSERK !!"], 66)
             eggsCount = 2
         else
             core:AddTimerBar("EGGS", self.L["Eggs (%s)"]:format(math.pow(2, eggsCount-1)), 66)

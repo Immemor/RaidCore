@@ -104,8 +104,8 @@ function mod:OnBossEnable()
     nRefTime = nTime
     bMidPhase = false
 
-    mod:AddTimerBar("SUPERCELL", "Supercell", 65, mod:GetSetting("SoundSupercell"))
-    mod:AddTimerBar("TORNADO", "~Tornado Spawn", 16, mod:GetSetting("SoundTornadoCountDown"))
+    mod:AddTimerBar("SUPERCELL", self.L["Supercell"], 65, mod:GetSetting("SoundSupercell"))
+    mod:AddTimerBar("TORNADO", self.L["~Tornado Spawn"], 16, mod:GetSetting("SoundTornadoCountDown"))
 end
 
 function mod:OnUnitCreated(unit, sName)
@@ -124,7 +124,7 @@ function mod:OnUnitCreated(unit, sName)
             core:AddLine(unit:GetId(), 2, unit, nil, 3, 30, 0, 10)
         end
         if GetGameTime() > nStartTime + 10 then
-            mod:AddTimerBar("TORNADO", "~Tornado Spawn", 17, mod:GetSetting("SoundTornadoCountDown"))
+            mod:AddTimerBar("TORNADO", self.L["~Tornado Spawn"], 17, mod:GetSetting("SoundTornadoCountDown"))
         end
     end
 end
@@ -141,7 +141,7 @@ function mod:OnSpellCastStart(unitName, castName, unit)
             bMidPhase = true
             core:AddMsg("RAW", self.L["Raw Power"]:upper(), 5, mod:GetSetting("SoundMidphase") and "Alert")
         elseif castName == self.L["Fierce Swipe"] then
-            mod:AddTimerBar("FIERCE_SWIPE", "Fierce Swipe", 16.5)
+            mod:AddTimerBar("FIERCE_SWIPE", self.L["Fierce Swipe"], 16.5)
         end
     elseif unitName == self.L["Aileron"] then
         if castName == self.L["Supercell"] then
@@ -149,7 +149,7 @@ function mod:OnSpellCastStart(unitName, castName, unit)
             if timeOfEvent - nRefTime > 30 then
                 nRefTime = timeOfEvent
                 core:AddMsg("SUPERCELL", self.L["Supercell"]:upper(), 5, mod:GetSetting("SoundSupercell") and "Alarm")
-                mod:AddTimerBar("SUPERCELL", "Supercell", 80)
+                mod:AddTimerBar("SUPERCELL", self.L["Supercell"], 80)
             end
         end
     end
@@ -160,6 +160,6 @@ function mod:OnChatDC(message)
         core:AddMsg("QUAKE", "JUMP !", 3, mod:GetSetting("SoundQuakeJump") and "Beware")
     elseif message:find(self.L["fractured crust leaves it exposed"]) and bMidPhase then
         bMidPhase = false
-        mod:AddTimerBar("RAWPOWER", "Raw Power", 60, mod:GetSetting("SoundMidphase"))
+        mod:AddTimerBar("RAWPOWER", self.L["Raw Power"], 60, mod:GetSetting("SoundMidphase"))
     end
 end

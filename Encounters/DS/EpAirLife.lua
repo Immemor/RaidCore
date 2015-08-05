@@ -152,8 +152,8 @@ function mod:OnBossEnable()
     nTreeKeeperCount = 0
     tTreeKeeperList = {}
 
-    mod:AddTimerBar("MIDPHASE", "Middle Phase", 90, mod:GetSetting("SoundMidphaseCountDown"))
-    mod:AddTimerBar("THORN", "Thorns", 20)
+    mod:AddTimerBar("MIDPHASE", self.L["Middle Phase"], 90, mod:GetSetting("SoundMidphaseCountDown"))
+    mod:AddTimerBar("THORN", self.L["Thorns"], 20)
 end
 
 function mod:OnUnitCreated(tUnit, sName)
@@ -164,9 +164,9 @@ function mod:OnUnitCreated(tUnit, sName)
         if nLastThornsTime + 5 < nCurrentTime and nCurrentTime + 16 < nMidPhaseTime then
             nLastThornsTime = nCurrentTime
             nTwirlCount = nTwirlCount + 1
-            mod:AddTimerBar("THORN", "Thorns", 15)
+            mod:AddTimerBar("THORN", self.L["Thorns"], 15)
             if nTwirlCount % 2 == 1 then
-                mod:AddTimerBar("TWIRL", "Twirl", 15)
+                mod:AddTimerBar("TWIRL", self.L["Twirl"], 15)
             end
         end
     elseif sName == self.L["[DS] e395 - Air - Tornado"] then
@@ -176,9 +176,9 @@ function mod:OnUnitCreated(tUnit, sName)
             nLightningStrikeCount = 0
             nTwirlCount = 0
             nMidPhaseTime = nCurrentTime + 115
-            mod:AddTimerBar("MIDEND", "Midphase Ending", 35)
-            mod:AddTimerBar("THORN", "Thorns", 35)
-            mod:AddTimerBar("LIFEKEEP", "Next Healing Tree", 35)
+            mod:AddTimerBar("MIDEND", self.L["Midphase Ending"], 35)
+            mod:AddTimerBar("THORN", self.L["Thorns"], 35)
+            mod:AddTimerBar("LIFEKEEP", self.L["Next Healing Tree"], 35)
         end
     elseif sName == self.L["Life Force"] then
         if mod:GetSetting("LineLifeOrbs") then
@@ -207,7 +207,7 @@ function mod:OnUnitCreated(tUnit, sName)
             core:MarkUnit(GetUnitById(tTreeKeeperList[nTreeKeeperCount - 1]), nil, nTreeKeeperCount - 1)
             core:MarkUnit(GetUnitById(tTreeKeeperList[nTreeKeeperCount]), nil, nTreeKeeperCount)
             if nTreeKeeperCount == 2 then
-                mod:AddTimerBar("LIFEKEEP", "Next Healing Tree", 30, mod:GetSetting("SoundHealingTreeCountDown"))
+                mod:AddTimerBar("LIFEKEEP", self.L["Next Healing Tree"], 30, mod:GetSetting("SoundHealingTreeCountDown"))
             end
         end
     elseif sName == self.L["Aileron"] then
@@ -232,7 +232,7 @@ function mod:OnUnitDestroyed(unit, sName)
     local nId = unit:GetId()
     if bIsMidPhase and sName == self.L["[DS] e395 - Air - Tornado"] then
         bIsMidPhase = false
-        mod:AddTimerBar("MIDPHASE", "Middle Phase", 90, mod:GetSetting("SoundMidphaseCountDown"))
+        mod:AddTimerBar("MIDPHASE", self.L["Middle Phase"], 90, mod:GetSetting("SoundMidphaseCountDown"))
     elseif sName == self.L["Life Force"] then
         core:DropPixie(nId)
     elseif sName == self.L["Lifekeeper"] then
