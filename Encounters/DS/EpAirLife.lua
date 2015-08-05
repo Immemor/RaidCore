@@ -188,9 +188,6 @@ function mod:OnUnitCreated(tUnit, sName)
         core:AddUnit(tUnit)
         nTreeKeeperCount = nTreeKeeperCount + 1
         tTreeKeeperList[nTreeKeeperCount] = nId
-        if mod:GetSetting("LineHealingTrees") then
-            core:AddPixie(nId, 1, GetPlayerUnit(), tUnit, "Yellow", 2)
-        end
         if nTreeKeeperCount % 2 == 0 then
             local Tree1_Pos = GetUnitById(tTreeKeeperList[nTreeKeeperCount - 1]):GetPosition()
             local Tree2_Pos = GetUnitById(tTreeKeeperList[nTreeKeeperCount]):GetPosition()
@@ -236,7 +233,6 @@ function mod:OnUnitDestroyed(unit, sName)
     elseif sName == self.L["Life Force"] then
         core:DropPixie(nId)
     elseif sName == self.L["Lifekeeper"] then
-        core:DropPixie(nId)
         for i, nTreeId in next, tTreeKeeperList do
             if nTreeId == nId then
                 tTreeKeeperList[i] = nil
