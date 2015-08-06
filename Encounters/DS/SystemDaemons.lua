@@ -183,6 +183,8 @@ mod:RegisterDefaultTimerBarConfigs({
 ----------------------------------------------------------------------------------------------------
 -- Constants.
 ----------------------------------------------------------------------------------------------------
+local DEBUFFID_PURGE = 79399
+local DEBUFFID_OVERLOAD = 43012
 local probesouth = { x = 95.89, y = -337.19, z = 211.26 }
 local PILLARS_POSITIONS = {
     ["mid1"] = {
@@ -208,6 +210,9 @@ local PILLARS_POSITIONS = {
 ----------------------------------------------------------------------------------------------------
 -- locals.
 ----------------------------------------------------------------------------------------------------
+local GetGameTime = GameLib.GetGameTime
+local GetUnitById = GameLib.GetUnitById
+local GetPlayerUnit = GameLib.GetPlayerUnit
 local sdwaveCount, probeCount, sdSurgeCount, PurgeLast = 0, 0, {}, {}
 local phase2warn, phase2 = false, false
 local phase2count = 0
@@ -215,6 +220,7 @@ local intNorth, intSouth = nil, nil
 local prev = 0
 local nbKick = 2
 local playerName
+local nLastPurgeTime
 
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
@@ -224,8 +230,8 @@ function mod:OnBossEnable()
     Apollo.RegisterEventHandler("RC_UnitDestroyed", "OnUnitDestroyed", self)
     Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
     Apollo.RegisterEventHandler("SPELL_CAST_END", "OnSpellCastEnd", self)
-    Apollo.RegisterEventHandler("DEBUFF_APPLIED", "OnDebuffApplied", self)
-    Apollo.RegisterEventHandler("DEBUFF_REMOVED", "OnDebuffRemoved", self)
+    Apollo.RegisterEventHandler("DEBUFF_ADD", "OnDebuffAdd", self)
+    Apollo.RegisterEventHandler("DEBUFF_DEL", "OnDebuffDel", self)
     Apollo.RegisterEventHandler("UNIT_HEALTH", "OnHealthChanged", self)
     Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
     Apollo.RegisterEventHandler("RAID_SYNC", "OnSyncRcv", self)
@@ -234,6 +240,7 @@ function mod:OnBossEnable()
     sdwaveCount, probeCount = 0, 0
     phase2warn, phase2 = false, false
     phase2count = 0
+    nLastPurgeTime = 0
     playerName = GameLib.GetPlayerUnit():GetName()
     core:AddSync("NORTH_SURGE", 5)
     core:AddSync("SOUTH_SURGE", 5)
@@ -347,7 +354,6 @@ function mod:OnSpellCastStart(unitName, castName, unit)
     elseif castName == "Purge" then
         PurgeLast[unit:GetId()] = GameLib.GetGameTime()
         if self:GetDistanceBetweenUnits(GameLib.GetPlayerUnit(), unit) < 40 then
-            core:AddMsg("PURGE", self.L["PURGE NEAR YOU!"], 5, mod:GetSetting("SoundPurge") and "Beware")
             if unitName == self.L["Null System Daemon"] then
                 mod:AddTimerBar("PURGE_NULL", "PURGE - NULL", 27)
             elseif unitName == self.L["Binary System Daemon"] then
@@ -379,32 +385,37 @@ function mod:RemoveHealMarker(unit)
     core:DropMark(unit:GetId())
 end
 
-function mod:OnDebuffApplied(unitName, splId, unit)
-    local eventTime = GameLib.GetGameTime()
-    local tSpell = GameLib.GetSpell(splId)
-    local strSpellName = tSpell:GetName()
-    if strSpellName == "Overload" then
+function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
+    local nCurrentTime = GetGameTime()
+    local tUnit = GetUnitById(nId)
+
+    if DEBUFFID_OVERLOAD == nSpellId then
         if mod:GetSetting("OtherOverloadMarkers") then
-            core:MarkUnit(unit, nil, "DOT DMG")
+            core:MarkUnit(tUnit, nil, "DOT DMG")
         end
-    elseif strSpellName == "Purge" then
+    elseif DEBUFFID_PURGE == nSpellId then
         if mod:GetSetting("OtherPurgePlayerMarkers") then
-            core:MarkUnit(unit, nil, "PURGE")
+            core:MarkUnit(tUnit, nil, "PURGE")
         end
-        if unitName == playerName then
-            core:AddMsg("PURGEDEBUFF", self.L["PURGE ON YOU"], 5, mod:GetSetting("SoundPurge") and "Beware")
+        local tPlayerUnit = GetPlayerUnit()
+        local sSound = nil
+        if nLastPurgeTime + 2 < nCurrentTime then
+            nLastPurgeTime = nCurrentTime
+            sSound = mod:GetSetting("SoundPurge") and "Beware"
+        end
+        if nId == tPlayerUnit:GetId() then
+            core:AddMsg("PURGEDEBUFF", self.L["PURGE ON YOU"], 5, sSound)
+        elseif mod:GetDistanceBetweenUnits(tPlayerUnit, tUnit) < 8 then
+            core:AddMsg("PURGE", self.L["PURGE NEAR YOU!"], 2, sSound)
         end
     end
 end
 
-function mod:OnDebuffRemoved(unitName, splId, unit)
-    local eventTime = GameLib.GetGameTime()
-    local tSpell = GameLib.GetSpell(splId)
-    local strSpellName = tSpell:GetName()
-    if strSpellName == "Overload" then
-        core:DropMark(unit:GetId())
-    elseif strSpellName == "Purge" then
-        core:DropMark(unit:GetId())
+function mod:OnDebuffDel(nId, nSpellId)
+    if DEBUFFID_OVERLOAD == nSpellId then
+        core:DropMark(nId)
+    elseif DEBUFFID_PURGE == nSpellId then
+        core:DropMark(nId)
     end
 end
 
