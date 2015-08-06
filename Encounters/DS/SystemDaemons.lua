@@ -55,7 +55,6 @@ mod:RegisterEnglishLocale({
     ["PURGE - NULL"] = "PURGE - NULL",
     ["PURGE - BINARY"] = "PURGE - BINARY",
     ["INTERRUPT !"] = "INTERRUPT !",
-    ["INTERRUPT HEAL!"] = "INTERRUPT HEAL!",
     ["BLACK IC"] = "BLACK IC",
     ["HEAL"] = "HEAL",
     ["PURGE ON YOU"] = "PURGE ON YOU",
@@ -102,7 +101,6 @@ mod:RegisterFrenchLocale({
     ["PURGE - NULL"] = "PURGE - 1.0",
     ["PURGE - BINARY"] = "PURGE - 2.0",
     --["INTERRUPT !"] = "INTERRUPT !", -- TODO: French translation missing !!!!
-    --["INTERRUPT HEAL!"] = "INTERRUPT HEAL!", -- TODO: French translation missing !!!!
     --["BLACK IC"] = "BLACK IC", -- TODO: French translation missing !!!!
     --["HEAL"] = "HEAL", -- TODO: French translation missing !!!!
     --["PURGE ON YOU"] = "PURGE ON YOU", -- TODO: French translation missing !!!!
@@ -149,7 +147,6 @@ mod:RegisterGermanLocale({
     ["PURGE - NULL"] = "SÄUBERN - NULL",
     ["PURGE - BINARY"] = "SÄUBERN - BINÄR",
     ["INTERRUPT !"] = "UNTERBRECHEN !",
-    ["INTERRUPT HEAL!"] = "HEILUNG UNTERBRECHEN !",
     ["BLACK IC"] = "GLATTEIS",
     ["HEAL"] = "HEILUNG",
     ["PURGE ON YOU"] = "STEHEN BLEIBEN !!!",
@@ -165,7 +162,6 @@ mod:RegisterDefaultSetting("SoundPhase2Soon")
 mod:RegisterDefaultSetting("SoundPhase2")
 mod:RegisterDefaultSetting("SoundPowerSurge")
 mod:RegisterDefaultSetting("SoundPurge")
-mod:RegisterDefaultSetting("SoundRepairSequence")
 mod:RegisterDefaultSetting("OtherOverloadMarkers")
 mod:RegisterDefaultSetting("OtherPurgePlayerMarkers")
 mod:RegisterDefaultSetting("OtherDisconnectTimer")
@@ -229,7 +225,6 @@ function mod:OnBossEnable()
     Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
     Apollo.RegisterEventHandler("RC_UnitDestroyed", "OnUnitDestroyed", self)
     Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
-    Apollo.RegisterEventHandler("SPELL_CAST_END", "OnSpellCastEnd", self)
     Apollo.RegisterEventHandler("DEBUFF_ADD", "OnDebuffAdd", self)
     Apollo.RegisterEventHandler("DEBUFF_DEL", "OnDebuffDel", self)
     Apollo.RegisterEventHandler("UNIT_HEALTH", "OnHealthChanged", self)
@@ -300,8 +295,6 @@ function mod:OnUnitCreated(unit, sName)
             core:AddLine(unit:GetId().."_1", 2, unit, nil, 1, 25, 90)
             core:AddLine(unit:GetId().."_2", 2, unit, nil, 2, 25, -90)
         end
-    elseif sName == self.L["Recovery Protocol"] then
-        core:WatchUnit(unit)
     elseif sName == self.L["Null System Daemon"] then
         core:AddUnit(unit)
         core:WatchUnit(unit)
@@ -331,12 +324,6 @@ function mod:OnHealthChanged(unitName, health)
     elseif health >= 30 and health <= 32 and not phase2warn and not phase2 then
         phase2warn = true
         core:AddMsg("SDP2", self.L["P2 SOON !"], 5, mod:GetSetting("SoundPhase2Soon") and "Algalon")
-    end
-end
-
-function mod:OnSpellCastEnd(unitName, castName, unit)
-    if unitName == self.L["Recovery Protocol"] and castName == self.L["Repair Sequence"] then
-        core:DropMark(unit:GetId())
     end
 end
 
@@ -371,18 +358,7 @@ function mod:OnSpellCastStart(unitName, castName, unit)
                 core:AddMsg("BLACKIC", self.L["INTERRUPT !"], 5, "Alert")
                 mod:AddTimerBar("BLACKIC", "BLACK IC", 30)
             end
-    elseif unitName == self.L["Recovery Protocol"] and castName == self.L["Repair Sequence"] then
-        if self:GetDistanceBetweenUnits(GameLib.GetPlayerUnit(), unit) < 50 then
-            core:AddMsg("HEAL", self.L["INTERRUPT HEAL!"], 5, mod:GetSetting("SoundRepairSequence") and "Inferno")
-            core:MarkUnit(unit, nil, self.L["HEAL"])
-            self:ScheduleTimer("RemoveHealMarker", 5, unit)
-        end
     end
-end
-
-function mod:RemoveHealMarker(unit)
-    if not unit then return end
-    core:DropMark(unit:GetId())
 end
 
 function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
