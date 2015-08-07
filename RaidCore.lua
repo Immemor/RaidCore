@@ -264,6 +264,7 @@ function RaidCore:OnDocLoaded()
             Kuralak = Apollo.LoadForm(self.xmlDoc, "ConfigForm_Kuralak", self.wndTargetFrame, self),
             Prototypes = Apollo.LoadForm(self.xmlDoc, "ConfigForm_Prototypes", self.wndTargetFrame, self),
             Phagemaw = Apollo.LoadForm(self.xmlDoc, "ConfigForm_Phagemaw", self.wndTargetFrame, self),
+            PhageCouncil = Apollo.LoadForm(self.xmlDoc, "ConfigForm_PhageCouncil", self.wndTargetFrame, self),
         },
         DS = {
             Minibosses = Apollo.LoadForm(self.xmlDoc, "ConfigForm_Minibosses", self.wndTargetFrame, self),
