@@ -33,8 +33,8 @@ mod:RegisterEnglishLocale({
     ["Summon Destructobot"] = "Summon Destructobot",
     -- Bar and messages.
     ["[1] LINK + KICK"] = "[1] LINK + KICK",
-    ["[2] TP + CROIX + BOTS"] = "[2] TP + CROIX + BOTS",
-    ["[3] SINGULARITY + VAGUE"] = "[3] SINGULARITY + VAGUE",
+    ["[2] TP + CROSS + BOTS"] = "[2] TP + CROSS + BOTS",
+    ["[3] SINGULARITY + WAVES"] = "[3] SINGULARITY + WAVES",
     ["[4] SOAK + BOTS"] = "[4] SOAK + BOTS",
     ["BOTS !!"] = "BOTS !!",
     ["BERSERK"] = "BERSERK",
@@ -56,8 +56,8 @@ mod:RegisterFrenchLocale({
     ["Summon Destructobot"] = "Déployer Destructobot",
     -- Bar and messages.
     ["[1] LINK + KICK"] = "[1] LIEN + KICK",
-    ["[2] TP + CROIX + BOTS"] = "[2] TP + CROIX + BOTS",
-    ["[3] SINGULARITY + VAGUE"] = "[3] SINGULARITÉ + VAGUE",
+    ["[2] TP + CROSS + BOTS"] = "[2] TP + CROSS + BOTS",
+    ["[3] SINGULARITY + WAVES"] = "[3] SINGULARITÉ + VAGUE",
     ["[4] SOAK + BOTS"] = "[4] SOAK + BOTS",
     ["BOTS !!"] = "BOTS !!",
     ["BERSERK"] = "BERSERK",
@@ -79,8 +79,8 @@ mod:RegisterGermanLocale({
     ["Summon Destructobot"] = "Destruktobot herbeirufen",
     -- Bar and messages.
     ["[1] LINK + KICK"] = "[1] VERBINDUNG + KICK",
-    ["[2] TP + CROIX + BOTS"] = "[2] FARBEN + KREUZ + REPARATURBOTS",
-    ["[3] SINGULARITY + VAGUE"] = "[3] SINGULARITÄT + WELLEN",
+    ["[2] TP + CROSS + BOTS"] = "[2] FARBEN + KREUZ + REPARATURBOTS",
+    ["[3] SINGULARITY + WAVES"] = "[3] SINGULARITÄT + WELLEN",
     ["[4] SOAK + BOTS"] = "[4] KREISE + DESTRUKTOBOTS",
     ["BOTS !!"] = "BOTS !!",
     ["BERSERK"] = "BERSERK",
@@ -129,13 +129,13 @@ end
 
 function mod:OnChatDC(message)
     if message:find(self.L["Phagetech Commander is now active!"]) then
-        core:AddTimerBar("PROTO", "[2] TP + CROIX + BOTS", protoFirst and 20 or 60)
-        if protoFirst then 
+        core:AddTimerBar("PROTO", "[2] TP + CROSS + BOTS", protoFirst and 20 or 60)
+        if protoFirst then
             protoFirst = nil
             core:AddTimerBar("BERSERK", "BERSERK", 585)
         end
     elseif message:find(self.L["Phagetech Augmentor is now active!"]) then
-        core:AddTimerBar("PROTO", "[3] SINGULARITY + VAGUE", 60)
+        core:AddTimerBar("PROTO", "[3] SINGULARITY + WAVES", 60)
     elseif message:find(self.L["Phagetech Protector is now active!"]) then
         core:AddTimerBar("SINGU", "Singularity", 5)
         core:AddTimerBar("PROTO", "[4] SOAK + BOTS", 60)
