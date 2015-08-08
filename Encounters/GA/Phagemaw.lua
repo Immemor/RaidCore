@@ -31,8 +31,8 @@ mod:RegisterFrenchLocale({
     ["Phage Maw"] = "Phagegueule",
     ["Detonation Bomb"] = "Bombe à détonateur",
     -- Datachron messages.
-    --["The augmented shield has been destroyed"] = "The augmented shield has been destroyed", -- TODO: French translation missing !!!!
-    --["Phage Maw begins charging an orbital strike"] = "Phage Maw begins charging an orbital strike", -- TODO: French translation missing !!!!
+    ["The augmented shield has been destroyed"] = "Le bouclier augmenté a été détruit",
+    ["Phage Maw begins charging an orbital strike"] = "La Méga Gueule d'acier commence à charger une frappe orbitale",
     -- Bar and messages.
     ["Bomb %u"] = "Bombe %u",
     ["BOOOM !"] = "BOOOM !",
