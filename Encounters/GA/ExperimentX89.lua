@@ -76,6 +76,8 @@ mod:RegisterGermanLocale({
     ["LITTLE BOMB"] = "KLEINE BOMBE",
 })
 -- Default settings.
+mod:RegisterDefaultSetting("SoundLittleBomb")
+mod:RegisterDefaultSetting("SoundBigBomb")
 -- Timers default configs.
 mod:RegisterDefaultTimerBarConfigs({
 })
@@ -130,15 +132,15 @@ function mod:OnChatDC(message)
     -- The value returned is the player name targeted by the boss.
     local pName = message:match(self.L["Experiment X-89 has placed a bomb"])
     if pName then
-        local sSound = pName == GetPlayerUnit():GetName() and "Destruction"
+        local sSound = pName == GetPlayerUnit():GetName() and mod:GetSetting("SoundBigBomb") and "Destruction"
         core:AddMsg("BIGB", self.L["BIG BOMB on %s !!!"]:format(pName), 5, sSound, "Blue")
     end
 end
 
 function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
     if nSpellId == DEBUFF_LITTLE_BOMB then
-        local sSound = nId == GetPlayerUnit():GetId() and "RunAway"
+        local sSound = nId == GetPlayerUnit():GetId() and mod:GetSetting("SoundLittleBomb") and "RunAway"
         core:AddMsg("LITTLEB", self.L["LITTLE BOMB on %s !!!"], 5, sSound, "Blue")
-        core:AddTimerBar("LITTLEB", "LITTLE BOMB", fTimeRemaining)
+        core:AddTimerBar("LITTLEB", "LITTLE BOMB", fTimeRemaining, mod:GetSetting("SoundLittleBomb"))
     end
 end

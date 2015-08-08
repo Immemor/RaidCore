@@ -118,6 +118,9 @@ mod:RegisterGermanLocale({
     ["MARKER west"] = "W",
 })
 -- Default settings.
+mod:RegisterDefaultSetting("SoundOutbreak")
+mod:RegisterDefaultSetting("SoundSiphon")
+mod:RegisterDefaultSetting("OtherPillarMarkers")
 -- Timers default configs.
 mod:RegisterDefaultTimerBarConfigs({
 })
@@ -166,7 +169,7 @@ function mod:OnChatDC(message)
         core:AddMsg("OUTBREAK", self.L["OUTBREAK"], 5, "RunAway")
         outbreakCount = outbreakCount + 1
         if outbreakCount <= 5 then
-            core:AddTimerBar("OUTBREAK", self.L["Outbreak (%s)"]:format(outbreakCount + 1), 45)
+            core:AddTimerBar("OUTBREAK", self.L["Outbreak (%s)"]:format(outbreakCount + 1), 45, mod:GetSetting("SoundOutbreak"))
         end
     elseif message:find(self.L["The corruption begins to fester"]) then
         if eggsCount < 2 then eggsCount = 2 end
@@ -182,7 +185,7 @@ function mod:OnChatDC(message)
         if siphonCount == 0 then siphonCount = 1 end
         siphonCount = siphonCount + 1
         if self:Tank() then
-            core:AddMsg("SIPHON", self.L["SWITCH TANK"], 5, "Alarm")
+            core:AddMsg("SIPHON", self.L["SWITCH TANK"], 5, "Alarm", mod:GetSetting("SoundSiphon"))
             if siphonCount < 4 then
                 core:AddTimerBar("SIPHON", self.L["Switch Tank (%s)"]:format(siphonCount), 88)
             end
@@ -205,14 +208,16 @@ function mod:OnChatNPCSay(message)
         if self:Tank() then
             core:AddTimerBar("SIPHON", self.L["Switch Tank (%s)"]:format(siphonCount), 37)
         end
-        local estpos = { x = 194.44, y = -110.80034637451, z = -483.20 }
-        core:SetWorldMarker("EAST", self.L["MARKER east"], estpos)
-        local sudpos = { x = 165.79222106934, y = -110.80034637451, z = -464.8489074707 }
-        core:SetWorldMarker("SOUTH", self.L["MARKER south"], sudpos)
-        local ouestpos = { x = 144.20, y = -110.80034637451, z = -494.38 }
-        core:SetWorldMarker("WEST", self.L["MARKER west"], ouestpos)
-        local nordpos = { x = 175.00, y = -110.80034637451, z = -513.31 }
-        core:SetWorldMarker("NORTH", self.L["MARKER north"], nordpos)
+        if mod:GetSetting("OtherPillarMarkers") then
+            local estpos = { x = 194.44, y = -110.80034637451, z = -483.20 }
+            core:SetWorldMarker("EAST", self.L["MARKER east"], estpos)
+            local sudpos = { x = 165.79222106934, y = -110.80034637451, z = -464.8489074707 }
+            core:SetWorldMarker("SOUTH", self.L["MARKER south"], sudpos)
+            local ouestpos = { x = 144.20, y = -110.80034637451, z = -494.38 }
+            core:SetWorldMarker("WEST", self.L["MARKER west"], ouestpos)
+            local nordpos = { x = 175.00, y = -110.80034637451, z = -513.31 }
+            core:SetWorldMarker("NORTH", self.L["MARKER north"], nordpos)
+        end
     end
 end
 
