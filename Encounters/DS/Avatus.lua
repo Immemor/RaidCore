@@ -103,6 +103,8 @@ mod:RegisterEnglishLocale({
     ["Hand %u"] = "Hand %u",
     ["MARKER North"] = "North",
     ["MARKER South"] = "South",
+    ["MARKER Est"] = "Est",
+    ["MARKER West"] = "West",
     ["PURGE BLUE"] = "PURGE BLUE",
     ["PURGE RED"] = "PURGE RED",
     ["PURGE GREEN"] = "PURGE GREEN",
@@ -141,6 +143,8 @@ mod:RegisterFrenchLocale({
     ["Hand %u"] = "Main %u",
     ["MARKER North"] = "Nord",
     ["MARKER South"] = "Sud",
+    ["MARKER Est"] = "Est",
+    ["MARKER West"] = "Ouest",
     ["PURGE BLUE"] = "PURGE BLEUE",
     ["PURGE RED"] = "PURGE ROUGE",
     ["PURGE GREEN"] = "PURGE VERT",
@@ -173,8 +177,10 @@ mod:RegisterGermanLocale({
     --["Gun Grid NOW!"] = "Gun Grid NOW!", -- TODO: German translation missing !!!!
     --["~Gun Grid"] = "~Gun Grid", -- TODO: German translation missing !!!!
     --["Hand %u"] = "Hand %u", -- TODO: German translation missing !!!!
-    ["MARKER North"] = "N",
-    ["MARKER South"] = "S",
+    ["MARKER North"] = "Nord",
+    ["MARKER South"] = "Süd",
+    ["MARKER Est"] = "Ost",
+    ["MARKER West"] = "West",
 })
 -- Default settings.
 mod:RegisterDefaultSetting("LineCleaveBoss")
@@ -229,7 +235,9 @@ local HAND_MAKERS = {
 
 local CARDINAL_MARKERS = {
     ["north"] = { x = 618, y = -198, z = -235 },
-    ["south"] = { x = 618, y = -198, z = -114 }
+    ["south"] = { x = 618, y = -198, z = -114 },
+    ["est"] = { x = 678, y = -198, z = -174 },
+    ["west"] = { x = 557, y = -198, z = -174 },
 }
 local GREEN_ROOM_MARKERS = {
    ["1"] = { y = -198, x = 557.58, z = -139.2 },
@@ -260,6 +268,35 @@ local bIsHoloHand
 local nPurgeCount
 local phase2warn, phase2
 
+local function SetMarkersByPhase(nNewPhase)
+    -- Remove previous markers
+    core:DropWorldMarker("HAND1")
+    core:DropWorldMarker("HAND2")
+    core:DropWorldMarker("NORTH")
+    core:DropWorldMarker("SOUTH")
+    core:DropWorldMarker("EST")
+    core:DropWorldMarker("WEST")
+
+    -- Set markers
+    if MAIN_PHASE == nNewPhase then
+        if mod:GetSetting("OtherHandSpawnMarkers") then
+            core:SetWorldMarker("HAND1", mod.L["Hand %u"]:format(1), HAND_MAKERS["hand1"])
+            core:SetWorldMarker("HAND2", mod.L["Hand %u"]:format(2), HAND_MAKERS["hand2"])
+        end
+    end
+    if MAIN_PHASE == nNewPhase or YELLOW_PHASE == nNewPhase or LABYRINTH_PHASE == nNewPhase then
+        if mod:GetSetting("OtherDirectionMarkers") then
+            core:SetWorldMarker("NORTH", mod.L["MARKER North"], CARDINAL_MARKERS["north"])
+            core:SetWorldMarker("SOUTH", mod.L["MARKER South"], CARDINAL_MARKERS["south"])
+            if YELLOW_PHASE == nNewPhase then
+                core:SetWorldMarker("EST", mod.L["MARKER Est"], CARDINAL_MARKERS["est"])
+                core:SetWorldMarker("WEST", mod.L["MARKER West"], CARDINAL_MARKERS["west"])
+            end
+        end
+    end
+    nCurrentPhase = nNewPhase
+end
+
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
@@ -274,7 +311,7 @@ function mod:OnBossEnable()
     Apollo.RegisterEventHandler("BUFF_APPLIED", "OnBuffApplied", self)
     Apollo.RegisterEventHandler("SHORTCUT_BAR", "OnShowShortcutBar", self)
 
-    nCurrentPhase = MAIN_PHASE
+    SetMarkersByPhase(MAIN_PHASE)
     phase2warn, phase2 = false, false
     tBlueRoomPurgeList = {
         [PURGE_BLUE] = {},
@@ -304,20 +341,20 @@ function mod:OnUnitCreated(unit, sName)
     local nHealth = unit:GetHealth()
 
     if self.L["Avatus"] == sName then
-        nCurrentPhase = MAIN_PHASE
+        SetMarkersByPhase(MAIN_PHASE)
         core:AddUnit(unit)
         core:WatchUnit(unit)
         if mod:GetSetting("LineCleaveBoss") then
             core:AddPixie(unit:GetId(), 2, unit, nil, "Green", 10, 22, 0)
         end
     elseif self.L["Augmented Rowsdower"] == sName then
-        nCurrentPhase = LABYRINTH_PHASE
+        SetMarkersByPhase(LABYRINTH_PHASE)
         core:AddMsg("Rowsdower", self.L["Augmented Rowsdower"], 3)
         SetTargetUnit(unit)
     elseif sName == self.L["Mobius Physics Constructor"] then
         -- Portals have same name, actual boss has HP, portals have nil value.
         if nHealth then
-            nCurrentPhase = YELLOW_PHASE
+            SetMarkersByPhase(YELLOW_PHASE)
             core:AddUnit(unit)
             core:WatchUnit(unit)
             if mod:GetSetting("LineCleaveYellowRoomBoss") then
@@ -330,7 +367,7 @@ function mod:OnUnitCreated(unit, sName)
     elseif sName == self.L["Unstoppable Object Simulation"] then
         -- Portals have same name, actual boss has HP, portals have nil value.
         if nHealth then
-            nCurrentPhase = GREEN_PHASE
+            SetMarkersByPhase(GREEN_PHASE)
             core:AddUnit(unit)
             core:WatchUnit(unit)
         else
@@ -340,7 +377,7 @@ function mod:OnUnitCreated(unit, sName)
     elseif sName == self.L["Infinite Logic Loop"] then
         if nHealth then
             -- Blue room.
-            nCurrentPhase = BLUE_PHASE
+            SetMarkersByPhase(BLUE_PHASE)
             core:AddUnit(unit)
             core:WatchUnit(unit)
         else
