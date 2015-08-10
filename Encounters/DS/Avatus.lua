@@ -441,7 +441,10 @@ function mod:OnUnitDestroyed(unit, sName)
         core:DropPixie(nUnitId)
     elseif sName == self.L["Mobius Physics Constructor"] then
         core:DropPixie(nUnitId)
-        mod:SendIndMessage("MOBIUS_DEATH")
+        if unit:GetHealth() then
+            -- Send information about the miniboss, not the portal.
+            mod:SendIndMessage("MOBIUS_DEATH")
+        end
     elseif self.L["Unstoppable Object Simulation"] == sName then
         core:DropPixie(nUnitId)
     elseif self.L["Excessive Force Protocol"] == sName then
@@ -605,6 +608,7 @@ function mod:ReceiveIndMessage(sFrom, sReason, data)
         -- Drop this message for player in Yellow phase.
         if nCurrentPhase ~= YELLOW_PHASE and nMobiusId == nil then
             nMobiusId = data
+            nMobiusHealthPourcent = 100
             if mod:GetSetting("OtherMobiusHealthMessages") then
                 core:AddMsg("MOBIUS_INFO", self.L["Yellow Room: Combat started"], 3, nil, "blue")
             end
