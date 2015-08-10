@@ -153,6 +153,7 @@ function EncounterPrototype:OnDisable()
     Apollo.RemoveEventHandler("BUFF_ADD", self)
     Apollo.RemoveEventHandler("BUFF_DEL", self)
     Apollo.RemoveEventHandler("BUFF_UPDATE", self)
+    Apollo.RemoveEventHandler("SHORTCUT_BAR", self)
 end
 
 function EncounterPrototype:Reboot(isWipe)
