@@ -118,6 +118,10 @@ mod:RegisterGermanLocale({
     ["NEXT BIG SPEW"] = "NÄCHSTES GROßES BRECHEN",
 })
 -- Default settings.
+mod:RegisterDefaultSetting("LineSafeZoneOhmna")
+mod:RegisterDefaultSetting("LineRavenousMaw")
+mod:RegisterDefaultSetting("SoundBigSpew")
+mod:RegisterDefaultSetting("OtherRavenousMawMarker")
 -- Timers default configs.
 mod:RegisterDefaultTimerBarConfigs({
 })
@@ -179,17 +183,23 @@ function mod:OnUnitCreated(unit, sName)
     if sName == self.L["Dreadphage Ohmna"] then
         core:AddUnit(unit)
         core:WatchUnit(unit)
-        core:AddLine("Ohmna1", 2, unit, nil, 3, 25, 0)
-        core:AddLine("Ohmna2", 2, unit, nil, 1, 25, 120)
-        core:AddLine("Ohmna3", 2, unit, nil, 1, 25, -120)
+        if mod:GetSetting("LineSafeZoneOhmna") then
+            core:AddLine("Ohmna1", 2, unit, nil, 3, 25, 0)
+            core:AddLine("Ohmna2", 2, unit, nil, 1, 25, 120)
+            core:AddLine("Ohmna3", 2, unit, nil, 1, 25, -120)
+        end
     elseif sName == self.L["Tentacle of Ohmna"] then
         if not OhmnaP4 then
             core:AddMsg("OTENT", self.L["Tentacles"], 5, "Info", "Blue")
             core:AddTimerBar("OTENT", "Next Tentacles", 20)
         end
     elseif sName == self.L["Ravenous Maw of the Dreadphage"] then
-        core:MarkUnit(unit, 0)
-        core:AddLine(unit:GetId(), 2, unit, nil, 3, 25, 0)
+        if mod:GetSetting("OtherRavenousMawMarker") then
+            core:MarkUnit(unit, 0)
+        end
+        if mod:GetSetting("LineRavenousMaw") then
+            core:AddLine(unit:GetId(), 2, unit, nil, 3, 25, 0)
+        end
     end
 end
 
@@ -215,7 +225,7 @@ function mod:OnSpellCastStart(unitName, castName, unit)
                 core:AddTimerBar("OBORE", "SWITCH TANK", 45)
             end
         elseif castName == self.L["Genetic Torrent"] then
-            core:AddMsg("SPEW", self.L["BIG SPEW"], 5, "RunAway")
+            core:AddMsg("SPEW", self.L["BIG SPEW"], 5, mod:GetSetting("SoundBigSpew") and "RunAway")
             core:AddTimerBar("OSPEW", "NEXT BIG SPEW", OhmnaP4 and 40 or 60)
         end
     end
