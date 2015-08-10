@@ -262,6 +262,7 @@ function RaidCore:OnDocLoaded()
         GA = {
             ExperimentX89 = Apollo.LoadForm(self.xmlDoc, "ConfigForm_ExperimentX89", self.wndTargetFrame, self),
             Kuralak = Apollo.LoadForm(self.xmlDoc, "ConfigForm_Kuralak", self.wndTargetFrame, self),
+            Prototypes = Apollo.LoadForm(self.xmlDoc, "ConfigForm_Prototypes", self.wndTargetFrame, self),
         },
         DS = {
             Minibosses = Apollo.LoadForm(self.xmlDoc, "ConfigForm_Minibosses", self.wndTargetFrame, self),
