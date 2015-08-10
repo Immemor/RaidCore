@@ -108,6 +108,8 @@ mod:RegisterEnglishLocale({
     ["PURGE BLUE"] = "PURGE BLUE",
     ["PURGE RED"] = "PURGE RED",
     ["PURGE GREEN"] = "PURGE GREEN",
+    ["Yellow Room: Combat started"] = "Yellow Room: Combat started",
+    ["Mobius health: %d%%"] = "Mobius health: %d%%",
 })
 mod:RegisterFrenchLocale({
     -- Unit names.
@@ -148,6 +150,8 @@ mod:RegisterFrenchLocale({
     ["PURGE BLUE"] = "PURGE BLEUE",
     ["PURGE RED"] = "PURGE ROUGE",
     ["PURGE GREEN"] = "PURGE VERT",
+    ["Yellow Room: Combat started"] = "Salle Jaune: Combat démarré",
+    ["Mobius health: %d%%"] = "Mobius santé: %d%%",
 })
 mod:RegisterGermanLocale({
     -- Unit names.
@@ -199,6 +203,7 @@ mod:RegisterDefaultSetting("OtherDirectionMarkers")
 mod:RegisterDefaultSetting("OtherGreenRoomMarkers")
 mod:RegisterDefaultSetting("OtherPurgeList")
 mod:RegisterDefaultSetting("OtherPurgeMessages")
+mod:RegisterDefaultSetting("OtherMobiusHealthMessages")
 -- Timers default configs.
 mod:RegisterDefaultTimerBarConfigs({
     ["OBBEAM"] = { sColor = "xkcdBloodRed" },
@@ -267,6 +272,8 @@ local tHoloHandsList
 local bIsHoloHand
 local nPurgeCount
 local phase2warn, phase2
+local nMobiusId
+local nMobiusHealthPourcent
 
 local function SetMarkersByPhase(nNewPhase)
     -- Remove previous markers
@@ -323,6 +330,8 @@ function mod:OnBossEnable()
     bIsHoloHand = true
     nPurgeCount = 0
     nGunGridLastPopTime = GetGameTime() + 20
+    nMobiusId = nil
+    nMobiusHealthPourcent = 100
 
     mod:AddTimerBar("OBBEAM", "Obliteration Beam", 69, mod:GetSetting("SoundObliterationBeam"))
     mod:AddTimerBar("GGRID", "~Gun Grid", 20, mod:GetSetting("SoundGunGrid"))
@@ -432,6 +441,7 @@ function mod:OnUnitDestroyed(unit, sName)
         core:DropPixie(nUnitId)
     elseif sName == self.L["Mobius Physics Constructor"] then
         core:DropPixie(nUnitId)
+        mod:SendIndMessage("MOBIUS_DEATH")
     elseif self.L["Unstoppable Object Simulation"] == sName then
         core:DropPixie(nUnitId)
     elseif self.L["Excessive Force Protocol"] == sName then
@@ -477,6 +487,8 @@ function mod:OnEnteredCombat(tUnit, bInCombat, sName)
                 end
             end
         end
+    elseif sName == self.L["Mobius Physics Constructor"] then
+        mod:SendIndMessage("MOBIUS_IN_COMBAT", tUnit:GetId())
     end
 end
 
@@ -519,6 +531,10 @@ function mod:OnHealthChanged(unitName, health)
             core:AddMsg("AVAP2", self.L["P2 SOON!"], 5, mod:GetSetting("SoundPortalPhase") and "Info")
         elseif health >= 70 and health <= 72 and phase2warn then
             phase2warn = false
+        end
+    elseif self.L["Mobius Physics Constructor"] == unitName then
+        if health % 10 == 0 and health < 100 then
+            mod:SendIndMessage("MOBIUS_HEALTH_UPDATE", health)
         end
     end
 end
@@ -585,7 +601,29 @@ function mod:OnShowShortcutBar(tIconFloatingSpellBar)
 end
 
 function mod:ReceiveIndMessage(sFrom, sReason, data)
-    if sReason == "PURGE_TYPE" then
+    if "MOBIUS_IN_COMBAT" == sReason then
+        -- Drop this message for player in Yellow phase.
+        if nCurrentPhase ~= YELLOW_PHASE and nMobiusId == nil then
+            nMobiusId = data
+            if mod:GetSetting("OtherMobiusHealthMessages") then
+                core:AddMsg("MOBIUS_INFO", self.L["Yellow Room: Combat started"], 3, nil, "blue")
+            end
+        end
+    elseif "MOBIUS_HEALTH_UPDATE" == sReason then
+        if nCurrentPhase == GREEN_PHASE and nMobiusHealthPourcent > data then
+            nMobiusHealthPourcent = data
+            if mod:GetSetting("OtherMobiusHealthMessages") then
+                core:AddMsg("MOBIUS_INFO", self.L["Mobius health: %d%%"]:format(nMobiusHealthPourcent), 2, nil, "blue")
+            end
+        end
+    elseif "MOBIUS_DEATH" == sReason then
+        if nCurrentPhase == GREEN_PHASE and nMobiusHealthPourcent ~= 0 then
+            nMobiusHealthPourcent = 0
+            if mod:GetSetting("OtherMobiusHealthMessages") then
+                core:AddMsg("MOBIUS_INFO", self.L["Mobius health: %d%%"]:format(0), 2, nil, "blue")
+            end
+        end
+    elseif "PURGE_TYPE" == sReason then
         tBlueRoomPurgeList[data][sFrom] = GetGameTime()
     end
 end
