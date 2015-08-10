@@ -49,6 +49,7 @@ mod:RegisterGermanLocale({
     ["BOOOM !"] = "BOOOM !",
 })
 -- Default settings.
+mod:RegisterDefaultSetting("OtherBombsMarkers")
 -- Timers default configs.
 mod:RegisterDefaultTimerBarConfigs({
 })
@@ -74,8 +75,10 @@ function mod:OnUnitCreated(unit, sName)
         core:AddUnit(unit)
         core:WatchUnit(unit)
     elseif sName == self.L["Detonation Bomb"] then
-        core:MarkUnit(unit, 1)
-        core:AddUnit(unit)
+        if mod:GetSetting("OtherBombsMarkers") then
+            core:MarkUnit(unit, 1)
+            core:AddUnit(unit)
+        end
     end
 end
 
@@ -86,6 +89,8 @@ function mod:OnChatDC(message)
         core:AddTimerBar("MAW3", self.L["Bomb %u"]:format(3), 78)
         core:AddTimerBar("PHAGEMAW", "BOOOM !", 104)
     elseif message:find(self.L["Phage Maw begins charging an orbital strike"]) then
-        core:ResetMarks()
+        if mod:GetSetting("OtherBombsMarkers") then
+            core:ResetMarks()
+        end
     end
 end
