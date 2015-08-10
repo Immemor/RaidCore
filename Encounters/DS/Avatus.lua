@@ -495,14 +495,14 @@ function mod:OnBuffApplied(unitName, splId, unit)
 
         if ePurgeType then
             nPurgeCount = nPurgeCount + 1
-            local sSuffix = ("(%d)"):format(nPurgeCount)
             if nCurrentPhase == BLUE_PHASE and mod:GetSetting("OtherPurgeMessages") then
+                local sSuffix = ("(%d)"):format(nPurgeCount)
                 if ePurgeType == PURGE_GREEN then
-                    core:AddMsg("PURGE", self.L["PURGE GREEN"] .. sSuffix, 3, "green")
+                    core:AddMsg("PURGE", self.L["PURGE GREEN"] .. sSuffix, 3, nil, "green")
                 elseif ePurgeType == PURGE_BLUE then
-                    core:AddMsg("PURGE", self.L["PURGE BLUE"] .. sSuffix, 3, "blue")
+                    core:AddMsg("PURGE", self.L["PURGE BLUE"] .. sSuffix, 3, nil, "blue")
                 elseif ePurgeType == PURGE_RED then
-                    core:AddMsg("PURGE", self.L["PURGE RED"] .. sSuffix, 3, "red")
+                    core:AddMsg("PURGE", self.L["PURGE RED"] .. sSuffix, 3, nil, "red")
                 end
             end
         end
