@@ -32,6 +32,7 @@ mod:RegisterEnglishLocale({
     -- Bar and messages.
     ["EARTH"] = "EARTH",
     ["~Tornado Spawn"] = "~Tornado Spawn",
+    ["JUMP !"] = "JUMP, JUMP, JUMP, JUMP !!!"
 })
 mod:RegisterFrenchLocale({
     -- Unit names.
@@ -48,6 +49,7 @@ mod:RegisterFrenchLocale({
     -- Bar and messages.
     ["EARTH"] = "TERRE",
     ["~Tornado Spawn"] = "~Tornade Apparition",
+    ["JUMP !"] = "SAUTEZ, SAUTEZ, SAUTEZ, SAUTEZ !!!"
 })
 mod:RegisterGermanLocale({
     -- Unit names.
@@ -72,6 +74,7 @@ mod:RegisterDefaultSetting("SoundMidphase")
 mod:RegisterDefaultSetting("SoundSupercell")
 mod:RegisterDefaultSetting("SoundQuakeJump")
 mod:RegisterDefaultSetting("SoundMoO")
+mod:RegisterDefaultSetting("OtherQuakeWarnings")
 -- Timers default configs.
 mod:RegisterDefaultTimerBarConfigs({
     ["SUPERCELL"] = { sColor = "xkcdBlueBlue" },
@@ -157,7 +160,13 @@ end
 
 function mod:OnChatDC(message)
     if message:find(self.L["The ground shudders beneath Megalith"]) then
-        core:AddMsg("QUAKE", "JUMP !", 3, mod:GetSetting("SoundQuakeJump") and "Beware")
+        if mod:GetSetting("SoundQuakeJump") then
+            core:PlaySound("Beware")
+        end
+        if mod:GetSetting("OtherQuakeWarnings") then
+            core:AddMsg("QUAKE1", self.L["JUMP !"], 2)
+            core:AddMsg("QUAKE2", self.L["JUMP !"], 2)
+        end
     elseif message:find(self.L["fractured crust leaves it exposed"]) and bMidPhase then
         bMidPhase = false
         mod:AddTimerBar("RAWPOWER", "Raw Power", 60, mod:GetSetting("SoundMidphase"))
