@@ -39,9 +39,14 @@ local tPixieLocPoints = { 0, 0, 0, 0 }
 local ColorStringToHex = {
     Blue = "FF0000ff",
     Green = "FF00ff00",
+    LightGreen = "9900ff00",
     Yellow = "FFff9933",
     Red = "FFDC143C",
+    White = "FFFFFFFF",
 }
+
+-- Container of line displayed between two world coordinates (not only unit to unit)
+local worldLines = {}
 
 local DisplayLine = {} 
 local addon = DisplayLine
@@ -69,6 +74,7 @@ function DisplayLine.new(xmlDoc)
     self.setup = {}
 
     self.pixie = {}
+    worldLines = {}    
 
     self.wOverlay = GeminiGUI:Create("WorldFixedWindow", tOverlayDef):GetInstance(nil, "InWorldHudStratum")
     self.wOverlay:Show(false)
@@ -163,6 +169,17 @@ function addon:AddPixie(key, type, uStart, uTarget, color, width, distance, rota
     end
 end
 
+function addon:AddWorldLine(key, vStart, vEnd, color, width)
+    if not worldLines[key] then
+        worldLines[key] = {}
+        worldLines[key].vStart = vStart
+        worldLines[key].vEnd = vEnd
+        worldLines[key].color = color
+        worldLines[key].width = width or 5
+        self:StartDrawing()
+    end
+end
+
 function addon:DropLine(key)
     if self.setup[key] then
         self:DestroyMarks(key)
@@ -176,6 +193,12 @@ function addon:DropPixie(key)
     end
 end
 
+function addon:DropWorldLine(key)
+    if worldLines[key] then
+        worldLines[key] = nil   
+    end
+end
+
 function addon:ResetLines()
     for k, v in pairs(self.setup) do
         self:DropLine(k)
@@ -183,6 +206,9 @@ function addon:ResetLines()
     for k, v in pairs(self.pixie) do
         self:DropPixie(k)
     end
+
+    worldLines = nil
+    
     self:StopDrawing()
     self.wOverlay:DestroyAllPixies()
 end
@@ -211,6 +237,23 @@ function addon:DrawLine(key, vectorStart, vectorEnd, colorSetting)
     for i = 1, #self.markers[key] do
         self.markers[key][i]:SetWorldLocation(Vector3.InterpolateLinear(vectorStart, vectorEnd, (1/#self.markers[key]) * i))
     end
+end
+
+function addon:DrawWorldLine(vectorStart, vectorEnd, color, width)
+    local hexColor = ColorStringToHex[color]
+
+    if not Vector3.Is(vectorStart) then
+        vectorStart = Vector3.New(vectorStart.x, vectorStart.y, vectorStart.z)
+    end
+
+    if not Vector3.Is(vectorEnd) then
+        vectorEnd = Vector3.New(vectorEnd.x, vectorEnd.y, vectorEnd.z)
+    end   
+
+    local scrStart = GameLib.WorldLocToScreenPoint(vectorStart)
+    local scrEnd = GameLib.WorldLocToScreenPoint(vectorEnd)
+
+    self.wOverlay:AddPixie( { bLine = true, fWidth = width, cr = hexColor, loc = { fPoints = tPixieLocPoints, nOffsets = { scrStart.x, scrStart.y, scrEnd.x, scrEnd.y }}} )
 end
 
 function addon:DrawPixie(vectorStart, vectorEnd, color, width)
@@ -293,6 +336,10 @@ function addon:OnUpdate()
                 self:DropPixie(k)
             end
         end
+    end
+
+    for k, v in pairs(worldLines) do
+        self:DrawWorldLine(v.vStart, v.vEnd, v.color, v.width)
     end
 end
 

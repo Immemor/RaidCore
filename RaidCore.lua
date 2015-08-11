@@ -494,6 +494,10 @@ function RaidCore:OnRaidCoreOn(cmd, args)
         self.drawline:AddPixie("Ohmna2", 2, unit, nil, "Green", 10, 25, 120)
         self.drawline:AddPixie("Ohmna3", 2, unit, nil, "Green", 10, 25, -120)
         self.drawline:AddPixie("Ohmna4", 1, uPlayer, unit, "Yellow", 5)
+    elseif tAllParams[1] == "testworldline" then
+        local uPlayer = GameLib.GetPlayerUnit()
+        local unit = GameLib.GetTargetUnit()
+        self.drawline:AddWorldLine("test", uPlayer:GetPosition(), unit:GetPosition(), "Blue", 2)
     elseif (tAllParams[1] == "stopline") then
         self.drawline:ResetLines()
     elseif (tAllParams[1] == "sysdm") then
@@ -723,12 +727,20 @@ function RaidCore:AddPixie(... )
     self.drawline:AddPixie(...)
 end
 
+function RaidCore:AddWorldLine(... )
+    self.drawline:AddWorldLine(...)
+end
+
 function RaidCore:DropPixie(key)
     self.drawline:DropPixie(key)
 end
 
 function RaidCore:DropLine(key)
     self.drawline:DropLine(key)
+end
+
+function RaidCore:DropWorldLine(key)
+    self.drawline:DropWorldLine(key)
 end
 
 function RaidCore:OnUnitDestroyed(nId, unit, unitName)
