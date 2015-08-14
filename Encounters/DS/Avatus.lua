@@ -334,7 +334,7 @@ function mod:OnBossEnable()
     nMobiusHealthPourcent = 100
 
     mod:AddTimerBar("OBBEAM", "Obliteration Beam", 69, mod:GetSetting("SoundObliterationBeam"))
-    mod:AddTimerBar("GGRID", "~Gun Grid", 20, mod:GetSetting("SoundGunGrid"))
+    mod:AddTimerBar("GGRID", "~Gun Grid", 21, mod:GetSetting("SoundGunGrid"))
     if mod:GetSetting("OtherHandSpawnMarkers") then
         core:SetWorldMarker("HAND1", self.L["Hand %u"]:format(1), HAND_MAKERS["hand1"])
         core:SetWorldMarker("HAND2", self.L["Hand %u"]:format(2), HAND_MAKERS["hand2"])
@@ -399,7 +399,9 @@ function mod:OnUnitCreated(unit, sName)
         table.insert(tHoloHandsList, nUnitId, { ["unit"] = unit} )
         core:AddMsg("HHAND", self.L["Holo Hand Spawned"], 5, "Info")
         if mod:GetSetting("LineCleaveHands") then
-            core:AddPixie(nUnitId .. "_1", 2, unit, nil, "Blue", 7, 20, 0)
+            core:AddPixie(nUnitId .. "_1", 2, unit, nil, "Blue", 7, 25, 0)
+            core:AddPixie(nUnitId .. "_2", 2, unit, nil, "xkcdBluegrey", 3, 7, 60)
+            core:AddPixie(nUnitId .. "_3", 2, unit, nil, "xkcdBluegrey", 3, 7, 300)
         end
     elseif self.L["Excessive Force Protocol"] == sName then
         if nHealth == nil then
@@ -428,6 +430,8 @@ function mod:OnUnitDestroyed(unit, sName)
 
     if sName == self.L["Holo Hand"] then
         core:DropPixie(nUnitId .. "_1")
+        core:DropPixie(nUnitId .. "_2")
+        core:DropPixie(nUnitId .. "_3")
         if tHoloHandsList[nUnitId] then
             tHoloHandsList[nUnitId] = nil
         end
