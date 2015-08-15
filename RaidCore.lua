@@ -151,7 +151,7 @@ end
 -- RaidCore Initialization
 ----------------------------------------------------------------------------------------------------
 function RaidCore:Print(sMessage)
-    ChatSystemLib.PostOnChannel(ChatSystemLib.ChatChannel_Debug, sMessage, "RaidCore")
+    ChatSystemLib.PostOnChannel(ChatSystemLib.ChatChannel_Debug, tostring(sMessage), "RaidCore")
 end
 
 function RaidCore:OnInitialize()
