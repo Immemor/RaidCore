@@ -195,7 +195,6 @@ function mod:OnUnitCreated(tUnit, sName)
             core:AddPixie(nId, 2, tUnit, nil, "Blue", 10, 40, 0)
         end
     elseif sName == self.L["Lifekeeper"] then
-        core:AddUnit(tUnit)
         nTreeKeeperCount = nTreeKeeperCount + 1
         if nTreeKeeperCount % 2 == 0 then
             local FirstTree_Pos = GetUnitById(nFirstTreeId):GetPosition()
@@ -211,8 +210,12 @@ function mod:OnUnitCreated(tUnit, sName)
             end
             table.insert(tTreeKeeperList, nNorthTreeId)
             table.insert(tTreeKeeperList, nSouthTreeId)
-            core:MarkUnit(GetUnitById(nNorthTreeId), nil, nTreeKeeperCount - 1)
-            core:MarkUnit(GetUnitById(nSouthTreeId), nil, nTreeKeeperCount)
+            local tNorthTreeUnit = GetUnitById(nNorthTreeId)
+            local tSouthTreeUnit = GetUnitById(nSouthTreeId)
+            core:AddUnit(tNorthTreeUnit)
+            core:AddUnit(tSouthTreeUnit)
+            core:MarkUnit(tNorthTreeUnit, nil, nTreeKeeperCount - 1)
+            core:MarkUnit(tSouthTreeUnit, nil, nTreeKeeperCount)
             if (nTreeKeeperCount + 2) % 4 == 0 then
                 local bCountDownEnable = mod:GetSetting("SoundHealingTreeCountDown")
                 mod:AddTimerBar("LIFEKEEP", "Next Healing Tree", 30, bCountDownEnable)
