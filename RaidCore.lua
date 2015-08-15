@@ -480,6 +480,18 @@ function RaidCore:OnRaidCoreOn(cmd, args)
         end
     elseif (tAllParams[1] == "summon") then
         self:SyncSummon()
+    elseif (tAllParams[1] == "cpu") then
+        local uPlayer = GetPlayerUnit()
+        self:AddTimerBar("TEST CPU", "Test CPU", 60)
+        for i = 1, 36 do
+            self:AddPixie(tostring(i), 2, uPlayer, nil, "Blue", 4, 10, i * 10)
+        end
+        self:ScheduleTimer(function ()
+            self:RemoveTimerBar("TEST CPU")
+            for i = 1, 36 do
+                self:DropPixie(tostring(i))
+            end
+        end, 60)
     elseif (tAllParams[1] == "testline") then
         local uPlayer = GetPlayerUnit()
         local unit = GameLib.GetTargetUnit()
