@@ -439,7 +439,7 @@ function RaidCore:OnRaidCoreOn(cmd, args)
         table.insert(tAllParams, sOneParam)
     end
 
-    if (tAllParams[1] == "config") then
+    if tAllParams[1] == nil or tAllParams[1] == "config" then
         self:OnConfigOn()
     elseif (tAllParams[1] == "bar") then
         if tAllParams[2] ~= nil and tAllParams[3] ~= nil then
@@ -526,68 +526,8 @@ function RaidCore:OnRaidCoreOn(cmd, args)
                 self:DropPixie("Ohmna4")
             end, 10)
         end
-    elseif (tAllParams[1] == "stopline") then
-        self.drawline:ResetLines()
-    elseif (tAllParams[1] == "sysdm") then
-        if tAllParams[2] ~= nil and tAllParams[3] ~= nil then
-            local mod = self:GetModule("SystemDaemons", 1)
-            if mod then
-                mod:SetInterrupter(tAllParams[2], tonumber(tAllParams[3]))
-            else
-                self:Print("Module SystemDaemons not loaded")
-            end
-        end
-    elseif (tAllParams[1] == "sysdm") then
-        if tAllParams[2] ~= nil and tAllParams[3] ~= nil then
-            local mod = self:GetModule("SystemDaemons", 1)
-            if mod then
-                mod:SetInterrupter(tAllParams[2], tonumber(tAllParams[3]))
-            else
-                self:Print("Module SystemDaemons not loaded")
-            end
-        end
-    elseif (tAllParams[1] == "testdm") then
-        local mod = self:GetModule("SystemDaemons", 1)
-        if mod then
-            mod:NextWave()
-            mod:OnChatDC("COMMENCING ENHANCEMENT SEQUENCE")
-        else
-            self:Print("Module SystemDaemons not loaded")
-        end
-    elseif (tAllParams[1] == "testel") then
-        local mod = self:GetModule("EpLogicEarth", 1)
-        if mod then
-            mod:PlaceSpawnPos()
-        else
-            self:Print("Module EpLogicEarth not loaded")
-        end
-    elseif (tAllParams[1] == "wm") then
-        local estpos = {
-            x = 194.44,
-            y = -110.80034637451,
-            z = -483.20
-        }
-        self:SetWorldMarker("EST", "EST", estpos)
-        local sudpos = {
-            x = 165.79222106934,
-            y = -110.80034637451,
-            z = -464.8489074707
-        }
-        self:SetWorldMarker("SUD", "SUD", sudpos)
-        local ouestpos = {
-            x = 144.20,
-            y = -110.80034637451,
-            z = -494.38
-        }
-        self:SetWorldMarker("WEST", "WEST", ouestpos)
-        local nordpos = {
-            x = 175.00,
-            y = -110.80034637451,
-            z = -513.31
-        }
-        self:SetWorldMarker("NORD", "NORD", nordpos)
     else
-        self:OnConfigOn()
+        self:Print(("Unknown command: %s"):format(tAllParams[1]))
     end
 end
 
