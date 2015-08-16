@@ -9,6 +9,7 @@
 --  Draw Manager will manage many type of graphic objects:
 --   * Line between two unit,
 --   * Line from 1 unit or a specific position,
+--   * Polygon attached to an unit or a specific position,
 --
 --   FeedBack:
 --    The GameLib.GetUnitScreenPosition API function return wrong values when Unit is out of screen.
@@ -333,6 +334,147 @@ function SimpleLine:RemoveDraw(Key)
 end
 
 ----------------------------------------------------------------------------------------------------
+-- Polygon from a unit or Position.
+----------------------------------------------------------------------------------------------------
+local Polygon = NewManager()
+
+function Polygon:UpdateDraw(tDraw)
+    local tVectors = nil
+    if tDraw.nOriginId then
+        local tOriginUnit = GetUnitById(tDraw.nOriginId)
+        if tOriginUnit and tOriginUnit:IsValid() then
+            local tOriginVector = NewVector3(tOriginUnit:GetPosition())
+            local tFacingVector = NewVector3(tOriginUnit:GetFacing())
+            local tRefVector = tFacingVector * tDraw.nRadius
+            tVectors = {}
+            for i = 1, tDraw.nSide do
+                local nRad = math.rad(360 * i / tDraw.nSide + tDraw.nRotation)
+                local nCos = math.cos(nRad)
+                local nSin = math.sin(nRad)
+                local CornerRotate = {
+                    x = NewVector3({ nCos, 0, -nSin }),
+                    y = NewVector3({ 0, 1, 0 }),
+                    z = NewVector3({ nSin, 0, nCos }),
+                }
+                tVectors[i] = tOriginVector + Rotation(tRefVector, CornerRotate)
+            end
+        end
+    else
+        tVectors = tDraw.tVectors
+    end
+    if tVectors then
+        -- Convert all 3D coordonate of game in 2D coordonnate of screen
+        local tScreenLoc = {}
+        for i = 1, tDraw.nSide do
+            tScreenLoc[i] = WorldLocToScreenPoint(tVectors[i])
+        end
+        for i = 1, tDraw.nSide do
+            local j = i == tDraw.nSide and 1 or i + 1
+            if tScreenLoc[i].z > 0 or tScreenLoc[j].z > 0 then
+                local tPixieAttributs = {
+                    bLine = true,
+                    fWidth = tDraw.nWidth,
+                    cr = tDraw.sColor,
+                    loc = {
+                        fPoints = FPOINT_NULL,
+                        nOffsets = {
+                            tScreenLoc[i].x,
+                            tScreenLoc[i].y,
+                            tScreenLoc[j].x,
+                            tScreenLoc[j].y,
+                        },
+                    },
+                }
+                if tDraw.nPixieIds[i] then
+                    _wndOverlay:UpdatePixie(tDraw.nPixieIds[i], tPixieAttributs)
+                else
+                    tDraw.nPixieIds[i] = _wndOverlay:AddPixie(tPixieAttributs)
+                end
+            else
+                -- The Line is out of sight.
+                if tDraw.nPixieIds[i] then
+                    _wndOverlay:DestroyPixie(tDraw.nPixieIds[i])
+                    tDraw.nPixieIds[i] = nil
+                end
+            end
+        end
+    else
+        -- Unit is not valid.
+        for i = 1, tDraw.nSide do
+            if tDraw.nPixieIds[i] then
+                _wndOverlay:DestroyPixie(tDraw.nPixieIds[i])
+                tDraw.nPixieIds[i] = nil
+            end
+        end
+    end
+end
+
+function Polygon:AddDraw(Key, Origin, nRadius, nRotation, nWidth, sColor, nSide)
+    local OriginType = type(Origin)
+    assert(OriginType == "number" or OriginType == "table")
+
+    if self.tDraws[Key] then
+        -- To complex to manage new definition with nSide which change,
+        -- simplest to remove previous.
+        local bSideChanged = nSide and self.tDraws[Key].nSide ~= nSide
+        -- The width update for a Pixie don't work. It's a carbine bug.
+        local bWidthChanged = nWidth and self.tDraws[Key].nWidth ~= nWidth
+        if bSideChanged or bWidthChanged then
+            self:RemoveDraw(Key)
+        end
+    end
+    -- Register a new object to manage.
+    local tDraw = self.tDraws[Key] or {}
+    tDraw.nRadius = nRadius or 10
+    tDraw.nWidth = nWidth or 4
+    tDraw.nRotation = nRotation or 0
+    tDraw.sColor = sColor or DEFAULT_LINE_COLOR
+    tDraw.nSide = nSide or 5
+    tDraw.nPixieIds = tDraw.nPixieIds or {}
+    tDraw.tVectors = tDraw.tVectors or {}
+
+    if OriginType == "number" then
+        -- Origin is the Id of an unit.
+        tDraw.nOriginId = Origin
+    else
+        -- Origin is the result of a GetPosition()
+        tDraw.nOriginId = nil
+        -- Precomputing coordonate of the polygon with constant origin.
+        local tOriginVector = NewVector3(Origin)
+        local tFacingVector = NewVector3(DEFAULT_NORTH_FACING)
+        local tRefVector = tFacingVector * tDraw.nRadius
+        for i = 1, tDraw.nSide do
+            local nRad = math.rad(360 * i / tDraw.nSide + tDraw.nRotation)
+            local nCos = math.cos(nRad)
+            local nSin = math.sin(nRad)
+            local CornerRotate = {
+                x = NewVector3({ nCos, 0, -nSin }),
+                y = NewVector3({ 0, 1, 0 }),
+                z = NewVector3({ nSin, 0, nCos }),
+            }
+            tDraw.tVectors[i] = tOriginVector + Rotation(tRefVector, CornerRotate)
+        end
+    end
+    -- Save this object (new or not).
+    self.tDraws[Key] = tDraw
+
+    StartDrawing()
+end
+
+function Polygon:RemoveDraw(Key)
+    local tDraw = self.tDraws[Key]
+    if tDraw then
+        for i = 1, tDraw.nSide do
+            if tDraw.nPixieIds[i] then
+                _wndOverlay:DestroyPixie(tDraw.nPixieIds[i])
+                tDraw.nPixieIds[i] = nil
+            end
+        end
+        self.tDraws[Key] = nil
+    end
+end
+
+----------------------------------------------------------------------------------------------------
 -- Relations between RaidCore and Draw Manager.
 ----------------------------------------------------------------------------------------------------
 function RaidCore:DrawManagersInit()
@@ -391,6 +533,14 @@ end
 
 function RaidCore:RemoveSimpleLine(...)
     SimpleLine:RemoveDraw(...)
+end
+
+function RaidCore:AddPolygon(...)
+    Polygon:AddDraw(...)
+end
+
+function RaidCore:RemovePolygon(...)
+    Polygon:RemoveDraw(...)
 end
 
 ----------------------------------------------------------------------------------------------------
