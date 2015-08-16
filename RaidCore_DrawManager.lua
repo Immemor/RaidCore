@@ -10,6 +10,7 @@
 --   * Line between two unit,
 --   * Line from 1 unit or a specific position,
 --   * Polygon attached to an unit or a specific position,
+--   * Sprite attached to an unit or a specific position,
 --
 --   FeedBack:
 --    The GameLib.GetUnitScreenPosition API function return wrong values when Unit is out of screen.
@@ -475,6 +476,112 @@ function Polygon:RemoveDraw(Key)
 end
 
 ----------------------------------------------------------------------------------------------------
+-- Picture from a unit or Position.
+----------------------------------------------------------------------------------------------------
+local Picture = NewManager()
+
+function Picture:UpdateDraw(tDraw)
+    local tVector = nil
+    if tDraw.nOriginId then
+        local tOriginUnit = GetUnitById(tDraw.nOriginId)
+        if tOriginUnit and tOriginUnit:IsValid() then
+            local tOriginVector = NewVector3(tOriginUnit:GetPosition())
+            local tFacingVector = NewVector3(tOriginUnit:GetFacing())
+            local tRefVector = tFacingVector * tDraw.nDistance
+            tVector = tOriginVector + Rotation(tRefVector, tDraw.RotationMatrix)
+            tVector.y = tVector.y + tDraw.nHeight
+        end
+    else
+        tVector = tDraw.tVector
+    end
+    if tVector then
+        -- Convert the 3D coordonate of game in 2D coordonnate of screen
+        local tScreenLoc = WorldLocToScreenPoint(tVector)
+        if tScreenLoc.z > 0 then
+            local tVectorPlayer = NewVector3(GetPlayerUnit():GetPosition())
+            local nDistance2Player = (tVectorPlayer - tVector):Length()
+            local nScale = math.min(40 / nDistance2Player, 1)
+            nScale = math.max(nScale, 0.5) * 25
+            local tPixieAttributs = {
+                bLine = false,
+                strSprite = tDraw.sSprite,
+                cr = tDraw.sColor,
+                loc = {
+                    fPoints = FPOINT_NULL,
+                    nOffsets = {
+                        tScreenLoc.x - nScale,
+                        tScreenLoc.y - nScale,
+                        tScreenLoc.x + nScale,
+                        tScreenLoc.y + nScale,
+                    },
+                },
+            }
+            if tDraw.nPixieId then
+                _wndOverlay:UpdatePixie(tDraw.nPixieId, tPixieAttributs)
+            else
+                tDraw.nPixieId = _wndOverlay:AddPixie(tPixieAttributs)
+            end
+        else
+            -- The Line is out of sight.
+            if tDraw.nPixieId then
+                _wndOverlay:DestroyPixie(tDraw.nPixieId)
+                tDraw.nPixieId = nil
+            end
+        end
+    end
+end
+
+function Picture:AddDraw(Key, Origin, sSprite, nRotation, nDistance, nHeight, sColor)
+    local OriginType = type(Origin)
+    assert(OriginType == "number" or OriginType == "table")
+
+    -- Register a new object to manage.
+    local tDraw = self.tDraws[Key] or {}
+    tDraw.sSprite = sSprite or "BasicSprites:WhiteCircle"
+    tDraw.nRotation = nRotation or 0
+    tDraw.nDistance = nDistance or 0
+    tDraw.nHeight = nHeight or 0
+    tDraw.sColor = sColor or "white"
+    -- Preprocessing.
+    local nRad = math.rad(tDraw.nRotation or 0)
+    local nCos = math.cos(nRad)
+    local nSin = math.sin(nRad)
+    tDraw.RotationMatrix = {
+        x = NewVector3({ nCos, 0, -nSin }),
+        y = NewVector3({ 0, 1, 0 }),
+        z = NewVector3({ nSin, 0, nCos }),
+    }
+
+    if OriginType == "number" then
+        -- Origin is the Id of an unit.
+        tDraw.nOriginId = Origin
+    else
+        -- Origin is the result of a GetPosition()
+        tDraw.nOriginId = nil
+        -- Precomputing coordonate of the polygon with constant origin.
+        local tOriginVector = NewVector3(Origin)
+        local tFacingVector = NewVector3(DEFAULT_NORTH_FACING)
+        local tRefVector = tFacingVector * tDraw.nDistance
+        tDraw.tVector = tOriginVector + Rotation(tRefVector, tDraw.RotationMatrix)
+        tDraw.tVector.y = tDraw.tVector.y + tDraw.nHeight
+    end
+    -- Save this object (new or not).
+    self.tDraws[Key] = tDraw
+    StartDrawing()
+end
+
+function Picture:RemoveDraw(Key)
+    local tDraw = self.tDraws[Key]
+    if tDraw then
+        if tDraw.nPixieId then
+            _wndOverlay:DestroyPixie(tDraw.nPixieId)
+            tDraw.nPixieId = nil
+        end
+        self.tDraws[Key] = nil
+    end
+end
+
+----------------------------------------------------------------------------------------------------
 -- Relations between RaidCore and Draw Manager.
 ----------------------------------------------------------------------------------------------------
 function RaidCore:DrawManagersInit()
@@ -541,6 +648,14 @@ end
 
 function RaidCore:RemovePolygon(...)
     Polygon:RemoveDraw(...)
+end
+
+function RaidCore:AddPicture(...)
+    Picture:AddDraw(...)
+end
+
+function RaidCore:RemovePicture(...)
+    Picture:RemoveDraw(...)
 end
 
 ----------------------------------------------------------------------------------------------------
