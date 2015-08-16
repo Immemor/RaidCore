@@ -229,6 +229,7 @@ function RaidCore:OnDocLoaded()
     -- Load every software block.
     self:CombatInterface_Init(self)
     self:BarManagersInit(self.db.profile.BarsManagers)
+    self:DrawManagersInit()
     self:LogGUI_init()
     -- Do additional initialization.
     self.mark = {}
@@ -286,7 +287,6 @@ function RaidCore:OnDocLoaded()
             Avatus = Apollo.LoadForm(self.xmlDoc, "ConfigForm_Avatus", self.wndTargetFrame, self),
         },
     }
-    self.drawline = RaidCoreLibs.DisplayLine.new(self.xmlDoc)
     self.GeminiColor = Apollo.GetPackage("GeminiColor").tPackage
     Apollo.RegisterEventHandler("WindowManagementReady", "OnWindowManagementReady", self)
 
@@ -687,22 +687,6 @@ function RaidCore:SetWorldMarker(key, sText, tPosition)
     end
 end
 
-function RaidCore:AddLine(... )
-    self.drawline:AddLine(...)
-end
-
-function RaidCore:AddPixie(... )
-    self.drawline:AddPixie(...)
-end
-
-function RaidCore:DropPixie(key)
-    self.drawline:DropPixie(key)
-end
-
-function RaidCore:DropLine(key)
-    self.drawline:DropLine(key)
-end
-
 function RaidCore:OnUnitDestroyed(nId, unit, unitName)
     Event_FireGenericEvent("RC_UnitDestroyed", unit, unitName)
     self:RemoveUnit(nId)
@@ -835,10 +819,6 @@ end
 function RaidCore:ResetSync()
     self.syncTimer = {}
     self.syncRegister = {}
-end
-
-function RaidCore:ResetLines()
-    self.drawline:ResetLines()
 end
 
 function RaidCore:TestPE()

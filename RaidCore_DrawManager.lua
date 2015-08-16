@@ -1,302 +1,447 @@
+----------------------------------------------------------------------------------------------------
+-- Client Lua Script for RaidCore Addon on WildStar Game.
+--
+-- Copyright (C) 2015 RaidCore
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+--  Description:
+--
+--  Draw Manager will manage many type of graphic objects:
+--   * Line between two unit,
+--   * Line from 1 unit or a specific position,
+--
+--   FeedBack:
+--    The GameLib.GetUnitScreenPosition API function return wrong values when Unit is out of screen.
+--
+----------------------------------------------------------------------------------------------------
 require "Window"
 require "GameLib"
 require "GroupLib"
 require "Vector3"
 
-local setmetatable = setmetatable
-local ipairs = ipairs
-local pairs = pairs
-local math = math
-local tonumber = tonumber
-local string = string
-local Print = Print
-local select = select
-local CColor = CColor
-local GameLib = GameLib
-local GroupLib = GroupLib
-local Apollo = Apollo
-local ApolloColor = ApolloColor
+local RaidCore = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
+
+----------------------------------------------------------------------------------------------------
+-- Copy of few objects to reduce the cpu load.
+-- Because all local objects are faster.
+----------------------------------------------------------------------------------------------------
+local next, pcall, assert = next, pcall, assert
+local GetPlayerUnit = GameLib.GetPlayerUnit
+local GetGameTime = GameLib.GetGameTime
+local GetUnitById = GameLib.GetUnitById
+local WorldLocToScreenPoint = GameLib.WorldLocToScreenPoint
 local Vector3 = Vector3
+local NewVector3 = Vector3.New
+local math = math
 
-local GeminiGUI = Apollo.GetPackage("Gemini:GUI-1.0").tPackage
+----------------------------------------------------------------------------------------------------
+-- local data.
+----------------------------------------------------------------------------------------------------
+local _nPreviousTime = 0
+local _wndOverlay = nil
+local _tDrawManagers = {}
+local TemplateManager = {}
 
-local tOverlayDef = {
-    AnchorOffsets = { 0, 1, 0, 1 },
-    AnchorPoints = { 0, 0, 1, 1 },
-    Class = "WorldFixedWindow",
-    RelativeToClient = true,
-    BGColor = "UI_WindowBGDefault",
-    TextColor = "UI_WindowTextDefault",
-    Name = "RaidCoreOverlay",
-    SwallowMouseClicks = true,
-    IgnoreMouse = true,
-    Overlapped = false,
-}
+----------------------------------------------------------------------------------------------------
+-- Constants.
+----------------------------------------------------------------------------------------------------
+local TEMPLATE_MANAGER_META = { __index = TemplateManager }
+local DRAW_UPDATE_PERIOD = nil
+local DOT_IS_A_LINE = 1
+local FPOINT_NULL = { 0, 0, 0, 0 }
+local DEFAULT_LINE_COLOR = { a = 1.0, r = 1.0, g = 0.0, b = 0.0 } -- Red
+local DEFAULT_NORTH_FACING = { x = 0, y = 0, z = -1.0 }
 
-local tPixieLocPoints = { 0, 0, 0, 0 }
+----------------------------------------------------------------------------------------------------
+-- local data.
+----------------------------------------------------------------------------------------------------
 
-
-local ColorStringToHex = {
-    Blue = "FF0000ff",
-    Green = "FF00ff00",
-    Yellow = "FFff9933",
-    Red = "FFDC143C",
-}
-
-local DisplayLine = {} 
-local addon = DisplayLine
-
-DisplayLine.__index = DisplayLine
-
-setmetatable(DisplayLine, {
-    __call = function (cls, ...)
-        return cls.new(...)
-    end,
-})
-
------------------------------------------------------------------------------------------------
--- Initialization
------------------------------------------------------------------------------------------------
-function DisplayLine.new(xmlDoc)
-    local self = setmetatable({}, DisplayLine)
-
-    self.xmlDoc = xmlDoc
-    self.tDB = {}
-    self.tDB.nAlpha = 1
-    self.tDB.nDPL = 20
-
-    self.markers = {}
-    self.setup = {}
-
-    self.pixie = {}
-
-    self.wOverlay = GeminiGUI:Create("WorldFixedWindow", tOverlayDef):GetInstance(nil, "InWorldHudStratum")
-    self.wOverlay:Show(false)
-
-    return self
+local function NewManager(sText)
+    local new = setmetatable({}, TEMPLATE_MANAGER_META)
+    new.tDraws = {}
+    table.insert(_tDrawManagers, new)
+    return new
 end
 
-local function hexToCColor(color, a)
-    if not a then a = 1 end
-    local r = tonumber(string.sub(color,1,2), 16) / 255
-    local g = tonumber(string.sub(color,3,4), 16) / 255
-    local b = tonumber(string.sub(color,5,6), 16) / 255
-    return CColor.new(r,g,b,a)
-end
-
-local function colorGradient(perc, ...)
-    if perc >= 1 then
-        local r, g, b = select(select("#", ...) - 2, ...)
-        return r, g, b
-    elseif perc <= 0 then
-        local r, g, b = ...
-        return r, g, b
+local function Rotation(tVector, tMatrixTeta)
+    local r = {}
+    for axis1, R in next, tMatrixTeta do
+        r[axis1] = tVector.x * R.x + tVector.y * R.y + tVector.z * R.z
     end
-    local num = select("#", ...) / 3
-    local segment, relperc = math.modf(perc*(num-1))
-    local r1, g1, b1, r2, g2, b2 = select((segment*3)+1, ...)
-    return r1 + (r2-r1)*relperc, g1 + (g2-g1)*relperc, b1 + (b2-b1)*relperc
+    return NewVector3(r)
 end
 
-function addon:SetupMarks(key, colorSetting)
-    if not self.markers[key] then
-        self.markers[key] = {}
 
-        local color
-        if colorSetting == 1 then
-            color = hexToCColor("00ff00", self.tDB.nAlpha)
-        elseif colorSetting == 2 then
-            color = hexToCColor("ff9933", self.tDB.nAlpha)
-        elseif colorSetting == 3 then
-            color = hexToCColor("0000ff", self.tDB.nAlpha)
-        end
-
-        for i = 1, self.setup[key].nDPL do
-            self.markers[key][i] = Apollo.LoadForm(self.xmlDoc, "Marker", "InWorldHudStratum", self)
-            self.markers[key][i]:Show(true)
-            self.markers[key][i]:SetBGColor(color)
-        end
+local function StartDrawing()
+    if _bDrawManagerRunning ~= true then
+        _bDrawManagerRunning = true
+        Apollo.RegisterEventHandler("NextFrame", "OnDrawUpdate", RaidCore)
     end
 end
 
-function addon:DestroyMarks(key)
-    if self.markers[key] then
-        for i = 1, #self.markers[key] do
-            self.markers[key][i]:Destroy()
-        end
-        self.markers[key] = nil
+local function StopDrawing()
+    if _bDrawManagerRunning == true then
+        _bDrawManagerRunning = false
+        Apollo.RemoveEventHandler("NextFrame", RaidCore)
     end
 end
 
-function addon:DestroyAllMarks()
-    for k, v in pairs(self.markers) do
-        self:DestroyMarks(k)
-    end
-end
+local function UpdateLine(tDraw, tVectorFrom, tVectorTo)
+    local tScreenLocTo = tVectorTo and WorldLocToScreenPoint(tVectorTo)
+    local tScreenLocFrom = tVectorFrom and WorldLocToScreenPoint(tVectorFrom)
 
-function addon:AddLine(key, type, uStart, uTarget, color, distance, rotation, nDPL)
-    if not self.setup[key] then
-        self.setup[key] = {}
-        self.setup[key].type = type
-        self.setup[key].uStart = uStart
-        self.setup[key].uTarget = uTarget
-        self.setup[key].color = color
-        self.setup[key].distance = distance
-        self.setup[key].rotation = rotation
-        self.setup[key].nDPL = nDPL or 20
-        self:StartDrawing()
-    end
-end
-
-function addon:AddPixie(key, type, uStart, uTarget, color, width, distance, rotation, heading)
-    if not self.pixie[key] then
-        self.pixie[key] = {}
-        self.pixie[key].type = type
-        self.pixie[key].uStart = uStart
-        self.pixie[key].uTarget = uTarget
-        self.pixie[key].color = color
-        self.pixie[key].width = width or 5
-        self.pixie[key].distance = distance
-        self.pixie[key].rotation = rotation
-        self.pixie[key].heading = heading or 0
-        self:StartDrawing()
-    end
-end
-
-function addon:DropLine(key)
-    if self.setup[key] then
-        self:DestroyMarks(key)
-        self.setup[key] = nil
-    end
-end
-
-function addon:DropPixie(key)
-    if self.pixie[key] then
-        self.pixie[key] = nil
-    end
-end
-
-function addon:ResetLines()
-    for k, v in pairs(self.setup) do
-        self:DropLine(k)
-    end
-    for k, v in pairs(self.pixie) do
-        self:DropPixie(k)
-    end
-    self:StopDrawing()
-    self.wOverlay:DestroyAllPixies()
-end
-
-function addon:StartDrawing()
-    self.wOverlay:Show(true)
-    Apollo.RegisterEventHandler("NextFrame", "OnUpdate", self)
-end
-
-function addon:StopDrawing()
-    self.wOverlay:Show(false)
-    Apollo.RemoveEventHandler("NextFrame", self)
-end
-
-function addon:DrawLine(key, vectorStart, vectorEnd, colorSetting)
-    if not self.markers[key] then self:SetupMarks(key, colorSetting) end
-
-    if not Vector3.Is(vectorStart) then
-        vectorStart = Vector3.New(vectorStart.x, vectorStart.y, vectorStart.z)
-    end
-
-    if not Vector3.Is(vectorEnd) then
-        vectorEnd = Vector3.New(vectorEnd.x, vectorEnd.y, vectorEnd.z)
-    end   
-
-    for i = 1, #self.markers[key] do
-        self.markers[key][i]:SetWorldLocation(Vector3.InterpolateLinear(vectorStart, vectorEnd, (1/#self.markers[key]) * i))
-    end
-end
-
-function addon:DrawPixie(vectorStart, vectorEnd, color, width)
-
-    local hexColor = ColorStringToHex[color] or color
-
-    if not Vector3.Is(vectorStart) then
-        vectorStart = Vector3.New(vectorStart.x, vectorStart.y, vectorStart.z)
-    end
-
-    if not Vector3.Is(vectorEnd) then
-        vectorEnd = Vector3.New(vectorEnd.x, vectorEnd.y, vectorEnd.z)
-    end   
-
-    local scrStart = GameLib.WorldLocToScreenPoint(vectorStart)
-    local scrEnd = GameLib.WorldLocToScreenPoint(vectorEnd)
-
-    self.wOverlay:AddPixie( { bLine = true, fWidth = width, cr = hexColor, loc = { fPoints = tPixieLocPoints, nOffsets = { scrStart.x, scrStart.y, scrEnd.x, scrEnd.y }}} )
-end
-
-
-function addon:Heading(unit)
-    if unit and not unit:IsDead() then
-        local unitHeading = unit:GetHeading()
-        if unitHeading < 0 then
-            unitHeading = unitHeading * -1
+    if tScreenLocFrom and tScreenLocTo and (tScreenLocFrom.z > 0 or tScreenLocTo.z > 0) then
+        if tDraw.nNumberOfDot == DOT_IS_A_LINE then
+            local tPixieAttributs = {
+                bLine = true,
+                fWidth = tDraw.nWidth,
+                cr = tDraw.sColor,
+                loc = {
+                    fPoints = FPOINT_NULL,
+                    nOffsets = {
+                        tScreenLocFrom.x,
+                        tScreenLocFrom.y,
+                        tScreenLocTo.x,
+                        tScreenLocTo.y,
+                    },
+                },
+            }
+            if tDraw.nPixieIdFull then
+                _wndOverlay:UpdatePixie(tDraw.nPixieIdFull, tPixieAttributs)
+            else
+                tDraw.nPixieIdFull = _wndOverlay:AddPixie(tPixieAttributs)
+            end
         else
-            unitHeading = 2 * math.pi - unitHeading
+            local tVectorPlayer = NewVector3(GetPlayerUnit():GetPosition())
+            for i = 1, tDraw.nNumberOfDot do
+                local nRatio = (i - 1) / (tDraw.nNumberOfDot - 1)
+                local tVectorDot = Vector3.InterpolateLinear(tVectorFrom, tVectorTo, nRatio)
+                local tScreenLocDot = WorldLocToScreenPoint(tVectorDot)
+                if tScreenLocDot.z > 0 then
+                    local nDistance2Player = (tVectorPlayer - tVectorDot):Length()
+                    local nScale = math.min(40 / nDistance2Player, 1)
+                    nScale = math.max(nScale, 0.5) * 4
+                    local tVector = tScreenLocTo - tScreenLocFrom
+                    local tPixieAttributs = {
+                        bLine = false,
+                        strSprite = "BasicSprites:WhiteCircle",
+                        cr = tDraw.sColor,
+                        fRotation = math.deg(math.atan2(tVector.y, tVector.x)) + 90,
+                        loc = {
+                            fPoints = FPOINT_NULL,
+                            nOffsets = {
+                                tScreenLocDot.x - nScale,
+                                tScreenLocDot.y - nScale ,
+                                tScreenLocDot.x + nScale,
+                                tScreenLocDot.y + nScale,
+                            },
+                        },
+                    }
+                    if tDraw.nPixieIdDot[i] then
+                        _wndOverlay:UpdatePixie(tDraw.nPixieIdDot[i], tPixieAttributs)
+                    else
+                        tDraw.nPixieIdDot[i] = _wndOverlay:AddPixie(tPixieAttributs)
+                    end
+                else
+                    _wndOverlay:DestroyPixie(tDraw.nPixieIdDot[i])
+                    tDraw.nPixieIdDot[i] = nil
+                end
+            end
         end
-        return unitHeading + 3 * math.pi / 2
-    end
-end
-
-function addon:OnUpdate()
-    local uPlayer = GameLib.GetPlayerUnit()
-    if not uPlayer then return end 
-    local uTarget  
-
-    self.wOverlay:DestroyAllPixies()
-
-    for k, v in pairs(self.setup) do
-        if v.type == 1 then
-            if v.uStart and v.uTarget and not v.uStart:IsDead() and not v.uTarget:IsDead() then
-                local pStart = v.uStart:GetPosition()
-                local pTarget = v.uTarget:GetPosition()
-                self:DrawLine(k, pStart, pTarget, v.color)
-            else
-                self:DropLine(k)
-            end
-        elseif v.type == 2 then
-            if v.uStart and not v.uStart:IsDead() then
-                local pStart = v.uStart:GetPosition()
-                local vectorStart = Vector3.New(pStart.x, pStart.y, pStart.z)
-                local rotation = self:Heading(v.uStart) + v.rotation/180 * math.pi
-                local vectorEnd = vectorStart + Vector3.New(v.distance * math.cos(rotation), 0, v.distance * math.sin(rotation)) 
-                self:DrawLine(k, vectorStart, vectorEnd, v.color)
-            else
-                self:DropLine(k)
-            end
+    else
+        -- Remove the pixie if:
+        --  * At least one unit is not available.
+        --  * The Line is out of sight.
+        if tDraw.nPixieIdFull then
+            _wndOverlay:DestroyPixie(tDraw.nPixieIdFull)
+            tDraw.nPixieIdFull = nil
         end
-    end
-
-    for k, v in pairs(self.pixie) do
-        if v.type == 1 then
-            if v.uStart and v.uTarget and not v.uStart:IsDead() and not v.uTarget:IsDead() then
-                local pStart = v.uStart:GetPosition()
-                local pTarget = v.uTarget:GetPosition()
-                self:DrawPixie(pStart, pTarget, v.color, v.width)
-            else
-                self:DropPixie(k)
+        if next(tDraw.nPixieIdDot) then
+            for _, nPixieIdDot in next, tDraw.nPixieIdDot do
+                _wndOverlay:DestroyPixie(nPixieIdDot)
             end
-        elseif v.type == 2 then
-            if v.uStart and not v.uStart:IsDead() then
-                local pStart = v.uStart:GetPosition()
-                local vectorStart = Vector3.New(pStart.x, pStart.y, pStart.z)
-                local rotation = self:Heading(v.uStart) + v.rotation/180 * math.pi
-                local vectorEnd = vectorStart + Vector3.New(v.distance * math.cos(rotation), v.heading, v.distance * math.sin(rotation)) 
-                self:DrawPixie(vectorStart, vectorEnd, v.color, v.width)
-            else
-                self:DropPixie(k)
-            end
+            tDraw.nPixieIdDot = {}
         end
     end
 end
 
-if _G["RaidCoreLibs"] == nil then
-    _G["RaidCoreLibs"] = { }
+local function RemoveDraw(tDraw)
+    assert(type(tDraw) == "table")
+    if tDraw.nPixieIdFull then
+        _wndOverlay:DestroyPixie(tDraw.nPixieIdFull)
+    elseif next(tDraw.nPixieIdDot) then
+        for _, nPixieIdDot in next, tDraw.nPixieIdDot do
+            _wndOverlay:DestroyPixie(nPixieIdDot)
+        end
+        tDraw.nPixieIdDot = {}
+    end
 end
-_G["RaidCoreLibs"]["DisplayLine"] = DisplayLine
+
+----------------------------------------------------------------------------------------------------
+-- Template Class.
+----------------------------------------------------------------------------------------------------
+function TemplateManager:OnUpdateAll()
+    for _, tDraw in next, self.tDraws do
+        self:UpdateDraw(tDraw)
+    end
+end
+
+----------------------------------------------------------------------------------------------------
+-- Line between 2 units.
+----------------------------------------------------------------------------------------------------
+local LineBetween = NewManager()
+
+function LineBetween:UpdateDraw(tDraw)
+    assert(type(tDraw) == "table")
+    local tFromUnit = GetUnitById(tDraw.nFromId)
+    local tToUnit = GetUnitById(tDraw.nToId)
+
+    local tVectorFrom, tVectorTo = nil, nil
+    if tFromUnit and tFromUnit:IsValid() then
+        tVectorFrom = NewVector3(tFromUnit:GetPosition())
+    end
+    if tToUnit and tToUnit:IsValid() then
+        tVectorTo = NewVector3(tToUnit:GetPosition())
+    end
+
+    UpdateLine(tDraw, tVectorFrom, tVectorTo)
+end
+
+function LineBetween:AddDraw(Key, nFromId, nToId, nWidth, sColor, nNumberOfDot)
+    assert(type(nFromId) == "number")
+    assert(type(nToId) == "number")
+
+    if self.tDraws[Key] then
+        -- To complex to manage new definition with nNumberOfDot which change,
+        -- simplest to remove previous.
+        local bNumberOfDot = nNumberOfDot and self.tDraws[Key].nNumberOfDot ~= nNumberOfDot
+        -- The width update for a Pixie don't work. It's a carbine bug.
+        local bWidthChanged = nWidth and self.tDraws[Key].nWidth ~= nWidth
+        if bNumberOfDot or bWidthChanged then
+            self:RemoveDraw(Key)
+        end
+    end
+    -- Get saved object or create a new table.
+    local tDraw = self.tDraws[Key] or {}
+    tDraw.nFromId = nFromId
+    tDraw.nToId = nToId
+    tDraw.nWidth = nWidth or 4.0
+    tDraw.sColor = sColor or DEFAULT_LINE_COLOR
+    tDraw.nNumberOfDot = nNumberOfDot or DOT_IS_A_LINE
+    tDraw.nPixieIdDot = tDraw.nPixieIdDot or {}
+    -- Save this object (new or not).
+    self.tDraws[Key] = tDraw
+
+    StartDrawing()
+end
+
+function LineBetween:RemoveDraw(Key)
+    local tDraw = self.tDraws[Key]
+    if tDraw then
+        RemoveDraw(tDraw)
+        self.tDraws[Key] = nil
+    end
+end
+
+----------------------------------------------------------------------------------------------------
+-- Line from a unit.
+----------------------------------------------------------------------------------------------------
+local SimpleLine = NewManager()
+
+function SimpleLine:UpdateDraw(tDraw)
+    local tVectorTo, tVectorFrom = nil, nil
+    if tDraw.nOriginId then
+        local tOriginUnit = GetUnitById(tDraw.nOriginId)
+        if tOriginUnit and tOriginUnit:IsValid() then
+            local tOriginVector = NewVector3(tOriginUnit:GetPosition())
+            local tFacingVector = NewVector3(tOriginUnit:GetFacing())
+            local tVectorA = tFacingVector * (tDraw.nOffset)
+            local tVectorB = tFacingVector * (tDraw.nLength + tDraw.nOffset)
+            tVectorA = Rotation(tVectorA, tDraw.RotationMatrix)
+            tVectorB = Rotation(tVectorB, tDraw.RotationMatrix)
+            tVectorFrom = tOriginVector + tVectorA
+            tVectorTo = tOriginVector + tVectorB
+        end
+    else
+        tVectorTo = tDraw.tToVector
+        tVectorFrom = tDraw.tFromVector
+    end
+
+    UpdateLine(tDraw, tVectorFrom, tVectorTo)
+end
+
+function SimpleLine:AddDraw(Key, Origin, nOffset, nLength, nRotation, nWidth, sColor, nNumberOfDot)
+    local OriginType = type(Origin)
+    assert(OriginType == "number" or OriginType == "table")
+
+    if self.tDraws[Key] then
+        -- To complex to manage new definition with nNumberOfDot which change,
+        -- simplest to remove previous.
+        local bNumberOfDot = nNumberOfDot and self.tDraws[Key].nNumberOfDot ~= nNumberOfDot
+        -- The width update for a Pixie don't work. It's a carbine bug.
+        local bWidthChanged = nWidth and self.tDraws[Key].nWidth ~= nWidth
+        if bNumberOfDot or bWidthChanged then
+            self:RemoveDraw(Key)
+        end
+    end
+    -- Get saved object or create a new table.
+    local tDraw = self.tDraws[Key] or {}
+    tDraw.nOffset = nOffset or 0
+    tDraw.nLength = nLength or 10
+    tDraw.nWidth = nWidth or 4
+    tDraw.sColor = sColor or DEFAULT_LINE_COLOR
+    tDraw.nNumberOfDot = nNumberOfDot or DOT_IS_A_LINE
+    tDraw.nPixieIdDot = tDraw.nPixieIdDot or {}
+    -- Preprocessing.
+    local nRad = math.rad(nRotation or 0)
+    local nCos = math.cos(nRad)
+    local nSin = math.sin(nRad)
+    tDraw.RotationMatrix = {
+        x = NewVector3({ nCos, 0, -nSin }),
+        y = NewVector3({ 0, 1, 0 }),
+        z = NewVector3({ nSin, 0, nCos }),
+    }
+    if OriginType == "number" then
+        -- Origin is the Id of an unit.
+        tDraw.nOriginId = Origin
+        tDraw.tFromVector = nil
+        tDraw.tToVector = nil
+    else
+        -- Origin is the result of a GetPosition()
+        local tOriginVector = NewVector3(Origin)
+        local tFacingVector = NewVector3(DEFAULT_NORTH_FACING)
+        local tVectorA = tFacingVector * (tDraw.nOffset)
+        local tVectorB = tFacingVector * (tDraw.nLength + tDraw.nOffset)
+        tVectorA = Rotation(tVectorA, tDraw.RotationMatrix)
+        tVectorB = Rotation(tVectorB, tDraw.RotationMatrix)
+        tDraw.nOriginId = nil
+        tDraw.tFromVector = tOriginVector + tVectorA
+        tDraw.tToVector = tOriginVector + tVectorB
+    end
+    -- Save this object (new or not).
+    self.tDraws[Key] = tDraw
+
+    StartDrawing()
+end
+
+function SimpleLine:RemoveDraw(Key)
+    local tDraw = self.tDraws[Key]
+    if tDraw then
+        RemoveDraw(tDraw)
+        self.tDraws[Key] = nil
+    end
+end
+
+----------------------------------------------------------------------------------------------------
+-- Relations between RaidCore and Draw Manager.
+----------------------------------------------------------------------------------------------------
+function RaidCore:DrawManagersInit()
+    _wndOverlay = Apollo.LoadForm(self.xmlDoc, "Overlay", "InWorldHudStratum", tClass)
+end
+
+function RaidCore:OnDrawUpdate()
+    local nCurrentTime = GetGameTime()
+    local nDeltaTime = nCurrentTime - _nPreviousTime
+
+    if not DRAW_UPDATE_PERIOD or nDeltaTime > DRAW_UPDATE_PERIOD then
+        _nPreviousTime = nCurrentTime
+
+        local bIsEmpty = true
+        for _, tDrawManager in next, _tDrawManagers do
+            for _, tDraw in next, tDrawManager.tDraws do
+                local bStatus, sResult = pcall(tDrawManager.UpdateDraw, tDrawManager, tDraw)
+                if not bStatus then
+                    --@alpha@
+                    RaidCore:Print(sResult)
+                    --@end-alpha@
+                end
+            end
+            if next(tDrawManager.tDraws) then
+                bIsEmpty = false
+            end
+        end
+        if bIsEmpty then
+            StopDrawing()
+        end
+    end
+end
+
+function RaidCore:ResetLines()
+    for _, tDrawManager in next, _tDrawManagers do
+        for Key, tDraw in next, tDrawManager.tDraws do
+            tDrawManager:RemoveDraw(Key)
+        end
+    end
+end
+
+----------------------------------------------------------------------------------------------------
+-- API to use in encounters.
+----------------------------------------------------------------------------------------------------
+function RaidCore:AddLineBetweenUnits(...)
+    LineBetween:AddDraw(...)
+end
+
+function RaidCore:RemoveLineBetweenUnits(...)
+    LineBetween:RemoveDraw(...)
+end
+
+function RaidCore:AddSimpleLine(...)
+    SimpleLine:AddDraw(...)
+end
+
+function RaidCore:RemoveSimpleLine(...)
+    SimpleLine:RemoveDraw(...)
+end
+
+----------------------------------------------------------------------------------------------------
+-- XXX: DEPRECATED FUNCTIONS, Keep for compatibility.
+-- If a 'Line' have the same key as a 'Pixie', we will have a problem to distinct them on erase.
+----------------------------------------------------------------------------------------------------
+function RaidCore:AddLine(Key, nType, uStart, uTarget, nColor, nLength, nRotation, nDPL)
+    local nFromId = uStart and uStart:GetId()
+    local sColor = nil
+    if nColor == 1 then
+        sColor = "ff00ff00"
+    elseif nColor == 2 then
+        sColor = "ffff9933"
+    elseif nColor == 3 then
+        sColor = "ff0000ff"
+    end
+    nDPL = nDPL or 20
+    if nType == 1 then
+        local nToId = uTarget and uTarget:GetId()
+        LineBetween:AddDraw(Key, nFromId, nToId, nil, sColor, nDPL)
+    elseif nType == 2 then
+        SimpleLine:AddDraw(Key, nFromId, nil, nLength, nRotation, nil, sColor, nDPL)
+    end
+end
+
+function RaidCore:DropLine(Key)
+    LineBetween:RemoveDraw(Key)
+    SimpleLine:RemoveDraw(Key)
+end
+
+function RaidCore:AddPixie(Key, nType, uStart, uTarget, sColor, nWidth, nLength, nRotation)
+    local nFromId = uStart and uStart:GetId()
+    if sColor == "Blue" then
+        sColor = "FF0000FF"
+    elseif sColor == "Green" then
+        sColor = "FF00FF00"
+    elseif sColor == "Yellow" then
+        sColor = "FFFF9933"
+    elseif sColor == "Red" then
+        sColor = "FFDC143C"
+    end
+
+    if nType == 1 then
+        local nToId = uTarget and uTarget:GetId()
+        LineBetween:AddDraw(Key, nFromId, nToId, nWidth, sColor)
+    elseif nType == 2 then
+        SimpleLine:AddDraw(Key, nFromId, nil, nLength, nRotation, nWidth, sColor)
+    end
+end
+
+function RaidCore:DropPixie(Key)
+    LineBetween:RemoveDraw(Key)
+    SimpleLine:RemoveDraw(Key)
+end
