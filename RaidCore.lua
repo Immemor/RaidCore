@@ -986,7 +986,7 @@ function RaidCore:VersionCheckResults()
     end
     self:Print(self.L["%d members are up to date."]:format(nMemberWithLasted))
     -- Send Msg to oudated players.
-    local msg = {action = "NewestVersion", version = maxver}
+    local msg = {action = "NewestVersion", version = nMaxVersion}
     self:SendMessage(msg)
     self:ProcessMessage(msg)
     VCtimer = nil
