@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Sprites>
+    <Sprite Name="AvatusLeftHand" Cycle="1">
+        <Frame Texture="RaidCore\Textures\Draw\AvatusHands.tga" x0="0" x1="0" x2="0" x3="178" x4="178" x5="178" y0="0" y1="0" y2="0" y3="178" y4="178" y5="178" Stretchy="1" HotspotX="110" HotspotY="98" Duration="0.600" StartColor="white" EndColor="darkgray"/>
+        <Frame Texture="RaidCore\Textures\Draw\AvatusHands.tga" x0="0" x1="0" x2="0" x3="178" x4="178" x5="178" y0="0" y1="0" y2="0" y3="178" y4="178" y5="178" Stretchy="1" HotspotX="110" HotspotY="98" Duration="0.600" StartColor="darkgray" EndColor="white"/>
+    </Sprite>
+    <Sprite Name="AvatusRightHand" Cycle="1">
+        <Frame Texture="RaidCore\Textures\Draw\AvatusHands.tga" x0="179" x1="179" x2="179" x3="356" x4="356" x5="356" y0="0" y1="0" y2="0" y3="178" y4="178" y5="178" Stretchy="1" HotspotX="0" HotspotY="0" Duration="0.600" StartColor="white" EndColor="darkgray"/>
+        <Frame Texture="RaidCore\Textures\Draw\AvatusHands.tga" x0="179" x1="179" x2="179" x3="356" x4="356" x5="356" y0="0" y1="0" y2="0" y3="178" y4="178" y5="178" Stretchy="1" HotspotX="0" HotspotY="0" Duration="0.600" StartColor="darkgray" EndColor="white"/>
+    </Sprite>
+    <Sprite Name="Crosshair" Cycle="1">
+        <Frame Texture="RaidCore\Textures\Draw\crosshair.tga" x0="0" x1="0" x2="0" x3="80" x4="80" x5="80" y0="0" y1="0" y2="0" y3="80" y4="80" y5="80" Stretchy="1" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
+    </Sprite>
+</Sprites>

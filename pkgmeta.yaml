@@ -19,3 +19,4 @@ externals:
 
 ignore:
  - Textures/GUI/DefaultBouton.ai
+ - Textures/Draw/AvatusHands.psd
