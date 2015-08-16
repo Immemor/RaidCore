@@ -233,10 +233,6 @@ local GREEN_PHASE = 3
 local YELLOW_PHASE = 4
 local RED_PHASE = 5
 local BLUE_PHASE = 6
-local HAND_MAKERS = {
-    ["hand1"] = {x = 608.70, y = -198.75, z = -191.62},
-    ["hand2"] = {x = 607.67, y = -198.75, z = -157.00},
-}
 
 local CARDINAL_MARKERS = {
     ["north"] = { x = 618, y = -198, z = -235 },
@@ -274,23 +270,17 @@ local nPurgeCount
 local phase2warn, phase2
 local nMobiusId
 local nMobiusHealthPourcent
+local bDisplayHandsPictures
+local nAvatusId
 
 local function SetMarkersByPhase(nNewPhase)
     -- Remove previous markers
-    core:DropWorldMarker("HAND1")
-    core:DropWorldMarker("HAND2")
     core:DropWorldMarker("NORTH")
     core:DropWorldMarker("SOUTH")
     core:DropWorldMarker("EST")
     core:DropWorldMarker("WEST")
 
     -- Set markers
-    if MAIN_PHASE == nNewPhase then
-        if mod:GetSetting("OtherHandSpawnMarkers") then
-            core:SetWorldMarker("HAND1", mod.L["Hand %u"]:format(1), HAND_MAKERS["hand1"])
-            core:SetWorldMarker("HAND2", mod.L["Hand %u"]:format(2), HAND_MAKERS["hand2"])
-        end
-    end
     if MAIN_PHASE == nNewPhase or YELLOW_PHASE == nNewPhase or LABYRINTH_PHASE == nNewPhase then
         if mod:GetSetting("OtherDirectionMarkers") then
             core:SetWorldMarker("NORTH", mod.L["MARKER North"], CARDINAL_MARKERS["north"])
@@ -302,6 +292,16 @@ local function SetMarkersByPhase(nNewPhase)
         end
     end
     nCurrentPhase = nNewPhase
+end
+
+local function RefreshHoloHandPictures()
+    if mod:GetSetting("OtherHandSpawnMarkers") and bDisplayHandsPictures then
+        core:AddPicture("HAND1", nAvatusId, "RaidCore_Draw:AvatusLeftHand", -90, 17)
+        core:AddPicture("HAND2", nAvatusId, "RaidCore_Draw:AvatusRightHand", 90, 17)
+    else
+        core:RemovePicture("HAND1")
+        core:RemovePicture("HAND2")
+    end
 end
 
 ----------------------------------------------------------------------------------------------------
@@ -332,17 +332,11 @@ function mod:OnBossEnable()
     nGunGridLastPopTime = GetGameTime() + 20
     nMobiusId = nil
     nMobiusHealthPourcent = 100
+    nAvatusId = nil
+    bDisplayHandsPictures = false
 
     mod:AddTimerBar("OBBEAM", "Obliteration Beam", 69, mod:GetSetting("SoundObliterationBeam"))
     mod:AddTimerBar("GGRID", "~Gun Grid", 21, mod:GetSetting("SoundGunGrid"))
-    if mod:GetSetting("OtherHandSpawnMarkers") then
-        core:SetWorldMarker("HAND1", self.L["Hand %u"]:format(1), HAND_MAKERS["hand1"])
-        core:SetWorldMarker("HAND2", self.L["Hand %u"]:format(2), HAND_MAKERS["hand2"])
-    end
-    if mod:GetSetting("OtherDirectionMarkers") then
-        core:SetWorldMarker("NORTH", self.L["MARKER North"], CARDINAL_MARKERS["north"])
-        core:SetWorldMarker("SOUTH", self.L["MARKER South"], CARDINAL_MARKERS["south"])
-    end
 end
 
 function mod:OnUnitCreated(unit, sName)
@@ -356,6 +350,8 @@ function mod:OnUnitCreated(unit, sName)
         if mod:GetSetting("LineCleaveBoss") then
             core:AddPixie(unit:GetId(), 2, unit, nil, "Green", 10, 22, 0)
         end
+        nAvatusId = nUnitId
+        RefreshHoloHandPictures()
     elseif self.L["Augmented Rowsdower"] == sName then
         SetMarkersByPhase(LABYRINTH_PHASE)
         core:AddMsg("Rowsdower", self.L["Augmented Rowsdower"], 3)
@@ -394,6 +390,8 @@ function mod:OnUnitCreated(unit, sName)
             core:AddPixie(nUnitId, 1, unit, GetPlayerUnit(), "blue")
         end
     elseif sName == self.L["Holo Hand"] then
+        bDisplayHandsPictures = false
+        RefreshHoloHandPictures()
         core:AddUnit(unit)
         core:WatchUnit(unit)
         table.insert(tHoloHandsList, nUnitId, { ["unit"] = unit} )
@@ -439,6 +437,8 @@ function mod:OnUnitDestroyed(unit, sName)
         core:DropPixie(nUnitId)
     elseif sName == self.L["Avatus"] then
         core:DropPixie(nUnitId)
+        core:RemovePicture("HAND1")
+        core:RemovePicture("HAND2")
     elseif sName == self.L["Shock Sphere"] then
         core:DropPixie(nUnitId)
     elseif sName == self.L["Infinite Logic Loop"] then
@@ -583,6 +583,8 @@ function mod:OnChatDC(message)
         mod:AddTimerBar("GGRID", "~Gun Grid", 112, mod:GetSetting("SoundGunGrid"))
         if bIsHoloHand then
             mod:AddTimerBar("HOLO", "Holo Hand", 22)
+            bDisplayHandsPictures = true
+            RefreshHoloHandPictures()
         else
             mod:AddTimerBar("HOLO", "Holo Cannon", 22)
         end
