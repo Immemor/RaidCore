@@ -122,6 +122,10 @@ function mod:OnBossEnable()
     end
 end
 
+function mod:RemoveSquarePolygon()
+    core:RemovePolygon("DEFRAG_SQUARE")
+end
+
 function mod:OnSpellCastStart(unitName, castName, unit)
     if unitName == self.L["Mnemesis"] then
         if castName == self.L["Circuit Breaker"] then
@@ -134,6 +138,8 @@ function mod:OnSpellCastStart(unitName, castName, unit)
         elseif castName == self.L["Defragment"] then
             core:AddMsg("DEFRAG", self.L["SPREAD"], 5, mod:GetSetting("SoundDefrag") and "Beware")
             mod:AddTimerBar("DEFRAG", "~Defrag", 36, mod:GetSetting("SoundDefrag"))
+            core:AddPolygon("DEFRAG_SQUARE", GetPlayerUnit():GetId(), 13, 0, 4, "xkcdBloodOrange", 4)
+            self:ScheduleTimer("RemoveSquarePolygon", 10)
         end
     elseif unitName == self.L["Hydroflux"] then
         if castName == self.L["Watery Grave"] then
@@ -183,18 +189,17 @@ function mod:OnUnitCreated(unit, sName)
 
     if sName == self.L["Alphanumeric Hash"] then
         if nUnitId and mod:GetSetting("LineTetrisBlocks") then
-            core:AddPixie(nUnitId, 2, unit, nil, "Red", 10, 20, 0)
+            core:AddSimpleLine(nUnitId, nUnitId, 0, 20, 0, 10, "red")
         end
     elseif sName == self.L["Hydro Disrupter - DNT"] then
         if nUnitId and not midphase and mod:GetSetting("LineOrbs") then
-            core:AddPixie(nUnitId, 1, unit, GetPlayerUnit(), "Blue", 5, 10, 10)
+            core:AddLineBetweenUnits("Disrupter" .. nUnitId, GetPlayerUnit():GetId(), nUnitId, nil, "blue")
         end
     elseif sName == self.L["Hydroflux"] then
         core:AddUnit(unit)
         core:WatchUnit(unit)
         if mod:GetSetting("LineCleaveHydroflux") then
-            core:AddPixie("Hydro_1", 2, unit, nil, "Yellow", 3, 7, 0)
-            core:AddPixie("Hydro_2", 2, unit, nil, "Yellow", 3, 7, 180)
+            core:AddSimpleLine("HydroCleave", unit:GetId(), -7, 14, 0, 3, "xkcdOrangeYellow")
         end
     elseif sName == self.L["Mnemesis"] then
         if nUnitId and (nMnemesisId == nil or nMnemesisId == nUnitId) then
@@ -211,11 +216,13 @@ function mod:OnUnitDestroyed(unit, sName)
     local nUnitId = unit:GetId()
     if sName == self.L["Alphanumeric Hash"] then
         if nUnitId then
-            core:DropPixie(nUnitId)
+            core:RemoveSimpleLine(nUnitId)
         end
+    elseif sName == self.L["Hydroflux"] then
+        core:RemoveSimpleLine("HydroCleave")
     elseif sName == self.L["Hydro Disrupter - DNT"] then
         if nUnitId then
-            core:DropPixie(nUnitId)
+            core:RemoveLineBetweenUnits("Disrupter" .. nUnitId)
         end
     end
 end
