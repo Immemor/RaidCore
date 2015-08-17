@@ -121,9 +121,9 @@ end
 
 function mod:OnSpellCastStart(unitName, castName, unit)
     if unitName == self.L["Phagetech Augmentor"] and castName == self.L["Summon Repairbot"] then
-        core:AddMsg("BOTS", self.L["BOTS !!"], 5, "Alert")
+        mod:AddMsg("BOTS", "BOTS !!", 5, "Alert")
     elseif unitName == self.L["Phagetech Fabricator"] and castName == self.L["Summon Destructobot"] then
-        core:AddMsg("BOTS", self.L["BOTS !!"], 5, "Alert")
+        mod:AddMsg("BOTS", "BOTS !!", 5, "Alert")
     end
 end
 

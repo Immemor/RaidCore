@@ -124,7 +124,7 @@ function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
 
     if nSpellId == DEBUFFID_PRIMAL_ENTANGLEMENT1 or nSpellId == DEBUFFID_PRIMAL_ENTANGLEMENT2 then
         if GetPlayerUnit():GetId() == nId then
-            core:AddMsg("ROOT", self.L["You are rooted"], 5, mod:GetSetting("SoundRooted") and "Info")
+            mod:AddMsg("ROOT", "You are rooted", 5, mod:GetSetting("SoundRooted") and "Info")
         end
         if mod:GetSetting("OtherRootedPlayersMarkers") then
             core:MarkUnit(tUnit, nil, "ROOT")
@@ -132,7 +132,7 @@ function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
         end
     elseif strSpellName == "Life Force Shackle" then
         if GetPlayerUnit():GetId() == nId then
-            core:AddMsg("NOHEAL", "No-Healing Debuff!", 5, mod:GetSetting("SoundNoHealDebuff") and "Alarm")
+            mod:AddMsg("NOHEAL", "No-Healing Debuff!", 5, mod:GetSetting("SoundNoHealDebuff") and "Alarm")
         end
     end
 end
@@ -148,7 +148,7 @@ function mod:OnSpellCastStart(unitName, castName, unit)
     if unitName == self.L["Visceralus"] then
         if castName == self.L["Blinding Light"]
             and self:GetDistanceBetweenUnits(unit, GetPlayerUnit()) < 33 then
-            core:AddMsg("BLIND", self.L["Blinding Light"], 5, mod:GetSetting("SoundBlindingLight") and "Beware")
+            mod:AddMsg("BLIND", "Blinding Light", 5, mod:GetSetting("SoundBlindingLight") and "Beware")
         end
     end
 end

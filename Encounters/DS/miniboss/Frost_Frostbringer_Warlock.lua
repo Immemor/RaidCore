@@ -96,7 +96,7 @@ function mod:OnHealthChanged(sUnitName, nHealth)
     if self.L["Frostbringer Warlock"] == sUnitName then
         if nHealth <= 20 then
             if bIsPhase2 == false then
-                core:AddMsg("PHASE2", self.L["PHASE2"], 5)
+                mod:AddMsg("PHASE2", "PHASE2", 5)
                 mod:RemoveTimerBar("EXPLODING_ICE")
                 mod:RemoveTimerBar("WAVES")
             end

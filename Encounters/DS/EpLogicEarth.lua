@@ -136,7 +136,7 @@ function mod:OnSpellCastStart(unitName, castName, unit)
             local timeOfEvent = GetGameTime()
             if timeOfEvent - nPreviousDefragmentTime > 10 then
                 nPreviousDefragmentTime = timeOfEvent
-                core:AddMsg("DEFRAG", self.L["SPREAD"], 5, mod:GetSetting("SoundDefrag") and "Alarm")
+                mod:AddMsg("DEFRAG", "SPREAD", 5, mod:GetSetting("SoundDefrag") and "Alarm")
                 mod:AddTimerBar("BOOM", "BOOM", 9)
                 mod:AddTimerBar("DEFRAG", "DEFRAG", 40)
             end
@@ -146,9 +146,9 @@ end
 
 function mod:OnChatDC(message)
     if message:find(self.L["The ground shudders beneath Megalith"]) then
-        core:AddMsg("QUAKE", self.L["JUMP !"], 3, mod:GetSetting("SoundQuakeJump") and "Beware")
+        mod:AddMsg("QUAKE", "JUMP !", 3, mod:GetSetting("SoundQuakeJump") and "Beware")
     elseif message:find(self.L["Logic creates powerful data caches"]) then
-        core:AddMsg("STAR", self.L["STARS"]:format(" !"), 5, mod:GetSetting("SoundStars") and "Alert")
+        mod:AddMsg("STAR", self.L["STARS"]:format(" !"), 5, mod:GetSetting("SoundStars") and "Alert")
         mod:AddTimerBar("STAR", self.L["STARS"]:format(""), 60)
     end
 end
@@ -160,7 +160,7 @@ function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
     if nSpellId == DEBUFF_SNAKE then
         local sSnakeOnX = self.L["SNAKE ON %s"]:format(sUnitName)
         local sSound = tUnit == GetPlayerUnit() and mod:GetSetting("SoundSnake") and "RunAway"
-        core:AddMsg("SNAKE", sSnakeOnX, 5, sSound, "Blue")
+        mod:AddMsg("SNAKE", sSnakeOnX, 5, sSound, "Blue")
         mod:AddTimerBar("SNAKE", sSnakeOnX, 20)
     end
 end

@@ -354,7 +354,7 @@ function mod:OnUnitCreated(unit, sName)
         RefreshHoloHandPictures()
     elseif self.L["Augmented Rowsdower"] == sName then
         SetMarkersByPhase(LABYRINTH_PHASE)
-        core:AddMsg("Rowsdower", self.L["Augmented Rowsdower"], 3)
+        mod:AddMsg("Rowsdower", "Augmented Rowsdower", 3)
         SetTargetUnit(unit)
     elseif sName == self.L["Mobius Physics Constructor"] then
         -- Portals have same name, actual boss has HP, portals have nil value.
@@ -395,7 +395,7 @@ function mod:OnUnitCreated(unit, sName)
         core:AddUnit(unit)
         core:WatchUnit(unit)
         table.insert(tHoloHandsList, nUnitId, { ["unit"] = unit} )
-        core:AddMsg("HHAND", self.L["Holo Hand Spawned"], 5, "Info")
+        mod:AddMsg("HHAND", "Holo Hand Spawned", 5, "Info")
         if mod:GetSetting("LineCleaveHands") then
             core:AddPixie(nUnitId .. "_1", 2, unit, nil, "Blue", 7, 25, 0)
             core:AddPixie(nUnitId .. "_2", 2, unit, nil, "xkcdBluegrey", 3, 7, 60)
@@ -517,11 +517,11 @@ function mod:OnBuffApplied(unitName, splId, unit)
             if nCurrentPhase == BLUE_PHASE and mod:GetSetting("OtherPurgeMessages") then
                 local sSuffix = ("(%d)"):format(nPurgeCount)
                 if ePurgeType == PURGE_GREEN then
-                    core:AddMsg("PURGE", self.L["PURGE GREEN"] .. sSuffix, 3, nil, "green")
+                    mod:AddMsg("PURGE", self.L["PURGE GREEN"] .. sSuffix, 3, nil, "green")
                 elseif ePurgeType == PURGE_BLUE then
-                    core:AddMsg("PURGE", self.L["PURGE BLUE"] .. sSuffix, 3, nil, "blue")
+                    mod:AddMsg("PURGE", self.L["PURGE BLUE"] .. sSuffix, 3, nil, "blue")
                 elseif ePurgeType == PURGE_RED then
-                    core:AddMsg("PURGE", self.L["PURGE RED"] .. sSuffix, 3, nil, "red")
+                    mod:AddMsg("PURGE", self.L["PURGE RED"] .. sSuffix, 3, nil, "red")
                 end
             end
         end
@@ -532,10 +532,10 @@ function mod:OnHealthChanged(unitName, health)
     if unitName == self.L["Avatus"] then
         if health >= 75 and health <= 76 and not phase2warn then
             phase2warn = true
-            core:AddMsg("AVAP2", self.L["P2 SOON !"], 5, mod:GetSetting("SoundPortalPhase") and "Info")
+            mod:AddMsg("AVAP2", "P2 SOON !", 5, mod:GetSetting("SoundPortalPhase") and "Info")
         elseif health >= 50 and health <= 52 and not phase2warn then
             phase2warn = true
-            core:AddMsg("AVAP2", self.L["P2 SOON!"], 5, mod:GetSetting("SoundPortalPhase") and "Info")
+            mod:AddMsg("AVAP2", "P2 SOON!", 5, mod:GetSetting("SoundPortalPhase") and "Info")
         elseif health >= 70 and health <= 72 and phase2warn then
             phase2warn = false
         end
@@ -568,18 +568,18 @@ function mod:OnSpellCastStart(unitName, castName, unit)
         end
         local sSpellName = closest_holo_hand["unit"]:GetCastName():gsub(NO_BREAK_SPACE, " ")
         if sSpellName == self.L["Crushing Blow"] then
-            core:AddMsg("CRBLOW", self.L["INTERRUPT CRUSHING BLOW!"], 5, mod:GetSetting("SoundHandInterrupt") and "Inferno")
+            mod:AddMsg("CRBLOW", "INTERRUPT CRUSHING BLOW!", 5, mod:GetSetting("SoundHandInterrupt") and "Inferno")
         end
     elseif unitName == self.L["Mobius Physics Constructor"] and castName == self.L["Data Flare"] then
         mod:AddTimerBar("BLIND", "Blind", 29, mod:GetSetting("SoundBlindYellowRoom"))
-        core:AddMsg("BLIND", self.L["BLIND! TURN AWAY FROM BOSS"], 5, mod:GetSetting("SoundBlindYellowRoom") and "Inferno")
+        mod:AddMsg("BLIND", "BLIND! TURN AWAY FROM BOSS", 5, mod:GetSetting("SoundBlindYellowRoom") and "Inferno")
     end
 end
 
 function mod:OnChatDC(message)
     if message:find(self.L["Gun Grid Activated"]) then
         nGunGridLastPopTime = GetGameTime()
-        core:AddMsg("GGRIDMSG", self.L["Gun Grid NOW!"], 5, mod:GetSetting("SoundGunGrid") and "Beware")
+        mod:AddMsg("GGRIDMSG", "Gun Grid NOW!", 5, mod:GetSetting("SoundGunGrid") and "Beware")
         mod:AddTimerBar("GGRID", "~Gun Grid", 112, mod:GetSetting("SoundGunGrid"))
         if bIsHoloHand then
             mod:AddTimerBar("HOLO", "Holo Hand", 22)
@@ -616,21 +616,21 @@ function mod:ReceiveIndMessage(sFrom, sReason, data)
             nMobiusId = data
             nMobiusHealthPourcent = 100
             if mod:GetSetting("OtherMobiusHealthMessages") then
-                core:AddMsg("MOBIUS_INFO", self.L["Yellow Room: Combat started"], 3, nil, "blue")
+                mod:AddMsg("MOBIUS_INFO", "Yellow Room: Combat started", 3, nil, "blue")
             end
         end
     elseif "MOBIUS_HEALTH_UPDATE" == sReason then
         if nCurrentPhase == GREEN_PHASE and nMobiusHealthPourcent > data then
             nMobiusHealthPourcent = data
             if mod:GetSetting("OtherMobiusHealthMessages") then
-                core:AddMsg("MOBIUS_INFO", self.L["Mobius health: %d%%"]:format(nMobiusHealthPourcent), 2, nil, "blue")
+                mod:AddMsg("MOBIUS_INFO", self.L["Mobius health: %d%%"]:format(nMobiusHealthPourcent), 2, nil, "blue")
             end
         end
     elseif "MOBIUS_DEATH" == sReason then
         if nCurrentPhase == GREEN_PHASE and nMobiusHealthPourcent ~= 0 then
             nMobiusHealthPourcent = 0
             if mod:GetSetting("OtherMobiusHealthMessages") then
-                core:AddMsg("MOBIUS_INFO", self.L["Mobius health: %d%%"]:format(0), 2, nil, "blue")
+                mod:AddMsg("MOBIUS_INFO", self.L["Mobius health: %d%%"]:format(0), 2, nil, "blue")
             end
         end
     elseif "PURGE_TYPE" == sReason then

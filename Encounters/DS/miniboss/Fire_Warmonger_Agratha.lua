@@ -90,7 +90,7 @@ function mod:OnUnitCreated(tUnit, sUnitName)
         if nPreviousBombPopDate + 8 < GetGameTime() then
             -- Second bomb have huge chance to be delayed by elemental cast.
             mod:AddTimerBar("BOMBS", "Bombs", bIsFirstBomb and 44 or 23)
-            core:AddMsg("BOMBS", self.L["Bombs"], 5, nil, "Blue")
+            mod:AddMsg("BOMBS", "Bombs", 5, nil, "Blue")
             nPreviousBombPopDate = GetGameTime()
             bIsFirstBomb = false
         end
@@ -100,7 +100,7 @@ end
 function mod:OnHealthChanged(sUnitName, nHealth)
     if self.L["Warmonger Agratha"] == sUnitName then
         if nHealth == 67 or nHealth == 34 then
-            core:AddMsg("ELEMENTALS", self.L["ELEMENTALS SOON"], 5)
+            mod:AddMsg("ELEMENTALS", "ELEMENTALS SOON", 5)
         end
     end
 end
@@ -108,7 +108,7 @@ end
 function mod:OnSpellCastStart(sUnitName, sCastName, tUnit)
     if self.L["Warmonger Agratha"] == sUnitName then
         if self.L["Conjure Fire Elementals"] == sCastName then
-            core:AddMsg("ELEMENTALS", self.L["FIRE ELEMENTALS"], 5)
+            mod:AddMsg("ELEMENTALS", "FIRE ELEMENTALS", 5)
         elseif self.L["Fire Room"] == sCastName then
             if bIsFirstFireRoom == false then
                 core:PlaySound("Long")

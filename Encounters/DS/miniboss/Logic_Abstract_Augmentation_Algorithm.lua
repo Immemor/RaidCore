@@ -154,7 +154,7 @@ function mod:OnDebuffAddedOrUpdated(nId, nSpellId, nStack, fTimeRemaining)
                 local sMessage = self.L["%s is candidate to interrupt"]:format(sCandidateName)
                 mod:AddTimerBar("NEXT_INTERRUPT", sMessage, INTERRUPT_INTERVAL, bIsCountDown)
                 if mod:GetSetting("OtherKickerAnnounce") then
-                    core:AddMsg("KICKER", sMessage, INTERRUPT_INTERVAL, nil, "red")
+                    mod:AddMsg("KICKER", sMessage, INTERRUPT_INTERVAL, nil, "red")
                 end
             else
                 mod:AddTimerBar("NEXT_INTERRUPT", "Next interrupt", INTERRUPT_INTERVAL)
