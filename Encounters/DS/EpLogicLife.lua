@@ -199,8 +199,8 @@ function mod:OnUnitCreated(unit, sName)
     elseif sName == self.L["Mnemesis"] then
         core:WatchUnit(unit)
         core:AddUnit(unit)
-        mod:AddTimerBar("DEFRAG", self.L["~DEFRAG CD"], 21, mod:GetSetting("SoundDefrag"))
-        mod:AddTimerBar("ENRAGE", self.L["ENRAGE"], 480, mod:GetSetting("SoundEnrageCountDown"))
+        mod:AddTimerBar("DEFRAG", "~DEFRAG CD", 21, mod:GetSetting("SoundDefrag"))
+        mod:AddTimerBar("ENRAGE", "ENRAGE", 480, mod:GetSetting("SoundEnrageCountDown"))
     elseif sName == self.L["Essence of Life"] then
         core:AddUnit(unit)
         if not midphase then
@@ -249,8 +249,8 @@ function mod:OnSpellCastStart(unitName, castName, unit)
         end
     elseif unitName == self.L["Mnemesis"] and castName == self.L["Defragment"] then
         -- Defrag is unreliable, but seems to take at least this long.
-        mod:AddTimerBar("DEFRAG", self.L["~DEFRAG CD"], 40, mod:GetSetting("SoundDefrag"))
-        mod:AddTimerBar("DEFRAG_EXPLOSION", self.L["Defrag Explosion"], 9, mod:GetSetting("SoundDefrag"))
+        mod:AddTimerBar("DEFRAG", "~DEFRAG CD", 40, mod:GetSetting("SoundDefrag"))
+        mod:AddTimerBar("DEFRAG_EXPLOSION", "Defrag Explosion", 9, mod:GetSetting("SoundDefrag"))
         core:AddMsg("DEFRAG", self.L["DEFRAG"], 5, mod:GetSetting("SoundDefrag") and "Beware")
     end
 end
