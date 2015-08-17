@@ -102,9 +102,9 @@ function mod:OnBossEnable()
     Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
     Apollo.RegisterEventHandler("DEBUFF_ADD", "OnDebuffAdd", self)
 
-    core:AddTimerBar("KNOCKBACK", "KNOCKBACK", 6)
-    core:AddTimerBar("SHOCKWAVE", "SHOCKWAVE", 17)
-    core:AddTimerBar("BEAM", "BEAM", 36)
+    mod:AddTimerBar("KNOCKBACK", "KNOCKBACK", 6)
+    mod:AddTimerBar("SHOCKWAVE", "SHOCKWAVE", 17)
+    mod:AddTimerBar("BEAM", "BEAM", 36)
 end
 
 function mod:OnUnitCreated(tUnit, sName)
@@ -118,12 +118,12 @@ function mod:OnSpellCastStart(unitName, castName, unit)
     if unitName == self.L["Experiment X-89"] then
         if castName == self.L["Resounding Shout"] then
             core:AddMsg("KNOCKBACK", self.L["KNOCKBACK !!"], 5, "Alert")
-            core:AddTimerBar("KNOCKBACK", "KNOCKBACK", 23)
+            mod:AddTimerBar("KNOCKBACK", "KNOCKBACK", 23)
         elseif castName == self.L["Repugnant Spew"] then
             core:AddMsg("BEAM", self.L["BEAM !!"], 5, "Alarm")
-            core:AddTimerBar("BEAM", "BEAM", 40)
+            mod:AddTimerBar("BEAM", "BEAM", 40)
         elseif castName == self.L["Shattering Shockwave"] then
-            core:AddTimerBar("SHOCKWAVE", "SHOCKWAVE", 19)
+            mod:AddTimerBar("SHOCKWAVE", "SHOCKWAVE", 19)
         end
     end
 end
@@ -142,6 +142,6 @@ function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
     if nSpellId == DEBUFF_LITTLE_BOMB then
         local sSound = nId == GetPlayerUnit():GetId() and mod:GetSetting("SoundLittleBomb") and "RunAway"
         core:AddMsg("LITTLEB", self.L["LITTLE BOMB on %s !!!"]:format(GetUnitById(nId):GetName()), 5, sSound, "Blue")
-        core:AddTimerBar("LITTLEB", "LITTLE BOMB", fTimeRemaining, mod:GetSetting("SoundLittleBomb"))
+        mod:AddTimerBar("LITTLEB", "LITTLE BOMB", fTimeRemaining, mod:GetSetting("SoundLittleBomb"))
     end
 end

@@ -165,22 +165,22 @@ end
 function mod:OnChatDC(message)
     if message:find(self.L["Kuralak the Defiler returns to the Archive Core"]) then
         core:AddMsg("VANISH", self.L["VANISH"], 5, "Alert")
-        core:AddTimerBar("VANISH", "Vanish", 47)
+        mod:AddTimerBar("VANISH", "Vanish", 47)
     elseif message:find(self.L["Kuralak the Defiler causes a violent outbreak of corruption"]) then
         core:AddMsg("OUTBREAK", self.L["OUTBREAK"], 5, "RunAway")
         outbreakCount = outbreakCount + 1
         if outbreakCount <= 5 then
-            core:AddTimerBar("OUTBREAK", self.L["Outbreak (%s)"]:format(outbreakCount + 1), 45, mod:GetSetting("SoundOutbreak"))
+            mod:AddTimerBar("OUTBREAK", self.L["Outbreak (%s)"]:format(outbreakCount + 1), 45, mod:GetSetting("SoundOutbreak"))
         end
     elseif message:find(self.L["The corruption begins to fester"]) then
         if eggsCount < 2 then eggsCount = 2 end
         core:AddMsg("EGGS", (self.L["EGGS (%s)"]):format(math.pow(2, eggsCount-1)), 5, "Alert")
         eggsCount = eggsCount + 1
         if eggsCount == 5 then
-            core:AddTimerBar("EGGS", "BERSERK !!", 66)
+            mod:AddTimerBar("EGGS", "BERSERK !!", 66)
             eggsCount = 2
         else
-            core:AddTimerBar("EGGS", self.L["Eggs (%s)"]:format(math.pow(2, eggsCount-1)), 66)
+            mod:AddTimerBar("EGGS", self.L["Eggs (%s)"]:format(math.pow(2, eggsCount-1)), 66)
         end
     elseif message:find(self.L["has been anesthetized"]) then
         if siphonCount == 0 then siphonCount = 1 end
@@ -188,7 +188,7 @@ function mod:OnChatDC(message)
         if self:Tank() then
             core:AddMsg("SIPHON", self.L["SWITCH TANK"], 5, "Alarm", mod:GetSetting("SoundSiphon"))
             if siphonCount < 4 then
-                core:AddTimerBar("SIPHON", self.L["Switch Tank (%s)"]:format(siphonCount), 88)
+                mod:AddTimerBar("SIPHON", self.L["Switch Tank (%s)"]:format(siphonCount), 88)
             end
         end
     end
@@ -204,10 +204,10 @@ function mod:OnChatNPCSay(message)
         eggsCount, siphonCount, outbreakCount = 2, 1, 0
         core:RemoveTimerBar("VANISH")
         core:AddMsg("KP2", self.L["PHASE 2 !"], 5, "Alert")
-        core:AddTimerBar("OUTBREAK", self.L["Outbreak (%s)"]:format(outbreakCount + 1), 15)
-        core:AddTimerBar("EGGS", self.L["Eggs (%s)"]:format(eggsCount), 73)
+        mod:AddTimerBar("OUTBREAK", self.L["Outbreak (%s)"]:format(outbreakCount + 1), 15)
+        mod:AddTimerBar("EGGS", self.L["Eggs (%s)"]:format(eggsCount), 73)
         if self:Tank() then
-            core:AddTimerBar("SIPHON", self.L["Switch Tank (%s)"]:format(siphonCount), 37)
+            mod:AddTimerBar("SIPHON", self.L["Switch Tank (%s)"]:format(siphonCount), 37)
         end
         if mod:GetSetting("OtherPillarMarkers") then
             local estpos = { x = 194.44, y = -110.80034637451, z = -483.20 }
