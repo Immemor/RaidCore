@@ -156,7 +156,7 @@ function mod:OnSpellCastEnd(unitName, castName)
     if unitName == self.L["Mnemesis"] then
         if castName == self.L["Circuit Breaker"] then
             midphase = false
-            mod:AddTimerBar("MIDPHASE", "Middle Phase", 90, mod:GetSetting("SoundMidphaseCountDown"))
+            mod:AddTimerBar("MIDPHASE", "Middle Phase", 85, mod:GetSetting("SoundMidphaseCountDown"))
             mod:AddTimerBar("PRISON", "Imprison", 25)
         end
     end
