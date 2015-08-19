@@ -33,6 +33,7 @@ mod:RegisterEnglishLocale({
     ["~Defrag"] = "~Defrag",
     ["~Imprison"] = "~Imprison",
     ["ORB"] = "ORB",
+    ["Enrage"] = "Enrage",
 })
 mod:RegisterFrenchLocale({
     -- Unit names.
@@ -52,6 +53,7 @@ mod:RegisterFrenchLocale({
     ["~Defrag"] = "~Defrag",
     ["~Imprison"] = "~Emprisonner",
     ["ORB"] = "ORB",
+    ["Enrage"] = "Enrage",
 })
 mod:RegisterGermanLocale({
     -- Unit names.
@@ -84,8 +86,9 @@ mod:RegisterDefaultSetting("LineCleaveHydroflux")
 mod:RegisterDefaultTimerBarConfigs({
     ["MIDPHASE"] = { sColor = "xkcdAlgaeGreen" },
     ["PRISON"] = { sColor = "xkcdBluegreen" },
-    ["GRAVE"] = { sColor = "xkcdBloodRed" },
+    ["GRAVE"] = { sColor = "xkcdDeepOrange" },
     ["DEFRAG"] = { sColor = "xkcdBarneyPurple" },
+    ["ENRAGE"] = { sColor = "red" },
 })
 
 ----------------------------------------------------------------------------------------------------
@@ -116,6 +119,7 @@ function mod:OnBossEnable()
     nMnemesisId = nil
     mod:AddTimerBar("MIDPHASE", "Middle Phase", 75, mod:GetSetting("SoundMidphaseCountDown"))
     mod:AddTimerBar("PRISON", "Imprison", 33)
+    mod:AddTimerBar("ENRAGE", "Enrage", 421)
     mod:AddTimerBar("DEFRAG", "~Defrag", 16, mod:GetSetting("SoundDefrag"))
     if mod:GetSetting("OtherWateryGraveTimer") then
         mod:AddTimerBar("GRAVE", "Watery Grave", 10)
