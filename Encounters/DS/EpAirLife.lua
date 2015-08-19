@@ -162,6 +162,7 @@ function mod:OnBossEnable()
     nTreeKeeperCount = 0
     tTreeKeeperList = {}
     nFirstTreeId = nil
+    nLightningStrikeCount = 0
 
     mod:AddTimerBar("MIDPHASE", "Middle Phase", 90, mod:GetSetting("SoundMidphaseCountDown"))
     mod:AddTimerBar("THORN", "Thorns", 20)
