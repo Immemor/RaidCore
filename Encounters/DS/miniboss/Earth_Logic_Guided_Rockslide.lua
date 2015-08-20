@@ -56,9 +56,11 @@ end
 
 function mod:OnUnitCreated(unit, sName)
     if sName == self.L["Logic Guided Rockslide"] then
+        local nId = unit:GetId()
         tRockslideUnit = unit
         core:AddUnit(unit)
         core:WatchUnit(unit)
+        core:AddPolygon(nId, nId, 8, 0, 4, "xkcdBrightPurple", 16)
     end
 end
 
