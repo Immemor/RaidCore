@@ -46,7 +46,7 @@ mod:RegisterEnglishLocale({
     ["No-Healing Debuff!"] = "No-Healing Debuff!",
     ["NO HEAL DEBUFF"] = "NO HEAL",
     ["Lightning"] = "Lightning",
-    ["Lightning on YOU"] = "Lightning on YOU",
+    ["Lightning on %s"] = "Lightning on %s",
     ["Enrage"] = "Enrage",
 })
 mod:RegisterFrenchLocale({
@@ -70,7 +70,7 @@ mod:RegisterFrenchLocale({
     ["No-Healing Debuff!"] = "Aucun-Soin Debuff!",
     ["NO HEAL DEBUFF"] = "NO HEAL",
     ["Lightning"] = "Foudre",
-    ["Lightning on YOU"] = "Foudre sur VOUS",
+    ["Lightning on %s"] = "Foudre sur %s",
     ["Enrage"] = "Enrage",
 })
 mod:RegisterGermanLocale({
@@ -94,7 +94,7 @@ mod:RegisterGermanLocale({
     --["No-Healing Debuff!"] = "No-Healing Debuff!", -- TODO: German translation missing !!!!
     --["NO HEAL DEBUFF"] = "NO HEAL", -- TODO: German translation missing !!!!
     ["Lightning"] = "Blitz",
-    --["Lightning on YOU"] = "Lightning on YOU", -- TODO: German translation missing !!!!
+    --["Lightning on %s"] = "Lightning on %s", -- TODO: German translation missing !!!!
 })
 -- Default settings.
 mod:RegisterDefaultSetting("LineLifeOrbs")
@@ -113,6 +113,7 @@ mod:RegisterDefaultSetting("OtherNoHealDebuffPlayerMarkers")
 mod:RegisterDefaultSetting("OtherNoHealDebuff")
 mod:RegisterDefaultSetting("OtherLightningMarkers")
 mod:RegisterDefaultSetting("OtherBlindingLight")
+mod:RegisterDefaultSetting("SoundLightningOnYou")
 -- Timers default configs.
 mod:RegisterDefaultTimerBarConfigs({
     ["THORN"] = { sColor = "xkcdBluegreen" },
@@ -136,7 +137,6 @@ local GetUnitById = GameLib.GetUnitById
 local GetGameTime = GameLib.GetGameTime
 local GetPlayerUnit= GameLib.GetPlayerUnit
 
-local nLightningStrikeCount
 local nTreeKeeperCount
 local tTreeKeeperList
 local nFirstTreeId
@@ -162,7 +162,6 @@ function mod:OnBossEnable()
     nTreeKeeperCount = 0
     tTreeKeeperList = {}
     nFirstTreeId = nil
-    nLightningStrikeCount = 0
 
     mod:AddTimerBar("MIDPHASE", "Middle Phase", 90, mod:GetSetting("SoundMidphaseCountDown"))
     mod:AddTimerBar("THORN", "Thorns", 20)
@@ -285,14 +284,15 @@ function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
         if mod:GetSetting("OtherLightningMarkers") then
             core:MarkUnit(tUnit, nil, self.L["Lightning"])
         end
-        nLightningStrikeCount = nLightningStrikeCount + 1
         if mod:GetSetting("LineHealingTrees") and #tTreeKeeperList > 0 then
             local sKey = ("LIGHTNING %d"):format(nId)
             core:AddPixie(sKey, 1, tUnit, GetUnitById(tTreeKeeperList[1]), "xkcdBrightPurple", 5)
         end
         if nId == nPlayerId then
             local sSound = mod:GetSetting("SoundLightning") and "RunAway"
-            mod:AddMsg("LIGHTNING", "Lightning on YOU", 5, sSound)
+            mod:AddMsg(nId, self.L["Lightning on %s"]:format(tUnit:GetName()), 3, sSound, "red")
+        else
+            mod:AddMsg(nId, self.L["Lightning on %s"]:format(tUnit:GetName()), 3, nil, "blue")
         end
     end
 end
