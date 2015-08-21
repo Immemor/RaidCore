@@ -201,7 +201,7 @@ end
 
 local function TrackThisUnit(nId)
     local tUnit = GetUnitById(nId)
-    if not _tTrackedUnits[nId] and tUnit then
+    if not _tTrackedUnits[nId] and tUnit and not tUnit:IsInYourGroup() then
         Log:Add("TrackThisUnit", nId)
         local tAllBuffs = GetAllBuffs(tUnit)
         _tAllUnits[nId] = true
