@@ -101,7 +101,7 @@ function mod:OnBossEnable()
     Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
 
     p2Count = 0
-    core:AddTimerBar("CONVP1", self.L["[%u] NEXT P2"]:format(p2Count + 1), 90)
+    mod:AddTimerBar("CONVP1", self.L["[%u] NEXT P2"]:format(p2Count + 1), 90)
 end
 
 function mod:OnUnitCreated(tUnit, sName)
@@ -119,12 +119,12 @@ function mod:OnSpellCastStart(unitName, castName, unit)
     if unitName == self.L["Golgox the Lifecrusher"] then
         if castName == self.L["Teleport"] then
             core:AddMsg("CONVP2", self.L["P2 : 20 IA"], 5, "Alert")
-            core:AddTimerBar("CONVP2", self.L["P2 : 20 IA"], 29.5)
+            mod:AddTimerBar("CONVP2", "P2 : 20 IA", 29.5)
         end
     elseif unitName == self.L["Terax Blightweaver"] then
         if castName == self.L["Teleport"] then
             core:AddMsg("CONVP2", self.L["P2 : MINI ADDS"], 5, "Alert")
-            core:AddTimerBar("CONVP2", self.L["P2 : MINI ADDS"], 29.5)
+            mod:AddTimerBar("CONVP2", "P2 : MINI ADDS", 29.5)
         elseif castName == self.L["Stitching Strain"] then
             if self:GetDistanceBetweenUnits(GameLib.GetPlayerUnit(), unit) < 30 then
                 core:AddMsg("INTSTRAIN", self.L["Interrupt Terax!"], 5, "Inferno")
@@ -133,17 +133,17 @@ function mod:OnSpellCastStart(unitName, castName, unit)
     elseif unitName == self.L["Ersoth Curseform"] then
         if castName == self.L["Teleport"] then
             core:AddMsg("CONVP2", self.L["P2 : SUBDUE"], 5, "Alert")
-            core:AddTimerBar("CONVP2", self.L["P2 : SUBDUE"], 29.5)
+            mod:AddTimerBar("CONVP2", "P2 : SUBDUE", 29.5)
         end
     elseif unitName == self.L["Noxmind the Insidious"] then
         if castName == self.L["Teleport"] then
             core:AddMsg("CONVP2", self.L["P2 : PILLARS"], 5, "Alert")
-            core:AddTimerBar("CONVP2", self.L["P2 : PILLARS"], 29.5)
+            mod:AddTimerBar("CONVP2", "P2 : PILLARS", 29.5)
         end
     elseif unitName == self.L["Fleshmonger Vratorg"] then
         if castName == self.L["Teleport"] then
             core:AddMsg("CONVP2", self.L["P2 : SHIELD"], 5, "Alert")
-            core:AddTimerBar("CONVP2", self.L["P2 : SHIELD"], 29.5)
+            mod:AddTimerBar("CONVP2", "P2 : SHIELD", 29.5)
         end
     end
 end
@@ -151,7 +151,7 @@ end
 function mod:OnSpellCastEnd(unitName, castName)
     if castName == self.L["Channeling Energy"] then
         core:RemoveTimerBar("CONVP2")
-        core:AddTimerBar("CONVP1", self.L["[%u] NEXT P2"]:format(p2Count + 1), 60)
+        mod:AddTimerBar("CONVP1", self.L["[%u] NEXT P2"]:format(p2Count + 1), 60)
     end
 end
 

@@ -84,10 +84,10 @@ end
 
 function mod:OnChatDC(message)
     if message:find(self.L["The augmented shield has been destroyed"]) then
-        core:AddTimerBar("MAW1", self.L["Bomb %u"]:format(1), 20)
-        core:AddTimerBar("MAW2", self.L["Bomb %u"]:format(2), 49)
-        core:AddTimerBar("MAW3", self.L["Bomb %u"]:format(3), 78)
-        core:AddTimerBar("PHAGEMAW", "BOOOM !", 104)
+        mod:AddTimerBar("MAW1", self.L["Bomb %u"]:format(1), 20)
+        mod:AddTimerBar("MAW2", self.L["Bomb %u"]:format(2), 49)
+        mod:AddTimerBar("MAW3", self.L["Bomb %u"]:format(3), 78)
+        mod:AddTimerBar("PHAGEMAW", "BOOOM !", 104)
     elseif message:find(self.L["Phage Maw begins charging an orbital strike"]) then
         if mod:GetSetting("OtherBombsMarkers") then
             core:ResetMarks()

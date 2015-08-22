@@ -173,9 +173,9 @@ function mod:OnBossEnable()
 
     pilarCount, boreCount, submergeCount = 1, 0, 0
     firstPull, OhmnaP3, OhmnaP4 = true, false, false
-    core:AddTimerBar("OPILAR", self.L["PILLAR %u"]:format(pilarCount), 25)
+    mod:AddTimerBar("OPILAR", self.L["PILLAR %u"]:format(pilarCount), 25)
     if self:Tank() then
-        core:AddTimerBar("OBORE", "SWITCH TANK", 45)
+        mod:AddTimerBar("OBORE", "SWITCH TANK", 45)
     end
 end
 
@@ -191,7 +191,7 @@ function mod:OnUnitCreated(unit, sName)
     elseif sName == self.L["Tentacle of Ohmna"] then
         if not OhmnaP4 then
             core:AddMsg("OTENT", self.L["Tentacles"], 5, "Info", "Blue")
-            core:AddTimerBar("OTENT", "Next Tentacles", 20)
+            mod:AddTimerBar("OTENT", "Next Tentacles", 20)
         end
     elseif sName == self.L["Ravenous Maw of the Dreadphage"] then
         if mod:GetSetting("OtherRavenousMawMarker") then
@@ -220,13 +220,13 @@ function mod:OnSpellCastStart(unitName, castName, unit)
         if castName == self.L["Erupt"] then
             if OhmnaP3 then return end
             local pilarActivated = self:OhmnaPE(pilarCount % 2)
-            core:AddTimerBar("OPILAR", self.L["PILLAR %u : %u"]:format(pilarCount, pilarActivated), 32)
+            mod:AddTimerBar("OPILAR", self.L["PILLAR %u : %u"]:format(pilarCount, pilarActivated), 32)
             if self:Tank() then
-                core:AddTimerBar("OBORE", "SWITCH TANK", 45)
+                mod:AddTimerBar("OBORE", "SWITCH TANK", 45)
             end
         elseif castName == self.L["Genetic Torrent"] then
             core:AddMsg("SPEW", self.L["BIG SPEW"], 5, mod:GetSetting("SoundBigSpew") and "RunAway")
-            core:AddTimerBar("OSPEW", "NEXT BIG SPEW", OhmnaP4 and 40 or 60)
+            mod:AddTimerBar("OSPEW", "NEXT BIG SPEW", OhmnaP4 and 40 or 60)
         end
     end
 end
@@ -264,11 +264,11 @@ function mod:OnChatDC(message)
         if OhmnaP3 then return end
         pilarCount = pilarCount + 1
         if submergeCount < 2 and pilarCount > 4 then
-            core:AddTimerBar("OPILAR", "PHASE 2", firstPull and 27 or 22)
+            mod:AddTimerBar("OPILAR", "PHASE 2", firstPull and 27 or 22)
             firstPull = false
         else
             local pilarActivated = self:OhmnaPE(pilarCount % 2)
-            core:AddTimerBar("OPILAR", self.L["PILLAR %u : %u"]:format(pilarCount, pilarActivated), 25)
+            mod:AddTimerBar("OPILAR", self.L["PILLAR %u : %u"]:format(pilarCount, pilarActivated), 25)
         end
     elseif message:find(self.L["Dreadphage Ohmna submerges"]) then
         pilarCount, boreCount = 1, 0
@@ -277,7 +277,7 @@ function mod:OnChatDC(message)
     elseif message:find(self.L["Dreadphage Ohmna is bored"]) then
         boreCount = boreCount + 1
         if boreCount < 2 and self:Tank() then
-            core:AddTimerBar("OBORE", "SWITCH TANK", 42)
+            mod:AddTimerBar("OBORE", "SWITCH TANK", 42)
         end
     elseif message:find(self.L["The Archives tremble as Dreadphage Ohmna"]) then
         core:AddMsg("OP2", self.L["P2: TENTACLES"], 5, "Alert")
@@ -286,6 +286,6 @@ function mod:OnChatDC(message)
         OhmnaP3 = true
         core:RemoveTimerBar("OPILAR")
         core:RemoveTimerBar("OBORE")
-        core:AddTimerBar("OSPEW", "NEXT BIG SPEW", 45)
+        mod:AddTimerBar("OSPEW", "NEXT BIG SPEW", 45)
     end
 end
