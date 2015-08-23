@@ -167,7 +167,6 @@ end
 function mod:OnBossEnable()
     Apollo.RegisterEventHandler("RC_UnitStateChanged", "OnUnitStateChanged", self)
     Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
-    Apollo.RegisterEventHandler("UNIT_HEALTH", "OnHealthChanged", self)
     Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
     Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
 
@@ -203,13 +202,13 @@ function mod:OnUnitCreated(unit, sName)
     end
 end
 
-function mod:OnHealthChanged(unitName, health)
-    if unitName == self.L["Dreadphage Ohmna"] then
-        if health == 52 then
+function mod:OnHealthChanged(nId, nPourcent, sName)
+    if sName == self.L["Dreadphage Ohmna"] then
+        if nPourcent == 52 then
             mod:AddMsg("OP2", "P2 SOON !", 5, "Alert")
-        elseif health == 20 then
+        elseif nPourcent == 20 then
             mod:AddMsg("OP3", "P3 SOON !", 5, "Alert")
-        elseif health == 17 then
+        elseif nPourcent == 17 then
             mod:AddMsg("OP3", "P3 REALLY SOON !", 5, "Alert")
         end
     end

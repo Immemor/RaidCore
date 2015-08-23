@@ -50,7 +50,6 @@ local tRockslideUnit
 function mod:OnBossEnable()
     Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
     Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
-    Apollo.RegisterEventHandler("UNIT_HEALTH", "OnHealthChanged", self)
     tRockslideUnit = nil
 end
 
@@ -64,7 +63,7 @@ function mod:OnUnitCreated(unit, sName)
     end
 end
 
-function mod:OnHealthChanged(sName, nHealth)
+function mod:OnHealthChanged(nId, nPourcent, sName)
     if sName == self.L["Logic Guided Rockslide"] then
         core:DropPixie("FOCUS")
     end

@@ -141,7 +141,6 @@ local eggsCount, siphonCount, outbreakCount = 0, 0, 0
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
     Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
-    Apollo.RegisterEventHandler("UNIT_HEALTH", "OnHealthChanged", self)
     Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
     Apollo.RegisterEventHandler("CHAT_NPCSAY", "OnChatNPCSay", self)
     Apollo.RegisterEventHandler("DEBUFF_ADD", "OnDebuffAdd", self)
@@ -156,9 +155,11 @@ function mod:OnUnitCreated(tUnit, sName)
     end
 end
 
-function mod:OnHealthChanged(unitName, health)
-    if health == 74 and unitName == self.L["Kuralak the Defiler"] then
-        mod:AddMsg("P2", "P2 SOON !", 5, "Info")
+function mod:OnHealthChanged(nId, nPourcent, sName)
+    if sName == self.L["Kuralak the Defiler"] then
+        if nPourcent == 74 then
+            mod:AddMsg("P2", "P2 SOON !", 5, "Info")
+        end
     end
 end
 

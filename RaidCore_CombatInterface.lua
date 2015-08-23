@@ -176,6 +176,9 @@ local function ExtraLog2Text(k, nRefTime, tParam)
     elseif k == "OnCombatLogHeal" then
         local sFormat = "CasterId=%s TargetId=%s sCasterName=\"%s\" sTargetName=\"%s\" nHealAmount=%u nOverHeal=%u nSpellId=%u"
         sResult = sFormat:format(tostring(tParam[1]), tostring(tParam[2]), tParam[3], tParam[4], tParam[5], tParam[6], tParam[7])
+    elseif k == "OnHealthChanged" then
+        local sFormat = "Id=%u nPourcent=%.2f sName=\"%s\""
+        sResult = sFormat:format(tParam[1], tParam[2], tParam[3])
     end
     return sResult
 end
@@ -212,6 +215,9 @@ local function TrackThisUnit(nId)
     if not _tTrackedUnits[nId] and tUnit and not tUnit:IsInYourGroup() then
         Log:Add("TrackThisUnit", nId)
         local tAllBuffs = GetAllBuffs(tUnit)
+        local MaxHealth = tUnit:GetMaxHealth()
+        local Health = tUnit:GetHealth()
+        local nPourcent = Health and MaxHealth and math.floor(100 * Health / MaxHealth)
         _tAllUnits[nId] = true
         _tTrackedUnits[nId] = {
             tUnit = tUnit,
@@ -226,6 +232,7 @@ local function TrackThisUnit(nId)
                 nCastEndTime = 0,
                 bSuccess = false,
             },
+            nPreviousHealthPourcent = nPourcent,
         }
     end
 end
@@ -642,6 +649,18 @@ function RaidCore:CI_OnScanUpdate()
                     bSuccess = false,
                 }
             end
+
+            -- Process Health tracking.
+            local MaxHealth = data.tUnit:GetMaxHealth()
+            local Health = data.tUnit:GetHealth()
+            if Health and MaxHealth then
+                local nPourcent = math.floor(100 * Health / MaxHealth)
+                if data.nPreviousHealthPourcent ~= nPourcent then
+                    data.nPreviousHealthPourcent = nPourcent
+                    ManagerCall("OnHealthChanged", nId, nPourcent, data.sName)
+                end
+            end
+
         end
     end
 end

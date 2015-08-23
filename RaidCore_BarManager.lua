@@ -149,12 +149,6 @@ local function UpdateUnitBar(tUnitManager, tBar)
                 -- Update the short health text.
                 tBar.wndUnitHPValue:SetText(Number2ShortString(Health))
             end
-
-            nPourcent = math.floor(nPourcent)
-            if tBar.nPreviousPourcent ~= nPourcent then
-                tBar.nPreviousPourcent = nPourcent
-                Event_FireGenericEvent("UNIT_HEALTH", sName, nPourcent)
-            end
         elseif tBar.wndUnitHPPercent then
             tBar.wndUnitHPPercent:SetText("")
             tBar.wndUnitHPValue:SetText("")

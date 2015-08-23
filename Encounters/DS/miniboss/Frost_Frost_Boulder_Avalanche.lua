@@ -88,7 +88,6 @@ local icicleSpell
 function mod:OnBossEnable()
     Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
     Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
-    Apollo.RegisterEventHandler("UNIT_HEALTH", "OnHealthChanged", self)
 
     icicleSpell = false
     mod:AddTimerBar("ICICLE", "~" .. self.L["ICICLE"], 17)
@@ -102,11 +101,11 @@ function mod:OnUnitCreated(tUnit, sName)
     end
 end
 
-function mod:OnHealthChanged(sUnitName, nHealth)
-    if sUnitName == self.L["Frost-Boulder Avalanche"] then
-        if nHealth == 85 or nHealth == 55 or nHealth == 31 then
+function mod:OnHealthChanged(nId, nPourcent, sName)
+    if sName == self.L["Frost-Boulder Avalanche"] then
+        if nPourcent == 85 or nPourcent == 55 or nPourcent == 31 then
             mod:AddMsg("CYCLONE", "CYCLONE SOON", 5, "Info", "Blue")
-        elseif nHealth == 22 then
+        elseif nPourcent == 22 then
             mod:AddMsg("PHASE2", "PHASE 2 SOON", 5, "Info", "Blue")
         end
     end

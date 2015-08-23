@@ -227,7 +227,6 @@ function mod:OnBossEnable()
     Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
     Apollo.RegisterEventHandler("DEBUFF_ADD", "OnDebuffAdd", self)
     Apollo.RegisterEventHandler("DEBUFF_DEL", "OnDebuffDel", self)
-    Apollo.RegisterEventHandler("UNIT_HEALTH", "OnHealthChanged", self)
     Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
     Apollo.RegisterEventHandler("RAID_SYNC", "OnSyncRcv", self)
     Apollo.RegisterEventHandler("SubZoneChanged", "OnZoneChanged", self)
@@ -317,13 +316,15 @@ function mod:OnUnitDestroyed(unit, sName)
     end
 end
 
-function mod:OnHealthChanged(unitName, health)
-    if health >= 70 and health <= 72 and not phase2warn and not phase2 then
-        phase2warn = true
-        mod:AddMsg("SDP2", "P2 SOON !", 5, mod:GetSetting("SoundPhase2Soon") and "Algalon")
-    elseif health >= 30 and health <= 32 and not phase2warn and not phase2 then
-        phase2warn = true
-        mod:AddMsg("SDP2", "P2 SOON !", 5, mod:GetSetting("SoundPhase2Soon") and "Algalon")
+function mod:OnHealthChanged(nId, nPourcent, sName)
+    if sName == self.L["Binary System Daemon"] or sName == self.L["Null System Daemon"] then
+        if nPourcent >= 70 and nPourcent <= 72 and not phase2warn and not phase2 then
+            phase2warn = true
+            mod:AddMsg("SDP2", "P2 SOON !", 5, mod:GetSetting("SoundPhase2Soon") and "Algalon")
+        elseif nPourcent >= 30 and nPourcent <= 32 and not phase2warn and not phase2 then
+            phase2warn = true
+            mod:AddMsg("SDP2", "P2 SOON !", 5, mod:GetSetting("SoundPhase2Soon") and "Algalon")
+        end
     end
 end
 

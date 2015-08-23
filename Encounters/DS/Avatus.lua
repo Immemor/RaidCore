@@ -312,7 +312,6 @@ function mod:OnBossEnable()
     Apollo.RegisterEventHandler("RC_UnitDestroyed", "OnUnitDestroyed", self)
     Apollo.RegisterEventHandler("RC_UnitStateChanged", "OnEnteredCombat", self)
     Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
-    Apollo.RegisterEventHandler("UNIT_HEALTH", "OnHealthChanged", self)
     Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
     Apollo.RegisterEventHandler("CHAT_NPCSAY", "OnChatNPCSay", self)
     Apollo.RegisterEventHandler("BUFF_APPLIED", "OnBuffApplied", self)
@@ -528,20 +527,20 @@ function mod:OnBuffApplied(unitName, splId, unit)
     end
 end
 
-function mod:OnHealthChanged(unitName, health)
-    if unitName == self.L["Avatus"] then
-        if health >= 75 and health <= 76 and not phase2warn then
+function mod:OnHealthChanged(nId, nPourcent, sName)
+    if sName == self.L["Avatus"] then
+        if nPourcent >= 75 and nPourcent <= 76 and not phase2warn then
             phase2warn = true
             mod:AddMsg("AVAP2", "P2 SOON !", 5, mod:GetSetting("SoundPortalPhase") and "Info")
-        elseif health >= 50 and health <= 52 and not phase2warn then
+        elseif nPourcent >= 50 and nPourcent <= 52 and not phase2warn then
             phase2warn = true
             mod:AddMsg("AVAP2", "P2 SOON!", 5, mod:GetSetting("SoundPortalPhase") and "Info")
-        elseif health >= 70 and health <= 72 and phase2warn then
+        elseif nPourcent >= 70 and nPourcent <= 72 and phase2warn then
             phase2warn = false
         end
-    elseif self.L["Mobius Physics Constructor"] == unitName then
-        if health % 10 == 0 and health < 100 then
-            mod:SendIndMessage("MOBIUS_HEALTH_UPDATE", health)
+    elseif self.L["Mobius Physics Constructor"] == sName then
+        if nPourcent % 10 == 0 and nPourcent < 100 then
+            mod:SendIndMessage("MOBIUS_HEALTH_UPDATE", nPourcent)
         end
     end
 end

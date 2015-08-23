@@ -843,6 +843,12 @@ function RaidCore:TestPE()
     end
 end
 
+function RaidCore:OnHealthChanged(nId, nPourcent, sName)
+    if _bIsEncounterInProgress and _tCurrentEncounter and _tCurrentEncounter.OnHealthChanged then
+        _tCurrentEncounter:OnHealthChanged(nId, nPourcent, sName)
+    end
+end
+
 function RaidCore:OnSay(sMessage, sSender)
     Event_FireGenericEvent('CHAT_SAY', sMessage, sSender)
 end

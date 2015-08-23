@@ -70,7 +70,6 @@ function mod:OnBossEnable()
     Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
     Apollo.RegisterEventHandler("SPELL_CAST_END", "OnSpellCastEnd", self)
     Apollo.RegisterEventHandler("DEBUFF_ADD", "OnDebuffAdd", self)
-    Apollo.RegisterEventHandler("UNIT_HEALTH", "OnHealthChanged", self)
 
     nFrostbringerWarlockId = nil
     nGlacierPopTime = 0
@@ -92,9 +91,9 @@ function mod:OnUnitCreated(tUnit, sUnitName)
     end
 end
 
-function mod:OnHealthChanged(sUnitName, nHealth)
-    if self.L["Frostbringer Warlock"] == sUnitName then
-        if nHealth <= 20 then
+function mod:OnHealthChanged(nId, nPourcent, sName)
+    if self.L["Frostbringer Warlock"] == sName then
+        if nPourcent <= 20 then
             if bIsPhase2 == false then
                 mod:AddMsg("PHASE2", "PHASE2", 5)
                 mod:RemoveTimerBar("EXPLODING_ICE")

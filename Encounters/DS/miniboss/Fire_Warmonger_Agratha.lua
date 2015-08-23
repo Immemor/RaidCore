@@ -72,7 +72,6 @@ local bIsFirstFireRoom
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
     Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
-    Apollo.RegisterEventHandler("UNIT_HEALTH", "OnHealthChanged", self)
     Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
     Apollo.RegisterEventHandler("SPELL_CAST_END", "OnSpellCastEnd", self)
 
@@ -97,9 +96,9 @@ function mod:OnUnitCreated(tUnit, sUnitName)
     end
 end
 
-function mod:OnHealthChanged(sUnitName, nHealth)
-    if self.L["Warmonger Agratha"] == sUnitName then
-        if nHealth == 67 or nHealth == 34 then
+function mod:OnHealthChanged(nId, nPourcent, sName)
+    if self.L["Warmonger Agratha"] == sName then
+        if nPourcent == 67 or nPourcent == 34 then
             mod:AddMsg("ELEMENTALS", "ELEMENTALS SOON", 5)
         end
     end
