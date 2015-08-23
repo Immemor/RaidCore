@@ -125,9 +125,9 @@ function mod:OnSpellCastStart(unitName, castName, unit)
         if castName == self.L["Tsunami"] then
             bIsPhase2 = true
             nMOOCount = nMOOCount + 1
-            core:AddMsg("PHASE2", self.L["Tsunami"]:upper(), 5, mod:GetSetting("SoundMidphase") and "Alert")
+            mod:AddMsg("PHASE2", self.L["Tsunami"]:upper(), 5, mod:GetSetting("SoundMidphase") and "Alert")
         elseif castName == self.L["Glacial Icestorm"] then
-            core:AddMsg("ICESTORM", self.L["ICESTORM"], 5, mod:GetSetting("SoundIcestorm") and "RunAway")
+            mod:AddMsg("ICESTORM", "ICESTORM", 5, mod:GetSetting("SoundIcestorm") and "RunAway")
         end
     end
 end
@@ -144,7 +144,7 @@ end
 function mod:OnBuffAdd(nId, nSpellId, nStack, fTimeRemaining)
     if bIsPhase2 and (nSpellId == BUFFID_MOO1 or nSpellId == BUFFID_MOO2) then
         bIsPhase2 = false
-        core:AddMsg("MOO", self.L["MOO !"], 5, mod:GetSetting("SoundMoO") and "Info", "Blue")
+        mod:AddMsg("MOO", "MOO !", 5, mod:GetSetting("SoundMoO") and "Info", "Blue")
         mod:AddTimerBar("MOO", "MOO PHASE", 10, mod:GetSetting("SoundMoO"))
         if nMOOCount == 2 then
             nMOOCount = 0
@@ -157,7 +157,7 @@ function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
     local tUnit = GetUnitById(nId)
     if nSpellId == DEBUFFID_TWIRL then
         if mod:GetSetting("OtherTwirlWarning") and GetPlayerUnit():GetId() == nId then
-            core:AddMsg("TWIRL", self.L["TWIRL ON YOU!"], 5, mod:GetSetting("SoundTwirl") and "Inferno")
+            mod:AddMsg("TWIRL", "TWIRL ON YOU!", 5, mod:GetSetting("SoundTwirl") and "Inferno")
         end
         if mod:GetSetting("OtherTwirlPlayerMarkers") then
             core:MarkUnit(tUnit, nil, self.L["TWIRL"])

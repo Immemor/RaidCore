@@ -140,7 +140,7 @@ function mod:OnSpellCastStart(unitName, castName, unit)
         elseif castName == self.L["Imprison"] then
             mod:RemoveTimerBar("PRISON")
         elseif castName == self.L["Defragment"] then
-            core:AddMsg("DEFRAG", self.L["SPREAD"], 5, mod:GetSetting("SoundDefrag") and "Beware")
+            mod:AddMsg("DEFRAG", "SPREAD", 5, mod:GetSetting("SoundDefrag") and "Beware")
             mod:AddTimerBar("DEFRAG", "~Defrag", 36, mod:GetSetting("SoundDefrag"))
             core:AddPolygon("DEFRAG_SQUARE", GetPlayerUnit():GetId(), 13, 0, 4, "xkcdBloodOrange", 4)
             self:ScheduleTimer("RemoveSquarePolygon", 10)

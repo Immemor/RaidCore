@@ -118,31 +118,31 @@ end
 function mod:OnSpellCastStart(unitName, castName, unit)
     if unitName == self.L["Golgox the Lifecrusher"] then
         if castName == self.L["Teleport"] then
-            core:AddMsg("CONVP2", self.L["P2 : 20 IA"], 5, "Alert")
+            mod:AddMsg("CONVP2", "P2 : 20 IA", 5, "Alert")
             mod:AddTimerBar("CONVP2", "P2 : 20 IA", 29.5)
         end
     elseif unitName == self.L["Terax Blightweaver"] then
         if castName == self.L["Teleport"] then
-            core:AddMsg("CONVP2", self.L["P2 : MINI ADDS"], 5, "Alert")
+            mod:AddMsg("CONVP2", "P2 : MINI ADDS", 5, "Alert")
             mod:AddTimerBar("CONVP2", "P2 : MINI ADDS", 29.5)
         elseif castName == self.L["Stitching Strain"] then
             if self:GetDistanceBetweenUnits(GameLib.GetPlayerUnit(), unit) < 30 then
-                core:AddMsg("INTSTRAIN", self.L["Interrupt Terax!"], 5, "Inferno")
+                mod:AddMsg("INTSTRAIN", "Interrupt Terax!", 5, "Inferno")
             end
         end
     elseif unitName == self.L["Ersoth Curseform"] then
         if castName == self.L["Teleport"] then
-            core:AddMsg("CONVP2", self.L["P2 : SUBDUE"], 5, "Alert")
+            mod:AddMsg("CONVP2", "P2 : SUBDUE", 5, "Alert")
             mod:AddTimerBar("CONVP2", "P2 : SUBDUE", 29.5)
         end
     elseif unitName == self.L["Noxmind the Insidious"] then
         if castName == self.L["Teleport"] then
-            core:AddMsg("CONVP2", self.L["P2 : PILLARS"], 5, "Alert")
+            mod:AddMsg("CONVP2", "P2 : PILLARS", 5, "Alert")
             mod:AddTimerBar("CONVP2", "P2 : PILLARS", 29.5)
         end
     elseif unitName == self.L["Fleshmonger Vratorg"] then
         if castName == self.L["Teleport"] then
-            core:AddMsg("CONVP2", self.L["P2 : SHIELD"], 5, "Alert")
+            mod:AddMsg("CONVP2", "P2 : SHIELD", 5, "Alert")
             mod:AddTimerBar("CONVP2", "P2 : SHIELD", 29.5)
         end
     end

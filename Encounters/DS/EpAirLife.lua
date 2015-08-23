@@ -266,7 +266,7 @@ function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
     if nSpellId == DEBUFFID_TWIRL then
         if nId == nPlayerId and mod:GetSetting("OtherTwirlWarning") then
             local sSound = mod:GetSetting("SoundTwirl") and "Inferno"
-            core:AddMsg("TWIRL", self.L["TWIRL ON YOU!"], 5, sSound)
+            mod:AddMsg("TWIRL", "TWIRL ON YOU!", 5, sSound)
         end
 
         if mod:GetSetting("OtherTwirlPlayerMarkers") then
@@ -279,7 +279,7 @@ function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
         end
         if nId == nPlayerId and mod:GetSetting("OtherNoHealDebuff") then
             local sSound = mod:GetSetting("SoundNoHealDebuff") and "Alarm"
-            core:AddMsg("NOHEAL", self.L["No-Healing Debuff!"], 5, sSound)
+            mod:AddMsg("NOHEAL", "No-Healing Debuff!", 5, sSound)
         end
     elseif nSpellId == DEBUFFID_LIGHTNING_STRIKE then
         if mod:GetSetting("OtherLightningMarkers") then
@@ -292,7 +292,7 @@ function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
         end
         if nId == nPlayerId then
             local sSound = mod:GetSetting("SoundLightning") and "RunAway"
-            core:AddMsg("LIGHTNING", self.L["Lightning on YOU"], 5, sSound)
+            mod:AddMsg("LIGHTNING", "Lightning on YOU", 5, sSound)
         end
     end
 end
@@ -316,7 +316,7 @@ function mod:OnSpellCastStart(unitName, castName, unit)
             if mod:GetSetting("OtherBlindingLight") then
                 if self:GetDistanceBetweenUnits(unit, GetPlayerUnit()) < 33 then
                     local sSound = mod:GetSetting("SoundBlindingLight") and "Beware"
-                    core:AddMsg("BLIND", self.L["Blinding Light"], 5, sSound)
+                    mod:AddMsg("BLIND", "Blinding Light", 5, sSound)
                 end
             end
         end

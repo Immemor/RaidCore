@@ -98,7 +98,7 @@ end
 function mod:OnSpellCastStart(sUnitName, sCastName, tUnit)
     if self.L["Grand Warmonger Tar'gresh"]  == sUnitName then
         if self.L["Meteor Storm"] == sCastName then
-            core:AddMsg("STORM", self.L["STORM !!"], 5, "RunAway")
+            mod:AddMsg("STORM", "STORM !!", 5, "RunAway")
         end
     end
 end
