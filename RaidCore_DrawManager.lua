@@ -189,25 +189,28 @@ end
 local LineBetween = NewManager()
 
 function LineBetween:UpdateDraw(tDraw)
-    assert(type(tDraw) == "table")
-    local tFromUnit = GetUnitById(tDraw.nFromId)
-    local tToUnit = GetUnitById(tDraw.nToId)
-
     local tVectorFrom, tVectorTo = nil, nil
-    if tFromUnit and tFromUnit:IsValid() then
-        tVectorFrom = NewVector3(tFromUnit:GetPosition())
+    if tDraw.nIdFrom then
+        local tUnitFrom = GetUnitById(tDraw.nIdFrom)
+        if tUnitFrom and tUnitFrom:IsValid() then
+            tVectorFrom = NewVector3(tUnitFrom:GetPosition())
+        end
+    else
+        tVectorFrom = tDraw.tVectorFrom
     end
-    if tToUnit and tToUnit:IsValid() then
-        tVectorTo = NewVector3(tToUnit:GetPosition())
+    if tDraw.nIdTo then
+        local tUnitTo = GetUnitById(tDraw.nIdTo)
+        if tUnitTo and tUnitTo:IsValid() then
+            tVectorTo = NewVector3(tUnitTo:GetPosition())
+        end
+    else
+        tVectorTo = tDraw.tVectorTo
     end
 
     UpdateLine(tDraw, tVectorFrom, tVectorTo)
 end
 
-function LineBetween:AddDraw(Key, nFromId, nToId, nWidth, sColor, nNumberOfDot)
-    assert(type(nFromId) == "number")
-    assert(type(nToId) == "number")
-
+function LineBetween:AddDraw(Key, FromOrigin, ToOrigin, nWidth, sColor, nNumberOfDot)
     if self.tDraws[Key] then
         -- To complex to manage new definition with nNumberOfDot which change,
         -- simplest to remove previous.
@@ -220,15 +223,33 @@ function LineBetween:AddDraw(Key, nFromId, nToId, nWidth, sColor, nNumberOfDot)
     end
     -- Get saved object or create a new table.
     local tDraw = self.tDraws[Key] or {}
-    tDraw.nFromId = nFromId
-    tDraw.nToId = nToId
     tDraw.nWidth = nWidth or 4.0
     tDraw.sColor = sColor or DEFAULT_LINE_COLOR
     tDraw.nNumberOfDot = nNumberOfDot or DOT_IS_A_LINE
     tDraw.nPixieIdDot = tDraw.nPixieIdDot or {}
+    -- Preprocessing of the 'From'.
+    if type(FromOrigin) == "number" then
+        -- FromOrigin is the Id of an unit.
+        tDraw.nIdFrom = FromOrigin
+        tDraw.tVectorFrom = nil
+    else
+        -- FromOrigin is the result of a GetPosition()
+        tDraw.nIdFrom = nil
+        tDraw.tVectorFrom = NewVector3(FromOrigin)
+    end
+    -- Preprocessing of the 'To'.
+    if type(ToOrigin) == "number" then
+        -- ToOrigin is the Id of an unit.
+        tDraw.nIdTo = ToOrigin
+        tDraw.tVectorTo = nil
+    else
+        -- ToOrigin is the result of a GetPosition()
+        tDraw.nIdTo = nil
+        tDraw.tVectorTo = NewVector3(ToOrigin)
+    end
     -- Save this object (new or not).
     self.tDraws[Key] = tDraw
-
+    -- Start the draw update service.
     StartDrawing()
 end
 
