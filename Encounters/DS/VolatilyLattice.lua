@@ -173,23 +173,23 @@ function mod:OnChatDC(message)
         end
         local sText = self.L["BEAM on %s"]:format(sPlayerFocused)
         if nPlayerId == GetPlayerUnit():GetId() then
-            core:AddMsg("BEAM", sText, 5, mod:GetSetting("SoundBeamOnYou") and "RunAway")
+            mod:AddMsg("BEAM", sText, 5, mod:GetSetting("SoundBeamOnYou") and "RunAway")
         else
-            core:AddMsg("BEAM", sText, 5, mod:GetSetting("SoundBeamOnOther") and "Info", "Blue")
+            mod:AddMsg("BEAM", sText, 5, mod:GetSetting("SoundBeamOnOther") and "Info", "Blue")
         end
         mod:AddTimerBar("BEAM", sText, 15)
     elseif message == self.L["Avatus prepares to delete all"] then
-        core:AddMsg("PILLAR_TIMEOUT", self.L["PILLAR TIMEOUT"], 5, mod:GetSetting("SoundBigCast") and "Beware")
+        mod:AddMsg("PILLAR_TIMEOUT", "PILLAR TIMEOUT", 5, mod:GetSetting("SoundBigCast") and "Beware")
         mod:AddTimerBar("PILLAR_TIMEOUT", "PILLAR TIMEOUT", 10)
         mod:AddTimerBar("NEXT_PILLAR", "NEXT PILLAR", 50)
     elseif message == self.L["Secure Sector Enhancement"] then
-        core:AddMsg("P2", self.L["P2: SHIELD PHASE"], 5, mod:GetSetting("SoundShieldPhase") and "Alert")
+        mod:AddMsg("P2", "P2: SHIELD PHASE", 5, mod:GetSetting("SoundShieldPhase") and "Alert")
         mod:AddTimerBar("P2", "EXPLOSION", 15, mod:GetSetting("SoundLaserCountDown"))
         mod:AddTimerBar("BEAM", "NEXT BEAM", 44)
         mod:AddTimerBar("DATA_DEVOURER", "Next Data Devourer", 53)
         mod:AddTimerBar("NEXT_PILLAR", "NEXT PILLAR", 58)
     elseif message == self.L["Vertical Locomotion Enhancement"] then
-        core:AddMsg("P2", self.L["P2: JUMP PHASE"], 5, mod:GetSetting("SoundJumpPhase") and "Alert")
+        mod:AddMsg("P2", "P2: JUMP PHASE", 5, mod:GetSetting("SoundJumpPhase") and "Alert")
         mod:AddTimerBar("P2", "BEGIN OF SCANNING LASER", 15, mod:GetSetting("SoundExplosionCountDown"))
         mod:AddTimerBar("BEAM", "NEXT BEAM", 58)
         mod:AddTimerBar("DATA_DEVOURER", "Next Data Devourer", 68)

@@ -95,7 +95,7 @@ function mod:OnSpellCastStart(unitName, castName, unit)
                     core:PlaySound("Alert")
                 end
             elseif castName == self.L["Exhaust"] then
-                core:AddMsg("EXHAUST", self.L["Warning: Knock-Back"], 3, "Info")
+                mod:AddMsg("EXHAUST", "Warning: Knock-Back", 3, "Info")
             end
         end
     end

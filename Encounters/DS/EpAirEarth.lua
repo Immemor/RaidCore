@@ -142,7 +142,7 @@ function mod:OnSpellCastStart(unitName, castName, unit)
     if unitName == self.L["Megalith"] then
         if castName == self.L["Raw Power"] then
             bMidPhase = true
-            core:AddMsg("RAW", self.L["Raw Power"]:upper(), 5, mod:GetSetting("SoundMidphase") and "Alert")
+            mod:AddMsg("RAW", self.L["Raw Power"]:upper(), 5, mod:GetSetting("SoundMidphase") and "Alert")
         elseif castName == self.L["Fierce Swipe"] then
             mod:AddTimerBar("FIERCE_SWIPE", "Fierce Swipe", 16.5)
         end
@@ -151,7 +151,7 @@ function mod:OnSpellCastStart(unitName, castName, unit)
             local timeOfEvent = GetGameTime()
             if timeOfEvent - nRefTime > 30 then
                 nRefTime = timeOfEvent
-                core:AddMsg("SUPERCELL", self.L["Supercell"]:upper(), 5, mod:GetSetting("SoundSupercell") and "Alarm")
+                mod:AddMsg("SUPERCELL", self.L["Supercell"]:upper(), 5, mod:GetSetting("SoundSupercell") and "Alarm")
                 mod:AddTimerBar("SUPERCELL", "Supercell", 80)
             end
         end
@@ -164,8 +164,8 @@ function mod:OnChatDC(message)
             core:PlaySound("Beware")
         end
         if mod:GetSetting("OtherQuakeWarnings") then
-            core:AddMsg("QUAKE1", self.L["JUMP !"], 2)
-            core:AddMsg("QUAKE2", self.L["JUMP !"], 2)
+            mod:AddMsg("QUAKE1", "JUMP !", 2)
+            mod:AddMsg("QUAKE2", "JUMP !", 2)
         end
     elseif message:find(self.L["fractured crust leaves it exposed"]) and bMidPhase then
         bMidPhase = false

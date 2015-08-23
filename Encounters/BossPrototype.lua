@@ -65,6 +65,18 @@ function EncounterPrototype:RegisterDefaultSetting(sKey)
     self.tDefaultSettings[sKey] = true
 end
 
+-- Add a message to screen.
+-- @param sKey  Index which will be used to match on AddMsg.
+-- @param sEnglishText  English text to search in language dictionnary.
+-- @param nDuration  Timer duration.
+-- @param sSound  The sound to be played back.
+-- @param sColor  The color of the message.
+--
+-- Note: If the English translation is not found, the current string will be used like that.
+function EncounterPrototype:AddMsg(sKey, sEnglishText, nDuration, sSound, sColor)
+    RaidCore:AddMsg(sKey, self.L[sEnglishText], nDuration, sSound, sColor)
+end
+
 -- Create a timer bar.
 -- @param sKey  Index which will be used to match on AddTimerBar.
 -- @param sEnglishText  English text to search in language dictionnary.

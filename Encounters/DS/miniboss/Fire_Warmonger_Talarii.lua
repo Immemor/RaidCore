@@ -95,7 +95,7 @@ function mod:OnUnitCreated(tUnit, sUnitName)
     elseif self.L["Conjured Fire Bomb"] == sUnitName then
         local nCurrentTime = GetGameTime()
         if nPreviousBombPopTime + 8 < nCurrentTime then
-            core:AddMsg("BOMB", self.L["BOMB"], 5, nil, "Blue")
+            mod:AddMsg("BOMB", "BOMB", 5, nil, "Blue")
             mod:AddTimerBar("BOMB", "BOMB", 23)
             nPreviousBombPopTime = nCurrentTime
         end
@@ -105,7 +105,7 @@ end
 function mod:OnHealthChanged(sUnitName, nHealth)
     if self.L["Warmonger Talarii"] == sUnitName then
         if nHealth == 67 or nHealth == 34 then
-            core:AddMsg("ELEMENTALS", self.L["ELEMENTALS SOON"], 5, "Info")
+            mod:AddMsg("ELEMENTALS", "ELEMENTALS SOON", 5, "Info")
         end
     end
 end
@@ -113,10 +113,10 @@ end
 function mod:OnSpellCastStart(sUnitName, sCastName, tUnit)
     if self.L["Warmonger Talarii"] == sUnitName then
         if self.L["Incineration"] == sCastName then
-            core:AddMsg("KNOCK", self.L["INTERRUPT !"], 5, "Alert")
+            mod:AddMsg("KNOCK", "INTERRUPT !", 5, "Alert")
             mod:AddTimerBar("KNOCK", "KNOCKBACK", 29)
         elseif self.L["Conjure Fire Elementals"] == sCastName then
-            core:AddMsg("ELEMENTALS", self.L["ELEMENTALS"], 5)
+            mod:AddMsg("ELEMENTALS", "ELEMENTALS", 5)
         elseif self.L["Fire Room"] == sCastName then
             if bIsFirstFireRoom == false then
                 core:PlaySound("Long")

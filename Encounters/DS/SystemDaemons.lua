@@ -267,13 +267,13 @@ function mod:OnUnitCreated(unit, sName)
             sdwaveCount = sdwaveCount + 1
             probeCount = 0
             if sdwaveCount == 1 then
-                core:AddMsg("SDWAVE", self.L["[%u] WAVE"]:format(sdwaveCount), 5, mod:GetSetting("SoundWave") and "Info", "Blue")
+                mod:AddMsg("SDWAVE", self.L["[%u] WAVE"]:format(sdwaveCount), 5, mod:GetSetting("SoundWave") and "Info", "Blue")
                 mod:AddTimerBar("SDWAVE", self.L["[%u] WAVE"]:format(sdwaveCount + 1), 50, mod:GetSetting("SoundWave"))
             elseif sdwaveCount % 2 == 0 then
-                core:AddMsg("SDWAVE", self.L["[%u] WAVE"]:format(sdwaveCount), 5, mod:GetSetting("SoundWave") and "Info", "Blue")
+                mod:AddMsg("SDWAVE", self.L["[%u] WAVE"]:format(sdwaveCount), 5, mod:GetSetting("SoundWave") and "Info", "Blue")
                 mod:AddTimerBar("SDWAVE", self.L["[%u] MINIBOSS"]:format(sdwaveCount + 1), 50, mod:GetSetting("SoundWave"))
             else
-                core:AddMsg("SDWAVE", self.L["[%u] MINIBOSS"]:format(sdwaveCount), 5, mod:GetSetting("SoundWave") and "Info", "Blue")
+                mod:AddMsg("SDWAVE", self.L["[%u] MINIBOSS"]:format(sdwaveCount), 5, mod:GetSetting("SoundWave") and "Info", "Blue")
                 mod:AddTimerBar("SDWAVE", self.L["[%u] WAVE"]:format(sdwaveCount + 1), 50, mod:GetSetting("SoundWave"))
             end
             mod:AddTimerBar("PROBES", self.L["[%u] Probe"]:format(1), 10)
@@ -320,10 +320,10 @@ end
 function mod:OnHealthChanged(unitName, health)
     if health >= 70 and health <= 72 and not phase2warn and not phase2 then
         phase2warn = true
-        core:AddMsg("SDP2", self.L["P2 SOON !"], 5, mod:GetSetting("SoundPhase2Soon") and "Algalon")
+        mod:AddMsg("SDP2", "P2 SOON !", 5, mod:GetSetting("SoundPhase2Soon") and "Algalon")
     elseif health >= 30 and health <= 32 and not phase2warn and not phase2 then
         phase2warn = true
-        core:AddMsg("SDP2", self.L["P2 SOON !"], 5, mod:GetSetting("SoundPhase2Soon") and "Algalon")
+        mod:AddMsg("SDP2", "P2 SOON !", 5, mod:GetSetting("SoundPhase2Soon") and "Algalon")
     end
 end
 
@@ -331,12 +331,12 @@ function mod:OnSpellCastStart(unitName, castName, unit)
     if unitName == self.L["Binary System Daemon"] and castName == self.L["Power Surge"] then
         core:SendSync("NORTH_SURGE", unit:GetId())
         if phase2 and self:GetDistanceBetweenUnits(GameLib.GetPlayerUnit(), unit) < 40 then
-            core:AddMsg("SURGE", self.L["INTERRUPT NORTH"], 5, mod:GetSetting("SoundPowerSurge") and "Alert")
+            mod:AddMsg("SURGE", "INTERRUPT NORTH", 5, mod:GetSetting("SoundPowerSurge") and "Alert")
         end
     elseif unitName == self.L["Null System Daemon"] and castName == self.L["Power Surge"] then
         core:SendSync("SOUTH_SURGE", unit:GetId())
         if phase2 and self:GetDistanceBetweenUnits(GameLib.GetPlayerUnit(), unit) < 40 then
-            core:AddMsg("SURGE", self.L["INTERRUPT SOUTH"], 5, mod:GetSetting("SoundPowerSurge") and "Alert")
+            mod:AddMsg("SURGE", "INTERRUPT SOUTH", 5, mod:GetSetting("SoundPowerSurge") and "Alert")
         end
     elseif castName == "Purge" then
         PurgeLast[unit:GetId()] = GameLib.GetGameTime()
@@ -355,7 +355,7 @@ function mod:OnSpellCastStart(unitName, castName, unit)
         end
     elseif unitName == self.L["Defragmentation Unit"] then
             if GetCurrentSubZoneName():find("Infinite Generator Core") and castName == self.L["Black IC"] then
-                core:AddMsg("BLACKIC", self.L["INTERRUPT !"], 5, "Alert")
+                mod:AddMsg("BLACKIC", "INTERRUPT !", 5, "Alert")
                 mod:AddTimerBar("BLACKIC", "BLACK IC", 30)
             end
     end
@@ -380,9 +380,9 @@ function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
             sSound = mod:GetSetting("SoundPurge") and "Beware"
         end
         if nId == tPlayerUnit:GetId() then
-            core:AddMsg("PURGEDEBUFF", self.L["PURGE ON YOU"], 5, sSound)
+            mod:AddMsg("PURGEDEBUFF", "PURGE ON YOU", 5, sSound)
         elseif mod:GetDistanceBetweenUnits(tPlayerUnit, tUnit) < 8 then
-            core:AddMsg("PURGE", self.L["PURGE NEAR YOU!"], 2, sSound)
+            mod:AddMsg("PURGE", "PURGE NEAR YOU!", 2, sSound)
         end
     end
 end
@@ -451,7 +451,7 @@ function mod:OnChatDC(message)
         phase2, phase2warn = true, false
         phase2count = phase2count + 1
         core:RemoveTimerBar("SDWAVE")
-        core:AddMsg("SDP2", self.L["PHASE 2 !"], 5, mod:GetSetting("SoundPhase2") and "Alarm")
+        mod:AddMsg("SDP2", "PHASE 2 !", 5, mod:GetSetting("SoundPhase2") and "Alarm")
         if mod:GetSetting("OtherDisconnectTimer") then
             mod:AddTimerBar("DISCONNECT", "Disconnect", 85)
         end
@@ -473,25 +473,25 @@ end
 function mod:OnSyncRcv(sync, parameter)
     if sync == "NORTH_SURGE" then
         if intNorth and intNorth == sdSurgeCount[parameter] and not phase2 then
-            core:AddMsg("SURGE", self.L["INTERRUPT NORTH"], 5, "Alert")
+            mod:AddMsg("SURGE", "INTERRUPT NORTH", 5, "Alert")
         end
 
         sdSurgeCount[parameter] = sdSurgeCount[parameter] + 1
         if sdSurgeCount[parameter] > nbKick then sdSurgeCount[parameter] = 1 end
 
         if intNorth and intNorth == sdSurgeCount[parameter] then
-            core:AddMsg("SURGE", self.L["YOU ARE NEXT ON NORTH !"], 5, "Long", "Blue")
+            mod:AddMsg("SURGE", "YOU ARE NEXT ON NORTH !", 5, "Long", "Blue")
         end
     elseif sync == "SOUTH_SURGE" then
         if intSouth and intSouth == sdSurgeCount[parameter] and not phase2 then
-            core:AddMsg("SURGE", self.L["INTERRUPT SOUTH"], 5, "Alert")
+            mod:AddMsg("SURGE", "INTERRUPT SOUTH", 5, "Alert")
         end
 
         sdSurgeCount[parameter] = sdSurgeCount[parameter] + 1
         if sdSurgeCount[parameter] > nbKick then sdSurgeCount[parameter] = 1 end
 
         if intSouth and intSouth == sdSurgeCount[parameter] then
-            core:AddMsg("SURGE", self.L["YOU ARE NEXT ON SOUTH !"], 5, "Long", "Blue")
+            mod:AddMsg("SURGE", "YOU ARE NEXT ON SOUTH !", 5, "Long", "Blue")
         end
     end
 end

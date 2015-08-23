@@ -168,7 +168,7 @@ function mod:OnUnitCreated(unit, sName)
         local nCurrentTime = GetGameTime()
         if nCurrentTime - nLastIceTombTime > 13 then
             nLastIceTombTime = nCurrentTime
-            core:AddMsg("TOMB", self.L["ICE TOMB"], 5, mod:GetSetting("SoundIceTomb") and "Alert", "Blue")
+            mod:AddMsg("TOMB", "ICE TOMB", 5, mod:GetSetting("SoundIceTomb") and "Alert", "Blue")
             mod:AddTimerBar("TOMB", "ICE TOMB", 15)
         end
         core:AddUnit(unit)
@@ -197,7 +197,7 @@ function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
         core:AddUnit(tUnit)
         tFireBombPlayersList[sUnitName] = tUnit
         if tUnit == GetPlayerUnit() then
-            core:AddMsg("BOMB", self.L["BOMBS UP !"], 5, mod:GetSetting("SoundBomb") and "RunAway")
+            mod:AddMsg("BOMB", "BOMBS UP !", 5, mod:GetSetting("SoundBomb") and "RunAway")
             if mod:GetSetting("LineBombPlayers") then
                 self:ScheduleTimer("ApplyBombLines", 1, "fire")
             end
@@ -210,7 +210,7 @@ function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
         core:AddUnit(tUnit)
         tFrostBombPlayersList[sUnitName] = tUnit
         if tUnit == GetPlayerUnit() then
-            core:AddMsg("BOMB", self.L["BOMBS UP !"], 5, mod:GetSetting("SoundBomb") and "RunAway")
+            mod:AddMsg("BOMB", "BOMBS UP !", 5, mod:GetSetting("SoundBomb") and "RunAway")
             if mod:GetSetting("LineBombPlayers") then
                 self:ScheduleTimer("ApplyBombLines", 1, "frost")
             end
@@ -239,7 +239,7 @@ function mod:OnDebuffUpdate(nId, nSpellId, nStack, fTimeRemaining)
         if (self:Tank() and nStack == 13) or (not self:Tank() and nStack == 10) then
             if tUnit == GetPlayerUnit() then
                 local sMessage = self.L["%d STACKS!"]:format(nStack)
-                core:AddMsg("STACK", sMessage, 5, mod:GetSetting("SoundHighDebuffStacks") and "Beware")
+                mod:AddMsg("STACK", sMessage, 5, mod:GetSetting("SoundHighDebuffStacks") and "Beware")
             end
         end
     end

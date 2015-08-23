@@ -117,10 +117,10 @@ end
 function mod:OnSpellCastStart(unitName, castName, unit)
     if unitName == self.L["Experiment X-89"] then
         if castName == self.L["Resounding Shout"] then
-            core:AddMsg("KNOCKBACK", self.L["KNOCKBACK !!"], 5, "Alert")
+            mod:AddMsg("KNOCKBACK", "KNOCKBACK !!", 5, "Alert")
             core:AddTimerBar("KNOCKBACK", "KNOCKBACK", 23)
         elseif castName == self.L["Repugnant Spew"] then
-            core:AddMsg("BEAM", self.L["BEAM !!"], 5, "Alarm")
+            mod:AddMsg("BEAM", "BEAM !!", 5, "Alarm")
             core:AddTimerBar("BEAM", "BEAM", 40)
         elseif castName == self.L["Shattering Shockwave"] then
             core:AddTimerBar("SHOCKWAVE", "SHOCKWAVE", 19)
@@ -134,14 +134,14 @@ function mod:OnChatDC(message)
     local pName = message:match(self.L["Experiment X-89 has placed a bomb"])
     if pName then
         local sSound = pName == GetPlayerUnit():GetName() and mod:GetSetting("SoundBigBomb") and "Destruction"
-        core:AddMsg("BIGB", self.L["BIG BOMB on %s !!!"]:format(pName), 5, sSound, "Blue")
+        mod:AddMsg("BIGB", self.L["BIG BOMB on %s !!!"]:format(pName), 5, sSound, "Blue")
     end
 end
 
 function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
     if nSpellId == DEBUFF_LITTLE_BOMB then
         local sSound = nId == GetPlayerUnit():GetId() and mod:GetSetting("SoundLittleBomb") and "RunAway"
-        core:AddMsg("LITTLEB", self.L["LITTLE BOMB on %s !!!"]:format(GetUnitById(nId):GetName()), 5, sSound, "Blue")
+        mod:AddMsg("LITTLEB", self.L["LITTLE BOMB on %s !!!"]:format(GetUnitById(nId):GetName()), 5, sSound, "Blue")
         core:AddTimerBar("LITTLEB", "LITTLE BOMB", fTimeRemaining, mod:GetSetting("SoundLittleBomb"))
     end
 end

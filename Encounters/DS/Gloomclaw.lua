@@ -184,7 +184,7 @@ end
 function mod:OnSpellCastStart(unitName, castName, unit)
     if unitName == self.L["Gloomclaw"] and castName == self.L["Rupture"] then
         ruptCount = ruptCount + 1
-        core:AddMsg("RUPTURE", self.L["INTERRUPT %s"]:format(unitName:upper()), 5, mod:GetSetting("SoundRuptureInterrupt") and "Destruction")
+        mod:AddMsg("RUPTURE", self.L["INTERRUPT %s"]:format(unitName:upper()), 5, mod:GetSetting("SoundRuptureInterrupt") and "Destruction")
         if ruptCount == 1 then
             mod:AddTimerBar("RUPTURE", "NEXT RUPTURE", 43, mod:GetSetting("SoundRuptureCountDown"))
         end
@@ -194,7 +194,7 @@ function mod:OnSpellCastStart(unitName, castName, unit)
         local playerUnit = GameLib.GetPlayerUnit()
         local distance_to_unit = self:GetDistanceBetweenUnits(playerUnit, unit)
         if distance_to_unit < 35 then
-            core:AddMsg("RAYS", self.L["INTERRUPT %s"]:format(unitName:upper()), 5, mod:GetSetting("SoundCorruptingRays") and "Inferno")
+            mod:AddMsg("RAYS", self.L["INTERRUPT %s"]:format(unitName:upper()), 5, mod:GetSetting("SoundCorruptingRays") and "Inferno")
         end
     end
 end
@@ -214,7 +214,7 @@ function mod:OnChatDC(message)
             else
                 section = section - 1
             end
-            core:AddMsg("PHASE", self.L["SECTION %u"]:format(section), 5, mod:GetSetting("SoundSectionSwitch") and "Info", "Blue")
+            mod:AddMsg("PHASE", self.L["SECTION %u"]:format(section), 5, mod:GetSetting("SoundSectionSwitch") and "Info", "Blue")
             if section ~= 4 then 
                 mod:AddTimerBar("WAVE", self.L["[%u] WAVE"]:format(waveCount + 1), 11)
                 mod:AddTimerBar("RUPTURE", "NEXT RUPTURE", 39, mod:GetSetting("SoundRuptureCountDown"))
@@ -243,7 +243,7 @@ function mod:OnChatDC(message)
         mod:RemoveTimerBar("RUPTURE")
         mod:RemoveTimerBar("CORRUPTION")
         mod:RemoveTimerBar("WAVE")
-        core:AddMsg("TRANSITION", self.L["TRANSITION"], 5, mod:GetSetting("SoundMoOWarning") and "Alert")
+        mod:AddMsg("TRANSITION", "TRANSITION", 5, mod:GetSetting("SoundMoOWarning") and "Alert")
         mod:AddTimerBar("MOO", "MOO PHASE", 15)
         for unitId, v in pairs(essenceUp) do
             core:RemoveUnit(unitId)
@@ -253,7 +253,7 @@ function mod:OnChatDC(message)
         mod:RemoveTimerBar("RUPTURE")
         mod:RemoveTimerBar("CORRUPTION")
         mod:RemoveTimerBar("WAVE")
-        core:AddMsg("TRANSITION", self.L["BURN HIM HARD"], 5, mod:GetSetting("SoundMoOWarning") and "Alert")
+        mod:AddMsg("TRANSITION", "BURN HIM HARD", 5, mod:GetSetting("SoundMoOWarning") and "Alert")
         mod:AddTimerBar("MOO", "MOO PHASE", 20, mod:GetSetting("SoundMoOWarning"))
         for unitId, v in pairs(essenceUp) do
             core:RemoveUnit(unitId)
@@ -303,7 +303,7 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
             if timeOfEvent - prev > 10 then
                 prev = timeOfEvent
                 waveCount = waveCount + 1
-                core:AddMsg("WAVE", self.L["[%u] WAVE"]:format(waveCount), 5, mod:GetSetting("SoundWaveWarning") and "Info", "Blue")
+                mod:AddMsg("WAVE", self.L["[%u] WAVE"]:format(waveCount), 5, mod:GetSetting("SoundWaveWarning") and "Info", "Blue")
                 if section < 5 then
                     if waveCount < spawnCount[section] then
                         mod:AddTimerBar("WAVE", self.L["[%u] WAVE"]:format(waveCount + 1), spawnTimer[section])

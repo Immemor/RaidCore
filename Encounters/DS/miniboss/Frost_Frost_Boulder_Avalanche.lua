@@ -105,9 +105,9 @@ end
 function mod:OnHealthChanged(sUnitName, nHealth)
     if sUnitName == self.L["Frost-Boulder Avalanche"] then
         if nHealth == 85 or nHealth == 55 or nHealth == 31 then
-            core:AddMsg("CYCLONE", self.L["CYCLONE SOON"], 5, "Info", "Blue")
+            mod:AddMsg("CYCLONE", "CYCLONE SOON", 5, "Info", "Blue")
         elseif nHealth == 22 then
-            core:AddMsg("PHASE2", self.L["PHASE 2 SOON"], 5, "Info", "Blue")
+            mod:AddMsg("PHASE2", "PHASE 2 SOON", 5, "Info", "Blue")
         end
     end
 end
@@ -116,14 +116,14 @@ function mod:OnSpellCastStart(sUnitName, sCastName, unit)
     if self.L["Frost-Boulder Avalanche"] == sUnitName then
         if self.L["Icicle Storm"] == sCastName then
             mod:RemoveTimerBar("SHATTER")
-            core:AddMsg("ICICLE", self.L["ICICLE"].." !!", 5, "Alert")
+            mod:AddMsg("ICICLE", self.L["ICICLE"].." !!", 5, "Alert")
             mod:AddTimerBar("ICICLE", "ICICLE", 22)
             icicleSpell = true
         elseif self.L["Shatter"] == sCastName then
-            core:AddMsg("SHATTER", self.L["Shatter"]:upper().." !!", 5, "Alert")
+            mod:AddMsg("SHATTER", self.L["Shatter"]:upper().." !!", 5, "Alert")
             mod:AddTimerBar("SHATTER", "Shatter", 30)
         elseif self.L["Cyclone"] == sCastName then
-            core:AddMsg("CYCLONE", self.L["Cyclone"]:upper(), 5, "RunAway")
+            mod:AddMsg("CYCLONE", self.L["Cyclone"]:upper(), 5, "RunAway")
             mod:AddTimerBar("RUN", "RUNNNN", 23, 1)
             if icicleSpell then
                 mod:AddTimerBar("1ST", "1ST ABILITY", 33)
