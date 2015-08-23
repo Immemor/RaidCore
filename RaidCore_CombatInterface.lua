@@ -70,6 +70,9 @@ local INTERFACE_STATES = {
     ["LightEnable"] = INTERFACE__LIGHTENABLE,
     ["FullEnable"] = INTERFACE__FULLENABLE,
 }
+local EXTRA_HANDLER_ALLOWED = {
+    ["CombatLogHeal"] = "CI_OnCombatLogHeal",
+}
 
 ----------------------------------------------------------------------------------------------------
 -- Privates variables.
@@ -87,6 +90,8 @@ local _tTrackedUnits = {}
 local _tMembers = {}
 local _RaidCoreChannelComm = nil
 local _nNumShortcuts
+local _CI_State
+local _CI_Extra = {}
 
 ----------------------------------------------------------------------------------------------------
 -- Privates functions: Log
@@ -168,6 +173,9 @@ local function ExtraLog2Text(k, nRefTime, tParam)
         sResult = ("sResult=\"%s\" MsgId=%d"):format(tParam[1], tParam[2])
     elseif k == "JoinResult" then
         sResult = ("Result=\"%s\""):format(tParam[1])
+    elseif k == "OnCombatLogHeal" then
+        local sFormat = "CasterId=%s TargetId=%s sCasterName=\"%s\" sTargetName=\"%s\" nHealAmount=%u nOverHeal=%u nSpellId=%u"
+        sResult = sFormat:format(tostring(tParam[1]), tostring(tParam[2]), tParam[3], tParam[4], tParam[5], tParam[6], tParam[7])
     end
     return sResult
 end
@@ -355,7 +363,15 @@ local function FullActivate(bEnable)
     _bRunning = bEnable
 end
 
+local function RemoveAllExtraActivation()
+    for sEvent, v in next, _CI_Extra do
+        RemoveEventHandler(sEvent, RaidCore)
+        _CI_Extra[sEvent] = nil
+    end
+end
+
 local function InterfaceSwitch(to)
+    RemoveAllExtraActivation()
     if to == INTERFACE__DISABLE then
         UnitInCombatActivate(false)
         UnitScanActivate(false)
@@ -377,6 +393,7 @@ local function InterfaceSwitch(to)
         UnitScanActivate(true)
         FullActivate(true)
     end
+    _CI_State = to
 end
 
 ----------------------------------------------------------------------------------------------------
@@ -435,6 +452,24 @@ function RaidCore:CombatInterface_Activate(sState)
     local nState = INTERFACE_STATES[sState]
     if nState then
         InterfaceSwitch(nState)
+    end
+end
+
+function RaidCore:CombatInterface_ExtraActivate(sEvent, bNewState)
+    assert(type(sEvent) == "string")
+    if _CI_State == INTERFACE__LIGHTENABLE or _CI_State == INTERFACE__FULLENABLE then
+        if EXTRA_HANDLER_ALLOWED[sEvent] then
+            if not _CI_Extra[sEvent] and bNewState then
+                _CI_Extra[sEvent] = true
+                RegisterEventHandler(sEvent, EXTRA_HANDLER_ALLOWED[sEvent], RaidCore)
+            elseif _CI_Extra[sEvent] and not bNewState then
+                RemoveEventHandler(sEvent, RaidCore)
+                _CI_Extra[sEvent] = nil
+            end
+        else
+            Log:Add("ERROR", ("Extra event '%s' is not supported"):format(sEvent))
+        end
+
     end
 end
 
@@ -661,4 +696,15 @@ function RaidCore:CI_ShowShortcutBarDelayed()
         table.insert(tIconFloatingSpellBar, strIcon)
     end
     ManagerCall("OnShowShortcutBar", tIconFloatingSpellBar)
+end
+
+function RaidCore:CI_OnCombatLogHeal(tArgs)
+    local nCasterId = tArgs.unitCaster and tArgs.unitCaster:GetId()
+    local nTargetId = tArgs.unitTarget and tArgs.unitTarget:GetId()
+    local sCasterName = tArgs.unitCaster and tArgs.unitCaster:GetName():gsub(NO_BREAK_SPACE, " ") or ""
+    local sTargetName = tArgs.unitTarget and tArgs.unitTarget:GetName():gsub(NO_BREAK_SPACE, " ") or ""
+    local nHealAmount = tArgs.nHealAmount or 0
+    local nOverHeal = tArgs.nOverHeal or 0
+    local nSpellId = tArgs.splCallingSpell and tArgs.splCallingSpell:GetId()
+    ManagerCall("OnCombatLogHeal", nCasterId, nTargetId, sCasterName, sTargetName, nHealAmount, nOverHeal, nSpellId)
 end
