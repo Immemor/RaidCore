@@ -218,6 +218,18 @@ local function UpdateUnitBar(tUnitManager, tBar)
             else
                 tBar.wndAbsorb:Show(false)
             end
+            -- Process Armor bar
+            local nArmorValue = tUnit:GetInterruptArmorValue()
+            if nArmorValue and nArmorValue > 0 then
+                local left, top, right, bottom = tBar.wndBody:GetAnchorOffsets()
+                tBar.wndBody:SetAnchorOffsets(left, top, -32, bottom)
+                tBar.wndArmor:Show(true)
+                tBar.wndArmorValue:SetText(nArmorValue)
+            else
+                local left, top, right, bottom = tBar.wndBody:GetAnchorOffsets()
+                tBar.wndBody:SetAnchorOffsets(left, top, 0, bottom)
+                tBar.wndArmor:Show(false)
+            end
         end
     end
 end
@@ -386,16 +398,19 @@ function UnitManager:AddBar(nId)
         local sMark = RaidCore.mark[nId] and RaidCore.mark[nId].number
         if self.tSettings.bEnabled then
             local wndMain = Apollo.LoadForm(RaidCore.xmlDoc, "BarUnitTemplate", self.wndParent, self)
-            local wndUnit = wndMain:FindChild("Body"):FindChild("Unit"):FindChild("bg")
-            local wndShield = wndMain:FindChild("Body"):FindChild("Shield")
-            local wndCast = wndMain:FindChild("Body"):FindChild("Cast")
-            local wndAbsorb = wndMain:FindChild("Body"):FindChild("Absorb")
+            local wndBody = wndMain:FindChild("Body")
+            local wndUnit = wndBody:FindChild("Unit"):FindChild("bg")
+            local wndShield = wndBody:FindChild("Shield")
+            local wndCast = wndBody:FindChild("Cast")
+            local wndAbsorb = wndBody:FindChild("Absorb")
             local wndMark = wndMain:FindChild("Mark")
+            local wndArmor = wndMain:FindChild("Armor")
             self.tBars[nId] = {
                 nId = nId,
                 sMark = sMark,
                 -- Windows objects.
                 wndMain = wndMain,
+                wndBody = wndBody,
                 wndUnit = wndUnit,
                 wndUnitHPProgressBar = wndUnit:FindChild("HP_ProgressBar"),
                 wndUnitHPPercent = wndUnit:FindChild("HP_Percent"),
@@ -416,6 +431,9 @@ function UnitManager:AddBar(nId)
                 wndAbsorb = wndAbsorb,
                 wndAbsorbProgressBar = wndAbsorb:FindChild("bg"):FindChild("ProgressBar"),
                 wndAbsorbValue = wndAbsorb:FindChild("bg"):FindChild("Value"),
+
+                wndArmor = wndArmor,
+                wndArmorValue = wndArmor:FindChild("Value"),
             }
             wndMain:SetData(GetGameTime())
             wndMain:SetAnchorOffsets(0, 0, 0, self.tSettings.nBarHeight)
