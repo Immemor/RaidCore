@@ -131,12 +131,12 @@ local function ExtraLog2Text(k, nRefTime, tParam)
         sResult = sFormat:format(tParam[1], sSpellName, tParam[2], tParam[3], tParam[4], tParam[5])
     elseif k == "OnCastStart" then
         local nCastEndTime = tParam[3] - nRefTime
-        local sFormat = "Id=%u CastName='%s' CastEndTime=%.3f"
-        sResult = sFormat:format(tParam[1], tParam[2], nCastEndTime)
+        local sFormat = "Id=%u CastName='%s' CastEndTime=%.3f sName=\"%s\""
+        sResult = sFormat:format(tParam[1], tParam[2], nCastEndTime, tParam[4])
     elseif k == "OnCastEnd" then
         local nCastEndTime = tParam[4] - nRefTime
-        local sFormat = "Id=%u CastName='%s' IsInterrupted=%s CastEndTime=%.3f"
-        sResult = sFormat:format(tParam[1], tParam[2], tostring(tParam[3]), nCastEndTime)
+        local sFormat = "Id=%u CastName='%s' IsInterrupted=%s CastEndTime=%.3f sName=\"%s\""
+        sResult = sFormat:format(tParam[1], tParam[2], tostring(tParam[3]), nCastEndTime, tParam[5])
     elseif k == "OnUnitCreated" then
         local sFormat = "Id=%u Unit='%s'"
         sResult = sFormat:format(tParam[1], tParam[3])
@@ -563,12 +563,12 @@ function RaidCore:CI_OnScanUpdate()
                         nCastEndTime = nCastEndTime,
                         bSuccess = false,
                     }
-                    ManagerCall("OnCastStart", nId, sCastName, nCastEndTime)
+                    ManagerCall("OnCastStart", nId, sCastName, nCastEndTime, data.sName)
                 elseif data.tCast.bCasting then
                     if sCastName ~= data.tCast.sCastName then
                         -- New cast just after a previous one.
                         if data.tCast.bSuccess == false then
-                            ManagerCall("OnCastEnd", nId, data.tCast.sCastName, false, data.tCast.nCastEndTime)
+                            ManagerCall("OnCastEnd", nId, data.tCast.sCastName, false, data.tCast.nCastEndTime, data.sName)
                         end
                         data.tCast = {
                             bCasting = true,
@@ -576,10 +576,10 @@ function RaidCore:CI_OnScanUpdate()
                             nCastEndTime = nCastEndTime,
                             bSuccess = false,
                         }
-                        ManagerCall("OnCastStart", nId, sCastName, nCastEndTime)
+                        ManagerCall("OnCastStart", nId, sCastName, nCastEndTime, data.sName)
                     elseif not data.tCast.bSuccess and nCastElapsed >= nCastDuration then
                         -- The have reached the end.
-                        ManagerCall("OnCastEnd", nId, data.tCast.sCastName, false, data.tCast.nCastEndTime)
+                        ManagerCall("OnCastEnd", nId, data.tCast.sCastName, false, data.tCast.nCastEndTime, data.sName)
                         data.tCast = {
                             bCasting = true,
                             sCastName = sCastName,
@@ -598,7 +598,7 @@ function RaidCore:CI_OnScanUpdate()
                     else
                         bIsInterrupted = false
                     end
-                    ManagerCall("OnCastEnd", nId, data.tCast.sCastName, bIsInterrupted, data.tCast.nCastEndTime)
+                    ManagerCall("OnCastEnd", nId, data.tCast.sCastName, bIsInterrupted, data.tCast.nCastEndTime, data.sName)
                 end
                 data.tCast = {
                     bCasting = false,
