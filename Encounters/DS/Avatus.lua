@@ -81,6 +81,9 @@ mod:RegisterEnglishLocale({
     -- Datachron messages.
     ["Portals have opened!"] = "Avatus' power begins to surge! Portals have opened!",
     ["Gun Grid Activated"] = "SECURITY PROTOCOL: Gun Grid Activated.",
+    ["The Excessive Force Protocol's protective barrier has fallen."] = "The Excessive Force Protocol's protective barrier has fallen.",
+    ["The Excessive Force Protocol has been terminated."] = "The Excessive Force Protocol has been terminated.",
+    ["Escalating defense matrix system"] = "Escalating defense matrix system to level (.*) protocols",
     -- Cast.
     ["Crushing Blow"] = "Crushing Blow",
     ["Data Flare"] = "Data Flare",
@@ -102,11 +105,13 @@ mod:RegisterEnglishLocale({
     ["MARKER South"] = "South",
     ["MARKER Est"] = "Est",
     ["MARKER West"] = "West",
-    ["PURGE BLUE"] = "PURGE BLUE",
-    ["PURGE RED"] = "PURGE RED",
-    ["PURGE GREEN"] = "PURGE GREEN",
+    ["%s. PURGE BLUE (%s)"] = "%s. PURGE BLUE (%s)",
+    ["%s. PURGE RED (%s)"] = "%s. PURGE RED (%s)",
+    ["%s. PURGE GREEN (%s)"] = "%s. PURGE GREEN (%s)",
     ["Yellow Room: Combat started"] = "Yellow Room: Combat started",
     ["Mobius health: %d%%"] = "Mobius health: %d%%",
+    ["Next increase of number of purge"] = "Next increase of number of purge",
+    ["Next purge cycle"] = "Next purge cycle",
 })
 mod:RegisterFrenchLocale({
     -- Unit names.
@@ -124,6 +129,9 @@ mod:RegisterFrenchLocale({
     -- Datachron messages.
     ["Portals have opened!"] = "L'énergie d'Avatus commence à déferler ! Des portails se sont ouverts !",
     ["Gun Grid Activated"] = "PROTOCOLE DE SÉCURITÉ : pétoires activées.",
+    --TODO ["The Excessive Force Protocol's protective barrier has fallen."] = "",
+    ["The Excessive Force Protocol has been terminated."] = "Le Protocole de force excessive a été abandonné.",
+    ["Escalating defense matrix system"] = "Passage de la matrice de défense aux protocoles de niveau (.*)",
     -- Cast.
     ["Crushing Blow"] = "Coup écrasant",
     ["Data Flare"] = "Signal de données",
@@ -145,11 +153,13 @@ mod:RegisterFrenchLocale({
     ["MARKER South"] = "Sud",
     ["MARKER Est"] = "Est",
     ["MARKER West"] = "Ouest",
-    ["PURGE BLUE"] = "PURGE BLEUE",
-    ["PURGE RED"] = "PURGE ROUGE",
-    ["PURGE GREEN"] = "PURGE VERT",
+    ["%s. PURGE BLUE (%s)"] = "%s. PURGE BLEUE (%s)",
+    ["%s. PURGE RED (%s)"] = "%s. PURGE ROUGE (%s)",
+    ["%s. PURGE GREEN (%s)"] = "%s. PURGE VERT (%s)",
     ["Yellow Room: Combat started"] = "Salle Jaune: Combat démarré",
     ["Mobius health: %d%%"] = "Mobius santé: %d%%",
+    ["Next increase of number of purge"] = "Prochaine augmentation du nombre de purge",
+    ["Next purge cycle"] = "Prochain cycle de purge",
 })
 mod:RegisterGermanLocale({
     -- Unit names.
@@ -208,6 +218,8 @@ mod:RegisterDefaultTimerBarConfigs({
     ["BLIND"] = { sColor = "xkcdBurntYellow" },
     ["GGRID"] = { sColor = "xkcdBlue" },
     ["HHAND"] = { sColor = "xkcdOrangeyRed" },
+    ["PURGE_CYCLE"] = { sColor = "xkcdBluishGreen" },
+    ["PURGE_INCREASE"] = { sColor = "xkcdBoringGreen" },
 })
 
 local PURGE_BLUE = 1
@@ -274,6 +286,8 @@ local tBlueRoomPurgeList
 local tHoloHandsList
 local bIsHoloHand
 local nPurgeCount
+local nPurgeCycleCount
+local nPurgeCycleCountPerColor
 local phase2warn, phase2
 local nMobiusId
 local nMobiusHealthPourcent
@@ -281,6 +295,7 @@ local bDisplayHandsPictures
 local nAvatusId
 local nMainPhaseCount
 local nHoloCannonActivationTime
+local nEscalatingMax
 
 local function SetMarkersByPhase(nNewPhase)
     -- Remove previous markers
@@ -313,6 +328,38 @@ local function RefreshHoloHandPictures()
     end
 end
 
+local function DisplayPurgeList()
+    if mod:GetSetting("OtherPurgeList") then
+        for ePurgeType = PURGE_BLUE, PURGE_GREEN do
+            local tCopy = {}
+            for k, v in next, tBlueRoomPurgeList[ePurgeType] do
+                tCopy[k] = v
+            end
+
+            local tOrdered = {}
+            while next(tCopy) do
+                local f = nil
+                for key, val in next, tCopy do
+                    if f == nil or tCopy[f] > val then
+                        f = key
+                    end
+                end
+                table.insert(tOrdered, f:gmatch("%a+")())
+                tCopy[f] = nil
+            end
+
+            local sPlayers = table.concat(tOrdered, ", ")
+            if ePurgeType == PURGE_BLUE then
+                core:Print(mod.L["%s. PURGE BLUE (%s)"]:format("a", sPlayers))
+            elseif ePurgeType == PURGE_RED then
+                core:Print(mod.L["%s. PURGE RED (%s)"]:format("b", sPlayers))
+            elseif ePurgeType == PURGE_GREEN then
+                core:Print(mod.L["%s. PURGE GREEN (%s)"]:format("c", sPlayers))
+            end
+        end
+    end
+end
+
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
@@ -338,10 +385,17 @@ function mod:OnBossEnable()
     bGreenRoomMarkerDisplayed = false
     bIsHoloHand = true
     nPurgeCount = 0
+    nPurgeCycleCount = 0
+    nPurgeCycleCountPerColor = {
+        [PURGE_BLUE] = 0,
+        [PURGE_RED] = 0,
+        [PURGE_GREEN] = 0,
+    }
     nMobiusId = nil
     nMobiusHealthPourcent = 100
     nAvatusId = nil
     nMainPhaseCount = 1
+    nEscalatingMax = nil
     nHoloCannonActivationTime = nil
     bDisplayHandsPictures = false
 
@@ -394,6 +448,11 @@ function mod:OnUnitCreated(unit, sName)
             SetMarkersByPhase(BLUE_PHASE)
             core:AddUnit(unit)
             core:WatchUnit(unit)
+            -- When player from red room come to blue room, the event EnteringInCombat is not
+            -- received.
+            if unit:IsInCombat() then
+                DisplayPurgeList()
+            end
         else
             -- Draw a line to the blue portal.
             core:AddPixie(nUnitId, 1, unit, GetPlayerUnit(), "blue")
@@ -457,6 +516,8 @@ function mod:OnUnitDestroyed(unit, sName)
         core:DropPixie(nUnitId)
     elseif sName == self.L["Infinite Logic Loop"] then
         core:DropPixie(nUnitId)
+        mod:RemoveTimerBar("PURGE_CYCLE")
+        mod:RemoveTimerBar("PURGE_INCREASE")
     elseif sName == self.L["Mobius Physics Constructor"] then
         core:DropPixie(nUnitId)
         if unit:GetHealth() then
@@ -479,34 +540,8 @@ end
 
 function mod:OnEnteredCombat(tUnit, bInCombat, sName)
     if unitName == self.L["Infinite Logic Loop"] then
-        if bInCombat and mod:GetSetting("OtherPurgeList") then
-            for ePurgeType = PURGE_BLUE, PURGE_GREEN do
-                local tCopy = {}
-                for k, v in next, tBlueRoomPurgeList[ePurgeType] do
-                    tCopy[k] = v
-                end
-
-                local tOrdered = {}
-                while next(tCopy) do
-                    local f = nil
-                    for key, val in next, tCopy do
-                        if f == nil or tCopy[f] > val then
-                            f = key
-                        end
-                    end
-                    table.insert(tOrdered, f:gmatch("%a+")())
-                    tCopy[f] = nil
-                end
-
-                local sPlayers = table.concat(tOrdered, ", ")
-                if ePurgeType == PURGE_BLUE then
-                    core:Print(self.L["PURGE BLUE"] .. (": %s"):format(sPlayers))
-                elseif ePurgeType == PURGE_RED then
-                    core:Print(self.L["PURGE RED"] .. (": %s"):format(sPlayers))
-                elseif ePurgeType == PURGE_GREEN then
-                    core:Print(self.L["PURGE GREEN"] .. (": %s"):format(sPlayers))
-                end
-            end
+        if bInCombat then
+            DisplayPurgeList()
         end
     elseif sName == self.L["Mobius Physics Constructor"] then
         mod:SendIndMessage("MOBIUS_IN_COMBAT", tUnit:GetId())
@@ -529,15 +564,31 @@ function mod:OnBuffApplied(unitName, splId, unit)
 
         if ePurgeType then
             nPurgeCount = nPurgeCount + 1
-            if nCurrentPhase == BLUE_PHASE and mod:GetSetting("OtherPurgeMessages") then
-                local sSuffix = ("(%d)"):format(nPurgeCount)
-                if ePurgeType == PURGE_GREEN then
-                    mod:AddMsg("PURGE", self.L["PURGE GREEN"] .. sSuffix, 3, nil, "green")
-                elseif ePurgeType == PURGE_BLUE then
-                    mod:AddMsg("PURGE", self.L["PURGE BLUE"] .. sSuffix, 3, nil, "blue")
-                elseif ePurgeType == PURGE_RED then
-                    mod:AddMsg("PURGE", self.L["PURGE RED"] .. sSuffix, 3, nil, "red")
+            if nEscalatingMax then
+                nPurgeCycleCount = nPurgeCycleCount + 1
+                nPurgeCycleCountPerColor[ePurgeType] = nPurgeCycleCountPerColor[ePurgeType] + 1
+                if nPurgeCycleCount == 1 then
+                    mod:AddTimerBar("PURGE_CYCLE", "Next purge cycle", 20)
                 end
+            end
+            if nCurrentPhase == BLUE_PHASE and mod:GetSetting("OtherPurgeMessages") then
+                local a = nEscalatingMax and nPurgeCycleCount or nPurgeCount
+                local b = nEscalatingMax and nPurgeCycleCountPerColor[ePurgeType] or "NA"
+                a = tostring(a)
+                b = tostring(b)
+                if ePurgeType == PURGE_GREEN then
+                    mod:AddMsg("PURGE", self.L["%s. PURGE GREEN (%s)"]:format(a, b), 3, nil, "green")
+                elseif ePurgeType == PURGE_BLUE then
+                    mod:AddMsg("PURGE", self.L["%s. PURGE BLUE (%s)"]:format(a, b), 3, nil, "blue")
+                elseif ePurgeType == PURGE_RED then
+                    mod:AddMsg("PURGE", self.L["%s. PURGE RED (%s)"]:format(a, b), 3, nil, "red")
+                end
+            end
+            if nEscalatingMax and nPurgeCycleCount >= nEscalatingMax then
+                nPurgeCycleCount = 0
+                nPurgeCycleCountPerColor[PURGE_BLUE] = 0
+                nPurgeCycleCountPerColor[PURGE_RED] = 0
+                nPurgeCycleCountPerColor[PURGE_GREEN] = 0
             end
         end
     elseif nAvatusId == nId then
@@ -615,6 +666,7 @@ function mod:OnSpellCastStart(unitName, castName, unit)
 end
 
 function mod:OnChatDC(message)
+    local nEscalatingFound = message:match(self.L["Escalating defense matrix system"])
     if message:find(self.L["Gun Grid Activated"]) then
         mod:AddMsg("GGRIDMSG", "Gun Grid NOW!", 5, mod:GetSetting("SoundGunGrid") and "Beware")
         mod:AddTimerBar("GGRID", "~Gun Grid", 112, mod:GetSetting("SoundGunGrid"))
@@ -626,12 +678,14 @@ function mod:OnChatDC(message)
             mod:AddTimerBar("HOLO", "Holo Cannon", 22)
         end
         bIsHoloHand = not bIsHoloHand
-    end
-    if message:find(self.L["Portals have opened!"]) then
+    elseif message:find(self.L["Portals have opened!"]) then
         phase2 = true
         mod:RemoveTimerBar("GGRID")
         mod:RemoveTimerBar("OBBEAM")
         mod:RemoveTimerBar("HOLO")
+    elseif nEscalatingFound then
+        nEscalatingMax = tonumber(nEscalatingFound)
+        mod:AddTimerBar("PURGE_INCREASE", "Next increase of number of purge", 30)
     end
 end
 
