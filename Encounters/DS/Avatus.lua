@@ -78,6 +78,7 @@ mod:RegisterEnglishLocale({
     ["Tower Platform"] = "Tower Platform",
     ["Augmented Rowsdower"] = "Augmented Rowsdower",
     ["Excessive Force Protocol"] = "Excessive Force Protocol",
+    ["Fragmented Data Chunk"] = "Fragmented Data Chunk",
     -- Datachron messages.
     ["Portals have opened!"] = "Avatus' power begins to surge! Portals have opened!",
     ["Gun Grid Activated"] = "SECURITY PROTOCOL: Gun Grid Activated.",
@@ -95,6 +96,7 @@ mod:RegisterEnglishLocale({
     -- Bar and messages.
     ["Holo Hand Spawned"] = "Holo Hand Spawned",
     ["P2 SOON !"] = "P2 SOON !",
+    ["P3 SOON !"] = "P3 SOON !",
     ["INTERRUPT CRUSHING BLOW!"] = "INTERRUPT CRUSHING BLOW!",
     ["BLIND! TURN AWAY FROM BOSS"] = "BLIND! TURN AWAY FROM BOSS",
     ["Blind"] = "Blind",
@@ -112,6 +114,7 @@ mod:RegisterEnglishLocale({
     ["Mobius health: %d%%"] = "Mobius health: %d%%",
     ["Next increase of number of purge"] = "Next increase of number of purge",
     ["Next purge cycle"] = "Next purge cycle",
+    ["Next support cannon"] = "Next support cannon",
 })
 mod:RegisterFrenchLocale({
     -- Unit names.
@@ -126,6 +129,7 @@ mod:RegisterFrenchLocale({
     ["Tower Platform"] = "Plateforme de la tour",
     ["Augmented Rowsdower"] = "Tamarou augmenté",
     ["Excessive Force Protocol"] = "Protocole de force excessive",
+    ["Fragmented Data Chunk"] = "Données fragmentées",
     -- Datachron messages.
     ["Portals have opened!"] = "L'énergie d'Avatus commence à déferler ! Des portails se sont ouverts !",
     ["Gun Grid Activated"] = "PROTOCOLE DE SÉCURITÉ : pétoires activées.",
@@ -143,6 +147,7 @@ mod:RegisterFrenchLocale({
     -- Bar and messages.
     ["Holo Hand Spawned"] = "Holo-main Apparition",
     ["P2 SOON !"] = "P2 BIENTÔT !",
+    ["P3 SOON !"] = "P3 BIENTÔT !",
     ["INTERRUPT CRUSHING BLOW!"] = "INTERROMPRE COUP ÉCRASANT!",
     ["BLIND! TURN AWAY FROM BOSS"] = "AVEUGLER! DOS AU BOSS",
     ["Blind"] = "Aveugler",
@@ -160,6 +165,7 @@ mod:RegisterFrenchLocale({
     ["Mobius health: %d%%"] = "Mobius santé: %d%%",
     ["Next increase of number of purge"] = "Prochaine augmentation du nombre de purge",
     ["Next purge cycle"] = "Prochain cycle de purge",
+    ["Next support cannon"] = "Prochain canon d'appui",
 })
 mod:RegisterGermanLocale({
     -- Unit names.
@@ -220,6 +226,7 @@ mod:RegisterDefaultTimerBarConfigs({
     ["HHAND"] = { sColor = "xkcdOrangeyRed" },
     ["PURGE_CYCLE"] = { sColor = "xkcdBluishGreen" },
     ["PURGE_INCREASE"] = { sColor = "xkcdBoringGreen" },
+    ["SUPPORT_CANNON"] = { sColor = "xkcdBrightLilac" },
 })
 
 local PURGE_BLUE = 1
@@ -288,7 +295,7 @@ local bIsHoloHand
 local nPurgeCount
 local nPurgeCycleCount
 local nPurgeCycleCountPerColor
-local phase2warn, phase2
+local bWarningSwitchPhaseDone
 local nMobiusId
 local nMobiusHealthPourcent
 local bDisplayHandsPictures
@@ -296,6 +303,7 @@ local nAvatusId
 local nMainPhaseCount
 local nHoloCannonActivationTime
 local nEscalatingMax
+local nLastSupportCannonPopTime
 
 local function SetMarkersByPhase(nNewPhase)
     -- Remove previous markers
@@ -375,7 +383,7 @@ function mod:OnBossEnable()
     Apollo.RegisterEventHandler("SHORTCUT_BAR", "OnShowShortcutBar", self)
 
     SetMarkersByPhase(MAIN_PHASE)
-    phase2warn, phase2 = false, false
+    bWarningSwitchPhaseDone = false
     tBlueRoomPurgeList = {
         [PURGE_BLUE] = {},
         [PURGE_RED] = {},
@@ -398,6 +406,7 @@ function mod:OnBossEnable()
     nEscalatingMax = nil
     nHoloCannonActivationTime = nil
     bDisplayHandsPictures = false
+    nLastSupportCannonPopTime = 0
 
     mod:AddTimerBar("GGRID", "~Gun Grid", 21, mod:GetSetting("SoundGunGrid"))
 end
@@ -486,12 +495,23 @@ function mod:OnUnitCreated(unit, sName)
         core:AddPixie(unit:GetId(), 2, unit, nil, "Blue", 5, -7, 0)
     elseif sName == self.L["Support Cannon"] then
         core:AddUnit(unit)
+        local nCurrentTime = GetGameTime()
+        if nLastSupportCannonPopTime + 20 < nCurrentTime then
+            nLastSupportCannonPopTime = nCurrentTime
+            mod:AddTimerBar("SUPPORT_CANNON", "Next support cannon", 23)
+        end
     elseif sName == self.L["Tower Platform"] then
         if not bGreenRoomMarkerDisplayed and mod:GetSetting("OtherGreenRoomMarkers") then
             bGreenRoomMarkerDisplayed = true
             for k, tPosition in next, GREEN_ROOM_MARKERS do
                 core:SetWorldMarker("GREEN_ROOM_MARKERS_" .. k, k, tPosition)
             end
+        end
+    elseif self.L["Fragmented Data Chunk"] == sName then
+        if mod:GetSetting("LineCleaveHands") then
+            core:AddSimpleLine(nUnitId .. "_1", nUnitId, 0, 25, 0, 5, "Blue")
+            core:AddSimpleLine(nUnitId .. "_2", nUnitId, 0, 7, 60, 3, "xkcdBluegrey")
+            core:AddSimpleLine(nUnitId .. "_3", nUnitId, 0, 7, -60, 3,  "xkcdBluegrey")
         end
     end
 end
@@ -535,6 +555,10 @@ function mod:OnUnitDestroyed(unit, sName)
                 core:DropWorldMarker("GREEN_ROOM_MARKERS_" .. k)
             end
         end
+    elseif self.L["Fragmented Data Chunk"] == sName then
+        core:RemoveSimpleLine(nUnitId .. "_1")
+        core:RemoveSimpleLine(nUnitId .. "_2")
+        core:RemoveSimpleLine(nUnitId .. "_3")
     end
 end
 
@@ -600,6 +624,12 @@ function mod:OnBuffApplied(unitName, splId, unit)
         elseif BUFFID_PROTECTIVE_BARRIER == splId then
             -- End of one main phase.
             nHoloCannonActivationTime = nil
+            bWarningSwitchPhaseDone = false
+            if nMainPhaseCount >= 3 then
+                mod:RemoveTimerBar("GGRID")
+                mod:RemoveTimerBar("OBBEAM")
+                mod:RemoveTimerBar("HOLO")
+            end
         end
     end
 end
@@ -615,14 +645,15 @@ end
 
 function mod:OnHealthChanged(nId, nPourcent, sName)
     if sName == self.L["Avatus"] then
-        if nPourcent >= 75 and nPourcent <= 76 and not phase2warn then
-            phase2warn = true
-            mod:AddMsg("AVAP2", "P2 SOON !", 5, mod:GetSetting("SoundPortalPhase") and "Info")
-        elseif nPourcent >= 50 and nPourcent <= 52 and not phase2warn then
-            phase2warn = true
-            mod:AddMsg("AVAP2", "P2 SOON!", 5, mod:GetSetting("SoundPortalPhase") and "Info")
-        elseif nPourcent >= 70 and nPourcent <= 72 and phase2warn then
-            phase2warn = false
+        if not bWarningSwitchPhaseDone then
+            bWarningSwitchPhaseDone = true
+            if nPourcent >= 75 and nPourcent <= 76 then
+                mod:AddMsg("AVAP2", "P2 SOON !", 5, mod:GetSetting("SoundPortalPhase") and "Info")
+            elseif nPourcent >= 50 and nPourcent <= 52 then
+                mod:AddMsg("AVAP2", "P2 SOON!", 5, mod:GetSetting("SoundPortalPhase") and "Info")
+            elseif nPourcent >= 25 and nPourcent <= 27 then
+                mod:AddMsg("AVAP2", "P3 SOON!", 5, mod:GetSetting("SoundPortalPhase") and "Info")
+            end
         end
     elseif self.L["Mobius Physics Constructor"] == sName then
         if nPourcent % 10 == 0 and nPourcent < 100 then
@@ -679,7 +710,6 @@ function mod:OnChatDC(message)
         end
         bIsHoloHand = not bIsHoloHand
     elseif message:find(self.L["Portals have opened!"]) then
-        phase2 = true
         mod:RemoveTimerBar("GGRID")
         mod:RemoveTimerBar("OBBEAM")
         mod:RemoveTimerBar("HOLO")
