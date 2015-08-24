@@ -78,9 +78,6 @@ mod:RegisterEnglishLocale({
     ["Tower Platform"] = "Tower Platform",
     ["Augmented Rowsdower"] = "Augmented Rowsdower",
     ["Excessive Force Protocol"] = "Excessive Force Protocol",
-    ["Augmented Triage Specialist"] = "Augmented Triage Specialist",
-    ["Augmented Juggernaut"] = "Augmented Juggernaut",
-    ["Augmented Predator"] = "Augmented Predator",
     -- Datachron messages.
     ["Portals have opened!"] = "Avatus' power begins to surge! Portals have opened!",
     ["Gun Grid Activated"] = "SECURITY PROTOCOL: Gun Grid Activated.",
@@ -123,6 +120,7 @@ mod:RegisterFrenchLocale({
     ["Infinite Logic Loop"] = "Boucle de logique infinie",
     ["Tower Platform"] = "Plateforme de la tour",
     ["Augmented Rowsdower"] = "Tamarou augmenté",
+    ["Excessive Force Protocol"] = "Protocole de force excessive",
     -- Datachron messages.
     ["Portals have opened!"] = "L'énergie d'Avatus commence à déferler ! Des portails se sont ouverts !",
     ["Gun Grid Activated"] = "PROTOCOLE DE SÉCURITÉ : pétoires activées.",
@@ -296,8 +294,8 @@ end
 
 local function RefreshHoloHandPictures()
     if mod:GetSetting("OtherHandSpawnMarkers") and bDisplayHandsPictures then
-        core:AddPicture("HAND1", nAvatusId, "RaidCore_Draw:AvatusLeftHand", -90, 17)
-        core:AddPicture("HAND2", nAvatusId, "RaidCore_Draw:AvatusRightHand", 90, 17)
+        core:AddPicture("HAND1", nAvatusId, "RaidCore_Draw:AvatusLeftHand", -60, 17)
+        core:AddPicture("HAND2", nAvatusId, "RaidCore_Draw:AvatusRightHand", 60, 17)
     else
         core:RemovePicture("HAND1")
         core:RemovePicture("HAND2")
@@ -401,7 +399,12 @@ function mod:OnUnitCreated(unit, sName)
             core:AddPixie(nUnitId .. "_3", 2, unit, nil, "xkcdBluegrey", 3, 7, 300)
         end
     elseif self.L["Excessive Force Protocol"] == sName then
-        if nHealth == nil then
+        if nHealth then
+            -- Red room.
+            SetMarkersByPhase(RED_PHASE)
+            core:AddUnit(unit)
+            core:WatchUnit(unit)
+        else
             -- Draw a line to the red portal.
             core:AddPixie(nUnitId, 1, unit, GetPlayerUnit(), "red")
         end
@@ -611,7 +614,7 @@ end
 function mod:ReceiveIndMessage(sFrom, sReason, data)
     if "MOBIUS_IN_COMBAT" == sReason then
         -- Drop this message for player in Yellow phase.
-        if nCurrentPhase ~= YELLOW_PHASE and nMobiusId == nil then
+        if (nCurrentPhase == LABYRINTH_PHASE or nCurrentPhase == GREEN_PHASE) and nMobiusId == nil then
             nMobiusId = data
             nMobiusHealthPourcent = 100
             if mod:GetSetting("OtherMobiusHealthMessages") then
