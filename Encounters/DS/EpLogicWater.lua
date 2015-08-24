@@ -34,6 +34,7 @@ mod:RegisterEnglishLocale({
     ["~Imprison"] = "~Imprison",
     ["ORB"] = "ORB",
     ["Enrage"] = "Enrage",
+    ["IA remaining %u"] = "IA remaining %u",
 })
 mod:RegisterFrenchLocale({
     -- Unit names.
@@ -54,6 +55,7 @@ mod:RegisterFrenchLocale({
     ["~Imprison"] = "~Emprisonner",
     ["ORB"] = "ORB",
     ["Enrage"] = "Enrage",
+    ["IA remaining %u"] = "IA restante %u",
 })
 mod:RegisterGermanLocale({
     -- Unit names.
@@ -137,6 +139,8 @@ function mod:OnSpellCastStart(unitName, castName, unit)
             mod:RemoveTimerBar("PRISON")
             mod:RemoveTimerBar("DEFRAG")
             mod:AddTimerBar("MIDPHASE", "Circuit Breaker", 25, mod:GetSetting("SoundMidphaseCountDown"))
+            local nArmorValue = unit:GetInterruptArmorValue()
+            mod:AddMsg("IA", self.L["IA remaining %u"]:format(nArmorValue), 5, nil, "blue")
         elseif castName == self.L["Imprison"] then
             mod:RemoveTimerBar("PRISON")
         elseif castName == self.L["Defragment"] then
