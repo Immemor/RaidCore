@@ -251,6 +251,16 @@ local GREEN_ROOM_MARKERS = {
    ["10"] = { y = -198, x = 583.21, z = -234.8 },
    ["11"] = { y = -198, x = 557.58, z = -209.2 },
 }
+-- Protective Barrier win by Avatus on each end of main phase.
+local BUFFID_PROTECTIVE_BARRIER = 45304
+-- Buff win by Avatus, which will enable obliteration beam.
+local BUFFID_HOLO_CANNONS_ACTIVE = 44756
+-- Holo cannons duration per main phase.
+local HOLO_CANNONS_DURATION = {
+    [1] = 93,
+    [2] = 93,
+    [3] = 64,
+}
 
 ----------------------------------------------------------------------------------------------------
 -- locals.
@@ -261,7 +271,6 @@ local SetTargetUnit = GameLib.SetTargetUnit
 local GetPlayerUnitByName = GameLib.GetPlayerUnitByName
 local nCurrentPhase
 local tBlueRoomPurgeList
-local nGunGridLastPopTime
 local tHoloHandsList
 local bIsHoloHand
 local nPurgeCount
@@ -270,6 +279,8 @@ local nMobiusId
 local nMobiusHealthPourcent
 local bDisplayHandsPictures
 local nAvatusId
+local nMainPhaseCount
+local nHoloCannonActivationTime
 
 local function SetMarkersByPhase(nNewPhase)
     -- Remove previous markers
@@ -313,6 +324,7 @@ function mod:OnBossEnable()
     Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
     Apollo.RegisterEventHandler("CHAT_NPCSAY", "OnChatNPCSay", self)
     Apollo.RegisterEventHandler("BUFF_APPLIED", "OnBuffApplied", self)
+    Apollo.RegisterEventHandler("BUFF_DEL", "OnBuffDel", self)
     Apollo.RegisterEventHandler("SHORTCUT_BAR", "OnShowShortcutBar", self)
 
     SetMarkersByPhase(MAIN_PHASE)
@@ -326,13 +338,13 @@ function mod:OnBossEnable()
     bGreenRoomMarkerDisplayed = false
     bIsHoloHand = true
     nPurgeCount = 0
-    nGunGridLastPopTime = GetGameTime() + 20
     nMobiusId = nil
     nMobiusHealthPourcent = 100
     nAvatusId = nil
+    nMainPhaseCount = 1
+    nHoloCannonActivationTime = nil
     bDisplayHandsPictures = false
 
-    mod:AddTimerBar("OBBEAM", "Obliteration Beam", 69, mod:GetSetting("SoundObliterationBeam"))
     mod:AddTimerBar("GGRID", "~Gun Grid", 21, mod:GetSetting("SoundGunGrid"))
 end
 
@@ -502,6 +514,7 @@ function mod:OnEnteredCombat(tUnit, bInCombat, sName)
 end
 
 function mod:OnBuffApplied(unitName, splId, unit)
+    local nId = unit:GetId()
     if unitName == self.L["Infinite Logic Loop"] then
         local sSpellName = GameLib.GetSpell(splId):GetName()
 
@@ -527,6 +540,25 @@ function mod:OnBuffApplied(unitName, splId, unit)
                 end
             end
         end
+    elseif nAvatusId == nId then
+        if BUFFID_HOLO_CANNONS_ACTIVE == splId then
+            if not nHoloCannonActivationTime then
+                nHoloCannonActivationTime = GetGameTime()
+                mod:AddTimerBar("OBBEAM", "Obliteration Beam", 26, mod:GetSetting("SoundObliterationBeam"))
+            end
+        elseif BUFFID_PROTECTIVE_BARRIER == splId then
+            -- End of one main phase.
+            nHoloCannonActivationTime = nil
+        end
+    end
+end
+
+function mod:OnBuffDel(nId, nSpellId)
+    if nAvatusId == nId then
+        if BUFFID_PROTECTIVE_BARRIER == nSpellId then
+            -- New main phase.
+            nMainPhaseCount = nMainPhaseCount < 3 and nMainPhaseCount + 1 or 3
+        end
     end
 end
 
@@ -549,11 +581,15 @@ function mod:OnHealthChanged(nId, nPourcent, sName)
 end
 
 function mod:OnSpellCastStart(unitName, castName, unit)
-    if unitName == self.L["Avatus"] and castName == self.L["Obliteration Beam"] then
-        mod:RemoveTimerBar("OBBEAM")
-        -- Check if next ob beam in sec doesn't happen during a gungrid which takes 20 sec.
-        if nGunGridLastPopTime + 132 < GetGameTime() + 37 then
-            mod:AddTimerBar("OBBEAM", "Obliteration Beam", 37, mod:GetSetting("SoundObliterationBeam"))
+    if unitName == self.L["Avatus"] then
+        if self.L["Obliteration Beam"] == castName then
+            local EndOfCannon = nHoloCannonActivationTime + HOLO_CANNONS_DURATION[nMainPhaseCount]
+            local NextBeam = GetGameTime() + 37
+            if EndOfCannon > NextBeam and nMainPhaseCount < 3 then
+                mod:AddTimerBar("OBBEAM", "Obliteration Beam", 37, mod:GetSetting("SoundObliterationBeam"))
+            else
+                mod:RemoveTimerBar("OBBEAM")
+            end
         end
     elseif unitName == self.L["Holo Hand"] and castName == self.L["Crushing Blow"] then
         local playerUnit = GetPlayerUnit()
@@ -580,7 +616,6 @@ end
 
 function mod:OnChatDC(message)
     if message:find(self.L["Gun Grid Activated"]) then
-        nGunGridLastPopTime = GetGameTime()
         mod:AddMsg("GGRIDMSG", "Gun Grid NOW!", 5, mod:GetSetting("SoundGunGrid") and "Beware")
         mod:AddTimerBar("GGRID", "~Gun Grid", 112, mod:GetSetting("SoundGunGrid"))
         if bIsHoloHand then
