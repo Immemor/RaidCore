@@ -646,12 +646,14 @@ end
 function mod:OnHealthChanged(nId, nPourcent, sName)
     if sName == self.L["Avatus"] then
         if not bWarningSwitchPhaseDone then
-            bWarningSwitchPhaseDone = true
             if nPourcent >= 75 and nPourcent <= 76 then
+                bWarningSwitchPhaseDone = true
                 mod:AddMsg("AVAP2", "P2 SOON !", 5, mod:GetSetting("SoundPortalPhase") and "Info")
             elseif nPourcent >= 50 and nPourcent <= 52 then
+                bWarningSwitchPhaseDone = true
                 mod:AddMsg("AVAP2", "P2 SOON!", 5, mod:GetSetting("SoundPortalPhase") and "Info")
             elseif nPourcent >= 25 and nPourcent <= 27 then
+                bWarningSwitchPhaseDone = true
                 mod:AddMsg("AVAP2", "P3 SOON!", 5, mod:GetSetting("SoundPortalPhase") and "Info")
             end
         end
