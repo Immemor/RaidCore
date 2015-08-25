@@ -280,6 +280,12 @@ local HOLO_CANNONS_DURATION = {
     [2] = 93,
     [3] = 64,
 }
+-- Timer of the next gun per main phase.
+local GUN_INTERVAL = {
+    [1] = 112,
+    [2] = 112,
+    [3] = 81,
+}
 
 ----------------------------------------------------------------------------------------------------
 -- locals.
@@ -722,7 +728,7 @@ function mod:OnChatDC(message)
     local nEscalatingFound = message:match(self.L["Escalating defense matrix system"])
     if message:find(self.L["Gun Grid Activated"]) then
         mod:AddMsg("GGRIDMSG", "Gun Grid NOW!", 5, mod:GetSetting("SoundGunGrid") and "Beware")
-        mod:AddTimerBar("GGRID", "~Gun Grid", 112, mod:GetSetting("SoundGunGrid"))
+        mod:AddTimerBar("GGRID", "~Gun Grid", GUN_INTERVAL[nMainPhaseCount], mod:GetSetting("SoundGunGrid"))
         if bIsHoloHand then
             mod:AddTimerBar("HOLO", "Holo Hand", 22)
             bDisplayHandsPictures = true
