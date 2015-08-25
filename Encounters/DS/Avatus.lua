@@ -646,11 +646,11 @@ function mod:OnBuffApplied(unitName, splId, unit)
             -- End of one main phase.
             nHoloCannonActivationTime = nil
             bWarningSwitchPhaseDone = false
-            if nMainPhaseCount >= 3 then
-                mod:RemoveTimerBar("GGRID")
-                mod:RemoveTimerBar("OBBEAM")
-                mod:RemoveTimerBar("HOLO")
-            end
+            bDisplayHandsPictures = false
+            mod:RemoveTimerBar("GGRID")
+            mod:RemoveTimerBar("OBBEAM")
+            mod:RemoveTimerBar("HOLO")
+            RefreshHoloHandPictures()
         end
     end
 end
