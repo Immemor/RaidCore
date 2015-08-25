@@ -303,8 +303,9 @@ local bDisplayHandsPictures
 local nAvatusId
 local nMainPhaseCount
 local nHoloCannonActivationTime
-local nEscalatingMax
 local nLastSupportCannonPopTime
+local nLastBuffPurgeTime
+local bIsPurgeSync
 
 local function SetMarkersByPhase(nNewPhase)
     -- Remove previous markers
@@ -417,10 +418,10 @@ function mod:OnBossEnable()
     nMobiusHealthPourcent = 100
     nAvatusId = nil
     nMainPhaseCount = 1
-    nEscalatingMax = nil
     nHoloCannonActivationTime = nil
     bDisplayHandsPictures = false
     nLastSupportCannonPopTime = 0
+    nLastBuffPurgeTime = 0
 
     mod:AddTimerBar("GGRID", "~Gun Grid", 21, mod:GetSetting("SoundGunGrid"))
 end
@@ -468,12 +469,17 @@ function mod:OnUnitCreated(unit, sName)
     elseif sName == self.L["Infinite Logic Loop"] then
         if nHealth then
             -- Blue room.
+            local bDisplayPurgeList = RED_PHASE == nCurrentPhase
             SetMarkersByPhase(BLUE_PHASE)
             core:AddUnit(unit)
             core:WatchUnit(unit)
+            -- Cheat on the last purge date, to avoid some troubles with:
+            --  * players who come from red phase.
+            --  * spellslinger who use their void slip spell.
+            nLastBuffPurgeTime = GetGameTime()
             -- When player from red room come to blue room, the event EnteringInCombat is not
             -- received.
-            if unit:IsInCombat() then
+            if bDisplayPurgeList then
                 DisplayPurgeList()
             end
         else
@@ -552,6 +558,8 @@ function mod:OnUnitDestroyed(unit, sName)
         core:DropPixie(nUnitId)
         mod:RemoveTimerBar("PURGE_CYCLE")
         mod:RemoveTimerBar("PURGE_INCREASE")
+        -- With the spellslinger's void slip spell, the purge sync is lost.
+        bIsPurgeSync = false
     elseif sName == self.L["Mobius Physics Constructor"] then
         core:DropPixie(nUnitId)
         if unit:GetHealth() then
@@ -593,7 +601,15 @@ function mod:OnBuffApplied(unitName, splId, unit)
 
         if ePurgeType then
             nPurgeCount = nPurgeCount + 1
-            if nEscalatingMax then
+            -- 1 second without debuff is requested to sync with new cycle.
+            if nLastBuffPurgeTime + 1 <= GetGameTime() then
+                bIsPurgeSync = true
+                nPurgeCycleCount = 0
+                nPurgeCycleCountPerColor[PURGE_BLUE] = 0
+                nPurgeCycleCountPerColor[PURGE_RED] = 0
+                nPurgeCycleCountPerColor[PURGE_GREEN] = 0
+            end
+            if bIsPurgeSync then
                 nPurgeCycleCount = nPurgeCycleCount + 1
                 nPurgeCycleCountPerColor[ePurgeType] = nPurgeCycleCountPerColor[ePurgeType] + 1
                 if nPurgeCycleCount == 1 then
@@ -601,8 +617,8 @@ function mod:OnBuffApplied(unitName, splId, unit)
                 end
             end
             if nCurrentPhase == BLUE_PHASE and mod:GetSetting("OtherPurgeMessages") then
-                local a = nEscalatingMax and nPurgeCycleCount or nPurgeCount
-                local b = nEscalatingMax and nPurgeCycleCountPerColor[ePurgeType] or "NA"
+                local a = bIsPurgeSync and nPurgeCycleCount or nPurgeCount
+                local b = bIsPurgeSync and nPurgeCycleCountPerColor[ePurgeType] or "NA"
                 a = tostring(a)
                 b = tostring(b)
                 if ePurgeType == PURGE_GREEN then
@@ -612,12 +628,6 @@ function mod:OnBuffApplied(unitName, splId, unit)
                 elseif ePurgeType == PURGE_RED then
                     mod:AddMsg("PURGE", self.L["%s. PURGE RED (%s)"]:format(a, b), 3, nil, "red")
                 end
-            end
-            if nEscalatingMax and nPurgeCycleCount >= nEscalatingMax then
-                nPurgeCycleCount = 0
-                nPurgeCycleCountPerColor[PURGE_BLUE] = 0
-                nPurgeCycleCountPerColor[PURGE_RED] = 0
-                nPurgeCycleCountPerColor[PURGE_GREEN] = 0
             end
         end
     elseif nAvatusId == nId then
@@ -644,6 +654,11 @@ function mod:OnBuffDel(nId, nSpellId)
         if BUFFID_PROTECTIVE_BARRIER == nSpellId then
             -- New main phase.
             nMainPhaseCount = nMainPhaseCount < 3 and nMainPhaseCount + 1 or 3
+        else
+            local ePurgeType = Spell2PurgeType(nSpellId)
+            if ePurgeType then
+                nLastBuffPurgeTime = GetGameTime()
+            end
         end
     end
 end
@@ -721,7 +736,6 @@ function mod:OnChatDC(message)
         mod:RemoveTimerBar("OBBEAM")
         mod:RemoveTimerBar("HOLO")
     elseif nEscalatingFound then
-        nEscalatingMax = tonumber(nEscalatingFound)
         mod:AddTimerBar("PURGE_INCREASE", "Next increase of number of purge", 30)
     end
 end
