@@ -285,6 +285,7 @@ local HOLO_CANNONS_DURATION = {
 -- locals.
 ----------------------------------------------------------------------------------------------------
 local GetGameTime = GameLib.GetGameTime
+local GetSpell = GameLib.GetSpell
 local GetPlayerUnit = GameLib.GetPlayerUnit
 local SetTargetUnit = GameLib.SetTargetUnit
 local GetPlayerUnitByName = GameLib.GetPlayerUnitByName
@@ -366,6 +367,19 @@ local function DisplayPurgeList()
             end
         end
     end
+end
+
+local function Spell2PurgeType(nSpellId)
+    local sSpellName = GetSpell(nSpellId):GetName()
+
+    if sSpellName == self.L["Green Reconstitution Matrix"] then
+        return PURGE_GREEN
+    elseif sSpellName == self.L["Blue Disruption Matrix"] then
+        return PURGE_BLUE
+    elseif sSpellName == self.L["Red Empowerment Matrix"] then
+        return PURGE_RED
+    end
+    return nil
 end
 
 ----------------------------------------------------------------------------------------------------
@@ -575,16 +589,7 @@ end
 function mod:OnBuffApplied(unitName, splId, unit)
     local nId = unit:GetId()
     if unitName == self.L["Infinite Logic Loop"] then
-        local sSpellName = GameLib.GetSpell(splId):GetName()
-
-        local ePurgeType = nil
-        if sSpellName == self.L["Green Reconstitution Matrix"] then
-            ePurgeType = PURGE_GREEN
-        elseif sSpellName == self.L["Blue Disruption Matrix"] then
-            ePurgeType = PURGE_BLUE
-        elseif sSpellName == self.L["Red Empowerment Matrix"] then
-            ePurgeType = PURGE_RED
-        end
+        local ePurgeType = Spell2PurgeType(splId)
 
         if ePurgeType then
             nPurgeCount = nPurgeCount + 1
