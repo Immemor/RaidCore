@@ -85,10 +85,12 @@ function mod:OnUnitCreated(unit, sName)
         if mod:GetSetting("LinePathOfInvisibleUnit") then
             if IsInRangeOfKeeper(unit) then
                 local nId = unit:GetId()
+                local tPosition = unit:GetPosition()
                 local sKey1 = ("BEAX %d-%d"):format(nId, 1)
                 local sKey2 = ("BEAX %d-%d"):format(nId, 2)
-                core:AddPolygon(sKey1, nId, 8, 0, 3, "xkcdBrightPurple", 12)
-                core:AddPolygon(sKey1, nId, 15, 0, 3, "xkcdBluishPurple", 12)
+                -- Avoid the rotation of the circles through the Position instead the nId.
+                core:AddPolygon(sKey1, tPosition, 8, 0, 3, "xkcdBrightPurple", 16)
+                core:AddPolygon(sKey2, tPosition, 15, 0, 3, "xkcdBluishPurple", 16)
             end
         end
     end
