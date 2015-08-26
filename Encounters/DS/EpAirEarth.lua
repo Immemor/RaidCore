@@ -109,6 +109,7 @@ function mod:OnBossEnable()
 
     mod:AddTimerBar("SUPERCELL", "Supercell", 65, mod:GetSetting("SoundSupercell"))
     mod:AddTimerBar("TORNADO", "~Tornado Spawn", 16, mod:GetSetting("SoundTornadoCountDown"))
+    mod:AddTimerBar("FIERCE_SWIPE", "Fierce Swipe", 16)
 end
 
 function mod:OnUnitCreated(unit, sName)
