@@ -59,13 +59,14 @@ function mod:OnUnitCreated(unit, sName)
         tRockslideUnit = unit
         core:AddUnit(unit)
         core:WatchUnit(unit)
-        core:AddPolygon(nId, nId, 8, 0, 4, "xkcdBrightPurple", 16)
+        core:AddPolygon(nId, nId, 15, 0, 4, "xkcdBrightPurple", 16)
     end
 end
 
 function mod:OnHealthChanged(nId, nPourcent, sName)
     if sName == self.L["Logic Guided Rockslide"] then
-        core:DropPixie("FOCUS")
+        core:RemoveLineBetweenUnits("FOCUS")
+        core:RemovePicture("FOCUS")
     end
 end
 
@@ -77,8 +78,11 @@ function mod:OnChatDC(message)
             core:PlaySound("Alarm")
         end
         if tRockslideUnit then
-            core:DropPixie("FOCUS")
-            core:AddPixie("FOCUS", 1, tUnit, tRockslideUnit, "Blue")
+            local nRockslideId = tRockslideUnit:GetId()
+            local nId = tUnit:GetId()
+            core:AddLineBetweenUnits("FOCUS", nId, tRockslideUnit, "Blue")
+            local o = core:AddPicture("FOCUS", nId, "RaidCore_Draw:Crosshair")
+            o:SetSprite(nil, 30)
         end
     end
 end
