@@ -32,6 +32,7 @@ local GetPlayerUnit = GameLib.GetPlayerUnit
 local GetGameTime = GameLib.GetGameTime
 local GetUnitById = GameLib.GetUnitById
 local WorldLocToScreenPoint = GameLib.WorldLocToScreenPoint
+local Races = GameLib.CodeEnumRace
 local Vector3 = Vector3
 local NewVector3 = Vector3.New
 local math = math
@@ -55,6 +56,15 @@ local DOT_IS_A_LINE = 1
 local FPOINT_NULL = { 0, 0, 0, 0 }
 local DEFAULT_LINE_COLOR = { a = 1.0, r = 1.0, g = 0.0, b = 0.0 } -- Red
 local DEFAULT_NORTH_FACING = { x = 0, y = 0, z = -1.0 }
+local HEIGHT_PER_RACEID = {
+    [Races.Human] = 1.2,
+    [Races.Granok] = 1.6,
+    [Races.Aurin] = 1.1,
+    [Races.Draken] = 1.4,
+    [Races.Mechari] = 1.75,
+    [Races.Chua] = 1.0,
+    [Races.Mordesh] = 1.85,
+}
 
 ----------------------------------------------------------------------------------------------------
 -- local data.
@@ -630,6 +640,11 @@ function Picture:AddDraw(Key, Origin, sSprite, nRotation, nDistance, nHeight, sC
     if OriginType == "number" then
         -- Origin is the Id of an unit.
         tDraw.nOriginId = Origin
+        local tUnit = GetUnitById(Origin)
+        local nRaceId = tUnit and tUnit:GetRaceId()
+        if nRaceId and HEIGHT_PER_RACEID[nRaceId] then
+            tDraw.nHeight = HEIGHT_PER_RACEID[nRaceId]
+        end
     else
         -- Origin is the result of a GetPosition()
         tDraw.nOriginId = nil
