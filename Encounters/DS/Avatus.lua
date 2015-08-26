@@ -229,20 +229,9 @@ mod:RegisterDefaultTimerBarConfigs({
     ["SUPPORT_CANNON"] = { sColor = "xkcdBrightLilac" },
 })
 
-local PURGE_BLUE = 1
-local PURGE_RED = 2
-local PURGE_GREEN = 3
-local PURGE_LIST_IN_BLUE_ROOM = {
-    ["Icon_SkillEnergy_UI_srcr_shckcntrp"] = PURGE_BLUE,
-    ["Icon_SkillFire_UI_ss_srngblst"] = PURGE_RED,
-    ["Icon_SkillEnergy_UI_srcr_surgeengine"] = PURGE_GREEN,
-}
-local PURGE_COOLDOWNS = 15
-
 ----------------------------------------------------------------------------------------------------
 -- Constants.
 ----------------------------------------------------------------------------------------------------
-local next = next
 local NO_BREAK_SPACE = string.char(194, 160)
 local MAIN_PHASE = 1
 local LABYRINTH_PHASE = 2
@@ -270,6 +259,15 @@ local GREEN_ROOM_MARKERS = {
    ["10"] = { y = -198, x = 583.21, z = -234.8 },
    ["11"] = { y = -198, x = 557.58, z = -209.2 },
 }
+local PURGE_BLUE = 1
+local PURGE_RED = 2
+local PURGE_GREEN = 3
+local PURGE_LIST_IN_BLUE_ROOM = {
+    ["Icon_SkillEnergy_UI_srcr_shckcntrp"] = PURGE_BLUE,
+    ["Icon_SkillFire_UI_ss_srngblst"] = PURGE_RED,
+    ["Icon_SkillEnergy_UI_srcr_surgeengine"] = PURGE_GREEN,
+}
+local PURGE_COOLDOWNS = 15
 -- Protective Barrier win by Avatus on each end of main phase.
 local BUFFID_PROTECTIVE_BARRIER = 45304
 -- Buff win by Avatus, which will enable obliteration beam.
@@ -290,6 +288,7 @@ local GUN_INTERVAL = {
 ----------------------------------------------------------------------------------------------------
 -- locals.
 ----------------------------------------------------------------------------------------------------
+local next = next
 local GetGameTime = GameLib.GetGameTime
 local GetSpell = GameLib.GetSpell
 local GetPlayerUnit = GameLib.GetPlayerUnit
