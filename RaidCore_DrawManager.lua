@@ -43,11 +43,13 @@ local _nPreviousTime = 0
 local _wndOverlay = nil
 local _tDrawManagers = {}
 local TemplateManager = {}
+local TemplateDraw = {}
 
 ----------------------------------------------------------------------------------------------------
 -- Constants.
 ----------------------------------------------------------------------------------------------------
 local TEMPLATE_MANAGER_META = { __index = TemplateManager }
+local TEMPLATE_DRAW_META = { __index = TemplateDraw }
 local DRAW_UPDATE_PERIOD = nil
 local DOT_IS_A_LINE = 1
 local FPOINT_NULL = { 0, 0, 0, 0 }
@@ -57,6 +59,26 @@ local DEFAULT_NORTH_FACING = { x = 0, y = 0, z = -1.0 }
 ----------------------------------------------------------------------------------------------------
 -- local data.
 ----------------------------------------------------------------------------------------------------
+local function NewDraw()
+    local new = {
+        nSpriteSize = 4,
+        sSprite = "BasicSprites:WhiteCircle",
+        sColor = DEFAULT_LINE_COLOR,
+    }
+    return setmetatable(new, TEMPLATE_DRAW_META)
+end
+
+local function BuildPublicDraw(t)
+    -- Create an empty metatable, with a write protection.
+    local mt = {
+        __index = t,
+        __newindex = function(t, k, v)
+            error("Attempt to update a read-only graphical object", 2)
+        end
+    }
+    -- Create a proxy table, which will be the public interface.
+    return setmetatable({}, mt)
+end
 
 local function NewManager(sText)
     local new = setmetatable({}, TEMPLATE_MANAGER_META)
@@ -89,9 +111,22 @@ local function StopDrawing()
 end
 
 local function UpdateLine(tDraw, tVectorFrom, tVectorTo)
-    local tScreenLocTo = tVectorTo and WorldLocToScreenPoint(tVectorTo)
-    local tScreenLocFrom = tVectorFrom and WorldLocToScreenPoint(tVectorFrom)
-
+    local tScreenLocTo, tScreenLocFrom = nil, nil
+    if tVectorFrom and tVectorTo then
+        local bShouldBeVisible = true
+        if tDraw.nMaxLengthVisible or tDraw.nMinLengthVisible then
+            local len = (tVectorTo - tVectorFrom):Length()
+            if tDraw.nMaxLengthVisible and tDraw.nMaxLengthVisible < len then
+                bShouldBeVisible = false
+            elseif tDraw.nMinLengthVisible and tDraw.nMinLengthVisible > len then
+                bShouldBeVisible = false
+            end
+        end
+        if bShouldBeVisible then
+            tScreenLocTo = WorldLocToScreenPoint(tVectorTo)
+            tScreenLocFrom = WorldLocToScreenPoint(tVectorFrom)
+        end
+    end
     if tScreenLocFrom and tScreenLocTo and (tScreenLocFrom.z > 0 or tScreenLocTo.z > 0) then
         if tDraw.nNumberOfDot == DOT_IS_A_LINE then
             local tPixieAttributs = {
@@ -122,11 +157,11 @@ local function UpdateLine(tDraw, tVectorFrom, tVectorTo)
                 if tScreenLocDot.z > 0 then
                     local nDistance2Player = (tVectorPlayer - tVectorDot):Length()
                     local nScale = math.min(40 / nDistance2Player, 1)
-                    nScale = math.max(nScale, 0.5) * 4
+                    nScale = math.max(nScale, 0.5) * tDraw.nSpriteSize
                     local tVector = tScreenLocTo - tScreenLocFrom
                     local tPixieAttributs = {
                         bLine = false,
-                        strSprite = "BasicSprites:WhiteCircle",
+                        strSprite = tDraw.sSprite,
                         cr = tDraw.sColor,
                         fRotation = math.deg(math.atan2(tVector.y, tVector.x)) + 90,
                         loc = {
@@ -182,6 +217,26 @@ end
 ----------------------------------------------------------------------------------------------------
 -- Template Class.
 ----------------------------------------------------------------------------------------------------
+function TemplateDraw:SetColor(sColor)
+    local mt = getmetatable(self)
+    mt.__index.sColor = sColor or DEFAULT_LINE_COLOR
+end
+
+function TemplateDraw:SetSprite(sSprite, nSize)
+    local mt = getmetatable(self)
+    mt.__index.sSprite = sSprite or mt.__index.sSprite or "BasicSprites:WhiteCircle"
+    mt.__index.nSpriteSize = nSize or mt.__index.nSpriteSize or 4
+end
+
+function TemplateDraw:SetMaxLengthVisible(nMax)
+    local mt = getmetatable(self)
+    mt.__index.nMaxLengthVisible = nMax
+end
+
+function TemplateDraw:SetMinLengthVisible(nMin)
+    local mt = getmetatable(self)
+    mt.__index.nMinLengthVisible = nMin
+end
 
 ----------------------------------------------------------------------------------------------------
 -- Line between 2 units.
@@ -222,9 +277,9 @@ function LineBetween:AddDraw(Key, FromOrigin, ToOrigin, nWidth, sColor, nNumberO
         end
     end
     -- Get saved object or create a new table.
-    local tDraw = self.tDraws[Key] or {}
+    local tDraw = self.tDraws[Key] or NewDraw()
     tDraw.nWidth = nWidth or 4.0
-    tDraw.sColor = sColor or DEFAULT_LINE_COLOR
+    tDraw.sColor = sColor or tDraw.sColor
     tDraw.nNumberOfDot = nNumberOfDot or DOT_IS_A_LINE
     tDraw.nPixieIdDot = tDraw.nPixieIdDot or {}
     -- Preprocessing of the 'From'.
@@ -251,6 +306,7 @@ function LineBetween:AddDraw(Key, FromOrigin, ToOrigin, nWidth, sColor, nNumberO
     self.tDraws[Key] = tDraw
     -- Start the draw update service.
     StartDrawing()
+    return BuildPublicDraw(tDraw)
 end
 
 function LineBetween:RemoveDraw(Key)
@@ -303,11 +359,11 @@ function SimpleLine:AddDraw(Key, Origin, nOffset, nLength, nRotation, nWidth, sC
         end
     end
     -- Get saved object or create a new table.
-    local tDraw = self.tDraws[Key] or {}
+    local tDraw = self.tDraws[Key] or NewDraw()
     tDraw.nOffset = nOffset or 0
     tDraw.nLength = nLength or 10
     tDraw.nWidth = nWidth or 4
-    tDraw.sColor = sColor or DEFAULT_LINE_COLOR
+    tDraw.sColor = sColor or tDraw.sColor
     tDraw.nNumberOfDot = nNumberOfDot or DOT_IS_A_LINE
     tDraw.nPixieIdDot = tDraw.nPixieIdDot or {}
     -- Preprocessing.
@@ -338,8 +394,9 @@ function SimpleLine:AddDraw(Key, Origin, nOffset, nLength, nRotation, nWidth, sC
     end
     -- Save this object (new or not).
     self.tDraws[Key] = tDraw
-
+    -- Start the draw update service.
     StartDrawing()
+    return BuildPublicDraw(tDraw)
 end
 
 function SimpleLine:RemoveDraw(Key)
@@ -441,11 +498,11 @@ function Polygon:AddDraw(Key, Origin, nRadius, nRotation, nWidth, sColor, nSide)
         end
     end
     -- Register a new object to manage.
-    local tDraw = self.tDraws[Key] or {}
+    local tDraw = self.tDraws[Key] or NewDraw()
     tDraw.nRadius = nRadius or 10
     tDraw.nWidth = nWidth or 4
     tDraw.nRotation = nRotation or 0
-    tDraw.sColor = sColor or DEFAULT_LINE_COLOR
+    tDraw.sColor = sColor or tDraw.sColor
     tDraw.nSide = nSide or 5
     tDraw.nPixieIds = tDraw.nPixieIds or {}
     tDraw.tVectors = tDraw.tVectors or {}
@@ -474,8 +531,9 @@ function Polygon:AddDraw(Key, Origin, nRadius, nRotation, nWidth, sColor, nSide)
     end
     -- Save this object (new or not).
     self.tDraws[Key] = tDraw
-
+    -- Start the draw update service.
     StartDrawing()
+    return BuildPublicDraw(tDraw)
 end
 
 function Polygon:RemoveDraw(Key)
@@ -517,7 +575,7 @@ function Picture:UpdateDraw(tDraw)
             local tVectorPlayer = NewVector3(GetPlayerUnit():GetPosition())
             local nDistance2Player = (tVectorPlayer - tVector):Length()
             local nScale = math.min(40 / nDistance2Player, 1)
-            nScale = math.max(nScale, 0.5) * 25
+            nScale = math.max(nScale, 0.5) * tDraw.nSpriteSize
             local tPixieAttributs = {
                 bLine = false,
                 strSprite = tDraw.sSprite,
@@ -552,11 +610,12 @@ function Picture:AddDraw(Key, Origin, sSprite, nRotation, nDistance, nHeight, sC
     assert(OriginType == "number" or OriginType == "table")
 
     -- Register a new object to manage.
-    local tDraw = self.tDraws[Key] or {}
-    tDraw.sSprite = sSprite or "BasicSprites:WhiteCircle"
+    local tDraw = self.tDraws[Key] or NewDraw()
+    tDraw.sSprite = sSprite or tDraw.sSprite
     tDraw.nRotation = nRotation or 0
     tDraw.nDistance = nDistance or 0
     tDraw.nHeight = nHeight or 0
+    tDraw.nSpriteSize = 25
     tDraw.sColor = sColor or "white"
     -- Preprocessing.
     local nRad = math.rad(tDraw.nRotation or 0)
@@ -583,7 +642,9 @@ function Picture:AddDraw(Key, Origin, sSprite, nRotation, nDistance, nHeight, sC
     end
     -- Save this object (new or not).
     self.tDraws[Key] = tDraw
+    -- Start the draw update service.
     StartDrawing()
+    return BuildPublicDraw(tDraw)
 end
 
 function Picture:RemoveDraw(Key)
@@ -643,7 +704,7 @@ end
 -- API to use in encounters.
 ----------------------------------------------------------------------------------------------------
 function RaidCore:AddLineBetweenUnits(...)
-    LineBetween:AddDraw(...)
+    return LineBetween:AddDraw(...)
 end
 
 function RaidCore:RemoveLineBetweenUnits(...)
@@ -651,7 +712,7 @@ function RaidCore:RemoveLineBetweenUnits(...)
 end
 
 function RaidCore:AddSimpleLine(...)
-    SimpleLine:AddDraw(...)
+    return SimpleLine:AddDraw(...)
 end
 
 function RaidCore:RemoveSimpleLine(...)
@@ -659,7 +720,7 @@ function RaidCore:RemoveSimpleLine(...)
 end
 
 function RaidCore:AddPolygon(...)
-    Polygon:AddDraw(...)
+    return Polygon:AddDraw(...)
 end
 
 function RaidCore:RemovePolygon(...)
@@ -667,7 +728,7 @@ function RaidCore:RemovePolygon(...)
 end
 
 function RaidCore:AddPicture(...)
-    Picture:AddDraw(...)
+    return Picture:AddDraw(...)
 end
 
 function RaidCore:RemovePicture(...)
