@@ -306,6 +306,7 @@ local nMobiusId
 local nMobiusHealthPourcent
 local bDisplayHandsPictures
 local nAvatusId
+local nInfiniteLogicLoopId
 local nMainPhaseCount
 local nHoloCannonActivationTime
 local nLastSupportCannonPopTime
@@ -378,11 +379,11 @@ end
 local function Spell2PurgeType(nSpellId)
     local sSpellName = GetSpell(nSpellId):GetName()
 
-    if sSpellName == self.L["Green Reconstitution Matrix"] then
+    if sSpellName == mod.L["Green Reconstitution Matrix"] then
         return PURGE_GREEN
-    elseif sSpellName == self.L["Blue Disruption Matrix"] then
+    elseif sSpellName == mod.L["Blue Disruption Matrix"] then
         return PURGE_BLUE
-    elseif sSpellName == self.L["Red Empowerment Matrix"] then
+    elseif sSpellName == mod.L["Red Empowerment Matrix"] then
         return PURGE_RED
     end
     return nil
@@ -476,6 +477,7 @@ function mod:OnUnitCreated(unit, sName)
             -- Blue room.
             local bDisplayPurgeList = RED_PHASE == nCurrentPhase
             SetMarkersByPhase(BLUE_PHASE)
+            nInfiniteLogicLoopId = nUnitId
             core:AddUnit(unit)
             core:WatchUnit(unit)
             -- Cheat on the last purge date, to avoid some troubles with:
@@ -659,11 +661,11 @@ function mod:OnBuffDel(nId, nSpellId)
         if BUFFID_PROTECTIVE_BARRIER == nSpellId then
             -- New main phase.
             nMainPhaseCount = nMainPhaseCount < 3 and nMainPhaseCount + 1 or 3
-        else
-            local ePurgeType = Spell2PurgeType(nSpellId)
-            if ePurgeType then
-                nLastBuffPurgeTime = GetGameTime()
-            end
+        end
+    elseif nInfiniteLogicLoopId == nId then
+        local ePurgeType = Spell2PurgeType(nSpellId)
+        if ePurgeType then
+            nLastBuffPurgeTime = GetGameTime()
         end
     end
 end
