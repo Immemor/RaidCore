@@ -58,12 +58,12 @@ mod:RegisterFrenchLocale({
     ["The corruption begins to fester"] = "La Corruption commence à se répandre",
     ["has been anesthetized"] = "est sous anesthésie",
     -- NPCSay messages.
-    ["Through the Strain you will be transformed"] = "La Souillure te transformera"
+    --["Through the Strain you will be transformed"] = "Through the Strain you will be transformed", -- TODO: French translation missing !!!!
     --["Your form is flawed, but I will make you beautiful"] = "Your form is flawed, but I will make you beautiful", -- TODO: French translation missing !!!!
-    ["Let the Strain perfect you"] = "Embrasse la perfection de la Souillure",
+    ["Let the Strain perfect you"] = "Embrasse la perfection de la Souillure...",
     ["The Experiment has failed"] = "L'expérience a échoué",
-    ["Join us... become one with the Strain"] = "Rejoinez-nous... Fusionnez avec la Souillure"
-    ["One of us... you will become one of us"] = "Des nôtres... Tu seras bientôt des nôtres",
+    ["Join us... become one with the Strain"] = "Livrez-vous corps et âme à la Souillure...",
+    ["One of us... you will become one of us"] = "Des nôtres... Tu seras bientôt des nôtres...",
     -- Cast.
     ["Vanish into Darkness"] = "Disparaître dans les ténèbres",
     -- Bar and messages.
