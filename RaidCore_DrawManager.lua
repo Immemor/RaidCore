@@ -615,7 +615,7 @@ function Picture:UpdateDraw(tDraw)
     end
 end
 
-function Picture:AddDraw(Key, Origin, sSprite, nRotation, nDistance, nHeight, sColor)
+function Picture:AddDraw(Key, Origin, sSprite, nSpriteSize, nRotation, nDistance, nHeight, sColor)
     local OriginType = type(Origin)
     assert(OriginType == "number" or OriginType == "table")
 
@@ -625,7 +625,7 @@ function Picture:AddDraw(Key, Origin, sSprite, nRotation, nDistance, nHeight, sC
     tDraw.nRotation = nRotation or 0
     tDraw.nDistance = nDistance or 0
     tDraw.nHeight = nHeight or 0
-    tDraw.nSpriteSize = 25
+    tDraw.nSpriteSize = nSpriteSize or tDraw.nSpriteSize or 25
     tDraw.sColor = sColor or "white"
     -- Preprocessing.
     local nRad = math.rad(tDraw.nRotation or 0)

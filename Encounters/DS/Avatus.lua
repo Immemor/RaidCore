@@ -336,8 +336,8 @@ end
 
 local function RefreshHoloHandPictures()
     if mod:GetSetting("OtherHandSpawnMarkers") and bDisplayHandsPictures then
-        core:AddPicture("HAND1", nAvatusId, "RaidCore_Draw:AvatusLeftHand", -60, 17)
-        core:AddPicture("HAND2", nAvatusId, "RaidCore_Draw:AvatusRightHand", 60, 17)
+        core:AddPicture("HAND1", nAvatusId, "RaidCore_Draw:AvatusLeftHand", 30, -60, 17)
+        core:AddPicture("HAND2", nAvatusId, "RaidCore_Draw:AvatusRightHand", 30, 60, 17)
     else
         core:RemovePicture("HAND1")
         core:RemovePicture("HAND2")

@@ -81,8 +81,7 @@ function mod:OnChatDC(message)
             local nRockslideId = tRockslideUnit:GetId()
             local nId = tUnit:GetId()
             core:AddLineBetweenUnits("FOCUS", nId, tRockslideUnit, "Blue")
-            local o = core:AddPicture("FOCUS", nId, "RaidCore_Draw:Crosshair")
-            o:SetSprite(nil, 30)
+            core:AddPicture("FOCUS", nId, "RaidCore_Draw:Crosshair", 30)
         end
     end
 end
