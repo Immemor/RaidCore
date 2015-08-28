@@ -227,6 +227,10 @@ end
 ----------------------------------------------------------------------------------------------------
 -- Template Class.
 ----------------------------------------------------------------------------------------------------
+function TemplateManager:GetDraw(sKey)
+    return self.tDraw[sKey]
+end
+
 function TemplateDraw:SetColor(sColor)
     local mt = getmetatable(self)
     mt.__index.sColor = sColor or DEFAULT_LINE_COLOR
@@ -722,12 +726,20 @@ function RaidCore:AddLineBetweenUnits(...)
     return LineBetween:AddDraw(...)
 end
 
+function RaidCore:GetLineBetweenUnits(...)
+    return LineBetween:GetDraw(...)
+end
+
 function RaidCore:RemoveLineBetweenUnits(...)
     LineBetween:RemoveDraw(...)
 end
 
 function RaidCore:AddSimpleLine(...)
     return SimpleLine:AddDraw(...)
+end
+
+function RaidCore:GetSimpleLine(...)
+    return SimpleLine:GetDraw(...)
 end
 
 function RaidCore:RemoveSimpleLine(...)
@@ -738,12 +750,20 @@ function RaidCore:AddPolygon(...)
     return Polygon:AddDraw(...)
 end
 
+function RaidCore:GetPolygon(...)
+    return Polygon:GetDraw(...)
+end
+
 function RaidCore:RemovePolygon(...)
     Polygon:RemoveDraw(...)
 end
 
 function RaidCore:AddPicture(...)
     return Picture:AddDraw(...)
+end
+
+function RaidCore:GetPicture(...)
+    return Picture:GetDraw(...)
 end
 
 function RaidCore:RemovePicture(...)
