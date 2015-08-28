@@ -140,8 +140,9 @@ end
 
 function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
     if nSpellId == DEBUFF_LITTLE_BOMB then
-        local sSound = nId == GetPlayerUnit():GetId() and mod:GetSetting("SoundLittleBomb") and "RunAway"
+        local bIsSoundLittleBomb = nId == GetPlayerUnit():GetId() and mod:GetSetting("SoundLittleBomb")
+        local sSound = bIsSoundLittleBomb and "RunAway"
         mod:AddMsg("LITTLEB", self.L["LITTLE BOMB on %s !!!"]:format(GetUnitById(nId):GetName()), 5, sSound, "Blue")
-        mod:AddTimerBar("LITTLEB", "LITTLE BOMB", fTimeRemaining, mod:GetSetting("SoundLittleBomb"))
+        mod:AddTimerBar("LITTLEB", "LITTLE BOMB", fTimeRemaining, bIsSoundLittleBomb)
     end
 end
