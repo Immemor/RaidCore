@@ -97,6 +97,7 @@ mod:RegisterEnglishLocale({
     ["Holo Hand Spawned"] = "Holo Hand Spawned",
     ["P2 SOON !"] = "P2 SOON !",
     ["P3 SOON !"] = "P3 SOON !",
+    ["KILL AVATUS !!!"] = "KILL AVATUS !!!",
     ["INTERRUPT CRUSHING BLOW!"] = "INTERRUPT CRUSHING BLOW!",
     ["BLIND! TURN AWAY FROM BOSS"] = "BLIND! TURN AWAY FROM BOSS",
     ["Blind"] = "Blind",
@@ -148,6 +149,7 @@ mod:RegisterFrenchLocale({
     ["Holo Hand Spawned"] = "Holo-main Apparition",
     ["P2 SOON !"] = "P2 BIENTÔT !",
     ["P3 SOON !"] = "P3 BIENTÔT !",
+    ["KILL AVATUS !!!"] = "TUEZ AVATUS !!!",
     ["INTERRUPT CRUSHING BLOW!"] = "INTERROMPRE COUP ÉCRASANT!",
     ["BLIND! TURN AWAY FROM BOSS"] = "AVEUGLER! DOS AU BOSS",
     ["Blind"] = "Aveugler",
@@ -225,7 +227,7 @@ mod:RegisterDefaultTimerBarConfigs({
     ["GGRID"] = { sColor = "xkcdBlue" },
     ["HHAND"] = { sColor = "xkcdOrangeyRed" },
     ["PURGE_CYCLE"] = { sColor = "xkcdBluishGreen" },
-    ["PURGE_INCREASE"] = { sColor = "xkcdBoringGreen" },
+    ["PURGE_INCREASE"] = { sColor = "xkcdDeepOrange" },
     ["SUPPORT_CANNON"] = { sColor = "xkcdBrightLilac" },
 })
 
@@ -398,7 +400,6 @@ function mod:OnBossEnable()
     Apollo.RegisterEventHandler("RC_UnitStateChanged", "OnEnteredCombat", self)
     Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
     Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
-    Apollo.RegisterEventHandler("CHAT_NPCSAY", "OnChatNPCSay", self)
     Apollo.RegisterEventHandler("BUFF_APPLIED", "OnBuffApplied", self)
     Apollo.RegisterEventHandler("BUFF_DEL", "OnBuffDel", self)
     Apollo.RegisterEventHandler("SHORTCUT_BAR", "OnShowShortcutBar", self)
@@ -515,11 +516,18 @@ function mod:OnUnitCreated(unit, sName)
             -- Draw a line to the red portal.
             core:AddPixie(nUnitId, 1, unit, GetPlayerUnit(), "red")
         end
-    elseif sName == self.L["Holo Cannon"] and mod:GetSetting("LineCannons") then
-        core:AddPixie(unit:GetId(), 2, unit, nil, "Blue", 5, 100, 0)
-    elseif sName == self.L["Shock Sphere"] and mod:GetSetting("LineOrbsYellowRoom") then
-        -- Yellow room orbs.
-        core:AddPixie(unit:GetId(), 2, unit, nil, "Blue", 5, -7, 0)
+    elseif sName == self.L["Holo Cannon"] then
+        if nHealth then
+            core:AddUnit(unit)
+        end
+        if mod:GetSetting("LineCannons") then
+            core:AddPixie(unit:GetId(), 2, unit, nil, "Blue", 5, 100, 0)
+        end
+    elseif sName == self.L["Shock Sphere"] then
+        if mod:GetSetting("LineOrbsYellowRoom") then
+            -- Yellow room orbs.
+            core:AddPixie(unit:GetId(), 2, unit, nil, "Blue", 5, -7, 0)
+        end
     elseif sName == self.L["Support Cannon"] then
         core:AddUnit(unit)
         local nCurrentTime = GetGameTime()
@@ -569,7 +577,7 @@ function mod:OnUnitDestroyed(unit, sName)
         bIsPurgeSync = false
     elseif sName == self.L["Mobius Physics Constructor"] then
         core:DropPixie(nUnitId)
-        if unit:GetHealth() then
+        if unit:GetHealth() == 0 then
             -- Send information about the miniboss, not the portal.
             mod:SendIndMessage("MOBIUS_DEATH")
         end
@@ -660,7 +668,12 @@ function mod:OnBuffDel(nId, nSpellId)
     if nAvatusId == nId then
         if BUFFID_PROTECTIVE_BARRIER == nSpellId then
             -- New main phase.
-            nMainPhaseCount = nMainPhaseCount < 3 and nMainPhaseCount + 1 or 3
+            if nMainPhaseCount < 3 then
+                nMainPhaseCount = nMainPhaseCount + 1
+            else
+                mod:RemoveTimerBar("SUPPORT_CANNON")
+                mod:AddMsg("KILL", "KILL AVATUS !!!", 4, "Info")
+            end
         end
     elseif nInfiniteLogicLoopId == nId then
         local ePurgeType = Spell2PurgeType(nSpellId)
