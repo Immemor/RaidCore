@@ -259,6 +259,7 @@ local GREEN_ROOM_MARKERS = {
    ["8"] = { y = -198, x = 653.21, z = -234.8 },
    ["9"] = { y = -198, x = 618.21, z = -244.2 },
    ["10"] = { y = -198, x = 583.21, z = -234.8 },
+
    ["11"] = { y = -198, x = 557.58, z = -209.2 },
 }
 local PURGE_BLUE = 1
@@ -314,6 +315,7 @@ local nHoloCannonActivationTime
 local nLastSupportCannonPopTime
 local nLastBuffPurgeTime
 local bIsPurgeSync
+local bIsProtectionBarrierEnable
 
 local function SetMarkersByPhase(nNewPhase)
     -- Remove previous markers
@@ -653,11 +655,12 @@ function mod:OnBuffApplied(unitName, splId, unit)
         end
     elseif nAvatusId == nId then
         if BUFFID_HOLO_CANNONS_ACTIVE == splId then
-            if not nHoloCannonActivationTime then
+            if not nHoloCannonActivationTime and not bIsProtectionBarrierEnable then
                 nHoloCannonActivationTime = GetGameTime()
                 mod:AddTimerBar("OBBEAM", "Obliteration Beam", 26, mod:GetSetting("SoundObliterationBeam"))
             end
         elseif BUFFID_PROTECTIVE_BARRIER == splId then
+            bIsProtectionBarrierEnable = true
             -- End of one main phase.
             nHoloCannonActivationTime = nil
             bWarningSwitchPhaseDone = false
@@ -673,6 +676,7 @@ end
 function mod:OnBuffDel(nId, nSpellId)
     if nAvatusId == nId then
         if BUFFID_PROTECTIVE_BARRIER == nSpellId then
+            bIsProtectionBarrierEnable = false
             -- New main phase.
             if nMainPhaseCount < 3 then
                 nMainPhaseCount = nMainPhaseCount + 1
