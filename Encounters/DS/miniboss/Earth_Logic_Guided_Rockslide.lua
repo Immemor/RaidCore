@@ -59,7 +59,7 @@ function mod:OnUnitCreated(unit, sName)
         tRockslideUnit = unit
         core:AddUnit(unit)
         core:WatchUnit(unit)
-        core:AddPolygon(nId, nId, 15, 0, 4, "xkcdBrightPurple", 16)
+        core:AddPolygon("TWIRL RANGE MIN", nId, 11.2, 0, 4, "xkcdBrightPurple", 16)
     end
 end
 
