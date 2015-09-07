@@ -182,9 +182,9 @@ function RaidCore:GUI_init(sVersion)
     self.wndBodyTarget = self.wndMain:FindChild("BodyTarget")
     self.LeftMenu2wndBody = {
         General = Apollo.LoadForm(self.xmlDoc, "ConfigForm_General", self.wndBodyTarget, self),
-        About_Us = Apollo.LoadForm(self.xmlDoc, "ConfigForm_About_Us", self.wndBodyTarget, self),
         Encounters = Apollo.LoadForm(self.xmlDoc, "ConfigBody_Encounters", self.wndBodyTarget, self),
         Logs = Apollo.LoadForm(self.xmlDoc, "ConfigBody_Logs", self.wndBodyTarget, self),
+        About_Us = Apollo.LoadForm(self.xmlDoc, "ConfigBody_AboutUs", self.wndBodyTarget, self),
     }
     self.wndEncounterTarget = self.LeftMenu2wndBody.Encounters:FindChild("Encounter_Target")
     self.wndEncounterList = self.LeftMenu2wndBody.Encounters:FindChild("Encounter_List")
