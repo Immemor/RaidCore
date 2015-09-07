@@ -208,7 +208,6 @@ function RaidCore:OnDocLoaded()
     self:CombatInterface_Init(self)
     self:BarManagersInit(self.db.profile.BarsManagers)
     self:DrawManagersInit()
-    self:LogGUI_init()
     self:GUI_init(RAIDCORE_CURRENT_VERSION)
     -- Do additional initialization.
     self.mark = {}

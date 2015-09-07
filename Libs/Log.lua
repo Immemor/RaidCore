@@ -93,7 +93,26 @@ function Lib:SetExtra2String(fCallback)
     self.fExtra2String = fCallback
 end
 
-function Lib:Dump()
+function Lib:CurrentDump()
+    local fExtra2String = self.fExtra2String
+    local tBuffer = _tBuffers[_nBufferIdx]
+    local tDump = {}
+    local nRefTime = _tRefTime[_nBufferIdx]
+
+    if tBuffer and fExtra2String then
+        for _, tEntry in next, tBuffer do
+            local o = {
+                tEntry[LOG_ENTRY__TIME] - nRefTime,
+                tEntry[LOG_ENTRY__TEXT],
+                fExtra2String(tEntry[LOG_ENTRY__TEXT], nRefTime, tEntry[LOG_ENTRY__EXTRAINFO]),
+            }
+            tinsert(tDump, o)
+        end
+    end
+    return tDump
+end
+
+function Lib:PreviousDump()
     local fExtra2String = self.fExtra2String
     local nBufferIdx = LogGetLastBufferIndex()
     local tBuffer = _tBuffers[nBufferIdx]

@@ -21,7 +21,6 @@
     <Script Name="RaidCore_BarManager.lua"/>
     <Script Name="RaidCore_DrawManager.lua"/>
     <Script Name="RaidCore_GUI.lua"/>
-    <Script Name="RaidCore_LogGUI.lua"/>
     <Script Name="Encounters/BossPrototype.lua"/>
     <!-- Encounters: Testing purpose -->
     <!--@alpha@-->

@@ -12,25 +12,30 @@
 require "Window"
 require "GameLib"
 
+local Log = Apollo.GetPackage("Log-1.0").tPackage
 local RaidCore = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 
 ----------------------------------------------------------------------------------------------------
 -- Copy of few objects to reduce the cpu load.
 -- Because all local objects are faster.
 ----------------------------------------------------------------------------------------------------
-local next, pcall, assert, error = next, pcall, assert, error
+local next, pcall, assert, error, ipairs = next, pcall, assert, error, ipairs
 local GetGameTime = GameLib.GetGameTime
 
 ----------------------------------------------------------------------------------------------------
 -- local data.
 ----------------------------------------------------------------------------------------------------
 local ShowHideClass = {}
+local _wndUploadAction
+local _wndLogGrid
 
 ----------------------------------------------------------------------------------------------------
 -- Constants.
 ----------------------------------------------------------------------------------------------------
+local COPY_TO_CLIPBOARD = GameLib.CodeEnumConfirmButtonType.CopyToClipboard
 local SHOW_HIDE_PANEL_ENCOUNTER_DURATION = 0.60
 local SHOW_HIDE_PANEL_ENCOUNTER_MOVE = 155
+local SHOW_HIDE_PANEL_LOG_MOVE = 120
 
 ----------------------------------------------------------------------------------------------------
 -- local functions.
@@ -45,6 +50,51 @@ local function OnMenuLeft_CheckUncheck(wndButton, bIsChecked)
     RaidCore.wndBodyTarget:SetData(wnd)
 end
 
+local function CopyLog2Clipboard(tDumpLog)
+    local JSONPackage = Apollo.GetPackage("Lib:dkJSON-2.5").tPackage
+    local sJSONData = JSONPackage.encode(tDumpLog)
+    if sJSONData then
+        local JSONLen = sJSONData:len()
+        if JSONLen < 1000 then
+            _wndLogSize:SetText(("(%u B)"):format(JSONLen))
+        elseif JSONLen < (1000 * 1000) then
+            _wndLogSize:SetText(("(%.1f kB)"):format(JSONLen / 1000.0))
+        else
+            _wndLogSize:SetText(("(%.1f MB)"):format(JSONLen / (1000.0 * 1000.0)))
+        end
+        if JSONLen > 0 then
+            _wndUploadAction:SetActionData(COPY_TO_CLIPBOARD, sJSONData)
+            _wndUploadAction:Show(true)
+        end
+    end
+end
+
+local function ClearLogGrid()
+    -- Clear current Grid data.
+    _wndLogGrid:DeleteAll()
+    _wndLogErrorCount:SetText("0")
+    _wndLogEventsCount:SetText("0")
+    _wndLogSize:SetText("")
+    _wndUploadAction:Show(false)
+end
+
+local function FillLogGrid(tDumpLog)
+    local nErrorCount = 0
+    for _, tLog in ipairs(tDumpLog) do
+        local idx = _wndLogGrid:AddRow("")
+        _wndLogGrid:SetCellSortText(idx, 1, ("%08u"):format(idx))
+        _wndLogGrid:SetCellText(idx, 1, ("%.3f"):format(tLog[1]))
+        _wndLogGrid:SetCellText(idx, 2, tLog[2])
+        _wndLogGrid:SetCellText(idx, 3, tLog[3])
+        -- Increase error counter on error logged.
+        if tLog[2] == "ERROR" then
+            nErrorCount = nErrorCount + 1
+        end
+    end
+    _wndLogErrorCount:SetText(tostring(nErrorCount))
+    _wndLogEventsCount:SetText(tostring(#tDumpLog))
+end
+
 ----------------------------------------------------------------------------------------------------
 -- ShowHide Class manager.
 ----------------------------------------------------------------------------------------------------
@@ -52,7 +102,10 @@ function ShowHideClass:OnShowHideUpdate()
     local left, top, right, bottom
     local nCurrentTime = GetGameTime()
     local nEncounterDelta = RaidCore.nShowHideEncounterPanelTime - nCurrentTime
+    local nLogDelta = RaidCore.nShowHideLogPanelTime - nCurrentTime
+
     nEncounterDelta = nEncounterDelta > 0 and nEncounterDelta or 0
+    nLogDelta = nLogDelta > 0 and nLogDelta or 0
 
     -- Manage ENCOUNTER panels.
     local nPourcentAction = 1 - nEncounterDelta / SHOW_HIDE_PANEL_ENCOUNTER_DURATION
@@ -79,7 +132,32 @@ function ShowHideClass:OnShowHideUpdate()
     end
     RaidCore.wndEncounterTarget:SetAnchorOffsets(left, RaidCore.tEncounterTargetAnchorOffsets[2], RaidCore.tEncounterTargetAnchorOffsets[3], RaidCore.tEncounterTargetAnchorOffsets[4])
 
-    if nEncounterDelta == 0 then
+    -- Manage LOGS panels.
+    local nLogPourcentAction = 1 - nLogDelta / SHOW_HIDE_PANEL_ENCOUNTER_DURATION
+    -- Manage the log panel list.
+    if RaidCore.bIsLogsPanelsToShow then
+        left = RaidCore.tLogsListAnchorOffsets[1] - SHOW_HIDE_PANEL_LOG_MOVE * nLogPourcentAction
+        left = left > -SHOW_HIDE_PANEL_LOG_MOVE and left or -SHOW_HIDE_PANEL_LOG_MOVE
+        right = RaidCore.tLogsListAnchorOffsets[3] - SHOW_HIDE_PANEL_LOG_MOVE * nLogPourcentAction
+        right = right > (150 - SHOW_HIDE_PANEL_LOG_MOVE) and right or (150 - SHOW_HIDE_PANEL_LOG_MOVE)
+    else
+        left = RaidCore.tLogsListAnchorOffsets[1] + SHOW_HIDE_PANEL_LOG_MOVE * nLogPourcentAction
+        left = left < 0 and left or 0
+        right = RaidCore.tLogsListAnchorOffsets[3] + SHOW_HIDE_PANEL_LOG_MOVE * nLogPourcentAction
+        right = right < 150 and right or 150
+    end
+    RaidCore.wndLogSubMenu:SetAnchorOffsets(left, RaidCore.tLogsListAnchorOffsets[2], right, RaidCore.tLogsListAnchorOffsets[4])
+    -- Manage the log panel target.
+    if RaidCore.bIsLogsPanelsToShow then
+        left = RaidCore.tLogsTargetAnchorOffsets[1] - SHOW_HIDE_PANEL_LOG_MOVE * nLogPourcentAction
+        left = left > (155 - SHOW_HIDE_PANEL_LOG_MOVE) and left or (155 - SHOW_HIDE_PANEL_LOG_MOVE)
+    else
+        left = RaidCore.tLogsTargetAnchorOffsets[1] + SHOW_HIDE_PANEL_LOG_MOVE * nLogPourcentAction
+        left = left < 155 and left or 155
+    end
+    RaidCore.wndLogTarget:SetAnchorOffsets(left, RaidCore.tLogsTargetAnchorOffsets[2], RaidCore.tLogsTargetAnchorOffsets[3], RaidCore.tLogsTargetAnchorOffsets[4])
+
+    if nEncounterDelta == 0 and nLogDelta == 0 then
         _bShowHidePanelActive = false
         Apollo.RemoveEventHandler("NextFrame", self)
     end
@@ -106,9 +184,16 @@ function RaidCore:GUI_init(sVersion)
         General = Apollo.LoadForm(self.xmlDoc, "ConfigForm_General", self.wndBodyTarget, self),
         About_Us = Apollo.LoadForm(self.xmlDoc, "ConfigForm_About_Us", self.wndBodyTarget, self),
         Encounters = Apollo.LoadForm(self.xmlDoc, "ConfigBody_Encounters", self.wndBodyTarget, self),
+        Logs = Apollo.LoadForm(self.xmlDoc, "ConfigBody_Logs", self.wndBodyTarget, self),
     }
     self.wndEncounterTarget = self.LeftMenu2wndBody.Encounters:FindChild("Encounter_Target")
     self.wndEncounterList = self.LeftMenu2wndBody.Encounters:FindChild("Encounter_List")
+    self.tEncounterListAnchorOffsets = { self.wndEncounterList:GetAnchorOffsets() }
+    self.tEncounterTargetAnchorOffsets = { self.wndEncounterTarget:GetAnchorOffsets() }
+    self.wndLogTarget = self.LeftMenu2wndBody.Logs:FindChild("Log_Target")
+    self.wndLogSubMenu = self.LeftMenu2wndBody.Logs:FindChild("Log_SubMenu")
+    self.tLogsListAnchorOffsets = { self.wndLogSubMenu:GetAnchorOffsets() }
+    self.tLogsTargetAnchorOffsets = { self.wndLogTarget:GetAnchorOffsets() }
     self.wndEncounters = {
         PrimeEvolutionaryOperant = Apollo.LoadForm(self.xmlDoc, "ConfigForm_CoreY83", self.wndEncounterTarget, self),
         ExperimentX89 = Apollo.LoadForm(self.xmlDoc, "ConfigForm_ExperimentX89", self.wndEncounterTarget, self),
@@ -141,6 +226,15 @@ function RaidCore:GUI_init(sVersion)
     -- Initialize the Show/Hide button in "encounter" body.
     self.LeftMenu2wndBody.Encounters:FindChild("ShowHidePanel"):SetCheck(true)
     self.nShowHideEncounterPanelTime = 0
+    -- Initialize the Show/Hide button in "log" body.
+    self.LeftMenu2wndBody.Logs:FindChild("ShowHidePanel"):SetCheck(true)
+    self.nShowHideLogPanelTime = 0
+    -- Initialize the "log" windows.
+    _wndUploadAction = self.LeftMenu2wndBody.Logs:FindChild("UploadAction")
+    _wndLogGrid = self.wndLogTarget:FindChild("Log_Grid")
+    _wndLogErrorCount = self.wndLogTarget:FindChild("ErrorsCount")
+    _wndLogEventsCount = self.wndLogTarget:FindChild("EventsCount")
+    _wndLogSize = self.wndLogTarget:FindChild("LogSize")
 
     -- Registering to Windows Manager.
     Apollo.RegisterEventHandler("WindowManagementReady", "OnWindowManagementReady", self)
@@ -194,4 +288,37 @@ function RaidCore:OnEncounterUncheck(wndHandler, wndControl, eMouseButton)
         wnd:Show(false)
     end
     self.wndEncounterTarget:SetData(nil)
+end
+
+function RaidCore:OnLogListShowHide(wndHandler, wndControl, eMouseButton)
+    self.tLogsListAnchorOffsets = { self.wndLogSubMenu:GetAnchorOffsets() }
+    self.tLogsTargetAnchorOffsets = { self.wndLogTarget:GetAnchorOffsets() }
+    self.bIsLogsPanelsToShow = not wndControl:IsChecked()
+    self.nShowHideLogPanelTime = GetGameTime() + SHOW_HIDE_PANEL_ENCOUNTER_DURATION
+    self:PlaySound("DoorFutur")
+    ShowHideClass:StartUpdate()
+end
+
+function RaidCore:OnLogLoadCurrentBuffer(wndHandler, wndControl, eMouseButton)
+    -- Clear current Grid data.
+    ClearLogGrid()
+    -- Retrieve current buffer.
+    local tDumpLog = Log:CurrentDump()
+    -- Update GUI
+    if tDumpLog and next(tDumpLog) then
+        FillLogGrid(tDumpLog)
+        CopyLog2Clipboard(tDumpLog)
+    end
+end
+
+function RaidCore:OnLogLoadPreviousBuffer(wndHandler, wndControl, eMouseButton)
+    -- Clear current Grid data.
+    ClearLogGrid()
+    -- Retrieve previous buffer.
+    local tDumpLog = Log:PreviousDump()
+    -- Update GUI
+    if tDumpLog and next(tDumpLog) then
+        FillLogGrid(tDumpLog)
+        CopyLog2Clipboard(tDumpLog)
+    end
 end
