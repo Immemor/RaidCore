@@ -124,29 +124,6 @@ local function ProcessDelayedUnit()
     _tDelayedUnits = {}
 end
 
-local function OnMenuLeft_CheckUncheck(wndButton, bIsChecked)
-    local sButtonName = wndButton:GetName()
-    if not bIsChecked then
-        local wnd = RaidCore.wndTargetFrame:GetData()
-        if wnd then
-            wnd:Show(false)
-            RaidCore.wndTargetFrame:SetData(nil)
-        end
-    else
-        if sButtonName ~= "Datascape" and sButtonName ~= "Genetic_Archives" then
-            local wnd = RaidCore.wndSettings[sButtonName]
-            wnd:Show(true)
-            RaidCore.wndTargetFrame:SetData(wnd)
-        end
-    end
-
-    if sButtonName == "Datascape" then
-        RaidCore.wndModuleList["DS"]:Show(bIsChecked)
-    elseif sButtonName == "Genetic_Archives" then
-        RaidCore.wndModuleList["GA"]:Show(bIsChecked)
-    end
-end
-
 ----------------------------------------------------------------------------------------------------
 -- RaidCore Initialization
 ----------------------------------------------------------------------------------------------------
@@ -232,6 +209,7 @@ function RaidCore:OnDocLoaded()
     self:BarManagersInit(self.db.profile.BarsManagers)
     self:DrawManagersInit()
     self:LogGUI_init()
+    self:GUI_init(RAIDCORE_CURRENT_VERSION)
     -- Do additional initialization.
     self.mark = {}
     self.worldmarker = {}
@@ -246,55 +224,7 @@ function RaidCore:OnDocLoaded()
     self:OnCheckMapZone()
 
     -- Load Forms.
-    self.wndConfig = Apollo.LoadForm(self.xmlDoc, "ConfigForm", nil, self)
-    self.wndConfig:FindChild("Tag"):SetText(RAIDCORE_CURRENT_VERSION)
-    self.wndConfig:SetSizingMinimum(950, 500)
-    self.wndTargetFrame = self.wndConfig:FindChild("BodyTarget")
-    self.wndConfigOptionsTargetFrame = self.wndConfig:FindChild("SubMenuLeft")
-    self.wndModuleList = {
-        GA = Apollo.LoadForm(self.xmlDoc, "ModuleList_GA", self.wndConfigOptionsTargetFrame, self),
-        DS = Apollo.LoadForm(self.xmlDoc, "ModuleList_DS", self.wndConfigOptionsTargetFrame, self),
-    }
-    self.wndSettings = {
-        General = Apollo.LoadForm(self.xmlDoc, "ConfigForm_General", self.wndTargetFrame, self),
-        Datascape = Apollo.LoadForm(self.xmlDoc, "ConfigForm_Datascape", self.wndTargetFrame, self),
-        CoreY83 = Apollo.LoadForm(self.xmlDoc, "ConfigForm_CoreY83", self.wndTargetFrame, self),
-        Genetic_Archives = Apollo.LoadForm(self.xmlDoc, "ConfigForm_Genetic_Archives", self.wndTargetFrame, self),
-        About_Us = Apollo.LoadForm(self.xmlDoc, "ConfigForm_About_Us", self.wndTargetFrame, self),
-        GA = {
-            ExperimentX89 = Apollo.LoadForm(self.xmlDoc, "ConfigForm_ExperimentX89", self.wndTargetFrame, self),
-            Kuralak = Apollo.LoadForm(self.xmlDoc, "ConfigForm_Kuralak", self.wndTargetFrame, self),
-            Prototypes = Apollo.LoadForm(self.xmlDoc, "ConfigForm_Prototypes", self.wndTargetFrame, self),
-            Phagemaw = Apollo.LoadForm(self.xmlDoc, "ConfigForm_Phagemaw", self.wndTargetFrame, self),
-            PhageCouncil = Apollo.LoadForm(self.xmlDoc, "ConfigForm_PhageCouncil", self.wndTargetFrame, self),
-            Ohmna = Apollo.LoadForm(self.xmlDoc, "ConfigForm_Ohmna", self.wndTargetFrame, self),
-        },
-        DS = {
-            Minibosses = Apollo.LoadForm(self.xmlDoc, "ConfigForm_Minibosses", self.wndTargetFrame, self),
-            SystemDaemons = Apollo.LoadForm(self.xmlDoc, "ConfigForm_SystemDaemons", self.wndTargetFrame, self),
-            Gloomclaw = Apollo.LoadForm(self.xmlDoc, "ConfigForm_Gloomclaw", self.wndTargetFrame, self),
-            Maelstrom = Apollo.LoadForm(self.xmlDoc, "ConfigForm_Maelstrom", self.wndTargetFrame, self),
-            Lattice = Apollo.LoadForm(self.xmlDoc, "ConfigForm_Lattice", self.wndTargetFrame, self),
-            LimboInfomatrix = Apollo.LoadForm(self.xmlDoc, "ConfigForm_LimboInfomatrix", self.wndTargetFrame, self),
-            AirEarth = Apollo.LoadForm(self.xmlDoc, "ConfigForm_EpAirEarth", self.wndTargetFrame, self),
-            AirLife = Apollo.LoadForm(self.xmlDoc, "ConfigForm_EpAirLife", self.wndTargetFrame, self),
-            AirWater = Apollo.LoadForm(self.xmlDoc, "ConfigForm_EpAirWater", self.wndTargetFrame, self),
-            FireEarth = Apollo.LoadForm(self.xmlDoc, "ConfigForm_EpFireEarth", self.wndTargetFrame, self),
-            FireLife = Apollo.LoadForm(self.xmlDoc, "ConfigForm_EpFireLife", self.wndTargetFrame, self),
-            FireWater = Apollo.LoadForm(self.xmlDoc, "ConfigForm_EpFireWater", self.wndTargetFrame, self),
-            LogicEarth = Apollo.LoadForm(self.xmlDoc, "ConfigForm_EpLogicEarth", self.wndTargetFrame, self),
-            LogicLife = Apollo.LoadForm(self.xmlDoc, "ConfigForm_EpLogicLife", self.wndTargetFrame, self),
-            LogicWater = Apollo.LoadForm(self.xmlDoc, "ConfigForm_EpLogicWater", self.wndTargetFrame, self),
-            Avatus = Apollo.LoadForm(self.xmlDoc, "ConfigForm_Avatus", self.wndTargetFrame, self),
-        },
-    }
     self.GeminiColor = Apollo.GetPackage("GeminiColor").tPackage
-    Apollo.RegisterEventHandler("WindowManagementReady", "OnWindowManagementReady", self)
-
-    -- Initialize Left Menu in Main RaidCore window.
-    local wndGeneralButton = self.wndConfig:FindChild("Static"):FindChild("General")
-    wndGeneralButton:SetCheck(true)
-    OnMenuLeft_CheckUncheck(wndGeneralButton, true)
 
     -- Register handlers for events, slash commands and timer, etc.
     Apollo.RegisterSlashCommand("raidc", "OnRaidCoreOn", self)
@@ -379,11 +309,6 @@ end
 ---------------------------------------------------------------------------------------------------
 ---- ConfigForm_General Functions
 -----------------------------------------------------------------------------------------------------
-function RaidCore:OnWindowManagementReady()
-    local param = {wnd = self.wndConfig, strName = "RaidCore"}
-    Event_FireGenericEvent('WindowManagementAdd', param)
-end
-
 function RaidCore:OnWindowLoad(wndHandler, wndControl)
     local a, b, c = unpack(Split(wndControl:GetName(), '_'))
     local val = nil
@@ -441,7 +366,7 @@ function RaidCore:OnRaidCoreOn(cmd, args)
     end
 
     if tAllParams[1] == nil or tAllParams[1] == "config" then
-        self:OnConfigOn()
+        self:DisplayMainWindow()
     elseif (tAllParams[1] == "bar") then
         if tAllParams[2] ~= nil and tAllParams[3] ~= nil then
             self:AddTimerBar(tAllParams[2], tAllParams[2], tonumber(tAllParams[3]))
@@ -1106,32 +1031,4 @@ function RaidCore:OnMoveBars(wndHandler, wndControl, eMouseButton)
         wndHandler:SetText("Move Bars")
         self:BarsAnchorUnlock(false)
     end
-end
-
-function RaidCore:OnConfigOn()
-    self.wndConfig:Invoke()
-end
-
-function RaidCore:OnConfigCloseButton()
-    self.wndConfig:Close()
-end
-
-function RaidCore:OnMenuLeft_Check(wndHandler, wndControl, eMouseButton)
-    OnMenuLeft_CheckUncheck(wndControl, true)
-end
-
-function RaidCore:OnMenuLeft_Uncheck(wndHandler, wndControl, eMouseButton)
-    OnMenuLeft_CheckUncheck(wndControl, false)
-end
-
-function RaidCore:OnModuleSettingsCheck(wndHandler, wndControl, eMouseButton)
-    local raidInstance = Split(wndControl:GetParent():GetName(), "_")
-    local identifier = Split(wndControl:GetName(), "_")
-    local wnd = self.wndSettings[raidInstance[2]][identifier[3]]
-    wnd:Show(true)
-    self.wndTargetFrame:SetData(wnd)
-end
-
-function RaidCore:OnModuleSettingsUncheck(wndHandler, wndControl, eMouseButton)
-    OnMenuLeft_CheckUncheck(wndControl, false)
 end
