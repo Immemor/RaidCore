@@ -12,6 +12,7 @@
 require "Window"
 require "GameLib"
 
+local GeminiLocale = Apollo.GetPackage("Gemini:Locale-1.0").tPackage
 local Log = Apollo.GetPackage("Log-1.0").tPackage
 local RaidCore = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 
@@ -28,6 +29,7 @@ local GetGameTime = GameLib.GetGameTime
 local ShowHideClass = {}
 local _wndUploadAction
 local _wndLogGrid
+local _TestTimer = nil
 
 ----------------------------------------------------------------------------------------------------
 -- Constants.
@@ -36,6 +38,7 @@ local COPY_TO_CLIPBOARD = GameLib.CodeEnumConfirmButtonType.CopyToClipboard
 local SHOW_HIDE_PANEL_ENCOUNTER_DURATION = 0.60
 local SHOW_HIDE_PANEL_ENCOUNTER_MOVE = 155
 local SHOW_HIDE_PANEL_LOG_MOVE = 120
+local SHOW_HIDE_PANEL_GENERAL_MOVE = 120
 
 ----------------------------------------------------------------------------------------------------
 -- local functions.
@@ -95,6 +98,16 @@ local function FillLogGrid(tDumpLog)
     _wndLogEventsCount:SetText(tostring(#tDumpLog))
 end
 
+local function Split(str, sep)
+    assert(str)
+    sep = sep or "%s"
+    local r = {}
+    for str in string.gmatch(str, "([^"..sep.."]+)") do
+        table.insert(r, str)
+    end
+    return r
+end
+
 ----------------------------------------------------------------------------------------------------
 -- ShowHide Class manager.
 ----------------------------------------------------------------------------------------------------
@@ -103,9 +116,11 @@ function ShowHideClass:OnShowHideUpdate()
     local nCurrentTime = GetGameTime()
     local nEncounterDelta = RaidCore.nShowHideEncounterPanelTime - nCurrentTime
     local nLogDelta = RaidCore.nShowHideLogPanelTime - nCurrentTime
+    local nSettingsDelta = RaidCore.nShowHideSettingsPanelTime - nCurrentTime
 
     nEncounterDelta = nEncounterDelta > 0 and nEncounterDelta or 0
     nLogDelta = nLogDelta > 0 and nLogDelta or 0
+    nSettingsDelta = nSettingsDelta > 0 and nSettingsDelta or 0
 
     -- Manage ENCOUNTER panels.
     local nPourcentAction = 1 - nEncounterDelta / SHOW_HIDE_PANEL_ENCOUNTER_DURATION
@@ -157,7 +172,32 @@ function ShowHideClass:OnShowHideUpdate()
     end
     RaidCore.wndLogTarget:SetAnchorOffsets(left, RaidCore.tLogsTargetAnchorOffsets[2], RaidCore.tLogsTargetAnchorOffsets[3], RaidCore.tLogsTargetAnchorOffsets[4])
 
-    if nEncounterDelta == 0 and nLogDelta == 0 then
+    -- Manage SETTINGS panels.
+    local nSettingsPourcentAction = 1 - nSettingsDelta / SHOW_HIDE_PANEL_ENCOUNTER_DURATION
+    -- Manage the settings sub menu.
+    if RaidCore.bIsSettingsPanelsToShow then
+        left = RaidCore.tSettingsListAnchorOffsets[1] - SHOW_HIDE_PANEL_GENERAL_MOVE * nSettingsPourcentAction
+        left = left > -SHOW_HIDE_PANEL_GENERAL_MOVE and left or -SHOW_HIDE_PANEL_GENERAL_MOVE
+        right = RaidCore.tSettingsListAnchorOffsets[3] - SHOW_HIDE_PANEL_GENERAL_MOVE * nSettingsPourcentAction
+        right = right > (150 - SHOW_HIDE_PANEL_GENERAL_MOVE) and right or (150 - SHOW_HIDE_PANEL_GENERAL_MOVE)
+    else
+        left = RaidCore.tSettingsListAnchorOffsets[1] + SHOW_HIDE_PANEL_GENERAL_MOVE * nSettingsPourcentAction
+        left = left < 0 and left or 0
+        right = RaidCore.tSettingsListAnchorOffsets[3] + SHOW_HIDE_PANEL_GENERAL_MOVE * nSettingsPourcentAction
+        right = right < 150 and right or 150
+    end
+    RaidCore.wndSettingsSubMenu:SetAnchorOffsets(left, RaidCore.tSettingsListAnchorOffsets[2], right, RaidCore.tSettingsListAnchorOffsets[4])
+    -- Manage the settings panel target.
+    if RaidCore.bIsSettingsPanelsToShow then
+        left = RaidCore.tSettingsTargetAnchorOffsets[1] - SHOW_HIDE_PANEL_GENERAL_MOVE * nSettingsPourcentAction
+        left = left > (155 - SHOW_HIDE_PANEL_GENERAL_MOVE) and left or (155 - SHOW_HIDE_PANEL_GENERAL_MOVE)
+    else
+        left = RaidCore.tSettingsTargetAnchorOffsets[1] + SHOW_HIDE_PANEL_GENERAL_MOVE * nSettingsPourcentAction
+        left = left < 155 and left or 155
+    end
+    RaidCore.wndSettingsTarget:SetAnchorOffsets(left, RaidCore.tSettingsTargetAnchorOffsets[2], RaidCore.tSettingsTargetAnchorOffsets[3], RaidCore.tSettingsTargetAnchorOffsets[4])
+
+    if nEncounterDelta == 0 and nLogDelta == 0 and nSettingsDelta == 0 then
         _bShowHidePanelActive = false
         Apollo.RemoveEventHandler("NextFrame", self)
     end
@@ -181,11 +221,14 @@ function RaidCore:GUI_init(sVersion)
     self.wndMain:SetSizingMinimum(950, 500)
     self.wndBodyTarget = self.wndMain:FindChild("BodyTarget")
     self.LeftMenu2wndBody = {
-        General = Apollo.LoadForm(self.xmlDoc, "ConfigForm_General", self.wndBodyTarget, self),
+        General = Apollo.LoadForm(self.xmlDoc, "ConfigBody_Settings", self.wndBodyTarget, self),
         Encounters = Apollo.LoadForm(self.xmlDoc, "ConfigBody_Encounters", self.wndBodyTarget, self),
         Logs = Apollo.LoadForm(self.xmlDoc, "ConfigBody_Logs", self.wndBodyTarget, self),
         About_Us = Apollo.LoadForm(self.xmlDoc, "ConfigBody_AboutUs", self.wndBodyTarget, self),
     }
+    for _, wnd in next, self.LeftMenu2wndBody do
+        GeminiLocale:TranslateWindow(self.L, wnd)
+    end
     self.wndEncounterTarget = self.LeftMenu2wndBody.Encounters:FindChild("Encounter_Target")
     self.wndEncounterList = self.LeftMenu2wndBody.Encounters:FindChild("Encounter_List")
     self.tEncounterListAnchorOffsets = { self.wndEncounterList:GetAnchorOffsets() }
@@ -194,6 +237,10 @@ function RaidCore:GUI_init(sVersion)
     self.wndLogSubMenu = self.LeftMenu2wndBody.Logs:FindChild("Log_SubMenu")
     self.tLogsListAnchorOffsets = { self.wndLogSubMenu:GetAnchorOffsets() }
     self.tLogsTargetAnchorOffsets = { self.wndLogTarget:GetAnchorOffsets() }
+    self.wndSettingsSubMenu = self.LeftMenu2wndBody.General:FindChild("SettingsSubMenu")
+    self.wndSettingsTarget = self.LeftMenu2wndBody.General:FindChild("SettingsTarget")
+    self.tSettingsListAnchorOffsets = { self.wndSettingsSubMenu:GetAnchorOffsets() }
+    self.tSettingsTargetAnchorOffsets = { self.wndSettingsTarget:GetAnchorOffsets() }
     self.wndEncounters = {
         PrimeEvolutionaryOperant = Apollo.LoadForm(self.xmlDoc, "ConfigForm_CoreY83", self.wndEncounterTarget, self),
         ExperimentX89 = Apollo.LoadForm(self.xmlDoc, "ConfigForm_ExperimentX89", self.wndEncounterTarget, self),
@@ -229,6 +276,11 @@ function RaidCore:GUI_init(sVersion)
     -- Initialize the Show/Hide button in "log" body.
     self.LeftMenu2wndBody.Logs:FindChild("ShowHidePanel"):SetCheck(true)
     self.nShowHideLogPanelTime = 0
+    -- Initialize the Show/Hide button in "settings" body.
+    self.LeftMenu2wndBody.General:FindChild("ShowHidePanel"):SetCheck(true)
+    self.nShowHideSettingsPanelTime = 0
+    self.wndSettingsSubMenu:FindChild("Bars"):SetCheck(true)
+    self.wndSettingsTarget:SetData(self.wndSettingsTarget:FindChild("Bars"))
     -- Initialize the "log" windows.
     _wndUploadAction = self.LeftMenu2wndBody.Logs:FindChild("UploadAction")
     _wndLogGrid = self.wndLogTarget:FindChild("Log_Grid")
@@ -320,5 +372,122 @@ function RaidCore:OnLogLoadPreviousBuffer(wndHandler, wndControl, eMouseButton)
     if tDumpLog and next(tDumpLog) then
         FillLogGrid(tDumpLog)
         CopyLog2Clipboard(tDumpLog)
+    end
+end
+
+function RaidCore:OnSettingsListShowHide(wndHandler, wndControl, eMouseButton)
+    self.tSettingsListAnchorOffsets = { self.wndSettingsSubMenu:GetAnchorOffsets() }
+    self.tSettingsTargetAnchorOffsets = { self.wndSettingsTarget:GetAnchorOffsets() }
+    self.bIsSettingsPanelsToShow = not wndControl:IsChecked()
+    self.nShowHideSettingsPanelTime = GetGameTime() + SHOW_HIDE_PANEL_ENCOUNTER_DURATION
+    self:PlaySound("DoorFutur")
+    ShowHideClass:StartUpdate()
+end
+
+function RaidCore:OnSettingsCheck(wndHandler, wndControl, eMouseButton)
+    local sTargetName = wndControl:GetName()
+    local wndTarget = self.wndSettingsTarget:FindChild(sTargetName)
+    if wndTarget then
+        wndTarget:Show(true)
+        self.wndSettingsTarget:SetData(wndTarget)
+    end
+end
+
+function RaidCore:OnSettingsUncheck(wndHandler, wndControl, eMouseButton)
+    local wndTarget = self.wndSettingsTarget:GetData()
+    if wndTarget then
+        wndTarget:Show(false)
+    end
+end
+
+-- When the Test button is pushed.
+function RaidCore:OnTestScenarioButton(wndHandler, wndControl, eMouseButton)
+    local bIsChecked = wndControl:IsChecked()
+    if bIsChecked then
+        wndControl:SetText(self.L["Stop test scenario"])
+        self:OnStartTestScenario()
+        _TestTimer = self:ScheduleTimer(function(wndControl)
+            wndControl:SetCheck(false)
+            wndControl:SetText(self.L["Start test scenario"])
+            self:OnStopTestScenario()
+        end, 60, wndControl)
+    else
+        self:CancelTimer(_TestTimer, true)
+
+        wndControl:SetText(self.L["Start test scenario"])
+        self:OnStopTestScenario()
+    end
+end
+
+-- When the Reset button is clicked.
+function RaidCore:OnResetBarsButton(wndHandler, wndControl, eMouseButton)
+    self:BarsResetAnchors()
+end
+
+-- When the Move button is pushed.
+function RaidCore:OnMoveBarsButton(wndHandler, wndControl, eMouseButton)
+    local bIsChecked = wndControl:IsChecked()
+    if bIsChecked then
+        wndControl:SetText(self.L["Lock Bars"])
+        self:BarsAnchorUnlock(true)
+    else
+        wndControl:SetText(self.L["Move Bars"])
+        self:BarsAnchorUnlock(false)
+    end
+end
+
+function RaidCore:OnWindowLoad(wndHandler, wndControl)
+    local a, b, c = unpack(Split(wndControl:GetName(), '_'))
+    local val = nil
+    if c then
+        val = self.db.profile[a][b][c]
+    elseif b then
+        val = self.db.profile[a][b]
+    elseif a then
+        val = self.db.profile[a]
+    end
+    if val == nil then
+        error((("Value not found in DB for keys: [%s][%s][%s]"):format(tostring(a), tostring(b), tostring(c))))
+    end
+    if wndControl.SetCheck then
+        wndControl:SetCheck(val)
+    end
+    if type(val) == "boolean"  or a == "Encounters" then
+        wndControl:SetCheck(val)
+    elseif type(val) == "number" or type(val) == "string" then
+        wndControl:SetText(val)
+        if wndControl.SetValue and type(val) == "number" then
+            wndControl:SetValue(val)
+        end
+    end
+end
+
+function RaidCore:OnButtonCheckBoxSwitched(wndHandler, wndControl, eMouseButton)
+    local a, b, c = unpack(Split(wndControl:GetName(), '_'))
+    if c then
+        self.db.profile[a][b][c] = wndControl:IsChecked()
+    elseif b then
+        self.db.profile[a][b] = wndControl:IsChecked()
+    else
+        self.db.profile[a] = wndControl:IsChecked()
+    end
+end
+
+function RaidCore:OnGeneralSettingsSliderBarChanged(wndHandler, wndControl, nNewValue, fOldValue)
+    local sName = wndControl:GetName()
+    local a, b, c = unpack(Split(sName, '_'))
+    nNewValue = math.floor(nNewValue)
+    for _, wnd in next, wndControl:GetParent():GetParent():GetChildren() do
+        if wnd:GetName() == sName then
+            wnd:SetText(nNewValue)
+            break
+        end
+    end
+    if c then
+        self.db.profile[a][b][c] = nNewValue
+    elseif b then
+        self.db.profile[a][b] = nNewValue
+    else
+        self.db.profile[a] = nNewValue
     end
 end

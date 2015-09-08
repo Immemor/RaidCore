@@ -57,16 +57,6 @@ local empCD, empTimer = 5, nil
 ----------------------------------------------------------------------------------------------------
 -- Privates functions
 ----------------------------------------------------------------------------------------------------
-local function Split(str, sep)
-    assert(str)
-    sep = sep or "%s"
-    local r = {}
-    for str in string.gmatch(str, "([^"..sep.."]+)") do
-        table.insert(r, str)
-    end
-    return r
-end
-
 local function ManageDelayedUnit(nId, sName, bInCombat)
     local tMap = GetCurrentZoneMap()
     local id1 = tMap.continentId
@@ -161,6 +151,7 @@ function RaidCore:OnDocLoaded()
             version = RAIDCORE_CURRENT_VERSION,
             Encounters = {},
             BarsManagers = self:GetBarsDefaultSettings(),
+            DrawManagers = self:GetDrawDefaultSettings(),
             -- Simple and general settings.
             bSoundEnabled = true,
             bAcceptSummons = true,
@@ -207,7 +198,7 @@ function RaidCore:OnDocLoaded()
     -- Load every software block.
     self:CombatInterface_Init(self)
     self:BarManagersInit(self.db.profile.BarsManagers)
-    self:DrawManagersInit()
+    self:DrawManagersInit(self.db.profile.DrawManagers)
     self:GUI_init(RAIDCORE_CURRENT_VERSION)
     -- Do additional initialization.
     self.mark = {}
@@ -308,55 +299,6 @@ end
 ---------------------------------------------------------------------------------------------------
 ---- ConfigForm_General Functions
 -----------------------------------------------------------------------------------------------------
-function RaidCore:OnWindowLoad(wndHandler, wndControl)
-    local a, b, c = unpack(Split(wndControl:GetName(), '_'))
-    local val = nil
-    if c then
-        val = self.db.profile[a][b][c]
-    elseif b then
-        val = self.db.profile[a][b]
-    elseif a then
-        val = self.db.profile[a]
-    end
-    assert(val ~= nil)
-    if wndControl.SetCheck then
-        wndControl:SetCheck(val)
-    end
-    if type(val) == "boolean"  or a == "Encounters" then
-        wndControl:SetCheck(val)
-    elseif type(val) == "number" or type(val) == "string" then
-        wndControl:SetText(val)
-        if wndControl.SetValue and type(val) == "number" then
-            wndControl:SetValue(val)
-        end
-    end
-end
-
-function RaidCore:OnButtonCheckBoxSwitched(wndHandler, wndControl, eMouseButton)
-    local a, b, c = unpack(Split(wndControl:GetName(), '_'))
-    if c then
-        self.db.profile[a][b][c] = wndControl:IsChecked()
-    elseif b then
-        self.db.profile[a][b] = wndControl:IsChecked()
-    else
-        self.db.profile[a] = wndControl:IsChecked()
-    end
-end
-
-function RaidCore:OnGeneralSliderBarChanged(wndHandler, wndControl, nNewValue, fOldValue)
-    local sName = wndControl:GetName()
-    local a, b, c = unpack(Split(sName, '_'))
-    nNewValue = math.floor(nNewValue)
-    wndControl:GetChildren()[1]:SetText(nNewValue)
-    if c then
-        self.db.profile[a][b][c] = nNewValue
-    elseif b then
-        self.db.profile[a][b] = nNewValue
-    else
-        self.db.profile[a] = nNewValue
-    end
-end
-
 -- on SlashCommand "/raidcore"
 function RaidCore:OnRaidCoreOn(cmd, args)
     local tAllParams = {}
@@ -1013,21 +955,44 @@ function RaidCore:isRaidManagement(strName)
     return false -- just in case
 end
 
-----------------------------------------------------------------------------------------------------
--- RaidCoreForm Functions
-----------------------------------------------------------------------------------------------------
--- When the Reset button is clicked
-function RaidCore:OnResetBarPositions(wndHandler, wndControl, eMouseButton)
-    self:BarsResetAnchors()
+function RaidCore:OnStartTestScenario()
+    local tPlayerUnit = GetPlayerUnit()
+    local nPlayerId = tPlayerUnit:GetId()
+    local nRandomGreen = math.random()
+    self:AddTimerBar("TEST1", "End of test scenario", 60, nil, { sColor = "red" })
+    self:AddTimerBar("TEST2", "Timer with count down", 8, nil, { sColor = "blue", bEmphasize = true })
+    self:AddTimerBar("TEST3", "Timer for a static circle", 15, nil, { sColor = "xkcdBarneyPurple" })
+    self:AddTimerBar("TEST4", "Timer for the crosshair on you", 30, nil, { sColor = "xkcdBrown" })
+    self:AddUnit(GetPlayerUnit())
+    self:AddMsg("TEST1", self.L["Start test scenario"], 5, "red")
+    for i = 1, 36 do
+        local nForce = 1 - i / 36.0
+        local tColor = { a = 1.0, r = 1 - nForce, g = nRandomGreen, b = nForce }
+        self:AddSimpleLine(("TEST%d"):format(i), nPlayerId, i / 6, i / 8 + 2, nForce * 360, i / 4 + 1, tColor)
+    end
+    self.tScenarioTestTimers = {}
+    self.tScenarioTestTimers[1] = self:ScheduleTimer(function()
+        self:AddPolygon("TEST1", GetPlayerUnit():GetPosition(), 8, 0, 3, "xkcdBrightPurple", 16)
+    end, 15)
+    self.tScenarioTestTimers[2] = self:ScheduleTimer(function()
+        self:AddPicture("TEST1", GetPlayerUnit():GetId(), "Crosshair", 55)
+    end, 30)
 end
 
--- When the Move button is clicked
-function RaidCore:OnMoveBars(wndHandler, wndControl, eMouseButton)
-    if wndHandler:GetText() == "Move Bars" then
-        wndHandler:SetText("Lock Bars")
-        self:BarsAnchorUnlock(true)
-    else
-        wndHandler:SetText("Move Bars")
-        self:BarsAnchorUnlock(false)
+function RaidCore:OnStopTestScenario()
+    for _, timer in next, self.tScenarioTestTimers do
+        self:CancelTimer(timer, true)
     end
+    self:RemovePolygon("TEST1")
+    self:RemovePicture("TEST1")
+    for i = 1, 36 do
+        local nForce = i / 36.0
+        self:RemoveSimpleLine(("TEST%d"):format(i))
+    end
+    self:RemoveMsg("TEST1")
+    self:RemoveUnit(GetPlayerUnit():GetId())
+    self:RemoveTimerBar("TEST1")
+    self:RemoveTimerBar("TEST2")
+    self:RemoveTimerBar("TEST3")
+    self:RemoveTimerBar("TEST4")
 end

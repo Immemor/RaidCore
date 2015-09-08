@@ -52,6 +52,8 @@ local DEFAULT_SETTINGS = {
     },
     ["Timer"] = {
         nBarHeight = 25,
+        bEnableCountDown = true,
+        bEnableCountDownSound = true,
         tAnchorPoints = { 0.25, 0.5, 0.25, 0.5 },
         tSizingMinimum = { 150, 250 },
     },
@@ -351,13 +353,14 @@ function TimerManager:OnTimerUpdate()
             local nRemaining = tBar.nEndTime - nCurrentTime
             tBar.wndProgressBar:SetProgress(nRemaining)
             tBar.wndTimeLeft:SetText(("%.1fs"):format(nRemaining))
-            if tBar.EnableCountDown then
+            if tBar.EnableCountDown and self.tSettings.bEnableCountDown then
                 if nRemaining < 5 then
                     local nCountDown = math.floor(tBar.nPrevRemaining)
                     local nFloorRemain = math.floor(nRemaining)
                     if nCountDown ~= nFloorRemain then
                         local sCountDown = tostring(nCountDown)
-                        RaidCore:AddMsg("COUNTDOWN", sCountDown, 1, sCountDown, "green")
+                        local sCountDownSound = self.tSettings.bEnableCountDownSound and sCountDown
+                        RaidCore:AddMsg("COUNTDOWN", sCountDown, 1, sCountDownSound, "green")
                     end
                 end
             end
@@ -498,6 +501,21 @@ function MessageManager:AddBar(sKey, sText, nDuration, tOptions)
     end
 end
 
+function MessageManager:RemoveOrFade(sKey)
+    if self.tSettings.bAutofadeEnable then
+        local tBar = self.tBars[sKey]
+        if tBar then
+            if not tBar.bAutoFade then
+                tBar.nEndTime = GetGameTime() + 0.5
+            else
+                self:RemoveBar(sKey)
+            end
+        end
+    else
+        self:RemoveBar(sKey)
+    end
+end
+
 function MessageManager:OnTimerUpdate()
     local nCurrentTime = GetGameTime()
     for k, tBar in next, self.tBars do
@@ -564,6 +582,10 @@ function RaidCore:AddMsg(sKey, sText, nDuration, sSound, sColor)
     if sSound then
         self:PlaySound(sSound)
     end
+end
+
+function RaidCore:RemoveMsg(sKey)
+    MessageManager:RemoveOrFade(sKey)
 end
 
 -- Add a timer bar on screen.

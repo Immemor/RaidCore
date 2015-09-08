@@ -51,7 +51,6 @@ local TemplateDraw = {}
 ----------------------------------------------------------------------------------------------------
 local TEMPLATE_MANAGER_META = { __index = TemplateManager }
 local TEMPLATE_DRAW_META = { __index = TemplateDraw }
-local DRAW_UPDATE_PERIOD = nil
 local DOT_IS_A_LINE = 1
 local FPOINT_NULL = { 0, 0, 0, 0 }
 local DEFAULT_LINE_COLOR = { a = 1.0, r = 1.0, g = 0.0, b = 0.0 } -- Red
@@ -64,6 +63,17 @@ local HEIGHT_PER_RACEID = {
     [Races.Mechari] = 1.75,
     [Races.Chua] = 1.0,
     [Races.Mordesh] = 1.85,
+}
+local DEFAULT_SETTINGS = {
+    ['**'] = {
+        bEnabled = true,
+    },
+    ["LineBetween"] = {},
+    ["SimpleLine"] = {},
+    ["Polygon"] = {},
+    ["Picture"] = {},
+
+    RefreshFrequencyMax = 60,
 }
 
 ----------------------------------------------------------------------------------------------------
@@ -92,6 +102,7 @@ end
 
 local function NewManager(sText)
     local new = setmetatable({}, TEMPLATE_MANAGER_META)
+    new.sManagerName = sText
     new.tDraws = {}
     table.insert(_tDrawManagers, new)
     return new
@@ -231,6 +242,12 @@ function TemplateManager:GetDraw(sKey)
     return self.tDraw[sKey]
 end
 
+function TemplateManager:_AddDraw(...)
+    if self.tSettings.bEnabled then
+        self:AddDraw(...)
+    end
+end
+
 function TemplateDraw:SetColor(sColor)
     local mt = getmetatable(self)
     mt.__index.sColor = sColor or DEFAULT_LINE_COLOR
@@ -255,7 +272,7 @@ end
 ----------------------------------------------------------------------------------------------------
 -- Line between 2 units.
 ----------------------------------------------------------------------------------------------------
-local LineBetween = NewManager()
+local LineBetween = NewManager("LineBetween")
 
 function LineBetween:UpdateDraw(tDraw)
     local tVectorFrom, tVectorTo = nil, nil
@@ -334,7 +351,7 @@ end
 ----------------------------------------------------------------------------------------------------
 -- Line from a unit.
 ----------------------------------------------------------------------------------------------------
-local SimpleLine = NewManager()
+local SimpleLine = NewManager("SimpleLine")
 
 function SimpleLine:UpdateDraw(tDraw)
     local tVectorTo, tVectorFrom = nil, nil
@@ -424,7 +441,7 @@ end
 ----------------------------------------------------------------------------------------------------
 -- Polygon from a unit or Position.
 ----------------------------------------------------------------------------------------------------
-local Polygon = NewManager()
+local Polygon = NewManager("Polygon")
 
 function Polygon:UpdateDraw(tDraw)
     local tVectors = nil
@@ -566,7 +583,7 @@ end
 ----------------------------------------------------------------------------------------------------
 -- Picture from a unit or Position.
 ----------------------------------------------------------------------------------------------------
-local Picture = NewManager()
+local Picture = NewManager("Picture")
 
 function Picture:UpdateDraw(tDraw)
     local tVector = nil
@@ -680,21 +697,41 @@ end
 ----------------------------------------------------------------------------------------------------
 -- Relations between RaidCore and Draw Manager.
 ----------------------------------------------------------------------------------------------------
-function RaidCore:DrawManagersInit()
+function RaidCore:DrawManagersInit(tSettings)
     _wndOverlay = Apollo.LoadForm(self.xmlDoc, "Overlay", "InWorldHudStratum", tClass)
+    tSettings = tSettings or {}
+    for _, tDrawManager in next, _tDrawManagers do
+        tDrawManager.tSettings = tSettings[tDrawManager.sManagerName] or {}
+    end
+end
+
+function RaidCore:GetDrawDefaultSettings()
+    return DEFAULT_SETTINGS
 end
 
 function RaidCore:OnDrawUpdate()
     local nCurrentTime = GetGameTime()
     local nDeltaTime = nCurrentTime - _nPreviousTime
+    local nRefreshPeriodMin = 1.0 / self.db.profile.DrawManagers.RefreshFrequencyMax
 
-    if not DRAW_UPDATE_PERIOD or nDeltaTime > DRAW_UPDATE_PERIOD then
-        _nPreviousTime = nCurrentTime
+    if nDeltaTime >= nRefreshPeriodMin then
+        if nRefreshPeriodMin > 0 then
+            _nPreviousTime = nCurrentTime - nDeltaTime % nRefreshPeriodMin
+        else
+            _nPreviousTime = nCurrentTime
+        end
 
         local bIsEmpty = true
         for _, tDrawManager in next, _tDrawManagers do
-            for _, tDraw in next, tDrawManager.tDraws do
-                local bStatus, sResult = pcall(tDrawManager.UpdateDraw, tDrawManager, tDraw)
+            local fHandler
+            if tDrawManager.tSettings.bEnabled then
+                fHandler = tDrawManager.UpdateDraw
+            else
+                fHandler = tDrawManager.RemoveDraw
+            end
+            for Key, tDraw in next, tDrawManager.tDraws do
+                local tArg = tDrawManager.tSettings.bEnabled and tDraw or Key
+                local bStatus, sResult = pcall(fHandler, tDrawManager, tArg)
                 if not bStatus then
                     --@alpha@
                     RaidCore:Print(sResult)
@@ -723,7 +760,7 @@ end
 -- API to use in encounters.
 ----------------------------------------------------------------------------------------------------
 function RaidCore:AddLineBetweenUnits(...)
-    return LineBetween:AddDraw(...)
+    return LineBetween:_AddDraw(...)
 end
 
 function RaidCore:GetLineBetweenUnits(...)
@@ -735,7 +772,7 @@ function RaidCore:RemoveLineBetweenUnits(...)
 end
 
 function RaidCore:AddSimpleLine(...)
-    return SimpleLine:AddDraw(...)
+    return SimpleLine:_AddDraw(...)
 end
 
 function RaidCore:GetSimpleLine(...)
@@ -747,7 +784,7 @@ function RaidCore:RemoveSimpleLine(...)
 end
 
 function RaidCore:AddPolygon(...)
-    return Polygon:AddDraw(...)
+    return Polygon:_AddDraw(...)
 end
 
 function RaidCore:GetPolygon(...)
@@ -759,7 +796,7 @@ function RaidCore:RemovePolygon(...)
 end
 
 function RaidCore:AddPicture(...)
-    return Picture:AddDraw(...)
+    return Picture:_AddDraw(...)
 end
 
 function RaidCore:GetPicture(...)
