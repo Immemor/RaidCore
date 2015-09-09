@@ -264,10 +264,13 @@ function RaidCore:ProcessMessage(tMessage, sSender)
             self:AddMsg("PULL", ("PULL in %s"):format(tMessage.cooldown), 5, MYCOLORS["Green"])
         end
     elseif tMessage.action == "LaunchBreak" then
-        if tMessage.cooldown then
+        if tMessage.cooldown and tMessage.cooldown > 0 then
             self:AddTimerBar("BREAK", "BREAK", tMessage.cooldown)
-            self:AddMsg("BREAK", ("BREAK for %s sec"):format(tMessage.cooldown), 5, MYCOLORS["Green"])
+            self:AddMsg("BREAK", ("BREAK for %ss"):format(tMessage.cooldown), 5, MYCOLORS["Green"])
             self:PlaySound("Long")
+        else
+            self:RemoveTimerBar("BREAK")
+            self:RemoveMsg("BREAK")
         end
     elseif tMessage.action == "Sync" then
         if tMessage.sync and self.syncRegister[tMessage.sync] then
@@ -897,13 +900,18 @@ function RaidCore:LaunchBreak(time)
     if not self:isRaidManagement(sPlayerName) then
         self:Print("You must be a raid leader or assistant to use this command!")
     else
-        if time and time > 5 then
+        if time then
             local msg = {
                 action = "LaunchBreak",
                 cooldown = time
             }
             self:SendMessage(msg)
             self:ProcessMessage(msg)
+            if time > 0 then
+                self:ScheduleTimer(function()
+                    GroupLib.ReadyCheck("Break End! FIGHT")
+                end, time)
+            end
         end
     end
 end
