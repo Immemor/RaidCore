@@ -52,7 +52,7 @@ local DEFAULT_SETTINGS = {
     },
     ["Timer"] = {
         nBarHeight = 25,
-        bEnableCountDown = true,
+        bEnableCountDownMessage = true,
         bEnableCountDownSound = true,
         tAnchorPoints = { 0.25, 0.5, 0.25, 0.5 },
         tSizingMinimum = { 150, 250 },
@@ -68,6 +68,9 @@ local DEFAULT_SETTINGS = {
         nBarHeight = 32,
         tAnchorPoints = { 0.75, 0.5, 0.75, 0.5 },
         tSizingMinimum = { 300, 200 },
+        bDisplayCast = true,
+        bDisplayAbsorb = true,
+        bDisplayShield = true,
     },
 }
 
@@ -184,7 +187,7 @@ local function UpdateUnitBar(tUnitManager, tBar)
                     bProcessMiddleBar = true
                 end
             end
-            if bProcessMiddleBar then
+            if bProcessMiddleBar and tUnitManager.tSettings.bDisplayCast then
                 tBar.wndCastProgressBar:SetProgress(nMidElapsed)
                 tBar.wndCastProgressBar:SetMax(nMidDuration)
                 tBar.wndCastText:SetText(sMidName)
@@ -195,7 +198,7 @@ local function UpdateUnitBar(tUnitManager, tBar)
             -- Process shield bar
             local nShieldCapacity = tUnit:GetShieldCapacity()
             local nShieldCapacityMax = tUnit:GetShieldCapacityMax()
-            if Health ~= 0 and nShieldCapacity and nShieldCapacity ~= 0 then
+            if Health ~= 0 and nShieldCapacity and nShieldCapacity ~= 0 and tUnitManager.tSettings.bDisplayShield then
                 tBar.wndShieldProgressBar:SetProgress(nShieldCapacity)
                 tBar.wndShieldProgressBar:SetMax(nShieldCapacityMax)
                 tBar.wndShieldValue:SetText(Number2ShortString(nShieldCapacity))
@@ -206,7 +209,7 @@ local function UpdateUnitBar(tUnitManager, tBar)
             -- Process absorb bar
             local nAbsorptionValue = tUnit:GetAbsorptionValue()
             local nAbsorptionMax = tUnit:GetAbsorptionMax()
-            if Health ~= 0 and nAbsorptionValue and nAbsorptionValue ~= 0 then
+            if Health ~= 0 and nAbsorptionValue and nAbsorptionValue ~= 0 and tUnitManager.tSettings.bDisplayAbsorb then
                 tBar.wndAbsorbProgressBar:SetProgress(nAbsorptionValue)
                 tBar.wndAbsorbProgressBar:SetMax(nAbsorptionMax)
                 tBar.wndAbsorbValue:SetText(Number2ShortString(nAbsorptionValue))
@@ -353,14 +356,18 @@ function TimerManager:OnTimerUpdate()
             local nRemaining = tBar.nEndTime - nCurrentTime
             tBar.wndProgressBar:SetProgress(nRemaining)
             tBar.wndTimeLeft:SetText(("%.1fs"):format(nRemaining))
-            if tBar.EnableCountDown and self.tSettings.bEnableCountDown then
+            if tBar.EnableCountDown then
                 if nRemaining < 5 then
                     local nCountDown = math.floor(tBar.nPrevRemaining)
                     local nFloorRemain = math.floor(nRemaining)
                     if nCountDown ~= nFloorRemain then
                         local sCountDown = tostring(nCountDown)
-                        local sCountDownSound = self.tSettings.bEnableCountDownSound and sCountDown
-                        RaidCore:AddMsg("COUNTDOWN", sCountDown, 1, sCountDownSound, "green")
+                        if self.tSettings.bEnableCountDownMessage then
+                            RaidCore:AddMsg("COUNTDOWN", sCountDown, 1, nil, "green")
+                        end
+                        if self.tSettings.bEnableCountDownSound then
+                            RaidCore:PlaySound(sCountDown)
+                        end
                     end
                 end
             end
