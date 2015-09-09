@@ -208,6 +208,7 @@ mod:RegisterDefaultSetting("LineCleaveHands")
 mod:RegisterDefaultSetting("LineCleaveYellowRoomBoss")
 mod:RegisterDefaultSetting("LineCannons")
 mod:RegisterDefaultSetting("LineOrbsYellowRoom")
+mod:RegisterDefaultSetting("LinePortals")
 mod:RegisterDefaultSetting("SoundObliterationBeam")
 mod:RegisterDefaultSetting("SoundPortalPhase")
 mod:RegisterDefaultSetting("SoundHandInterrupt")
@@ -460,7 +461,9 @@ function mod:OnUnitCreated(unit, sName)
             end
         else
             -- Draw a line to the yellow portal.
-            core:AddPixie(nUnitId, 1, unit, GetPlayerUnit(), "xkcdBananaYellow")
+            if mod:GetSetting("LinePortals") then
+                core:AddPixie(nUnitId, 1, unit, GetPlayerUnit(), "xkcdBananaYellow")
+            end
         end
     elseif sName == self.L["Unstoppable Object Simulation"] then
         -- Portals have same name, actual boss has HP, portals have nil value.
@@ -470,7 +473,9 @@ function mod:OnUnitCreated(unit, sName)
             core:WatchUnit(unit)
         else
             -- Draw a line to the green portal.
-            core:AddPixie(nUnitId, 1, unit, GetPlayerUnit(), "green")
+            if mod:GetSetting("LinePortals") then
+                core:AddPixie(nUnitId, 1, unit, GetPlayerUnit(), "green")
+            end
         end
     elseif sName == self.L["Infinite Logic Loop"] then
         if nHealth then
@@ -491,7 +496,9 @@ function mod:OnUnitCreated(unit, sName)
             end
         else
             -- Draw a line to the blue portal.
-            core:AddPixie(nUnitId, 1, unit, GetPlayerUnit(), "blue")
+            if mod:GetSetting("LinePortals") then
+                core:AddPixie(nUnitId, 1, unit, GetPlayerUnit(), "blue")
+            end
         end
     elseif sName == self.L["Holo Hand"] then
         bDisplayHandsPictures = false
