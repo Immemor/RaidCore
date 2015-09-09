@@ -96,6 +96,7 @@ local DEBUFF_SNAKE = 74570
 ----------------------------------------------------------------------------------------------------
 -- Locals.
 ----------------------------------------------------------------------------------------------------
+local GetUnitById = GameLib.GetUnitById
 local GetPlayerUnit = GameLib.GetPlayerUnit
 local GetGameTime = GameLib.GetGameTime
 local nPreviousDefragmentTime
