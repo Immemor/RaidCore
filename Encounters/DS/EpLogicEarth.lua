@@ -22,18 +22,18 @@ mod:RegisterEnglishLocale({
     ["Mnemesis"] = "Mnemesis",
     ["Obsidian Outcropping"] = "Obsidian Outcropping",
     ["Crystalline Matrix"] = "Crystalline Matrix",
+    ["Snake Piece"] = "e395- [Datascape] Logic Elemental - Snake Piece (invis unit)",
     -- Datachron messages.
     ["The ground shudders beneath Megalith"] = "The ground shudders beneath Megalith",
     ["Logic creates powerful data caches"] = "Logic creates powerful data caches",
     -- Cast.
     ["Defragment"] = "Defragment",
     -- Bar and messages.
-    ["SNAKE ON %s"] = "SNAKE ON %s",
+    ["SNAKE on %s"] = "SNAKE on %s",
     ["DEFRAG"] = "DEFRAG",
     ["SPREAD"] = "SPREAD",
-    ["BOOM"] = "BOOM",
     ["JUMP !"] = "JUMP !",
-    ["STARS"] = "STARS%s"
+    ["STARS"] = "STARS",
 })
 mod:RegisterFrenchLocale({
     -- Unit names.
@@ -41,49 +41,42 @@ mod:RegisterFrenchLocale({
     ["Mnemesis"] = "Mnémésis",
     ["Obsidian Outcropping"] = "Affleurement d'obsidienne",
     ["Crystalline Matrix"] = "Matrice cristalline",
+    ["Snake Piece"] = "e395- [Datascape] Logic Elemental - Snake Piece (invis unit)",
     -- Datachron messages.
     ["The ground shudders beneath Megalith"] = "Le sol tremble sous les pieds de Mégalithe !",
     ["Logic creates powerful data caches"] = "La logique crée de puissantes caches de données !",
     -- Cast.
     ["Defragment"] = "Défragmentation",
     -- Bar and messages.
-    ["SNAKE ON %s"] = "SERPENT sur %s",
+    ["SNAKE on %s"] = "SERPENT sur %s",
     ["DEFRAG"] = "DEFRAG",
     ["SPREAD"] = "ECARTER",
-    ["BOOM"] = "BOOM",
     ["JUMP !"] = "SAUTEZ !",
-    ["STARS"] = "Etoile%s"
+    ["STARS"] = "Étoile",
 })
 mod:RegisterGermanLocale({
     -- Unit names.
     ["Megalith"] = "Megalith",
     ["Mnemesis"] = "Mnemesis",
-    --["Obsidian Outcropping"] = "Obsidian Outcropping", -- TODO: German translation missing !!!!
     ["Crystalline Matrix"] = "Kristallmatrix",
     -- Datachron messages.
-    --["The ground shudders beneath Megalith"] = "The ground shudders beneath Megalith", -- TODO: German translation missing !!!!
-    --["Logic creates powerful data caches"] = "Logic creates powerful data caches", -- TODO: German translation missing !!!!
     -- Cast.
     ["Defragment"] = "Defragmentieren",
     -- Bar and messages.
-    --["SNAKE ON %s"] = "SNAKE ON %s", -- TODO: German translation missing !!!!
-    --["DEFRAG"] = "DEFRAG", -- TODO: German translation missing !!!!
-    --["SPREAD"] = "SPREAD", -- TODO: German translation missing !!!!
-    --["BOOM"] = "BOOM", -- TODO: German translation missing !!!!
-    --["JUMP !"] = "JUMP !", -- TODO: German translation missing !!!!
-    --["STARS"] = "STARS%s" -- TODO: German translation missing !!!!
 })
 -- Default settings.
-mod:RegisterDefaultSetting("LineObsidianOutcropping")
+mod:RegisterDefaultSetting("LineSnakeVsPlayer")
+mod:RegisterDefaultSetting("LineSnakeVsCloseObsidian")
+mod:RegisterDefaultSetting("LineSnakeVsOtherObsidian")
+mod:RegisterDefaultSetting("PolygonDefrag")
 mod:RegisterDefaultSetting("SoundDefrag")
 mod:RegisterDefaultSetting("SoundQuakeJump")
 mod:RegisterDefaultSetting("SoundStars")
 mod:RegisterDefaultSetting("SoundSnake")
 -- Timers default configs.
 mod:RegisterDefaultTimerBarConfigs({
-    ["BOOM"] = { sColor = "xkcdBloodRed" },
     ["DEFRAG"] = { sColor = "xkcdAlgaeGreen" },
-    ["STAR"] = { sColor = "xkcdBlue" },
+    ["STARS"] = { sColor = "xkcdBlue" },
     ["SNAKE"] = { sColor = "xkcdBrickOrange" },
 })
 
@@ -92,14 +85,56 @@ mod:RegisterDefaultTimerBarConfigs({
 ----------------------------------------------------------------------------------------------------
 local BUFF_MNEMESIS_INFORMATIC_CLOUD = 52571
 local DEBUFF_SNAKE = 74570
+local COLOR_SNAKE_FOCUS = "xkcdBarneyPurple"
+local COLOR_SNAKE_UNFOCUS_OBSIDIAN = "xkcdBarbiePink"
+local COLOR_SNAKE_UNFOCUS_PLAYER = "xkcdBabyPink"
 
 ----------------------------------------------------------------------------------------------------
 -- Locals.
 ----------------------------------------------------------------------------------------------------
+local ipairs = ipairs
 local GetUnitById = GameLib.GetUnitById
 local GetPlayerUnit = GameLib.GetPlayerUnit
 local GetGameTime = GameLib.GetGameTime
 local nPreviousDefragmentTime
+local nLastSnakePieceId
+local nMemberIdTargetedBySnake
+local tObsidianList
+
+local function DrawSnakePieceLines()
+    if nLastSnakePieceId and #tObsidianList > 0 then
+        local nObisidianMostClosedId = nil
+        local nObisidianMostClosedDistance = nil
+
+        for i, nId in ipairs(tObsidianList) do
+            local nDistance = mod:GetDistanceBetweenUnits(nId, nLastSnakePieceId)
+            if not nObisidianMostClosedDistance or nObisidianMostClosedDistance > nDistance then
+                nObisidianMostClosedDistance = nDistance
+                nObisidianMostClosedId = nId
+            end
+        end
+        for i, nId in ipairs(tObsidianList) do
+            local bIsMostClose = nId == nObisidianMostClosedId
+            local c = bIsMostClose and COLOR_SNAKE_FOCUS or COLOR_SNAKE_UNFOCUS_OBSIDIAN
+            local w = bIsMostClose and 4 or 2
+            if mod:GetSetting("LineSnakeVsCloseObsidian") and bIsMostClose or
+                mod:GetSetting("LineSnakeVsOtherObsidian") and not bIsMostClose then
+                core:AddLineBetweenUnits("OBSIDIAN" .. nId, nLastSnakePieceId, nId, w, c)
+            end
+        end
+    end
+
+    if mod:GetSetting("LineSnakeVsPlayer") then
+        if nLastSnakePieceId and nMemberIdTargetedBySnake then
+            local bTrig = #tObsidianList == 0
+            local c = bTrig and COLOR_SNAKE_FOCUS or COLOR_SNAKE_UNFOCUS_PLAYER
+            local w = bTrig and 4 or 2
+            core:AddLineBetweenUnits("Player VS Snake", nLastSnakePieceId, nMemberIdTargetedBySnake, w, c)
+        else
+            core:RemoveLineBetweenUnits("Player VS Snake")
+        end
+    end
+end
 
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
@@ -112,34 +147,59 @@ function mod:OnBossEnable()
     Apollo.RegisterEventHandler("DEBUFF_ADD", "OnDebuffAdd", self)
 
     nPreviousDefragmentTime = 0
+    nLastSnakePieceId = nil
+    tObsidianList = {}
+    nMemberIdTargetedBySnake = nil
     mod:AddTimerBar("DEFRAG", "DEFRAG", 10)
-    mod:AddTimerBar("STAR", self.L["STARS"]:format(""), 60)
+    mod:AddTimerBar("STARS", "STARS", 60)
 end
 
-function mod:OnUnitCreated(unit, sName)
+function mod:OnUnitCreated(tUnit, sName)
+    local nHealth = tUnit:GetHealth()
+    local nId = tUnit:GetId()
+
     if self.L["Megalith"] == sName or self.L["Mnemesis"] == sName then
-        core:AddUnit(unit)
-        core:WatchUnit(unit)
-    elseif sName == self.L["Obsidian Outcropping"] and mod:GetSetting("LineObsidianOutcropping") then
-        core:AddPixie(unit:GetId().."_1", 1, GetPlayerUnit(), unit, "Blue", 10)
+        if nHealth then
+            core:AddUnit(tUnit)
+            core:WatchUnit(tUnit)
+        end
+    elseif sName == self.L["Obsidian Outcropping"] then
+        table.insert(tObsidianList, nId)
+    elseif self.L["Snake Piece"] == sName then
+        nLastSnakePieceId = nId
+        DrawSnakePieceLines()
     end
 end
 
-function mod:OnUnitDestroyed(unit, sName)
+function mod:OnUnitDestroyed(tUnit, sName)
+    local nId = tUnit:GetId()
+
     if sName == self.L["Obsidian Outcropping"] then
-        core:DropPixie(unit:GetId())
+        core:RemoveLineBetweenUnits("OBSIDIAN" .. nId)
+        for i, nIdSaved in ipairs(tObsidianList) do
+            if nIdSaved == nId then
+                table.remove(tObsidianList, i)
+                break
+            end
+        end
+        DrawSnakePieceLines()
     end
 end
 
-function mod:OnSpellCastStart(unitName, castName, unit)
+function mod:OnSpellCastStart(unitName, castName, tUnit)
     if unitName == self.L["Mnemesis"] then
         if castName == self.L["Defragment"] then
-            local timeOfEvent = GetGameTime()
-            if timeOfEvent - nPreviousDefragmentTime > 10 then
-                nPreviousDefragmentTime = timeOfEvent
+            local nCurrentTime = GetGameTime()
+            if nCurrentTime - nPreviousDefragmentTime > 10 then
+                nPreviousDefragmentTime = nCurrentTime
                 mod:AddMsg("DEFRAG", "SPREAD", 5, mod:GetSetting("SoundDefrag") and "Alarm")
-                mod:AddTimerBar("BOOM", "BOOM", 9)
                 mod:AddTimerBar("DEFRAG", "DEFRAG", 40)
+                if mod:GetSettings("PolygonDefrag") then
+                    core:AddPolygon("DEFRAG_SQUARE", GetPlayerUnit():GetId(), 13, 0, 4, "xkcdBloodOrange", 4)
+                    self:ScheduleTimer(function()
+                        core:RemovePolygon("DEFRAG_SQUARE")
+                    end, 10)
+                end
             end
         end
     end
@@ -149,8 +209,8 @@ function mod:OnChatDC(message)
     if message:find(self.L["The ground shudders beneath Megalith"]) then
         mod:AddMsg("QUAKE", "JUMP !", 3, mod:GetSetting("SoundQuakeJump") and "Beware")
     elseif message:find(self.L["Logic creates powerful data caches"]) then
-        mod:AddMsg("STAR", self.L["STARS"]:format(" !"), 5, mod:GetSetting("SoundStars") and "Alert")
-        mod:AddTimerBar("STAR", self.L["STARS"]:format(""), 60)
+        mod:AddMsg("STARS", "STARS", 5, mod:GetSetting("SoundStars") and "Alert")
+        mod:AddTimerBar("STARS", "STARS", 60)
     end
 end
 
@@ -159,9 +219,11 @@ function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
     local sUnitName = tUnit:GetName()
 
     if nSpellId == DEBUFF_SNAKE then
-        local sSnakeOnX = self.L["SNAKE ON %s"]:format(sUnitName)
+        local sSnakeOnX = self.L["SNAKE on %s"]:format(sUnitName)
         local sSound = tUnit == GetPlayerUnit() and mod:GetSetting("SoundSnake") and "RunAway"
         mod:AddMsg("SNAKE", sSnakeOnX, 5, sSound, "Blue")
         mod:AddTimerBar("SNAKE", sSnakeOnX, 20)
+        nMemberIdTargetedBySnake = nId
+        DrawSnakePieceLines()
     end
 end
