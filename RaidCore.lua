@@ -853,7 +853,7 @@ function RaidCore:VersionCheckResults()
     end
     if next(tOutdated) then
         self:Print("Outdated RaidCore Version:")
-        for sPlayerVersion, tList in next, tOutdated do
+        for sPlayerVersion, tList in pairs(tOutdated) do
             self:Print((" - '%s': %s"):format(sPlayerVersion, table.concat(tList, ", ")))
         end
     end
