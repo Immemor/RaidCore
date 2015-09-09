@@ -33,11 +33,10 @@ mod:RegisterEnglishLocale({
     ["P2: JUMP PHASE"] = "P2: JUMP PHASE",
     ["LASER"] = "LASER",
     ["EXPLOSION"] = "EXPLOSION",
-    ["BEGIN OF SCANNING LASER"] = "BEGIN OF SCANNING LASER",
-    ["NEXT BEAM"] = "NEXT BEAM",
-    ["NEXT PILLAR"] = "NEXT PILLAR",
+    ["Next Beam"] = "Next Beam",
+    ["Next Pillar"] = "Next Pillar",
     ["BEAM on %s"] = "BEAM on %s",
-    ["PILLAR TIMEOUT"] = "PILLAR TIMEOUT",
+    ["Pillar Timeout"] = "Pillar Timeout",
 })
 mod:RegisterFrenchLocale({
     -- Unit names.
@@ -57,11 +56,10 @@ mod:RegisterFrenchLocale({
     ["P2: JUMP PHASE"] = "P2: PHASE SAUTER",
     ["LASER"] = "LASER",
     ["EXPLOSION"] = "EXPLOSION",
-    ["BEGIN OF SCANNING LASER"] = "DEBUT DU BALAYAGE LASER",
-    ["NEXT BEAM"] = "PROCHAIN LASER",
-    ["NEXT PILLAR"] = "PROCHAIN PILLIER",
+    ["Next Beam"] = "Prochain Laser",
+    ["Next Pillar"] = "Prochain Pillier",
     ["BEAM on %s"] = "LASER sur %s",
-    ["PILLAR TIMEOUT"] = "PILLIER EXPIRATION",
+    ["Pillar Timeout"] = "Pillier Expiration",
 })
 mod:RegisterGermanLocale({
     -- Unit names.
@@ -79,22 +77,19 @@ mod:RegisterGermanLocale({
     --["P2: SHIELD PHASE"] = "P2: SHIELD PHASE", -- TODO: German translation missing !!!!
     --["P2: JUMP PHASE"] = "P2: JUMP PHASE", -- TODO: German translation missing !!!!
     --["LASER"] = "LASER", -- TODO: German translation missing !!!!
-    --["BEGIN OF SCANNING LASER"] = "BEGIN OF SCANNING LASER", -- TODO: German translation missing !!!!
-    --["NEXT BEAM"] = "NEXT BEAM", -- TODO: German translation missing !!!!
-    --["NEXT PILLAR"] = "NEXT PILLAR", -- TODO: German translation missing !!!!
+    --["Next Beam"] = "Next Beam", -- TODO: German translation missing !!!!
+    --["Next Pillar"] = "Next Pillar", -- TODO: German translation missing !!!!
     --["BEAM on %s"] = "BEAM on %s", -- TODO: German translation missing !!!!
-    --["PILLAR TIMEOUT"] = "PILLAR TIMEOUT", -- TODO: German translation missing !!!!
+    --["Pillar Timeout"] = "Pillar Timeout", -- TODO: German translation missing !!!!
 })
 -- Default settings.
 mod:RegisterDefaultSetting("LineDataDevourers")
 mod:RegisterDefaultSetting("SoundBeamOnYou")
 mod:RegisterDefaultSetting("SoundBeamOnOther")
-mod:RegisterDefaultSetting("SoundNewWave")
 mod:RegisterDefaultSetting("SoundBigCast")
 mod:RegisterDefaultSetting("SoundShieldPhase")
 mod:RegisterDefaultSetting("SoundJumpPhase")
 mod:RegisterDefaultSetting("SoundLaserCountDown")
-mod:RegisterDefaultSetting("SoundExplosionCountDown")
 mod:RegisterDefaultSetting("OtherPlayerBeamMarkers")
 mod:RegisterDefaultSetting("OtherLogicWallMarkers")
 -- Timers default configs.
@@ -110,7 +105,6 @@ mod:RegisterDefaultTimerBarConfigs({
 ----------------------------------------------------------------------------------------------------
 -- Constants.
 ----------------------------------------------------------------------------------------------------
-local NO_BREAK_SPACE = string.char(194, 160)
 
 ----------------------------------------------------------------------------------------------------
 -- Locals.
@@ -118,7 +112,6 @@ local NO_BREAK_SPACE = string.char(194, 160)
 local GetPlayerUnit = GameLib.GetPlayerUnit
 local GetGameTime = GameLib.GetGameTime
 local nDataDevourerLastPopTime
-local nObstinateLogicWallLastPopTime
 
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
@@ -129,14 +122,18 @@ function mod:OnBossEnable()
     Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
 
     nDataDevourerLastPopTime = 0
-    nObstinateLogicWallLastPopTime = 0
     mod:AddTimerBar("ENRAGE", "Enrage", 576)
+    mod:AddTimerBar("DATA_DEVOURER", "Next Data Devourer", 10)
+    mod:AddTimerBar("NEXT_PILLAR", "Next Pillar", 45)
 end
 
 function mod:OnUnitCreated(unit, sName)
+    local nId = unit:GetId()
+
     if sName == self.L["Data Devourer"] then
-        if mod:GetSetting("LineDataDevourers") and self:GetDistanceBetweenUnits(unit, GetPlayerUnit()) < 45 then
-            core:AddPixie(unit:GetId(), 1, GetPlayerUnit(), unit, "Blue", 5, 10, 10)
+        if mod:GetSetting("LineDataDevourers") then
+            local line = core:AddLineBetweenUnits(nId, GetPlayerUnit():GetId(), nId, 5, "blue")
+            line:SetMaxLengthVisible(45)
         end
         local nCurrentTime = GetGameTime()
         if nDataDevourerLastPopTime + 13 < nCurrentTime then
@@ -152,13 +149,11 @@ function mod:OnUnitCreated(unit, sName)
     end
 end
 
-function mod:RemoveLaserMark(nPlayerId)
-    core:DropMark(nPlayerId)
-end
-
 function mod:OnUnitDestroyed(unit, sName)
+    local nId = unit:GetId()
+
     if sName == self.L["Data Devourer"] then
-        core:DropPixie(unit:GetId())
+        core:RemoveLineBetweenUnits(nId)
     end
 end
 
@@ -169,7 +164,9 @@ function mod:OnChatDC(message)
         local nPlayerId = tPlayerUnit:GetId()
         if nPlayerId and mod:GetSetting("OtherPlayerBeamMarkers") then
             core:MarkUnit(tPlayerUnit, nil, self.L["LASER"])
-            self:ScheduleTimer("RemoveLaserMark", 15, nPlayerId)
+            self:ScheduleTimer(function(nPlayerId)
+                core:DropMark(nPlayerId)
+            end, 15, nPlayerId)
         end
         local sText = self.L["BEAM on %s"]:format(sPlayerFocused)
         if nPlayerId == GetPlayerUnit():GetId() then
@@ -179,20 +176,19 @@ function mod:OnChatDC(message)
         end
         mod:AddTimerBar("BEAM", sText, 15)
     elseif message == self.L["Avatus prepares to delete all"] then
-        mod:AddMsg("PILLAR_TIMEOUT", "PILLAR TIMEOUT", 5, mod:GetSetting("SoundBigCast") and "Beware")
-        mod:AddTimerBar("PILLAR_TIMEOUT", "PILLAR TIMEOUT", 10)
-        mod:AddTimerBar("NEXT_PILLAR", "NEXT PILLAR", 50)
+        mod:AddMsg("PILLAR_TIMEOUT", "Pillar Timeout", 5, mod:GetSetting("SoundBigCast") and "Beware")
+        mod:AddTimerBar("PILLAR_TIMEOUT", "Pillar Timeout", 10)
+        mod:AddTimerBar("NEXT_PILLAR", "Next Pillar", 50)
     elseif message == self.L["Secure Sector Enhancement"] then
         mod:AddMsg("P2", "P2: SHIELD PHASE", 5, mod:GetSetting("SoundShieldPhase") and "Alert")
         mod:AddTimerBar("P2", "EXPLOSION", 15, mod:GetSetting("SoundLaserCountDown"))
-        mod:AddTimerBar("BEAM", "NEXT BEAM", 44)
+        mod:AddTimerBar("BEAM", "Next Beam", 44)
         mod:AddTimerBar("DATA_DEVOURER", "Next Data Devourer", 53)
-        mod:AddTimerBar("NEXT_PILLAR", "NEXT PILLAR", 58)
+        mod:AddTimerBar("NEXT_PILLAR", "Next Pillar", 58)
     elseif message == self.L["Vertical Locomotion Enhancement"] then
         mod:AddMsg("P2", "P2: JUMP PHASE", 5, mod:GetSetting("SoundJumpPhase") and "Alert")
-        mod:AddTimerBar("P2", "BEGIN OF SCANNING LASER", 15, mod:GetSetting("SoundExplosionCountDown"))
-        mod:AddTimerBar("BEAM", "NEXT BEAM", 58)
+        mod:AddTimerBar("BEAM", "Next Beam", 58)
         mod:AddTimerBar("DATA_DEVOURER", "Next Data Devourer", 68)
-        mod:AddTimerBar("NEXT_PILLAR", "NEXT PILLAR", 75)
+        mod:AddTimerBar("NEXT_PILLAR", "Next Pillar", 75)
     end
 end
