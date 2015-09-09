@@ -127,6 +127,7 @@ function RaidCore:OnInitialize()
     Apollo.LoadSprites("Textures_GUI.xml")
     Apollo.LoadSprites("Textures_Bars.xml")
     Apollo.LoadSprites("RaidCore_Draw.xml")
+    Apollo.LoadTemplates("RaidCore_Templates.xml")
 
     local GeminiLocale = Apollo.GetPackage("Gemini:Locale-1.0").tPackage
     self.L = GeminiLocale:GetLocale("RaidCore")

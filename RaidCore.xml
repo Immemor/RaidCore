@@ -1313,4 +1313,5 @@
     <SpriteFile Name="Textures_GUI.xml"/>
     <SpriteFile Name="Textures_Bars.xml"/>
     <SpriteFile Name="RaidCore_Draw.xml"/>
+    <TemplateFile Name="RaidCore_Templates.xml"/>
 </Forms>

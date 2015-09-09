@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<WindowTemplates>
+    <WindowTemplate Name="Holo_with_Margin" SingleBorderFrame="CRB_Basekit:kitInnerFrame_Holo_SimpleInset" UseMargins="1" TopMargin="7" LeftMargin="7" RightMargin="7" BottomMargin="7"/>
+</WindowTemplates>
