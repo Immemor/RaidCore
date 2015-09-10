@@ -314,91 +314,20 @@ function RaidCore:OnRaidCoreOn(cmd, args)
 
     if tAllParams[1] == nil or tAllParams[1] == "config" then
         self:DisplayMainWindow()
-    elseif (tAllParams[1] == "bar") then
-        if tAllParams[2] ~= nil and tAllParams[3] ~= nil then
-            self:AddTimerBar(tAllParams[2], tAllParams[2], tonumber(tAllParams[3]))
-        else
-            self:AddTimerBar("truc", "OVERDRIVE", 10)
-            self:AddMsg("mtruc2", "OVERDRIVE", 5, "Alarm", MYCOLORS["Blue"])
-        end
-    elseif (tAllParams[1] == "unit") then
-        local unit = GameLib.GetTargetUnit()
-        if unit ~= nil then
-            self:MarkUnit(unit, 1, "N1")
-            self:AddUnit(unit)
-        end
     elseif (tAllParams[1] == "reset") then
         self:ResetAll()
-    elseif (tAllParams[1] == "testpe") then
-        self:TestPE()
-    elseif (tAllParams[1] == "msg") then
-        if tAllParams[2] ~= nil and tAllParams[3] ~= nil then
-            self:AddMsg(tAllParams[2], tAllParams[3], 5)
-        end
     elseif (tAllParams[1] == "version") then
         self:Print("Version : " .. ADDON_DATE_VERSION)
     elseif (tAllParams[1] == "versioncheck") then
         self:VersionCheck()
     elseif (tAllParams[1] == "pull") then
-        if tAllParams[2] ~= nil then
-            self:LaunchPull(tonumber(tAllParams[2]))
-        else
-            self:LaunchPull(10)
-        end
+        local time = tonumber(tAllParams[2]) or 10
+        self:LaunchPull(time)
     elseif (tAllParams[1] == "break") then
-        if tAllParams[2] ~= nil then
-            self:LaunchBreak(tonumber(tAllParams[2]))
-        else
-            self:LaunchBreak(600)
-        end
+        local time = tonumber(tAllParams[2]) or 600
+        self:LaunchBreak(time)
     elseif (tAllParams[1] == "summon") then
         self:SyncSummon()
-    elseif (tAllParams[1] == "cpu") then
-        local uPlayer = GetPlayerUnit()
-        self:AddTimerBar("TEST CPU", "Test CPU", 60)
-        for i = 1, 36 do
-            self:AddPixie(tostring(i), 2, uPlayer, nil, "Blue", 4, 10, i * 10)
-        end
-        self:ScheduleTimer(function ()
-            self:RemoveTimerBar("TEST CPU")
-            for i = 1, 36 do
-                self:DropPixie(tostring(i))
-            end
-        end, 60)
-    elseif (tAllParams[1] == "testline") then
-        local uPlayer = GetPlayerUnit()
-        local unit = GameLib.GetTargetUnit()
-        if unit then
-            self:AddTimerBar("TEST Line", "Test Line", 10)
-            self:AddLine("Ohmna1", 2, unit, nil, 3, 25, 0, 10)
-            self:AddLine("Ohmna2", 2, unit, nil, 1, 25, 120)
-            self:AddLine("Ohmna3", 2, unit, nil, 1, 25, -120)
-            self:AddLine("Ohmna4", 1, uPlayer, unit, 2)
-            self:ScheduleTimer(function ()
-                self:RemoveTimerBar("TEST Line")
-                self:DropLine("Ohmna1")
-                self:DropLine("Ohmna2")
-                self:DropLine("Ohmna3")
-                self:DropLine("Ohmna4")
-            end, 10)
-        end
-    elseif (tAllParams[1] == "testpixie") then
-        local uPlayer = GetPlayerUnit()
-        local unit = GameLib.GetTargetUnit()
-        if unit then
-            self:AddTimerBar("TEST Pixie", "Test Pixie", 10)
-            self:AddPixie("Ohmna1", 2, unit, nil, "Blue", 10, 25, 0)
-            self:AddPixie("Ohmna2", 2, unit, nil, "Green", 10, 25, 120)
-            self:AddPixie("Ohmna3", 2, unit, nil, "Green", 10, 25, -120)
-            self:AddPixie("Ohmna4", 1, uPlayer, unit, "Yellow", 5)
-            self:ScheduleTimer(function ()
-                self:RemoveTimerBar("TEST Pixie")
-                self:DropPixie("Ohmna1")
-                self:DropPixie("Ohmna2")
-                self:DropPixie("Ohmna3")
-                self:DropPixie("Ohmna4")
-            end, 10)
-        end
     else
         self:Print(("Unknown command: %s"):format(tAllParams[1]))
     end
@@ -694,6 +623,7 @@ function RaidCore:ResetSync()
     self.syncRegister = {}
 end
 
+-- Obsolete way to test. PublicEventObjectif will be reworked later.
 function RaidCore:TestPE()
     local tActiveEvents = PublicEvent.GetActiveEvents()
     local i = RaidCore:isPublicEventObjectiveActive("Talk to Captain Tero")
