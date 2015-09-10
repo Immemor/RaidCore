@@ -260,12 +260,14 @@ function RaidCore:ProcessMessage(tMessage, sSender)
         end
     elseif tMessage.action == "LaunchPull" then
         if tMessage.cooldown then
-            self:AddTimerBar("PULL", "PULL", tMessage.cooldown)
-            self:AddMsg("PULL", ("PULL in %s"):format(tMessage.cooldown), 5, MYCOLORS["Green"])
+            local tOptions = { bEmphasize = true }
+            self:AddTimerBar("PULL", "PULL", tMessage.cooldown, nil, tOptions)
+            self:AddMsg("PULL", ("PULL in %s"):format(tMessage.cooldown), 2, MYCOLORS["Green"])
         end
     elseif tMessage.action == "LaunchBreak" then
         if tMessage.cooldown and tMessage.cooldown > 0 then
-            self:AddTimerBar("BREAK", "BREAK", tMessage.cooldown)
+            local tOptions = { bEmphasize = true }
+            self:AddTimerBar("BREAK", "BREAK", tMessage.cooldown, nil, tOptions)
             self:AddMsg("BREAK", ("BREAK for %ss"):format(tMessage.cooldown), 5, MYCOLORS["Green"])
             self:PlaySound("Long")
         else
