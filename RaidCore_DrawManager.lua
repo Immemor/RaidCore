@@ -646,7 +646,7 @@ function Picture:AddDraw(Key, Origin, sSprite, nSpriteSize, nRotation, nDistance
     tDraw.nRotation = nRotation or 0
     tDraw.nDistance = nDistance or 0
     tDraw.nHeight = nHeight or 0
-    tDraw.nSpriteSize = nSpriteSize or tDraw.nSpriteSize or 25
+    tDraw.nSpriteSize = nSpriteSize or 30
     tDraw.sColor = sColor or "white"
     -- Preprocessing.
     local nRad = math.rad(tDraw.nRotation or 0)
