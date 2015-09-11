@@ -473,6 +473,17 @@ function RaidCore:OnButtonCheckBoxSwitched(wndHandler, wndControl, eMouseButton)
     end
 end
 
+function RaidCore:OnEditBoxChanged(wndHandler, wndControl, eMouseButton)
+    local a, b, c = unpack(Split(wndControl:GetName(), '_'))
+    if c then
+        self.db.profile[a][b][c] = wndControl:GetText()
+    elseif b then
+        self.db.profile[a][b] = wndControl:GetText()
+    else
+        self.db.profile[a] = wndControl:GetText()
+    end
+end
+
 function RaidCore:OnGeneralSettingsSliderBarChanged(wndHandler, wndControl, nNewValue, fOldValue)
     local sName = wndControl:GetName()
     local a, b, c = unpack(Split(sName, '_'))
