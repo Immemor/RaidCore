@@ -244,7 +244,7 @@ end
 
 function TemplateManager:_AddDraw(...)
     if self.tSettings.bEnabled then
-        self:AddDraw(...)
+        return self:AddDraw(...)
     end
 end
 
