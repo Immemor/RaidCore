@@ -274,14 +274,6 @@ function RaidCore:ProcessMessage(tMessage, sSender)
             self:RemoveTimerBar("BREAK")
             self:RemoveMsg("BREAK")
         end
-    elseif tMessage.action == "Sync" then
-        if tMessage.sync and self.syncRegister[tMessage.sync] then
-            local timeOfEvent = GameLib.GetGameTime()
-            if timeOfEvent - self.syncTimer[tMessage.sync] >= self.syncRegister[tMessage.sync] then
-                self.syncTimer[tMessage.sync] = timeOfEvent
-                Event_FireGenericEvent("RAID_SYNC", tMessage.sync, tMessage.parameter)
-            end
-        end
     elseif tMessage.action == "SyncSummon" then
         if not self.db.profile.bAcceptSummons or not self:isRaidManagement(strSender) then
             return false
@@ -856,27 +848,6 @@ function RaidCore:SyncSummon()
     end
     local msg = {
         action = "SyncSummon",
-    }
-    self:SendMessage(msg)
-end
-
-function RaidCore:AddSync(sync, throttle)
-    self.syncRegister[sync] = throttle or 5
-    if not self.syncTimer[sync] then self.syncTimer[sync] = 0 end
-end
-
-function RaidCore:SendSync(syncName, param)
-    if syncName and self.syncRegister[syncName] then
-        local timeOfEvent = GameLib.GetGameTime()
-        if timeOfEvent - self.syncTimer[syncName] >= self.syncRegister[syncName] then
-            self.syncTimer[syncName] = timeOfEvent
-            Event_FireGenericEvent("RAID_SYNC", syncName, param)
-        end
-    end
-    local msg = {
-        action = "Sync",
-        sync = syncName,
-        parameter = param,
     }
     self:SendMessage(msg)
 end

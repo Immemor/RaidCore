@@ -209,12 +209,10 @@ local PILLARS_POSITIONS = {
 local GetGameTime = GameLib.GetGameTime
 local GetUnitById = GameLib.GetUnitById
 local GetPlayerUnit = GameLib.GetPlayerUnit
-local sdwaveCount, probeCount, sdSurgeCount, PurgeLast = 0, 0, {}, {}
+local sdwaveCount, probeCount = 0, 0
 local phase2warn, phase2 = false, false
 local phase2count = 0
-local intNorth, intSouth = nil, nil
 local prev = 0
-local nbKick = 2
 local playerName
 local nLastPurgeTime
 
@@ -228,7 +226,6 @@ function mod:OnBossEnable()
     Apollo.RegisterEventHandler("DEBUFF_ADD", "OnDebuffAdd", self)
     Apollo.RegisterEventHandler("DEBUFF_DEL", "OnDebuffDel", self)
     Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
-    Apollo.RegisterEventHandler("RAID_SYNC", "OnSyncRcv", self)
     Apollo.RegisterEventHandler("SubZoneChanged", "OnZoneChanged", self)
 
     sdwaveCount, probeCount = 0, 0
@@ -236,8 +233,6 @@ function mod:OnBossEnable()
     phase2count = 0
     nLastPurgeTime = 0
     playerName = GameLib.GetPlayerUnit():GetName()
-    core:AddSync("NORTH_SURGE", 5)
-    core:AddSync("SOUTH_SURGE", 5)
 
     if mod:GetSetting("OtherDisconnectTimer") then
         mod:AddTimerBar("DISCONNECT", "Disconnect", 41)
@@ -298,14 +293,10 @@ function mod:OnUnitCreated(unit, sName)
         core:AddUnit(unit)
         core:WatchUnit(unit)
         core:MarkUnit(unit, 0, self.L["MARKER south"])
-        sdSurgeCount[unit:GetId()] = 1
-        PurgeLast[unit:GetId()] = 0
     elseif sName == self.L["Binary System Daemon"] then
         core:AddUnit(unit)
         core:WatchUnit(unit)
         core:MarkUnit(unit, 0, self.L["MARKER north"])
-        sdSurgeCount[unit:GetId()] = 1
-        PurgeLast[unit:GetId()] = 0
     end
 end
 
@@ -330,17 +321,14 @@ end
 
 function mod:OnSpellCastStart(unitName, castName, unit)
     if unitName == self.L["Binary System Daemon"] and castName == self.L["Power Surge"] then
-        core:SendSync("NORTH_SURGE", unit:GetId())
         if phase2 and self:GetDistanceBetweenUnits(GameLib.GetPlayerUnit(), unit) < 40 then
             mod:AddMsg("SURGE", "INTERRUPT NORTH", 5, mod:GetSetting("SoundPowerSurge") and "Alert")
         end
     elseif unitName == self.L["Null System Daemon"] and castName == self.L["Power Surge"] then
-        core:SendSync("SOUTH_SURGE", unit:GetId())
         if phase2 and self:GetDistanceBetweenUnits(GameLib.GetPlayerUnit(), unit) < 40 then
             mod:AddMsg("SURGE", "INTERRUPT SOUTH", 5, mod:GetSetting("SoundPowerSurge") and "Alert")
         end
     elseif castName == "Purge" then
-        PurgeLast[unit:GetId()] = GameLib.GetGameTime()
         if self:GetDistanceBetweenUnits(GameLib.GetPlayerUnit(), unit) < 40 then
             if unitName == self.L["Null System Daemon"] then
                 mod:AddTimerBar("PURGE_NULL", "PURGE - NULL", 27)
@@ -400,24 +388,7 @@ function mod:OnZoneChanged(zoneId, zoneName)
     if zoneName == "Datascape" then
         return
     elseif zoneName == "Halls of the Infinite Mind" then
-        local timeOfEvent = GameLib.GetGameTime()
-        for id, timer in pairs(PurgeLast) do
-            local unit = GameLib.GetUnitById(id)
-            if unit and (self:GetDistanceBetweenUnits(GameLib.GetPlayerUnit(), unit) < 40 or phase2) then
-                if timeOfEvent - timer < 27 then
-                    local NO_BREAK_SPACE = string.char(194, 160)
-                    local unitName = unit:GetName():gsub(NO_BREAK_SPACE, " ")
-                    if unitName == self.L["Null System Daemon"] then
-                        mod:AddTimerBar("PURGE_NULL", "PURGE - NULL", timer + 27 - timeOfEvent)
-                    elseif unitName == self.L["Binary System Daemon"] then
-                        mod:AddTimerBar("PURGE_BINARY", "PURGE - BINARY", timer + 27 - timeOfEvent)
-                    end
-                end
-            end
-        end
     elseif zoneName:find("Infinite Generator Core") then
-        mod:RemoveTimerBar("PURGE_NULL")
-        mod:RemoveTimerBar("PURGE_BINARY")
         core:SetWorldMarker("PROBE_SOUTH", self.L["Probe Spawn"], probesouth)
     end
 end
@@ -468,47 +439,5 @@ function mod:OnChatDC(message)
             end
         end
         self:ScheduleTimer("NextWave", 5)
-    end
-end
-
-function mod:OnSyncRcv(sync, parameter)
-    if sync == "NORTH_SURGE" then
-        if intNorth and intNorth == sdSurgeCount[parameter] and not phase2 then
-            mod:AddMsg("SURGE", "INTERRUPT NORTH", 5, "Alert")
-        end
-
-        sdSurgeCount[parameter] = sdSurgeCount[parameter] + 1
-        if sdSurgeCount[parameter] > nbKick then sdSurgeCount[parameter] = 1 end
-
-        if intNorth and intNorth == sdSurgeCount[parameter] then
-            mod:AddMsg("SURGE", "YOU ARE NEXT ON NORTH !", 5, "Long", "Blue")
-        end
-    elseif sync == "SOUTH_SURGE" then
-        if intSouth and intSouth == sdSurgeCount[parameter] and not phase2 then
-            mod:AddMsg("SURGE", "INTERRUPT SOUTH", 5, "Alert")
-        end
-
-        sdSurgeCount[parameter] = sdSurgeCount[parameter] + 1
-        if sdSurgeCount[parameter] > nbKick then sdSurgeCount[parameter] = 1 end
-
-        if intSouth and intSouth == sdSurgeCount[parameter] then
-            mod:AddMsg("SURGE", "YOU ARE NEXT ON SOUTH !", 5, "Long", "Blue")
-        end
-    end
-end
-
-function mod:SetInterrupter(position, num)
-    if num > nbKick then
-        Print("MORON ! Set a good number")
-        return
-    end
-    if position:lower() == "north" then
-        intNorth = num
-        Print(("Position %s set for North Boss"):format(num))
-    elseif position:lower() == "south" then
-        intSouth = num
-        Print(("Position %s set for South Boss"):format(num))
-    else 
-        Print(("Bad Position : %s"):format(position))
     end
 end
