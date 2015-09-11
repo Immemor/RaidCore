@@ -22,12 +22,10 @@ mod:RegisterEnglishLocale({
     ["Life Force"] = "Life Force",
     ["Essence of Life"] = "Essence of Life",
     ["Flame Wave"] = "Flame Wave",
-    -- Datachron messages.
     -- Cast.
     ["Blinding Light"] = "Blinding Light",
     -- Bar and messages.
-    ["You are rooted"] = "You are rooted",
-    ["MIDPHASE"] = "MIDPHASE",
+    ["No-Healing DEBUFF!"] = "No-Healing DEBUFF!",
 })
 mod:RegisterFrenchLocale({
     -- Unit names.
@@ -36,12 +34,10 @@ mod:RegisterFrenchLocale({
     ["Life Force"] = "Force vitale",
     ["Essence of Life"] = "Essence de vie",
     ["Flame Wave"] = "Vague de feu",
-    -- Datachron messages.
     -- Cast.
     ["Blinding Light"] = "Lumière aveuglante",
     -- Bar and messages.
-    --["You are rooted"] = "You are rooted", -- TODO: French translation missing !!!!
-    --["MIDPHASE"] = "MIDPHASE", -- TODO: French translation missing !!!!
+    ["No-Healing DEBUFF!"] = "Aucun-Soin DEBUFF!",
 })
 mod:RegisterGermanLocale({
     -- Unit names.
@@ -50,20 +46,19 @@ mod:RegisterGermanLocale({
     ["Life Force"] = "Lebenskraft",
     ["Essence of Life"] = "Lebensessenz",
     ["Flame Wave"] = "Flammenwelle",
-    -- Datachron messages.
     -- Cast.
     ["Blinding Light"] = "Blendendes Licht",
-    -- Bar and messages.
-    --["You are rooted"] = "You are rooted", -- TODO: German translation missing !!!!
-    --["MIDPHASE"] = "MIDPHASE", -- TODO: German translation missing !!!!
 })
 -- Default settings.
-mod:RegisterDefaultSetting("SoundRooted")
 mod:RegisterDefaultSetting("SoundNoHealDebuff")
 mod:RegisterDefaultSetting("SoundBlindingLight")
-mod:RegisterDefaultSetting("OtherRootedPlayersMarkers")
+mod:RegisterDefaultSetting("SoundCountDownMidPhase")
 mod:RegisterDefaultSetting("LineLifeOrbs")
 mod:RegisterDefaultSetting("LineFlameWaves")
+mod:RegisterDefaultSetting("LineBlindVisceralus")
+mod:RegisterDefaultSetting("PictureLifeForceShackle")
+mod:RegisterDefaultSetting("PictureBeforeRoot")
+mod:RegisterDefaultSetting("PictureRoot")
 -- Timers default configs.
 mod:RegisterDefaultTimerBarConfigs({
     ["MID"] = { sColor = "xkcdLightOrange" },
@@ -72,14 +67,16 @@ mod:RegisterDefaultTimerBarConfigs({
 ----------------------------------------------------------------------------------------------------
 -- Constants.
 ----------------------------------------------------------------------------------------------------
-local DEBUFFID_PRIMAL_ENTANGLEMENT1 = 73179 -- A root ability.
-local DEBUFFID_PRIMAL_ENTANGLEMENT2 = 73177 -- A root ability.
-
+local DEBUFFID_PRIMAL_ENTANGLEMENT1 = 73179 -- After the root ability.
+local DEBUFFID_PRIMAL_ENTANGLEMENT2 = 73177 -- Before the root ability.
+local DEBUFFID_LIFE_FORCE_SHACKLE = 74366
 ----------------------------------------------------------------------------------------------------
 -- Locals.
 ----------------------------------------------------------------------------------------------------
 local GetPlayerUnit = GameLib.GetPlayerUnit
 local GetUnitById = GameLib.GetUnitById
+
+local nEssenceofLifeCount
 
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
@@ -90,65 +87,99 @@ function mod:OnBossEnable()
     Apollo.RegisterEventHandler("DEBUFF_ADD", "OnDebuffAdd", self)
     Apollo.RegisterEventHandler("DEBUFF_DEL", "OnDebuffDel", self)
     Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
+
+    nEssenceofLifeCount = 0
+    mod:AddTimerBar("MID", "Middle Phase", 90, mod:GetSetting("SoundCountDownMidPhase"))
 end
 
 function mod:OnUnitCreated(tUnit, sName)
     local nId = tUnit:GetId()
-    if sName == self.L["Visceralus"] or sName == self.L["Pyrobane"] then
-        core:AddUnit(tUnit)
-        core:WatchUnit(tUnit)
+    local nHealth = tUnit:GetHealth()
+
+    if sName == self.L["Visceralus"] then
+        if nHealth and nHealth > 0 then
+            core:AddUnit(tUnit)
+            core:WatchUnit(tUnit)
+            if mod:GetSetting("LineBlindVisceralus") then
+                core:AddSimpleLine("Visc1", nId, 0, 25, 0, 4, "blue", 10)
+                core:AddSimpleLine("Visc2", nId, 0, 25, 72, 4, "green", 20)
+                core:AddSimpleLine("Visc3", nId, 0, 25, 144, 4, "green", 20)
+                core:AddSimpleLine("Visc4", nId, 0, 25, 216, 4, "green", 20)
+                core:AddSimpleLine("Visc5", nId, 0, 25, 288, 4, "green", 20)
+            end
+        end
+    elseif sName == self.L["Pyrobane"] then
+        if nHealth and nHealth > 0 then
+            core:AddUnit(tUnit)
+            core:WatchUnit(tUnit)
+        else
+            -- Other units called Pyrobane are in fact the wall of fire un phase 2.
+            -- The positions retrieve of these wall of fire, are always the middle.
+            -- So that can't be used to detect hole in the wall.
+        end
     elseif sName == self.L["Life Force"] then
-        if mod:GetSetting("LineLifeOrbs") and nId then
-            core:AddPixie(nId, 2, tUnit, nil, "Blue", 10, -40, 0)
+        if mod:GetSetting("LineLifeOrbs") then
+            core:AddSimpleLine(nId, nId, 0, 40, 0, 10, "blue")
         end
     elseif sName == self.L["Flame Wave"] then
-        if mod:GetSetting("LineFlameWaves") and nId then
-            core:AddPixie(nId, 2, tUnit, nil, "Green", 10, 20, 0)
+        if mod:GetSetting("LineFlameWaves") then
+            core:AddSimpleLine(nId, nId, 0, 20, 0, 10, "green")
         end
+    elseif self.L["Essence of Life"] == sName then
+        nEssenceofLifeCount = nEssenceofLifeCount + 1
     end
 end
 
 function mod:OnUnitDestroyed(tUnit, sName)
     local nId = tUnit:GetId()
     if sName == self.L["Life Force"] then
-        core:DropPixie(nId)
+        core:RemoveSimpleLine(nId)
     elseif sName == self.L["Flame Wave"] then
-        core:DropPixie(nId)
+        core:RemoveSimpleLine(nId)
+    elseif self.L["Essence of Life"] == sName then
+        nEssenceofLifeCount = nEssenceofLifeCount - 1
+        if nEssenceofLifeCount == 0 then
+            mod:AddTimerBar("MID", "Middle Phase", 90, mod:GetSetting("SoundCountDownMidPhase"))
+        end
     end
 end
 
 function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
     local tUnit = GetUnitById(nId)
-    local tSpell = GameLib.GetSpell(splId)
-    local strSpellName = tSpell:GetName()
 
-    if nSpellId == DEBUFFID_PRIMAL_ENTANGLEMENT1 or nSpellId == DEBUFFID_PRIMAL_ENTANGLEMENT2 then
-        if GetPlayerUnit():GetId() == nId then
-            mod:AddMsg("ROOT", "You are rooted", 5, mod:GetSetting("SoundRooted") and "Info")
+    if nSpellId == DEBUFFID_PRIMAL_ENTANGLEMENT1 then
+        if mod:GetSetting("PictureRoot") then
+            core:AddPicture("ROOT" .. nId, nId, "Crosshair", 40, nil, nil, nil, "red")
         end
-        if mod:GetSetting("OtherRootedPlayersMarkers") then
-            core:MarkUnit(tUnit, nil, "ROOT")
-            core:AddUnit(tUnit)
+    elseif nSpellId == DEBUFFID_PRIMAL_ENTANGLEMENT2 then
+        if mod:GetSetting("PictureBeforeRoot") then
+            core:AddPicture("BEFORE_ROOT" .. nId, nId, "Crosshair", 60, nil, nil, nil, "green")
         end
-    elseif strSpellName == "Life Force Shackle" then
+    elseif nSpellId == DEBUFFID_LIFE_FORCE_SHACKLE then
         if GetPlayerUnit():GetId() == nId then
-            mod:AddMsg("NOHEAL", "No-Healing Debuff!", 5, mod:GetSetting("SoundNoHealDebuff") and "Alarm")
+            mod:AddMsg("NOHEAL", "No-Healing DEBUFF!", 3, mod:GetSetting("SoundNoHealDebuff") and "Alarm")
+        end
+        if mod:GetSetting("PictureLifeForceShackle") then
+            core:AddPicture("NOHEAL" .. nId, nId, "Crosshair", 30, nil, nil, nil, "xkcdBarbiePink")
         end
     end
 end
 
 function mod:OnDebuffDel(nId, nSpellId)
-    if nSpellId == DEBUFFID_PRIMAL_ENTANGLEMENT1 or nSpellId == DEBUFFID_PRIMAL_ENTANGLEMENT2 then
-        core:DropMark(nId)
-        core:RemoveUnit(nId)
+    if nSpellId == DEBUFFID_PRIMAL_ENTANGLEMENT1 then
+        core:RemovePicture("ROOT" .. nId)
+    elseif nSpellId == DEBUFFID_PRIMAL_ENTANGLEMENT2 then
+        core:RemovePicture("BEFORE_ROOT" .. nId)
+    elseif nSpellId == DEBUFFID_LIFE_FORCE_SHACKLE then
+        core:RemovePicture("NOHEAL" .. nId)
     end
 end
 
 function mod:OnSpellCastStart(unitName, castName, unit)
     if unitName == self.L["Visceralus"] then
         if castName == self.L["Blinding Light"]
-            and self:GetDistanceBetweenUnits(unit, GetPlayerUnit()) < 33 then
-            mod:AddMsg("BLIND", "Blinding Light", 5, mod:GetSetting("SoundBlindingLight") and "Beware")
+            and self:GetDistanceBetweenUnits(unit, GetPlayerUnit()) < 50 then
+            mod:AddMsg("BLIND", "Blinding Light", 3, mod:GetSetting("SoundBlindingLight") and "Beware")
         end
     end
 end
