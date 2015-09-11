@@ -28,9 +28,8 @@ mod:RegisterEnglishLocale({
     ["Blinding Light"] = "Blinding Light",
     ["Defragment"] = "Defragment",
     -- Bar and messages.
-    ["Defrag Explosion"] = "Defrag Explosion",
-    ["~DEFRAG CD"] = "~DEFRAG CD",
-    ["DEFRAG"] = "DEFRAG",
+    ["Next defragment"] = "Next defragment",
+    ["SPREAD"] = "SPREAD",
     ["ENRAGE"] = "ENRAGE",
     ["No-Healing Debuff!"] = "No-Healing Debuff!",
     ["NO HEAL DEBUFF"] = "NO HEAL\nDEBUFF",
@@ -56,9 +55,8 @@ mod:RegisterFrenchLocale({
     ["Blinding Light"] = "Lumière aveuglante",
     ["Defragment"] = "Défragmentation",
     -- Bar and messages.
-    ["Defrag Explosion"] = "Defrag Explosion",
-    ["~DEFRAG CD"] = "~DEFRAG CD",
-    ["DEFRAG"] = "DEFRAG",
+    ["Next defragment"] = "Prochaine defragmentation",
+    ["SPREAD"] = "SEPAREZ-VOUS",
     ["ENRAGE"] = "ENRAGE",
     ["No-Healing Debuff!"] = "No-Healing Debuff!",
     ["NO HEAL DEBUFF"] = "NO HEAL\nDEBUFF",
@@ -84,9 +82,6 @@ mod:RegisterGermanLocale({
     ["Blinding Light"] = "Blendendes Licht",
     ["Defragment"] = "Defragmentieren",
     -- Bar and messages.
-    --["Defrag Explosion"] = "Defrag Explosion", -- TODO: German translation missing !!!!
-    --["~DEFRAG CD"] = "~DEFRAG CD", -- TODO: German translation missing !!!!
-    --["DEFRAG"] = "DEFRAG", -- TODO: German translation missing !!!!
     --["ENRAGE"] = "ENRAGE", -- TODO: German translation missing !!!!
     --["No-Healing Debuff!"] = "No-Healing Debuff!", -- TODO: German translation missing !!!!
     --["NO HEAL DEBUFF"] = "NO HEAL\nDEBUFF", -- TODO: German translation missing !!!!
@@ -113,10 +108,10 @@ mod:RegisterDefaultSetting("OtherDirectionMarkers")
 mod:RegisterDefaultSetting("LineTetrisBlocks")
 mod:RegisterDefaultSetting("LineLifeOrbs")
 mod:RegisterDefaultSetting("LineCleaveVisceralus")
+mod:RegisterDefaultSetting("PolygonDefrag")
 -- Timers default configs.
 mod:RegisterDefaultTimerBarConfigs({
     ["DEFRAG"] = { sColor = "xkcdAlgaeGreen" },
-    ["DEFRAG_EXPLOSION"] = { sColor = "xkcdBluegreen" },
     ["ENRAGE"] = { sColor = "xkcdBloodRed" },
 })
 
@@ -199,7 +194,7 @@ function mod:OnUnitCreated(unit, sName)
     elseif sName == self.L["Mnemesis"] then
         core:WatchUnit(unit)
         core:AddUnit(unit)
-        mod:AddTimerBar("DEFRAG", "~DEFRAG CD", 21, mod:GetSetting("SoundDefrag"))
+        mod:AddTimerBar("DEFRAG", "Next defragment", 21, mod:GetSetting("SoundDefrag"))
         mod:AddTimerBar("ENRAGE", "ENRAGE", 480, mod:GetSetting("SoundEnrageCountDown"))
     elseif sName == self.L["Essence of Life"] then
         core:AddUnit(unit)
@@ -243,14 +238,22 @@ end
 
 function mod:OnSpellCastStart(unitName, castName, unit)
     local eventTime = GameLib.GetGameTime()
-    if unitName == self.L["Visceralus"] and castName == self.L["Blinding Light"] then
-        if self:GetDistanceBetweenUnits(unit, GetPlayerUnit()) < 33 then
-            mod:AddMsg("BLIND", "Blinding Light", 5, mod:GetSetting("SoundBlindingLight") and "Beware")
+    if unitName == self.L["Visceralus"] then
+        if castName == self.L["Blinding Light"] then
+            if self:GetDistanceBetweenUnits(unit, GetPlayerUnit()) < 33 then
+                mod:AddMsg("BLIND", "Blinding Light", 5, mod:GetSetting("SoundBlindingLight") and "Beware")
+            end
         end
-    elseif unitName == self.L["Mnemesis"] and castName == self.L["Defragment"] then
-        -- Defrag is unreliable, but seems to take at least this long.
-        mod:AddTimerBar("DEFRAG", "~DEFRAG CD", 40, mod:GetSetting("SoundDefrag"))
-        mod:AddTimerBar("DEFRAG_EXPLOSION", "Defrag Explosion", 9, mod:GetSetting("SoundDefrag"))
-        mod:AddMsg("DEFRAG", "DEFRAG", 5, mod:GetSetting("SoundDefrag") and "Beware")
+    elseif unitName == self.L["Mnemesis"] then
+        if castName == self.L["Defragment"] then
+            mod:AddMsg("DEFRAG", "SPREAD", 3, mod:GetSetting("SoundDefrag") and "Alarm")
+            mod:AddTimerBar("DEFRAG", "Next defragment", 40, mod:GetSetting("SoundDefrag"))
+            if mod:GetSetting("PolygonDefrag") then
+                core:AddPolygon("DEFRAG_SQUARE", GetPlayerUnit():GetId(), 13, 0, 4, "xkcdBloodOrange", 4)
+                self:ScheduleTimer(function()
+                    core:RemovePolygon("DEFRAG_SQUARE")
+                end, 10)
+            end
+        end
     end
 end

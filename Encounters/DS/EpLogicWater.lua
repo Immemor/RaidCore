@@ -28,9 +28,9 @@ mod:RegisterEnglishLocale({
     ["Watery Grave"] = "Watery Grave",
     ["Tsunami"] = "Tsunami",
     -- Bar and messages.
+    ["Next defragment"] = "Next defragment",
     ["Middle Phase"] = "Middle Phase",
     ["SPREAD"] = "SPREAD",
-    ["~Defrag"] = "~Defrag",
     ["~Imprison"] = "~Imprison",
     ["ORB"] = "ORB",
     ["Enrage"] = "Enrage",
@@ -49,9 +49,9 @@ mod:RegisterFrenchLocale({
     ["Watery Grave"] = "Tombe aqueuse",
     ["Tsunami"] = "Tsunami",
     -- Bar and messages.
+    ["Next defragment"] = "Prochaine defragmentation",
     ["Middle Phase"] = "Phase du Milieu",
     ["SPREAD"] = "SEPAREZ-VOUS",
-    ["~Defrag"] = "~Defrag",
     ["~Imprison"] = "~Emprisonner",
     ["ORB"] = "ORB",
     ["Enrage"] = "Enrage",
@@ -71,7 +71,6 @@ mod:RegisterGermanLocale({
     -- Bar and messages.
     --["Middle Phase"] = "Middle Phase", -- TODO: German translation missing !!!!
     --["SPREAD"] = "SPREAD", -- TODO: German translation missing !!!!
-    --["~Defrag"] = "~Defrag", -- TODO: German translation missing !!!!
     ["~Imprison"] = "~Einsperren",
     --["ORB"] = "ORB", -- TODO: German translation missing !!!!
 })
@@ -84,6 +83,7 @@ mod:RegisterDefaultSetting("OtherOrbMarkers")
 mod:RegisterDefaultSetting("LineTetrisBlocks")
 mod:RegisterDefaultSetting("LineOrbs")
 mod:RegisterDefaultSetting("LineCleaveHydroflux")
+mod:RegisterDefaultSetting("PolygonDefrag")
 -- Timers default configs.
 mod:RegisterDefaultTimerBarConfigs({
     ["MIDPHASE"] = { sColor = "xkcdAlgaeGreen" },
@@ -122,14 +122,10 @@ function mod:OnBossEnable()
     mod:AddTimerBar("MIDPHASE", "Middle Phase", 75, mod:GetSetting("SoundMidphaseCountDown"))
     mod:AddTimerBar("PRISON", "Imprison", 33)
     mod:AddTimerBar("ENRAGE", "Enrage", 421)
-    mod:AddTimerBar("DEFRAG", "~Defrag", 16, mod:GetSetting("SoundDefrag"))
+    mod:AddTimerBar("DEFRAG", "Next defragment", 16, mod:GetSetting("SoundDefrag"))
     if mod:GetSetting("OtherWateryGraveTimer") then
         mod:AddTimerBar("GRAVE", "Watery Grave", 10)
     end
-end
-
-function mod:RemoveSquarePolygon()
-    core:RemovePolygon("DEFRAG_SQUARE")
 end
 
 function mod:OnSpellCastStart(unitName, castName, unit)
@@ -144,10 +140,14 @@ function mod:OnSpellCastStart(unitName, castName, unit)
         elseif castName == self.L["Imprison"] then
             mod:RemoveTimerBar("PRISON")
         elseif castName == self.L["Defragment"] then
-            mod:AddMsg("DEFRAG", "SPREAD", 5, mod:GetSetting("SoundDefrag") and "Beware")
-            mod:AddTimerBar("DEFRAG", "~Defrag", 36, mod:GetSetting("SoundDefrag"))
-            core:AddPolygon("DEFRAG_SQUARE", GetPlayerUnit():GetId(), 13, 0, 4, "xkcdBloodOrange", 4)
-            self:ScheduleTimer("RemoveSquarePolygon", 10)
+            mod:AddMsg("DEFRAG", "SPREAD", 3, mod:GetSetting("SoundDefrag") and "Alarm")
+            mod:AddTimerBar("DEFRAG", "Next defragment", 36, mod:GetSetting("SoundDefrag"))
+            if mod:GetSetting("PolygonDefrag") then
+                core:AddPolygon("DEFRAG_SQUARE", GetPlayerUnit():GetId(), 13, 0, 4, "xkcdBloodOrange", 4)
+                self:ScheduleTimer(function()
+                    core:RemovePolygon("DEFRAG_SQUARE")
+                end, 10)
+            end
         end
     elseif unitName == self.L["Hydroflux"] then
         if castName == self.L["Watery Grave"] then

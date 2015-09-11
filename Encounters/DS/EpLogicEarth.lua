@@ -29,8 +29,8 @@ mod:RegisterEnglishLocale({
     -- Cast.
     ["Defragment"] = "Defragment",
     -- Bar and messages.
+    ["Next defragment"] = "Next defragment",
     ["SNAKE on %s"] = "SNAKE on %s",
-    ["DEFRAG"] = "DEFRAG",
     ["SPREAD"] = "SPREAD",
     ["JUMP !"] = "JUMP !",
     ["STARS"] = "STARS",
@@ -48,9 +48,9 @@ mod:RegisterFrenchLocale({
     -- Cast.
     ["Defragment"] = "Défragmentation",
     -- Bar and messages.
+    ["Next defragment"] = "Prochaine defragmentation",
     ["SNAKE on %s"] = "SERPENT sur %s",
-    ["DEFRAG"] = "DEFRAG",
-    ["SPREAD"] = "ECARTER",
+    ["SPREAD"] = "SEPAREZ-VOUS",
     ["JUMP !"] = "SAUTEZ !",
     ["STARS"] = "Étoile",
 })
@@ -147,7 +147,7 @@ function mod:OnBossEnable()
     nLastSnakePieceId = nil
     tObsidianList = {}
     nMemberIdTargetedBySnake = nil
-    mod:AddTimerBar("DEFRAG", "DEFRAG", 10)
+    mod:AddTimerBar("DEFRAG", "Next defragment", 10)
     mod:AddTimerBar("STARS", "STARS", 60)
 end
 
@@ -186,8 +186,8 @@ end
 function mod:OnSpellCastStart(unitName, castName, tUnit)
     if unitName == self.L["Mnemesis"] then
         if castName == self.L["Defragment"] then
-            mod:AddMsg("DEFRAG", "SPREAD", 5, mod:GetSetting("SoundDefrag") and "Alarm")
-            mod:AddTimerBar("DEFRAG", "DEFRAG", 40)
+            mod:AddMsg("DEFRAG", "SPREAD", 3, mod:GetSetting("SoundDefrag") and "Alarm")
+            mod:AddTimerBar("DEFRAG", "Next defragment", 40)
             if mod:GetSetting("PolygonDefrag") then
                 core:AddPolygon("DEFRAG_SQUARE", GetPlayerUnit():GetId(), 13, 0, 4, "xkcdBloodOrange", 4)
                 self:ScheduleTimer(function()
