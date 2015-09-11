@@ -141,10 +141,18 @@ local maulerSpawn = {
 ----------------------------------------------------------------------------------------------------
 -- Locals.
 ----------------------------------------------------------------------------------------------------
-local prev = 0
-local waveCount, ruptCount, essenceUp = 0, 0, {}
-local first = true
-local section = 1
+local prev
+local waveCount, ruptCount, essenceUp
+local first
+local section
+
+local function RemoveEssenceTracking()
+    for nId, _ in next, essenceUp do
+        core:RemoveUnit(nId)
+        core:DropMark(nId)
+        essenceUp[nId] = nil
+    end
+end
 
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
@@ -154,6 +162,13 @@ function mod:OnBossEnable()
     Apollo.RegisterEventHandler("RC_UnitStateChanged", "OnUnitStateChanged", self)
     Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
     Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
+
+    waveCount, ruptCount, prev = 0, 0, 0
+    section = 1
+    first = true
+    essenceUp = {}
+    mod:AddTimerBar("RUPTURE", "next rupture", 35, mod:GetSetting("SoundRuptureCountDown"))
+    mod:AddTimerBar("CORRUPTION", "Full corruption", 106, mod:GetSetting("SoundCorruptionCountDown"))
 end
 
 function mod:OnWipe()
@@ -230,20 +245,14 @@ function mod:OnChatDC(message)
         mod:RemoveTimerBar("CORRUPTION")
         mod:RemoveTimerBar("WAVE")
         mod:AddMsg("TRANSITION", "TRANSITION", 5, mod:GetSetting("SoundMoOWarning") and "Alert")
-        for unitId, v in pairs(essenceUp) do
-            core:RemoveUnit(unitId)
-            essenceUp[unitId] = nil
-        end
+        RemoveEssenceTracking()
     elseif message:find(self.L["Gloomclaw is vulnerable"]) then
         mod:RemoveTimerBar("RUPTURE")
         mod:RemoveTimerBar("CORRUPTION")
         mod:RemoveTimerBar("WAVE")
         mod:AddMsg("TRANSITION", "BURN HIM HARD", 5, mod:GetSetting("SoundMoOWarning") and "Alert")
         mod:AddTimerBar("MOO", "MOO PHASE", 20, mod:GetSetting("SoundMoOWarning"))
-        for unitId, v in pairs(essenceUp) do
-            core:RemoveUnit(unitId)
-            essenceUp[unitId] = nil
-        end
+        RemoveEssenceTracking()
     end
 end
 
@@ -269,17 +278,8 @@ end
 function mod:OnUnitStateChanged(unit, bInCombat, sName)
     if unit:GetType() == "NonPlayer" and bInCombat then
         if sName == self.L["Gloomclaw"] then
-            waveCount, ruptCount, prev = 0, 0, 0
-            section = 1
-            first = true
-            for unitId, v in pairs(essenceUp) do
-                core:RemoveUnit(unitId)
-                essenceUp[unitId] = nil
-            end
             core:AddUnit(unit)
             core:WatchUnit(unit)
-            mod:AddTimerBar("RUPTURE", "next rupture", 35, mod:GetSetting("SoundRuptureCountDown"))
-            mod:AddTimerBar("CORRUPTION", "Full corruption", 106, mod:GetSetting("SoundCorruptionCountDown"))
         elseif sName == self.L["Strain Parasite"]
             or sName == self.L["Gloomclaw Skurge"]
             or sName == self.L["Corrupted Fraz"] then
