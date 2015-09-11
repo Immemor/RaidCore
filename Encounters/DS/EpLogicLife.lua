@@ -190,11 +190,11 @@ function mod:OnUnitCreated(unit, sName)
         core:AddUnit(unit)
         core:WatchUnit(unit)
         if mod:GetSetting("LineCleaveVisceralus") then
-            core:AddLine("Visc1", 2, unit, nil, 3, 25, 0, 10)
-            core:AddLine("Visc2", 2, unit, nil, 1, 25, 72)
-            core:AddLine("Visc3", 2, unit, nil, 1, 25, 144)
-            core:AddLine("Visc4", 2, unit, nil, 1, 25, 216)
-            core:AddLine("Visc5", 2, unit, nil, 1, 25, 288)
+            core:AddSimpleLine("Visc1", nId, 0, 25, 0, 4, "blue", 10)
+            core:AddSimpleLine("Visc2", nId, 0, 25, 72, 4, "green", 20)
+            core:AddSimpleLine("Visc3", nId, 0, 25, 144, 4, "green", 20)
+            core:AddSimpleLine("Visc4", nId, 0, 25, 216, 4, "green", 20)
+            core:AddSimpleLine("Visc5", nId, 0, 25, 288, 4, "green", 20)
         end
     elseif sName == self.L["Mnemesis"] then
         core:WatchUnit(unit)

@@ -232,11 +232,11 @@ function mod:OnUnitCreated(tUnit, sName)
         core:AddUnit(tUnit)
         core:WatchUnit(tUnit)
         if mod:GetSetting("LineVisceralus") then
-            core:AddPixie("Visceralus_1", 2, tUnit, nil, "red", 5, 30, 0)
-            core:AddPixie("Visceralus_2", 2, tUnit, nil, "xkcdBarbiePink", 5, 30, 72)
-            core:AddPixie("Visceralus_3", 2, tUnit, nil, "xkcdBarbiePink", 5, 30, 144)
-            core:AddPixie("Visceralus_4", 2, tUnit, nil, "xkcdBarbiePink", 5, 30, 216)
-            core:AddPixie("Visceralus_5", 2, tUnit, nil, "xkcdBarbiePink", 5, 30, 288)
+            core:AddSimpleLine("Visc1", nId, 0, 25, 0, 4, "blue", 10)
+            core:AddSimpleLine("Visc2", nId, 0, 25, 72, 4, "green", 20)
+            core:AddSimpleLine("Visc3", nId, 0, 25, 144, 4, "green", 20)
+            core:AddSimpleLine("Visc4", nId, 0, 25, 216, 4, "green", 20)
+            core:AddSimpleLine("Visc5", nId, 0, 25, 288, 4, "green", 20)
         end
     end
 end
