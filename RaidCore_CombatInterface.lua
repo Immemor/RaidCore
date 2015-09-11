@@ -578,6 +578,9 @@ function RaidCore:CI_OnScanUpdate()
                 Print(err)
             end
 
+            -- Process name update.
+            data.sName = data.tUnit:GetName():gsub(NO_BREAK_SPACE, " ")
+
             -- Process cast tracking.
             local bCasting = data.tUnit:IsCasting()
             local nCurrentTime
