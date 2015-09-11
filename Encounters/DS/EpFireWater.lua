@@ -22,12 +22,14 @@ mod:RegisterEnglishLocale({
     ["Ice Tomb"] = "Ice Tomb",
     -- Cast.
     ["Flame Wave"] = "Flame Wave",
-    -- Bar and messages.
+    -- Timer bars.
+    ["Next bombs"] = "Next bombs",
+    ["Bomb explosion"] = "Bomb explosion",
+    ["Next ice tomb"] = "Next ice tomb",
+    -- Message bars.
     ["Fire Bomb"] = "Fire",
     ["Frost Bomb"] = "Frost",
-    ["BOMBS"] = "BOMBS",
-    ["BOMBS UP !"] = "BOMBS UP !",
-    ["Bomb Explosion"] = "Bomb Explosion",
+    ["BOMBS ON YOU!"] = "BOMBS ON YOU!",
     ["ICE TOMB"] = "ICE TOMB",
     ["%d STACKS!"] = "%d STACKS!",
 })
@@ -38,12 +40,14 @@ mod:RegisterFrenchLocale({
     ["Ice Tomb"] = "Tombeau de glace",
     -- Cast.
     ["Flame Wave"] = "Vague de feu",
-    -- Bar and messages.
+    -- Timer bars.
+    ["Next bombs"] = "Prochaine bombes",
+    ["Bomb explosion"] = "Bombe explosion",
+    ["Next ice tomb"] = "Prochain tombeau de glace",
+    -- Message bars.
     ["Fire Bomb"] = "Feu",
     ["Frost Bomb"] = "Givre",
-    ["BOMBS"] = "BOMBES",
-    --["BOMBS UP !"] = "BOMBS UP !", -- TODO: French translation missing !!!!
-    ["Bomb Explosion"] = "Bombe Explosion",
+    ["BOMBS ON YOU!"] = "BOMBES SUR VOUS !",
     ["ICE TOMB"] = "TOMBEAU DE GLACE",
     ["%d STACKS!"] = "%d STACKS!",
 })
@@ -54,12 +58,8 @@ mod:RegisterGermanLocale({
     ["Ice Tomb"] = "Eisgrab",
     -- Cast.
     ["Flame Wave"] = "Flammenwelle",
-    -- Bar and messages.
-    --["Fire Bomb"] = "Fire", -- TODO: German translation missing !!!!
-    --["Frost Bomb"] = "Frost", -- TODO: German translation missing !!!!
-    --["BOMBS"] = "BOMBS", -- TODO: German translation missing !!!!
-    --["BOMBS UP !"] = "BOMBS UP !", -- TODO: German translation missing !!!!
-    ["Bomb Explosion"] = "Bomb Explosion",
+    -- Timer bars.
+    -- Message bars.
     ["ICE TOMB"] = "EISGRAB",
     ["%d STACKS!"] = "%d STACKS!",
 })
@@ -113,8 +113,8 @@ function mod:OnBossEnable()
     nLastBombTime = 0
     tFireBombPlayersList = {}
     tFrostBombPlayersList = {}
-    mod:AddTimerBar("BOMBS", "BOMBS", 30)
-    mod:AddTimerBar("TOMB", "ICE TOMB", 26)
+    mod:AddTimerBar("BOMBS", "Next bombs", 30)
+    mod:AddTimerBar("TOMB", "Next ice tomb", 26)
 end
 
 function mod:RemoveBombMarker(bomb_type, unit)
@@ -169,7 +169,7 @@ function mod:OnUnitCreated(unit, sName)
         if nCurrentTime - nLastIceTombTime > 13 then
             nLastIceTombTime = nCurrentTime
             mod:AddMsg("TOMB", "ICE TOMB", 5, mod:GetSetting("SoundIceTomb") and "Alert", "Blue")
-            mod:AddTimerBar("TOMB", "ICE TOMB", 15)
+            mod:AddTimerBar("TOMB", "Next ice tomb", 15)
         end
         core:AddUnit(unit)
     elseif sName == self.L["Flame Wave"] and mod:GetSetting("LineFlameWaves") then
@@ -196,8 +196,8 @@ function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
         end
         core:AddUnit(tUnit)
         tFireBombPlayersList[sUnitName] = tUnit
-        if tUnit == GetPlayerUnit() then
-            mod:AddMsg("BOMB", "BOMBS UP !", 5, mod:GetSetting("SoundBomb") and "RunAway")
+        if nId == GetPlayerUnit():GetId() then
+            mod:AddMsg("BOMB", "BOMBS ON YOU!", 5, mod:GetSetting("SoundBomb") and "RunAway")
             if mod:GetSetting("LineBombPlayers") then
                 self:ScheduleTimer("ApplyBombLines", 1, "fire")
             end
@@ -209,8 +209,8 @@ function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
         end
         core:AddUnit(tUnit)
         tFrostBombPlayersList[sUnitName] = tUnit
-        if tUnit == GetPlayerUnit() then
-            mod:AddMsg("BOMB", "BOMBS UP !", 5, mod:GetSetting("SoundBomb") and "RunAway")
+        if nId == GetPlayerUnit():GetId() then
+            mod:AddMsg("BOMB", "BOMBS ON YOU!", 5, mod:GetSetting("SoundBomb") and "RunAway")
             if mod:GetSetting("LineBombPlayers") then
                 self:ScheduleTimer("ApplyBombLines", 1, "frost")
             end
@@ -226,8 +226,8 @@ function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
         local nCurrentTime = GetGameTime()
         if nCurrentTime - nLastBombTime > 10 then
             nLastBombTime = nCurrentTime
-            mod:AddTimerBar("BOMBS", "BOMBS", 30)
-            mod:AddTimerBar("BEXPLODE", "Bomb Explosion", 10, mod:GetSetting("SoundBomb"))
+            mod:AddTimerBar("BOMBS", "Next bombs", 30)
+            mod:AddTimerBar("BEXPLODE", "Bomb explosion", 10, mod:GetSetting("SoundBomb"))
         end
     end
 end

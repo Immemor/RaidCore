@@ -28,12 +28,14 @@ mod:RegisterEnglishLocale({
     ["Logic creates powerful data caches"] = "Logic creates powerful data caches",
     -- Cast.
     ["Defragment"] = "Defragment",
-    -- Bar and messages.
+    -- Timer bars.
     ["Next defragment"] = "Next defragment",
+    ["Next phase: Stars"] = "Next phase: Stars",
+    -- Message bars.
     ["SNAKE on %s"] = "SNAKE on %s",
     ["SPREAD"] = "SPREAD",
     ["JUMP !"] = "JUMP !",
-    ["STARS"] = "STARS",
+    ["STARS !"] = "STARS !",
 })
 mod:RegisterFrenchLocale({
     -- Unit names.
@@ -47,12 +49,14 @@ mod:RegisterFrenchLocale({
     ["Logic creates powerful data caches"] = "La logique crée de puissantes caches de données !",
     -- Cast.
     ["Defragment"] = "Défragmentation",
-    -- Bar and messages.
+    -- Timer bars.
     ["Next defragment"] = "Prochaine defragmentation",
+    ["Next phase: Stars"] = "Prochaine phase: Étoile",
+    -- Message bars.
     ["SNAKE on %s"] = "SERPENT sur %s",
     ["SPREAD"] = "SEPAREZ-VOUS",
     ["JUMP !"] = "SAUTEZ !",
-    ["STARS"] = "Étoile",
+    ["STARS !"] = "ÉTOILE !",
 })
 mod:RegisterGermanLocale({
     -- Unit names.
@@ -62,7 +66,8 @@ mod:RegisterGermanLocale({
     -- Datachron messages.
     -- Cast.
     ["Defragment"] = "Defragmentieren",
-    -- Bar and messages.
+    -- Timer bars.
+    -- Message bars.
 })
 -- Default settings.
 mod:RegisterDefaultSetting("LineSnakeVsPlayer")
@@ -148,7 +153,7 @@ function mod:OnBossEnable()
     tObsidianList = {}
     nMemberIdTargetedBySnake = nil
     mod:AddTimerBar("DEFRAG", "Next defragment", 10)
-    mod:AddTimerBar("STARS", "STARS", 60)
+    mod:AddTimerBar("STARS", "Next phase: Stars", 60)
 end
 
 function mod:OnUnitCreated(tUnit, sName)
@@ -202,8 +207,8 @@ function mod:OnChatDC(message)
     if message:find(self.L["The ground shudders beneath Megalith"]) then
         mod:AddMsg("QUAKE", "JUMP !", 3, mod:GetSetting("SoundQuakeJump") and "Beware")
     elseif message:find(self.L["Logic creates powerful data caches"]) then
-        mod:AddMsg("STARS", "STARS", 5, mod:GetSetting("SoundStars") and "Alert")
-        mod:AddTimerBar("STARS", "STARS", 60)
+        mod:AddMsg("STARS", "STARS !", 5, mod:GetSetting("SoundStars") and "Alert")
+        mod:AddTimerBar("STARS", "Next phase: Stars", 60)
     end
 end
 

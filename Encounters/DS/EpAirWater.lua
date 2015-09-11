@@ -22,12 +22,12 @@ mod:RegisterEnglishLocale({
     -- Cast.
     ["Tsunami"] = "Tsunami",
     ["Glacial Icestorm"] = "Glacial Icestorm",
-    -- Bar and messages.
-    ["MOO !"] = "MOO !",
-    ["MOO PHASE"] = "MOO PHASE",
+    -- Timer bars.
+    ["Next middle phase"] = "Next middle phase",
+    ["Next frost tombs"] = "Next frost tombs",
+    ["Next icestorm"] = "Next icestorm",
+    -- Message bars.
     ["ICESTORM"] = "ICESTORM",
-    ["~Middle Phase"] = "~Middle Phase",
-    ["~Frost Tombs"] = "~Frost Tombs",
     ["TWIRL ON YOU!"] = "TWIRL ON YOU!",
     ["TWIRL"] = "TWIRL",
 })
@@ -38,14 +38,14 @@ mod:RegisterFrenchLocale({
     -- Cast.
     ["Tsunami"] = "Tsunami",
     ["Glacial Icestorm"] = "Tempête de neige glaciale",
-    -- Bar and messages.
-    --["MOO !"] = "MOO !", -- TODO: French translation missing !!!!
-    ["MOO PHASE"] = "MOO PHASE",
-    --["ICESTORM"] = "ICESTORM", -- TODO: French translation missing !!!!
-    --["~Middle Phase"] = "~Middle Phase", -- TODO: French translation missing !!!!
-    --["~Frost Tombs"] = "~Frost Tombs", -- TODO: French translation missing !!!!
-    --["TWIRL ON YOU!"] = "TWIRL ON YOU!", -- TODO: French translation missing !!!!
-    --["TWIRL"] = "TWIRL", -- TODO: French translation missing !!!!
+    -- Timer bars.
+    ["Next middle phase"] = "Prochaine phase milieu",
+    ["Next frost tombs"] = "Prochain tombeau glacé",
+    ["Next icestorm"] = "Prochaine tempête glaciale",
+    -- Message bars.
+    ["TWIRL ON YOU!"] = "TOURNOIEMENT SUR VOUS!",
+    ["TWIRL"] = "TOURNOIEMENT",
+    ["ICESTORM"] = "TEMPÊTE GLACIALE",
 })
 mod:RegisterGermanLocale({
     -- Unit names.
@@ -54,20 +54,13 @@ mod:RegisterGermanLocale({
     -- Cast.
     ["Tsunami"] = "Tsunami",
     ["Glacial Icestorm"] = "Frostiger Eissturm",
-    -- Bar and messages.
-    --["MOO !"] = "MOO !", -- TODO: German translation missing !!!!
-    --["MOO PHASE"] = "MOO PHASE", -- TODO: German translation missing !!!!
-    --["ICESTORM"] = "ICESTORM", -- TODO: German translation missing !!!!
-    --["~Middle Phase"] = "~Middle Phase", -- TODO: German translation missing !!!!
-    --["~Frost Tombs"] = "~Frost Tombs", -- TODO: German translation missing !!!!
-    --["TWIRL ON YOU!"] = "TWIRL ON YOU!", -- TODO: German translation missing !!!!
-    --["TWIRL"] = "TWIRL", -- TODO: German translation missing !!!!
+    -- Timer bars.
+    -- Message bars.
 })
 -- Default settings.
 mod:RegisterDefaultSetting("SoundMidphase")
 mod:RegisterDefaultSetting("SoundIcestorm")
 mod:RegisterDefaultSetting("SoundTwirl")
-mod:RegisterDefaultSetting("SoundMoO")
 mod:RegisterDefaultSetting("SoundFrostTombsCountDown")
 mod:RegisterDefaultSetting("OtherTwirlWarning")
 mod:RegisterDefaultSetting("OtherTwirlPlayerMarkers")
@@ -75,7 +68,6 @@ mod:RegisterDefaultSetting("OtherTwirlPlayerMarkers")
 mod:RegisterDefaultTimerBarConfigs({
     ["MIDPHASE"] = { sColor = "xkcdLavenderBlue" },
     ["TOMB"] = { sColor = "xkcdDarkishBlue" },
-    ["MOO"] = { sColor = "xkcdGreenishBlue" },
     ["ICESTORM"] = { sColor = "xkcdTurquoiseBlue" },
 })
 
@@ -109,8 +101,8 @@ function mod:OnBossEnable()
 
     nMOOCount = 0
     bIsPhase2 = false
-    mod:AddTimerBar("MIDPHASE", "Middle Phase", 60, mod:GetSetting("SoundMidphase"))
-    mod:AddTimerBar("TOMB", "~Frost Tombs", 30, mod:GetSetting("SoundFrostTombsCountDown"))
+    mod:AddTimerBar("MIDPHASE", "Next middle phase", 60, mod:GetSetting("SoundMidphase"))
+    mod:AddTimerBar("TOMB", "Next frost tombs", 30, mod:GetSetting("SoundFrostTombsCountDown"))
 end
 
 function mod:OnUnitCreated(tUnit, sName)
@@ -135,8 +127,8 @@ end
 function mod:OnSpellCastEnd(unitName, castName)
     if unitName == self.L["Hydroflux"] then
         if castName == self.L["Tsunami"] then
-            mod:AddTimerBar("MIDPHASE", "~Middle Phase", 88, mod:GetSetting("SoundMidphase"))
-            mod:AddTimerBar("TOMB", "~Frost Tombs", 30, mod:GetSetting("SoundFrostTombsCountDown"))
+            mod:AddTimerBar("MIDPHASE", "Next middle phase", 88, mod:GetSetting("SoundMidphase"))
+            mod:AddTimerBar("TOMB", "Next frost tombs", 30, mod:GetSetting("SoundFrostTombsCountDown"))
         end
     end
 end
@@ -144,11 +136,9 @@ end
 function mod:OnBuffAdd(nId, nSpellId, nStack, fTimeRemaining)
     if bIsPhase2 and (nSpellId == BUFFID_MOO1 or nSpellId == BUFFID_MOO2) then
         bIsPhase2 = false
-        mod:AddMsg("MOO", "MOO !", 5, mod:GetSetting("SoundMoO") and "Info", "Blue")
-        mod:AddTimerBar("MOO", "MOO PHASE", 10, mod:GetSetting("SoundMoO"))
         if nMOOCount == 2 then
             nMOOCount = 0
-            mod:AddTimerBar("ICESTORM", "ICESTORM", 15)
+            mod:AddTimerBar("ICESTORM", "Next icestorm", 15)
         end
     end
 end

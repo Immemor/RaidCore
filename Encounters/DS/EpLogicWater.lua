@@ -21,20 +21,25 @@ mod:RegisterEnglishLocale({
     ["Hydroflux"] = "Hydroflux",
     ["Alphanumeric Hash"] = "Alphanumeric Hash",
     ["Hydro Disrupter - DNT"] = "Hydro Disrupter - DNT",
+    -- Datachron messages.
+    ["Time to die, sapients!"] = "Time to die, sapients!",
     -- Cast.
     ["Circuit Breaker"] = "Circuit Breaker",
     ["Imprison"] = "Imprison",
     ["Defragment"] = "Defragment",
     ["Watery Grave"] = "Watery Grave",
     ["Tsunami"] = "Tsunami",
-    -- Bar and messages.
+    -- Timer bars.
     ["Next defragment"] = "Next defragment",
-    ["Middle Phase"] = "Middle Phase",
-    ["SPREAD"] = "SPREAD",
-    ["~Imprison"] = "~Imprison",
-    ["ORB"] = "ORB",
+    ["Next imprison"] = "Next imprison",
+    ["Next Watery Grave"] = "Next watery grave",
+    ["Next middle phase"] = "Next middle phase",
+    ["Avatus incoming"] = "Avatus incoming",
     ["Enrage"] = "Enrage",
-    ["IA remaining %u"] = "IA remaining %u",
+    -- Message bars.
+    ["SPREAD"] = "SPREAD",
+    ["ORB"] = "ORB",
+    ["IA REMAINING %u"] = "IA REMAINING %u",
 })
 mod:RegisterFrenchLocale({
     -- Unit names.
@@ -42,37 +47,38 @@ mod:RegisterFrenchLocale({
     ["Hydroflux"] = "Hydroflux",
     ["Alphanumeric Hash"] = "Alphanumeric Hash",
     ["Hydro Disrupter - DNT"] = "Hydro-disrupteur - DNT",
+    -- Datachron messages.
+    ["Time to die, sapients!"] = "Maintenant c'est l'heure de mourir, misérables !",
     -- Cast.
     ["Circuit Breaker"] = "Coupe-circuit",
     ["Imprison"] = "Emprisonner",
     ["Defragment"] = "Défragmentation",
     ["Watery Grave"] = "Tombe aqueuse",
     ["Tsunami"] = "Tsunami",
-    -- Bar and messages.
+    -- Timer bars.
     ["Next defragment"] = "Prochaine defragmentation",
-    ["Middle Phase"] = "Phase du Milieu",
-    ["SPREAD"] = "SEPAREZ-VOUS",
-    ["~Imprison"] = "~Emprisonner",
-    ["ORB"] = "ORB",
+    ["Next Imprison"] = "Prochain emprisonner",
+    ["Next Watery Grave"] = "Prochaine tombe aqueuse",
+    ["Next middle phase"] = "Prochaine phase milieu",
+    ["Avatus incoming"] = "Avatus arrivé",
     ["Enrage"] = "Enrage",
-    ["IA remaining %u"] = "IA restante %u",
+    -- Message bars.
+    ["SPREAD"] = "SEPAREZ-VOUS",
+    ["ORB"] = "ORB",
+    ["IA REMAINING %u"] = "IA RESTANTE %u",
 })
 mod:RegisterGermanLocale({
     -- Unit names.
     ["Mnemesis"] = "Mnemesis",
     ["Hydroflux"] = "Hydroflux",
     ["Alphanumeric Hash"] = "Alphanumerische Raute",
-    --["Hydro Disrupter - DNT"] = "Hydro Disrupter - DNT", -- TODO: German translation missing !!!!
     -- Cast.
     ["Circuit Breaker"] = "Schaltkreiszerstörer",
     ["Imprison"] = "Einsperren",
     ["Defragment"] = "Defragmentieren",
     ["Watery Grave"] = "Seemannsgrab",
-    -- Bar and messages.
-    --["Middle Phase"] = "Middle Phase", -- TODO: German translation missing !!!!
-    --["SPREAD"] = "SPREAD", -- TODO: German translation missing !!!!
-    ["~Imprison"] = "~Einsperren",
-    --["ORB"] = "ORB", -- TODO: German translation missing !!!!
+    -- Timer bars.
+    -- Message bars.
 })
 -- Default settings.
 mod:RegisterDefaultSetting("SoundDefrag")
@@ -90,7 +96,8 @@ mod:RegisterDefaultTimerBarConfigs({
     ["PRISON"] = { sColor = "xkcdBluegreen" },
     ["GRAVE"] = { sColor = "xkcdDeepOrange" },
     ["DEFRAG"] = { sColor = "xkcdBarneyPurple" },
-    ["ENRAGE"] = { sColor = "red" },
+    ["AVATUS_INCOMING"] = { sColor = "xkcdAmethyst" },
+    ["ENRAGE"] = { sColor = "xkcdBloodRed" },
 })
 
 ----------------------------------------------------------------------------------------------------
@@ -103,7 +110,6 @@ local DEBUFFID_DATA_DISRUPTOR = 78407
 ----------------------------------------------------------------------------------------------------
 local GetPlayerUnit = GameLib.GetPlayerUnit
 local GetGameTime = GameLib.GetGameTime
-local nMnemesisId
 local midphase = false
 
 ----------------------------------------------------------------------------------------------------
@@ -116,15 +122,22 @@ function mod:OnBossEnable()
     Apollo.RegisterEventHandler("SPELL_CAST_END", "OnSpellCastEnd", self)
     Apollo.RegisterEventHandler("DEBUFF_APPLIED", "OnDebuffApplied", self)
     Apollo.RegisterEventHandler("DEBUFF_REMOVED", "OnDebuffRemoved", self)
+    Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
 
     midphase = false
-    nMnemesisId = nil
-    mod:AddTimerBar("MIDPHASE", "Middle Phase", 75, mod:GetSetting("SoundMidphaseCountDown"))
-    mod:AddTimerBar("PRISON", "Imprison", 33)
-    mod:AddTimerBar("ENRAGE", "Enrage", 421)
+    mod:AddTimerBar("MIDPHASE", "Next middle phase", 75, mod:GetSetting("SoundMidphaseCountDown"))
+    mod:AddTimerBar("PRISON", "Next Imprison", 33)
+    mod:AddTimerBar("AVATUS_INCOMING", "Avatus incoming", 421)
     mod:AddTimerBar("DEFRAG", "Next defragment", 16, mod:GetSetting("SoundDefrag"))
     if mod:GetSetting("OtherWateryGraveTimer") then
-        mod:AddTimerBar("GRAVE", "Watery Grave", 10)
+        mod:AddTimerBar("GRAVE", "Next Watery Grave", 10)
+    end
+end
+
+function mod:OnChatDC(message)
+    if self.L["Time to die, sapients!"] == message then
+        mod:RemoveTimerBar("AVATUS_INCOMING")
+        mod:AddTimerBar("ENRAGE", "Enrage", 34)
     end
 end
 
@@ -136,7 +149,7 @@ function mod:OnSpellCastStart(unitName, castName, unit)
             mod:RemoveTimerBar("DEFRAG")
             mod:AddTimerBar("MIDPHASE", "Circuit Breaker", 25, mod:GetSetting("SoundMidphaseCountDown"))
             local nArmorValue = unit:GetInterruptArmorValue()
-            mod:AddMsg("IA", self.L["IA remaining %u"]:format(nArmorValue), 5, nil, "blue")
+            mod:AddMsg("IA", self.L["IA REMAINING %u"]:format(nArmorValue), 5, nil, "blue")
         elseif castName == self.L["Imprison"] then
             mod:RemoveTimerBar("PRISON")
         elseif castName == self.L["Defragment"] then
@@ -152,7 +165,7 @@ function mod:OnSpellCastStart(unitName, castName, unit)
     elseif unitName == self.L["Hydroflux"] then
         if castName == self.L["Watery Grave"] then
             if mod:GetSetting("OtherWateryGraveTimer") then
-                mod:AddTimerBar("GRAVE", "Watery Grave", 10)
+                mod:AddTimerBar("GRAVE", "Next Watery Grave", 10)
             end
         elseif self.L["Tsunami"] == castName then
             mod:RemoveTimerBar("GRAVE")
@@ -164,8 +177,8 @@ function mod:OnSpellCastEnd(unitName, castName)
     if unitName == self.L["Mnemesis"] then
         if castName == self.L["Circuit Breaker"] then
             midphase = false
-            mod:AddTimerBar("MIDPHASE", "Middle Phase", 85, mod:GetSetting("SoundMidphaseCountDown"))
-            mod:AddTimerBar("PRISON", "Imprison", 25)
+            mod:AddTimerBar("MIDPHASE", "Next middle phase", 85, mod:GetSetting("SoundMidphaseCountDown"))
+            mod:AddTimerBar("PRISON", "Next Imprison", 25)
         end
     end
 end
@@ -194,6 +207,7 @@ end
 
 function mod:OnUnitCreated(unit, sName)
     local nUnitId = unit:GetId()
+    local nHealth = unit:GetHealth()
 
     if sName == self.L["Alphanumeric Hash"] then
         if nUnitId and mod:GetSetting("LineTetrisBlocks") then
@@ -210,10 +224,7 @@ function mod:OnUnitCreated(unit, sName)
             core:AddSimpleLine("HydroCleave", unit:GetId(), -7, 14, 0, 3, "xkcdOrangeYellow")
         end
     elseif sName == self.L["Mnemesis"] then
-        if nUnitId and (nMnemesisId == nil or nMnemesisId == nUnitId) then
-            -- A filter is needed, because there is many unit called Mnemesis.
-            -- Only the first is the good.
-            nMnemesisId = nUnitId
+        if nHealth and nHealth > 0 then
             core:AddUnit(unit)
             core:WatchUnit(unit)
         end

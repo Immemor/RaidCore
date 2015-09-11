@@ -18,7 +18,6 @@ mod:RegisterTrigMob("ANY", { "Maelstrom Authority" })
 mod:RegisterEnglishLocale({
     -- Unit names.
     ["Wind Wall"] = "Wind Wall",
-    ["Avatus Hologram"] = "Avatus Hologram",
     ["Weather Station"] = "Weather Station",
     ["Maelstrom Authority"] = "Maelstrom Authority",
     -- Datachron messages.
@@ -28,7 +27,9 @@ mod:RegisterEnglishLocale({
     ["Ice Breath"] = "Ice Breath",
     ["Crystallize"] = "Crystallize",
     ["Typhoon"] = "Typhoon",
-    -- Bar and messages.
+    -- Timer bars.
+    ["Next stations"] = "Next stations",
+    -- Message bars.
     ["STATION: %s %s"] = "STATION: %s %s",
     ["STATION"] = "STATION",
     ["ICE BREATH"] = "ICE BREATH",
@@ -43,7 +44,6 @@ mod:RegisterEnglishLocale({
 mod:RegisterFrenchLocale({
     -- Unit names.
     ["Wind Wall"] = "Mur de vent",
-    ["Avatus Hologram"] = "Hologramme d'Avatus",
     ["Weather Station"] = "Station météorologique",
     ["Maelstrom Authority"] = "Contrôleur du Maelstrom",
     -- Datachron messages.
@@ -53,7 +53,9 @@ mod:RegisterFrenchLocale({
     ["Ice Breath"] = "Souffle de glace",
     ["Crystallize"] = "Cristalliser",
     ["Typhoon"] = "Typhon",
-    -- Bar and messages.
+    -- Timer bars.
+    ["Next stations"] = "Prochaine stations",
+    -- Message bars.
     ["STATION: %s %s"] = "STATION: %s %s",
     ["STATION"] = "STATION",
     ["ICE BREATH"] = "SOUFFLE DE GLACE",
@@ -68,23 +70,16 @@ mod:RegisterFrenchLocale({
 mod:RegisterGermanLocale({
     -- Unit names.
     ["Wind Wall"] = "Windwand",
-    --["Avatus Hologram"] = "Avatus Hologram", -- TODO: German translation missing !!!!
     ["Weather Station"] = "Wetterstation",
     ["Maelstrom Authority"] = "Mahlstromgewalt",
     -- Datachron messages.
-    --["The platform trembles"] = "The platform trembles", -- TODO: German translation missing !!!!
     -- Cast.
     ["Activate Weather Cycle"] = "Wetterzyklus aktivieren",
     ["Ice Breath"] = "Eisatem",
     ["Crystallize"] = "Kristallisieren",
     ["Typhoon"] = "Taifun",
-    -- Bar and messages.
-    --["STATION: %s %s"] = "STATION: %s %s", -- TODO: German translation missing !!!!
-    --["STATION"] = "STATION", -- TODO: German translation missing !!!!
-    --["ICE BREATH"] = "ICE BREATH", -- TODO: German translation missing !!!!
-    --["TYPHOON"] = "TYPHOON", -- TODO: German translation missing !!!!
-    --["JUMP"] = "JUMP", -- TODO: German translation missing !!!!
-    --["Encounter Start"] = "Encounter Start", -- TODO: German translation missing !!!!
+    -- Timer bars.
+    -- Message bars.
     ["NORTH"] = "N",
     ["SOUTH"] = "S",
     ["EAST"] = "E",
@@ -153,7 +148,7 @@ end
 function mod:OnEnteredCombat(tUnit, bInCombat, sName)
     if bInCombat then
         if sName == self.L["Weather Station"] then
-            mod:AddTimerBar("STATION", "STATION", 25)
+            mod:AddTimerBar("STATION", "Next stations", 25)
             nStationCount = nStationCount + 1
             local tStationPos = tUnit:GetPosition()
             local sMessage = "STATION"
@@ -183,7 +178,7 @@ function mod:OnSpellCastStart(unitName, castName, unit)
         if castName == self.L["Activate Weather Cycle"] then
             bossPos = unit:GetPosition()
             nStationCount = 0
-            mod:AddTimerBar("STATION", "STATION", 13)
+            mod:AddTimerBar("STATION", "Next stations", 13)
         elseif castName == self.L["Ice Breath"] then
             mod:AddMsg("BREATH", "ICE BREATH", 5, mod:GetSetting("SoundIceBreath") and "RunAway")
         elseif castName == self.L["Crystallize"] then

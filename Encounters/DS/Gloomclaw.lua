@@ -32,13 +32,14 @@ mod:RegisterEnglishLocale({
     -- Cast.
     ["Rupture"] = "Rupture",
     ["Corrupting Rays"] = "Corrupting Rays",
-    -- Bar and messages.
+    -- Timer bars.
+    ["Next wave #%u"] = "Next wave #%u",
+    ["Next rupture"] = "Next rupture",
+    ["Full corruption"] = "Full corruption",
+    -- Message bars.
+    ["WAVE"] = "WAVE",
     ["INTERRUPT %s"] = "INTERRUPT %s",
-    ["NEXT RUPTURE"] = "NEXT RUPTURE",
-    ["~NEXT RUPTURE"] = "~NEXT RUPTURE",
-    ["FULL CORRUPTION"] = "FULL CORRUPTION",
     ["SECTION %u"] = "SECTION %u",
-    ["[%u] WAVE"] = "[%u] WAVE",
     ["FROG %u"] = "FROG %u",
     ["LEFT"] = "LEFT",
     ["RIGHT"] = "RIGHT",
@@ -63,13 +64,14 @@ mod:RegisterFrenchLocale({
     -- Cast.
     ["Rupture"] = "Rupture",
     ["Corrupting Rays"] = "Rayons de corruption",
-    -- Bar and messages.
+    -- Timer bars.
+    ["Next wave #%u"] = "Next wave n°%u",
+    ["Next rupture"] = "Prochaine rupture",
+    ["Full corruption"] = "Totalement corrompu",
+    -- Message bars.
+    ["WAVE"] = "WAVE",
     ["INTERRUPT %s"] = "INTERROMPRE %s",
-    ["NEXT RUPTURE"] = "PROCHAINE RUPTURE",
-    ["~NEXT RUPTURE"] = "~PROCHAINE RUPTURE",
-    ["FULL CORRUPTION"] = "100% CORROMPU",
     ["SECTION %u"] = "SECTION %u",
-    ["[%u] WAVE"] = "[%u] WAVE",
     ["FROG %u"] = "ADD %u",
     ["LEFT"] = "GAUCHE",
     ["RIGHT"] = "DROITE",
@@ -81,32 +83,16 @@ mod:RegisterGermanLocale({
     -- Unit names.
     ["Gloomclaw"] = "Düsterklaue",
     ["Corrupted Ravager"] = "Korrumpierter Verwüster",
-    --["Empowered Ravager"] = "Empowered Ravager", -- TODO: German translation missing !!!!
     ["Strain Parasite"] = "Transmutierten-Parasit",
     ["Gloomclaw Skurge"] = "Düsterklauen-Geißel",
     ["Corrupted Fraz"] = "Korrumpierter Fraz",
     ["Essence of Logic"] = "Logikessenz",
     -- Datachron messages.
-    --["Gloomclaw is reduced to a weakened state"] = "Gloomclaw is reduced to a weakened state!", -- TODO: German translation missing !!!!
-    --["Gloomclaw is vulnerable"] = "Gloomclaw is vulnerable!", -- TODO: German translation missing !!!!
-    --["Gloomclaw is pushed back"] = "Gloomclaw is pushed back by the purification of the essences!", -- TODO: German translation missing !!!!
-    --["Gloomclaw is moving forward"] = "Gloomclaw is moving forward to corrupt more essences!", -- TODO: German translation missing !!!!
     -- Cast.
     ["Rupture"] = "Aufreißen",
     ["Corrupting Rays"] = "Korrumpierende Strahlen",
-    -- Bar and messages.
-    --["INTERRUPT %s"] = "INTERRUPT %s", -- TODO: German translation missing !!!!
-    --["NEXT RUPTURE"] = "NEXT RUPTURE", -- TODO: German translation missing !!!!
-    --["~NEXT RUPTURE"] = "~NEXT RUPTURE", -- TODO: German translation missing !!!!
-    --["FULL CORRUPTION"] = "FULL CORRUPTION", -- TODO: German translation missing !!!!
-    --["SECTION %u"] = "SECTION %u", -- TODO: German translation missing !!!!
-    --["[%u] WAVE"] = "[%u] WAVE", -- TODO: German translation missing !!!!
-    --["FROG %u"] = "FROG %u", -- TODO: German translation missing !!!!
-    --["LEFT"] = "LEFT", -- TODO: German translation missing !!!!
-    --["RIGHT"] = "RIGHT", -- TODO: German translation missing !!!!
-    --["TRANSITION"] = "TRANSITION", -- TODO: German translation missing !!!!
-    --["MOO PHASE"] = "MOO PHASE", -- TODO: German translation missing !!!!
-    --["BURN HIM HARD"] = "BURN HIM HARD", -- TODO: German translation missing !!!!
+    -- Timer bars.
+    -- Message bars.
 })
 -- Default settings.
 mod:RegisterDefaultSetting("SoundRuptureInterrupt")
@@ -186,7 +172,7 @@ function mod:OnSpellCastStart(unitName, castName, unit)
         ruptCount = ruptCount + 1
         mod:AddMsg("RUPTURE", self.L["INTERRUPT %s"]:format(unitName:upper()), 5, mod:GetSetting("SoundRuptureInterrupt") and "Destruction")
         if ruptCount == 1 then
-            mod:AddTimerBar("RUPTURE", "NEXT RUPTURE", 43, mod:GetSetting("SoundRuptureCountDown"))
+            mod:AddTimerBar("RUPTURE", "Next rupture", 43, mod:GetSetting("SoundRuptureCountDown"))
         end
     elseif (unitName == self.L["Corrupted Ravager"] or unitName == self.L["Empowered Ravager"])
         and castName == self.L["Corrupting Rays"] then
@@ -216,10 +202,10 @@ function mod:OnChatDC(message)
             end
             mod:AddMsg("PHASE", self.L["SECTION %u"]:format(section), 5, mod:GetSetting("SoundSectionSwitch") and "Info", "Blue")
             if section ~= 4 then 
-                mod:AddTimerBar("WAVE", self.L["[%u] WAVE"]:format(waveCount + 1), 11)
-                mod:AddTimerBar("RUPTURE", "NEXT RUPTURE", 39, mod:GetSetting("SoundRuptureCountDown"))
+                mod:AddTimerBar("WAVE", self.L["Next wave #%u"]:format(waveCount + 1), 11)
+                mod:AddTimerBar("RUPTURE", "Next rupture", 39, mod:GetSetting("SoundRuptureCountDown"))
             end
-            mod:AddTimerBar("CORRUPTION", "FULL CORRUPTION", 111, mod:GetSetting("SoundCorruptionCountDown"))
+            mod:AddTimerBar("CORRUPTION", "Full corruption", 111, mod:GetSetting("SoundCorruptionCountDown"))
         else
             first = false
         end
@@ -244,7 +230,6 @@ function mod:OnChatDC(message)
         mod:RemoveTimerBar("CORRUPTION")
         mod:RemoveTimerBar("WAVE")
         mod:AddMsg("TRANSITION", "TRANSITION", 5, mod:GetSetting("SoundMoOWarning") and "Alert")
-        mod:AddTimerBar("MOO", "MOO PHASE", 15)
         for unitId, v in pairs(essenceUp) do
             core:RemoveUnit(unitId)
             essenceUp[unitId] = nil
@@ -293,8 +278,8 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
             end
             core:AddUnit(unit)
             core:WatchUnit(unit)
-            mod:AddTimerBar("RUPTURE", "~NEXT RUPTURE", 35, mod:GetSetting("SoundRuptureCountDown"))
-            mod:AddTimerBar("CORRUPTION", "FULL CORRUPTION", 106, mod:GetSetting("SoundCorruptionCountDown"))
+            mod:AddTimerBar("RUPTURE", "next rupture", 35, mod:GetSetting("SoundRuptureCountDown"))
+            mod:AddTimerBar("CORRUPTION", "Full corruption", 106, mod:GetSetting("SoundCorruptionCountDown"))
         elseif sName == self.L["Strain Parasite"]
             or sName == self.L["Gloomclaw Skurge"]
             or sName == self.L["Corrupted Fraz"] then
@@ -303,13 +288,13 @@ function mod:OnUnitStateChanged(unit, bInCombat, sName)
             if timeOfEvent - prev > 10 then
                 prev = timeOfEvent
                 waveCount = waveCount + 1
-                mod:AddMsg("WAVE", self.L["[%u] WAVE"]:format(waveCount), 5, mod:GetSetting("SoundWaveWarning") and "Info", "Blue")
+                mod:AddMsg("WAVE", "WAVE", 5, mod:GetSetting("SoundWaveWarning") and "Info", "Blue")
                 if section < 5 then
                     if waveCount < spawnCount[section] then
-                        mod:AddTimerBar("WAVE", self.L["[%u] WAVE"]:format(waveCount + 1), spawnTimer[section])
+                        mod:AddTimerBar("WAVE", self.L["Next wave #%u"]:format(waveCount + 1), spawnTimer[section])
                     end
                 else
-                    local sTimerText = self.L["[%u] WAVE"]:format(waveCount + 1)
+                    local sTimerText = self.L["Next wave #%u"]:format(waveCount + 1)
                     if waveCount == 1 then
                         mod:AddTimerBar("WAVE", sTimerText, 20.5)
                     elseif waveCount == 2 then

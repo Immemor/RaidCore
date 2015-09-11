@@ -25,7 +25,7 @@ mod:RegisterEnglishLocale({
     ["Exhaust"] = "Exhaust",
     ["Desiccate"] = "Desiccate",
     -- Bar and messages.
-    ["Warning: Knock-Back"] = "Warning: Knock-Back",
+    ["WARNING: KNOCK-BACK"] = "WARNING: KNOCK-BACK",
 })
 mod:RegisterFrenchLocale({
     -- Unit names.
@@ -37,7 +37,7 @@ mod:RegisterFrenchLocale({
     ["Exhaust"] = "Épuiser",
     ["Desiccate"] = "Dessécher",
     -- Bar and messages.
-    ["Warning: Knock-Back"] = "Attention: Knock-Back",
+    ["WARNING: KNOCK-BACK"] = "ATTENTION: KNOCK-BACK",
 })
 mod:RegisterGermanLocale({
 })
@@ -114,7 +114,7 @@ function mod:OnSpellCastStart(unitName, castName, unit)
                     core:PlaySound("Alert")
                 end
             elseif castName == self.L["Exhaust"] then
-                mod:AddMsg("EXHAUST", "Warning: Knock-Back", 3, "Info")
+                mod:AddMsg("EXHAUST", "WARNING: KNOCK-BACK", 3, "Info")
             end
         end
     end

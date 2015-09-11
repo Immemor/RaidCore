@@ -27,16 +27,17 @@ mod:RegisterEnglishLocale({
     ["Vertical Locomotion Enhancement"] = "The Vertical Locomotion Enhancement Ports have been activated!",
     -- Cast.
     ["Null and Void"] = "Null and Void",
-    -- Bar and messages.
+    -- Timer bars.
+    ["Next Beam"] = "Next Beam",
+    ["Next Pillar"] = "Next Pillar",
+    ["Pillar Timeout"] = "Pillar Timeout",
     ["Enrage"] = "Enrage",
+    ["Explosion"] = "Explosion",
+    -- Message bars.
     ["P2: SHIELD PHASE"] = "P2: SHIELD PHASE",
     ["P2: JUMP PHASE"] = "P2: JUMP PHASE",
     ["LASER"] = "LASER",
-    ["EXPLOSION"] = "EXPLOSION",
-    ["Next Beam"] = "Next Beam",
-    ["Next Pillar"] = "Next Pillar",
     ["BEAM on %s"] = "BEAM on %s",
-    ["Pillar Timeout"] = "Pillar Timeout",
 })
 mod:RegisterFrenchLocale({
     -- Unit names.
@@ -50,16 +51,17 @@ mod:RegisterFrenchLocale({
     ["Vertical Locomotion Enhancement"] = "Les ports d'amélioration de locomotion verticale ont été activés !",
     -- Cast.
     ["Null and Void"] = "Caduque",
-    -- Bar and messages.
+    -- Timer bars.
+    ["Next Beam"] = "Prochain Laser",
+    ["Next Pillar"] = "Prochain Pillier",
+    ["Pillar Timeout"] = "Pillier Expiration",
     ["Enrage"] = "Enrage",
+    ["Explosion"] = "Explosion",
+    -- Message bars.
     ["P2: SHIELD PHASE"] = "P2: PHASE BOUCLIER",
     ["P2: JUMP PHASE"] = "P2: PHASE SAUTER",
     ["LASER"] = "LASER",
-    ["EXPLOSION"] = "EXPLOSION",
-    ["Next Beam"] = "Prochain Laser",
-    ["Next Pillar"] = "Prochain Pillier",
     ["BEAM on %s"] = "LASER sur %s",
-    ["Pillar Timeout"] = "Pillier Expiration",
 })
 mod:RegisterGermanLocale({
     -- Unit names.
@@ -67,20 +69,9 @@ mod:RegisterGermanLocale({
     ["Obstinate Logic Wall"] = "Hartnäckige Logikmauer",
     ["Data Devourer"] = "Datenverschlinger",
     -- Datachron messages.
-    --["Avatus sets his focus on [PlayerName]!"] = "Avatus sets his focus on (.*)!", -- TODO: German translation missing !!!!
-    --["Avatus prepares to delete all"] = "Avatus prepares to delete all data!", -- TODO: German translation missing !!!!
-    --["Secure Sector Enhancement"] = "The Secure Sector Enhancement Ports have been activated!", -- TODO: German translation missing !!!!
-    --["Vertical Locomotion Enhancement"] = "The Vertical Locomotion Enhancement Ports have been activated!", -- TODO: German translation missing !!!!
     -- Cast.
     ["Null and Void"] = "Unordnung und Chaos",
     -- Bar and messages.
-    --["P2: SHIELD PHASE"] = "P2: SHIELD PHASE", -- TODO: German translation missing !!!!
-    --["P2: JUMP PHASE"] = "P2: JUMP PHASE", -- TODO: German translation missing !!!!
-    --["LASER"] = "LASER", -- TODO: German translation missing !!!!
-    --["Next Beam"] = "Next Beam", -- TODO: German translation missing !!!!
-    --["Next Pillar"] = "Next Pillar", -- TODO: German translation missing !!!!
-    --["BEAM on %s"] = "BEAM on %s", -- TODO: German translation missing !!!!
-    --["Pillar Timeout"] = "Pillar Timeout", -- TODO: German translation missing !!!!
 })
 -- Default settings.
 mod:RegisterDefaultSetting("LineDataDevourers")
@@ -181,7 +172,7 @@ function mod:OnChatDC(message)
         mod:AddTimerBar("NEXT_PILLAR", "Next Pillar", 50)
     elseif message == self.L["Secure Sector Enhancement"] then
         mod:AddMsg("P2", "P2: SHIELD PHASE", 5, mod:GetSetting("SoundShieldPhase") and "Alert")
-        mod:AddTimerBar("P2", "EXPLOSION", 15, mod:GetSetting("SoundLaserCountDown"))
+        mod:AddTimerBar("P2", "Explosion", 15, mod:GetSetting("SoundLaserCountDown"))
         mod:AddTimerBar("BEAM", "Next Beam", 44)
         mod:AddTimerBar("DATA_DEVOURER", "Next Data Devourer", 53)
         mod:AddTimerBar("NEXT_PILLAR", "Next Pillar", 58)

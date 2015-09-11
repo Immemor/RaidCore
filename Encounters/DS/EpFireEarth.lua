@@ -28,12 +28,13 @@ mod:RegisterEnglishLocale({
     -- Datachron.
     ["The lava begins to rise through the floor!"] = "The lava begins to rise through the floor!",
     ["Time to die, sapients!"] = "Time to die, sapients!",
-    -- Bar and messages.
-    ["Enrage"] = "Enrage",
-    ["RAID WIPE"] = "RAID WIPE",
-    ["Lava Floor Phase"] = "Lava Floor Phase",
-    ["End of Lava Floor"] = "End of Lava Floor",
+    -- Timer bars.
+    ["Next lava floor phase"] = "Next lava floor phase",
     ["Next Obsidian"] = "Next Obsidian %d/%d",
+    ["End of lava floor phase"] = "End of lava floor phase",
+    ["Avatus incoming"] = "Avatus incoming",
+    ["Enrage"] = "Enrage",
+    -- Message bars.
 })
 mod:RegisterFrenchLocale({
     -- Unit names.
@@ -46,12 +47,13 @@ mod:RegisterFrenchLocale({
     -- Datachron.
     ["The lava begins to rise through the floor!"] = "La lave apparaît par les fissures du sol !",
     ["Time to die, sapients!"] = "Maintenant c'est l'heure de mourir, misérables !",
-    -- Bar and messages.
-    ["Enrage"] = "Enrage",
-    ["RAID WIPE"] = "MORT DU RAID",
-    ["Lava Floor Phase"] = "Phase Lave",
-    ["End of Lava Floor"] = "Fin de la lave",
+    -- Timer bars.
+    ["Next lava floor phase"] = "Prochaine phase de lave",
     ["Next Obsidian"] = "Prochaine Obsidienne %d/%d",
+    ["End of lava floor phase"] = "Fin de la phase de lave",
+    ["Avatus incoming"] = "Avatus arrivé",
+    ["Enrage"] = "Enrage",
+    -- Message bars.
 })
 mod:RegisterGermanLocale({
     -- Unit names.
@@ -63,9 +65,9 @@ mod:RegisterGermanLocale({
 mod:RegisterDefaultSetting("LineFlameWaves")
 -- Timers default configs.
 mod:RegisterDefaultTimerBarConfigs({
-    ["ENRAGE"] = { sColor = "xkcdAmethyst" },
+    ["AVATUS_INCOMING"] = { sColor = "xkcdAmethyst" },
     ["LAVA_FLOOR"] = { sColor = "xkcdBloodRed" },
-    ["RAID_WIPE"] = { sColor = "xkcdBloodRed" },
+    ["ENRAGE"] = { sColor = "xkcdBloodRed" },
     ["OBSIDIAN"] = { sColor = "xkcdMediumBrown" },
 })
 ----------------------------------------------------------------------------------------------------
@@ -97,8 +99,8 @@ function mod:OnBossEnable()
     nLavaFloorCount = 0
     local text = self.L["Next Obsidian"]:format(nObsidianPopCount, nObsidianPopMax)
     mod:AddTimerBar("OBSIDIAN", text, OBSIDIAN_POP_INTERVAL)
-    mod:AddTimerBar("LAVA_FLOOR", "Lava Floor Phase", 94)
-    mod:AddTimerBar("ENRAGE", "Enrage", 425)
+    mod:AddTimerBar("LAVA_FLOOR", "Next lava floor phase", 94)
+    mod:AddTimerBar("AVATUS_INCOMING", "Avatus incoming", 425)
 end
 
 function mod:OnBuffAdded(nId, nSpellId, nStack, fTimeRemaining)
@@ -112,10 +114,11 @@ end
 
 function mod:OnChatDC(message)
     if message == self.L["The lava begins to rise through the floor!"] then
-        mod:AddTimerBar("LAVA_FLOOR", "End of Lava Floor", 28)
+        mod:AddTimerBar("LAVA_FLOOR", "End of lava floor phase", 28)
         nLavaFloorCount = nLavaFloorCount + 1
     elseif self.L["Time to die, sapients!"] == message then
-        mod:AddTimerBar("RAID_WIPE", "RAID WIPE", 34)
+        mod:RemoveTimerBar("AVATUS_INCOMING")
+        mod:AddTimerBar("ENRAGE", "Enrage", 34)
     end
 end
 
@@ -141,7 +144,7 @@ function mod:OnUnitDestroyed(unit, sName)
         core:DropPixie(unit:GetId())
     elseif sName == self.L["Lava Floor (invis unit)"] then
         if nLavaFloorCount < 3 then
-            mod:AddTimerBar("LAVA_FLOOR", "Lava Floor Phase", 89)
+            mod:AddTimerBar("LAVA_FLOOR", "Next lava floor phase", 89)
         end
         nObsidianPopCount = 1
         if nObsidianPopMax > 2 then

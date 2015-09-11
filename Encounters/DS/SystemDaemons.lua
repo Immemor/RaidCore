@@ -41,10 +41,17 @@ mod:RegisterEnglishLocale({
     ["Repair Sequence"] = "Repair Sequence",
     ["Power Surge"] = "Power Surge",
     ["Black IC"] = "Black IC",
-    -- Bar and messages.
-    ["[%u] Probe"] = "[%u] Probe",
-    ["[%u] WAVE"] = "[%u] WAVE",
-    ["[%u] MINIBOSS"] = "[%u] MINIBOSS",
+    -- Timer bars.
+    ["Next disconnect"] = "Next disconnect",
+    ["Next probe #%u"] = "Next probe #%u",
+    ["Next wave: Mobs"] = "Next wave: Mobs",
+    ["Next wave: Miniboss"] = "Next wave: Miniboss",
+    ["Next purge on south daemon"] = "Next purge on south daemon",
+    ["Next purge on north daemon"] = "Next purge on north daemon",
+    ["Next black IC"] = "Next black IC",
+    -- Message bars.
+    ["WAVE: MINIBOSS !"] = "WAVE: MINIBOSS !",
+    ["WAVE: MOBS !"] = "WAVE: MOBS !",
     ["MARKER north"] = "N",
     ["MARKER south"] = "S",
     ["P2 SOON !"] = "P2 SOON !",
@@ -52,14 +59,9 @@ mod:RegisterEnglishLocale({
     ["INTERRUPT NORTH"] = "INTERRUPT NORTH",
     ["INTERRUPT SOUTH"] = "INTERRUPT SOUTH",
     ["PURGE NEAR YOU!"] = "PURGE NEAR YOU!",
-    ["PURGE - NULL"] = "PURGE - NULL",
-    ["PURGE - BINARY"] = "PURGE - BINARY",
     ["INTERRUPT !"] = "INTERRUPT !",
-    ["BLACK IC"] = "BLACK IC",
-    ["HEAL"] = "HEAL",
     ["PURGE ON YOU"] = "PURGE ON YOU",
     ["Probe Spawn"] = "Probe Spawn",
-    ["Disconnect"] = "Disconnect",
     ["YOU ARE NEXT ON NORTH !"] = "YOU ARE NEXT ON NORTH !",
     ["YOU ARE NEXT ON SOUTH !"] = "YOU ARE NEXT ON SOUTH !",
 })
@@ -87,25 +89,27 @@ mod:RegisterFrenchLocale({
     ["Repair Sequence"] = "Séquence de réparation",
     ["Power Surge"] = "Afflux d'énergie",
     ["Black IC"] = "CI noir",
-    -- Bar and messages.
-    --["[%u] Probe"] = "[%u] Probe", -- TODO: French translation missing !!!!
-    ["[%u] WAVE"] = "[%u] WAVE",
-    --["[%u] MINIBOSS"] = "[%u] MINIBOSS", -- TODO: French translation missing !!!!
+    -- Timer bars.
+    ["Next disconnect"] = "Prochaine déconnexion",
+    ["Next probe #%u"] = "Prochaine sonde n°%u",
+    ["Next wave: Mobs"] = "Prochaine vague: mobs",
+    ["Next wave: Miniboss"] = "Prochaine vague: Miniboss",
+    ["Next purge on south daemon"] = "Prochaine purge sur le daemon sud",
+    ["Next purge on north daemon"] = "Prochaine purge sur le daemon nord",
+    ["Next black IC"] = "Next CI noir",
+    -- Message bars.
+    ["WAVE: MINIBOSS !"] = "VAGUE: MINIBOSS !",
+    ["WAVE: MOBS !"] = "VAGUE: MOBS !",
     ["MARKER north"] = "N",
     ["MARKER south"] = "S",
-    ["P2 SOON !"] = "P2 SOON !",
+    ["P2 SOON !"] = "P2 BIENTÔT !",
     ["PHASE 2 !"] = "PHASE 2 !",
     ["INTERRUPT NORTH"] = "INTÉRROMPRE NORD",
     ["INTERRUPT SOUTH"] = "INTÉRROMPRE SUD",
     ["PURGE NEAR YOU!"] = "PURGE PROCHE DE VOUS !",
-    ["PURGE - NULL"] = "PURGE - 1.0",
-    ["PURGE - BINARY"] = "PURGE - 2.0",
     --["INTERRUPT !"] = "INTERRUPT !", -- TODO: French translation missing !!!!
-    --["BLACK IC"] = "BLACK IC", -- TODO: French translation missing !!!!
-    --["HEAL"] = "HEAL", -- TODO: French translation missing !!!!
     --["PURGE ON YOU"] = "PURGE ON YOU", -- TODO: French translation missing !!!!
     --["Probe Spawn"] = "Probe Spawn", -- TODO: French translation missing !!!!
-    ["Disconnect"] = "Déconnexion",
     --["YOU ARE NEXT ON NORTH !"] = "YOU ARE NEXT ON NORTH !", -- TODO: French translation missing !!!!
     --["YOU ARE NEXT ON SOUTH !"] = "YOU ARE NEXT ON SOUTH !", -- TODO: French translation missing !!!!
 })
@@ -134,24 +138,17 @@ mod:RegisterGermanLocale({
     ["Power Surge"] = "Energieschweller",
     ["Black IC"] = "Glatteis",
     -- Bar and messages.
-    ["[%u] Probe"] = "[%u] Sonde",
-    ["[%u] WAVE"] = "[%u] WELLE",
-    ["[%u] MINIBOSS"] = "[%u] MINIBOSS",
+    ["Next disconnect"] = "Nächste trennung",
+    ["Next probe"] = "Nächste probe #%u",
     ["MARKER north"] = "N",
     ["MARKER south"] = "S",
     ["P2 SOON !"] = "GLEICH PHASE 2 !",
     ["PHASE 2 !"] = "PHASE 2 !",
     ["INTERRUPT NORTH"] = "UNTERBRECHE NORDEN",
     ["INTERRUPT SOUTH"] = "UNTERBRECHE SÜDEN",
-    --["PURGE NEAR YOU!"] = "PURGE NEAR YOU!",
-    ["PURGE - NULL"] = "SÄUBERN - NULL",
-    ["PURGE - BINARY"] = "SÄUBERN - BINÄR",
     ["INTERRUPT !"] = "UNTERBRECHEN !",
-    ["BLACK IC"] = "GLATTEIS",
-    ["HEAL"] = "HEILUNG",
     ["PURGE ON YOU"] = "STEHEN BLEIBEN !!!",
     ["Probe Spawn"] = "Sonde Spawn",
-    ["Disconnect"] = "Trennung",
     ["YOU ARE NEXT ON NORTH !"] = "DU BIST DER NÄCHSTE IM NORDEN !",
     ["YOU ARE NEXT ON SOUTH !"] = "DU BIST DER NÄCHSTE IM SÜDEN !",
 })
@@ -235,9 +232,9 @@ function mod:OnBossEnable()
     playerName = GameLib.GetPlayerUnit():GetName()
 
     if mod:GetSetting("OtherDisconnectTimer") then
-        mod:AddTimerBar("DISCONNECT", "Disconnect", 41)
+        mod:AddTimerBar("DISCONNECT", "Next disconnect", 41)
     end
-    mod:AddTimerBar("SDWAVE", self.L["[%u] WAVE"]:format(1), 15, mod:GetSetting("SoundWave"))
+    mod:AddTimerBar("SDWAVE", "Next wave: Mobs", 15, mod:GetSetting("SoundWave"))
 end
 
 function mod:OnUnitCreated(unit, sName)
@@ -261,25 +258,25 @@ function mod:OnUnitCreated(unit, sName)
             sdwaveCount = sdwaveCount + 1
             probeCount = 0
             if sdwaveCount == 1 then
-                mod:AddMsg("SDWAVE", self.L["[%u] WAVE"]:format(sdwaveCount), 5, mod:GetSetting("SoundWave") and "Info", "Blue")
-                mod:AddTimerBar("SDWAVE", self.L["[%u] WAVE"]:format(sdwaveCount + 1), 50, mod:GetSetting("SoundWave"))
+                mod:AddMsg("SDWAVE", "WAVE: MOBS !", 5, mod:GetSetting("SoundWave") and "Info", "Blue")
+                mod:AddTimerBar("SDWAVE", "Next wave: Mobs", 50, mod:GetSetting("SoundWave"))
             elseif sdwaveCount % 2 == 0 then
-                mod:AddMsg("SDWAVE", self.L["[%u] WAVE"]:format(sdwaveCount), 5, mod:GetSetting("SoundWave") and "Info", "Blue")
-                mod:AddTimerBar("SDWAVE", self.L["[%u] MINIBOSS"]:format(sdwaveCount + 1), 50, mod:GetSetting("SoundWave"))
+                mod:AddMsg("SDWAVE", "WAVE: MOBS !", 5, mod:GetSetting("SoundWave") and "Info", "Blue")
+                mod:AddTimerBar("SDWAVE", "Next wave: Miniboss", 50, mod:GetSetting("SoundWave"))
             else
-                mod:AddMsg("SDWAVE", self.L["[%u] MINIBOSS"]:format(sdwaveCount), 5, mod:GetSetting("SoundWave") and "Info", "Blue")
-                mod:AddTimerBar("SDWAVE", self.L["[%u] WAVE"]:format(sdwaveCount + 1), 50, mod:GetSetting("SoundWave"))
+                mod:AddMsg("SDWAVE", "WAVE: MINIBOSS !", 5, mod:GetSetting("SoundWave") and "Info", "Blue")
+                mod:AddTimerBar("SDWAVE", "Next wave: Mobs", 50, mod:GetSetting("SoundWave"))
             end
-            mod:AddTimerBar("PROBES", self.L["[%u] Probe"]:format(1), 10)
+            mod:AddTimerBar("PROBES", self.L["Next probe #%u"]:format(1), 10)
         end
     elseif sName == self.L["Conduction Unit Mk. I"] then
         if probeCount == 0 then probeCount = 1 end
         if GetCurrentSubZoneName():find(self.L["Infinite Generator Core"]) then core:MarkUnit(unit, 1, 1) end
-        mod:AddTimerBar("PROBES", self.L["[%u] Probe"]:format(2), 10)
+        mod:AddTimerBar("PROBES", self.L["Next probe #%u"]:format(2), 10)
     elseif sName == self.L["Conduction Unit Mk. II"] then
         if probeCount == 1 then probeCount = 2 end
         if GetCurrentSubZoneName():find(self.L["Infinite Generator Core"]) then core:MarkUnit(unit, 1, 2) end
-        mod:AddTimerBar("PROBES", self.L["[%u] Probe"]:format(3), 10)
+        mod:AddTimerBar("PROBES", self.L["Next probe #%u"]:format(3), 10)
     elseif sName == self.L["Conduction Unit Mk. III"] then
         if probeCount == 2 then probeCount = 3 end
         if GetCurrentSubZoneName():find(self.L["Infinite Generator Core"]) then core:MarkUnit(unit, 1, 3) end
@@ -331,21 +328,21 @@ function mod:OnSpellCastStart(unitName, castName, unit)
     elseif castName == "Purge" then
         if self:GetDistanceBetweenUnits(GameLib.GetPlayerUnit(), unit) < 40 then
             if unitName == self.L["Null System Daemon"] then
-                mod:AddTimerBar("PURGE_NULL", "PURGE - NULL", 27)
+                mod:AddTimerBar("PURGE_NULL", "Next purge on south daemon", 27)
             elseif unitName == self.L["Binary System Daemon"] then
-                mod:AddTimerBar("PURGE_BINARY", "PURGE - BINARY", 27)
+                mod:AddTimerBar("PURGE_BINARY", "Next purge on north daemon", 27)
             end
         elseif phase2 then
             if unitName == self.L["Null System Daemon"] then
-                mod:AddTimerBar("PURGE_NULL", "PURGE - NULL", 27)
+                mod:AddTimerBar("PURGE_NULL", "Next purge on south daemon", 27)
             elseif unitName == self.L["Binary System Daemon"] then
-                mod:AddTimerBar("PURGE_BINARY", "PURGE - BINARY", 27)
+                mod:AddTimerBar("PURGE_BINARY", "Next purge on north daemon", 27)
             end
         end
     elseif unitName == self.L["Defragmentation Unit"] then
             if GetCurrentSubZoneName():find("Infinite Generator Core") and castName == self.L["Black IC"] then
                 mod:AddMsg("BLACKIC", "INTERRUPT !", 5, "Alert")
-                mod:AddTimerBar("BLACKIC", "BLACK IC", 30)
+                mod:AddTimerBar("BLACKIC", "Next black IC", 30)
             end
     end
 end
@@ -396,15 +393,15 @@ end
 function mod:NextWave()
     if probeCount == 3 then
         if sdwaveCount % 2 == 0 then
-            mod:AddTimerBar("SDWAVE", self.L["[%u] MINIBOSS"]:format(sdwaveCount + 1), 90, mod:GetSetting("SoundWave"))
+            mod:AddTimerBar("SDWAVE", "Next wave: Miniboss", 90, mod:GetSetting("SoundWave"))
         else
-            mod:AddTimerBar("SDWAVE", self.L["[%u] WAVE"]:format(sdwaveCount + 1), 90, mod:GetSetting("SoundWave"))
+            mod:AddTimerBar("SDWAVE", "Next wave: Mobs", 90, mod:GetSetting("SoundWave"))
         end
     else
         if sdwaveCount % 2 == 0 then
-            mod:AddTimerBar("SDWAVE", self.L["[%u] MINIBOSS"]:format(sdwaveCount + 1), 110 + (2 - probeCount) * 10, mod:GetSetting("SoundWave"))
+            mod:AddTimerBar("SDWAVE", "Next wave: Miniboss", 110 + (2 - probeCount) * 10, mod:GetSetting("SoundWave"))
         else
-            mod:AddTimerBar("SDWAVE", self.L["[%u] WAVE"]:format(sdwaveCount + 1), 110 + (2 - probeCount) * 10, mod:GetSetting("SoundWave"))
+            mod:AddTimerBar("SDWAVE", "Next wave: Mobs", 110 + (2 - probeCount) * 10, mod:GetSetting("SoundWave"))
         end
     end
 end
@@ -417,7 +414,7 @@ function mod:OnChatDC(message)
             phase2warn = false
         end
         if mod:GetSetting("OtherDisconnectTimer") then
-            mod:AddTimerBar("DISCONNECT", "Disconnect", 60)
+            mod:AddTimerBar("DISCONNECT", "Next disconnect", 60)
         end
     elseif message:find(self.L["COMMENCING ENHANCEMENT SEQUENCE"]) then
         phase2, phase2warn = true, false
@@ -425,7 +422,7 @@ function mod:OnChatDC(message)
         core:RemoveTimerBar("SDWAVE")
         mod:AddMsg("SDP2", "PHASE 2 !", 5, mod:GetSetting("SoundPhase2") and "Alarm")
         if mod:GetSetting("OtherDisconnectTimer") then
-            mod:AddTimerBar("DISCONNECT", "Disconnect", 85)
+            mod:AddTimerBar("DISCONNECT", "Next disconnect", 85)
         end
         if mod:GetSetting("OtherPillarMarkers") then
             if phase2count == 1 then

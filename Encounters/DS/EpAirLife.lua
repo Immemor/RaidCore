@@ -34,20 +34,23 @@ mod:RegisterEnglishLocale({
     ["Life Force"] = "Life Force",
     ["Lifekeeper"] = "Lifekeeper",
     -- Datachron messages.
+    ["Time to die, sapients!"] = "Time to die, sapients!",
     -- Cast.
     ["Blinding Light"] = "Blinding Light",
-    -- Bar and messages.
+    -- Timer bars.
+    ["Next middle phase"] = "Next middle phase",
+    ["Next thorns"] = "Next thorns",
+    ["Avatus incoming"] = "Avatus incoming",
+    ["Enrage"] = "Enrage",
+    -- Message bars.
     ["TWIRL ON YOU!"] = "TWIRL ON YOU!",
-    ["Thorns"] = "Thorns",
     ["Twirl"] = "Twirl",
     ["Midphase Ending"] = "Midphase Ending",
-    ["Middle Phase"] = "Middle Phase",
     ["Next Healing Tree"] = "Next Healing Tree",
     ["No-Healing Debuff!"] = "No-Healing Debuff!",
     ["NO HEAL DEBUFF"] = "NO HEAL",
     ["Lightning"] = "Lightning",
     ["Lightning on %s"] = "Lightning on %s",
-    ["Enrage"] = "Enrage",
 })
 mod:RegisterFrenchLocale({
     -- Unit names.
@@ -58,43 +61,38 @@ mod:RegisterFrenchLocale({
     ["Life Force"] = "Force vitale",
     ["Lifekeeper"] = "Garde-vie",
     -- Datachron messages.
+    ["Time to die, sapients!"] = "Maintenant c'est l'heure de mourir, misérables !",
     -- Cast.
     ["Blinding Light"] = "Lumière aveuglante",
-    -- Bar and messages.
+    -- Timer bars.
+    ["Next middle phase"] = "Prochaine phase milieu",
+    ["Next thorns"] = "Prochaine épines",
+    ["Avatus incoming"] = "Avatus arrivé",
+    ["Enrage"] = "Enrage",
+    -- Message bars.
     ["TWIRL ON YOU!"] = "TOURNOIEMENT SUR VOUS!",
-    ["Thorns"] = "Épines",
     ["Twirl"] = "Tournoiement",
     ["Midphase Ending"] = "Phase Milieu Fin",
-    ["Middle Phase"] = "Phase Milieu",
     ["Next Healing Tree"] = "Prochain Arbres à Soigner",
     ["No-Healing Debuff!"] = "Aucun-Soin Debuff!",
     ["NO HEAL DEBUFF"] = "NO HEAL",
     ["Lightning"] = "Foudre",
     ["Lightning on %s"] = "Foudre sur %s",
-    ["Enrage"] = "Enrage",
 })
 mod:RegisterGermanLocale({
     -- Unit names.
     ["Visceralus"] = "Viszeralus",
     ["Aileron"] = "Aileron",
     ["Wild Brambles"] = "Wilde Brombeeren",
-    --["[DS] e395 - Air - Tornado"] = "[DS] e395 - Air - Tornado", -- TODO: German translation missing !!!!
     ["Life Force"] = "Lebenskraft",
     ["Lifekeeper"] = "Lebensbewahrer",
     -- Datachron messages.
     -- Cast.
     ["Blinding Light"] = "Blendendes Licht",
-    -- Bar and messages.
-    --["TWIRL ON YOU!"] = "TWIRL ON YOU!", -- TODO: German translation missing !!!!
-    ["Thorns"] = "Dornen",
+    -- Timer bars.
+    -- Message bars.
     ["Twirl"] = "Wirbel",
-    --["Midphase Ending"] = "Midphase Ending", -- TODO: German translation missing !!!!
-    --["Middle Phase"] = "Middle Phase", -- TODO: German translation missing !!!!
-    --["Next Healing Tree"] = "Next Healing Tree", -- TODO: German translation missing !!!!
-    --["No-Healing Debuff!"] = "No-Healing Debuff!", -- TODO: German translation missing !!!!
-    --["NO HEAL DEBUFF"] = "NO HEAL", -- TODO: German translation missing !!!!
     ["Lightning"] = "Blitz",
-    --["Lightning on %s"] = "Lightning on %s", -- TODO: German translation missing !!!!
 })
 -- Default settings.
 mod:RegisterDefaultSetting("LineLifeOrbs")
@@ -121,6 +119,8 @@ mod:RegisterDefaultTimerBarConfigs({
     ["LIFEKEEP"] = { sColor = "xkcdAvocadoGreen" },
     ["TWIRL"] = { sColor = "xkcdBluegreen" },
     ["MIDPHASE"] = { sColor = "xkcdBluePurple" },
+    ["AVATUS_INCOMING"] = { sColor = "xkcdAmethyst" },
+    ["ENRAGE"] = { sColor = "xkcdBloodRed" },
 })
 
 ----------------------------------------------------------------------------------------------------
@@ -154,6 +154,7 @@ function mod:OnBossEnable()
     Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
     Apollo.RegisterEventHandler("DEBUFF_ADD", "OnDebuffAdd", self)
     Apollo.RegisterEventHandler("DEBUFF_DEL", "OnDebuffDel", self)
+    Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
 
     nLastThornsTime = 0
     bIsMidPhase = false
@@ -163,9 +164,9 @@ function mod:OnBossEnable()
     tTreeKeeperList = {}
     nFirstTreeId = nil
 
-    mod:AddTimerBar("MIDPHASE", "Middle Phase", 90, mod:GetSetting("SoundMidphaseCountDown"))
-    mod:AddTimerBar("THORN", "Thorns", 20)
-    mod:AddTimerBar("ENRAGE", "Enrage", 500)
+    mod:AddTimerBar("MIDPHASE", "Next middle phase", 90, mod:GetSetting("SoundMidphaseCountDown"))
+    mod:AddTimerBar("THORN", "Next thorns", 20)
+    mod:AddTimerBar("AVATUS_INCOMING", "Avatus incoming", 500)
 end
 
 function mod:OnUnitCreated(tUnit, sName)
@@ -176,7 +177,7 @@ function mod:OnUnitCreated(tUnit, sName)
         if nLastThornsTime + 5 < nCurrentTime and nCurrentTime + 16 < nMidPhaseTime then
             nLastThornsTime = nCurrentTime
             nTwirlCount = nTwirlCount + 1
-            mod:AddTimerBar("THORN", "Thorns", 15)
+            mod:AddTimerBar("THORN", "Next thorns", 15)
             if nTwirlCount % 2 == 1 then
                 mod:AddTimerBar("TWIRL", "Twirl", 15)
             end
@@ -187,7 +188,7 @@ function mod:OnUnitCreated(tUnit, sName)
             nTwirlCount = 0
             nMidPhaseTime = nCurrentTime + 115
             mod:AddTimerBar("MIDEND", "Midphase Ending", 35)
-            mod:AddTimerBar("THORN", "Thorns", 35)
+            mod:AddTimerBar("THORN", "Next thorns", 35)
             mod:AddTimerBar("LIFEKEEP", "Next Healing Tree", 35)
         end
     elseif sName == self.L["Life Force"] then
@@ -245,7 +246,7 @@ function mod:OnUnitDestroyed(unit, sName)
     local nId = unit:GetId()
     if bIsMidPhase and sName == self.L["[DS] e395 - Air - Tornado"] then
         bIsMidPhase = false
-        mod:AddTimerBar("MIDPHASE", "Middle Phase", 90, mod:GetSetting("SoundMidphaseCountDown"))
+        mod:AddTimerBar("MIDPHASE", "Next middle phase", 90, mod:GetSetting("SoundMidphaseCountDown"))
     elseif sName == self.L["Life Force"] then
         core:DropPixie(nId)
     elseif sName == self.L["Lifekeeper"] then
@@ -255,6 +256,13 @@ function mod:OnUnitDestroyed(unit, sName)
                 break
             end
         end
+    end
+end
+
+function mod:OnChatDC(message)
+    if self.L["Time to die, sapients!"] == message then
+        mod:RemoveTimerBar("AVATUS_INCOMING")
+        mod:AddTimerBar("ENRAGE", "Enrage", 34)
     end
 end
 

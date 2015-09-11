@@ -29,9 +29,13 @@ mod:RegisterEnglishLocale({
     ["Supercell"] = "Supercell",
     ["Raw Power"] = "Raw Power",
     ["Fierce Swipe"] = "Fierce Swipe",
-    -- Bar and messages.
+    -- Timer bars.
+    ["Next supercell"] = "Next supercell",
+    ["Next fierce swipe"] = "Next fierce swipe",
+    ["Next tornado"] = "Next tornado",
+    ["Next raw power"] = "Next raw power",
+    -- Message bars.
     ["EARTH"] = "EARTH",
-    ["~Tornado Spawn"] = "~Tornado Spawn",
     ["JUMP !"] = "JUMP, JUMP, JUMP, JUMP !!!"
 })
 mod:RegisterFrenchLocale({
@@ -46,9 +50,13 @@ mod:RegisterFrenchLocale({
     ["Supercell"] = "Super-cellule",
     ["Raw Power"] = "Énergie brute",
     ["Fierce Swipe"] = "Baffe féroce",
-    -- Bar and messages.
+    -- Timer bars.
+    ["Next supercell"] = "Prochaine super-cellule",
+    ["Next fierce swipe"] = "Prochaine baffe féroce",
+    ["Next tornado"] = "Prochaine tornade",
+    ["Next raw power"] = "Prochaine énergie brute",
+    -- Message bars.
     ["EARTH"] = "TERRE",
-    ["~Tornado Spawn"] = "~Tornade Apparition",
     ["JUMP !"] = "SAUTEZ, SAUTEZ, SAUTEZ, SAUTEZ !!!"
 })
 mod:RegisterGermanLocale({
@@ -57,14 +65,11 @@ mod:RegisterGermanLocale({
     ["Aileron"] = "Aileron",
     ["Air Column"] = "Luftsäule",
     -- Datachron messages.
-    --["The ground shudders beneath Megalith"] = "The ground shudders beneath Megalith", -- TODO: German translation missing !!!!
-    --["fractured crust leaves it exposed"] = "fractured crust leaves it exposed", -- TODO: German translation missing !!!!
     -- Cast.
     ["Supercell"] = "Superzelle",
     ["Raw Power"] = "Rohe Kraft",
-    -- Bar and messages.
-    --["EARTH"] = "EARTH", -- TODO: German translation missing !!!!
-    --["~Tornado Spawn"] = "~Tornado Spawn", -- TODO: German translation missing !!!!
+    -- Timer bars.
+    -- Message bars.
 })
 -- Default settings.
 mod:RegisterDefaultSetting("LineTornado")
@@ -107,9 +112,9 @@ function mod:OnBossEnable()
     nRefTime = nTime
     bMidPhase = false
 
-    mod:AddTimerBar("SUPERCELL", "Supercell", 65, mod:GetSetting("SoundSupercell"))
-    mod:AddTimerBar("TORNADO", "~Tornado Spawn", 16, mod:GetSetting("SoundTornadoCountDown"))
-    mod:AddTimerBar("FIERCE_SWIPE", "Fierce Swipe", 16)
+    mod:AddTimerBar("SUPERCELL", "Next supercell", 65, mod:GetSetting("SoundSupercell"))
+    mod:AddTimerBar("TORNADO", "Next tornado", 16, mod:GetSetting("SoundTornadoCountDown"))
+    mod:AddTimerBar("FIERCE_SWIPE", "Next fierce swipe", 16)
 end
 
 function mod:OnUnitCreated(unit, sName)
@@ -128,7 +133,7 @@ function mod:OnUnitCreated(unit, sName)
             core:AddLine(unit:GetId(), 2, unit, nil, 3, 30, 0, 10)
         end
         if GetGameTime() > nStartTime + 10 then
-            mod:AddTimerBar("TORNADO", "~Tornado Spawn", 17, mod:GetSetting("SoundTornadoCountDown"))
+            mod:AddTimerBar("TORNADO", "Next tornado", 17, mod:GetSetting("SoundTornadoCountDown"))
         end
     end
 end
@@ -143,17 +148,17 @@ function mod:OnSpellCastStart(unitName, castName, unit)
     if unitName == self.L["Megalith"] then
         if castName == self.L["Raw Power"] then
             bMidPhase = true
-            mod:AddMsg("RAW", self.L["Raw Power"]:upper(), 5, mod:GetSetting("SoundMidphase") and "Alert")
+            mod:AddMsg("RAW", castName:upper(), 5, mod:GetSetting("SoundMidphase") and "Alert")
         elseif castName == self.L["Fierce Swipe"] then
-            mod:AddTimerBar("FIERCE_SWIPE", "Fierce Swipe", 16.5)
+            mod:AddTimerBar("FIERCE_SWIPE", "Next fierce swipe", 16.5)
         end
     elseif unitName == self.L["Aileron"] then
         if castName == self.L["Supercell"] then
             local timeOfEvent = GetGameTime()
             if timeOfEvent - nRefTime > 30 then
                 nRefTime = timeOfEvent
-                mod:AddMsg("SUPERCELL", self.L["Supercell"]:upper(), 5, mod:GetSetting("SoundSupercell") and "Alarm")
-                mod:AddTimerBar("SUPERCELL", "Supercell", 80)
+                mod:AddMsg("SUPERCELL", castName:upper(), 5, mod:GetSetting("SoundSupercell") and "Alarm")
+                mod:AddTimerBar("SUPERCELL", "Next supercell", 80)
             end
         end
     end
@@ -170,6 +175,6 @@ function mod:OnChatDC(message)
         end
     elseif message:find(self.L["fractured crust leaves it exposed"]) and bMidPhase then
         bMidPhase = false
-        mod:AddTimerBar("RAWPOWER", "Raw Power", 60, mod:GetSetting("SoundMidphase"))
+        mod:AddTimerBar("RAWPOWER", "Next raw power", 60, mod:GetSetting("SoundMidphase"))
     end
 end

@@ -24,7 +24,9 @@ mod:RegisterEnglishLocale({
     ["Flame Wave"] = "Flame Wave",
     -- Cast.
     ["Blinding Light"] = "Blinding Light",
-    -- Bar and messages.
+    -- Timer bars.
+    ["Next middle phase"] = "Next middle phase",
+    -- Message bars.
     ["No-Healing DEBUFF!"] = "No-Healing DEBUFF!",
 })
 mod:RegisterFrenchLocale({
@@ -36,7 +38,9 @@ mod:RegisterFrenchLocale({
     ["Flame Wave"] = "Vague de feu",
     -- Cast.
     ["Blinding Light"] = "Lumière aveuglante",
-    -- Bar and messages.
+    -- Timer bars.
+    ["Next middle phase"] = "Prochaine phase milieu",
+    -- Message bars.
     ["No-Healing DEBUFF!"] = "Aucun-Soin DEBUFF!",
 })
 mod:RegisterGermanLocale({
@@ -48,6 +52,8 @@ mod:RegisterGermanLocale({
     ["Flame Wave"] = "Flammenwelle",
     -- Cast.
     ["Blinding Light"] = "Blendendes Licht",
+    -- Timer bars.
+    -- Message bars.
 })
 -- Default settings.
 mod:RegisterDefaultSetting("SoundNoHealDebuff")
@@ -89,7 +95,7 @@ function mod:OnBossEnable()
     Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
 
     nEssenceofLifeCount = 0
-    mod:AddTimerBar("MID", "Middle Phase", 90, mod:GetSetting("SoundCountDownMidPhase"))
+    mod:AddTimerBar("MID", "Next middle phase", 90, mod:GetSetting("SoundCountDownMidPhase"))
 end
 
 function mod:OnUnitCreated(tUnit, sName)
@@ -139,7 +145,7 @@ function mod:OnUnitDestroyed(tUnit, sName)
     elseif self.L["Essence of Life"] == sName then
         nEssenceofLifeCount = nEssenceofLifeCount - 1
         if nEssenceofLifeCount == 0 then
-            mod:AddTimerBar("MID", "Middle Phase", 90, mod:GetSetting("SoundCountDownMidPhase"))
+            mod:AddTimerBar("MID", "Next middle phase", 90, mod:GetSetting("SoundCountDownMidPhase"))
         end
     end
 end

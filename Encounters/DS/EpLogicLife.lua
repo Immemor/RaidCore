@@ -24,13 +24,16 @@ mod:RegisterEnglishLocale({
     ["Mnemesis"] = "Mnemesis",
     ["Visceralus"] = "Visceralus",
     -- Datachron messages.
+    ["Time to die, sapients!"] = "Time to die, sapients!",
     -- Cast.
     ["Blinding Light"] = "Blinding Light",
     ["Defragment"] = "Defragment",
-    -- Bar and messages.
+    -- Timer bars.
     ["Next defragment"] = "Next defragment",
+    ["Avatus incoming"] = "Avatus incoming",
+    ["Enrage"] = "Enrage",
+    -- Message bars.
     ["SPREAD"] = "SPREAD",
-    ["ENRAGE"] = "ENRAGE",
     ["No-Healing Debuff!"] = "No-Healing Debuff!",
     ["NO HEAL DEBUFF"] = "NO HEAL\nDEBUFF",
     ["SNAKE ON YOU!"] = "SNAKE ON YOU!",
@@ -51,13 +54,16 @@ mod:RegisterFrenchLocale({
     ["Mnemesis"] = "Mnémésis",
     ["Visceralus"] = "Visceralus",
     -- Datachron messages.
+    ["Time to die, sapients!"] = "Maintenant c'est l'heure de mourir, misérables !",
     -- Cast.
     ["Blinding Light"] = "Lumière aveuglante",
     ["Defragment"] = "Défragmentation",
-    -- Bar and messages.
+    -- Timer bars.
     ["Next defragment"] = "Prochaine defragmentation",
+    ["Avatus incoming"] = "Avatus arrivé",
+    ["Enrage"] = "Enrage",
+    -- Message bars.
     ["SPREAD"] = "SEPAREZ-VOUS",
-    ["ENRAGE"] = "ENRAGE",
     ["No-Healing Debuff!"] = "No-Healing Debuff!",
     ["NO HEAL DEBUFF"] = "NO HEAL\nDEBUFF",
     ["SNAKE ON YOU!"] = "SERPENT SUR VOUS!",
@@ -81,14 +87,8 @@ mod:RegisterGermanLocale({
     -- Cast.
     ["Blinding Light"] = "Blendendes Licht",
     ["Defragment"] = "Defragmentieren",
-    -- Bar and messages.
-    --["ENRAGE"] = "ENRAGE", -- TODO: German translation missing !!!!
-    --["No-Healing Debuff!"] = "No-Healing Debuff!", -- TODO: German translation missing !!!!
-    --["NO HEAL DEBUFF"] = "NO HEAL\nDEBUFF", -- TODO: German translation missing !!!!
-    --["SNAKE ON YOU!"] = "SNAKE ON YOU!", -- TODO: German translation missing !!!!
-    --["SNAKE ON %s!"] = "SNAKE ON %s!", -- TODO: German translation missing !!!!
-    --["SNAKE"] = "SNAKE", -- TODO: German translation missing !!!!
-    --["THORNS DEBUFF"] = "THORNS\nDEBUFF", -- TODO: German translation missing !!!!
+    -- Timer bars.
+    -- Message bars.
     ["MARKER North"] = "N",
     ["MARKER South"] = "S",
     ["MARKER East"] = "O",
@@ -112,6 +112,7 @@ mod:RegisterDefaultSetting("PolygonDefrag")
 -- Timers default configs.
 mod:RegisterDefaultTimerBarConfigs({
     ["DEFRAG"] = { sColor = "xkcdAlgaeGreen" },
+    ["AVATUS_INCOMING"] = { sColor = "xkcdAmethyst" },
     ["ENRAGE"] = { sColor = "xkcdBloodRed" },
 })
 
@@ -132,7 +133,7 @@ local MID_POSITIONS = {
 -- Locals.
 ----------------------------------------------------------------------------------------------------
 local GetPlayerUnit = GameLib.GetPlayerUnit
-local midphase = false
+local bIsMidPhase = false
 
 ---------------------------------------------------------------------------------------------------
 -- Encounter description.
@@ -143,7 +144,18 @@ function mod:OnBossEnable()
     Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
     Apollo.RegisterEventHandler("DEBUFF_APPLIED", "OnDebuffApplied", self)
     Apollo.RegisterEventHandler("DEBUFF_REMOVED", "OnDebuffRemoved", self)
-    midphase = false
+    Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
+    bIsMidPhase = false
+
+    mod:AddTimerBar("DEFRAG", "Next defragment", 21, mod:GetSetting("SoundDefrag"))
+    mod:AddTimerBar("AVATUS_INCOMING", "Avatus incoming", 480, mod:GetSetting("SoundEnrageCountDown"))
+end
+
+function mod:OnChatDC(message)
+    if self.L["Time to die, sapients!"] == message then
+        mod:RemoveTimerBar("AVATUS_INCOMING")
+        mod:AddTimerBar("ENRAGE", "Enrage", 34)
+    end
 end
 
 function mod:OnDebuffApplied(unitName, splId, unit)
@@ -181,25 +193,29 @@ function mod:OnDebuffRemoved(unitName, splId, unit)
 end
 
 function mod:OnUnitCreated(unit, sName)
+    local nHealth = tUnit:GetHealth()
+
     if sName == self.L["Visceralus"] then
-        core:AddUnit(unit)
-        core:WatchUnit(unit)
-        if mod:GetSetting("LineCleaveVisceralus") then
-            core:AddSimpleLine("Visc1", nId, 0, 25, 0, 4, "blue", 10)
-            core:AddSimpleLine("Visc2", nId, 0, 25, 72, 4, "green", 20)
-            core:AddSimpleLine("Visc3", nId, 0, 25, 144, 4, "green", 20)
-            core:AddSimpleLine("Visc4", nId, 0, 25, 216, 4, "green", 20)
-            core:AddSimpleLine("Visc5", nId, 0, 25, 288, 4, "green", 20)
+        if nHealth then 
+            core:AddUnit(unit)
+            core:WatchUnit(unit)
+            if mod:GetSetting("LineCleaveVisceralus") then
+                core:AddSimpleLine("Visc1", nId, 0, 25, 0, 4, "blue", 10)
+                core:AddSimpleLine("Visc2", nId, 0, 25, 72, 4, "green", 20)
+                core:AddSimpleLine("Visc3", nId, 0, 25, 144, 4, "green", 20)
+                core:AddSimpleLine("Visc4", nId, 0, 25, 216, 4, "green", 20)
+                core:AddSimpleLine("Visc5", nId, 0, 25, 288, 4, "green", 20)
+            end
         end
     elseif sName == self.L["Mnemesis"] then
-        core:WatchUnit(unit)
-        core:AddUnit(unit)
-        mod:AddTimerBar("DEFRAG", "Next defragment", 21, mod:GetSetting("SoundDefrag"))
-        mod:AddTimerBar("ENRAGE", "ENRAGE", 480, mod:GetSetting("SoundEnrageCountDown"))
+        if nHealth then 
+            core:WatchUnit(unit)
+            core:AddUnit(unit)
+        end
     elseif sName == self.L["Essence of Life"] then
         core:AddUnit(unit)
-        if not midphase then
-            midphase = true
+        if not bIsMidPhase then
+            bIsMidPhase = true
             if mod:GetSetting("OtherDirectionMarkers") then
                 core:SetWorldMarker("NORTH", self.L["MARKER North"], MID_POSITIONS["north"])
                 core:SetWorldMarker("EAST", self.L["MARKER East"], MID_POSITIONS["east"])
@@ -226,7 +242,7 @@ function mod:OnUnitDestroyed(unit, sName)
     local nId = unit:GetId()
 
     if sName == self.L["Essence of Logic"] then
-        midphase = false
+        bIsMidPhase = false
         core:ResetWorldMarkers()
     elseif sName == self.L["Alphanumeric Hash"] then
         core:RemoveSimpleLine(nId)

@@ -93,17 +93,23 @@ mod:RegisterEnglishLocale({
     ["Red Empowerment Matrix"] = "Red Empowerment Matrix",
     ["Blue Disruption Matrix"] = "Blue Disruption Matrix",
     ["Green Reconstitution Matrix"] = "Green Reconstitution Matrix",
-    -- Bar and messages.
-    ["Holo Hand Spawned"] = "Holo Hand Spawned",
+    -- Timer bars.
+    ["Next gun grid"] = "Next gun grid",
+    ["Next obliteration beam"] = "Next obliteration beam",
+    ["Next increase of number of purge"] = "Next increase of number of purge",
+    ["Next purge cycle"] = "Next purge cycle",
+    ["Next support cannon"] = "Next support cannon",
+    ["Next holo: Hands"] = "Next holo: Hands",
+    ["Next holo: Cannons"] = "Next holo: Cannons",
+    ["Next blind"] = "Next blind",
+    -- Message bars.
+    ["HOLO HAND SPAWNED"] = "HOLO HAND SPAWNED",
     ["P2 SOON !"] = "P2 SOON !",
     ["P3 SOON !"] = "P3 SOON !",
     ["KILL AVATUS !!!"] = "KILL AVATUS !!!",
     ["INTERRUPT CRUSHING BLOW!"] = "INTERRUPT CRUSHING BLOW!",
     ["BLIND! TURN AWAY FROM BOSS"] = "BLIND! TURN AWAY FROM BOSS",
-    ["Blind"] = "Blind",
-    ["Gun Grid NOW!"] = "Gun Grid NOW!",
-    ["~Gun Grid"] = "~Gun Grid",
-    ["Hand %u"] = "Hand %u",
+    ["GUN GRID NOW!"] = "GUN GRID NOW!",
     ["MARKER North"] = "North",
     ["MARKER South"] = "South",
     ["MARKER Est"] = "Est",
@@ -113,9 +119,6 @@ mod:RegisterEnglishLocale({
     ["%s. PURGE GREEN (%s)"] = "%s. PURGE GREEN (%s)",
     ["Yellow Room: Combat started"] = "Yellow Room: Combat started",
     ["Mobius health: %d%%"] = "Mobius health: %d%%",
-    ["Next increase of number of purge"] = "Next increase of number of purge",
-    ["Next purge cycle"] = "Next purge cycle",
-    ["Next support cannon"] = "Next support cannon",
 })
 mod:RegisterFrenchLocale({
     -- Unit names.
@@ -145,17 +148,23 @@ mod:RegisterFrenchLocale({
     ["Red Empowerment Matrix"] = "Matrice de renforcement rouge",
     ["Blue Disruption Matrix"] = "Matrice disruptive bleue",
     ["Green Reconstitution Matrix"] = "Matrice de reconstitution verte",
-    -- Bar and messages.
-    ["Holo Hand Spawned"] = "Holo-main Apparition",
+    -- Timer bars.
+    ["Next gun grid"] = "Prochaine pétoires grille",
+    ["Next obliteration beam"] = "Prochain rayon de suppression",
+    ["Next increase of number of purge"] = "Prochaine augmentation du nombre de purge",
+    ["Next purge cycle"] = "Prochain cycle de purge",
+    ["Next support cannon"] = "Prochain canon d'appui",
+    ["Next holo: Hands"] = "Prochain holo: Mains",
+    ["Next holo: Cannons"] = "Prochain holo: Cannons",
+    ["Next blind"] = "Prochain aveuglement",
+    -- Message bars.
+    ["HOLO HAND SPAWNED"] = "HOLO-MAIN APPARITION",
     ["P2 SOON !"] = "P2 BIENTÔT !",
     ["P3 SOON !"] = "P3 BIENTÔT !",
     ["KILL AVATUS !!!"] = "TUEZ AVATUS !!!",
     ["INTERRUPT CRUSHING BLOW!"] = "INTERROMPRE COUP ÉCRASANT!",
     ["BLIND! TURN AWAY FROM BOSS"] = "AVEUGLER! DOS AU BOSS",
-    ["Blind"] = "Aveugler",
-    ["Gun Grid NOW!"] = "pétoires MAINTENANT!",
-    ["~Gun Grid"] = "~Pétoires Grille",
-    ["Hand %u"] = "Main %u",
+    ["GUN GRID NOW!"] = "PÉTOIRES MAINTENANT!",
     ["MARKER North"] = "Nord",
     ["MARKER South"] = "Sud",
     ["MARKER Est"] = "Est",
@@ -165,9 +174,6 @@ mod:RegisterFrenchLocale({
     ["%s. PURGE GREEN (%s)"] = "%s. PURGE VERT (%s)",
     ["Yellow Room: Combat started"] = "Salle Jaune: Combat démarré",
     ["Mobius health: %d%%"] = "Mobius santé: %d%%",
-    ["Next increase of number of purge"] = "Prochaine augmentation du nombre de purge",
-    ["Next purge cycle"] = "Prochain cycle de purge",
-    ["Next support cannon"] = "Prochain canon d'appui",
 })
 mod:RegisterGermanLocale({
     -- Unit names.
@@ -179,24 +185,13 @@ mod:RegisterGermanLocale({
     ["Shock Sphere"] = "Schocksphäre",
     ["Support Cannon"] = "Hilfskanone",
     ["Infinite Logic Loop"] = "Unendliche Logikschleife",
-    --["Tower Platform"] = "Tower Platform", -- TODO: German translation missing !!!!
-    --["Augmented Rowsdower"] = "Augmented Rowsdower", -- TODO: German translation missing !!!!
     -- Datachron messages.
-    --["Portals have opened!"] = "Portals have opened!", -- TODO: German translation missing !!!!
-    --["Gun Grid Activated"] = "Gun Grid Activated", -- TODO: German translation missing !!!!
     -- Cast.
     ["Crushing Blow"] = "Vernichtender Schlag",
     ["Data Flare"] = "Daten-Leuchtsignal",
     ["Obliteration Beam"] = "Vernichtungsstrahl",
     -- Bar and messages.
-    --["Holo Hand Spawned"] = "Holo Hand Spawned", -- TODO: German translation missing !!!!
     ["P2 SOON !"] = "GLEICH PHASE 2 !",
-    --["INTERRUPT CRUSHING BLOW!"] = "INTERRUPT CRUSHING BLOW!", -- TODO: German translation missing !!!!
-    --["BLIND! TURN AWAY FROM BOSS"] = "BLIND! TURN AWAY FROM BOSS", -- TODO: German translation missing !!!!
-    ["Blind"] = "Geblendet",
-    --["Gun Grid NOW!"] = "Gun Grid NOW!", -- TODO: German translation missing !!!!
-    --["~Gun Grid"] = "~Gun Grid", -- TODO: German translation missing !!!!
-    --["Hand %u"] = "Hand %u", -- TODO: German translation missing !!!!
     ["MARKER North"] = "Nord",
     ["MARKER South"] = "Süd",
     ["MARKER Est"] = "Ost",
@@ -369,6 +364,7 @@ local function DisplayPurgeList()
             end
 
             local sPlayers = table.concat(tOrdered, ", ")
+            core:Print("====== PURGE LIST ======")
             if ePurgeType == PURGE_BLUE then
                 core:Print(mod.L["%s. PURGE BLUE (%s)"]:format("a", sPlayers))
             elseif ePurgeType == PURGE_RED then
@@ -432,7 +428,7 @@ function mod:OnBossEnable()
     nLastSupportCannonPopTime = 0
     nLastBuffPurgeTime = 0
 
-    mod:AddTimerBar("GGRID", "~Gun Grid", 21, mod:GetSetting("SoundGunGrid"))
+    mod:AddTimerBar("GGRID", "Next gun grid", 21, mod:GetSetting("SoundGunGrid"))
 end
 
 function mod:OnUnitCreated(unit, sName)
@@ -508,7 +504,7 @@ function mod:OnUnitCreated(unit, sName)
         core:AddUnit(unit)
         core:WatchUnit(unit)
         table.insert(tHoloHandsList, nUnitId, { ["unit"] = unit} )
-        mod:AddMsg("HHAND", "Holo Hand Spawned", 5, "Info")
+        mod:AddMsg("HHAND", "HOLO HAND SPAWNED", 5, "Info")
         if mod:GetSetting("LineCleaveHands") then
             core:AddPixie(nUnitId .. "_1", 2, unit, nil, "Blue", 7, 25, 0)
             core:AddPixie(nUnitId .. "_2", 2, unit, nil, "xkcdBluegrey", 3, 7, 60)
@@ -637,6 +633,7 @@ function mod:OnBuffApplied(unitName, splId, unit)
                 nPurgeCycleCountPerColor[ePurgeType] = nPurgeCycleCountPerColor[ePurgeType] + 1
                 if nPurgeCycleCount == 1 then
                     mod:AddTimerBar("PURGE_CYCLE", "Next purge cycle", 20)
+                    DisplayPurgeList()
                 end
             end
             if nCurrentPhase == BLUE_PHASE and mod:GetSetting("OtherPurgeMessages") then
@@ -657,7 +654,7 @@ function mod:OnBuffApplied(unitName, splId, unit)
         if BUFFID_HOLO_CANNONS_ACTIVE == splId then
             if not nHoloCannonActivationTime and not bIsProtectionBarrierEnable then
                 nHoloCannonActivationTime = GetGameTime()
-                mod:AddTimerBar("OBBEAM", "Obliteration Beam", 26, mod:GetSetting("SoundObliterationBeam"))
+                mod:AddTimerBar("OBBEAM", "Next obliteration beam", 26, mod:GetSetting("SoundObliterationBeam"))
             end
         elseif BUFFID_PROTECTIVE_BARRIER == splId then
             bIsProtectionBarrierEnable = true
@@ -720,7 +717,7 @@ function mod:OnSpellCastStart(unitName, castName, unit)
             local EndOfCannon = nHoloCannonActivationTime + HOLO_CANNONS_DURATION[nMainPhaseCount]
             local NextBeam = GetGameTime() + 37
             if EndOfCannon > NextBeam and nMainPhaseCount < 3 then
-                mod:AddTimerBar("OBBEAM", "Obliteration Beam", 37, mod:GetSetting("SoundObliterationBeam"))
+                mod:AddTimerBar("OBBEAM", "Next obliteration beam", 37, mod:GetSetting("SoundObliterationBeam"))
             else
                 mod:RemoveTimerBar("OBBEAM")
             end
@@ -743,7 +740,7 @@ function mod:OnSpellCastStart(unitName, castName, unit)
             mod:AddMsg("CRBLOW", "INTERRUPT CRUSHING BLOW!", 5, mod:GetSetting("SoundHandInterrupt") and "Inferno")
         end
     elseif unitName == self.L["Mobius Physics Constructor"] and castName == self.L["Data Flare"] then
-        mod:AddTimerBar("BLIND", "Blind", 29, mod:GetSetting("SoundBlindYellowRoom"))
+        mod:AddTimerBar("BLIND", "Next blind", 29, mod:GetSetting("SoundBlindYellowRoom"))
         mod:AddMsg("BLIND", "BLIND! TURN AWAY FROM BOSS", 5, mod:GetSetting("SoundBlindYellowRoom") and "Inferno")
     end
 end
@@ -751,14 +748,14 @@ end
 function mod:OnChatDC(message)
     local nEscalatingFound = message:match(self.L["Escalating defense matrix system"])
     if message:find(self.L["Gun Grid Activated"]) then
-        mod:AddMsg("GGRIDMSG", "Gun Grid NOW!", 5, mod:GetSetting("SoundGunGrid") and "Beware")
-        mod:AddTimerBar("GGRID", "~Gun Grid", GUN_INTERVAL[nMainPhaseCount], mod:GetSetting("SoundGunGrid"))
+        mod:AddMsg("GGRIDMSG", "GUN GRID NOW!", 5, mod:GetSetting("SoundGunGrid") and "Beware")
+        mod:AddTimerBar("GGRID", "Next gun grid", GUN_INTERVAL[nMainPhaseCount], mod:GetSetting("SoundGunGrid"))
         if bIsHoloHand then
-            mod:AddTimerBar("HOLO", "Holo Hand", 22)
+            mod:AddTimerBar("HOLO", "Next holo: Hands", 22)
             bDisplayHandsPictures = true
             RefreshHoloHandPictures()
         else
-            mod:AddTimerBar("HOLO", "Holo Cannon", 22)
+            mod:AddTimerBar("HOLO", "Next holo: Cannons", 22)
         end
         bIsHoloHand = not bIsHoloHand
     elseif message:find(self.L["Portals have opened!"]) then
