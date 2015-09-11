@@ -221,16 +221,13 @@ function mod:OnUnitCreated(unit, sName)
 end
 
 function mod:OnUnitDestroyed(unit, sName)
-    local nUnitId = unit:GetId()
+    local nId = unit:GetId()
+
     if sName == self.L["Alphanumeric Hash"] then
-        if nUnitId then
-            core:RemoveSimpleLine(nUnitId)
-        end
+        core:RemoveSimpleLine(nId)
     elseif sName == self.L["Hydroflux"] then
         core:RemoveSimpleLine("HydroCleave")
     elseif sName == self.L["Hydro Disrupter - DNT"] then
-        if nUnitId then
-            core:RemoveLineBetweenUnits("Disrupter" .. nUnitId)
-        end
+        core:RemoveLineBetweenUnits("Disrupter" .. nId)
     end
 end

@@ -214,7 +214,7 @@ function mod:OnUnitCreated(unit, sName)
         local unitId = unit:GetId()
         if unitId then
             if mod:GetSetting("LineTetrisBlocks") then
-                core:AddPixie(unitId, 2, unit, nil, "Red", 10, 20, 0)
+                core:AddSimpleLine(unitId, unitId, 0, 20, 0, 10, "red")
             end
         end
     elseif sName == self.L["Life Force"] and mod:GetSetting("LineLifeOrbs") then
@@ -223,16 +223,15 @@ function mod:OnUnitCreated(unit, sName)
 end
 
 function mod:OnUnitDestroyed(unit, sName)
+    local nId = unit:GetId()
+
     if sName == self.L["Essence of Logic"] then
         midphase = false
         core:ResetWorldMarkers()
     elseif sName == self.L["Alphanumeric Hash"] then
-        local unitId = unit:GetId()
-        if unitId then
-            core:DropPixie(unitId)
-        end
+        core:RemoveSimpleLine(nId)
     elseif sName == self.L["Life Force"] then
-        core:DropPixie(unit:GetId())
+        core:DropPixie(nId)
     end
 end
 
