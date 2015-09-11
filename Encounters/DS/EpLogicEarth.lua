@@ -96,12 +96,21 @@ local ipairs = ipairs
 local GetUnitById = GameLib.GetUnitById
 local GetPlayerUnit = GameLib.GetPlayerUnit
 local GetGameTime = GameLib.GetGameTime
-local nPreviousDefragmentTime
 local nLastSnakePieceId
 local nMemberIdTargetedBySnake
 local tObsidianList
 
 local function DrawSnakePieceLines()
+    if mod:GetSetting("LineSnakeVsPlayer") then
+        if nLastSnakePieceId and nMemberIdTargetedBySnake then
+            local bTrig = #tObsidianList == 0
+            local c = bTrig and COLOR_SNAKE_FOCUS or COLOR_SNAKE_UNFOCUS_PLAYER
+            local w = bTrig and 8 or 3
+            core:AddLineBetweenUnits("Player VS Snake", nLastSnakePieceId, nMemberIdTargetedBySnake, w, c)
+        else
+            core:RemoveLineBetweenUnits("Player VS Snake")
+        end
+    end
     if nLastSnakePieceId and #tObsidianList > 0 then
         local nObisidianMostClosedId = nil
         local nObisidianMostClosedDistance = nil
@@ -116,22 +125,11 @@ local function DrawSnakePieceLines()
         for i, nId in ipairs(tObsidianList) do
             local bIsMostClose = nId == nObisidianMostClosedId
             local c = bIsMostClose and COLOR_SNAKE_FOCUS or COLOR_SNAKE_UNFOCUS_OBSIDIAN
-            local w = bIsMostClose and 4 or 2
+            local w = bIsMostClose and 8 or 3
             if mod:GetSetting("LineSnakeVsCloseObsidian") and bIsMostClose or
                 mod:GetSetting("LineSnakeVsOtherObsidian") and not bIsMostClose then
                 core:AddLineBetweenUnits("OBSIDIAN" .. nId, nLastSnakePieceId, nId, w, c)
             end
-        end
-    end
-
-    if mod:GetSetting("LineSnakeVsPlayer") then
-        if nLastSnakePieceId and nMemberIdTargetedBySnake then
-            local bTrig = #tObsidianList == 0
-            local c = bTrig and COLOR_SNAKE_FOCUS or COLOR_SNAKE_UNFOCUS_PLAYER
-            local w = bTrig and 4 or 2
-            core:AddLineBetweenUnits("Player VS Snake", nLastSnakePieceId, nMemberIdTargetedBySnake, w, c)
-        else
-            core:RemoveLineBetweenUnits("Player VS Snake")
         end
     end
 end
@@ -146,7 +144,6 @@ function mod:OnBossEnable()
     Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
     Apollo.RegisterEventHandler("DEBUFF_ADD", "OnDebuffAdd", self)
 
-    nPreviousDefragmentTime = 0
     nLastSnakePieceId = nil
     tObsidianList = {}
     nMemberIdTargetedBySnake = nil
@@ -189,17 +186,13 @@ end
 function mod:OnSpellCastStart(unitName, castName, tUnit)
     if unitName == self.L["Mnemesis"] then
         if castName == self.L["Defragment"] then
-            local nCurrentTime = GetGameTime()
-            if nCurrentTime - nPreviousDefragmentTime > 10 then
-                nPreviousDefragmentTime = nCurrentTime
-                mod:AddMsg("DEFRAG", "SPREAD", 5, mod:GetSetting("SoundDefrag") and "Alarm")
-                mod:AddTimerBar("DEFRAG", "DEFRAG", 40)
-                if mod:GetSettings("PolygonDefrag") then
-                    core:AddPolygon("DEFRAG_SQUARE", GetPlayerUnit():GetId(), 13, 0, 4, "xkcdBloodOrange", 4)
-                    self:ScheduleTimer(function()
-                        core:RemovePolygon("DEFRAG_SQUARE")
-                    end, 10)
-                end
+            mod:AddMsg("DEFRAG", "SPREAD", 5, mod:GetSetting("SoundDefrag") and "Alarm")
+            mod:AddTimerBar("DEFRAG", "DEFRAG", 40)
+            if mod:GetSetting("PolygonDefrag") then
+                core:AddPolygon("DEFRAG_SQUARE", GetPlayerUnit():GetId(), 13, 0, 4, "xkcdBloodOrange", 4)
+                self:ScheduleTimer(function()
+                    core:RemovePolygon("DEFRAG_SQUARE")
+                end, 10)
             end
         end
     end
