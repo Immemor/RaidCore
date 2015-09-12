@@ -57,6 +57,7 @@ mod:RegisterDefaultTimerBarConfigs({
 ----------------------------------------------------------------------------------------------------
 -- Constants.
 ----------------------------------------------------------------------------------------------------
+local GetPlayerUnit = GameLib.GetPlayerUnit
 
 ----------------------------------------------------------------------------------------------------
 -- Locals.
@@ -71,6 +72,8 @@ function mod:OnBossEnable()
 end
 
 function mod:OnUnitCreated(unit, sName)
+    local nId = unit:GetId()
+
     if sName == self.L["Phage Maw"] then
         core:AddUnit(unit)
         core:WatchUnit(unit)
@@ -79,6 +82,8 @@ function mod:OnUnitCreated(unit, sName)
             core:MarkUnit(unit, 1)
             core:AddUnit(unit)
         end
+        local o = core:AddLineBetweenUnits("Bomb" .. nId, GetPlayerUnit():GetId(), nId, nil, "green")
+        o:SetMaxLengthVisible(40)
     end
 end
 
