@@ -89,6 +89,10 @@ mod:RegisterDefaultTimerBarConfigs({
 ----------------------------------------------------------------------------------------------------
 -- Locals.
 ----------------------------------------------------------------------------------------------------
+local GetUnitById = GameLib.GetUnitById
+local GetPlayerUnit = GameLib.GetPlayerUnit
+local NewVector3 = Vector3.New
+local tBossId
 local p2Count = 0
 
 ----------------------------------------------------------------------------------------------------
@@ -96,23 +100,40 @@ local p2Count = 0
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
     Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
+    Apollo.RegisterEventHandler("RC_UnitDestroyed", "OnUnitDestroyed", self)
     Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
     Apollo.RegisterEventHandler("SPELL_CAST_END", "OnSpellCastEnd", self)
     Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
 
     p2Count = 0
+    tBossId = {}
     mod:AddTimerBar("CONVP1", self.L["[%u] NEXT P2"]:format(p2Count + 1), 90)
 end
 
 function mod:OnUnitCreated(tUnit, sName)
+    local nHealth = tUnit:GetHealth()
+    local nId = tUnit:GetId()
     if sName == self.L["Golgox the Lifecrusher"]
         or sName == self.L["Terax Blightweaver"]
         or sName == self.L["Ersoth Curseform"]
         or sName == self.L["Noxmind the Insidious"]
         or sName == self.L["Fleshmonger Vratorg"] then
-        core:AddUnit(tUnit)
-        core:WatchUnit(tUnit)
+        if nHealth then
+            core:AddUnit(tUnit)
+            core:WatchUnit(tUnit)
+            tBossId[sName] = nId
+        elseif sName == self.L["Noxmind the Insidious"] then
+            -- It's the wave from Nox which target a player
+            local tPos = tUnit:GetPosition()
+            local tNoxmindUnit = GetUnitById(tBossId[sName])
+            if tNoxmindUnit then
+                -- core:AddSimpleLine("Wave" .. nId, nId, 0, 22, 0, 8, "green")
+            end
+        end
     end
+end
+
+function mod:OnUnitDestroyed(tUnit, sName)
 end
 
 function mod:OnSpellCastStart(unitName, castName, unit)
@@ -126,7 +147,7 @@ function mod:OnSpellCastStart(unitName, castName, unit)
             mod:AddMsg("CONVP2", "P2 : MINI ADDS", 5, "Alert")
             mod:AddTimerBar("CONVP2", "P2 : MINI ADDS", 29.5)
         elseif castName == self.L["Stitching Strain"] then
-            if self:GetDistanceBetweenUnits(GameLib.GetPlayerUnit(), unit) < 30 then
+            if self:GetDistanceBetweenUnits(GetPlayerUnit(), unit) < 30 then
                 mod:AddMsg("INTSTRAIN", "Interrupt Terax!", 5, "Inferno")
             end
         end
