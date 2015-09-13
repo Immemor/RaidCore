@@ -377,7 +377,6 @@ end
 
 function SimpleLine:AddDraw(Key, Origin, nOffset, nLength, nRotation, nWidth, sColor, nNumberOfDot)
     local OriginType = type(Origin)
-    assert(OriginType == "number" or OriginType == "table")
 
     if self.tDraws[Key] then
         -- To complex to manage new definition with nNumberOfDot which change,
