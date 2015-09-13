@@ -173,7 +173,7 @@ function mod:OnBossEnable()
     mod:AddTimerBar("NEXT_IRRADIATE", "~Next irradiate", 27, mod:GetSetting("SoundNextIrradiateCountDown"))
     if mod:GetSetting("LinesOnBosses") then
         for i, Vectors in next, STATIC_LINES do
-            core:AddLineBetweenUnits("StaticLine" .. i, Line[1], Line[2], 3, "xkcdAmber")
+            core:AddLineBetweenUnits("StaticLine" .. i, Vectors[1], Vectors[2], 3, "xkcdAmber")
         end
     end
     if mod:GetSetting("IncubationRegroupZone") then
