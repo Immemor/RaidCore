@@ -32,7 +32,6 @@ mod:RegisterEnglishLocale({
     ["KNOCKBACK"] = "KNOCKBACK",
     ["BEAM"] = "BEAM",
     ["SHOCKWAVE"] = "SHOCKWAVE",
-    ["LITTLE BOMB"] = "LITTLE BOMB",
 })
 mod:RegisterFrenchLocale({
     -- Unit names.
@@ -44,13 +43,13 @@ mod:RegisterFrenchLocale({
     ["Shattering Shockwave"] = "Onde de choc dévastatrice",
     ["Repugnant Spew"] = "Crachat répugnant",
     ["Resounding Shout"] = "Hurlement retentissant",
-    -- Bar and messages.
+    -- Timer bars.
+    ["Big bomb on %s"] = "Grosse bombe sur %s",
+    ["Little bomb on %s"] = "Petite bombe sur %s",
+    -- Message bars.
     ["KNOCKBACK"] = "KNOCKBACK",
     ["BEAM"] = "LASER",
     ["SHOCKWAVE"] = "ONDE DE CHOC",
-    ["BIG BOMB on %s !!!"] = "GROSSE BOMBE sur %s !!!",
-    ["LITTLE BOMB on %s !!!"] = "PETITE BOMBE sur %s !!!",
-    ["LITTLE BOMB"] = "PETITE BOMBE",
 })
 mod:RegisterGermanLocale({
     -- Unit names.
@@ -62,13 +61,11 @@ mod:RegisterGermanLocale({
     ["Shattering Shockwave"] = "Zerschmetternde Schockwelle",
     ["Repugnant Spew"] = "Widerliches Erbrochenes",
     ["Resounding Shout"] = "Widerhallender Schrei",
-    -- Bar and messages.
+    -- Timer bars.
+    -- Message bars.
     ["KNOCKBACK"] = "RÜCKSTOß",
     ["BEAM"] = "LASER",
     ["SHOCKWAVE"] = "SCHOCKWELLE",
-    ["BIG BOMB on %s !!!"] = "GROßE BOMBE auf %s !!!",
-    ["LITTLE BOMB on %s !!!"] = "KLEINE BOMBE auf %s !!!",
-    ["LITTLE BOMB"] = "KLEINE BOMBE",
 })
 -- Default settings.
 mod:RegisterDefaultSetting("LineExperimentX89")
