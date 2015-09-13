@@ -23,31 +23,24 @@ mod:RegisterEnglishLocale({
     ["Kuralak the Defiler causes a violent outbreak of corruption"] = "Kuralak the Defiler causes a violent outbreak of corruption",
     ["The corruption begins to fester"] = "The corruption begins to fester",
     ["has been anesthetized"] = "has been anesthetized",
-    -- NPCSay messages.
-    ["Through the Strain you will be transformed"] = "Through the Strain you will be transformed",
-    ["Your form is flawed, but I will make you beautiful"] = "Your form is flawed, but I will make you beautiful",
-    ["Let the Strain perfect you"] = "Let the Strain perfect you",
-    ["The Experiment has failed"] = "The Experiment has failed",
-    ["Join us... become one with the Strain"] = "Join us... become one with the Strain",
-    ["One of us... you will become one of us"] = "One of us... you will become one of us",
     -- Cast.
     ["Vanish into Darkness"] = "Vanish into Darkness",
+    ["Chromosome Corruption"] = "Chromosome Corruption",
     -- Bar and messages.
+    ["Next outbreak"] = "Next outbreak",
+    ["Next eggs"] = "Next eggs",
+    ["Next switch tank"] = "Next switch tank",
+    ["Next vanish"] = "Next vanish",
     ["P2 SOON !"] = "P2 SOON !",
     ["PHASE 2 !"] = "PHASE 2 !",
     ["VANISH"] = "VANISH",
-    ["Vanish"] = "Vanish",
     ["OUTBREAK"] = "OUTBREAK",
-    ["Outbreak (%s)"] = "Outbreak (%s)",
-    ["EGGS (%s)"] = "EGGS (%s)",
-    ["Eggs (%s)"] = "Eggs (%s)",
-    ["BERSERK !!"] = "BERSERK !!",
+    ["EGGS"] = "EGGS",
     ["SWITCH TANK"] = "SWITCH TANK",
-    ["Switch Tank (%s)"] = "Switch Tank (%s)",
-    ["MARKER north"] = "N",
-    ["MARKER south"] = "S",
-    ["MARKER east"] = "E",
-    ["MARKER west"] = "W",
+    ["MARKER north"] = "North",
+    ["MARKER south"] = "South",
+    ["MARKER east"] = "Est",
+    ["MARKER west"] = "West",
 })
 mod:RegisterFrenchLocale({
     -- Unit names.
@@ -57,31 +50,24 @@ mod:RegisterFrenchLocale({
     ["Kuralak the Defiler causes a violent outbreak of corruption"] = "Kuralak la Profanatrice provoque une violente éruption de Corruption",
     ["The corruption begins to fester"] = "La Corruption commence à se répandre",
     ["has been anesthetized"] = "est sous anesthésie",
-    -- NPCSay messages.
-    --["Through the Strain you will be transformed"] = "Through the Strain you will be transformed", -- TODO: French translation missing !!!!
-    --["Your form is flawed, but I will make you beautiful"] = "Your form is flawed, but I will make you beautiful", -- TODO: French translation missing !!!!
-    ["Let the Strain perfect you"] = "Embrasse la perfection de la Souillure...",
-    ["The Experiment has failed"] = "L'expérience a échoué",
-    ["Join us... become one with the Strain"] = "Livrez-vous corps et âme à la Souillure...",
-    ["One of us... you will become one of us"] = "Des nôtres... Tu seras bientôt des nôtres...",
     -- Cast.
     ["Vanish into Darkness"] = "Disparaître dans les ténèbres",
+    ["Chromosome Corruption"] = "Corruption chromosomique",
     -- Bar and messages.
+    ["Next outbreak"] = "Prochaine invasion",
+    ["Next eggs"] = "Prochain oeufs",
+    ["Next switch tank"] = "Prochain changement de tank",
+    ["Next vanish"] = "Prochaine disparition",
     ["P2 SOON !"] = "P2 SOON !",
     ["PHASE 2 !"] = "PHASE 2 !",
     ["VANISH"] = "DISPARITION",
-    ["Vanish"] = "Disparition",
     ["OUTBREAK"] = "INVASION",
-    ["Outbreak (%s)"] = "Invasion (%s)",
-    ["EGGS (%s)"] = "Oeufs (%s)",
-    ["Eggs (%s)"] = "Oeufs (%s)",
-    ["BERSERK !!"] = "BERSERK !!",
+    ["EGGS"] = "OEUFS",
     ["SWITCH TANK"] = "CHANGEMENT TANK",
-    ["Switch Tank (%s)"] = "Changement de Tank (%s)",
-    ["MARKER north"] = "N",
-    ["MARKER south"] = "S",
-    ["MARKER east"] = "E",
-    ["MARKER west"] = "O",
+    ["MARKER north"] = "Nord",
+    ["MARKER south"] = "Sud",
+    ["MARKER east"] = "Est",
+    ["MARKER west"] = "Ouest",
 })
 mod:RegisterGermanLocale({
     -- Unit names.
@@ -91,50 +77,62 @@ mod:RegisterGermanLocale({
     ["Kuralak the Defiler causes a violent outbreak of corruption"] = "Kuralak die Schänderin verursacht einen heftigen Ausbruch der Korrumpierung",
     ["The corruption begins to fester"] = "Die Korrumpierung beginnt zu eitern",
     ["has been anesthetized"] = "wurde narkotisiert",
-    -- NPCSay messages.
-    ["Through the Strain you will be transformed"] = "Durch die Transformation wirst du",
-    ["Your form is flawed, but I will make you beautiful"] = "aber ich werde dich schön machen",
-    ["Let the Strain perfect you"] = "Dies ist mein Reich! Daraus gibt es kein Entrinnen ...",
-    ["The Experiment has failed"] = "Lass dich von der Transmutation perfektionieren",
-    ["Join us... become one with the Strain"] = "Die Transmutation ... Lass dich von ihr verschlingen ...",
-    ["One of us... you will become one of us"] = "Einer von uns ...",
     -- Cast.
     ["Vanish into Darkness"] = "In der Dunkelheit verschwinden",
     -- Bar and messages.
+    ["Next outbreak"] = "Das nächste ausbruch",
+    ["Next eggs"] = "Das nächste eier",
+    ["Next switch tank"] = "Das nächste tankwechsel",
+    ["Next vanish"] = "Das nächste Verschwinden",
     ["P2 SOON !"] = "GLEICH PHASE 2 !",
     ["PHASE 2 !"] = "PHASE 2 !",
     ["VANISH"] = "VERSCHWINDEN",
-    ["Vanish"] = "Verschwinden",
     ["OUTBREAK"] = "AUSBRUCH",
-    ["Outbreak (%s)"] = "Ausbruch (%s)",
-    ["EGGS (%s)"] = "Eier (%s)",
-    ["Eggs (%s)"] = "Eier (%s)",
-    ["BERSERK !!"] = "DAS WARS !!",
+    ["EGGS"] = "EIER",
     ["SWITCH TANK"] = "AGGRO ZIEHEN !!!",
-    ["Switch Tank (%s)"] = "Tankwechsel (%s)",
-    ["MARKER north"] = "N",
-    ["MARKER south"] = "S",
-    ["MARKER east"] = "O",
-    ["MARKER west"] = "W",
+    ["MARKER north"] = "Norden",
+    ["MARKER south"] = "Süden",
+    ["MARKER east"] = "Osten",
+    ["MARKER west"] = "Westen",
 })
 -- Default settings.
+mod:RegisterDefaultSetting("PictureCorruption")
 mod:RegisterDefaultSetting("SoundOutbreak")
 mod:RegisterDefaultSetting("SoundSiphon")
+mod:RegisterDefaultSetting("SoundVanish")
+mod:RegisterDefaultSetting("SoundPhase2Switch")
 mod:RegisterDefaultSetting("OtherPillarMarkers")
+mod:RegisterDefaultSetting("OtherEggPositions")
 -- Timers default configs.
 mod:RegisterDefaultTimerBarConfigs({
+    ["EGGS"] = { sColor = "xkcdOrangered" },
 })
 
 ----------------------------------------------------------------------------------------------------
 -- Constants.
 ----------------------------------------------------------------------------------------------------
+-- A player have incubation when he is transform in egg.
+local DEBUFFID_INCUBATION = 58564
+-- Chromosome corruption is when a player is twice powerfull, and have a dot.
 local DEBUFFID_CHROMOSOME_CORRUPTION = 56652
+-- Pillar Markers.
+local PILLAR_POSITIONS = {
+    ["EST"] = { x = 194.44, y = -110.80, z = -483.20 },
+    ["SOUTH"] = { x = 165.79, y = -110.80, z = -464.84 },
+    ["WEST"] = { x = 144.20, y = -110.80, z = -494.38 },
+    ["NORTH"] = { x = 175.00, y = -110.80, z = -513.31 },
+}
+
+-- TODO: Set values when found.
+local EGG_BEST_POSITIONS
 
 ----------------------------------------------------------------------------------------------------
 -- Locals.
 ----------------------------------------------------------------------------------------------------
 local GetUnitById = GameLib.GetUnitById
-local eggsCount, siphonCount, outbreakCount = 0, 0, 0
+local GetPlayerUnit = GameLib.GetPlayerUnit
+local tCorruptedPlayerList
+local bIsPhase2
 
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
@@ -142,93 +140,129 @@ local eggsCount, siphonCount, outbreakCount = 0, 0, 0
 function mod:OnBossEnable()
     Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
     Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
-    Apollo.RegisterEventHandler("CHAT_NPCSAY", "OnChatNPCSay", self)
     Apollo.RegisterEventHandler("DEBUFF_ADD", "OnDebuffAdd", self)
+    Apollo.RegisterEventHandler("DEBUFF_DEL", "OnDebuffDel", self)
+    Apollo.RegisterEventHandler("SPELL_CAST_START", "OnCastStart", self)
 
-    eggsCount, siphonCount, outbreakCount = 2, 1, 0
+
+    tCorruptedPlayerList = {}
+    bIsPhase2 = false
+    -- TODO: Remove this init, when values will be found.
+    EGG_BEST_POSITIONS = nil
+    if mod:GetSetting("OtherPillarMarkers") then
+        core:SetWorldMarker("EAST", self.L["MARKER east"], PILLAR_POSITIONS["EST"])
+        core:SetWorldMarker("SOUTH", self.L["MARKER south"], PILLAR_POSITIONS["SOUTH"])
+        core:SetWorldMarker("WEST", self.L["MARKER west"], PILLAR_POSITIONS["WEST"])
+        core:SetWorldMarker("NORTH", self.L["MARKER north"], PILLAR_POSITIONS["NORTH"])
+    end
 end
 
 function mod:OnUnitCreated(tUnit, sName)
     if sName == self.L["Kuralak the Defiler"] then
         core:AddUnit(tUnit)
         core:WatchUnit(tUnit)
+        -- TODO: Remove this init, when values will be found.
+        if EGG_BEST_POSITIONS == nil then
+            local tPosition = tUnit:GetPosition()
+            local nDistance = 15
+            local tRad = { 0, 180, 90, 270, 45, 135, 225, 315 }
+            EGG_BEST_POSITIONS = {}
+            for i = 1, #tRad do
+                local nRad = math.rad(tRad[i])
+                EGG_BEST_POSITIONS[i] = {
+                    x = tPosition.x + math.cos(nRad) * nDistance,
+                    y = tPosition.y,
+                    z = tPosition.z - math.sin(nRad) * nDistance,
+                }
+            end
+        end
     end
 end
 
 function mod:OnHealthChanged(nId, nPourcent, sName)
     if sName == self.L["Kuralak the Defiler"] then
         if nPourcent == 74 then
-            mod:AddMsg("P2", "P2 SOON !", 5, "Info")
+            mod:AddMsg("P2", "P2 SOON !", 5, mod:GetSetting("SoundPhase2Switch") and "Info")
         end
+    end
+end
+
+function mod:RemoveEggBestPosition()
+    for i, nId in ipairs(tCorruptedPlayerList) do
+        core:RemoveLineBetweenUnits(nId)
+        core:DropWorldMarker(nId)
+    end
+end
+
+function mod:DisplayEggBestPosition()
+    if mod:GetSetting("OtherEggPositions") then
+        local nIdPlayer = GetPlayerUnit():GetId()
+        for i, nId in ipairs(tCorruptedPlayerList) do
+            if EGG_BEST_POSITIONS[i] then
+                local sColor = nIdPlayer == nId and "red" or "blue"
+                core:AddLineBetweenUnits(nId, nId, EGG_BEST_POSITIONS[i], 4, sColor)
+                core:SetWorldMarker(nId, i, EGG_BEST_POSITIONS[i])
+            end
+        end
+        mod:ScheduleTimer("RemoveEggBestPosition", 7)
     end
 end
 
 function mod:OnChatDC(message)
     if message:find(self.L["Kuralak the Defiler returns to the Archive Core"]) then
-        mod:AddMsg("VANISH", "VANISH", 5, "Alert")
-        mod:AddTimerBar("VANISH", "Vanish", 47)
+        mod:AddMsg("VANISH", "VANISH", 3, mod:GetSetting("SoundVanish") and "Alert")
+        mod:AddTimerBar("VANISH", "Next vanish", 47)
     elseif message:find(self.L["Kuralak the Defiler causes a violent outbreak of corruption"]) then
-        mod:AddMsg("OUTBREAK", "OUTBREAK", 5, "RunAway")
-        outbreakCount = outbreakCount + 1
-        if outbreakCount <= 5 then
-            mod:AddTimerBar("OUTBREAK", self.L["Outbreak (%s)"]:format(outbreakCount + 1), 45, mod:GetSetting("SoundOutbreak"))
-        end
+        mod:AddMsg("OUTBREAK", "OUTBREAK", 3, "RunAway")
+        mod:AddTimerBar("OUTBREAK", "Next outbreak", 45, mod:GetSetting("SoundOutbreak"))
     elseif message:find(self.L["The corruption begins to fester"]) then
-        if eggsCount < 2 then eggsCount = 2 end
-        mod:AddMsg("EGGS", self.L["EGGS (%s)"]:format(math.pow(2, eggsCount-1)), 5, "Alert")
-        eggsCount = eggsCount + 1
-        if eggsCount == 5 then
-            mod:AddTimerBar("EGGS", "BERSERK !!", 66)
-            eggsCount = 2
-        else
-            mod:AddTimerBar("EGGS", self.L["Eggs (%s)"]:format(math.pow(2, eggsCount-1)), 66)
-        end
+        mod:AddMsg("EGGS", "EGGS", 5, "Alert")
+        mod:AddTimerBar("EGGS", "Next eggs", 66)
+        mod:DisplayEggBestPosition()
     elseif message:find(self.L["has been anesthetized"]) then
-        if siphonCount == 0 then siphonCount = 1 end
-        siphonCount = siphonCount + 1
         if self:Tank() then
-            mod:AddMsg("SIPHON", "SWITCH TANK", 5, "Alarm", mod:GetSetting("SoundSiphon"))
-            if siphonCount < 4 then
-                mod:AddTimerBar("SIPHON", self.L["Switch Tank (%s)"]:format(siphonCount), 88)
+            mod:AddMsg("SIPHON", "SWITCH TANK", 5, mod:GetSetting("SoundSiphon") and "Alarm")
+        end
+        mod:AddTimerBar("SIPHON", "Next switch tank", 88)
+    end
+end
+
+function mod:OnCastStart(sName, sCastName, tUnit)
+    if self.L["Kuralak the Defiler"] == sName then
+        if self.L["Chromosome Corruption"] == sCastName then
+            if not bIsPhase2 then
+                bIsPhase2 = true
+                core:RemoveTimerBar("VANISH")
+                mod:AddMsg("KP2", "PHASE 2 !", 3, mod:GetSetting("SoundPhase2Switch") and "Long")
+                mod:AddTimerBar("OUTBREAK", "Next outbreak", 15)
+                mod:AddTimerBar("EGGS", "Next eggs", 73)
+                mod:AddTimerBar("SIPHON", "Next switch tank", 37)
             end
         end
     end
 end
 
-function mod:OnChatNPCSay(message)
-    if message:find(self.L["Through the Strain you will be transformed"])
-        or message:find(self.L["Your form is flawed, but I will make you beautiful"])
-        or message:find(self.L["Let the Strain perfect you"])
-        or message:find(self.L["The Experiment has failed"])
-        or message:find(self.L["Join us... become one with the Strain"])
-        or message:find(self.L["One of us... you will become one of us"]) then
-        eggsCount, siphonCount, outbreakCount = 2, 1, 0
-        core:RemoveTimerBar("VANISH")
-        mod:AddMsg("KP2", "PHASE 2 !", 5, "Alert")
-        mod:AddTimerBar("OUTBREAK", self.L["Outbreak (%s)"]:format(outbreakCount + 1), 15)
-        mod:AddTimerBar("EGGS", self.L["Eggs (%s)"]:format(eggsCount), 73)
-        if self:Tank() then
-            mod:AddTimerBar("SIPHON", self.L["Switch Tank (%s)"]:format(siphonCount), 37)
+function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
+    if DEBUFFID_CHROMOSOME_CORRUPTION == nSpellId then
+        table.insert(tCorruptedPlayerList, nId)
+        if mod:GetSetting("PictureCorruption") then
+            core:AddPicture(nId, nId, "Crosshair", 30)
         end
-        if mod:GetSetting("OtherPillarMarkers") then
-            local estpos = { x = 194.44, y = -110.80034637451, z = -483.20 }
-            core:SetWorldMarker("EAST", self.L["MARKER east"], estpos)
-            local sudpos = { x = 165.79222106934, y = -110.80034637451, z = -464.8489074707 }
-            core:SetWorldMarker("SOUTH", self.L["MARKER south"], sudpos)
-            local ouestpos = { x = 144.20, y = -110.80034637451, z = -494.38 }
-            core:SetWorldMarker("WEST", self.L["MARKER west"], ouestpos)
-            local nordpos = { x = 175.00, y = -110.80034637451, z = -513.31 }
-            core:SetWorldMarker("NORTH", self.L["MARKER north"], nordpos)
-        end
+    elseif DEBUFFID_INCUBATION == nSpellId then
+        mod:RemoveEggBestPosition()
     end
 end
 
-function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
+function mod:OnDebuffDel(nId, nSpellId)
     if nSpellId == DEBUFFID_CHROMOSOME_CORRUPTION then
-        local tUnit = GetUnitById(nId)
-        if tUnit then
-            core:MarkUnit(tUnit)
-            core:AddUnit(tUnit)
+        core:RemovePicture(nId)
+        for i, nPlayerId in next, tCorruptedPlayerList do
+            if nPlayerId == nId then
+                core:RemoveLineBetweenUnits(nId)
+                core:DropWorldMarker(nId)
+                table.remove(i)
+                break
+            end
         end
     end
 end
