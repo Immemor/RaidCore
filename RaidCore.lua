@@ -157,7 +157,7 @@ function RaidCore:OnDocLoaded()
             bSoundEnabled = true,
             bAcceptSummons = true,
             bReadyCheckOnBreakTimeout = true,
-            bReadyCheckMessage = self.L["Raid Resume"],
+            sReadyCheckMessage = self.L["Raid Resume"],
         }
     }
     -- Final parsing about encounters.
@@ -835,7 +835,7 @@ function RaidCore:LaunchBreak(time)
             self:ProcessMessage(msg)
             if time > 0 and self.db.profile.bReadyCheckOnBreakTimeout then
                 self:ScheduleTimer(function()
-                    GroupLib.ReadyCheck("Break End! FIGHT")
+                    GroupLib.ReadyCheck(self.db.profile.sReadyCheckMessage or "")
                 end, time)
             end
         end

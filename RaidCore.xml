@@ -284,7 +284,7 @@
                         <Event Name="ButtonUncheck" Function="OnButtonCheckBoxSwitched"/>
                         <Event Name="WindowLoad" Function="OnWindowLoad"/>
                     </Control>
-                    <Control Class="EditBox" LAnchorPoint="0" LAnchorOffset="150" TAnchorPoint="0" TAnchorOffset="80" RAnchorPoint="1" RAnchorOffset="-10" BAnchorPoint="0" BAnchorOffset="110" RelativeToClient="1" Font="Nameplates" Text="" BGColor="UI_WindowBGDefault" TextColor="UI_WindowTextDefault" Template="Holo_InputBox" TooltipType="OnCursor" Name="bReadyCheckMessage" TooltipColor="" Border="1" UseTemplateBG="1" DT_VCENTER="1" TextId="">
+                    <Control Class="EditBox" LAnchorPoint="0" LAnchorOffset="150" TAnchorPoint="0" TAnchorOffset="80" RAnchorPoint="1" RAnchorOffset="-10" BAnchorPoint="0" BAnchorOffset="110" RelativeToClient="1" Font="Nameplates" Text="" BGColor="UI_WindowBGDefault" TextColor="UI_WindowTextDefault" Template="Holo_InputBox" TooltipType="OnCursor" Name="sReadyCheckMessage" TooltipColor="" Border="1" UseTemplateBG="1" DT_VCENTER="1" TextId="">
                         <Event Name="WindowLoad" Function="OnWindowLoad"/>
                         <Event Name="EditBoxChanged" Function="OnEditBoxChanged"/>
                     </Control>
