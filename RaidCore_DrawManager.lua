@@ -239,7 +239,11 @@ end
 -- Template Class.
 ----------------------------------------------------------------------------------------------------
 function TemplateManager:GetDraw(sKey)
-    return self.tDraw[sKey]
+    local tDraw = self.tDraws[sKey]
+    if tDraw then
+        return BuildPublicDraw(tDraw)
+    end
+    return nil
 end
 
 function TemplateManager:_AddDraw(...)
