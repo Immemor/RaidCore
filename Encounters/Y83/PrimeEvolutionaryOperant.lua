@@ -137,11 +137,11 @@ local INCUBATION_ZONE_NORTH = 2
 local INCUBATION_ZONE_EST = 3
 local INCUBATION_ZONE_POLYGONS = {
     -- West boss (or left):
-    [INCUBATION_ZONE_WEST] = { NewVector3(1234.56, GROUND_Y, 896.48) },
+    [INCUBATION_ZONE_WEST] = NewVector3(1234.56, GROUND_Y, 896.48),
     -- North boss (or middle/ahead):
-    [INCUBATION_ZONE_NORTH] = { NewVector3(1268.17, GROUND_Y, 838.32) },
+    [INCUBATION_ZONE_NORTH] = NewVector3(1268.17, GROUND_Y, 838.32),
     -- Est boss (or right):
-    [INCUBATION_ZONE_EST] = { NewVector3(1301.67, GROUND_Y, 896.48) },
+    [INCUBATION_ZONE_EST] = NewVector3(1301.67, GROUND_Y, 896.48),
 }
 
 ----------------------------------------------------------------------------------------------------

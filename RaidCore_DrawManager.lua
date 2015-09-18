@@ -377,6 +377,7 @@ end
 
 function SimpleLine:AddDraw(Key, Origin, nOffset, nLength, nRotation, nWidth, sColor, nNumberOfDot)
     local OriginType = type(Origin)
+    assert(OriginType == "number" or OriginType == "table" or OriginType == "userdata")
 
     if self.tDraws[Key] then
         -- To complex to manage new definition with nNumberOfDot which change,
@@ -515,7 +516,7 @@ end
 
 function Polygon:AddDraw(Key, Origin, nRadius, nRotation, nWidth, sColor, nSide)
     local OriginType = type(Origin)
-    assert(OriginType == "number" or OriginType == "table")
+    assert(OriginType == "number" or OriginType == "table" or OriginType == "userdata")
 
     if self.tDraws[Key] then
         -- To complex to manage new definition with nSide which change,
@@ -637,7 +638,7 @@ end
 
 function Picture:AddDraw(Key, Origin, sSprite, nSpriteSize, nRotation, nDistance, nHeight, sColor)
     local OriginType = type(Origin)
-    assert(OriginType == "number" or OriginType == "table")
+    assert(OriginType == "number" or OriginType == "table" or OriginType == "userdata")
 
     -- Register a new object to manage.
     local tDraw = self.tDraws[Key] or NewDraw()
