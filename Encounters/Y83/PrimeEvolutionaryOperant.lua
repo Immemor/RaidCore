@@ -68,6 +68,7 @@ mod:RegisterDefaultSetting("LinesOnBosses")
 mod:RegisterDefaultSetting("LineRadiation")
 mod:RegisterDefaultSetting("PictureIncubation")
 mod:RegisterDefaultSetting("IncubationRegroupZone")
+mod:RegisterDefaultSetting("OrganicIncineratorBeam")
 -- Timers default configs.
 mod:RegisterDefaultTimerBarConfigs({
     ["NEXT_IRRADIATE"] = { sColor = "xkcdLightRed" },
@@ -96,6 +97,8 @@ local DEBUFF_RADIATION_BATH = 71188
 local DEBUFF_STRAIN_INCUBATION = 49303
 -- Debuff get only in Hard Mode.
 local DEBUFF_DEGENERATION = 79892
+-- DoT taken by everyone when the laser is interrupted. Hardmode only
+local DEBUFF_PAIN_SUPPRESSORS = 81783
 -- Buff stackable on bosses. The beam from the wall buff the boss when they are not hit by the boss
 -- itself. At 15 stacks, the datachron message "A Prime Purifier has been corrupted!" will trig.
 -- Note: the datachron event is raised before the buff update event.
@@ -148,6 +151,7 @@ local INCUBATION_ZONE_POLYGONS = {
 -- Locals.
 ----------------------------------------------------------------------------------------------------
 local nRadiationEndTime
+local nPainSuppressorsFadeTime
 local bIsHardMode
 local tPrimeOperant2ZoneIndex
 local nPrimeDistributorId
@@ -166,6 +170,7 @@ function mod:OnBossEnable()
     Apollo.RegisterEventHandler("DEBUFF_DEL", "OnDebuffDel", self)
 
     nRadiationEndTime = 0
+    nPainSuppressorsFadeTime = 0
     tPrimeOperant2ZoneIndex = {}
     nPrimeDistributorId = nil
     bIsPhaseUnder20Poucent = false
@@ -207,6 +212,9 @@ function mod:OnUnitCreated(tUnit, sName)
     elseif self.L["Organic Incinerator"] == sName then
         bIsHardMode = true
         core:WatchUnit(tUnit)
+        if mod:GetSetting("OrganicIncineratorBeam") then
+            core:AddSimpleLine("Orga.Inc. beam", nId, 0, 65, 0, 10, "red")
+        end
     end
 end
 
@@ -252,6 +260,7 @@ end
 function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
     local nPlayerId = GetPlayerUnit():GetId()
     local tUnit = GetUnitById(nId)
+    local nCurrentTime = GetGameTime()
 
     if DEBUFF_STRAIN_INCUBATION == nSpellId then
         if mod:GetSetting("PictureIncubation") then
@@ -269,7 +278,6 @@ function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
             end
         end
     elseif DEBUFF_RADIATION_BATH == nSpellId then
-        local nCurrentTime = GetGameTime()
         if nRadiationEndTime < nCurrentTime then
             nRadiationEndTime = nCurrentTime + 12
             if mod:GetSetting("LineRadiation") then
@@ -279,6 +287,18 @@ function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
                 mod:ScheduleTimer(function()
                     core:RemoveLineBetweenUnits("RADIATION")
                 end, 10)
+            end
+        end
+    elseif DEBUFF_PAIN_SUPPRESSORS == nSpellId then
+        -- When the Organic Incinerator is interrupt, all alive players will have this debuff
+        -- during 7s. The Organic Incinerator beam is without danger during 5s.
+        if nPainSuppressorsFadeTime < nCurrentTime then
+            nPainSuppressorsFadeTime = nCurrentTime + fTimeRemaining
+            local line = core:GetSimpleLine("Orga.Inc. beam")
+            if line then
+                line:SetColor("6000ff00")
+                self:ScheduleTimer(function(line) line:SetColor("A0ff8000") end, 4, line)
+                self:ScheduleTimer(function(line) line:SetColor("red") end, 5, line)
             end
         end
     end
