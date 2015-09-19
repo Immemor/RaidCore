@@ -30,14 +30,22 @@ mod:RegisterEnglishLocale({
     -- Cast.
     ["Teleport"] = "Teleport",
     ["Channeling Energy"] = "Channeling Energy",
+    ["Gathering Energy"] = "Gathering Energy",
     ["Stitching Strain"] = "Stitching Strain",
-    -- Bar and messages.
-    ["[%u] NEXT P2"] = "[%u] NEXT P2",
-    ["P2 : 20 IA"] = "P2 : 20 IA",
-    ["P2 : MINI ADDS"] = "P2 : MINI ADDS",
-    ["P2 : SUBDUE"] = "P2 : SUBDUE",
-    ["P2 : PILLARS"] = "P2 : PILLARS",
-    ["Interrupt Terax!"] = "Interrupt Terax!",
+    -- Timer bars.
+    ["Next P2"] = "Next P2",
+    ["P2: Timeout 20 IA"] = "P2: Timeout 20 IA",
+    ["P2: Timeout mini adds"] = "P2: Timeout mini adds",
+    ["P2: Timeout subdue"] = "P2: Timeout subdue",
+    ["P2: Timeout pillars"] = "P2: Timeout pillars",
+    ["P2: Timeout shield"] = "P2: Timeout shield",
+    -- Message bars.
+    ["INTERRUPT TERAX!"] = "INTERRUPT TERAX!",
+    ["Phase 2: GOLGOX! (20 IA)"] = "Phase 2: GOLGOX! (20 IA)",
+    ["Phase 2: TERAX! (Mini adds)"] = "Phase 2: TERAX! (Mini adds)",
+    ["Phase 2: ERSOTH! (Subdue)"] = "Phase 2: ERSOTH! (Subdue)",
+    ["Phase 2: NOXMIND! (Pillars)"] = "Phase 2: NOXMIND! (Pillars)",
+    ["Phase 2: VRATORG! (Shield)"] = "Phase 2: VRATORG! (Shield)",
 })
 mod:RegisterFrenchLocale({
     -- Unit names.
@@ -51,12 +59,22 @@ mod:RegisterFrenchLocale({
     -- Cast.
     ["Teleport"] = "Se téléporter",
     ["Channeling Energy"] = "Canalisation d'énergie",
-    -- Bar and messages.
-    ["[%u] NEXT P2"] = "[%u] PROCHAINE P2",
-    ["P2 : 20 IA"] = "P2 : 20 IA",
-    ["P2 : MINI ADDS"] = "P2 : MINI ADDS",
-    ["P2 : SUBDUE"] = "P2 : DESARMEMENT",
-    ["P2 : PILLARS"] = "P2 : PILLIERS",
+    ["Gathering Energy"] = "Accumulation d'énergie",
+    ["Stitching Strain"] = "Pression de suture",
+    -- Timer bars.
+    ["Next P2"] = "Prochaine P2",
+    ["P2: Timeout 20 IA"] = "P2: Timeout 20 IA",
+    ["P2: Timeout mini adds"] = "P2: Timeout mini adds",
+    ["P2: Timeout subdue"] = "P2: Timeout désarmement",
+    ["P2: Timeout pillars"] = "P2: Timeout pilliers",
+    ["P2: Timeout shield"] = "P2: Timeout bouclier",
+    -- Message bars.
+    ["INTERRUPT TERAX!"] = "INTÉRROMPRE TERAX !",
+    ["Phase 2: GOLGOX! (20 IA)"] = "Phase 2: GOLGOX! (20 IA)",
+    ["Phase 2: TERAX! (Mini adds)"] = "Phase 2: TERAX! (Mini adds)",
+    ["Phase 2: ERSOTH! (Subdue)"] = "Phase 2: ERSOTH! (Désarmement)",
+    ["Phase 2: NOXMIND! (Pillars)"] = "Phase 2: TOXULTIME! (Pilliers)",
+    ["Phase 2: VRATORG! (Shield)"] = "Phase 2: VRATORG! (Bouclier)",
 })
 mod:RegisterGermanLocale({
     -- Unit names.
@@ -70,16 +88,19 @@ mod:RegisterGermanLocale({
     -- Cast.
     ["Teleport"] = "Teleportieren",
     ["Channeling Energy"] = "Energie kanalisieren",
-    -- Bar and messages.
-    ["[%u] NEXT P2"] = "[%u] NÄCHSTE P2",
-    ["P2 : 20 IA"] = "P2 : 20x UNTERBRECHEN",
-    ["P2 : MINI ADDS"] = "P2 : MINI ADDS",
-    ["P2 : SUBDUE"] = "P2 : ENTWAFFNEN",
-    ["P2 : PILLARS"] = "P2 : GENERATOREN",
+    -- Timer bars.
+    ["Next P2"] = "Nächste P2",
 })
 -- Default settings.
+mod:RegisterDefaultSetting("CircleErsothInterruptDist")
+mod:RegisterDefaultSetting("LineToxWaves")
+mod:RegisterDefaultSetting("SoundPhase2CountDown")
+mod:RegisterDefaultSetting("SoundPhase2Alert")
+mod:RegisterDefaultSetting("SoundInterruptTerax")
 -- Timers default configs.
 mod:RegisterDefaultTimerBarConfigs({
+    ["NextP2"] = { sColor = "xkcdBluishPurple" },
+    ["P2Timeout"] = { sColor = "xkcdBloodOrange" },
 })
 
 ----------------------------------------------------------------------------------------------------
@@ -91,9 +112,7 @@ mod:RegisterDefaultTimerBarConfigs({
 ----------------------------------------------------------------------------------------------------
 local GetUnitById = GameLib.GetUnitById
 local GetPlayerUnit = GameLib.GetPlayerUnit
-local NewVector3 = Vector3.New
-local tBossId
-local p2Count = 0
+local tBossesId
 
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
@@ -105,9 +124,8 @@ function mod:OnBossEnable()
     Apollo.RegisterEventHandler("SPELL_CAST_END", "OnSpellCastEnd", self)
     Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
 
-    p2Count = 0
-    tBossId = {}
-    mod:AddTimerBar("CONVP1", self.L["[%u] NEXT P2"]:format(p2Count + 1), 90)
+    tBossesId = {}
+    mod:AddTimerBar("NextP2", "Next P2", 90, mod:GetSetting("SoundPhase2CountDown"))
 end
 
 function mod:OnUnitCreated(tUnit, sName)
@@ -121,63 +139,102 @@ function mod:OnUnitCreated(tUnit, sName)
         if nHealth then
             core:AddUnit(tUnit)
             core:WatchUnit(tUnit)
-            tBossId[sName] = nId
+            tBossesId[sName] = nId
         elseif sName == self.L["Noxmind the Insidious"] then
-            -- It's the wave from Nox which target a player
-            local tPos = tUnit:GetPosition()
-            local tNoxmindUnit = GetUnitById(tBossId[sName])
-            if tNoxmindUnit then
-                -- core:AddSimpleLine("Wave" .. nId, nId, 0, 22, 0, 8, "green")
+            if mod:GetSetting("LineToxWaves") then
+                -- It's the wave from Nox which target a player
+                local line = core:AddSimpleLine("Wave" .. nId, nId, 5, 45, 0, 8, "white", 10)
+                line:SetSprite("CRB_MegamapSprites:sprMap_PlayerArrowBase", 40)
             end
         end
     end
 end
 
 function mod:OnUnitDestroyed(tUnit, sName)
+    local nId = tUnit:GetId()
+    if sName == self.L["Noxmind the Insidious"] then
+        core:RemoveSimpleLine("Wave" .. nId)
+    end
 end
 
-function mod:OnSpellCastStart(unitName, castName, unit)
-    if unitName == self.L["Golgox the Lifecrusher"] then
-        if castName == self.L["Teleport"] then
-            mod:AddMsg("CONVP2", "P2 : 20 IA", 5, "Alert")
-            mod:AddTimerBar("CONVP2", "P2 : 20 IA", 29.5)
-        end
-    elseif unitName == self.L["Terax Blightweaver"] then
-        if castName == self.L["Teleport"] then
-            mod:AddMsg("CONVP2", "P2 : MINI ADDS", 5, "Alert")
-            mod:AddTimerBar("CONVP2", "P2 : MINI ADDS", 29.5)
-        elseif castName == self.L["Stitching Strain"] then
-            if self:GetDistanceBetweenUnits(GetPlayerUnit(), unit) < 30 then
-                mod:AddMsg("INTSTRAIN", "Interrupt Terax!", 5, "Inferno")
+function mod:OnSpellCastStart(sName, sCastName, tUnit)
+    if sName == self.L["Golgox the Lifecrusher"]
+        or sName == self.L["Terax Blightweaver"]
+        or sName == self.L["Ersoth Curseform"]
+        or sName == self.L["Noxmind the Insidious"]
+        or sName == self.L["Fleshmonger Vratorg"] then
+        -- Common behavior.
+        local nId = tUnit:GetId()
+        if self.L["Teleport"] == sCastName then
+            mod:RemoveTimerBar("NextP2")
+            if mod:GetSetting("SoundPhase2Alert") then
+                core:PlaySound("Alert")
             end
         end
-    elseif unitName == self.L["Ersoth Curseform"] then
-        if castName == self.L["Teleport"] then
-            mod:AddMsg("CONVP2", "P2 : SUBDUE", 5, "Alert")
-            mod:AddTimerBar("CONVP2", "P2 : SUBDUE", 29.5)
-        end
-    elseif unitName == self.L["Noxmind the Insidious"] then
-        if castName == self.L["Teleport"] then
-            mod:AddMsg("CONVP2", "P2 : PILLARS", 5, "Alert")
-            mod:AddTimerBar("CONVP2", "P2 : PILLARS", 29.5)
-        end
-    elseif unitName == self.L["Fleshmonger Vratorg"] then
-        if castName == self.L["Teleport"] then
-            mod:AddMsg("CONVP2", "P2 : SHIELD", 5, "Alert")
-            mod:AddTimerBar("CONVP2", "P2 : SHIELD", 29.5)
+        -- Specific behavior.
+        if sName == self.L["Golgox the Lifecrusher"] then
+            if self.L["Teleport"] == sCastName then
+                mod:AddMsg("InfoPhase", "Phase 2: GOLGOX! (20 IA)", 5, nil, "blue")
+                mod:AddTimerBar("P2Timeout", "P2: Timeout 20 IA", 29.5)
+            end
+        elseif sName == self.L["Terax Blightweaver"] then
+            if self.L["Teleport"] == sCastName then
+                mod:AddMsg("InfoPhase", "Phase 2: TERAX! (Mini adds)", 5, nil, "blue")
+                mod:AddTimerBar("P2Timeout", "P2: Timeout mini adds", 29.5)
+            elseif self.L["Stitching Strain"] == sCastName then
+                if self:GetDistanceBetweenUnits(GetPlayerUnit(), tUnit) < 35 then
+                    if mod:GetSetting("SoundInterruptTerax") then
+                        core:PlaySound("Alarm")
+                    end
+                    mod:AddMsg("INTSTRAIN", "INTERRUPT TERAX!", 5, nil, "red")
+                end
+            end
+        elseif sName == self.L["Ersoth Curseform"] then
+            if self.L["Teleport"] == sCastName then
+                mod:AddMsg("InfoPhase", "Phase 2: ERSOTH! (Subdue)", 5, nil, "blue")
+                mod:AddTimerBar("P2Timeout", "P2: Timeout subdue", 29.5)
+            elseif self.L["Gathering Energy"] == sCastName then
+                if mod:GetSetting("CircleErsothInterruptDist") then
+                    core:AddPolygon("ErsothCircle1", nId, 10, 0, 3, "red", 20)
+                    core:AddPolygon("ErsothCircle2", nId, 20, 0, 3, "xkcdOrangeyRed", 20)
+                    core:AddPolygon("ErsothCircle3", nId, 30, 0, 3, "xkcdOrange", 20)
+                end
+            end
+        elseif sName == self.L["Noxmind the Insidious"] then
+            if self.L["Teleport"] == sCastName then
+                mod:AddMsg("InfoPhase", "Phase 2: NOXMIND! (Pillars)", 5, nil, "blue")
+                mod:AddTimerBar("P2Timeout", "P2: Timeout pillars", 29.5)
+            end
+        elseif sName == self.L["Fleshmonger Vratorg"] then
+            if self.L["Teleport"] == sCastName then
+                mod:AddMsg("InfoPhase", "Phase 2: VRATORG! (Shield)", 5, nil, "blue")
+                mod:AddTimerBar("P2Timeout", "P2: Timeout shield", 29.5)
+            end
         end
     end
 end
 
-function mod:OnSpellCastEnd(unitName, castName)
-    if castName == self.L["Channeling Energy"] then
-        core:RemoveTimerBar("CONVP2")
-        mod:AddTimerBar("CONVP1", self.L["[%u] NEXT P2"]:format(p2Count + 1), 60)
+function mod:OnSpellCastEnd(sName, sCastName, tUnit)
+    if sName == self.L["Golgox the Lifecrusher"]
+        or sName == self.L["Terax Blightweaver"]
+        or sName == self.L["Ersoth Curseform"]
+        or sName == self.L["Noxmind the Insidious"]
+        or sName == self.L["Fleshmonger Vratorg"] then
+        -- Common behavior.
+        if self.L["Gathering Energy"] == sCastName then
+            mod:RemoveTimerBar("P2Timeout")
+            -- Specific behavior.
+            if sName == self.L["Ersoth Curseform"] then
+                core:RemovePolygon("ErsothCircle1")
+                core:RemovePolygon("ErsothCircle2")
+                core:RemovePolygon("ErsothCircle3")
+            end
+        end
     end
 end
 
 function mod:OnChatDC(message)
     if message:find(self.L["The Phageborn Convergence begins gathering its power"]) then
-        p2Count = p2Count + 1
+        mod:AddTimerBar("NextP2", "Next P2", 60, mod:GetSetting("SoundPhase2CountDown"))
     end
 end
