@@ -22,9 +22,11 @@ mod:RegisterEnglishLocale({
     -- Datachron messages.
     ["The augmented shield has been destroyed"] = "The augmented shield has been destroyed",
     ["Phage Maw begins charging an orbital strike"] = "Phage Maw begins charging an orbital strike",
-    -- Bar and messages.
-    ["Bomb %u"] = "Bomb %u",
-    ["BOOOM !"] = "BOOOM !",
+    -- Timer bars.
+    ["Bombs wave #1"] = "Bombs wave #1",
+    ["Bombs wave #2"] = "Bombs wave #2",
+    ["Bombs wave #3"] = "Bombs wave #3",
+    ["Timeout all bombs!"] = "Timeout all bombs!",
 })
 mod:RegisterFrenchLocale({
     -- Unit names.
@@ -33,9 +35,11 @@ mod:RegisterFrenchLocale({
     -- Datachron messages.
     ["The augmented shield has been destroyed"] = "Le bouclier augmenté a été détruit",
     ["Phage Maw begins charging an orbital strike"] = "La Méga Gueule d'acier commence à charger une frappe orbitale",
-    -- Bar and messages.
-    ["Bomb %u"] = "Bombe %u",
-    ["BOOOM !"] = "BOOOM !",
+    -- Timer bars.
+    ["Bombs wave #1"] = "Vague de bombes n°1",
+    ["Bombs wave #2"] = "Vague de bombes n°2",
+    ["Bombs wave #3"] = "Vague de bombes n°3",
+    ["Timeout all bombs!"] = "Timeout toutes les bombes!",
 })
 mod:RegisterGermanLocale({
     -- Unit names.
@@ -44,20 +48,30 @@ mod:RegisterGermanLocale({
     -- Datachron messages.
     ["The augmented shield has been destroyed"] = "Der augmentierte Schild wurde zerstört",
     ["Phage Maw begins charging an orbital strike"] = "Phagenschlund beginnt einen Orbitalschlag aufzuladen",
-    -- Bar and messages.
-    ["Bomb %u"] = "Bombe %u",
-    ["BOOOM !"] = "BOOOM !",
 })
 -- Default settings.
 mod:RegisterDefaultSetting("OtherBombsMarkers")
+mod:RegisterDefaultSetting("PillarNumber")
+mod:RegisterDefaultSetting("LineBombs")
 -- Timers default configs.
 mod:RegisterDefaultTimerBarConfigs({
+    ["BombsWave1"] = { sColor = "xkcdBarneyPurple" },
+    ["BombsWave2"] = { sColor = "xkcdBluePurple" },
+    ["BombsWave3"] = { sColor = "xkcdDeepPurple" },
+    ["TimeoutBombs"] = { sColor = "xkcdBloodRed" },
 })
 
 ----------------------------------------------------------------------------------------------------
 -- Constants.
 ----------------------------------------------------------------------------------------------------
 local GetPlayerUnit = GameLib.GetPlayerUnit
+--TODO: Set the correct coordonate!
+local GROUND_Y = -800.51
+local PILLAR_POSITIONS = {
+    ["P1"] = Vector3.New(1234.56, GROUND_Y, 896.48),
+    ["P2"] = Vector3.New(1268.17, GROUND_Y, 838.32),
+    ["P3"] = Vector3.New(1301.67, GROUND_Y, 896.48),
+}
 
 ----------------------------------------------------------------------------------------------------
 -- Locals.
@@ -69,10 +83,17 @@ local GetPlayerUnit = GameLib.GetPlayerUnit
 function mod:OnBossEnable()
     Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
     Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
+
+    if self:GetSetting("PillarNumber") then
+        for n, vector in next, PILLAR_POSITIONS do
+            -- core:SetWorldMarker(n, n, vector)
+        end
+    end
 end
 
 function mod:OnUnitCreated(unit, sName)
     local nId = unit:GetId()
+    local nPlayerId = GetPlayerUnit():GetId()
 
     if sName == self.L["Phage Maw"] then
         core:AddUnit(unit)
@@ -82,17 +103,19 @@ function mod:OnUnitCreated(unit, sName)
             core:MarkUnit(unit, 1)
             core:AddUnit(unit)
         end
-        local o = core:AddLineBetweenUnits("Bomb" .. nId, GetPlayerUnit():GetId(), nId, nil, "green")
-        o:SetMaxLengthVisible(40)
+        if mod:GetSetting("LineBombs") then
+            local o = core:AddLineBetweenUnits("Bomb" .. nId, nPlayerId, nId, nil, "xkcdBrightLightGreen")
+            o:SetMaxLengthVisible(40)
+        end
     end
 end
 
 function mod:OnChatDC(message)
     if message:find(self.L["The augmented shield has been destroyed"]) then
-        mod:AddTimerBar("MAW1", self.L["Bomb %u"]:format(1), 20)
-        mod:AddTimerBar("MAW2", self.L["Bomb %u"]:format(2), 49)
-        mod:AddTimerBar("MAW3", self.L["Bomb %u"]:format(3), 78)
-        mod:AddTimerBar("PHAGEMAW", "BOOOM !", 104)
+        mod:AddTimerBar("BombsWave1", "Bombs wave #1", 20)
+        mod:AddTimerBar("BombsWave2", "Bombs wave #2", 49)
+        mod:AddTimerBar("BombsWave3", "Bombs wave #3", 78)
+        mod:AddTimerBar("TimeoutBombs", "Timeout all bombs!", 104)
     elseif message:find(self.L["Phage Maw begins charging an orbital strike"]) then
         if mod:GetSetting("OtherBombsMarkers") then
             core:ResetMarks()
