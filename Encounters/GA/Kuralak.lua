@@ -102,7 +102,7 @@ mod:RegisterDefaultSetting("SoundSiphon")
 mod:RegisterDefaultSetting("SoundVanish")
 mod:RegisterDefaultSetting("SoundPhase2Switch")
 mod:RegisterDefaultSetting("OtherPillarMarkers")
-mod:RegisterDefaultSetting("OtherEggPositions")
+mod:RegisterDefaultSetting("OtherRecommendedPositions")
 -- Timers default configs.
 mod:RegisterDefaultTimerBarConfigs({
     ["EGGS"] = { sColor = "xkcdOrangered" },
@@ -164,7 +164,7 @@ function mod:OnUnitCreated(tUnit, sName)
         -- TODO: Remove this init, when values will be found.
         if EGG_BEST_POSITIONS == nil then
             local tPosition = tUnit:GetPosition()
-            local nDistance = 15
+            local nDistance = 10
             local tRad = { 0, 180, 90, 270, 45, 135, 225, 315 }
             EGG_BEST_POSITIONS = {}
             for i = 1, #tRad do
@@ -174,6 +174,9 @@ function mod:OnUnitCreated(tUnit, sName)
                     y = tPosition.y,
                     z = tPosition.z - math.sin(nRad) * nDistance,
                 }
+                if mod:GetSetting("OtherRecommendedPositions") then
+                    core:SetWorldMarker("EggBest" .. i, i, EGG_BEST_POSITIONS[i])
+                end
             end
         end
     end
@@ -190,18 +193,16 @@ end
 function mod:RemoveEggBestPosition()
     for i, nId in ipairs(tCorruptedPlayerList) do
         core:RemoveLineBetweenUnits(nId)
-        core:DropWorldMarker(nId)
     end
 end
 
 function mod:DisplayEggBestPosition()
-    if mod:GetSetting("OtherEggPositions") then
+    if mod:GetSetting("OtherRecommendedPositions") then
         local nIdPlayer = GetPlayerUnit():GetId()
         for i, nId in ipairs(tCorruptedPlayerList) do
             if EGG_BEST_POSITIONS[i] then
-                local sColor = nIdPlayer == nId and "red" or "blue"
+                local sColor = nIdPlayer == nId and "red" or "800000ff"
                 core:AddLineBetweenUnits(nId, nId, EGG_BEST_POSITIONS[i], 4, sColor)
-                core:SetWorldMarker(nId, i, EGG_BEST_POSITIONS[i])
             end
         end
         mod:ScheduleTimer("RemoveEggBestPosition", 7)
@@ -259,7 +260,6 @@ function mod:OnDebuffDel(nId, nSpellId)
         for i, nPlayerId in next, tCorruptedPlayerList do
             if nPlayerId == nId then
                 core:RemoveLineBetweenUnits(nId)
-                core:DropWorldMarker(nId)
                 table.remove(i)
                 break
             end
