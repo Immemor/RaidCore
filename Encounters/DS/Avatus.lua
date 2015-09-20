@@ -200,6 +200,7 @@ mod:RegisterGermanLocale({
 -- Default settings.
 mod:RegisterDefaultSetting("LineCleaveBoss")
 mod:RegisterDefaultSetting("LineCleaveHands")
+mod:RegisterDefaultSetting("LineCleaveFragments")
 mod:RegisterDefaultSetting("LineCleaveYellowRoomBoss")
 mod:RegisterDefaultSetting("LineCannons")
 mod:RegisterDefaultSetting("LineOrbsYellowRoom")
@@ -547,7 +548,7 @@ function mod:OnUnitCreated(unit, sName)
             end
         end
     elseif self.L["Fragmented Data Chunk"] == sName then
-        if mod:GetSetting("LineCleaveHands") then
+        if mod:GetSetting("LineCleaveFragments") then
             core:AddSimpleLine(nUnitId .. "_1", nUnitId, 0, 25, 0, 5, "Blue")
             core:AddSimpleLine(nUnitId .. "_2", nUnitId, 0, 7, 60, 3, "xkcdBluegrey")
             core:AddSimpleLine(nUnitId .. "_3", nUnitId, 0, 7, -60, 3,  "xkcdBluegrey")
