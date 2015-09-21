@@ -174,9 +174,6 @@ function mod:OnUnitCreated(tUnit, sName)
                     y = tPosition.y,
                     z = tPosition.z - math.sin(nRad) * nDistance,
                 }
-                if mod:GetSetting("OtherRecommendedPositions") then
-                    core:SetWorldMarker("EggBest" .. i, i, EGG_BEST_POSITIONS[i])
-                end
             end
         end
     end
@@ -238,6 +235,11 @@ function mod:OnCastStart(sName, sCastName, tUnit)
                 mod:AddTimerBar("OUTBREAK", "Next outbreak", 15)
                 mod:AddTimerBar("EGGS", "Next eggs", 73)
                 mod:AddTimerBar("SIPHON", "Next switch tank", 37)
+                if mod:GetSetting("OtherRecommendedPositions") then
+                    for i, vector in next, EGG_BEST_POSITIONS do
+                        core:SetWorldMarker("EggBest" .. i, i, vector)
+                    end
+                end
             end
         end
     end
