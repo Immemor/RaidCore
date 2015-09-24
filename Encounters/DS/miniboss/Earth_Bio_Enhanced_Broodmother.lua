@@ -23,7 +23,7 @@ mod:RegisterEnglishLocale({
 })
 mod:RegisterFrenchLocale({
     -- Unit names.
-    ["Bio-Enhanced Broodmother"] = "Mère de couvée augmentée",
+    ["Bio-Enhanced Broodmother"] = "Mère de couvée bio-améliorée",
     -- Cast
     ["Augmented Bio-Web"] = "Bio-soie augmentée",
 })
