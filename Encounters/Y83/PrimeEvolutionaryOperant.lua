@@ -35,7 +35,7 @@ mod:RegisterEnglishLocale({
     ["Sternum Buster"] = "Sternum Buster",
     ["Organic Incinerator"] = "Organic Incinerator",
     -- Datachron messages.
-    ["(.*) is being irradiated"] = "(.*) is being irradiated",
+    ["(.*) is being irradiated"] = "(.*) is being irradiated!",
     ["ENGAGING TECHNOPHAGE TRASMISSION"] = "ENGAGING TECHNOPHAGE TRASMISSION",
     ["A Prime Purifier has been corrupted!"] = "A Prime Purifier has been corrupted!",
     ["INITIATING DECONTAMINATION SEQUENCE"] = "INITIATING DECONTAMINATION SEQUENCE",
@@ -231,8 +231,8 @@ function mod:OnChatDC(message)
                 local nMemberId = tMemberUnit:GetId()
                 local nPlayerId = GetPlayerUnit():GetId()
                 if nMemberId ~= nPlayerId then
-                    local o = core:AddLineBetweenUnits("RADIATION", nPlayerId, nMemberId, 4, "cyan", 12)
-                    o:SetSprite("CRB_MinimapSprites:sprMM_QuestArrow", 10)
+                    local o = core:AddLineBetweenUnits("RADIATION", nPlayerId, nMemberId, 4, "cyan", 18)
+                    o:SetSprite("CRB_MinimapSprites:sprMM_QuestArrow", 15)
                     o:SetMinLengthVisible(10)
                 end
             end
@@ -276,8 +276,8 @@ function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
         if nRadiationEndTime < nCurrentTime then
             nRadiationEndTime = nCurrentTime + 12
             if mod:GetSetting("LineRadiation") then
-                local o = core:AddLineBetweenUnits("RADIATION", nPlayerId, tUnit:GetPosition(), 4, "cyan", 12)
-                o:SetSprite("CRB_MinimapSprites:sprMM_QuestArrow", 10)
+                local o = core:AddLineBetweenUnits("RADIATION", nPlayerId, tUnit:GetPosition(), 4, "cyan", 18)
+                o:SetSprite("CRB_MinimapSprites:sprMM_QuestArrow", 15)
                 o:SetMinLengthVisible(10)
                 mod:ScheduleTimer(function()
                     core:RemoveLineBetweenUnits("RADIATION")
