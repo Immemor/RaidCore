@@ -138,13 +138,13 @@ local STATIC_LINES = {
 local INCUBATION_ZONE_WEST = 1
 local INCUBATION_ZONE_NORTH = 2
 local INCUBATION_ZONE_EST = 3
-local INCUBATION_ZONE_POLYGONS = {
+local INCUBATION_REGROUP_ZONE = {
     -- West boss (or left):
-    [INCUBATION_ZONE_WEST] = NewVector3(1234.56, GROUND_Y, 896.48),
+    [INCUBATION_ZONE_WEST] = NewVector3(1238.03, GROUND_Y, 894.45),
     -- North boss (or middle/ahead):
-    [INCUBATION_ZONE_NORTH] = NewVector3(1268.17, GROUND_Y, 838.32),
+    [INCUBATION_ZONE_NORTH] = NewVector3(1268.17, GROUND_Y, 842.32),
     -- Est boss (or right):
-    [INCUBATION_ZONE_EST] = NewVector3(1301.67, GROUND_Y, 896.48),
+    [INCUBATION_ZONE_EST] = NewVector3(1298.20, GROUND_Y, 894.57),
 }
 
 ----------------------------------------------------------------------------------------------------
@@ -182,7 +182,7 @@ function mod:OnBossEnable()
         end
     end
     if mod:GetSetting("IncubationRegroupZone") then
-        local Vector = INCUBATION_ZONE_POLYGONS[INCUBATION_ZONE_NORTH]
+        local Vector = INCUBATION_REGROUP_ZONE[INCUBATION_ZONE_NORTH]
         core:AddPicture("IZ" .. INCUBATION_ZONE_NORTH, Vector, "ClientSprites:LootCloseBox_Holo", 30)
     end
 end
@@ -270,7 +270,7 @@ function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
             local nIndex = tPrimeOperant2ZoneIndex[nPrimeDistributorId]
             if nIndex then
                 local sColor = nPlayerId == nId and "ffff00ff" or "60ff00ff"
-                local Vector = INCUBATION_ZONE_POLYGONS[nIndex]
+                local Vector = INCUBATION_REGROUP_ZONE[nIndex]
                 local o = core:AddLineBetweenUnits("SafeZoneGO" .. nId, nId, Vector, 5, sColor, 10)
                 o:SetSprite("CRB_MegamapSprites:sprMap_PlayerArrowNoRing", 20)
                 o:SetMinLengthVisible(5)
@@ -313,7 +313,7 @@ end
 
 function mod:OnBuffAdd(nId, nSpellId, nStack, fTimeRemaining)
     if BUFF_COMPROMISED_CIRCUITRY == nSpellId then
-        for i, Vector in next, INCUBATION_ZONE_POLYGONS do
+        for i, Vector in next, INCUBATION_REGROUP_ZONE do
             core:RemovePicture("IZ" .. i)
         end
         if not bIsPhaseUnder20Poucent then
@@ -321,7 +321,7 @@ function mod:OnBuffAdd(nId, nSpellId, nStack, fTimeRemaining)
             if mod:GetSetting("IncubationRegroupZone") then
                 local nIndex = tPrimeOperant2ZoneIndex[nId]
                 if nIndex then
-                    local Vector = INCUBATION_ZONE_POLYGONS[nIndex]
+                    local Vector = INCUBATION_REGROUP_ZONE[nIndex]
                     core:AddPicture("IZ" .. nIndex, Vector, "ClientSprites:LootCloseBox_Holo", 30)
                 end
             end
