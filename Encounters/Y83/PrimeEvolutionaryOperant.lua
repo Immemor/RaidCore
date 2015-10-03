@@ -152,7 +152,6 @@ local INCUBATION_REGROUP_ZONE = {
 ----------------------------------------------------------------------------------------------------
 local nRadiationEndTime
 local nPainSuppressorsFadeTime
-local bIsHardMode
 local tPrimeOperant2ZoneIndex
 local nPrimeDistributorId
 local bIsPhaseUnder20Poucent
@@ -174,7 +173,6 @@ function mod:OnBossEnable()
     tPrimeOperant2ZoneIndex = {}
     nPrimeDistributorId = nil
     bIsPhaseUnder20Poucent = false
-    bIsHardMode = false
     mod:AddTimerBar("NEXT_IRRADIATE", "~Next irradiate", 27, mod:GetSetting("SoundNextIrradiateCountDown"))
     if mod:GetSetting("LinesOnBosses") then
         for i, Vectors in next, STATIC_LINES do
@@ -210,7 +208,6 @@ function mod:OnUnitCreated(tUnit, sName)
         tPrimeOperant2ZoneIndex[nId] = INCUBATION_ZONE_NORTH
         nPrimeDistributorId = nId
     elseif self.L["Organic Incinerator"] == sName then
-        bIsHardMode = true
         core:WatchUnit(tUnit)
         if mod:GetSetting("OrganicIncineratorBeam") then
             core:AddSimpleLine("Orga.Inc. beam", nId, 0, 65, 0, 10, "red")
@@ -242,8 +239,6 @@ function mod:OnChatDC(message)
         end
     elseif message == self.L["ENGAGING TECHNOPHAGE TRASMISSION"] then
         mod:AddTimerBar("NEXT_IRRADIATE", "~Next irradiate", 40, mod:GetSetting("SoundNextIrradiateCountDown"))
-    elseif message == self.L["INITIATING DECONTAMINATION SEQUENCE"] then
-        bIsHardMode = true
     elseif message == self.L["A Prime Purifier has been corrupted!"] then
         bIsPhaseUnder20Poucent = true
     end
