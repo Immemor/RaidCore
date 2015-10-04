@@ -14,7 +14,3 @@ externals:
     url: https://github.com/wildstarnasa/LibJSON.git
   Libs/GeminiDB:
     url: https://github.com/wildstarnasa/GeminiDB.git
-
-ignore:
- - Textures/GUI/DefaultBouton.ai
- - Textures/Draw/AvatusHands.psd
