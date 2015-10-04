@@ -217,9 +217,6 @@ function RaidCore:OnDocLoaded()
     self:DrawManagersInit(self.db.profile.DrawManagers)
     self:GUI_init(RAIDCORE_CURRENT_VERSION)
 
-    -- Load Forms.
-    self.GeminiColor = Apollo.GetPackage("GeminiColor").tPackage
-
     -- Register handlers for events, slash commands and timer, etc.
     Apollo.RegisterSlashCommand("raidc", "OnRaidCoreOn", self)
 end

@@ -4,8 +4,6 @@ enable-nolib-creation: no
 externals:
   Libs/GeminiAddon:
     url: https://github.com/wildstarnasa/GeminiAddon.git
-  Libs/GeminiColor:
-    url: https://github.com/wildstarnasa/GeminiColor.git
   Libs/GeminiGUI:
     url: https://github.com/wildstarnasa/GeminiGUI.git
   Libs/GeminiLocale:

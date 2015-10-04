@@ -6,7 +6,6 @@
     <Script Name="Libs/GeminiAddon/GeminiAddon.lua"/>
     <Script Name="Libs/GeminiTimer/GeminiTimer-1.0.lua"/>
     <Script Name="Libs/GeminiGUI/GeminiGUI.lua"/>
-    <Script Name="Libs/GeminiColor/GeminiColor.lua"/>
     <Script Name="Libs/LibJSON/LibJSON-2.5.lua"/>
     <Script Name="Libs/Log.lua"/>
     <!-- Global Locales -->
