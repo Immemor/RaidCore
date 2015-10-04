@@ -57,28 +57,28 @@ local empCD, empTimer = 5, nil
 ----------------------------------------------------------------------------------------------------
 -- Privates functions
 ----------------------------------------------------------------------------------------------------
-local function ManageDelayedUnit(nId, sName, bInCombat)
+local function RemoveDelayedUnit(nId, sName)
+    if _tDelayedUnits[sName] then
+        if _tDelayedUnits[sName][nId] then
+            _tDelayedUnits[sName][nId] = nil
+        end
+        if next(_tDelayedUnits[sName]) == nil then
+            _tDelayedUnits[sName] = nil
+        end
+    end
+end
+
+local function AddDelayedUnit(nId, sName, bInCombat)
     local tMap = GetCurrentZoneMap()
     local id1 = tMap.continentId
     local id2 = tMap.parentZoneId
     local id3 = tMap.id
     local tTrig = _tTrigPerZone[id1] and _tTrigPerZone[id1][id2] and _tTrigPerZone[id1][id2][id3]
     if tTrig and tTrig[sName] then
-        if bInCombat then
-            if not _tDelayedUnits[sName] then
-                _tDelayedUnits[sName] = {}
-            end
-            _tDelayedUnits[sName][nId] = true
-        else
-            if _tDelayedUnits[sName] then
-                if _tDelayedUnits[sName][nId] then
-                    _tDelayedUnits[sName][nId] = nil
-                end
-                if next(_tDelayedUnits[sName]) == nil then
-                    _tDelayedUnits[sName] = nil
-                end
-            end
+        if not _tDelayedUnits[sName] then
+            _tDelayedUnits[sName] = {}
         end
+        _tDelayedUnits[sName][nId] = bInCombat
     end
 end
 
@@ -133,18 +133,6 @@ function RaidCore:OnInitialize()
     self.L = GeminiLocale:GetLocale("RaidCore")
     local GeminiDB = Apollo.GetPackage("Gemini:DB-1.0").tPackage
     self.db = GeminiDB:New(self, nil, true)
-end
-
-----------------------------------------------------------------------------------------------------
--- RaidCore OnDocLoaded
-----------------------------------------------------------------------------------------------------
-function RaidCore:OnDocLoaded()
-    -- Send version information to OneVersion Addon.
-    local fNumber = RAIDCORE_CURRENT_VERSION:gmatch("%d+")
-    local sSuffix = RAIDCORE_CURRENT_VERSION:gmatch("%a+")()
-    local nMajor, nMinor = fNumber(), fNumber()
-    local nSuffix = sSuffix == "alpha" and -2 or sSuffix == "beta" and -1 or 0
-    Event_FireGenericEvent("OneVersion_ReportAddonInfo", "RaidCore", nMajor, nMinor, 0, nSuffix)
 
     -- Create default settings to provide to GeminiDB.
     local tDefaultSettings = {
@@ -200,26 +188,40 @@ function RaidCore:OnDocLoaded()
 
     -- Load every software block.
     self:CombatInterface_Init(self)
-    self:BarManagersInit(self.db.profile.BarsManagers)
-    self:DrawManagersInit(self.db.profile.DrawManagers)
-    self:GUI_init(RAIDCORE_CURRENT_VERSION)
     -- Do additional initialization.
     self.mark = {}
     self.worldmarker = {}
     _tWipeTimer = ApolloTimer.Create(0.5, true, "WipeCheck", self)
     _tWipeTimer:Stop()
     self.lines = {}
-
     -- Initialize the Zone Detection.
     self:OnCheckMapZone()
+
+    Apollo.RegisterEventHandler("ChangeWorld", "OnCheckMapZone", self)
+    Apollo.RegisterEventHandler("SubZoneChanged", "OnCheckMapZone", self)
+end
+
+----------------------------------------------------------------------------------------------------
+-- RaidCore OnDocLoaded
+----------------------------------------------------------------------------------------------------
+function RaidCore:OnDocLoaded()
+    -- Send version information to OneVersion Addon.
+    local fNumber = RAIDCORE_CURRENT_VERSION:gmatch("%d+")
+    local sSuffix = RAIDCORE_CURRENT_VERSION:gmatch("%a+")()
+    local nMajor, nMinor = fNumber(), fNumber()
+    local nSuffix = sSuffix == "alpha" and -2 or sSuffix == "beta" and -1 or 0
+    Event_FireGenericEvent("OneVersion_ReportAddonInfo", "RaidCore", nMajor, nMinor, 0, nSuffix)
+
+    -- Load every software block.
+    self:BarManagersInit(self.db.profile.BarsManagers)
+    self:DrawManagersInit(self.db.profile.DrawManagers)
+    self:GUI_init(RAIDCORE_CURRENT_VERSION)
 
     -- Load Forms.
     self.GeminiColor = Apollo.GetPackage("GeminiColor").tPackage
 
     -- Register handlers for events, slash commands and timer, etc.
     Apollo.RegisterSlashCommand("raidc", "OnRaidCoreOn", self)
-    Apollo.RegisterEventHandler("ChangeWorld", "OnCheckMapZone", self)
-    Apollo.RegisterEventHandler("SubZoneChanged", "OnCheckMapZone", self)
 end
 
 ----------------------------------------------------------------------------------------------------
@@ -368,7 +370,7 @@ function RaidCore:OnCheckMapZone()
                 end
             end
             if bSearching then
-                self:CombatInterface_Activate("DetectCombat")
+                self:CombatInterface_Activate("DetectAll")
             else
                 self:CombatInterface_Activate("Disable")
             end
@@ -481,7 +483,13 @@ function RaidCore:SetWorldMarker(key, sText, tPosition)
 end
 
 function RaidCore:OnUnitDestroyed(nId, unit, unitName)
-    Event_FireGenericEvent("RC_UnitDestroyed", unit, unitName)
+    if not _tCurrentEncounter then
+        RemoveDelayedUnit(nId, unit)
+    else
+        -- Dispatch this Event to the Encounter
+        Event_FireGenericEvent("RC_UnitDestroyed", unit, unitName)
+    end
+
     self:RemoveUnit(nId)
     if self.mark[nId] then
         local markFrame = self.mark[nId].frame
@@ -687,7 +695,15 @@ function RaidCore:WipeCheck()
 end
 
 function RaidCore:OnUnitCreated(nId, tUnit, sName)
-    Event_FireGenericEvent("RC_UnitCreated", tUnit, sName)
+    if not tUnit:IsInYourGroup() then
+        if not _tCurrentEncounter then
+            local bInCombat = tUnit:IsInCombat()
+            AddDelayedUnit(nId, sName, bInCombat)
+        else
+            -- Dispatch this Event to the Encounter
+            Event_FireGenericEvent("RC_UnitCreated", tUnit, sName)
+        end
+    end
 end
 
 function RaidCore:OnEnteredCombat(nId, tUnit, sName, bInCombat)
@@ -708,7 +724,7 @@ function RaidCore:OnEnteredCombat(nId, tUnit, sName, bInCombat)
         end
     elseif not tUnit:IsInYourGroup() then
         if not _tCurrentEncounter then
-            ManageDelayedUnit(nId, sName, bInCombat)
+            AddDelayedUnit(nId, sName, bInCombat)
             if _bIsEncounterInProgress then
                 SearchEncounter()
                 if _tCurrentEncounter and not _tCurrentEncounter:IsEnabled() then
