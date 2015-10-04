@@ -206,9 +206,6 @@ function RaidCore:OnDocLoaded()
     -- Do additional initialization.
     self.mark = {}
     self.worldmarker = {}
-    self.berserk = false
-    self.syncRegister = {}
-    self.syncTimer = {}
     _tWipeTimer = ApolloTimer.Create(0.5, true, "WipeCheck", self)
     _tWipeTimer:Stop()
     self.lines = {}
@@ -612,11 +609,6 @@ function RaidCore:ResetMarks()
     markCount = 0
 end
 
-function RaidCore:ResetSync()
-    self.syncTimer = {}
-    self.syncRegister = {}
-end
-
 -- Obsolete way to test. PublicEventObjectif will be reworked later.
 function RaidCore:TestPE()
     local tActiveEvents = PublicEvent.GetActiveEvents()
@@ -669,28 +661,11 @@ function RaidCore:OnParty(sMessage, sSender)
     Event_FireGenericEvent('CHAT_PARTY', sMessage, sSender)
 end
 
-function RaidCore:PrintBerserk()
-    self:AddMsg("BERSERK", "BERSERK IN 1MIN", 5, false, MYCOLORS["Green"])
-    self:AddTimerBar("BERSERK", "BERSERK", 60)
-    self.berserk = false
-end
-
-function RaidCore:Berserk(timer)
-    if timer > 60 then
-        self.berserk = self:ScheduleTimer("PrintBerserk", timer - 60)
-    end
-end
-
 function RaidCore:ResetAll()
     _tWipeTimer:Stop()
-    if self.berserk then
-        self:CancelTimer(self.berserk)
-        self.berserk = nil
-    end
     self:BarsRemoveAll()
     self:ResetMarks()
     self:ResetWorldMarkers()
-    self:ResetSync()
     self:ResetLines()
 end
 
