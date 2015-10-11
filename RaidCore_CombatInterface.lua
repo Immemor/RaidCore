@@ -77,7 +77,6 @@ local EXTRA_HANDLER_ALLOWED = {
 ----------------------------------------------------------------------------------------------------
 -- Privates variables.
 ----------------------------------------------------------------------------------------------------
-local _tCombatManager = nil
 local _bDetectAllEnable = false
 local _bUnitInCombatEnable = false
 local _bRunning = false
@@ -100,13 +99,10 @@ local function ManagerCall(sMethod, ...)
     -- Trace all call to upper layer for debugging purpose.
     Log:Add(sMethod, ...)
     -- Retrieve callback function.
-    local fMethod = nil
-    if _tCombatManager then
-        fMethod = _tCombatManager[sMethod]
-    end
+    local fMethod = RaidCore[sMethod]
     -- Protected call.
     if fMethod then
-        local s, sErrMsg = pcall(fMethod, _tCombatManager, ...)
+        local s, sErrMsg = pcall(fMethod, RaidCore, ...)
         if not s then
             --@alpha@
             Print(sMethod .. ": " .. sErrMsg)
@@ -437,10 +433,7 @@ end
 ----------------------------------------------------------------------------------------------------
 -- Relations between RaidCore and CombatInterface.
 ----------------------------------------------------------------------------------------------------
-function RaidCore:CombatInterface_Init(class)
-    assert(_tCombatManager == nil)
-
-    _tCombatManager = class
+function RaidCore:CombatInterface_Init()
     _tAllUnits = {}
     _tTrackedUnits = {}
     _tMembers = {}

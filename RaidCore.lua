@@ -187,7 +187,7 @@ function RaidCore:OnInitialize()
     self.db:RegisterDefaults(tDefaultSettings)
 
     -- Load every software block.
-    self:CombatInterface_Init(self)
+    self:CombatInterface_Init()
     -- Do additional initialization.
     self.mark = {}
     self.worldmarker = {}
