@@ -166,7 +166,6 @@ function mod:OnSpellCastStart(sName, sCastName, tUnit)
         -- Common behavior.
         local nId = tUnit:GetId()
         if self.L["Teleport"] == sCastName then
-            mod:RemoveTimerBar("NextP2")
             if mod:GetSetting("SoundPhase2Alert") then
                 core:PlaySound("Alert")
             end
