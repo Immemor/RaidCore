@@ -141,7 +141,8 @@ function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
             core:AddPicture("LittleBomb", nId, "Crosshair", 20, 0, 0, nil, "blue")
         end
         mod:AddMsg("LittleBomb", sText:upper(), 3, nil, "blue")
-        mod:AddTimerBar("LittleBomb", sText, fTimeRemaining)
+        local bCountDownLittleBomb = mod:GetSetting("SoundLittleBomb") and bIsItself
+        mod:AddTimerBar("LittleBomb", sText, fTimeRemaining, bCountDownLittleBomb)
         if bIsItself then
             if mod:GetSetting("SoundLittleBomb") then
                 core:PlaySound("RunAway")
@@ -158,7 +159,8 @@ function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
             core:AddPicture("BigBomb", nId, "Crosshair", 40, 0, 0, nil, "red")
         end
         mod:AddMsg("BigBomb", sText:upper(), 3, nil, "red")
-        mod:AddTimerBar("BigBomb", sText, fTimeRemaining)
+        local bCountDownBigBomb = mod:GetSetting("SoundBigBomb") and bIsItself
+        mod:AddTimerBar("BigBomb", sText, fTimeRemaining, bCountDownBigBomb)
         if bIsItself then
             if mod:GetSetting("SoundBigBomb") then
                 core:PlaySound("RunAway")
