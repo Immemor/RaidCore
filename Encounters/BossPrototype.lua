@@ -143,10 +143,8 @@ end
 
 function EncounterPrototype:OnDisable()
     if type(self.OnBossDisable) == "function" then self:OnBossDisable() end
-    Apollo.RemoveEventHandler("UnitCreated",self)
     Apollo.RemoveEventHandler("UnitEnteredCombat", self)
     Apollo.RemoveEventHandler("UnitDestroyed", self)
-    Apollo.RemoveEventHandler("RC_UnitCreated", self)
     Apollo.RemoveEventHandler("RC_UnitStateChanged", self)
     Apollo.RemoveEventHandler("RC_UnitDestroyed", self)
     Apollo.RemoveEventHandler("SPELL_CAST_START", self)

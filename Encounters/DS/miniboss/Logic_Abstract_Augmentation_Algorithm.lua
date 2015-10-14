@@ -79,7 +79,6 @@ local nExpectedKickerId
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
     Apollo.RegisterEventHandler("DEBUFF_ADD", "OnDebuffAddedOrUpdated", self)
     Apollo.RegisterEventHandler("DEBUFF_UPDATE", "OnDebuffAddedOrUpdated", self)
 

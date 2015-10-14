@@ -55,7 +55,6 @@ mod:RegisterDefaultTimerBarConfigs({
 function mod:OnBossEnable()
     Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
     Apollo.RegisterEventHandler("SPELL_CAST_END", "OnSpellCastEnd", self)
-    Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
 
     mod:AddTimerBar("Terra-forme", "Terra-forme", 59.5)
     mod:AddTimerBar("Undermine", "5 x undermine", 31.7)

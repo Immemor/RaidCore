@@ -87,7 +87,6 @@ local nLavaFloorCount
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
     Apollo.RegisterEventHandler("RC_UnitDestroyed", "OnUnitDestroyed", self)
     Apollo.RegisterEventHandler("BUFF_ADD", "OnBuffAdded", self)
     Apollo.RegisterEventHandler("BUFF_UPDATE", "OnBuffUpdate", self)

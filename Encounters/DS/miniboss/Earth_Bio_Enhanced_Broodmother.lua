@@ -48,7 +48,6 @@ mod:RegisterDefaultTimerBarConfigs({
 function mod:OnBossEnable()
     Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
     Apollo.RegisterEventHandler("SPELL_CAST_END", "OnSpellCastEnd", self)
-    Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
 end
 
 function mod:OnUnitCreated(nId, unit, sName)

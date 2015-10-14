@@ -154,7 +154,6 @@ end
 
 function RaidCore:OnInitialize()
     _tEncounterHookHandlers = {
-        ["OnUnitCreated"] = self.OnEncounterHookUnitCreated,
         ["OnEnteredCombat"] = self.OnEncounterHookEnteredCombat,
         ["OnUnitDestroyed"] = self.OnEncounterHookUnitDestroyed,
         ["OnCastStart"] = self.OnEncounterHookCastStart,
@@ -842,10 +841,6 @@ end
 ----------------------------------------------------------------------------------------------------
 -- Hook Table. Will be replace step by step by a direct call to _tCurrentEncounter.
 ----------------------------------------------------------------------------------------------------
-function RaidCore:OnEncounterHookUnitCreated(nId, tUnit, sName)
-    Event_FireGenericEvent("RC_UnitCreated", nId, tUnit, sName)
-end
-
 function RaidCore:OnEncounterHookEnteredCombat(nId, tUnit, sName, bInCombat)
     Event_FireGenericEvent("RC_UnitStateChanged", tUnit, bInCombat, sName)
 end
