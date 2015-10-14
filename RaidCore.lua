@@ -14,6 +14,7 @@ require "ChatSystemLib"
 local GeminiAddon = Apollo.GetPackage("Gemini:Addon-1.1").tPackage
 local JSON = Apollo.GetPackage("Lib:dkJSON-2.5").tPackage
 local RaidCore = GeminiAddon:NewAddon("RaidCore", false, {}, "Gemini:Timer-1.0")
+local Log = Apollo.GetPackage("Log-1.0").tPackage
 
 ----------------------------------------------------------------------------------------------------
 -- Copy of few objects to reduce the cpu load.
@@ -22,6 +23,7 @@ local RaidCore = GeminiAddon:NewAddon("RaidCore", false, {}, "Gemini:Timer-1.0")
 local GetPlayerUnit = GameLib.GetPlayerUnit
 local GetUnitById = GameLib.GetUnitById
 local GetCurrentZoneMap = GameLib.GetCurrentZoneMap
+local next, pcall  = next, pcall
 
 ----------------------------------------------------------------------------------------------------
 -- Constants.
@@ -39,6 +41,10 @@ local MYCOLORS = {
     ["Green"] = "FF00CC00",
 }
 
+-- State Machine.
+local MAIN_FSM__SEARCH = 1
+local MAIN_FSM__RUNNING = 2
+
 ----------------------------------------------------------------------------------------------------
 -- Privates variables.
 ----------------------------------------------------------------------------------------------------
@@ -49,6 +55,9 @@ local _tEncountersPerZone = {}
 local _tDelayedUnits = {}
 local _bIsEncounterInProgress = false
 local _tCurrentEncounter = nil
+local _eCurrentFSM
+local _tEncounterHookHandlers
+local _tMainFSMHandlers
 local trackMaster = Apollo.GetAddon("TrackMaster")
 local markCount = 0
 local VCReply, VCtimer = {}, nil
@@ -57,6 +66,16 @@ local empCD, empTimer = 5, nil
 ----------------------------------------------------------------------------------------------------
 -- Privates functions
 ----------------------------------------------------------------------------------------------------
+local function OnEncounterHookGeneric(sMethod, ...)
+    local fHook = _tEncounterHookHandlers[sMethod]
+    local fEncounter = _tCurrentEncounter[sMethod]
+    if fHook then
+        fHook(RaidCore, ...)
+    elseif fEncounter then
+        fEncounter(_tCurrentEncounter, ...)
+    end
+end
+
 local function RemoveDelayedUnit(nId, sName)
     if _tDelayedUnits[sName] then
         if _tDelayedUnits[sName][nId] then
@@ -100,19 +119,25 @@ end
 
 local function ProcessDelayedUnit()
     for nDelayedName, tDelayedList in next, _tDelayedUnits do
-        for nDelayedId, _ in next, tDelayedList do
+        for nDelayedId, bInCombat in next, tDelayedList do
             local tUnit = GetUnitById(nDelayedId)
             if tUnit then
-                local bInCombat = tUnit:IsInCombat()
-                Event_FireGenericEvent("RC_UnitCreated", tUnit, nDelayedName)
+                local s, sErrMsg = pcall(OnEncounterHookGeneric, "OnUnitCreated", nDelayedId, tUnit, nDelayedName)
+                if not s then
+                    Log:Add("ERROR", sErrMsg)
+                end
                 if bInCombat then
-                    Event_FireGenericEvent("RC_UnitStateChanged", tUnit, bInCombat, nDelayedName)
+                    s, sErrMsg = pcall(OnEncounterHookGeneric, "OnEnteredCombat", nDelayedId, tUnit, bInCombat, nDelayedName)
+                    if not s then
+                        Log:Add("ERROR", sErrMsg)
+                    end
                 end
             end
         end
     end
     _tDelayedUnits = {}
 end
+
 
 ----------------------------------------------------------------------------------------------------
 -- RaidCore Initialization
@@ -122,6 +147,39 @@ function RaidCore:Print(sMessage)
 end
 
 function RaidCore:OnInitialize()
+    _tEncounterHookHandlers = {
+        ["OnUnitCreated"] = self.OnEncounterHookUnitCreated,
+        ["OnEnteredCombat"] = self.OnEncounterHookEnteredCombat,
+        ["OnUnitDestroyed"] = self.OnEncounterHookUnitDestroyed,
+        ["OnCastStart"] = self.OnEncounterHookCastStart,
+        ["OnCastEnd"] = self.OnEncounterHookCastEnd,
+        ["OnBuffAdd"] = self.OnEncounterHookBuffAdd,
+        ["OnBuffRemove"] = self.OnEncounterHookBuffRemove,
+        ["OnBuffUpdate"] = self.OnEncounterHookBuffUpdate,
+        ["OnDebuffAdd"] = self.OnEncounterHookDebuffAdd,
+        ["OnDebuffRemove"] = self.OnEncounterHookDebuffRemove,
+        ["OnDebuffUpdate"] = self.OnEncounterHookDebuffUpdate,
+        ["OnShowShortcutBar"] = self.OnEncounterHookShowShortcutBar,
+        ["OnSay"] = self.OnEncounterHookSay,
+        ["OnNPCSay"] = self.OnEncounterHookNPCSay,
+        ["OnNPCYell"] = self.OnEncounterHookNPCYell,
+        ["OnNPCWisper"] = self.OnEncounterHookNPCWisper,
+        ["OnDatachron"] = self.OnEncounterHookDatachron,
+    }
+    _tMainFSMHandlers = {
+        [MAIN_FSM__SEARCH] = {
+            ["OnChangeWorld"] = self.SEARCH_OnCheckMapZone,
+            ["OnSubZoneChanged"] = self.SEARCH_OnCheckMapZone,
+            ["OnUnitCreated"] = self.SEARCH_OnUnitCreated,
+            ["OnEnteredCombat"] = self.SEARCH_OnEnteredCombat,
+            ["OnUnitDestroyed"] = self.SEARCH_OnUnitDestroyed,
+        },
+        [MAIN_FSM__RUNNING] = {
+            ["OnEnteredCombat"] = self.RUNNING_OnEnteredCombat,
+            ["OnUnitDestroyed"] = self.RUNNING_OnUnitDestroyed,
+        },
+    }
+    _eCurrentFSM = MAIN_FSM__SEARCH
     self.xmlDoc = XmlDoc.CreateFromFile("RaidCore.xml")
     self.xmlDoc:RegisterCallback("OnDocLoaded", self)
     Apollo.LoadSprites("Textures_GUI.xml")
@@ -195,10 +253,7 @@ function RaidCore:OnInitialize()
     _tWipeTimer:Stop()
     self.lines = {}
     -- Initialize the Zone Detection.
-    self:OnCheckMapZone()
-
-    Apollo.RegisterEventHandler("ChangeWorld", "OnCheckMapZone", self)
-    Apollo.RegisterEventHandler("SubZoneChanged", "OnCheckMapZone", self)
+    self:SEARCH_OnCheckMapZone()
 end
 
 ----------------------------------------------------------------------------------------------------
@@ -351,32 +406,6 @@ function RaidCore:hasActiveEvent(tblEvents)
     return false
 end
 
-function RaidCore:OnCheckMapZone()
-    if not _bIsEncounterInProgress then
-        local tMap = GetCurrentZoneMap()
-        if tMap then
-            local tTrigInZone = _tTrigPerZone[tMap.continentId]
-            local bSearching = false
-            if tTrigInZone then
-                tTrigInZone = tTrigInZone[tMap.parentZoneId]
-                if tTrigInZone then
-                    tTrigInZone = tTrigInZone[tMap.id]
-                    if tTrigInZone then
-                        bSearching = true
-                    end
-                end
-            end
-            if bSearching then
-                self:CombatInterface_Activate("DetectAll")
-            else
-                self:CombatInterface_Activate("Disable")
-            end
-        else
-            self:ScheduleTimer("OnCheckMapZone", 5)
-        end
-    end
-end
-
 function RaidCore:PlaySound(sFilename)
     assert(type(sFilename) == "string")
     if self.db.profile.bSoundEnabled then
@@ -479,114 +508,12 @@ function RaidCore:SetWorldMarker(key, sText, tPosition)
     end
 end
 
-function RaidCore:OnUnitDestroyed(nId, unit, unitName)
-    if not _tCurrentEncounter then
-        RemoveDelayedUnit(nId, unit)
-    else
-        -- Dispatch this Event to the Encounter
-        Event_FireGenericEvent("RC_UnitDestroyed", unit, unitName)
-    end
-
-    self:RemoveUnit(nId)
-    if self.mark[nId] then
-        local markFrame = self.mark[nId].frame
-        markFrame:SetUnit(nil)
-        markFrame:Destroy()
-        self.mark[nId] = nil
-    end
-end
-
 function RaidCore:SetTarget(position)
     if trackMaster ~= nil then
         trackMaster:SetTarget(position)
     end
 end
 
-function RaidCore:OnCastStart(nId, sCastName)
-    local tUnit = GetUnitById(nId)
-    if tUnit then
-        local unitName = tUnit:GetName():gsub(NO_BREAK_SPACE, " ")
-        Event_FireGenericEvent("SPELL_CAST_START", unitName, sCastName, tUnit)
-    end
-end
-
-function RaidCore:OnCastEnd(nId, sCastName, bInterrupted)
-    local tUnit = GetUnitById(nId)
-    if tUnit then
-        local unitName = tUnit:GetName():gsub(NO_BREAK_SPACE, " ")
-        Event_FireGenericEvent("SPELL_CAST_END", unitName, sCastName, tUnit)
-    end
-end
-
-function RaidCore:OnBuffAdd(nId, nSpellId, nStack, fTimeRemaining)
-    local tUnit = GetUnitById(nId)
-    if tUnit then
-        local unitName = tUnit:GetName():gsub(NO_BREAK_SPACE, " ")
-        -- Keep Old event for compatibility.
-        Event_FireGenericEvent("BUFF_APPLIED", unitName, nSpellId, tUnit)
-    end
-    -- New event not based on the name.
-    Event_FireGenericEvent("BUFF_ADD", nId, nSpellId, nStack, fTimeRemaining)
-end
-
-function RaidCore:OnBuffRemove(nId, nSpellId)
-    local tUnit = GetUnitById(nId)
-    if tUnit then
-        local unitName = tUnit:GetName():gsub(NO_BREAK_SPACE, " ")
-        -- Keep Old event for compatibility.
-        Event_FireGenericEvent("BUFF_REMOVED", unitName, nSpellId, GetUnitById(nId))
-    end
-    -- New event not based on the name.
-    Event_FireGenericEvent("BUFF_DEL", nId, nSpellId)
-end
-
-function RaidCore:OnBuffUpdate(nId, nSpellId, nOldStack, nNewStack, fTimeRemaining)
-    local tUnit = GetUnitById(nId)
-    if tUnit then
-        local unitName = tUnit:GetName():gsub(NO_BREAK_SPACE, " ")
-        -- Keep Old event for compatibility.
-        Event_FireGenericEvent("BUFF_APPLIED_DOSE", unitName, nSpellId, nNewStack)
-    end
-    -- New event not based on the name.
-    Event_FireGenericEvent("BUFF_UPDATE", nId, nSpellId, nNewStack, fTimeRemaining)
-end
-
-function RaidCore:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
-    local tUnit = GetUnitById(nId)
-    if tUnit then
-        local unitName = tUnit:GetName():gsub(NO_BREAK_SPACE, " ")
-        -- Keep Old event for compatibility.
-        Event_FireGenericEvent("DEBUFF_APPLIED", unitName, nSpellId, tUnit)
-    end
-    -- New event not based on the name.
-    Event_FireGenericEvent("DEBUFF_ADD", nId, nSpellId, nStack, fTimeRemaining)
-end
-
-function RaidCore:OnDebuffRemove(nId, nSpellId)
-    local tUnit = GetUnitById(nId)
-    if tUnit then
-        local unitName = tUnit:GetName():gsub(NO_BREAK_SPACE, " ")
-        -- Keep Old event for compatibility.
-        Event_FireGenericEvent("DEBUFF_REMOVED", unitName, nSpellId, tUnit)
-    end
-    -- New event not based on the name.
-    Event_FireGenericEvent("DEBUFF_DEL", nId, nSpellId)
-end
-
-function RaidCore:OnDebuffUpdate(nId, nSpellId, nOldStack, nNewStack, fTimeRemaining)
-    local tUnit = GetUnitById(nId)
-    if tUnit then
-        local unitName = tUnit:GetName():gsub(NO_BREAK_SPACE, " ")
-        -- Keep Old event for compatibility.
-        Event_FireGenericEvent("DEBUFF_APPLIED_DOSE", unitName, nSpellId, nNewStack)
-    end
-    -- New event not based on the name.
-    Event_FireGenericEvent("DEBUFF_UPDATE", nId, nSpellId, nNewStack, fTimeRemaining)
-end
-
-function RaidCore:OnShowShortcutBar(tIconFloatingSpellBar)
-    Event_FireGenericEvent("SHORTCUT_BAR", tIconFloatingSpellBar)
-end
 
 function RaidCore:OnMarkUpdate()
     for k, v in pairs(self.mark) do
@@ -642,26 +569,6 @@ function RaidCore:OnHealthChanged(nId, nPourcent, sName)
     end
 end
 
-function RaidCore:OnSay(sMessage, sSender)
-    Event_FireGenericEvent('CHAT_SAY', sMessage, sSender)
-end
-
-function RaidCore:OnNPCSay(sMessage, sSender)
-    Event_FireGenericEvent('CHAT_NPCSAY', sMessage, sSender)
-end
-
-function RaidCore:OnNPCYell(sMessage, sSender)
-    Event_FireGenericEvent('CHAT_NPCYELL', sMessage, sSender)
-end
-
-function RaidCore:OnNPCWisper(sMessage, sSender)
-    Event_FireGenericEvent('CHAT_NPCWHISPER', sMessage, sSender)
-end
-
-function RaidCore:OnDatachron(sMessage, sSender)
-    Event_FireGenericEvent('CHAT_DATACHRON', sMessage, sSender)
-end
-
 function RaidCore:ResetAll()
     _tWipeTimer:Stop()
     self:BarsRemoveAll()
@@ -677,58 +584,16 @@ function RaidCore:WipeCheck()
             return
         end
     end
+    self:CombatInterface_Activate("DetectAll")
     _bIsEncounterInProgress = false
     if _tCurrentEncounter then
         _tCurrentEncounter:Disable()
         _tCurrentEncounter = nil
     end
-    self:CombatInterface_Activate("DetectCombat")
     self:ResetAll()
-end
-
-function RaidCore:OnUnitCreated(nId, tUnit, sName)
-    if not tUnit:IsInYourGroup() then
-        if not _tCurrentEncounter then
-            local bInCombat = tUnit:IsInCombat()
-            AddDelayedUnit(nId, sName, bInCombat)
-        else
-            -- Dispatch this Event to the Encounter
-            Event_FireGenericEvent("RC_UnitCreated", tUnit, sName)
-        end
-    end
-end
-
-function RaidCore:OnEnteredCombat(nId, tUnit, sName, bInCombat)
-    -- Manage the lower layer.
-    if tUnit == GetPlayerUnit() then
-        if bInCombat then
-            -- Player entering in combat.
-            _bIsEncounterInProgress = true
-            self:CombatInterface_Activate("FullEnable")
-            SearchEncounter()
-            if _tCurrentEncounter and not _tCurrentEncounter:IsEnabled() then
-                _tCurrentEncounter:Enable()
-                ProcessDelayedUnit()
-            end
-        else
-            -- Player is dead or left the combat.
-            _tWipeTimer:Start()
-        end
-    elseif not tUnit:IsInYourGroup() then
-        if not _tCurrentEncounter then
-            AddDelayedUnit(nId, sName, bInCombat)
-            if _bIsEncounterInProgress then
-                SearchEncounter()
-                if _tCurrentEncounter and not _tCurrentEncounter:IsEnabled() then
-                    _tCurrentEncounter:Enable()
-                    ProcessDelayedUnit()
-                end
-            end
-        else
-            -- Dispatch this Event to the Encounter
-            Event_FireGenericEvent("RC_UnitStateChanged", tUnit, bInCombat, sName)
-        end
-    end
+    -- Set the FSM in SEARCH mode.
+    _eCurrentFSM = MAIN_FSM__SEARCH
+    self:SEARCH_OnCheckMapZone()
 end
 
 function RaidCore:VersionCheckResults()
@@ -852,6 +717,242 @@ function RaidCore:isRaidManagement(strName)
     return false -- just in case
 end
 
+function RaidCore:AutoCleanUnitDestroyed(nId, tUnit, sName)
+    self:RemoveUnit(nId)
+    if self.mark[nId] then
+        local markFrame = self.mark[nId].frame
+        markFrame:SetUnit(nil)
+        markFrame:Destroy()
+        self.mark[nId] = nil
+    end
+end
+
+----------------------------------------------------------------------------------------------------
+-- Relation between: CombatInterface <-> RaidCore <-> Encounter
+----------------------------------------------------------------------------------------------------
+function RaidCore:GlobalEventHandler(sMethod, ...)
+    -- Call the encounter handler if we were in RUNNING.
+    if _eCurrentFSM == MAIN_FSM__RUNNING then
+        local s, sErrMsg = pcall(OnEncounterHookGeneric, sMethod, ...)
+        if not s then
+            Log:Add("ERROR", sErrMsg)
+        end
+    end
+    -- Call the FSM handler, if needed.
+    local fFSMHandler = _tMainFSMHandlers[_eCurrentFSM][sMethod]
+    if fFSMHandler then
+        fFSMHandler(self, ...)
+    end
+end
+
+function RaidCore:SEARCH_OnCheckMapZone()
+    if not _bIsEncounterInProgress then
+        local tMap = GetCurrentZoneMap()
+        if tMap then
+            Log:Add("CurrentZoneMap", tMap.continentId, tMap.parentZoneId, tMap.id)
+            local tTrigInZone = _tTrigPerZone[tMap.continentId]
+            local bSearching = false
+            if tTrigInZone then
+                tTrigInZone = tTrigInZone[tMap.parentZoneId]
+                if tTrigInZone then
+                    tTrigInZone = tTrigInZone[tMap.id]
+                    if tTrigInZone then
+                        bSearching = true
+                    end
+                end
+            end
+            if bSearching then
+                self:CombatInterface_Activate("DetectAll")
+            else
+                self:CombatInterface_Activate("Disable")
+            end
+        else
+            self:ScheduleTimer("SEARCH_OnCheckMapZone", 5)
+        end
+    end
+end
+
+function RaidCore:SEARCH_OnUnitCreated(nId, tUnit, sName)
+    local bInCombat = tUnit:IsInCombat()
+    AddDelayedUnit(nId, sName, bInCombat)
+end
+
+function RaidCore:SEARCH_OnEnteredCombat(nId, tUnit, sName, bInCombat)
+    -- Manage the lower layer.
+    if tUnit == GetPlayerUnit() then
+        if bInCombat then
+            -- Player entering in combat.
+            _bIsEncounterInProgress = true
+            -- Enable CombatInterface now to be able to log a combat
+            -- not registered.
+            self:CombatInterface_Activate("FullEnable")
+            SearchEncounter()
+            if _tCurrentEncounter and not _tCurrentEncounter:IsEnabled() then
+                _eCurrentFSM = MAIN_FSM__RUNNING
+                _tCurrentEncounter:Enable()
+                ProcessDelayedUnit()
+            end
+        else
+            -- Player is dead or left the combat.
+            _tWipeTimer:Start()
+        end
+    elseif not tUnit:IsInYourGroup() then
+        if not _tCurrentEncounter then
+            AddDelayedUnit(nId, sName, bInCombat)
+            if _bIsEncounterInProgress then
+                SearchEncounter()
+                if _tCurrentEncounter and not _tCurrentEncounter:IsEnabled() then
+                    _eCurrentFSM = MAIN_FSM__RUNNING
+                    _tCurrentEncounter:Enable()
+                    ProcessDelayedUnit()
+                end
+            end
+        end
+    end
+end
+
+function RaidCore:SEARCH_OnUnitDestroyed(nId, tUnit, sName)
+    RemoveDelayedUnit(nId, tUnit)
+    self:AutoCleanUnitDestroyed(nId, tUnit, sName)
+end
+
+function RaidCore:RUNNING_OnEnteredCombat(nId, tUnit, sName, bInCombat)
+    if tUnit == GetPlayerUnit() then
+        if bInCombat == false then
+            -- Player is dead or left the combat.
+            _tWipeTimer:Start()
+        end
+    end
+end
+
+function RaidCore:RUNNING_OnUnitDestroyed(nId, tUnit, sName)
+    self:AutoCleanUnitDestroyed(nId, tUnit, sName)
+end
+
+----------------------------------------------------------------------------------------------------
+-- Hook Table. Will be replace step by step by a direct call to _tCurrentEncounter.
+----------------------------------------------------------------------------------------------------
+function RaidCore:OnEncounterHookUnitCreated(nId, tUnit, sName)
+    Event_FireGenericEvent("RC_UnitCreated", tUnit, sName)
+end
+
+function RaidCore:OnEncounterHookEnteredCombat(nId, tUnit, sName, bInCombat)
+    Event_FireGenericEvent("RC_UnitStateChanged", tUnit, bInCombat, sName)
+end
+
+function RaidCore:OnEncounterHookUnitDestroyed(nId, tUnit, sName)
+    Event_FireGenericEvent("RC_UnitDestroyed", tUnit, sName)
+end
+
+function RaidCore:OnEncounterHookCastStart(nId, sCastName)
+    local tUnit = GetUnitById(nId)
+    if tUnit then
+        local unitName = tUnit:GetName():gsub(NO_BREAK_SPACE, " ")
+        Event_FireGenericEvent("SPELL_CAST_START", unitName, sCastName, tUnit)
+    end
+end
+
+function RaidCore:OnEncounterHookCastEnd(nId, sCastName, bInterrupted)
+    local tUnit = GetUnitById(nId)
+    if tUnit then
+        local unitName = tUnit:GetName():gsub(NO_BREAK_SPACE, " ")
+        Event_FireGenericEvent("SPELL_CAST_END", unitName, sCastName, tUnit)
+    end
+end
+
+function RaidCore:OnEncounterHookBuffAdd(nId, nSpellId, nStack, fTimeRemaining)
+    local tUnit = GetUnitById(nId)
+    if tUnit then
+        local unitName = tUnit:GetName():gsub(NO_BREAK_SPACE, " ")
+        -- Keep Old event for compatibility.
+        Event_FireGenericEvent("BUFF_APPLIED", unitName, nSpellId, tUnit)
+    end
+    -- New event not based on the name.
+    Event_FireGenericEvent("BUFF_ADD", nId, nSpellId, nStack, fTimeRemaining)
+end
+
+function RaidCore:OnEncounterHookBuffRemove(nId, nSpellId)
+    local tUnit = GetUnitById(nId)
+    if tUnit then
+        local unitName = tUnit:GetName():gsub(NO_BREAK_SPACE, " ")
+        -- Keep Old event for compatibility.
+        Event_FireGenericEvent("BUFF_REMOVED", unitName, nSpellId, GetUnitById(nId))
+    end
+    -- New event not based on the name.
+    Event_FireGenericEvent("BUFF_DEL", nId, nSpellId)
+end
+
+function RaidCore:OnEncounterHookBuffUpdate(nId, nSpellId, nOldStack, nNewStack, fTimeRemaining)
+    local tUnit = GetUnitById(nId)
+    if tUnit then
+        local unitName = tUnit:GetName():gsub(NO_BREAK_SPACE, " ")
+        -- Keep Old event for compatibility.
+        Event_FireGenericEvent("BUFF_APPLIED_DOSE", unitName, nSpellId, nNewStack)
+    end
+    -- New event not based on the name.
+    Event_FireGenericEvent("BUFF_UPDATE", nId, nSpellId, nNewStack, fTimeRemaining)
+end
+
+function RaidCore:OnEncounterHookDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
+    local tUnit = GetUnitById(nId)
+    if tUnit then
+        local unitName = tUnit:GetName():gsub(NO_BREAK_SPACE, " ")
+        -- Keep Old event for compatibility.
+        Event_FireGenericEvent("DEBUFF_APPLIED", unitName, nSpellId, tUnit)
+    end
+    -- New event not based on the name.
+    Event_FireGenericEvent("DEBUFF_ADD", nId, nSpellId, nStack, fTimeRemaining)
+end
+
+function RaidCore:OnEncounterHookDebuffRemove(nId, nSpellId)
+    local tUnit = GetUnitById(nId)
+    if tUnit then
+        local unitName = tUnit:GetName():gsub(NO_BREAK_SPACE, " ")
+        -- Keep Old event for compatibility.
+        Event_FireGenericEvent("DEBUFF_REMOVED", unitName, nSpellId, tUnit)
+    end
+    -- New event not based on the name.
+    Event_FireGenericEvent("DEBUFF_DEL", nId, nSpellId)
+end
+
+function RaidCore:OnEncounterHookDebuffUpdate(nId, nSpellId, nOldStack, nNewStack, fTimeRemaining)
+    local tUnit = GetUnitById(nId)
+    if tUnit then
+        local unitName = tUnit:GetName():gsub(NO_BREAK_SPACE, " ")
+        -- Keep Old event for compatibility.
+        Event_FireGenericEvent("DEBUFF_APPLIED_DOSE", unitName, nSpellId, nNewStack)
+    end
+    -- New event not based on the name.
+    Event_FireGenericEvent("DEBUFF_UPDATE", nId, nSpellId, nNewStack, fTimeRemaining)
+end
+
+function RaidCore:OnEncounterHookShowShortcutBar(tIconFloatingSpellBar)
+    Event_FireGenericEvent("SHORTCUT_BAR", tIconFloatingSpellBar)
+end
+
+function RaidCore:OnEncounterHookSay(sMessage, sSender)
+    Event_FireGenericEvent('CHAT_SAY', sMessage, sSender)
+end
+
+function RaidCore:OnEncounterHookNPCSay(sMessage, sSender)
+    Event_FireGenericEvent('CHAT_NPCSAY', sMessage, sSender)
+end
+
+function RaidCore:OnEncounterHookNPCYell(sMessage, sSender)
+    Event_FireGenericEvent('CHAT_NPCYELL', sMessage, sSender)
+end
+
+function RaidCore:OnEncounterHookNPCWisper(sMessage, sSender)
+    Event_FireGenericEvent('CHAT_NPCWHISPER', sMessage, sSender)
+end
+
+function RaidCore:OnEncounterHookDatachron(sMessage, sSender)
+    Event_FireGenericEvent('CHAT_DATACHRON', sMessage, sSender)
+end
+
+----------------------------------------------------------------------------------------------------
+-- TEST features functions
+----------------------------------------------------------------------------------------------------
 function RaidCore:OnStartTestScenario()
     local tPlayerUnit = GetPlayerUnit()
     local nPlayerId = tPlayerUnit:GetId()

@@ -98,19 +98,13 @@ local _CI_Extra = {}
 local function ManagerCall(sMethod, ...)
     -- Trace all call to upper layer for debugging purpose.
     Log:Add(sMethod, ...)
-    -- Retrieve callback function.
-    local fMethod = RaidCore[sMethod]
     -- Protected call.
-    if fMethod then
-        local s, sErrMsg = pcall(fMethod, RaidCore, ...)
-        if not s then
-            --@alpha@
-            Print(sMethod .. ": " .. sErrMsg)
-            --@end-alpha@
-            Log:Add("ERROR", sErrMsg)
-        end
-    else
-        Log:Add("No callback found.")
+    local s, sErrMsg = pcall(RaidCore.GlobalEventHandler, RaidCore, sMethod, ...)
+    if not s then
+        --@alpha@
+        Print(sMethod .. ": " .. sErrMsg)
+        --@end-alpha@
+        Log:Add("ERROR", sErrMsg)
     end
 end
 
@@ -173,6 +167,12 @@ local function ExtraLog2Text(k, nRefTime, tParam)
         sResult = sFormat:format(tostring(tParam[1]), tostring(tParam[2]), tParam[3], tParam[4], tParam[5], tParam[6], tParam[7])
     elseif k == "OnHealthChanged" then
         local sFormat = "Id=%u nPourcent=%.2f sName=\"%s\""
+        sResult = sFormat:format(tParam[1], tParam[2], tParam[3])
+    elseif k == "OnSubZoneChanged" then
+        local sFormat = "ZoneId=%u ZoneName=\"%s\""
+        sResult = sFormat:format(tParam[1], tParam[2])
+    elseif k == "CurrentZoneMap" then
+        local sFormat = "ContinentId=%u ZoneId=%u Id=%u"
         sResult = sFormat:format(tParam[1], tParam[2], tParam[3])
     end
     return sResult
@@ -441,6 +441,9 @@ function RaidCore:CombatInterface_Init()
     _nCommChannelRetry = 1
 
     self:CI_JoinRaidCoreChannel()
+    -- Permanent registering.
+    RegisterEventHandler("ChangeWorld", "CI_OnChangeWorld", self)
+    RegisterEventHandler("SubZoneChanged", "CI_OnSubZoneChanged", self)
 
     InterfaceSwitch(INTERFACE__DISABLE)
     self.wndBarItem = Apollo.LoadForm(self.xmlDoc, "ActionBarShortcutItem", "FixedHudStratum", self)
@@ -723,4 +726,12 @@ function RaidCore:CI_OnCombatLogHeal(tArgs)
     local nOverHeal = tArgs.nOverHeal or 0
     local nSpellId = tArgs.splCallingSpell and tArgs.splCallingSpell:GetId()
     ManagerCall("OnCombatLogHeal", nCasterId, nTargetId, sCasterName, sTargetName, nHealAmount, nOverHeal, nSpellId)
+end
+
+function RaidCore:CI_OnChangeWorld()
+    ManagerCall("OnChangeWorld")
+end
+
+function RaidCore:CI_OnSubZoneChanged(nZoneId, sZoneName)
+    ManagerCall("OnSubZoneChanged", nZoneId, sZoneName)
 end
