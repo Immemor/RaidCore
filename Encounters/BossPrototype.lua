@@ -139,8 +139,6 @@ function EncounterPrototype:OnEnable()
     -- TODO: Redefine this part.
     if self.SetupOptions then self:SetupOptions() end
     if type(self.OnBossEnable) == "function" then self:OnBossEnable() end
-
-    Apollo.RegisterEventHandler("RAID_WIPE", "OnRaidWipe", self)
 end
 
 function EncounterPrototype:OnDisable()
@@ -159,7 +157,6 @@ function EncounterPrototype:OnDisable()
     Apollo.RemoveEventHandler("CHAT_NPCWHISPER", self)
     Apollo.RemoveEventHandler("CHAT_DATACHRON", self)
     Apollo.RemoveEventHandler("CHAT_PARTY", self)
-    Apollo.RemoveEventHandler("RAID_WIPE", self)
     Apollo.RemoveEventHandler("DEBUFF_APPLIED", self)
     Apollo.RemoveEventHandler("DEBUFF_APPLIED_DOSE", self)
     Apollo.RemoveEventHandler("DEBUFF_REMOVED", self)
@@ -173,6 +170,8 @@ function EncounterPrototype:OnDisable()
     Apollo.RemoveEventHandler("BUFF_REMOVED", self)
     Apollo.RemoveEventHandler("BUFF_APPLIED_DOSE", self)
     Apollo.RemoveEventHandler("SHORTCUT_BAR", self)
+    self:CancelAllTimers()
+    if type(self.OnWipe) == "function" then self:OnWipe() end
 end
 
 function EncounterPrototype:Reboot(isWipe)
@@ -202,11 +201,6 @@ function EncounterPrototype:GetSetting(sKey)
         self.tSettings[sKey] = false
     end
     return self.tSettings[sKey]
-end
-
-function EncounterPrototype:OnRaidWipe()
-    self:CancelAllTimers()
-    if type(self.OnWipe) == "function" then self:OnWipe() end
 end
 
 function EncounterPrototype:Tank()

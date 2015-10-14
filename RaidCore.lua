@@ -683,7 +683,6 @@ function RaidCore:WipeCheck()
     end
     _bIsEncounterInProgress = false
     if _tCurrentEncounter then
-        Event_FireGenericEvent("RAID_WIPE")
         _tCurrentEncounter:Disable()
         _tCurrentEncounter = nil
     end
