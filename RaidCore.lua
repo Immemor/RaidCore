@@ -662,10 +662,6 @@ function RaidCore:OnDatachron(sMessage, sSender)
     Event_FireGenericEvent('CHAT_DATACHRON', sMessage, sSender)
 end
 
-function RaidCore:OnParty(sMessage, sSender)
-    Event_FireGenericEvent('CHAT_PARTY', sMessage, sSender)
-end
-
 function RaidCore:ResetAll()
     _tWipeTimer:Stop()
     self:BarsRemoveAll()

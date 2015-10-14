@@ -45,7 +45,7 @@ local SCAN_PERIOD = 0.1 -- in seconds.
 -- Array with chat permission.
 local CHANNEL_HANDLERS = {
     [ChatSystemLib.ChatChannel_Say] = nil,
-    [ChatSystemLib.ChatChannel_Party] = "OnParty",
+    [ChatSystemLib.ChatChannel_Party] = nil,
     [ChatSystemLib.ChatChannel_NPCSay] = "OnNPCSay",
     [ChatSystemLib.ChatChannel_NPCYell] = "OnNPCYell",
     [ChatSystemLib.ChatChannel_NPCWhisper] = "OnNPCWhisper",
@@ -147,8 +147,7 @@ local function ExtraLog2Text(k, nRefTime, tParam)
     elseif k == "OnEnteredCombat" then
         local sFormat = "Id=%u Unit='%s' InCombat=%s"
         sResult = sFormat:format(tParam[1], tParam[3], tostring(tParam[4]))
-    elseif k == "OnNPCSay" or k == "OnNPCYell" or k == "OnNPCWhisper" or k == "OnDatachron"
-        or k == "OnParty" then
+    elseif k == "OnNPCSay" or k == "OnNPCYell" or k == "OnNPCWhisper" or k == "OnDatachron" then
         local sFormat = "sMessage='%s' sSender='%s'"
         sResult = sFormat:format(tParam[1], tParam[2])
     elseif k == "TrackThisUnit" or k == "UnTrackThisUnit" then
