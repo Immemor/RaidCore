@@ -432,8 +432,7 @@ function mod:OnBossEnable()
     mod:AddTimerBar("GGRID", "Next gun grid", 21, mod:GetSetting("SoundGunGrid"))
 end
 
-function mod:OnUnitCreated(unit, sName)
-    local nUnitId = unit:GetId()
+function mod:OnUnitCreated(nId, unit, sName)
     local nHealth = unit:GetHealth()
 
     if self.L["Avatus"] == sName then
@@ -443,7 +442,7 @@ function mod:OnUnitCreated(unit, sName)
         if mod:GetSetting("LineCleaveBoss") then
             core:AddPixie(unit:GetId(), 2, unit, nil, "Green", 10, 22, 0)
         end
-        nAvatusId = nUnitId
+        nAvatusId = nId
         RefreshHoloHandPictures()
     elseif self.L["Augmented Rowsdower"] == sName then
         SetMarkersByPhase(LABYRINTH_PHASE)
@@ -456,12 +455,12 @@ function mod:OnUnitCreated(unit, sName)
             core:AddUnit(unit)
             core:WatchUnit(unit)
             if mod:GetSetting("LineCleaveYellowRoomBoss") then
-                core:AddPixie(nUnitId, 2, unit, nil, "Red", 5, 35, 0)
+                core:AddPixie(nId, 2, unit, nil, "Red", 5, 35, 0)
             end
         else
             -- Draw a line to the yellow portal.
             if mod:GetSetting("LinePortals") then
-                core:AddPixie(nUnitId, 1, unit, GetPlayerUnit(), "xkcdBananaYellow")
+                core:AddPixie(nId, 1, unit, GetPlayerUnit(), "xkcdBananaYellow")
             end
         end
     elseif sName == self.L["Unstoppable Object Simulation"] then
@@ -473,7 +472,7 @@ function mod:OnUnitCreated(unit, sName)
         else
             -- Draw a line to the green portal.
             if mod:GetSetting("LinePortals") then
-                core:AddPixie(nUnitId, 1, unit, GetPlayerUnit(), "green")
+                core:AddPixie(nId, 1, unit, GetPlayerUnit(), "green")
             end
         end
     elseif sName == self.L["Infinite Logic Loop"] then
@@ -481,7 +480,7 @@ function mod:OnUnitCreated(unit, sName)
             -- Blue room.
             local bDisplayPurgeList = RED_PHASE == nCurrentPhase
             SetMarkersByPhase(BLUE_PHASE)
-            nInfiniteLogicLoopId = nUnitId
+            nInfiniteLogicLoopId = nId
             core:AddUnit(unit)
             core:WatchUnit(unit)
             -- Cheat on the last purge date, to avoid some troubles with:
@@ -496,7 +495,7 @@ function mod:OnUnitCreated(unit, sName)
         else
             -- Draw a line to the blue portal.
             if mod:GetSetting("LinePortals") then
-                core:AddPixie(nUnitId, 1, unit, GetPlayerUnit(), "blue")
+                core:AddPixie(nId, 1, unit, GetPlayerUnit(), "blue")
             end
         end
     elseif sName == self.L["Holo Hand"] then
@@ -504,12 +503,12 @@ function mod:OnUnitCreated(unit, sName)
         RefreshHoloHandPictures()
         core:AddUnit(unit)
         core:WatchUnit(unit)
-        table.insert(tHoloHandsList, nUnitId, { ["unit"] = unit} )
+        table.insert(tHoloHandsList, nId, { ["unit"] = unit} )
         mod:AddMsg("HHAND", "HOLO HAND SPAWNED", 5, "Info")
         if mod:GetSetting("LineCleaveHands") then
-            core:AddPixie(nUnitId .. "_1", 2, unit, nil, "Blue", 7, 25, 0)
-            core:AddPixie(nUnitId .. "_2", 2, unit, nil, "xkcdBluegrey", 3, 7, 60)
-            core:AddPixie(nUnitId .. "_3", 2, unit, nil, "xkcdBluegrey", 3, 7, 300)
+            core:AddPixie(nId .. "_1", 2, unit, nil, "Blue", 7, 25, 0)
+            core:AddPixie(nId .. "_2", 2, unit, nil, "xkcdBluegrey", 3, 7, 60)
+            core:AddPixie(nId .. "_3", 2, unit, nil, "xkcdBluegrey", 3, 7, 300)
         end
     elseif self.L["Excessive Force Protocol"] == sName then
         if nHealth then
@@ -519,7 +518,7 @@ function mod:OnUnitCreated(unit, sName)
             core:WatchUnit(unit)
         else
             -- Draw a line to the red portal.
-            core:AddPixie(nUnitId, 1, unit, GetPlayerUnit(), "red")
+            core:AddPixie(nId, 1, unit, GetPlayerUnit(), "red")
         end
     elseif sName == self.L["Holo Cannon"] then
         if nHealth then
@@ -549,9 +548,9 @@ function mod:OnUnitCreated(unit, sName)
         end
     elseif self.L["Fragmented Data Chunk"] == sName then
         if mod:GetSetting("LineCleaveFragments") then
-            core:AddSimpleLine(nUnitId .. "_1", nUnitId, 0, 25, 0, 5, "Blue")
-            core:AddSimpleLine(nUnitId .. "_2", nUnitId, 0, 7, 60, 3, "xkcdBluegrey")
-            core:AddSimpleLine(nUnitId .. "_3", nUnitId, 0, 7, -60, 3,  "xkcdBluegrey")
+            core:AddSimpleLine(nId .. "_1", nId, 0, 25, 0, 5, "Blue")
+            core:AddSimpleLine(nId .. "_2", nId, 0, 7, 60, 3, "xkcdBluegrey")
+            core:AddSimpleLine(nId .. "_3", nId, 0, 7, -60, 3,  "xkcdBluegrey")
         end
     end
 end

@@ -51,7 +51,7 @@ function mod:OnBossEnable()
     Apollo.RegisterEventHandler("RC_UnitCreated", "OnUnitCreated", self)
 end
 
-function mod:OnUnitCreated(unit, sName)
+function mod:OnUnitCreated(nId, unit, sName)
     if sName == self.L["Bio-Enhanced Broodmother"] then
         core:AddUnit(unit)
         core:WatchUnit(unit)

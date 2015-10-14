@@ -106,9 +106,9 @@ function mod:OnBossEnable()
     nExperimentX89Id = nil
 end
 
-function mod:OnUnitCreated(tUnit, sName)
+function mod:OnUnitCreated(nId, tUnit, sName)
     if sName == self.L["Experiment X-89"] then
-        nExperimentX89Id = tUnit:GetId()
+        nExperimentX89Id = nId
         core:AddUnit(unit)
         core:WatchUnit(unit)
         if mod:GetSetting("LineExperimentX89") then

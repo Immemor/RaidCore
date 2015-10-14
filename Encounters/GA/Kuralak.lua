@@ -144,7 +144,6 @@ function mod:OnBossEnable()
     Apollo.RegisterEventHandler("DEBUFF_DEL", "OnDebuffDel", self)
     Apollo.RegisterEventHandler("SPELL_CAST_START", "OnCastStart", self)
 
-
     tCorruptedPlayerList = {}
     bIsPhase2 = false
     -- TODO: Remove this init, when values will be found.
@@ -157,7 +156,7 @@ function mod:OnBossEnable()
     end
 end
 
-function mod:OnUnitCreated(tUnit, sName)
+function mod:OnUnitCreated(nId, tUnit, sName)
     if sName == self.L["Kuralak the Defiler"] then
         core:AddUnit(tUnit)
         core:WatchUnit(tUnit)

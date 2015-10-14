@@ -91,8 +91,7 @@ function mod:OnBossEnable()
     end
 end
 
-function mod:OnUnitCreated(unit, sName)
-    local nId = unit:GetId()
+function mod:OnUnitCreated(nId, unit, sName)
     local nPlayerId = GetPlayerUnit():GetId()
 
     if sName == self.L["Phage Maw"] then

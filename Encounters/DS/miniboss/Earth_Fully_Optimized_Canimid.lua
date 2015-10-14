@@ -61,7 +61,7 @@ function mod:OnBossEnable()
     mod:AddTimerBar("Undermine", "5 x undermine", 31.7)
 end
 
-function mod:OnUnitCreated(tUnit, sName)
+function mod:OnUnitCreated(nId, tUnit, sName)
     if sName == self.L["Fully-Optimized Canimid"] then
         core:AddUnit(tUnit)
         core:WatchUnit(tUnit)

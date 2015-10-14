@@ -105,7 +105,7 @@ function mod:OnBossEnable()
     mod:AddTimerBar("TOMB", "Next frost tombs", 30, mod:GetSetting("SoundFrostTombsCountDown"))
 end
 
-function mod:OnUnitCreated(tUnit, sName)
+function mod:OnUnitCreated(nId, tUnit, sName)
     if sName == self.L["Hydroflux"] or sName == self.L["Aileron"] then
         core:AddUnit(tUnit)
         core:WatchUnit(tUnit)

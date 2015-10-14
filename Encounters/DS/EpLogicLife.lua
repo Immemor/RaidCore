@@ -192,7 +192,7 @@ function mod:OnDebuffRemoved(unitName, splId, unit)
     end
 end
 
-function mod:OnUnitCreated(unit, sName)
+function mod:OnUnitCreated(nId, unit, sName)
     local nHealth = tUnit:GetHealth()
 
     if sName == self.L["Visceralus"] then

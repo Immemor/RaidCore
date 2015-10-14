@@ -205,17 +205,16 @@ function mod:OnDebuffRemoved(unitName, splId, unit)
     end
 end
 
-function mod:OnUnitCreated(unit, sName)
-    local nUnitId = unit:GetId()
+function mod:OnUnitCreated(nId, unit, sName)
     local nHealth = unit:GetHealth()
 
     if sName == self.L["Alphanumeric Hash"] then
-        if nUnitId and mod:GetSetting("LineTetrisBlocks") then
-            core:AddSimpleLine(nUnitId, nUnitId, 0, 20, 0, 10, "red")
+        if nId and mod:GetSetting("LineTetrisBlocks") then
+            core:AddSimpleLine(nId, nId, 0, 20, 0, 10, "red")
         end
     elseif sName == self.L["Hydro Disrupter - DNT"] then
-        if nUnitId and not midphase and mod:GetSetting("LineOrbs") then
-            core:AddLineBetweenUnits("Disrupter" .. nUnitId, GetPlayerUnit():GetId(), nUnitId, nil, "blue")
+        if nId and not midphase and mod:GetSetting("LineOrbs") then
+            core:AddLineBetweenUnits("Disrupter" .. nId, GetPlayerUnit():GetId(), nId, nil, "blue")
         end
     elseif sName == self.L["Hydroflux"] then
         core:AddUnit(unit)

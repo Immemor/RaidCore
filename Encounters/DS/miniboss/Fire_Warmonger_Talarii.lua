@@ -87,7 +87,7 @@ function mod:OnBossEnable()
     mod:AddTimerBar("KNOCK", "KNOCKBACK", 23)
 end
 
-function mod:OnUnitCreated(tUnit, sUnitName)
+function mod:OnUnitCreated(nId, tUnit, sUnitName)
     if self.L["Warmonger Talarii"] == sUnitName then
         core:AddUnit(tUnit)
         core:WatchUnit(tUnit)

@@ -75,13 +75,12 @@ function mod:OnBossEnable()
     mod:AddTimerBar("NEXT_KILL", "Next flame of Tar'gresh to kill", 45)
 end
 
-function mod:OnUnitCreated(tUnit, sUnitName)
+function mod:OnUnitCreated(nId, tUnit, sUnitName)
     if self.L["Grand Warmonger Tar'gresh"] == sUnitName then
-        local nUnitId = tUnit:GetId()
-        if nUnitId and (nGrandWarmongerTarGreshId == nil or nGrandWarmongerTarGreshId == nUnitId) then
+        if nId and (nGrandWarmongerTarGreshId == nil or nGrandWarmongerTarGreshId == nId) then
             -- A filter is needed, because there is many unit called "Grand Warmonger Tar'gresh".
             -- Only the first is the good.
-            nGrandWarmongerTarGreshId = nUnitId
+            nGrandWarmongerTarGreshId = nId
             core:AddUnit(tUnit)
             core:WatchUnit(tUnit)
         end

@@ -98,8 +98,7 @@ function mod:OnBossEnable()
     mod:AddTimerBar("MID", "Next middle phase", 90, mod:GetSetting("SoundCountDownMidPhase"))
 end
 
-function mod:OnUnitCreated(tUnit, sName)
-    local nId = tUnit:GetId()
+function mod:OnUnitCreated(nId, tUnit, sName)
     local nHealth = tUnit:GetHealth()
 
     if sName == self.L["Visceralus"] then

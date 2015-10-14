@@ -152,8 +152,7 @@ function mod:ApplyBombLines(bomb_type)
     end
 end
 
-function mod:OnUnitCreated(unit, sName)
-    local nId = unit:GetId()
+function mod:OnUnitCreated(nId, unit, sName)
     if sName == self.L["Hydroflux"] then
         core:AddUnit(unit)
         core:WatchUnit(unit)

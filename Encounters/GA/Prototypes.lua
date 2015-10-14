@@ -111,7 +111,7 @@ function mod:OnBossEnable()
     protoFirst = true
 end
 
-function mod:OnUnitCreated(tUnit, sName)
+function mod:OnUnitCreated(nId, tUnit, sName)
     if sName == self.L["Phagetech Commander"] or sName == self.L["Phagetech Augmentor"]
         or sName == self.L["Phagetech Protector"] or sName == self.L["Phagetech Fabricator"] then
         core:AddUnit(tUnit)

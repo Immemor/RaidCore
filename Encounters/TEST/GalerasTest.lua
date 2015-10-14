@@ -67,7 +67,7 @@ function mod:InfiniteTimer()
     mod:AddTimerBar("INFINITE", "Loop Timer in class", 10, false, mod.InfiniteTimer, mod)
 end
 
-function mod:OnUnitCreated(unit, sName)
+function mod:OnUnitCreated(nId, unit, sName)
     if sName == self.L["Crimson Spiderbot"] then
         core:MarkUnit(unit, 1, "A")
     end

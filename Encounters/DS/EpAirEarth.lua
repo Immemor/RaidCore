@@ -117,7 +117,7 @@ function mod:OnBossEnable()
     mod:AddTimerBar("FIERCE_SWIPE", "Next fierce swipe", 16)
 end
 
-function mod:OnUnitCreated(unit, sName)
+function mod:OnUnitCreated(nId, unit, sName)
     if sName == self.L["Megalith"] then
         core:AddUnit(unit)
         core:WatchUnit(unit)

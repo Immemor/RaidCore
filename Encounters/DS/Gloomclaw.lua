@@ -176,7 +176,7 @@ function mod:OnWipe()
     core:ResetWorldMarkers()
 end
 
-function mod:OnUnitCreated(unit, sName)
+function mod:OnUnitCreated(nId, unit, sName)
     if sName == self.L["Corrupted Ravager"] or sName == self.L["Empowered Ravager"] then
         core:WatchUnit(unit)
     end

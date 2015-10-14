@@ -156,9 +156,8 @@ function mod:OnBossEnable()
     mod:AddTimerBar("STARS", "Next phase: Stars", 60)
 end
 
-function mod:OnUnitCreated(tUnit, sName)
+function mod:OnUnitCreated(nId, tUnit, sName)
     local nHealth = tUnit:GetHealth()
-    local nId = tUnit:GetId()
 
     if self.L["Megalith"] == sName or self.L["Mnemesis"] == sName then
         if nHealth then

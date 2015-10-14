@@ -52,7 +52,7 @@ function mod:OnBossEnable()
     mod:AddTimerBar("CUBE", "CUBE SMASH", 8)
 end
 
-function mod:OnUnitCreated(unit, sName)
+function mod:OnUnitCreated(nId, unit, sName)
     if self.L["Augmented Herald of Avatus"] == sName then
         core:AddUnit(unit)
         core:WatchUnit(unit)

@@ -78,13 +78,12 @@ function mod:OnBossEnable()
     mod:AddTimerBar("EXPLODING_ICE", "Exploding Ice", 17)
 end
 
-function mod:OnUnitCreated(tUnit, sUnitName)
+function mod:OnUnitCreated(nId, tUnit, sUnitName)
     if self.L["Frostbringer Warlock"] == sUnitName then
-        local nUnitId = tUnit:GetId()
-        if nUnitId and (nFrostbringerWarlockId == nil or nFrostbringerWarlockId == nUnitId) then
+        if nId and (nFrostbringerWarlockId == nil or nFrostbringerWarlockId == nId) then
             -- A filter is needed, because there is many unit called Frostbringer Warlock.
             -- Only the first is the good.
-            nFrostbringerWarlockId = nUnitId
+            nFrostbringerWarlockId = nId
             core:AddUnit(tUnit)
             core:WatchUnit(tUnit)
         end

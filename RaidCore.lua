@@ -843,7 +843,7 @@ end
 -- Hook Table. Will be replace step by step by a direct call to _tCurrentEncounter.
 ----------------------------------------------------------------------------------------------------
 function RaidCore:OnEncounterHookUnitCreated(nId, tUnit, sName)
-    Event_FireGenericEvent("RC_UnitCreated", tUnit, sName)
+    Event_FireGenericEvent("RC_UnitCreated", nId, tUnit, sName)
 end
 
 function RaidCore:OnEncounterHookEnteredCombat(nId, tUnit, sName, bInCombat)

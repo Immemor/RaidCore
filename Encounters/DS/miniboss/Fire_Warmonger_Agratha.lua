@@ -81,7 +81,7 @@ function mod:OnBossEnable()
     mod:AddTimerBar("BOMBS", "Bombs", 8)
 end
 
-function mod:OnUnitCreated(tUnit, sUnitName)
+function mod:OnUnitCreated(nId, tUnit, sUnitName)
     if self.L["Warmonger Agratha"] == sUnitName then
         core:AddUnit(tUnit)
         core:WatchUnit(tUnit)

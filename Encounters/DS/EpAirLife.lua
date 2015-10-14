@@ -169,8 +169,7 @@ function mod:OnBossEnable()
     mod:AddTimerBar("AVATUS_INCOMING", "Avatus incoming", 500)
 end
 
-function mod:OnUnitCreated(tUnit, sName)
-    local nId = tUnit:GetId()
+function mod:OnUnitCreated(nId, tUnit, sName)
     local nCurrentTime = GetGameTime()
 
     if sName == self.L["Wild Brambles"] then

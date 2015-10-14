@@ -81,7 +81,7 @@ function mod:OnBossEnable()
     bIsFirstFireRoom = true
 end
 
-function mod:OnUnitCreated(tUnit, sUnitName)
+function mod:OnUnitCreated(nId, tUnit, sUnitName)
     local nCurrentTime = GetGameTime()
 
     if self.L["Warmonger Chuna"] == sUnitName then

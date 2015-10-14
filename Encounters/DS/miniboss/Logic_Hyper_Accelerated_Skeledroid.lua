@@ -41,7 +41,7 @@ function mod:OnBossEnable()
     Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
 end
 
-function mod:OnUnitCreated(unit, sName)
+function mod:OnUnitCreated(nId, unit, sName)
     if self.L["Hyper-Accelerated Skeledroid"] == sName then
         core:AddUnit(unit)
         core:WatchUnit(unit)

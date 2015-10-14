@@ -72,7 +72,7 @@ function mod:OnBossEnable()
     Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
 end
 
-function mod:OnUnitCreated(unit, sName)
+function mod:OnUnitCreated(nId, unit, sName)
     if sName == self.L["Keeper of Sands"] then
         core:AddUnit(unit)
         core:WatchUnit(unit)
@@ -84,7 +84,6 @@ function mod:OnUnitCreated(unit, sName)
     elseif sName == self.L["BEAX"] then
         if mod:GetSetting("LinePathOfInvisibleUnit") then
             if IsInRangeOfKeeper(unit) then
-                local nId = unit:GetId()
                 local tPosition = unit:GetPosition()
                 local sKey1 = ("BEAX %d-%d"):format(nId, 1)
                 local sKey2 = ("BEAX %d-%d"):format(nId, 2)

@@ -53,9 +53,8 @@ function mod:OnBossEnable()
     tRockslideUnit = nil
 end
 
-function mod:OnUnitCreated(unit, sName)
+function mod:OnUnitCreated(nId, unit, sName)
     if sName == self.L["Logic Guided Rockslide"] then
-        local nId = unit:GetId()
         tRockslideUnit = unit
         core:AddUnit(unit)
         core:WatchUnit(unit)

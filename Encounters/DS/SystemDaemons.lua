@@ -237,7 +237,7 @@ function mod:OnBossEnable()
     mod:AddTimerBar("SDWAVE", "Next wave: Mobs", 15, mod:GetSetting("SoundWave"))
 end
 
-function mod:OnUnitCreated(unit, sName)
+function mod:OnUnitCreated(nId, unit, sName)
     if sName == self.L["Brute Force Algorithm"]
         or sName == self.L["Encryption Program"]
         or sName == self.L["Radiation Dispersion Unit"]
@@ -283,8 +283,8 @@ function mod:OnUnitCreated(unit, sName)
     elseif sName == self.L["Enhancement Module"] then
         core:AddUnit(unit)
         if mod:GetSetting("LineOnModulesMidphase") then
-            core:AddLine(unit:GetId().."_1", 2, unit, nil, 1, 25, 90)
-            core:AddLine(unit:GetId().."_2", 2, unit, nil, 2, 25, -90)
+            core:AddLine(nId .. "_1", 2, unit, nil, 1, 25, 90)
+            core:AddLine(nId .. "_2", 2, unit, nil, 2, 25, -90)
         end
     elseif sName == self.L["Null System Daemon"] then
         core:AddUnit(unit)

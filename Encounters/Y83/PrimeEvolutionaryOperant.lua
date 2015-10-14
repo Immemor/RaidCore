@@ -185,9 +185,7 @@ function mod:OnBossEnable()
     end
 end
 
-function mod:OnUnitCreated(tUnit, sName)
-    local nId = tUnit:GetId()
-
+function mod:OnUnitCreated(nId, tUnit, sName)
     if self.L["Prime Evolutionary Operant"] == sName then
         core:AddUnit(tUnit)
         core:WatchUnit(tUnit)

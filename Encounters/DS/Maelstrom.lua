@@ -125,22 +125,22 @@ function mod:OnBossEnable()
     nStationCount = 0
 end
 
-function mod:OnUnitCreated(unit, sName)
+function mod:OnUnitCreated(nId, unit, sName)
     if sName == self.L["Maelstrom Authority"] then
         core:AddUnit(unit)
         core:WatchUnit(unit)
         if mod:GetSetting("LineCleaveBoss") then
-            core:AddPixie(unit:GetId(), 2, unit, nil, "Red", 10, 15, 0)
+            core:AddPixie(nId, 2, unit, nil, "Red", 10, 15, 0)
         end
     elseif sName == self.L["Weather Station"] then
         core:AddUnit(unit)
         if mod:GetSetting("LineWeatherStations") then
-            core:AddPixie(unit:GetId(), 1, GetPlayerUnit(), unit, "Blue", 5, 10, 10)
+            core:AddPixie(nId, 1, GetPlayerUnit(), unit, "Blue", 5, 10, 10)
         end
     elseif sName == self.L["Wind Wall"] then
         if mod:GetSetting("LineWindWalls") then
-            core:AddPixie(unit:GetId().."_1", 2, unit, nil, "Green", 10, 20, 0)
-            core:AddPixie(unit:GetId().."_2", 2, unit, nil, "Green", 10, 20, 180)
+            core:AddPixie(nId .. "_1", 2, unit, nil, "Green", 10, 20, 0)
+            core:AddPixie(nId .. "_2", 2, unit, nil, "Green", 10, 20, 180)
         end
     end
 end

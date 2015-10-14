@@ -128,9 +128,8 @@ function mod:OnBossEnable()
     mod:AddTimerBar("NextP2", "Next P2", 90, mod:GetSetting("SoundPhase2CountDown"))
 end
 
-function mod:OnUnitCreated(tUnit, sName)
+function mod:OnUnitCreated(nId, tUnit, sName)
     local nHealth = tUnit:GetHealth()
-    local nId = tUnit:GetId()
     if sName == self.L["Golgox the Lifecrusher"]
         or sName == self.L["Terax Blightweaver"]
         or sName == self.L["Ersoth Curseform"]

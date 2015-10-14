@@ -118,9 +118,7 @@ function mod:OnBossEnable()
     mod:AddTimerBar("NEXT_PILLAR", "Next Pillar", 45)
 end
 
-function mod:OnUnitCreated(unit, sName)
-    local nId = unit:GetId()
-
+function mod:OnUnitCreated(nId, unit, sName)
     if sName == self.L["Data Devourer"] then
         if mod:GetSetting("LineDataDevourers") then
             local line = core:AddLineBetweenUnits(nId, GetPlayerUnit():GetId(), nId, 5, "blue")

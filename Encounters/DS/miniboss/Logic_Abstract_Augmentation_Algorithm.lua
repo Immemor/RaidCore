@@ -99,7 +99,7 @@ function mod:OnBossEnable()
     end
 end
 
-function mod:OnUnitCreated(unit, sName)
+function mod:OnUnitCreated(nId, unit, sName)
     if self.L["Abstract Augmentation Algorithm"] == sName then
         core:AddUnit(unit)
         core:WatchUnit(unit)

@@ -178,7 +178,7 @@ function mod:OnBossEnable()
     end
 end
 
-function mod:OnUnitCreated(unit, sName)
+function mod:OnUnitCreated(nId, unit, sName)
     if sName == self.L["Dreadphage Ohmna"] then
         core:AddUnit(unit)
         core:WatchUnit(unit)
@@ -197,7 +197,7 @@ function mod:OnUnitCreated(unit, sName)
             core:MarkUnit(unit, 0)
         end
         if mod:GetSetting("LineRavenousMaw") then
-            core:AddLine(unit:GetId(), 2, unit, nil, 3, 25, 0)
+            core:AddLine(nId, 2, unit, nil, 3, 25, 0)
         end
     end
 end
