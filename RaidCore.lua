@@ -124,11 +124,17 @@ local function ProcessDelayedUnit()
             if tUnit then
                 local s, sErrMsg = pcall(OnEncounterHookGeneric, "OnUnitCreated", nDelayedId, tUnit, nDelayedName)
                 if not s then
+                    if self.db.profile.bLUAErrorMessage then
+                        RaidCore:Print(sErrMsg)
+                    end
                     Log:Add("ERROR", sErrMsg)
                 end
                 if bInCombat then
                     s, sErrMsg = pcall(OnEncounterHookGeneric, "OnEnteredCombat", nDelayedId, tUnit, bInCombat, nDelayedName)
                     if not s then
+                        if self.db.profile.bLUAErrorMessage then
+                            RaidCore:Print(sErrMsg)
+                        end
                         Log:Add("ERROR", sErrMsg)
                     end
                 end
@@ -202,6 +208,7 @@ function RaidCore:OnInitialize()
             -- Simple and general settings.
             bSoundEnabled = true,
             bAcceptSummons = true,
+            bLUAErrorMessage = false,
             bReadyCheckOnBreakTimeout = true,
             sReadyCheckMessage = self.L["Raid Resume"],
         }
@@ -735,6 +742,9 @@ function RaidCore:GlobalEventHandler(sMethod, ...)
     if _eCurrentFSM == MAIN_FSM__RUNNING then
         local s, sErrMsg = pcall(OnEncounterHookGeneric, sMethod, ...)
         if not s then
+            if self.db.profile.bLUAErrorMessage then
+                self:Print(sErrMsg)
+            end
             Log:Add("ERROR", sErrMsg)
         end
     end
