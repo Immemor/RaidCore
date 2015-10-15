@@ -102,7 +102,6 @@ local bMidPhase = false
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("RC_UnitDestroyed", "OnUnitDestroyed", self)
     Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
     Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
 
@@ -137,9 +136,9 @@ function mod:OnUnitCreated(nId, unit, sName)
     end
 end
 
-function mod:OnUnitDestroyed(unit, sName)
+function mod:OnUnitDestroyed(nId, tUnit, sName)
     if sName == self.L["Air Column"] then
-        core:DropLine(unit:GetId())
+        core:DropLine(nId)
     end
 end
 

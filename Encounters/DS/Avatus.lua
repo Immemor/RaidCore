@@ -394,7 +394,6 @@ end
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("RC_UnitDestroyed", "OnUnitDestroyed", self)
     Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
     Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
     Apollo.RegisterEventHandler("BUFF_APPLIED", "OnBuffApplied", self)
@@ -553,40 +552,38 @@ function mod:OnUnitCreated(nId, unit, sName)
     end
 end
 
-function mod:OnUnitDestroyed(unit, sName)
-    local nUnitId = unit:GetId()
-
+function mod:OnUnitDestroyed(nId, tUnit, sName)
     if sName == self.L["Holo Hand"] then
-        core:DropPixie(nUnitId .. "_1")
-        core:DropPixie(nUnitId .. "_2")
-        core:DropPixie(nUnitId .. "_3")
-        if tHoloHandsList[nUnitId] then
-            tHoloHandsList[nUnitId] = nil
+        core:DropPixie(nId .. "_1")
+        core:DropPixie(nId .. "_2")
+        core:DropPixie(nId .. "_3")
+        if tHoloHandsList[nId] then
+            tHoloHandsList[nId] = nil
         end
     elseif sName == self.L["Holo Cannon"] then
-        core:DropPixie(nUnitId)
+        core:DropPixie(nId)
     elseif sName == self.L["Avatus"] then
-        core:DropPixie(nUnitId)
+        core:DropPixie(nId)
         core:RemovePicture("HAND1")
         core:RemovePicture("HAND2")
     elseif sName == self.L["Shock Sphere"] then
-        core:DropPixie(nUnitId)
+        core:DropPixie(nId)
     elseif sName == self.L["Infinite Logic Loop"] then
-        core:DropPixie(nUnitId)
+        core:DropPixie(nId)
         mod:RemoveTimerBar("PURGE_CYCLE")
         mod:RemoveTimerBar("PURGE_INCREASE")
         -- With the spellslinger's void slip spell, the purge sync is lost.
         bIsPurgeSync = false
     elseif sName == self.L["Mobius Physics Constructor"] then
-        core:DropPixie(nUnitId)
-        if unit:GetHealth() == 0 then
+        core:DropPixie(nId)
+        if tUnit:GetHealth() == 0 then
             -- Send information about the miniboss, not the portal.
             mod:SendIndMessage("MOBIUS_DEATH")
         end
     elseif self.L["Unstoppable Object Simulation"] == sName then
-        core:DropPixie(nUnitId)
+        core:DropPixie(nId)
     elseif self.L["Excessive Force Protocol"] == sName then
-        core:DropPixie(nUnitId)
+        core:DropPixie(nId)
     elseif sName == self.L["Tower Platform"] then
         if bGreenRoomMarkerDisplayed then
             bGreenRoomMarkerDisplayed = false
@@ -595,9 +592,9 @@ function mod:OnUnitDestroyed(unit, sName)
             end
         end
     elseif self.L["Fragmented Data Chunk"] == sName then
-        core:RemoveSimpleLine(nUnitId .. "_1")
-        core:RemoveSimpleLine(nUnitId .. "_2")
-        core:RemoveSimpleLine(nUnitId .. "_3")
+        core:RemoveSimpleLine(nId .. "_1")
+        core:RemoveSimpleLine(nId .. "_2")
+        core:RemoveSimpleLine(nId .. "_3")
     end
 end
 

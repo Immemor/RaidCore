@@ -115,7 +115,6 @@ local bossPos
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("RC_UnitDestroyed", "OnUnitDestroyed", self)
     Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
     Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
 
@@ -162,12 +161,12 @@ function mod:OnEnteredCombat(nId, tUnit, sName, bInCombat)
     end
 end
 
-function mod:OnUnitDestroyed(unit, sName)
+function mod:OnUnitDestroyed(nId, tUnit, sName)
     if sName == self.L["Wind Wall"] then
-        core:DropPixie(unit:GetId().."_1")
-        core:DropPixie(unit:GetId().."_2")
+        core:DropPixie(nId .. "_1")
+        core:DropPixie(nId .. "_2")
     elseif sName == self.L["Weather Station"] then
-        core:DropPixie(unit:GetId())
+        core:DropPixie(nId)
     end
 end
 

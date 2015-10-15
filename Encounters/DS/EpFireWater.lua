@@ -103,7 +103,6 @@ local tFrostBombPlayersList
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("RC_UnitDestroyed", "OnUnitDestroyed", self)
     Apollo.RegisterEventHandler("DEBUFF_ADD", "OnDebuffAdd", self)
     Apollo.RegisterEventHandler("DEBUFF_UPDATE", "OnDebuffUpdate", self)
     Apollo.RegisterEventHandler("DEBUFF_DEL", "OnDebuffDel", self)
@@ -175,12 +174,9 @@ function mod:OnUnitCreated(nId, unit, sName)
     end
 end
 
-function mod:OnUnitDestroyed(unit, sName)
+function mod:OnUnitDestroyed(nId, tUnit, sName)
     if sName == self.L["Flame Wave"] then
-        local unitId = unit:GetId()
-        if unitId then
-            core:DropPixie(unitId)
-        end
+        core:DropPixie(nId)
     end
 end
 

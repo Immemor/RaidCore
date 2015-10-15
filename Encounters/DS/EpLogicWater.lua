@@ -116,7 +116,6 @@ local midphase = false
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("RC_UnitDestroyed", "OnUnitDestroyed", self)
     Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
     Apollo.RegisterEventHandler("SPELL_CAST_END", "OnSpellCastEnd", self)
     Apollo.RegisterEventHandler("DEBUFF_APPLIED", "OnDebuffApplied", self)
@@ -229,9 +228,7 @@ function mod:OnUnitCreated(nId, unit, sName)
     end
 end
 
-function mod:OnUnitDestroyed(unit, sName)
-    local nId = unit:GetId()
-
+function mod:OnUnitDestroyed(nId, tUnit, sName)
     if sName == self.L["Alphanumeric Hash"] then
         core:RemoveSimpleLine(nId)
     elseif sName == self.L["Hydroflux"] then

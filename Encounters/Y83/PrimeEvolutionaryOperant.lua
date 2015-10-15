@@ -160,7 +160,6 @@ local bIsPhaseUnder20Poucent
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("RC_UnitDestroyed", "OnUnitDestroyed", self)
     Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
     Apollo.RegisterEventHandler("BUFF_ADD", "OnBuffAdd", self)
     Apollo.RegisterEventHandler("BUFF_UPDATE", "OnBuffUpdate", self)
@@ -212,11 +211,12 @@ function mod:OnUnitCreated(nId, tUnit, sName)
     end
 end
 
-function mod:OnUnitDestroyed(tUnit, sName)
+function mod:OnUnitDestroyed(nId, tUnit, sName)
     if self.L["Prime Evolutionary Operant"] == sName and self.L["Prime Phage Distributor"] == sName then
-        core:RemoveSimpleLine(("Cleave%d"):format(tUnit:GetId()))
+        core:RemoveSimpleLine(("Cleave%d"):format(nId))
     end
 end
+
 function mod:OnChatDC(message)
     local sPlayerNameIrradiate = message:match(self.L["(.*) is being irradiated"])
     if sPlayerNameIrradiate then

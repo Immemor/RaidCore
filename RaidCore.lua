@@ -180,7 +180,6 @@ function RaidCore:OnInitialize()
         },
         [MAIN_FSM__RUNNING] = {
             ["OnEnteredCombat"] = self.RUNNING_OnEnteredCombat,
-            ["OnUnitDestroyed"] = self.RUNNING_OnUnitDestroyed,
         },
     }
     _eCurrentFSM = MAIN_FSM__SEARCH
@@ -833,15 +832,17 @@ function RaidCore:RUNNING_OnEnteredCombat(nId, tUnit, sName, bInCombat)
     end
 end
 
-function RaidCore:RUNNING_OnUnitDestroyed(nId, tUnit, sName)
-    self:AutoCleanUnitDestroyed(nId, tUnit, sName)
-end
-
 ----------------------------------------------------------------------------------------------------
 -- Hook Table. Will be replace step by step by a direct call to _tCurrentEncounter.
 ----------------------------------------------------------------------------------------------------
 function RaidCore:OnEncounterHookUnitDestroyed(nId, tUnit, sName)
-    Event_FireGenericEvent("RC_UnitDestroyed", tUnit, sName)
+    -- Auto clean.
+    self:AutoCleanUnitDestroyed(nId, tUnit, sName)
+    -- Encounter call now.
+    local fEncounter = _tCurrentEncounter["OnUnitDestroyed"]
+    if fEncounter then
+        fEncounter(_tCurrentEncounter, nId, tUnit, sName)
+    end
 end
 
 function RaidCore:OnEncounterHookCastStart(nId, sCastName)

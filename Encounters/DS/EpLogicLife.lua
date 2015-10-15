@@ -139,7 +139,6 @@ local bIsMidPhase = false
 -- Encounter description.
 ---------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("RC_UnitDestroyed", "OnUnitDestroyed", self)
     Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
     Apollo.RegisterEventHandler("DEBUFF_APPLIED", "OnDebuffApplied", self)
     Apollo.RegisterEventHandler("DEBUFF_REMOVED", "OnDebuffRemoved", self)
@@ -237,9 +236,7 @@ function mod:OnUnitCreated(nId, unit, sName)
     end
 end
 
-function mod:OnUnitDestroyed(unit, sName)
-    local nId = unit:GetId()
-
+function mod:OnUnitDestroyed(nId, tUnit, sName)
     if sName == self.L["Essence of Logic"] then
         bIsMidPhase = false
         core:ResetWorldMarkers()

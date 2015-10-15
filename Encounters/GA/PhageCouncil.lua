@@ -118,7 +118,6 @@ local tBossesId
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("RC_UnitDestroyed", "OnUnitDestroyed", self)
     Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
     Apollo.RegisterEventHandler("SPELL_CAST_END", "OnSpellCastEnd", self)
     Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
@@ -148,8 +147,7 @@ function mod:OnUnitCreated(nId, tUnit, sName)
     end
 end
 
-function mod:OnUnitDestroyed(tUnit, sName)
-    local nId = tUnit:GetId()
+function mod:OnUnitDestroyed(nId, tUnit, sName)
     if sName == self.L["Noxmind the Insidious"] then
         core:RemoveSimpleLine("Wave" .. nId)
     end

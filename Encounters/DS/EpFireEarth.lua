@@ -87,7 +87,6 @@ local nLavaFloorCount
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("RC_UnitDestroyed", "OnUnitDestroyed", self)
     Apollo.RegisterEventHandler("BUFF_ADD", "OnBuffAdded", self)
     Apollo.RegisterEventHandler("BUFF_UPDATE", "OnBuffUpdate", self)
     Apollo.RegisterEventHandler("BUFF_DEL", "OnBuffRemoved", self)
@@ -138,9 +137,9 @@ function mod:OnUnitCreated(nId, unit, sName)
     end
 end
 
-function mod:OnUnitDestroyed(unit, sName)
+function mod:OnUnitDestroyed(nId, tUnit, sName)
     if sName == self.L["Flame Wave"] then
-        core:DropPixie(unit:GetId())
+        core:DropPixie(nId)
     elseif sName == self.L["Lava Floor (invis unit)"] then
         if nLavaFloorCount < 3 then
             mod:AddTimerBar("LAVA_FLOOR", "Next lava floor phase", 89)

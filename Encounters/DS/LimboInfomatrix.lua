@@ -67,7 +67,6 @@ end
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("RC_UnitDestroyed", "OnUnitDestroyed", self)
     Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
 end
 
@@ -94,9 +93,8 @@ function mod:OnUnitCreated(nId, unit, sName)
     end
 end
 
-function mod:OnUnitDestroyed(unit, sName)
+function mod:OnUnitDestroyed(nId, tUnit, sName)
     if sName == self.L["BEAX"] then
-        local nId = unit:GetId()
         for i=1, 2 do
             core:RemovePolygon(("BEAX %d-%d"):format(nId, i))
         end

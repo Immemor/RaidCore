@@ -149,7 +149,6 @@ local nTwirlCount
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("RC_UnitDestroyed", "OnUnitDestroyed", self)
     Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
     Apollo.RegisterEventHandler("DEBUFF_ADD", "OnDebuffAdd", self)
     Apollo.RegisterEventHandler("DEBUFF_DEL", "OnDebuffDel", self)
@@ -240,8 +239,7 @@ function mod:OnUnitCreated(nId, tUnit, sName)
     end
 end
 
-function mod:OnUnitDestroyed(unit, sName)
-    local nId = unit:GetId()
+function mod:OnUnitDestroyed(nId, tUnit, sName)
     if bIsMidPhase and sName == self.L["[DS] e395 - Air - Tornado"] then
         bIsMidPhase = false
         mod:AddTimerBar("MIDPHASE", "Next middle phase", 90, mod:GetSetting("SoundMidphaseCountDown"))

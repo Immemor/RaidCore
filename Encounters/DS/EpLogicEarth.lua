@@ -143,7 +143,6 @@ end
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("RC_UnitDestroyed", "OnUnitDestroyed", self)
     Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
     Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
     Apollo.RegisterEventHandler("DEBUFF_ADD", "OnDebuffAdd", self)
@@ -171,9 +170,7 @@ function mod:OnUnitCreated(nId, tUnit, sName)
     end
 end
 
-function mod:OnUnitDestroyed(tUnit, sName)
-    local nId = tUnit:GetId()
-
+function mod:OnUnitDestroyed(nId, tUnit, sName)
     if sName == self.L["Obsidian Outcropping"] then
         core:RemoveLineBetweenUnits("OBSIDIAN" .. nId)
         for i, nIdSaved in ipairs(tObsidianList) do

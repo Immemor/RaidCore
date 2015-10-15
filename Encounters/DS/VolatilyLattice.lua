@@ -108,7 +108,6 @@ local nDataDevourerLastPopTime
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("RC_UnitDestroyed", "OnUnitDestroyed", self)
     Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
 
     nDataDevourerLastPopTime = 0
@@ -137,9 +136,7 @@ function mod:OnUnitCreated(nId, unit, sName)
     end
 end
 
-function mod:OnUnitDestroyed(unit, sName)
-    local nId = unit:GetId()
-
+function mod:OnUnitDestroyed(nId, tUnit, sName)
     if sName == self.L["Data Devourer"] then
         core:RemoveLineBetweenUnits(nId)
     end

@@ -217,7 +217,6 @@ local nLastPurgeTime
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("RC_UnitDestroyed", "OnUnitDestroyed", self)
     Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
     Apollo.RegisterEventHandler("DEBUFF_ADD", "OnDebuffAdd", self)
     Apollo.RegisterEventHandler("DEBUFF_DEL", "OnDebuffDel", self)
@@ -295,10 +294,10 @@ function mod:OnUnitCreated(nId, unit, sName)
     end
 end
 
-function mod:OnUnitDestroyed(unit, sName)
+function mod:OnUnitDestroyed(nId, tUnit, sName)
     if sName == self.L["Enhancement Module"] then
-        core:DropLine(unit:GetId().."_1")
-        core:DropLine(unit:GetId().."_2")
+        core:DropLine(nId .. "_1")
+        core:DropLine(nId .. "_2")
     end
 end
 
