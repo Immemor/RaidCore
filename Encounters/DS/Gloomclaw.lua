@@ -158,7 +158,6 @@ end
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("RC_UnitStateChanged", "OnUnitStateChanged", self)
     Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
     Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
 
@@ -274,11 +273,11 @@ function mod:OnCombatLogHeal(tArgs)
     end
 end
 
-function mod:OnUnitStateChanged(unit, bInCombat, sName)
-    if unit:GetType() == "NonPlayer" and bInCombat then
+function mod:OnEnteredCombat(nId, tUnit, sName, bInCombat)
+    if bInCombat then
         if sName == self.L["Gloomclaw"] then
-            core:AddUnit(unit)
-            core:WatchUnit(unit)
+            core:AddUnit(tUnit)
+            core:WatchUnit(tUnit)
         elseif sName == self.L["Strain Parasite"]
             or sName == self.L["Gloomclaw Skurge"]
             or sName == self.L["Corrupted Fraz"] then

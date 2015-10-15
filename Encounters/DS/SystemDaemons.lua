@@ -222,7 +222,6 @@ function mod:OnBossEnable()
     Apollo.RegisterEventHandler("DEBUFF_ADD", "OnDebuffAdd", self)
     Apollo.RegisterEventHandler("DEBUFF_DEL", "OnDebuffDel", self)
     Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
-    Apollo.RegisterEventHandler("SubZoneChanged", "OnZoneChanged", self)
 
     sdwaveCount, probeCount = 0, 0
     phase2warn, phase2 = false, false
@@ -380,11 +379,11 @@ function mod:OnDebuffDel(nId, nSpellId)
     end
 end
 
-function mod:OnZoneChanged(zoneId, zoneName)
-    if zoneName == "Datascape" then
+function mod:OnSubZoneChanged(nZoneId, sZoneName)
+    if sZoneName == "Datascape" then
         return
-    elseif zoneName == "Halls of the Infinite Mind" then
-    elseif zoneName:find("Infinite Generator Core") then
+    elseif sZoneName == "Halls of the Infinite Mind" then
+    elseif sZoneName:find("Infinite Generator Core") then
         core:SetWorldMarker("PROBE_SOUTH", self.L["Probe Spawn"], probesouth)
     end
 end

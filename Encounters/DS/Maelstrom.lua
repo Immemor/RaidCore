@@ -116,7 +116,6 @@ local bossPos
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
     Apollo.RegisterEventHandler("RC_UnitDestroyed", "OnUnitDestroyed", self)
-    Apollo.RegisterEventHandler("RC_UnitStateChanged", "OnEnteredCombat", self)
     Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
     Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
 
@@ -144,7 +143,7 @@ function mod:OnUnitCreated(nId, unit, sName)
     end
 end
 
-function mod:OnEnteredCombat(tUnit, bInCombat, sName)
+function mod:OnEnteredCombat(nId, tUnit, sName, bInCombat)
     if bInCombat then
         if sName == self.L["Weather Station"] then
             mod:AddTimerBar("STATION", "Next stations", 25)

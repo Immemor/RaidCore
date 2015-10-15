@@ -395,7 +395,6 @@ end
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
     Apollo.RegisterEventHandler("RC_UnitDestroyed", "OnUnitDestroyed", self)
-    Apollo.RegisterEventHandler("RC_UnitStateChanged", "OnEnteredCombat", self)
     Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
     Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
     Apollo.RegisterEventHandler("BUFF_APPLIED", "OnBuffApplied", self)
@@ -602,7 +601,7 @@ function mod:OnUnitDestroyed(unit, sName)
     end
 end
 
-function mod:OnEnteredCombat(tUnit, bInCombat, sName)
+function mod:OnEnteredCombat(nId, tUnit, sName, bInCombat)
     if unitName == self.L["Infinite Logic Loop"] then
         if bInCombat then
             DisplayPurgeList()

@@ -53,7 +53,6 @@ end
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("RC_UnitStateChanged", "OnUnitStateChanged", self)
     Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
     Apollo.RegisterEventHandler("SPELL_CAST_END", "OnSpellCastEnd", self)
 
@@ -72,12 +71,12 @@ function mod:OnUnitCreated(nId, unit, sName)
     end
 end
 
-function mod:OnUnitStateChanged(unit, bInCombat, sName)
+function mod:OnEnteredCombat(nId, tUnit, sName, bInCombat)
     if bInCombat then
         if sName == self.L["Crimson Spiderbot"] then
-            core:WatchUnit(unit)
-            core:AddUnit(unit)
-            core:MarkUnit(unit, 51)
+            core:WatchUnit(tUnit)
+            core:AddUnit(tUnit)
+            core:MarkUnit(tUnit, 51)
         end
     end
 end
