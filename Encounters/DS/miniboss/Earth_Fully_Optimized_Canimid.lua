@@ -53,7 +53,6 @@ mod:RegisterDefaultTimerBarConfigs({
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
     Apollo.RegisterEventHandler("SPELL_CAST_END", "OnSpellCastEnd", self)
 
     mod:AddTimerBar("Terra-forme", "Terra-forme", 59.5)
@@ -67,11 +66,11 @@ function mod:OnUnitCreated(nId, tUnit, sName)
     end
 end
 
-function mod:OnSpellCastStart(sName, sSpellName, tUnit)
+function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
    if self.L["Fully-Optimized Canimid"] == sName then
-       if self.L["Terra-forme"] == sSpellName then
+       if self.L["Terra-forme"] == sCastName then
            mod:RemoveTimerBar("Terra-forme")
-       elseif self.L["Undermine"] == sSpellName then
+       elseif self.L["Undermine"] == sCastName then
            mod:RemoveTimerBar("5 x undermine")
        end
    end

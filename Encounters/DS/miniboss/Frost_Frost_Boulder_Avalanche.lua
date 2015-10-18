@@ -90,8 +90,6 @@ local icicleSpell
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
-
     icicleSpell = false
     mod:AddTimerBar("ICICLE", "~" .. self.L["ICICLE"], 17)
     mod:AddTimerBar("SHATTER", "~" .. self.L["Shatter"], 30)
@@ -114,8 +112,8 @@ function mod:OnHealthChanged(nId, nPourcent, sName)
     end
 end
 
-function mod:OnSpellCastStart(sUnitName, sCastName, unit)
-    if self.L["Frost-Boulder Avalanche"] == sUnitName then
+function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
+    if self.L["Frost-Boulder Avalanche"] == sName then
         if self.L["Icicle Storm"] == sCastName then
             mod:RemoveTimerBar("SHATTER")
             mod:AddMsg("ICICLE", self.L["ICICLE"].." !!", 5, "Alert")

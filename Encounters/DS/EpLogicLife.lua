@@ -139,7 +139,6 @@ local bIsMidPhase = false
 -- Encounter description.
 ---------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
     Apollo.RegisterEventHandler("DEBUFF_APPLIED", "OnDebuffApplied", self)
     Apollo.RegisterEventHandler("DEBUFF_REMOVED", "OnDebuffRemoved", self)
     Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
@@ -247,16 +246,16 @@ function mod:OnUnitDestroyed(nId, tUnit, sName)
     end
 end
 
-function mod:OnSpellCastStart(unitName, castName, unit)
-    local eventTime = GameLib.GetGameTime()
-    if unitName == self.L["Visceralus"] then
-        if castName == self.L["Blinding Light"] then
-            if self:GetDistanceBetweenUnits(unit, GetPlayerUnit()) < 33 then
+function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
+    if self.L["Visceralus"] == sName then
+        if self.L["Blinding Light"] == sCastName then
+            local tUnit = GetUnitById(nId)
+            if self:GetDistanceBetweenUnits(tUnit, GetPlayerUnit()) < 33 then
                 mod:AddMsg("BLIND", "Blinding Light", 5, mod:GetSetting("SoundBlindingLight") and "Beware")
             end
         end
-    elseif unitName == self.L["Mnemesis"] then
-        if castName == self.L["Defragment"] then
+    elseif self.L["Mnemesis"] == sName then
+        if self.L["Defragment"] == sCastName then
             mod:AddMsg("DEFRAG", "SPREAD", 3, mod:GetSetting("SoundDefrag") and "Alarm")
             mod:AddTimerBar("DEFRAG", "Next defragment", 40, mod:GetSetting("SoundDefrag"))
             if mod:GetSetting("PolygonDefrag") then

@@ -166,7 +166,6 @@ end
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
     Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
-    Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
 
     pilarCount, boreCount, submergeCount = 1, 0, 0
     firstPull, OhmnaP3, OhmnaP4 = true, false, false
@@ -212,16 +211,16 @@ function mod:OnHealthChanged(nId, nPourcent, sName)
     end
 end
 
-function mod:OnSpellCastStart(unitName, castName, unit)
-    if unitName == self.L["Dreadphage Ohmna"] then
-        if castName == self.L["Erupt"] then
+function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
+    if sName == self.L["Dreadphage Ohmna"] then
+        if sCastName == self.L["Erupt"] then
             if OhmnaP3 then return end
             local pilarActivated = self:OhmnaPE(pilarCount % 2)
             mod:AddTimerBar("OPILAR", self.L["PILLAR %u : %u"]:format(pilarCount, pilarActivated), 32)
             if self:Tank() then
                 mod:AddTimerBar("OBORE", "SWITCH TANK", 45)
             end
-        elseif castName == self.L["Genetic Torrent"] then
+        elseif sCastName == self.L["Genetic Torrent"] then
             mod:AddMsg("SPEW", "BIG SPEW", 5, mod:GetSetting("SoundBigSpew") and "RunAway")
             mod:AddTimerBar("OSPEW", "NEXT BIG SPEW", OhmnaP4 and 40 or 60)
         end

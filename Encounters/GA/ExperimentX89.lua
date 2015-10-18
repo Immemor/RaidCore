@@ -99,7 +99,6 @@ local nExperimentX89Id
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
     Apollo.RegisterEventHandler("DEBUFF_ADD", "OnDebuffAdd", self)
     Apollo.RegisterEventHandler("DEBUFF_DEL", "OnDebuffDel", self)
     nExperimentX89Id = nil
@@ -116,11 +115,11 @@ function mod:OnUnitCreated(nId, tUnit, sName)
     end
 end
 
-function mod:OnSpellCastStart(unitName, castName, unit)
-    if unitName == self.L["Experiment X-89"] then
-        if castName == self.L["Resounding Shout"] then
+function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
+    if sName == self.L["Experiment X-89"] then
+        if sCastName == self.L["Resounding Shout"] then
             mod:AddMsg("KNOCKBACK", "KNOCKBACK", 3, "Alert")
-        elseif castName == self.L["Repugnant Spew"] then
+        elseif sCastName == self.L["Repugnant Spew"] then
             mod:AddMsg("BEAM", "BEAM", 3, "Info")
         end
     end

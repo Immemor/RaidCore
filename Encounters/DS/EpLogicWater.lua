@@ -116,7 +116,6 @@ local midphase = false
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
     Apollo.RegisterEventHandler("SPELL_CAST_END", "OnSpellCastEnd", self)
     Apollo.RegisterEventHandler("DEBUFF_APPLIED", "OnDebuffApplied", self)
     Apollo.RegisterEventHandler("DEBUFF_REMOVED", "OnDebuffRemoved", self)
@@ -139,18 +138,19 @@ function mod:OnChatDC(message)
     end
 end
 
-function mod:OnSpellCastStart(unitName, castName, unit)
-    if unitName == self.L["Mnemesis"] then
-        if castName == self.L["Circuit Breaker"] then
+function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
+    if sName == self.L["Mnemesis"] then
+        if self.L["Circuit Breaker"] == sCastName then
             midphase = true
             mod:RemoveTimerBar("PRISON")
             mod:RemoveTimerBar("DEFRAG")
             mod:AddTimerBar("MIDPHASE", "Circuit Breaker", 25, mod:GetSetting("SoundMidphaseCountDown"))
-            local nArmorValue = unit:GetInterruptArmorValue()
+            local tUnit = GetUnitById(nId)
+            local nArmorValue = tUnit:GetInterruptArmorValue()
             mod:AddMsg("IA", self.L["IA REMAINING %u"]:format(nArmorValue), 5, nil, "blue")
-        elseif castName == self.L["Imprison"] then
+        elseif self.L["Imprison"] == sCastName then
             mod:RemoveTimerBar("PRISON")
-        elseif castName == self.L["Defragment"] then
+        elseif self.L["Defragment"] == sCastName then
             mod:AddMsg("DEFRAG", "SPREAD", 3, mod:GetSetting("SoundDefrag") and "Alarm")
             mod:AddTimerBar("DEFRAG", "Next defragment", 36, mod:GetSetting("SoundDefrag"))
             if mod:GetSetting("PolygonDefrag") then
@@ -160,12 +160,12 @@ function mod:OnSpellCastStart(unitName, castName, unit)
                 end, 10)
             end
         end
-    elseif unitName == self.L["Hydroflux"] then
-        if castName == self.L["Watery Grave"] then
+    elseif sName == self.L["Hydroflux"] then
+        if self.L["Watery Grave"] == sCastName then
             if mod:GetSetting("OtherWateryGraveTimer") then
                 mod:AddTimerBar("GRAVE", "Next Watery Grave", 10)
             end
-        elseif self.L["Tsunami"] == castName then
+        elseif self.L["Tsunami"] == sCastName then
             mod:RemoveTimerBar("GRAVE")
         end
     end

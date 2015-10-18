@@ -92,7 +92,6 @@ local bIsPhase2 = false
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
     Apollo.RegisterEventHandler("SPELL_CAST_END", "OnSpellCastEnd", self)
     Apollo.RegisterEventHandler("BUFF_ADD", "OnBuffAdd", self)
     Apollo.RegisterEventHandler("DEBUFF_ADD", "OnDebuffAdd", self)
@@ -111,13 +110,13 @@ function mod:OnUnitCreated(nId, tUnit, sName)
     end
 end
 
-function mod:OnSpellCastStart(unitName, castName, unit)
-    if unitName == self.L["Hydroflux"] then
-        if castName == self.L["Tsunami"] then
+function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
+    if self.L["Hydroflux"] == sName then
+        if self.L["Tsunami"] == sCastName then
             bIsPhase2 = true
             nMOOCount = nMOOCount + 1
             mod:AddMsg("PHASE2", self.L["Tsunami"]:upper(), 5, mod:GetSetting("SoundMidphase") and "Alert")
-        elseif castName == self.L["Glacial Icestorm"] then
+        elseif self.L["Glacial Icestorm"] == sCastName then
             mod:AddMsg("ICESTORM", "ICESTORM", 5, mod:GetSetting("SoundIcestorm") and "RunAway")
         end
     end

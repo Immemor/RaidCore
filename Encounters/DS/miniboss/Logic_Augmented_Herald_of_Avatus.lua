@@ -46,8 +46,6 @@ mod:RegisterDefaultTimerBarConfigs({
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
-
     mod:AddTimerBar("CUBE", "CUBE SMASH", 8)
 end
 
@@ -58,9 +56,9 @@ function mod:OnUnitCreated(nId, unit, sName)
     end
 end
 
-function mod:OnSpellCastStart(sName, sSpellName, tUnit)
+function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
     if self.L["Augmented Herald of Avatus"] == sName then
-        if self.L["Cube Smash"] == sSpellName then
+        if self.L["Cube Smash"] == sCastName then
             mod:AddTimerBar("CUBE", "CUBE SMASH", 17)
         end
     end

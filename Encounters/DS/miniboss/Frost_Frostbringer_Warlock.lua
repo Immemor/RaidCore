@@ -65,7 +65,6 @@ local bIsPhase2
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
     Apollo.RegisterEventHandler("SPELL_CAST_END", "OnSpellCastEnd", self)
     Apollo.RegisterEventHandler("DEBUFF_ADD", "OnDebuffAdd", self)
 
@@ -101,8 +100,8 @@ function mod:OnHealthChanged(nId, nPourcent, sName)
     end
 end
 
-function mod:OnSpellCastStart(sUnitName, sCastName, tUnit)
-    if self.L["Frostbringer Warlock"] == sUnitName then
+function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
+    if self.L["Frostbringer Warlock"] == sName then
         if self.L["Frost Waves"] == sCastName then
             mod:RemoveTimerBar("WAVES")
             mod:RemoveTimerBar("GLACIER")

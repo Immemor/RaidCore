@@ -71,7 +71,6 @@ local bIsFirstFireRoom
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
     Apollo.RegisterEventHandler("SPELL_CAST_END", "OnSpellCastEnd", self)
 
     nPreviousBombPopDate = 0
@@ -103,8 +102,8 @@ function mod:OnHealthChanged(nId, nPourcent, sName)
     end
 end
 
-function mod:OnSpellCastStart(sUnitName, sCastName, tUnit)
-    if self.L["Warmonger Agratha"] == sUnitName then
+function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
+    if self.L["Warmonger Agratha"] == sName then
         if self.L["Conjure Fire Elementals"] == sCastName then
             mod:AddMsg("ELEMENTALS", "FIRE ELEMENTALS", 5)
         elseif self.L["Fire Room"] == sCastName then

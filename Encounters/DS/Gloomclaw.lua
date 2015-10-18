@@ -158,7 +158,6 @@ end
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
     Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
 
     waveCount, ruptCount, prev = 0, 0, 0
@@ -180,20 +179,21 @@ function mod:OnUnitCreated(nId, unit, sName)
     end
 end
 
-function mod:OnSpellCastStart(unitName, castName, unit)
-    if unitName == self.L["Gloomclaw"] and castName == self.L["Rupture"] then
+function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
+    if sName == self.L["Gloomclaw"] and sCastName == self.L["Rupture"] then
         ruptCount = ruptCount + 1
-        mod:AddMsg("RUPTURE", self.L["INTERRUPT %s"]:format(unitName:upper()), 5, mod:GetSetting("SoundRuptureInterrupt") and "Destruction")
+        mod:AddMsg("RUPTURE", self.L["INTERRUPT %s"]:format(sName:upper()), 5, mod:GetSetting("SoundRuptureInterrupt") and "Destruction")
         if ruptCount == 1 then
             mod:AddTimerBar("RUPTURE", "Next rupture", 43, mod:GetSetting("SoundRuptureCountDown"))
         end
-    elseif (unitName == self.L["Corrupted Ravager"] or unitName == self.L["Empowered Ravager"])
-        and castName == self.L["Corrupting Rays"] then
+    elseif (sName == self.L["Corrupted Ravager"] or sName == self.L["Empowered Ravager"])
+        and sCastName == self.L["Corrupting Rays"] then
 
         local playerUnit = GameLib.GetPlayerUnit()
-        local distance_to_unit = self:GetDistanceBetweenUnits(playerUnit, unit)
+        local tUnit = GetUnitById(nId)
+        local distance_to_unit = self:GetDistanceBetweenUnits(playerUnit, tUnit)
         if distance_to_unit < 35 then
-            mod:AddMsg("RAYS", self.L["INTERRUPT %s"]:format(unitName:upper()), 5, mod:GetSetting("SoundCorruptingRays") and "Inferno")
+            mod:AddMsg("RAYS", self.L["INTERRUPT %s"]:format(sName:upper()), 5, mod:GetSetting("SoundCorruptingRays") and "Inferno")
         end
     end
 end

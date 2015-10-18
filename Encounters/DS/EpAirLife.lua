@@ -149,7 +149,6 @@ local nTwirlCount
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
     Apollo.RegisterEventHandler("DEBUFF_ADD", "OnDebuffAdd", self)
     Apollo.RegisterEventHandler("DEBUFF_DEL", "OnDebuffDel", self)
     Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
@@ -314,11 +313,13 @@ function mod:OnDebuffDel(nId, nSpellId)
     end
 end
 
-function mod:OnSpellCastStart(unitName, castName, unit)
-    if unitName == self.L["Visceralus"] then
-        if castName == self.L["Blinding Light"] then
+function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
+    if self.L["Visceralus"] == sName then
+        if self.L["Blinding Light"] == sCastName then
             if mod:GetSetting("OtherBlindingLight") then
-                if self:GetDistanceBetweenUnits(unit, GetPlayerUnit()) < 33 then
+                local tUnit = GetUnitById(nId)
+                local bIsClose = self:GetDistanceBetweenUnits(tUnit, GetPlayerUnit()) < 33
+                if bIsClose then
                     local sSound = mod:GetSetting("SoundBlindingLight") and "Beware"
                     mod:AddMsg("BLIND", "Blinding Light", 5, sSound)
                 end

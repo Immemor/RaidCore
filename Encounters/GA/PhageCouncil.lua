@@ -118,7 +118,6 @@ local tBossesId
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
     Apollo.RegisterEventHandler("SPELL_CAST_END", "OnSpellCastEnd", self)
     Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
 
@@ -153,14 +152,13 @@ function mod:OnUnitDestroyed(nId, tUnit, sName)
     end
 end
 
-function mod:OnSpellCastStart(sName, sCastName, tUnit)
+function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
     if sName == self.L["Golgox the Lifecrusher"]
         or sName == self.L["Terax Blightweaver"]
         or sName == self.L["Ersoth Curseform"]
         or sName == self.L["Noxmind the Insidious"]
         or sName == self.L["Fleshmonger Vratorg"] then
         -- Common behavior.
-        local nId = tUnit:GetId()
         if self.L["Teleport"] == sCastName then
             if mod:GetSetting("SoundPhase2Alert") then
                 core:PlaySound("Alert")
@@ -177,6 +175,7 @@ function mod:OnSpellCastStart(sName, sCastName, tUnit)
                 mod:AddMsg("InfoPhase", "Phase 2: TERAX! (Mini adds)", 5, nil, "blue")
                 mod:AddTimerBar("P2Timeout", "P2: Timeout mini adds", 29.5)
             elseif self.L["Stitching Strain"] == sCastName then
+                local tUnit = GetUnitById(nId)
                 if self:GetDistanceBetweenUnits(GetPlayerUnit(), tUnit) < 35 then
                     if mod:GetSetting("SoundInterruptTerax") then
                         core:PlaySound("Alarm")

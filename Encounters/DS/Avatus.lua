@@ -394,7 +394,6 @@ end
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
     Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
     Apollo.RegisterEventHandler("BUFF_APPLIED", "OnBuffApplied", self)
     Apollo.RegisterEventHandler("BUFF_DEL", "OnBuffDel", self)
@@ -706,9 +705,9 @@ function mod:OnHealthChanged(nId, nPourcent, sName)
     end
 end
 
-function mod:OnSpellCastStart(unitName, castName, unit)
-    if unitName == self.L["Avatus"] then
-        if self.L["Obliteration Beam"] == castName then
+function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
+    if self.L["Avatus"] == sName then
+        if self.L["Obliteration Beam"] == sCastName then
             local EndOfCannon = nHoloCannonActivationTime + HOLO_CANNONS_DURATION[nMainPhaseCount]
             local NextBeam = GetGameTime() + 37
             if EndOfCannon > NextBeam and nMainPhaseCount < 3 then
@@ -717,26 +716,30 @@ function mod:OnSpellCastStart(unitName, castName, unit)
                 mod:RemoveTimerBar("OBBEAM")
             end
         end
-    elseif unitName == self.L["Holo Hand"] and castName == self.L["Crushing Blow"] then
-        local playerUnit = GetPlayerUnit()
-        for _, hand in pairs(tHoloHandsList) do
-            local distance_to_hand = self:GetDistanceBetweenUnits(playerUnit, hand["unit"])
-            hand["distance"] = distance_to_hand
-        end
+    elseif self.L["Holo Hand"] == sName then
+        if self.L["Crushing Blow"] == sCastName then
+            local playerUnit = GetPlayerUnit()
+            for _, hand in pairs(tHoloHandsList) do
+                local distance_to_hand = self:GetDistanceBetweenUnits(playerUnit, hand["unit"])
+                hand["distance"] = distance_to_hand
+            end
 
-        local closest_holo_hand = tHoloHandsList[next(tHoloHandsList)]
-        for _, hand in pairs(tHoloHandsList) do
-            if hand["distance"] < closest_holo_hand["distance"] then
-                closest_holo_hand = hand
+            local closest_holo_hand = tHoloHandsList[next(tHoloHandsList)]
+            for _, hand in pairs(tHoloHandsList) do
+                if hand["distance"] < closest_holo_hand["distance"] then
+                    closest_holo_hand = hand
+                end
+            end
+            local sSpellName = closest_holo_hand["unit"]:GetCastName():gsub(NO_BREAK_SPACE, " ")
+            if sSpellName == self.L["Crushing Blow"] then
+                mod:AddMsg("CRBLOW", "INTERRUPT CRUSHING BLOW!", 5, mod:GetSetting("SoundHandInterrupt") and "Inferno")
             end
         end
-        local sSpellName = closest_holo_hand["unit"]:GetCastName():gsub(NO_BREAK_SPACE, " ")
-        if sSpellName == self.L["Crushing Blow"] then
-            mod:AddMsg("CRBLOW", "INTERRUPT CRUSHING BLOW!", 5, mod:GetSetting("SoundHandInterrupt") and "Inferno")
+    elseif self.L["Mobius Physics Constructor"] == sName then
+        if self.L["Data Flare"] == sCastName then
+            mod:AddTimerBar("BLIND", "Next blind", 29, mod:GetSetting("SoundBlindYellowRoom"))
+            mod:AddMsg("BLIND", "BLIND! TURN AWAY FROM BOSS", 5, mod:GetSetting("SoundBlindYellowRoom") and "Inferno")
         end
-    elseif unitName == self.L["Mobius Physics Constructor"] and castName == self.L["Data Flare"] then
-        mod:AddTimerBar("BLIND", "Next blind", 29, mod:GetSetting("SoundBlindYellowRoom"))
-        mod:AddMsg("BLIND", "BLIND! TURN AWAY FROM BOSS", 5, mod:GetSetting("SoundBlindYellowRoom") and "Inferno")
     end
 end
 

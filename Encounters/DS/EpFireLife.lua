@@ -90,7 +90,6 @@ local nEssenceofLifeCount
 function mod:OnBossEnable()
     Apollo.RegisterEventHandler("DEBUFF_ADD", "OnDebuffAdd", self)
     Apollo.RegisterEventHandler("DEBUFF_DEL", "OnDebuffDel", self)
-    Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
 
     nEssenceofLifeCount = 0
     mod:AddTimerBar("MID", "Next middle phase", 90, mod:GetSetting("SoundCountDownMidPhase"))
@@ -177,10 +176,11 @@ function mod:OnDebuffDel(nId, nSpellId)
     end
 end
 
-function mod:OnSpellCastStart(unitName, castName, unit)
-    if unitName == self.L["Visceralus"] then
-        if castName == self.L["Blinding Light"]
-            and self:GetDistanceBetweenUnits(unit, GetPlayerUnit()) < 50 then
+function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
+    if self.L["Visceralus"] == sName then
+        local tUnit = GetUnitById(nId)
+        local bIsClose = self:GetDistanceBetweenUnits(tUnit, GetPlayerUnit()) < 50
+        if self.L["Blinding Light"] == sCastName and bIsClose then
             mod:AddMsg("BLIND", "Blinding Light", 3, mod:GetSetting("SoundBlindingLight") and "Beware")
         end
     end

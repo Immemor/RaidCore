@@ -141,7 +141,6 @@ function mod:OnBossEnable()
     Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
     Apollo.RegisterEventHandler("DEBUFF_ADD", "OnDebuffAdd", self)
     Apollo.RegisterEventHandler("DEBUFF_DEL", "OnDebuffDel", self)
-    Apollo.RegisterEventHandler("SPELL_CAST_START", "OnCastStart", self)
 
     tCorruptedPlayerList = {}
     bIsPhase2 = false
@@ -223,7 +222,7 @@ function mod:OnChatDC(message)
     end
 end
 
-function mod:OnCastStart(sName, sCastName, tUnit)
+function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
     if self.L["Kuralak the Defiler"] == sName then
         if self.L["Chromosome Corruption"] == sCastName then
             if not bIsPhase2 then

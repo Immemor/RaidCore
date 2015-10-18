@@ -78,7 +78,6 @@ local bIsFirstFireRoom
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
     Apollo.RegisterEventHandler("SPELL_CAST_END", "OnSpellCastEnd", self)
 
     nPreviousBombPopTime = 0
@@ -108,8 +107,8 @@ function mod:OnHealthChanged(nId, nPourcent, sName)
     end
 end
 
-function mod:OnSpellCastStart(sUnitName, sCastName, tUnit)
-    if self.L["Warmonger Talarii"] == sUnitName then
+function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
+    if self.L["Warmonger Talarii"] == sName then
         if self.L["Incineration"] == sCastName then
             mod:AddMsg("KNOCK", "INTERRUPT !", 5, "Alert")
             mod:AddTimerBar("KNOCK", "KNOCKBACK", 29)

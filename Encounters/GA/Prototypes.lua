@@ -105,7 +105,6 @@ local protoFirst = true
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
     Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
-    Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
 
     protoFirst = true
 end
@@ -118,11 +117,15 @@ function mod:OnUnitCreated(nId, tUnit, sName)
     end
 end
 
-function mod:OnSpellCastStart(unitName, castName, unit)
-    if unitName == self.L["Phagetech Augmentor"] and castName == self.L["Summon Repairbot"] then
-        mod:AddMsg("BOTS", "BOTS !!", 5, "Alert")
-    elseif unitName == self.L["Phagetech Fabricator"] and castName == self.L["Summon Destructobot"] then
-        mod:AddMsg("BOTS", "BOTS !!", 5, "Alert")
+function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
+    if sName == self.L["Phagetech Augmentor"] then
+        if sCastName == self.L["Summon Repairbot"] then
+            mod:AddMsg("BOTS", "BOTS !!", 5, "Alert")
+        end
+    elseif sName == self.L["Phagetech Fabricator"] then
+        if sCastName == self.L["Summon Destructobot"] then
+            mod:AddMsg("BOTS", "BOTS !!", 5, "Alert")
+        end
     end
 end
 

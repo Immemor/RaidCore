@@ -67,7 +67,6 @@ end
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
 end
 
 function mod:OnUnitCreated(nId, unit, sName)
@@ -101,15 +100,16 @@ function mod:OnUnitDestroyed(nId, tUnit, sName)
     end
 end
 
-function mod:OnSpellCastStart(unitName, castName, unit)
-    if unitName == self.L["Keeper of Sands"] then
-        local bInRange = IsInRangeOfKeeper(unit)
+function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
+    if sName == self.L["Keeper of Sands"] then
+        local tUnit = GetUnitById(nId)
+        local bInRange = IsInRangeOfKeeper(tUnit)
         if bInRange then
-            if castName == self.L["Desiccate"] then
+            if sCastName == self.L["Desiccate"] then
                 if mod:GetSetting("SoundDessicateInterrupt") then
                     core:PlaySound("Alert")
                 end
-            elseif castName == self.L["Exhaust"] then
+            elseif sCastName == self.L["Exhaust"] then
                 mod:AddMsg("EXHAUST", "WARNING: KNOCK-BACK", 3, "Info")
             end
         end

@@ -102,7 +102,6 @@ local bMidPhase = false
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
     Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
 
     local nTime = GetGameTime()
@@ -142,20 +141,20 @@ function mod:OnUnitDestroyed(nId, tUnit, sName)
     end
 end
 
-function mod:OnSpellCastStart(unitName, castName, unit)
-    if unitName == self.L["Megalith"] then
-        if castName == self.L["Raw Power"] then
+function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
+    if self.L["Megalith"] == sName then
+        if self.L["Raw Power"] == sCastName then
             bMidPhase = true
-            mod:AddMsg("RAW", castName:upper(), 5, mod:GetSetting("SoundMidphase") and "Alert")
-        elseif castName == self.L["Fierce Swipe"] then
+            mod:AddMsg("RAW", sCastName:upper(), 5, mod:GetSetting("SoundMidphase") and "Alert")
+        elseif self.L["Fierce Swipe"] == sCastName then
             mod:AddTimerBar("FIERCE_SWIPE", "Next fierce swipe", 16.5)
         end
-    elseif unitName == self.L["Aileron"] then
-        if castName == self.L["Supercell"] then
+    elseif self.L["Aileron"] == sName then
+        if self.L["Supercell"] == sCastName then
             local timeOfEvent = GetGameTime()
             if timeOfEvent - nRefTime > 30 then
                 nRefTime = timeOfEvent
-                mod:AddMsg("SUPERCELL", castName:upper(), 5, mod:GetSetting("SoundSupercell") and "Alarm")
+                mod:AddMsg("SUPERCELL", sCastName:upper(), 5, mod:GetSetting("SoundSupercell") and "Alarm")
                 mod:AddTimerBar("SUPERCELL", "Next supercell", 80)
             end
         end

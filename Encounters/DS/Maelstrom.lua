@@ -115,7 +115,6 @@ local bossPos
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
     Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
 
     bossPos = {}
@@ -170,17 +169,18 @@ function mod:OnUnitDestroyed(nId, tUnit, sName)
     end
 end
 
-function mod:OnSpellCastStart(unitName, castName, unit)
-    if unitName == self.L["Maelstrom Authority"] then
-        if castName == self.L["Activate Weather Cycle"] then
-            bossPos = unit:GetPosition()
+function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
+    if sName == self.L["Maelstrom Authority"] then
+        if sCastName == self.L["Activate Weather Cycle"] then
+            local tUnit = GetUnitById(nId)
+            bossPos = tUnit:GetPosition()
             nStationCount = 0
             mod:AddTimerBar("STATION", "Next stations", 13)
-        elseif castName == self.L["Ice Breath"] then
+        elseif sCastName == self.L["Ice Breath"] then
             mod:AddMsg("BREATH", "ICE BREATH", 5, mod:GetSetting("SoundIceBreath") and "RunAway")
-        elseif castName == self.L["Crystallize"] then
+        elseif sCastName == self.L["Crystallize"] then
             mod:AddMsg("BREATH", "ICE BREATH", 5, mod:GetSetting("SoundCrystallize") and "Beware")
-        elseif castName == self.L["Typhoon"] then
+        elseif sCastName == self.L["Typhoon"] then
             mod:AddMsg("BREATH", "TYPHOON", 5, mod:GetSetting("SoundTyphoon") and "Beware")
         end
     end

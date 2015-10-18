@@ -143,7 +143,6 @@ end
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
     Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
     Apollo.RegisterEventHandler("DEBUFF_ADD", "OnDebuffAdd", self)
 
@@ -183,9 +182,9 @@ function mod:OnUnitDestroyed(nId, tUnit, sName)
     end
 end
 
-function mod:OnSpellCastStart(unitName, castName, tUnit)
-    if unitName == self.L["Mnemesis"] then
-        if castName == self.L["Defragment"] then
+function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
+    if self.L["Mnemesis"] == sName then
+        if self.L["Defragment"] == sCastName then
             mod:AddMsg("DEFRAG", "SPREAD", 3, mod:GetSetting("SoundDefrag") and "Alarm")
             mod:AddTimerBar("DEFRAG", "Next defragment", 40)
             if mod:GetSetting("PolygonDefrag") then

@@ -53,7 +53,6 @@ end
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
     Apollo.RegisterEventHandler("SPELL_CAST_END", "OnSpellCastEnd", self)
 
     mod:AddTimerBar("INFINITE", "Timer in class", 12, false, mod.InfiniteTimer, mod)
@@ -81,8 +80,8 @@ function mod:OnEnteredCombat(nId, tUnit, sName, bInCombat)
     end
 end
 
-function mod:OnSpellCastStart(unitName, castName, unit)
-    if castName == self.L["Phaser Combo"] then
+function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
+    if sCastName == self.L["Phaser Combo"] then
         mod:AddTimerBar("UNIT", "End of Combo Phaser", 3)
     end
 end

@@ -217,7 +217,6 @@ local nLastPurgeTime
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("SPELL_CAST_START", "OnSpellCastStart", self)
     Apollo.RegisterEventHandler("DEBUFF_ADD", "OnDebuffAdd", self)
     Apollo.RegisterEventHandler("DEBUFF_DEL", "OnDebuffDel", self)
     Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
@@ -313,34 +312,36 @@ function mod:OnHealthChanged(nId, nPourcent, sName)
     end
 end
 
-function mod:OnSpellCastStart(unitName, castName, unit)
-    if unitName == self.L["Binary System Daemon"] and castName == self.L["Power Surge"] then
-        if phase2 and self:GetDistanceBetweenUnits(GameLib.GetPlayerUnit(), unit) < 40 then
+function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
+    local tUnit = GetUnitById(nId)
+
+    if sName == self.L["Binary System Daemon"] and sCastName == self.L["Power Surge"] then
+        if phase2 and self:GetDistanceBetweenUnits(GameLib.GetPlayerUnit(), tUnit) < 40 then
             mod:AddMsg("SURGE", "INTERRUPT NORTH", 5, mod:GetSetting("SoundPowerSurge") and "Alert")
         end
-    elseif unitName == self.L["Null System Daemon"] and castName == self.L["Power Surge"] then
-        if phase2 and self:GetDistanceBetweenUnits(GameLib.GetPlayerUnit(), unit) < 40 then
+    elseif sName == self.L["Null System Daemon"] and sCastName == self.L["Power Surge"] then
+        if phase2 and self:GetDistanceBetweenUnits(GameLib.GetPlayerUnit(), tUnit) < 40 then
             mod:AddMsg("SURGE", "INTERRUPT SOUTH", 5, mod:GetSetting("SoundPowerSurge") and "Alert")
         end
-    elseif castName == "Purge" then
-        if self:GetDistanceBetweenUnits(GameLib.GetPlayerUnit(), unit) < 40 then
-            if unitName == self.L["Null System Daemon"] then
+    elseif sCastName == "Purge" then
+        if self:GetDistanceBetweenUnits(GameLib.GetPlayerUnit(), tUnit) < 40 then
+            if sName == self.L["Null System Daemon"] then
                 mod:AddTimerBar("PURGE_NULL", "Next purge on south daemon", 27)
-            elseif unitName == self.L["Binary System Daemon"] then
+            elseif sName == self.L["Binary System Daemon"] then
                 mod:AddTimerBar("PURGE_BINARY", "Next purge on north daemon", 27)
             end
         elseif phase2 then
-            if unitName == self.L["Null System Daemon"] then
+            if sName == self.L["Null System Daemon"] then
                 mod:AddTimerBar("PURGE_NULL", "Next purge on south daemon", 27)
-            elseif unitName == self.L["Binary System Daemon"] then
+            elseif sName == self.L["Binary System Daemon"] then
                 mod:AddTimerBar("PURGE_BINARY", "Next purge on north daemon", 27)
             end
         end
-    elseif unitName == self.L["Defragmentation Unit"] then
-            if GetCurrentSubZoneName():find("Infinite Generator Core") and castName == self.L["Black IC"] then
-                mod:AddMsg("BLACKIC", "INTERRUPT !", 5, "Alert")
-                mod:AddTimerBar("BLACKIC", "Next black IC", 30)
-            end
+    elseif sName == self.L["Defragmentation Unit"] then
+        if GetCurrentSubZoneName():find("Infinite Generator Core") and sCastName == self.L["Black IC"] then
+            mod:AddMsg("BLACKIC", "INTERRUPT !", 5, "Alert")
+            mod:AddTimerBar("BLACKIC", "Next black IC", 30)
+        end
     end
 end
 
