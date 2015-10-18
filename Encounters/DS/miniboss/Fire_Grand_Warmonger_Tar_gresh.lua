@@ -65,8 +65,6 @@ local bIsFirstFireRoom
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("SPELL_CAST_END", "OnSpellCastEnd", self)
-
     nGrandWarmongerTarGreshId = nil
     nPreviousWarmongerTime = 0
     mod:AddTimerBar("STORM", "~METEOR STORM", 26)
@@ -100,8 +98,8 @@ function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
     end
 end
 
-function mod:OnSpellCastEnd(sUnitName, sCastName, tUnit)
-    if self.L["Grand Warmonger Tar'gresh"]  == sUnitName then
+function mod:OnCastEnd(nId, sCastName, bInterrupted, nCastEndTime, sName)
+    if self.L["Grand Warmonger Tar'gresh"] == sName then
         if self.L["Meteor Storm"] == sCastName then
             mod:AddTimerBar("STORM", "~METEOR STORM", 43)
         end

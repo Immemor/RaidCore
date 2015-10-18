@@ -116,7 +116,6 @@ local midphase = false
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("SPELL_CAST_END", "OnSpellCastEnd", self)
     Apollo.RegisterEventHandler("DEBUFF_APPLIED", "OnDebuffApplied", self)
     Apollo.RegisterEventHandler("DEBUFF_REMOVED", "OnDebuffRemoved", self)
     Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
@@ -171,9 +170,9 @@ function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
     end
 end
 
-function mod:OnSpellCastEnd(unitName, castName)
-    if unitName == self.L["Mnemesis"] then
-        if castName == self.L["Circuit Breaker"] then
+function mod:OnCastEnd(nId, sCastName, bInterrupted, nCastEndTime, sName)
+    if self.L["Mnemesis"] == sName then
+        if self.L["Circuit Breaker"] == sCastName then
             midphase = false
             mod:AddTimerBar("MIDPHASE", "Next middle phase", 85, mod:GetSetting("SoundMidphaseCountDown"))
             mod:AddTimerBar("PRISON", "Next Imprison", 25)

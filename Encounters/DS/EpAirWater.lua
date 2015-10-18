@@ -92,7 +92,6 @@ local bIsPhase2 = false
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("SPELL_CAST_END", "OnSpellCastEnd", self)
     Apollo.RegisterEventHandler("BUFF_ADD", "OnBuffAdd", self)
     Apollo.RegisterEventHandler("DEBUFF_ADD", "OnDebuffAdd", self)
     Apollo.RegisterEventHandler("DEBUFF_DEL", "OnDebuffDel", self)
@@ -122,9 +121,9 @@ function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
     end
 end
 
-function mod:OnSpellCastEnd(unitName, castName)
-    if unitName == self.L["Hydroflux"] then
-        if castName == self.L["Tsunami"] then
+function mod:OnCastEnd(nId, sCastName, bInterrupted, nCastEndTime, sName)
+    if sName == self.L["Hydroflux"] then
+        if sCastName == self.L["Tsunami"] then
             mod:AddTimerBar("MIDPHASE", "Next middle phase", 88, mod:GetSetting("SoundMidphase"))
             mod:AddTimerBar("TOMB", "Next frost tombs", 30, mod:GetSetting("SoundFrostTombsCountDown"))
         end

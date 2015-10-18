@@ -118,7 +118,6 @@ local tBossesId
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("SPELL_CAST_END", "OnSpellCastEnd", self)
     Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
 
     tBossesId = {}
@@ -208,7 +207,7 @@ function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
     end
 end
 
-function mod:OnSpellCastEnd(sName, sCastName, tUnit)
+function mod:OnCastEnd(nId, sCastName, bInterrupted, nCastEndTime, sName)
     if sName == self.L["Golgox the Lifecrusher"]
         or sName == self.L["Terax Blightweaver"]
         or sName == self.L["Ersoth Curseform"]

@@ -73,8 +73,6 @@ local bIsFirstFireRoom
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("SPELL_CAST_END", "OnSpellCastEnd", self)
-
     nPreviousBombPopDate, nPreviousTotemPopDate  = 0, 0
     bIsFirstFireRoom = true
 end
@@ -119,8 +117,8 @@ function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
     end
 end
 
-function mod:OnSpellCastEnd(sUnitName, sCastName, tUnit)
-    if self.L["Warmonger Chuna"] == sUnitName then
+function mod:OnCastEnd(nId, sCastName, bInterrupted, nCastEndTime, sName)
+    if self.L["Warmonger Chuna"] == sName then
         if self.L["Fire Room"] == sCastName then
             mod:AddTimerBar("BUBBLE", "Safe Bubble", 50, true)
         end

@@ -65,7 +65,6 @@ local bIsPhase2
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("SPELL_CAST_END", "OnSpellCastEnd", self)
     Apollo.RegisterEventHandler("DEBUFF_ADD", "OnDebuffAdd", self)
 
     nFrostbringerWarlockId = nil
@@ -111,8 +110,8 @@ function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
     end
 end
 
-function mod:OnSpellCastEnd(sUnitName, sCastName, tUnit)
-    if self.L["Frostbringer Warlock"] == sUnitName then
+function mod:OnCastEnd(nId, sCastName, bInterrupted, nCastEndTime, sName)
+    if self.L["Frostbringer Warlock"] == sName then
         if self.L["Frost Waves"] == sCastName then
             mod:AddTimerBar("WAVES", "Frost Waves", 36)
             mod:AddTimerBar("EXPLODING_ICE", "Exploding Ice", 36.5)

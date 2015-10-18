@@ -155,7 +155,6 @@ end
 function RaidCore:OnInitialize()
     _tEncounterHookHandlers = {
         ["OnUnitDestroyed"] = self.OnEncounterHookUnitDestroyed,
-        ["OnCastEnd"] = self.OnEncounterHookCastEnd,
         ["OnBuffAdd"] = self.OnEncounterHookBuffAdd,
         ["OnBuffRemove"] = self.OnEncounterHookBuffRemove,
         ["OnBuffUpdate"] = self.OnEncounterHookBuffUpdate,
@@ -841,14 +840,6 @@ function RaidCore:OnEncounterHookUnitDestroyed(nId, tUnit, sName)
     local fEncounter = _tCurrentEncounter["OnUnitDestroyed"]
     if fEncounter then
         fEncounter(_tCurrentEncounter, nId, tUnit, sName)
-    end
-end
-
-function RaidCore:OnEncounterHookCastEnd(nId, sCastName, bInterrupted)
-    local tUnit = GetUnitById(nId)
-    if tUnit then
-        local unitName = tUnit:GetName():gsub(NO_BREAK_SPACE, " ")
-        Event_FireGenericEvent("SPELL_CAST_END", unitName, sCastName, tUnit)
     end
 end
 

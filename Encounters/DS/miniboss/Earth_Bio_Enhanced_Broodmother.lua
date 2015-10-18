@@ -46,7 +46,6 @@ mod:RegisterDefaultTimerBarConfigs({
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("SPELL_CAST_END", "OnSpellCastEnd", self)
 end
 
 function mod:OnUnitCreated(nId, unit, sName)
@@ -64,8 +63,8 @@ function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
     end
 end
 
-function mod:OnSpellCastEnd(unitName, castName, unit)
-    if castName == self.L["Augmented Bio-Web"] then
+function mod:OnCastEnd(nId, sCastName, bInterrupted, nCastEndTime, sName)
+    if self.L["Augmented Bio-Web"] == sCastName then
         mod:AddTimerBar("BIOWEB", "Augmented Bio-Web", 44)
     end
 end

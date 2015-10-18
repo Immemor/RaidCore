@@ -53,7 +53,6 @@ mod:RegisterDefaultTimerBarConfigs({
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("SPELL_CAST_END", "OnSpellCastEnd", self)
 
     mod:AddTimerBar("Terra-forme", "Terra-forme", 59.5)
     mod:AddTimerBar("Undermine", "5 x undermine", 31.7)
@@ -76,9 +75,9 @@ function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
    end
 end
 
-function mod:OnSpellCastEnd(sName, sSpellName, tUnit)
+function mod:OnCastEnd(nId, sCastName, bInterrupted, nCastEndTime, sName)
    if self.L["Fully-Optimized Canimid"] == sName then
-       if self.L["Terra-forme"] == sSpellName then
+       if self.L["Terra-forme"] == sCastName then
            -- Timings are corrects only if the absorb have been broken.
            -- The MOO duration is 10s.
            mod:AddTimerBar("Undermine", "5 x undermine", 28.8)
