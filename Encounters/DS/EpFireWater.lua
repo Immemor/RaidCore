@@ -103,10 +103,6 @@ local tFrostBombPlayersList
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("DEBUFF_ADD", "OnDebuffAdd", self)
-    Apollo.RegisterEventHandler("DEBUFF_UPDATE", "OnDebuffUpdate", self)
-    Apollo.RegisterEventHandler("DEBUFF_DEL", "OnDebuffDel", self)
-
     nLastIceTombTime = 0
     nLastBombTime = 0
     tFireBombPlayersList = {}
@@ -226,7 +222,7 @@ function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
     end
 end
 
-function mod:OnDebuffUpdate(nId, nSpellId, nStack, fTimeRemaining)
+function mod:OnDebuffUpdate(nId, nSpellId, nOldStack, nStack, fTimeRemaining)
     local tUnit = GetUnitById(nId)
 
     if nSpellId == DEBUFFID_DRENCHED or nSpellId == DEBUFFID_ENGULFED then
@@ -239,7 +235,7 @@ function mod:OnDebuffUpdate(nId, nSpellId, nStack, fTimeRemaining)
     end
 end
 
-function mod:OnDebuffDel(nId, nSpellId)
+function mod:OnDebuffRemove(nId, nSpellId)
     local tUnit = GetUnitById(nId)
 
     if nSpellId == DEBUFFID_FIREBOMB then

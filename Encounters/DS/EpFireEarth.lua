@@ -87,10 +87,6 @@ local nLavaFloorCount
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("BUFF_ADD", "OnBuffAdded", self)
-    Apollo.RegisterEventHandler("BUFF_UPDATE", "OnBuffUpdate", self)
-    Apollo.RegisterEventHandler("BUFF_DEL", "OnBuffRemoved", self)
-
     nObsidianPopMax = 6
     nObsidianPopCount = 1
     nLavaFloorCount = 0
@@ -103,10 +99,10 @@ end
 function mod:OnBuffAdded(nId, nSpellId, nStack, fTimeRemaining)
 end
 
-function mod:OnBuffUpdate(nId, nSpellId, nStack, fTimeRemaining)
+function mod:OnBuffUpdate(nId, nSpellId, nOldStack, nStack, fTimeRemaining)
 end
 
-function mod:OnBuffRemoved(nId, nSpellId)
+function mod:OnBuffRemove(nId, nSpellId)
 end
 
 function mod:OnDatachron(sMessage)

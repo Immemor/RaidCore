@@ -92,10 +92,6 @@ local bIsPhase2 = false
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("BUFF_ADD", "OnBuffAdd", self)
-    Apollo.RegisterEventHandler("DEBUFF_ADD", "OnDebuffAdd", self)
-    Apollo.RegisterEventHandler("DEBUFF_DEL", "OnDebuffDel", self)
-
     nMOOCount = 0
     bIsPhase2 = false
     mod:AddTimerBar("MIDPHASE", "Next middle phase", 60, mod:GetSetting("SoundMidphase"))
@@ -153,7 +149,7 @@ function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
     end
 end
 
-function mod:OnDebuffDel(nId, nSpellId)
+function mod:OnDebuffRemove(nId, nSpellId)
     if nSpellId == DEBUFFID_TWIRL then
         core:DropMark(nId)
         core:RemoveUnit(nId)

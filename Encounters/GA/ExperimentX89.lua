@@ -99,8 +99,6 @@ local nExperimentX89Id
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("DEBUFF_ADD", "OnDebuffAdd", self)
-    Apollo.RegisterEventHandler("DEBUFF_DEL", "OnDebuffDel", self)
     nExperimentX89Id = nil
 end
 
@@ -167,7 +165,7 @@ function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
     end
 end
 
-function mod:OnDebuffDel(nId, nSpellId)
+function mod:OnDebuffRemove(nId, nSpellId)
     if DEBUFFID_LITTLE_BOMB == nSpellId then
         core:RemovePicture("LittleBomb")
         core:RemoveLineBetweenUnits("LittleBomb")

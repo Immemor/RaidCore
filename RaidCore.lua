@@ -155,12 +155,6 @@ end
 function RaidCore:OnInitialize()
     _tEncounterHookHandlers = {
         ["OnUnitDestroyed"] = self.OnEncounterHookUnitDestroyed,
-        ["OnBuffAdd"] = self.OnEncounterHookBuffAdd,
-        ["OnBuffRemove"] = self.OnEncounterHookBuffRemove,
-        ["OnBuffUpdate"] = self.OnEncounterHookBuffUpdate,
-        ["OnDebuffAdd"] = self.OnEncounterHookDebuffAdd,
-        ["OnDebuffRemove"] = self.OnEncounterHookDebuffRemove,
-        ["OnDebuffUpdate"] = self.OnEncounterHookDebuffUpdate,
     }
     _tMainFSMHandlers = {
         [MAIN_FSM__SEARCH] = {
@@ -835,72 +829,6 @@ function RaidCore:OnEncounterHookUnitDestroyed(nId, tUnit, sName)
     if fEncounter then
         fEncounter(_tCurrentEncounter, nId, tUnit, sName)
     end
-end
-
-function RaidCore:OnEncounterHookBuffAdd(nId, nSpellId, nStack, fTimeRemaining)
-    local tUnit = GetUnitById(nId)
-    if tUnit then
-        local unitName = tUnit:GetName():gsub(NO_BREAK_SPACE, " ")
-        -- Keep Old event for compatibility.
-        Event_FireGenericEvent("BUFF_APPLIED", unitName, nSpellId, tUnit)
-    end
-    -- New event not based on the name.
-    Event_FireGenericEvent("BUFF_ADD", nId, nSpellId, nStack, fTimeRemaining)
-end
-
-function RaidCore:OnEncounterHookBuffRemove(nId, nSpellId)
-    local tUnit = GetUnitById(nId)
-    if tUnit then
-        local unitName = tUnit:GetName():gsub(NO_BREAK_SPACE, " ")
-        -- Keep Old event for compatibility.
-        Event_FireGenericEvent("BUFF_REMOVED", unitName, nSpellId, GetUnitById(nId))
-    end
-    -- New event not based on the name.
-    Event_FireGenericEvent("BUFF_DEL", nId, nSpellId)
-end
-
-function RaidCore:OnEncounterHookBuffUpdate(nId, nSpellId, nOldStack, nNewStack, fTimeRemaining)
-    local tUnit = GetUnitById(nId)
-    if tUnit then
-        local unitName = tUnit:GetName():gsub(NO_BREAK_SPACE, " ")
-        -- Keep Old event for compatibility.
-        Event_FireGenericEvent("BUFF_APPLIED_DOSE", unitName, nSpellId, nNewStack)
-    end
-    -- New event not based on the name.
-    Event_FireGenericEvent("BUFF_UPDATE", nId, nSpellId, nNewStack, fTimeRemaining)
-end
-
-function RaidCore:OnEncounterHookDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
-    local tUnit = GetUnitById(nId)
-    if tUnit then
-        local unitName = tUnit:GetName():gsub(NO_BREAK_SPACE, " ")
-        -- Keep Old event for compatibility.
-        Event_FireGenericEvent("DEBUFF_APPLIED", unitName, nSpellId, tUnit)
-    end
-    -- New event not based on the name.
-    Event_FireGenericEvent("DEBUFF_ADD", nId, nSpellId, nStack, fTimeRemaining)
-end
-
-function RaidCore:OnEncounterHookDebuffRemove(nId, nSpellId)
-    local tUnit = GetUnitById(nId)
-    if tUnit then
-        local unitName = tUnit:GetName():gsub(NO_BREAK_SPACE, " ")
-        -- Keep Old event for compatibility.
-        Event_FireGenericEvent("DEBUFF_REMOVED", unitName, nSpellId, tUnit)
-    end
-    -- New event not based on the name.
-    Event_FireGenericEvent("DEBUFF_DEL", nId, nSpellId)
-end
-
-function RaidCore:OnEncounterHookDebuffUpdate(nId, nSpellId, nOldStack, nNewStack, fTimeRemaining)
-    local tUnit = GetUnitById(nId)
-    if tUnit then
-        local unitName = tUnit:GetName():gsub(NO_BREAK_SPACE, " ")
-        -- Keep Old event for compatibility.
-        Event_FireGenericEvent("DEBUFF_APPLIED_DOSE", unitName, nSpellId, nNewStack)
-    end
-    -- New event not based on the name.
-    Event_FireGenericEvent("DEBUFF_UPDATE", nId, nSpellId, nNewStack, fTimeRemaining)
 end
 
 ----------------------------------------------------------------------------------------------------

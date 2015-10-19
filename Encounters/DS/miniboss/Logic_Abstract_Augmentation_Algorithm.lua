@@ -79,9 +79,6 @@ local nExpectedKickerId
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("DEBUFF_ADD", "OnDebuffAddedOrUpdated", self)
-    Apollo.RegisterEventHandler("DEBUFF_UPDATE", "OnDebuffAddedOrUpdated", self)
-
     tKickerList = {}
     nLastKickerId = nil
     nExpectedKickerId = nil
@@ -107,6 +104,14 @@ function mod:OnUnitCreated(nId, unit, sName)
         core:MarkUnit(unit)
         mod:AddTimerBar("NEXT_QUANTUM_AMPLIFIED", "Next quantum amplified", 35)
     end
+end
+
+function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
+    mod:OnDebuffAddedOrUpdated(nId, nSpellId, nStack, fTimeRemaining)
+end
+
+function mod:OnDebuffUpdate(nId, nSpellId, nOldStack, nStack, fTimeRemaining)
+    mod:OnDebuffAddedOrUpdated(nId, nSpellId, nStack, fTimeRemaining)
 end
 
 function mod:OnDebuffAddedOrUpdated(nId, nSpellId, nStack, fTimeRemaining)

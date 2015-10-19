@@ -394,9 +394,6 @@ end
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("BUFF_APPLIED", "OnBuffApplied", self)
-    Apollo.RegisterEventHandler("BUFF_DEL", "OnBuffDel", self)
-
     SetMarkersByPhase(MAIN_PHASE)
     bWarningSwitchPhaseDone = false
     tBlueRoomPurgeList = {
@@ -605,10 +602,9 @@ function mod:OnEnteredCombat(nId, tUnit, sName, bInCombat)
     end
 end
 
-function mod:OnBuffApplied(unitName, splId, unit)
-    local nId = unit:GetId()
-    if unitName == self.L["Infinite Logic Loop"] then
-        local ePurgeType = Spell2PurgeType(splId)
+function mod:OnBuffAdd(nId, nSpellId, nStack, fTimeRemaining)
+    if nInfiniteLogicLoopId == nId then
+        local ePurgeType = Spell2PurgeType(nSpellId)
 
         if ePurgeType then
             nPurgeCount = nPurgeCount + 1
@@ -662,7 +658,7 @@ function mod:OnBuffApplied(unitName, splId, unit)
     end
 end
 
-function mod:OnBuffDel(nId, nSpellId)
+function mod:OnBuffRemove(nId, nSpellId)
     if nAvatusId == nId then
         if BUFFID_PROTECTIVE_BARRIER == nSpellId then
             bIsProtectionBarrierEnable = false

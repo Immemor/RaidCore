@@ -149,9 +149,6 @@ local nTwirlCount
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("DEBUFF_ADD", "OnDebuffAdd", self)
-    Apollo.RegisterEventHandler("DEBUFF_DEL", "OnDebuffDel", self)
-
     nLastThornsTime = 0
     bIsMidPhase = false
     nMidPhaseTime = GetGameTime() + 90
@@ -299,7 +296,7 @@ function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
     end
 end
 
-function mod:OnDebuffDel(nId, nSpellId)
+function mod:OnDebuffRemove(nId, nSpellId)
     if nSpellId == DEBUFFID_TWIRL then
         core:DropMark(nId)
         core:RemoveUnit(nId)

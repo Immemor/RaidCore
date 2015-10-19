@@ -88,9 +88,6 @@ local nEssenceofLifeCount
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("DEBUFF_ADD", "OnDebuffAdd", self)
-    Apollo.RegisterEventHandler("DEBUFF_DEL", "OnDebuffDel", self)
-
     nEssenceofLifeCount = 0
     mod:AddTimerBar("MID", "Next middle phase", 90, mod:GetSetting("SoundCountDownMidPhase"))
 end
@@ -166,7 +163,7 @@ function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
     end
 end
 
-function mod:OnDebuffDel(nId, nSpellId)
+function mod:OnDebuffRemove(nId, nSpellId)
     if nSpellId == DEBUFFID_PRIMAL_ENTANGLEMENT1 then
         core:RemovePicture("ROOT" .. nId)
     elseif nSpellId == DEBUFFID_PRIMAL_ENTANGLEMENT2 then

@@ -138,9 +138,6 @@ local bIsPhase2
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("DEBUFF_ADD", "OnDebuffAdd", self)
-    Apollo.RegisterEventHandler("DEBUFF_DEL", "OnDebuffDel", self)
-
     tCorruptedPlayerList = {}
     bIsPhase2 = false
     -- TODO: Remove this init, when values will be found.
@@ -252,7 +249,7 @@ function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
     end
 end
 
-function mod:OnDebuffDel(nId, nSpellId)
+function mod:OnDebuffRemove(nId, nSpellId)
     if nSpellId == DEBUFFID_CHROMOSOME_CORRUPTION then
         core:RemovePicture(nId)
         for i, nPlayerId in next, tCorruptedPlayerList do

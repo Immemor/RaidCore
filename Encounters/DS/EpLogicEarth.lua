@@ -143,8 +143,6 @@ end
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("DEBUFF_ADD", "OnDebuffAdd", self)
-
     nLastSnakePieceId = nil
     tObsidianList = {}
     nMemberIdTargetedBySnake = nil

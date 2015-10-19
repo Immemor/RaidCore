@@ -217,9 +217,6 @@ local nLastPurgeTime
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("DEBUFF_ADD", "OnDebuffAdd", self)
-    Apollo.RegisterEventHandler("DEBUFF_DEL", "OnDebuffDel", self)
-
     sdwaveCount, probeCount = 0, 0
     phase2warn, phase2 = false, false
     phase2count = 0
@@ -370,7 +367,7 @@ function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
     end
 end
 
-function mod:OnDebuffDel(nId, nSpellId)
+function mod:OnDebuffRemove(nId, nSpellId)
     if DEBUFFID_OVERLOAD == nSpellId then
         core:DropMark(nId)
     elseif DEBUFFID_PURGE == nSpellId then

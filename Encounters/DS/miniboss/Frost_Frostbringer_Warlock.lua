@@ -65,8 +65,6 @@ local bIsPhase2
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("DEBUFF_ADD", "OnDebuffAdd", self)
-
     nFrostbringerWarlockId = nil
     nGlacierPopTime = 0
     bIsPhase2 = false

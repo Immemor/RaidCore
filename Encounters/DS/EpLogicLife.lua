@@ -139,8 +139,6 @@ local bIsMidPhase = false
 -- Encounter description.
 ---------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("DEBUFF_APPLIED", "OnDebuffApplied", self)
-    Apollo.RegisterEventHandler("DEBUFF_REMOVED", "OnDebuffRemoved", self)
     bIsMidPhase = false
 
     mod:AddTimerBar("DEFRAG", "Next defragment", 21, mod:GetSetting("SoundDefrag"))
@@ -154,37 +152,39 @@ function mod:OnDatachron(sMessage)
     end
 end
 
-function mod:OnDebuffApplied(unitName, splId, unit)
-    if DEBUFF__SNAKE_SNACK == splId then
-        if unit == GetPlayerUnit() then
+function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
+    local tUnit = GetUnitById(nId)
+    if DEBUFF__SNAKE_SNACK == nSpellId then
+        local sName = tUnit:GetName()
+        if tUnit == GetPlayerUnit() then
             mod:AddMsg("SNAKE", "SNAKE ON YOU!", 5, mod:GetSetting("SoundSnakeOnYou") and "RunAway")
         else
-            mod:AddMsg("SNAKE", self.L["SNAKE ON %s!"]:format(unitName), 5, mod:GetSetting("SoundSnakeOnOther") and "Info")
+            mod:AddMsg("SNAKE", self.L["SNAKE ON %s!"]:format(sName), 5, mod:GetSetting("SoundSnakeOnOther") and "Info")
         end
         if mod:GetSetting("OtherSnakePlayerMarkers") then
-            core:MarkUnit(unit, nil, self.L["SNAKE"]) 
+            core:MarkUnit(tUnit, nil, self.L["SNAKE"]) 
         end
-    elseif DEBUFF__LIFE_FORCE_SHACKLE == splId then
+    elseif DEBUFF__LIFE_FORCE_SHACKLE == nSpellId then
         if mod:GetSetting("OtherNoHealDebuffPlayerMarkers") then
-            core:MarkUnit(unit, nil, self.L["NO HEAL DEBUFF"])
+            core:MarkUnit(tUnit, nil, self.L["NO HEAL DEBUFF"])
         end
-        if unit == GetPlayerUnit() then
+        if tUnit == GetPlayerUnit() then
             mod:AddMsg("NOHEAL", "No-Healing Debuff!", 5, mod:GetSetting("SoundNoHealDebuff") and "Alarm")
         end
-    elseif DEBUFF__THORNS == splId then
+    elseif DEBUFF__THORNS == nSpellId then
         if mod:GetSetting("OtherRootedPlayersMarkers") then
-            core:MarkUnit(unit, nil, self.L["THORNS DEBUFF"])
+            core:MarkUnit(tUnit, nil, self.L["THORNS DEBUFF"])
         end
     end
 end
 
-function mod:OnDebuffRemoved(unitName, splId, unit)
-    if DEBUFF__SNAKE_SNACK == splId then
-        core:DropMark(unit:GetId())
-    elseif DEBUFF__LIFE_FORCE_SHACKLE == splId then
-        core:DropMark(unit:GetId())
-    elseif DEBUFF__THORNS == splId then
-        core:DropMark(unit:GetId())
+function mod:OnDebuffRemove(nId, nSpellId)
+    if DEBUFF__SNAKE_SNACK == nSpellId then
+        core:DropMark(nId)
+    elseif DEBUFF__LIFE_FORCE_SHACKLE == nSpellId then
+        core:DropMark(nId)
+    elseif DEBUFF__THORNS == nSpellId then
+        core:DropMark(nId)
     end
 end
 

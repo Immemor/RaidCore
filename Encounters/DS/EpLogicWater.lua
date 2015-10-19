@@ -116,9 +116,6 @@ local midphase = false
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("DEBUFF_APPLIED", "OnDebuffApplied", self)
-    Apollo.RegisterEventHandler("DEBUFF_REMOVED", "OnDebuffRemoved", self)
-
     midphase = false
     mod:AddTimerBar("MIDPHASE", "Next middle phase", 75, mod:GetSetting("SoundMidphaseCountDown"))
     mod:AddTimerBar("PRISON", "Next Imprison", 33)
@@ -179,25 +176,23 @@ function mod:OnCastEnd(nId, sCastName, bInterrupted, nCastEndTime, sName)
     end
 end
 
-function mod:OnDebuffApplied(unitName, splId, unit)
-    if splId == DEBUFFID_DATA_DISRUPTOR then
-        if unit == GetPlayerUnit() then
+function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
+    if DEBUFFID_DATA_DISRUPTOR == nSpellId then
+        local tUnit = GetUnitById(nId)
+        if tUnit == GetPlayerUnit() then
             if mod:GetSetting("SoundDataDisruptorDebuff") then
                core:PlaySound("Beware")
            end
         end
         if mod:GetSetting("OtherOrbMarkers") then
-            core:MarkUnit(unit, nil, self.L["ORB"])
+            core:MarkUnit(tUnit, nil, self.L["ORB"])
         end
     end
 end
 
-function mod:OnDebuffRemoved(unitName, splId, unit)
-    if splId == DEBUFFID_DATA_DISRUPTOR then
-        local unitId = unit:GetId()
-        if unitId then
-            core:DropMark(unit:GetId())
-        end
+function mod:OnDebuffRemove(nId, nSpellId)
+    if DEBUFFID_DATA_DISRUPTOR == nSpellId then
+        core:DropMark(nId)
     end
 end
 

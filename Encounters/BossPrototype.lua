@@ -143,18 +143,6 @@ end
 
 function EncounterPrototype:OnDisable()
     if type(self.OnBossDisable) == "function" then self:OnBossDisable() end
-    Apollo.RemoveEventHandler("DEBUFF_APPLIED", self)
-    Apollo.RemoveEventHandler("DEBUFF_APPLIED_DOSE", self)
-    Apollo.RemoveEventHandler("DEBUFF_REMOVED", self)
-    Apollo.RemoveEventHandler("DEBUFF_ADD", self)
-    Apollo.RemoveEventHandler("DEBUFF_DEL", self)
-    Apollo.RemoveEventHandler("DEBUFF_UPDATE", self)
-    Apollo.RemoveEventHandler("BUFF_ADD", self)
-    Apollo.RemoveEventHandler("BUFF_DEL", self)
-    Apollo.RemoveEventHandler("BUFF_UPDATE", self)
-    Apollo.RemoveEventHandler("BUFF_APPLIED", self)
-    Apollo.RemoveEventHandler("BUFF_REMOVED", self)
-    Apollo.RemoveEventHandler("BUFF_APPLIED_DOSE", self)
     self:CancelAllTimers()
     if type(self.OnWipe) == "function" then self:OnWipe() end
 end

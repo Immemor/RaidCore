@@ -160,11 +160,6 @@ local bIsPhaseUnder20Poucent
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("BUFF_ADD", "OnBuffAdd", self)
-    Apollo.RegisterEventHandler("BUFF_UPDATE", "OnBuffUpdate", self)
-    Apollo.RegisterEventHandler("DEBUFF_ADD", "OnDebuffAdd", self)
-    Apollo.RegisterEventHandler("DEBUFF_DEL", "OnDebuffDel", self)
-
     nRadiationEndTime = 0
     nPainSuppressorsFadeTime = 0
     tPrimeOperant2ZoneIndex = {}
