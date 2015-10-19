@@ -161,7 +161,6 @@ function RaidCore:OnInitialize()
         ["OnDebuffAdd"] = self.OnEncounterHookDebuffAdd,
         ["OnDebuffRemove"] = self.OnEncounterHookDebuffRemove,
         ["OnDebuffUpdate"] = self.OnEncounterHookDebuffUpdate,
-        ["OnShowShortcutBar"] = self.OnEncounterHookShowShortcutBar,
     }
     _tMainFSMHandlers = {
         [MAIN_FSM__SEARCH] = {
@@ -902,10 +901,6 @@ function RaidCore:OnEncounterHookDebuffUpdate(nId, nSpellId, nOldStack, nNewStac
     end
     -- New event not based on the name.
     Event_FireGenericEvent("DEBUFF_UPDATE", nId, nSpellId, nNewStack, fTimeRemaining)
-end
-
-function RaidCore:OnEncounterHookShowShortcutBar(tIconFloatingSpellBar)
-    Event_FireGenericEvent("SHORTCUT_BAR", tIconFloatingSpellBar)
 end
 
 ----------------------------------------------------------------------------------------------------

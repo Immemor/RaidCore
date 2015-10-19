@@ -396,7 +396,6 @@ end
 function mod:OnBossEnable()
     Apollo.RegisterEventHandler("BUFF_APPLIED", "OnBuffApplied", self)
     Apollo.RegisterEventHandler("BUFF_DEL", "OnBuffDel", self)
-    Apollo.RegisterEventHandler("SHORTCUT_BAR", "OnShowShortcutBar", self)
 
     SetMarkersByPhase(MAIN_PHASE)
     bWarningSwitchPhaseDone = false

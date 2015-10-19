@@ -155,7 +155,6 @@ function EncounterPrototype:OnDisable()
     Apollo.RemoveEventHandler("BUFF_APPLIED", self)
     Apollo.RemoveEventHandler("BUFF_REMOVED", self)
     Apollo.RemoveEventHandler("BUFF_APPLIED_DOSE", self)
-    Apollo.RemoveEventHandler("SHORTCUT_BAR", self)
     self:CancelAllTimers()
     if type(self.OnWipe) == "function" then self:OnWipe() end
 end
