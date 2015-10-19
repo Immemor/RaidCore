@@ -219,7 +219,6 @@ local nLastPurgeTime
 function mod:OnBossEnable()
     Apollo.RegisterEventHandler("DEBUFF_ADD", "OnDebuffAdd", self)
     Apollo.RegisterEventHandler("DEBUFF_DEL", "OnDebuffDel", self)
-    Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
 
     sdwaveCount, probeCount = 0, 0
     phase2warn, phase2 = false, false
@@ -404,8 +403,8 @@ function mod:NextWave()
     end
 end
 
-function mod:OnChatDC(message)
-    if message:find(self.L["INVALID SIGNAL. DISCONNECTING"]) then
+function mod:OnDatachron(sMessage)
+    if sMessage:find(self.L["INVALID SIGNAL. DISCONNECTING"]) then
         if phase2 then
             core:ResetWorldMarkers()
             phase2 = false
@@ -414,7 +413,7 @@ function mod:OnChatDC(message)
         if mod:GetSetting("OtherDisconnectTimer") then
             mod:AddTimerBar("DISCONNECT", "Next disconnect", 60)
         end
-    elseif message:find(self.L["COMMENCING ENHANCEMENT SEQUENCE"]) then
+    elseif sMessage:find(self.L["COMMENCING ENHANCEMENT SEQUENCE"]) then
         phase2, phase2warn = true, false
         phase2count = phase2count + 1
         core:RemoveTimerBar("SDWAVE")

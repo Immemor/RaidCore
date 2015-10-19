@@ -118,8 +118,6 @@ local tBossesId
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
-
     tBossesId = {}
     mod:AddTimerBar("NextP2", "Next P2", 90, mod:GetSetting("SoundPhase2CountDown"))
 end
@@ -226,8 +224,8 @@ function mod:OnCastEnd(nId, sCastName, bInterrupted, nCastEndTime, sName)
     end
 end
 
-function mod:OnChatDC(message)
-    if message:find(self.L["The Phageborn Convergence begins gathering its power"]) then
+function mod:OnDatachron(sMessage)
+    if sMessage:find(self.L["The Phageborn Convergence begins gathering its power"]) then
         mod:AddTimerBar("NextP2", "Next P2", 60, mod:GetSetting("SoundPhase2CountDown"))
     end
 end

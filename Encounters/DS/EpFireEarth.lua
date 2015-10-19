@@ -90,7 +90,6 @@ function mod:OnBossEnable()
     Apollo.RegisterEventHandler("BUFF_ADD", "OnBuffAdded", self)
     Apollo.RegisterEventHandler("BUFF_UPDATE", "OnBuffUpdate", self)
     Apollo.RegisterEventHandler("BUFF_DEL", "OnBuffRemoved", self)
-    Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
 
     nObsidianPopMax = 6
     nObsidianPopCount = 1
@@ -110,11 +109,11 @@ end
 function mod:OnBuffRemoved(nId, nSpellId)
 end
 
-function mod:OnChatDC(message)
-    if message == self.L["The lava begins to rise through the floor!"] then
+function mod:OnDatachron(sMessage)
+    if sMessage == self.L["The lava begins to rise through the floor!"] then
         mod:AddTimerBar("LAVA_FLOOR", "End of lava floor phase", 28)
         nLavaFloorCount = nLavaFloorCount + 1
-    elseif self.L["Time to die, sapients!"] == message then
+    elseif self.L["Time to die, sapients!"] == sMessage then
         mod:RemoveTimerBar("AVATUS_INCOMING")
         mod:AddTimerBar("ENRAGE", "Enrage", 34)
     end

@@ -141,15 +141,14 @@ local bIsMidPhase = false
 function mod:OnBossEnable()
     Apollo.RegisterEventHandler("DEBUFF_APPLIED", "OnDebuffApplied", self)
     Apollo.RegisterEventHandler("DEBUFF_REMOVED", "OnDebuffRemoved", self)
-    Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
     bIsMidPhase = false
 
     mod:AddTimerBar("DEFRAG", "Next defragment", 21, mod:GetSetting("SoundDefrag"))
     mod:AddTimerBar("AVATUS_INCOMING", "Avatus incoming", 480, mod:GetSetting("SoundEnrageCountDown"))
 end
 
-function mod:OnChatDC(message)
-    if self.L["Time to die, sapients!"] == message then
+function mod:OnDatachron(sMessage)
+    if self.L["Time to die, sapients!"] == sMessage then
         mod:RemoveTimerBar("AVATUS_INCOMING")
         mod:AddTimerBar("ENRAGE", "Enrage", 34)
     end

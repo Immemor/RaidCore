@@ -102,8 +102,6 @@ local bMidPhase = false
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
-
     local nTime = GetGameTime()
     nStartTime = nTime
     nRefTime = nTime
@@ -161,8 +159,8 @@ function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
     end
 end
 
-function mod:OnChatDC(message)
-    if message:find(self.L["The ground shudders beneath Megalith"]) then
+function mod:OnDatachron(sMessage)
+    if sMessage:find(self.L["The ground shudders beneath Megalith"]) then
         if mod:GetSetting("SoundQuakeJump") then
             core:PlaySound("Beware")
         end
@@ -170,7 +168,7 @@ function mod:OnChatDC(message)
             mod:AddMsg("QUAKE1", "JUMP !", 2)
             mod:AddMsg("QUAKE2", "JUMP !", 2)
         end
-    elseif message:find(self.L["fractured crust leaves it exposed"]) and bMidPhase then
+    elseif sMessage:find(self.L["fractured crust leaves it exposed"]) and bMidPhase then
         bMidPhase = false
         mod:AddTimerBar("RAWPOWER", "Next raw power", 60, mod:GetSetting("SoundMidphase"))
     end

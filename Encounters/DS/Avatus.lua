@@ -394,7 +394,6 @@ end
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
     Apollo.RegisterEventHandler("BUFF_APPLIED", "OnBuffApplied", self)
     Apollo.RegisterEventHandler("BUFF_DEL", "OnBuffDel", self)
     Apollo.RegisterEventHandler("SHORTCUT_BAR", "OnShowShortcutBar", self)
@@ -743,9 +742,9 @@ function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
     end
 end
 
-function mod:OnChatDC(message)
-    local nEscalatingFound = message:match(self.L["Escalating defense matrix system"])
-    if message:find(self.L["Gun Grid Activated"]) then
+function mod:OnDatachron(sMessage)
+    local nEscalatingFound = sMessage:match(self.L["Escalating defense matrix system"])
+    if sMessage:find(self.L["Gun Grid Activated"]) then
         mod:AddMsg("GGRIDMSG", "GUN GRID NOW!", 5, mod:GetSetting("SoundGunGrid") and "Beware")
         mod:AddTimerBar("GGRID", "Next gun grid", GUN_INTERVAL[nMainPhaseCount], mod:GetSetting("SoundGunGrid"))
         if bIsHoloHand then
@@ -756,7 +755,7 @@ function mod:OnChatDC(message)
             mod:AddTimerBar("HOLO", "Next holo: Cannons", 22)
         end
         bIsHoloHand = not bIsHoloHand
-    elseif message:find(self.L["Portals have opened!"]) then
+    elseif sMessage:find(self.L["Portals have opened!"]) then
         mod:RemoveTimerBar("GGRID")
         mod:RemoveTimerBar("OBBEAM")
         mod:RemoveTimerBar("HOLO")

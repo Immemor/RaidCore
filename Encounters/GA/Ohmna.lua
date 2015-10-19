@@ -165,8 +165,6 @@ end
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
-
     pilarCount, boreCount, submergeCount = 1, 0, 0
     firstPull, OhmnaP3, OhmnaP4 = true, false, false
     mod:AddTimerBar("OPILAR", self.L["PILLAR %u"]:format(pilarCount), 25)
@@ -255,8 +253,8 @@ function mod:OhmnaPE(lowest)
     return strResult
 end
 
-function mod:OnChatDC(message)
-    if message:find(self.L["A plasma leech begins draining"]) then
+function mod:OnDatachron(sMessage)
+    if sMessage:find(self.L["A plasma leech begins draining"]) then
         if OhmnaP3 then return end
         pilarCount = pilarCount + 1
         if submergeCount < 2 and pilarCount > 4 then
@@ -266,18 +264,18 @@ function mod:OnChatDC(message)
             local pilarActivated = self:OhmnaPE(pilarCount % 2)
             mod:AddTimerBar("OPILAR", self.L["PILLAR %u : %u"]:format(pilarCount, pilarActivated), 25)
         end
-    elseif message:find(self.L["Dreadphage Ohmna submerges"]) then
+    elseif sMessage:find(self.L["Dreadphage Ohmna submerges"]) then
         pilarCount, boreCount = 1, 0
         submergeCount = submergeCount + 1
         core:RemoveTimerBar("OTENT")
-    elseif message:find(self.L["Dreadphage Ohmna is bored"]) then
+    elseif sMessage:find(self.L["Dreadphage Ohmna is bored"]) then
         boreCount = boreCount + 1
         if boreCount < 2 and self:Tank() then
             mod:AddTimerBar("OBORE", "SWITCH TANK", 42)
         end
-    elseif message:find(self.L["The Archives tremble as Dreadphage Ohmna"]) then
+    elseif sMessage:find(self.L["The Archives tremble as Dreadphage Ohmna"]) then
         mod:AddMsg("OP2", "P2: TENTACLES", 5, "Alert")
-    elseif message:find(self.L["The Archives quake with the furious might"]) then
+    elseif sMessage:find(self.L["The Archives quake with the furious might"]) then
         mod:AddMsg("OP3", "P3: RAVENOUS", 5, "Alert")
         OhmnaP3 = true
         core:RemoveTimerBar("OPILAR")

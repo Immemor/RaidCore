@@ -81,8 +81,6 @@ local PILLAR_POSITIONS = {
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
-
     if self:GetSetting("PillarNumber") then
         for n, vector in next, PILLAR_POSITIONS do
             -- core:SetWorldMarker(n, n, vector)
@@ -108,13 +106,13 @@ function mod:OnUnitCreated(nId, unit, sName)
     end
 end
 
-function mod:OnChatDC(message)
-    if message:find(self.L["The augmented shield has been destroyed"]) then
+function mod:OnDatachron(sMessage)
+    if sMessage:find(self.L["The augmented shield has been destroyed"]) then
         mod:AddTimerBar("BombsWave1", "Bombs wave #1", 20)
         mod:AddTimerBar("BombsWave2", "Bombs wave #2", 49)
         mod:AddTimerBar("BombsWave3", "Bombs wave #3", 78)
         mod:AddTimerBar("TimeoutBombs", "Timeout all bombs!", 104)
-    elseif message:find(self.L["Phage Maw begins charging an orbital strike"]) then
+    elseif sMessage:find(self.L["Phage Maw begins charging an orbital strike"]) then
         if mod:GetSetting("OtherBombsMarkers") then
             core:ResetMarks()
         end

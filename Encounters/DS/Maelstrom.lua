@@ -115,8 +115,6 @@ local bossPos
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
-
     bossPos = {}
     nStationCount = 0
 end
@@ -186,8 +184,8 @@ function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
     end
 end
 
-function mod:OnChatDC(message)
-    if message:find(self.L["The platform trembles"]) then
+function mod:OnDatachron(sMessage)
+    if sMessage:find(self.L["The platform trembles"]) then
         mod:RemoveTimerBar("STATION")
         mod:AddTimerBar("JUMP", "JUMP", 7, true)
     end

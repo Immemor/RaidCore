@@ -143,11 +143,6 @@ end
 
 function EncounterPrototype:OnDisable()
     if type(self.OnBossDisable) == "function" then self:OnBossDisable() end
-    Apollo.RemoveEventHandler("CHAT_SAY", self)
-    Apollo.RemoveEventHandler("CHAT_NPCSAY", self)
-    Apollo.RemoveEventHandler("CHAT_NPCYELL", self)
-    Apollo.RemoveEventHandler("CHAT_NPCWHISPER", self)
-    Apollo.RemoveEventHandler("CHAT_DATACHRON", self)
     Apollo.RemoveEventHandler("DEBUFF_APPLIED", self)
     Apollo.RemoveEventHandler("DEBUFF_APPLIED_DOSE", self)
     Apollo.RemoveEventHandler("DEBUFF_REMOVED", self)

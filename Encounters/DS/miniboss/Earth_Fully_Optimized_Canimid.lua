@@ -53,7 +53,6 @@ mod:RegisterDefaultTimerBarConfigs({
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-
     mod:AddTimerBar("Terra-forme", "Terra-forme", 59.5)
     mod:AddTimerBar("Undermine", "5 x undermine", 31.7)
 end

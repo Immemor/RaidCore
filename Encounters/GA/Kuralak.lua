@@ -138,7 +138,6 @@ local bIsPhase2
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
     Apollo.RegisterEventHandler("DEBUFF_ADD", "OnDebuffAdd", self)
     Apollo.RegisterEventHandler("DEBUFF_DEL", "OnDebuffDel", self)
 
@@ -203,18 +202,18 @@ function mod:DisplayEggBestPosition()
     end
 end
 
-function mod:OnChatDC(message)
-    if message:find(self.L["Kuralak the Defiler returns to the Archive Core"]) then
+function mod:OnDatachron(sMessage)
+    if sMessage:find(self.L["Kuralak the Defiler returns to the Archive Core"]) then
         mod:AddMsg("VANISH", "VANISH", 3, mod:GetSetting("SoundVanish") and "Alert")
         mod:AddTimerBar("VANISH", "Next vanish", 47)
-    elseif message:find(self.L["Kuralak the Defiler causes a violent outbreak of corruption"]) then
+    elseif sMessage:find(self.L["Kuralak the Defiler causes a violent outbreak of corruption"]) then
         mod:AddMsg("OUTBREAK", "OUTBREAK", 3, "RunAway")
         mod:AddTimerBar("OUTBREAK", "Next outbreak", 45, mod:GetSetting("SoundOutbreak"))
-    elseif message:find(self.L["The corruption begins to fester"]) then
+    elseif sMessage:find(self.L["The corruption begins to fester"]) then
         mod:AddMsg("EGGS", "EGGS", 5, "Alert")
         mod:AddTimerBar("EGGS", "Next eggs", 66)
         mod:DisplayEggBestPosition()
-    elseif message:find(self.L["has been anesthetized"]) then
+    elseif sMessage:find(self.L["has been anesthetized"]) then
         if self:Tank() then
             mod:AddMsg("SIPHON", "SWITCH TANK", 5, mod:GetSetting("SoundSiphon") and "Alarm")
         end

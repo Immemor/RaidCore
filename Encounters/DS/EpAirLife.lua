@@ -151,7 +151,6 @@ local nTwirlCount
 function mod:OnBossEnable()
     Apollo.RegisterEventHandler("DEBUFF_ADD", "OnDebuffAdd", self)
     Apollo.RegisterEventHandler("DEBUFF_DEL", "OnDebuffDel", self)
-    Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
 
     nLastThornsTime = 0
     bIsMidPhase = false
@@ -254,8 +253,8 @@ function mod:OnUnitDestroyed(nId, tUnit, sName)
     end
 end
 
-function mod:OnChatDC(message)
-    if self.L["Time to die, sapients!"] == message then
+function mod:OnDatachron(sMessage)
+    if self.L["Time to die, sapients!"] == sMessage then
         mod:RemoveTimerBar("AVATUS_INCOMING")
         mod:AddTimerBar("ENRAGE", "Enrage", 34)
     end

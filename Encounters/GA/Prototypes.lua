@@ -104,8 +104,6 @@ local protoFirst = true
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
-
     protoFirst = true
 end
 
@@ -129,19 +127,19 @@ function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
     end
 end
 
-function mod:OnChatDC(message)
-    if message:find(self.L["Phagetech Commander is now active!"]) then
+function mod:OnDatachron(sMessage)
+    if sMessage:find(self.L["Phagetech Commander is now active!"]) then
         mod:AddTimerBar("PROTO", "[2] TP + CROSS + BOTS", protoFirst and 20 or 60)
         if protoFirst then
             protoFirst = nil
             mod:AddTimerBar("BERSERK", "BERSERK", 585)
         end
-    elseif message:find(self.L["Phagetech Augmentor is now active!"]) then
+    elseif sMessage:find(self.L["Phagetech Augmentor is now active!"]) then
         mod:AddTimerBar("PROTO", "[3] SINGULARITY + WAVES", 60)
-    elseif message:find(self.L["Phagetech Protector is now active!"]) then
+    elseif sMessage:find(self.L["Phagetech Protector is now active!"]) then
         mod:AddTimerBar("SINGU", "Singularity", 5)
         mod:AddTimerBar("PROTO", "[4] SOAK + BOTS", 60)
-    elseif message:find(self.L["Phagetech Fabricator is now active!"]) then
+    elseif sMessage:find(self.L["Phagetech Fabricator is now active!"]) then
         mod:AddTimerBar("PROTO", "[1] LINK + KICK", 60)
     end
 end

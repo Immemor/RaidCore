@@ -160,7 +160,6 @@ local bIsPhaseUnder20Poucent
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
     Apollo.RegisterEventHandler("BUFF_ADD", "OnBuffAdd", self)
     Apollo.RegisterEventHandler("BUFF_UPDATE", "OnBuffUpdate", self)
     Apollo.RegisterEventHandler("DEBUFF_ADD", "OnDebuffAdd", self)
@@ -217,8 +216,8 @@ function mod:OnUnitDestroyed(nId, tUnit, sName)
     end
 end
 
-function mod:OnChatDC(message)
-    local sPlayerNameIrradiate = message:match(self.L["(.*) is being irradiated"])
+function mod:OnDatachron(sMessage)
+    local sPlayerNameIrradiate = sMessage:match(self.L["(.*) is being irradiated"])
     if sPlayerNameIrradiate then
         -- Sometime it's 26s, sometime 27s or 28s.
         mod:AddTimerBar("NEXT_IRRADIATE", "~Next irradiate", 26, mod:GetSetting("SoundNextIrradiateCountDown"))
@@ -234,9 +233,9 @@ function mod:OnChatDC(message)
                 end
             end
         end
-    elseif message == self.L["ENGAGING TECHNOPHAGE TRASMISSION"] then
+    elseif sMessage == self.L["ENGAGING TECHNOPHAGE TRASMISSION"] then
         mod:AddTimerBar("NEXT_IRRADIATE", "~Next irradiate", 40, mod:GetSetting("SoundNextIrradiateCountDown"))
-    elseif message == self.L["A Prime Purifier has been corrupted!"] then
+    elseif sMessage == self.L["A Prime Purifier has been corrupted!"] then
         bIsPhaseUnder20Poucent = true
     end
 end

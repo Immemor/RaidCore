@@ -108,8 +108,6 @@ local nDataDevourerLastPopTime
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
-
     nDataDevourerLastPopTime = 0
     mod:AddTimerBar("ENRAGE", "Enrage", 576)
     mod:AddTimerBar("DATA_DEVOURER", "Next Data Devourer", 10)
@@ -142,8 +140,8 @@ function mod:OnUnitDestroyed(nId, tUnit, sName)
     end
 end
 
-function mod:OnChatDC(message)
-    local sPlayerFocused = message:match(self.L["Avatus sets his focus on [PlayerName]!"])
+function mod:OnDatachron(sMessage)
+    local sPlayerFocused = sMessage:match(self.L["Avatus sets his focus on [PlayerName]!"])
     if sPlayerFocused then
         local tPlayerUnit = GameLib.GetPlayerUnitByName(sPlayerFocused)
         local nPlayerId = tPlayerUnit:GetId()
@@ -160,17 +158,17 @@ function mod:OnChatDC(message)
             mod:AddMsg("BEAM", sText, 5, mod:GetSetting("SoundBeamOnOther") and "Info", "Blue")
         end
         mod:AddTimerBar("BEAM", sText, 15)
-    elseif message == self.L["Avatus prepares to delete all"] then
+    elseif sMessage == self.L["Avatus prepares to delete all"] then
         mod:AddMsg("PILLAR_TIMEOUT", "Pillar Timeout", 5, mod:GetSetting("SoundBigCast") and "Beware")
         mod:AddTimerBar("PILLAR_TIMEOUT", "Pillar Timeout", 10)
         mod:AddTimerBar("NEXT_PILLAR", "Next Pillar", 50)
-    elseif message == self.L["Secure Sector Enhancement"] then
+    elseif sMessage == self.L["Secure Sector Enhancement"] then
         mod:AddMsg("P2", "P2: SHIELD PHASE", 5, mod:GetSetting("SoundShieldPhase") and "Alert")
         mod:AddTimerBar("P2", "Explosion", 15, mod:GetSetting("SoundLaserCountDown"))
         mod:AddTimerBar("BEAM", "Next Beam", 44)
         mod:AddTimerBar("DATA_DEVOURER", "Next Data Devourer", 53)
         mod:AddTimerBar("NEXT_PILLAR", "Next Pillar", 58)
-    elseif message == self.L["Vertical Locomotion Enhancement"] then
+    elseif sMessage == self.L["Vertical Locomotion Enhancement"] then
         mod:AddMsg("P2", "P2: JUMP PHASE", 5, mod:GetSetting("SoundJumpPhase") and "Alert")
         mod:AddTimerBar("BEAM", "Next Beam", 58)
         mod:AddTimerBar("DATA_DEVOURER", "Next Data Devourer", 68)

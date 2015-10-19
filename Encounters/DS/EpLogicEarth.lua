@@ -143,7 +143,6 @@ end
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
     Apollo.RegisterEventHandler("DEBUFF_ADD", "OnDebuffAdd", self)
 
     nLastSnakePieceId = nil
@@ -197,10 +196,10 @@ function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
     end
 end
 
-function mod:OnChatDC(message)
-    if message:find(self.L["The ground shudders beneath Megalith"]) then
+function mod:OnDatachron(sMessage)
+    if sMessage:find(self.L["The ground shudders beneath Megalith"]) then
         mod:AddMsg("QUAKE", "JUMP !", 3, mod:GetSetting("SoundQuakeJump") and "Beware")
-    elseif message:find(self.L["Logic creates powerful data caches"]) then
+    elseif sMessage:find(self.L["Logic creates powerful data caches"]) then
         mod:AddMsg("STARS", "STARS !", 5, mod:GetSetting("SoundStars") and "Alert")
         mod:AddTimerBar("STARS", "Next phase: Stars", 60)
     end

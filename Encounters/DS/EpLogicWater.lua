@@ -118,7 +118,6 @@ local midphase = false
 function mod:OnBossEnable()
     Apollo.RegisterEventHandler("DEBUFF_APPLIED", "OnDebuffApplied", self)
     Apollo.RegisterEventHandler("DEBUFF_REMOVED", "OnDebuffRemoved", self)
-    Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
 
     midphase = false
     mod:AddTimerBar("MIDPHASE", "Next middle phase", 75, mod:GetSetting("SoundMidphaseCountDown"))
@@ -130,8 +129,8 @@ function mod:OnBossEnable()
     end
 end
 
-function mod:OnChatDC(message)
-    if self.L["Time to die, sapients!"] == message then
+function mod:OnDatachron(sMessage)
+    if self.L["Time to die, sapients!"] == sMessage then
         mod:RemoveTimerBar("AVATUS_INCOMING")
         mod:AddTimerBar("ENRAGE", "Enrage", 34)
     end

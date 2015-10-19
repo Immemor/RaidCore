@@ -48,7 +48,6 @@ local tRockslideUnit
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
     tRockslideUnit = nil
 end
 
@@ -68,8 +67,8 @@ function mod:OnHealthChanged(nId, nPourcent, sName)
     end
 end
 
-function mod:OnChatDC(message)
-    local sPlayerFocus = message:match(self.L["Logic Guided Rockslide focuses on (.*)!"])
+function mod:OnDatachron(sMessage)
+    local sPlayerFocus = sMessage:match(self.L["Logic Guided Rockslide focuses on (.*)!"])
     if sPlayerFocus then
         local tUnit = GetPlayerUnitByName(sPlayerFocus)
         if tUnit == GetPlayerUnit() then

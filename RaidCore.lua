@@ -162,11 +162,6 @@ function RaidCore:OnInitialize()
         ["OnDebuffRemove"] = self.OnEncounterHookDebuffRemove,
         ["OnDebuffUpdate"] = self.OnEncounterHookDebuffUpdate,
         ["OnShowShortcutBar"] = self.OnEncounterHookShowShortcutBar,
-        ["OnSay"] = self.OnEncounterHookSay,
-        ["OnNPCSay"] = self.OnEncounterHookNPCSay,
-        ["OnNPCYell"] = self.OnEncounterHookNPCYell,
-        ["OnNPCWisper"] = self.OnEncounterHookNPCWisper,
-        ["OnDatachron"] = self.OnEncounterHookDatachron,
     }
     _tMainFSMHandlers = {
         [MAIN_FSM__SEARCH] = {
@@ -911,26 +906,6 @@ end
 
 function RaidCore:OnEncounterHookShowShortcutBar(tIconFloatingSpellBar)
     Event_FireGenericEvent("SHORTCUT_BAR", tIconFloatingSpellBar)
-end
-
-function RaidCore:OnEncounterHookSay(sMessage, sSender)
-    Event_FireGenericEvent('CHAT_SAY', sMessage, sSender)
-end
-
-function RaidCore:OnEncounterHookNPCSay(sMessage, sSender)
-    Event_FireGenericEvent('CHAT_NPCSAY', sMessage, sSender)
-end
-
-function RaidCore:OnEncounterHookNPCYell(sMessage, sSender)
-    Event_FireGenericEvent('CHAT_NPCYELL', sMessage, sSender)
-end
-
-function RaidCore:OnEncounterHookNPCWisper(sMessage, sSender)
-    Event_FireGenericEvent('CHAT_NPCWHISPER', sMessage, sSender)
-end
-
-function RaidCore:OnEncounterHookDatachron(sMessage, sSender)
-    Event_FireGenericEvent('CHAT_DATACHRON', sMessage, sSender)
 end
 
 ----------------------------------------------------------------------------------------------------

@@ -158,8 +158,6 @@ end
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    Apollo.RegisterEventHandler("CHAT_DATACHRON", "OnChatDC", self)
-
     waveCount, ruptCount, prev = 0, 0, 0
     section = 1
     first = true
@@ -198,9 +196,9 @@ function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
     end
 end
 
-function mod:OnChatDC(message)
-    local isPushBack = message == self.L["Gloomclaw is pushed back"]
-    local isMoveForward = message == self.L["Gloomclaw is moving forward"]
+function mod:OnDatachron(sMessage)
+    local isPushBack = sMessage == self.L["Gloomclaw is pushed back"]
+    local isMoveForward = sMessage == self.L["Gloomclaw is moving forward"]
 
     if isPushBack or isMoveForward then
         if not first then
@@ -238,13 +236,13 @@ function mod:OnChatDC(message)
             end
         end
         Apollo.RegisterEventHandler("CombatLogHeal", "OnCombatLogHeal", self)
-    elseif message:find(self.L["Gloomclaw is reduced to a weakened state"]) then
+    elseif sMessage:find(self.L["Gloomclaw is reduced to a weakened state"]) then
         mod:RemoveTimerBar("RUPTURE")
         mod:RemoveTimerBar("CORRUPTION")
         mod:RemoveTimerBar("WAVE")
         mod:AddMsg("TRANSITION", "TRANSITION", 5, mod:GetSetting("SoundMoOWarning") and "Alert")
         RemoveEssenceTracking()
-    elseif message:find(self.L["Gloomclaw is vulnerable"]) then
+    elseif sMessage:find(self.L["Gloomclaw is vulnerable"]) then
         mod:RemoveTimerBar("RUPTURE")
         mod:RemoveTimerBar("CORRUPTION")
         mod:RemoveTimerBar("WAVE")
