@@ -596,7 +596,7 @@ function mod:OnUnitDestroyed(nId, tUnit, sName)
 end
 
 function mod:OnEnteredCombat(nId, tUnit, sName, bInCombat)
-    if unitName == self.L["Infinite Logic Loop"] then
+    if sName == self.L["Infinite Logic Loop"] then
         if bInCombat then
             DisplayPurgeList()
         end
