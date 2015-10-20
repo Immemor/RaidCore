@@ -255,7 +255,7 @@ function mod:OnDebuffRemove(nId, nSpellId)
         for i, nPlayerId in next, tCorruptedPlayerList do
             if nPlayerId == nId then
                 core:RemoveLineBetweenUnits(nId)
-                table.remove(i)
+                table.remove(tCorruptedPlayerList, i)
                 break
             end
         end
