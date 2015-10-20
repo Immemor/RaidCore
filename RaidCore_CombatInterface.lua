@@ -416,7 +416,7 @@ function RaidCore:CI_JoinRaidCoreChannel()
     if _RaidCoreChannelComm == nil then
         Log:Add("JoinRaidCoreChannel")
         local eChannelType = ICCommLib.CodeEnumICCommChannelType.Group
-        _RaidCoreChannelComm = ICCommLib.JoinChannel("RaidCore", eChannelType)
+        _RaidCoreChannelComm = ICCommLib.JoinChannel("RaidCoreChannel", eChannelType)
         if _RaidCoreChannelComm:IsReady() then
             Log:Add("ChannelCommStatus", "Join success")
             _RaidCoreChannelComm:SetReceivedMessageFunction("CI_OnReceivedMessage", RaidCore)
