@@ -217,16 +217,24 @@ function EncounterPrototype:OnTrig(tNames)
         return false
     end
     if self.nTrigType == TRIG__ANY then
-        for _, sMob in next, self.EnableMob do
-            if tNames[sMob] then
-                return true
+        for _, sMobName in next, self.EnableMob do
+            if tNames[sMobName] then
+                for nId, bInCombat in next, tNames[sMobName] do
+                    if bInCombat then
+                        return true
+                    end
+                end
             end
         end
         return false
     elseif self.nTrigType == TRIG__ALL then
-        for _, sMob in next, self.EnableMob do
-            if not tNames[sMob] then
-                return false
+        for _, sMobName in next, self.EnableMob do
+            if tNames[sMobName] then
+                for nId, bInCombat in next, tNames[sMobName] do
+                    if not bInCombat then
+                        return false
+                    end
+                end
             end
         end
         return true
