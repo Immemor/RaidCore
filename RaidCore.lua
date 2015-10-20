@@ -89,29 +89,33 @@ end
 
 local function AddDelayedUnit(nId, sName, bInCombat)
     local tMap = GetCurrentZoneMap()
-    local id1 = tMap.continentId
-    local id2 = tMap.parentZoneId
-    local id3 = tMap.id
-    local tTrig = _tTrigPerZone[id1] and _tTrigPerZone[id1][id2] and _tTrigPerZone[id1][id2][id3]
-    if tTrig and tTrig[sName] then
-        if not _tDelayedUnits[sName] then
-            _tDelayedUnits[sName] = {}
+    if tMap then
+        local id1 = tMap.continentId
+        local id2 = tMap.parentZoneId
+        local id3 = tMap.id
+        local tTrig = _tTrigPerZone[id1] and _tTrigPerZone[id1][id2] and _tTrigPerZone[id1][id2][id3]
+        if tTrig and tTrig[sName] then
+            if not _tDelayedUnits[sName] then
+                _tDelayedUnits[sName] = {}
+            end
+            _tDelayedUnits[sName][nId] = bInCombat
         end
-        _tDelayedUnits[sName][nId] = bInCombat
     end
 end
 
 local function SearchEncounter()
     local tMap = GetCurrentZoneMap()
-    local id1 = tMap.continentId
-    local id2 = tMap.parentZoneId
-    local id3 = tMap.id
-    local tEncounters = _tEncountersPerZone[id1] and _tEncountersPerZone[id1][id2] and _tEncountersPerZone[id1][id2][id3]
-    if tEncounters then
-        for _, tEncounter in next, tEncounters do
-            if tEncounter:OnTrig(_tDelayedUnits) then
-                _tCurrentEncounter = tEncounter
-                break
+    if tMap then
+        local id1 = tMap.continentId
+        local id2 = tMap.parentZoneId
+        local id3 = tMap.id
+        local tEncounters = _tEncountersPerZone[id1] and _tEncountersPerZone[id1][id2] and _tEncountersPerZone[id1][id2][id3]
+        if tEncounters then
+            for _, tEncounter in next, tEncounters do
+                if tEncounter:OnTrig(_tDelayedUnits) then
+                    _tCurrentEncounter = tEncounter
+                    break
+                end
             end
         end
     end
