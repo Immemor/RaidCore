@@ -105,8 +105,8 @@ end
 function mod:OnUnitCreated(nId, tUnit, sName)
     if sName == self.L["Experiment X-89"] then
         nExperimentX89Id = nId
-        core:AddUnit(unit)
-        core:WatchUnit(unit)
+        core:AddUnit(tUnit)
+        core:WatchUnit(tUnit)
         if mod:GetSetting("LineExperimentX89") then
             core:AddSimpleLine("Cleave", nExperimentX89Id, 0, 5, 0, 8, "green")
         end
