@@ -136,8 +136,7 @@ function mod:OnUnitCreated(nId, tUnit, sName)
         elseif sName == self.L["Noxmind the Insidious"] then
             if mod:GetSetting("LineToxWaves") then
                 -- It's the wave from Nox which target a player
-                local line = core:AddSimpleLine("Wave" .. nId, nId, 5, 45, 0, 8, "white", 10)
-                line:SetSprite("CRB_MegamapSprites:sprMap_PlayerArrowBase", 40)
+                local line = core:AddSimpleLine("Wave" .. nId, nId, 5, 45, 0, 4, "green")
             end
         end
     end
