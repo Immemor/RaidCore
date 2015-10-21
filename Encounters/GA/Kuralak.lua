@@ -157,7 +157,7 @@ function mod:OnUnitCreated(nId, tUnit, sName)
         -- TODO: Remove this init, when values will be found.
         if EGG_BEST_POSITIONS == nil then
             local tPosition = tUnit:GetPosition()
-            local nDistance = 10
+            local nDistance = 9.5
             local tRad = { 0, 180, 90, 270, 45, 135, 225, 315 }
             EGG_BEST_POSITIONS = {}
             for i = 1, #tRad do
