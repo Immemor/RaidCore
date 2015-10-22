@@ -107,6 +107,7 @@ mod:RegisterDefaultTimerBarConfigs({
 -- Locals.
 ----------------------------------------------------------------------------------------------------
 local GetPlayerUnit = GameLib.GetPlayerUnit
+local GetUnitById = GameLib.GetUnitById
 local prev = 0
 local nStationCount = 0
 local bossPos
@@ -115,7 +116,6 @@ local bossPos
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    bossPos = {}
     nStationCount = 0
 end
 
