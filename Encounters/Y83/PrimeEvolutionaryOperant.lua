@@ -290,7 +290,7 @@ function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
     end
 end
 
-function mod:OnDebuffDel(nId, nSpellId)
+function mod:OnDebuffRemove(nId, nSpellId)
     if DEBUFF_STRAIN_INCUBATION == nSpellId then
         core:RemovePicture(("INCUBATION %d"):format(nId))
         core:RemoveLineBetweenUnits("SafeZoneGO" .. nId)
