@@ -54,6 +54,7 @@ mod:RegisterDefaultSetting("OtherMarkerAntlion")
 -- Locals.
 ----------------------------------------------------------------------------------------------------
 local GetPlayerUnit = GameLib.GetPlayerUnit
+local GetUnitById = GameLib.GetUnitById
 local GetGameTime = GameLib.GetGameTime
 
 -- Is the player is far from the Keeper Of Sands.
