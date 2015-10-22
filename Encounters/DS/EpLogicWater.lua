@@ -110,6 +110,7 @@ local DEBUFFID_DATA_DISRUPTOR = 78407
 ----------------------------------------------------------------------------------------------------
 local GetPlayerUnit = GameLib.GetPlayerUnit
 local GetGameTime = GameLib.GetGameTime
+local GetUnitById = GameLib.GetUnitById
 local midphase = false
 
 ----------------------------------------------------------------------------------------------------
