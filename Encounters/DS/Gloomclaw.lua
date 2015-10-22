@@ -141,6 +141,7 @@ local maulerSpawn = {
 ----------------------------------------------------------------------------------------------------
 -- Locals.
 ----------------------------------------------------------------------------------------------------
+local GetUnitById = GameLib.GetUnitById
 local prev
 local waveCount, ruptCount, essenceUp
 local first
