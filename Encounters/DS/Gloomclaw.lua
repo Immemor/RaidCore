@@ -171,9 +171,12 @@ function mod:OnWipe()
     core:ResetWorldMarkers()
 end
 
-function mod:OnUnitCreated(nId, unit, sName)
+function mod:OnUnitCreated(nId, tUnit, sName)
     if sName == self.L["Corrupted Ravager"] or sName == self.L["Empowered Ravager"] then
-        core:WatchUnit(unit)
+        core:WatchUnit(tUnit)
+    elseif sName == self.L["Gloomclaw"] then
+        core:AddUnit(tUnit)
+        core:WatchUnit(tUnit)
     end
 end
 
@@ -273,10 +276,7 @@ end
 
 function mod:OnEnteredCombat(nId, tUnit, sName, bInCombat)
     if bInCombat then
-        if sName == self.L["Gloomclaw"] then
-            core:AddUnit(tUnit)
-            core:WatchUnit(tUnit)
-        elseif sName == self.L["Strain Parasite"]
+        if sName == self.L["Strain Parasite"]
             or sName == self.L["Gloomclaw Skurge"]
             or sName == self.L["Corrupted Fraz"] then
 

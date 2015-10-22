@@ -134,7 +134,7 @@ local function ProcessDelayedUnit()
                     Log:Add("ERROR", sErrMsg)
                 end
                 if bInCombat then
-                    s, sErrMsg = pcall(OnEncounterHookGeneric, "OnEnteredCombat", nDelayedId, tUnit, bInCombat, nDelayedName)
+                    s, sErrMsg = pcall(OnEncounterHookGeneric, "OnEnteredCombat", nDelayedId, tUnit, nDelayedName, bInCombat)
                     if not s then
                         if self.db.profile.bLUAErrorMessage then
                             RaidCore:Print(sErrMsg)
