@@ -43,7 +43,7 @@ mod:RegisterEnglishLocale({
     ["P3 SOON !"] = "P3 SOON !",
     ["P3: RAVENOUS"] = "P3: RAVENOUS",
     ["P3 REALLY SOON !"] = "P3 REALLY SOON !",
-    ["PILLAR %u : %u"] = "PILLAR %u : %u",
+    ["PILLAR %u : %s"] = "PILLAR %u : %s",
     ["PILLAR %u"] = "PILLAR %u",
     ["SWITCH TANK"] = "SWITCH TANK",
     ["BIG SPEW"] = "BIG SPEW",
@@ -77,7 +77,7 @@ mod:RegisterFrenchLocale({
     ["P3 SOON !"] = "P3 BIENTÔT !",
     ["P3: RAVENOUS"] = "P3: AFFAMÉ",
     ["P3 REALLY SOON !"] = "P3 RÉELLEMENT BIENTÔT !",
-    ["PILLAR %u : %u"] = "PILLIER %u : %u",
+    ["PILLAR %u : %s"] = "PILLIER %u : %s",
     ["PILLAR %u"] = "PILLIER %u",
     ["SWITCH TANK"] = "CHANGEMENT TANK",
     ["BIG SPEW"] = "TORRENT",
@@ -111,7 +111,7 @@ mod:RegisterGermanLocale({
     ["P3 SOON !"] = "GLEICH PHASE 3 !",
     ["P3: RAVENOUS"] = "P3: GROßE WÜRMER",
     ["P3 REALLY SOON !"] = "17 % | VORSICHT MIT DAMAGE",
-    ["PILLAR %u : %u"] = "SÄULE %u : %u",
+    ["PILLAR %u : %s"] = "SÄULE %u : %s",
     ["PILLAR %u"] = "SÄULE %u",
     ["SWITCH TANK"] = "AGGRO ZIEHEN !!!",
     ["BIG SPEW"] = "GROßES BRECHEN",
@@ -214,7 +214,7 @@ function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
         if sCastName == self.L["Erupt"] then
             if OhmnaP3 then return end
             local pilarActivated = self:OhmnaPE(pilarCount % 2)
-            mod:AddTimerBar("OPILAR", self.L["PILLAR %u : %u"]:format(pilarCount, pilarActivated), 32)
+            mod:AddTimerBar("OPILAR", self.L["PILLAR %u : %s"]:format(pilarCount, pilarActivated), 32)
             if self:Tank() then
                 mod:AddTimerBar("OBORE", "SWITCH TANK", 45)
             end
@@ -262,7 +262,7 @@ function mod:OnDatachron(sMessage)
             firstPull = false
         else
             local pilarActivated = self:OhmnaPE(pilarCount % 2)
-            mod:AddTimerBar("OPILAR", self.L["PILLAR %u : %u"]:format(pilarCount, pilarActivated), 25)
+            mod:AddTimerBar("OPILAR", self.L["PILLAR %u : %s"]:format(pilarCount, pilarActivated), 25)
         end
     elseif sMessage:find(self.L["Dreadphage Ohmna submerges"]) then
         pilarCount, boreCount = 1, 0
