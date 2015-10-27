@@ -639,12 +639,12 @@ function mod:OnBuffAdd(nId, nSpellId, nStack, fTimeRemaining)
             end
         end
     elseif nAvatusId == nId then
-        if BUFFID_HOLO_CANNONS_ACTIVE == splId then
+        if BUFFID_HOLO_CANNONS_ACTIVE == nSpellId then
             if not nHoloCannonActivationTime and not bIsProtectionBarrierEnable then
                 nHoloCannonActivationTime = GetGameTime()
                 mod:AddTimerBar("OBBEAM", "Next obliteration beam", 26, mod:GetSetting("SoundObliterationBeam"))
             end
-        elseif BUFFID_PROTECTIVE_BARRIER == splId then
+        elseif BUFFID_PROTECTIVE_BARRIER == nSpellId then
             bIsProtectionBarrierEnable = true
             -- End of one main phase.
             nHoloCannonActivationTime = nil
