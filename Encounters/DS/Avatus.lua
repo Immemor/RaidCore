@@ -346,32 +346,34 @@ end
 
 local function DisplayPurgeList()
     if mod:GetSetting("OtherPurgeList") then
+        core:Print("====== PURGE LIST ======")
         for ePurgeType = PURGE_BLUE, PURGE_GREEN do
-            local tCopy = {}
-            for k, v in next, tBlueRoomPurgeList[ePurgeType] do
-                tCopy[k] = v
-            end
-
-            local tOrdered = {}
-            while next(tCopy) do
-                local f = nil
-                for key, val in next, tCopy do
-                    if f == nil or tCopy[f] > val then
-                        f = key
-                    end
+            if next(tBlueRoomPurgeList[ePurgeType]) then
+                local tCopy = {}
+                for k, v in next, tBlueRoomPurgeList[ePurgeType] do
+                    tCopy[k] = v
                 end
-                table.insert(tOrdered, f:gmatch("%a+")())
-                tCopy[f] = nil
-            end
 
-            local sPlayers = table.concat(tOrdered, ", ")
-            core:Print("====== PURGE LIST ======")
-            if ePurgeType == PURGE_BLUE then
-                core:Print(mod.L["%s. PURGE BLUE (%s)"]:format("a", sPlayers))
-            elseif ePurgeType == PURGE_RED then
-                core:Print(mod.L["%s. PURGE RED (%s)"]:format("b", sPlayers))
-            elseif ePurgeType == PURGE_GREEN then
-                core:Print(mod.L["%s. PURGE GREEN (%s)"]:format("c", sPlayers))
+                local tOrdered = {}
+                while next(tCopy) do
+                    local f = nil
+                    for key, val in next, tCopy do
+                        if f == nil or tCopy[f] > val then
+                            f = key
+                        end
+                    end
+                    table.insert(tOrdered, f:gmatch("%a+")())
+                    tCopy[f] = nil
+                end
+
+                local sPlayers = table.concat(tOrdered, ", ")
+                if ePurgeType == PURGE_BLUE then
+                    core:Print(mod.L["%s. PURGE BLUE (%s)"]:format("a", sPlayers))
+                elseif ePurgeType == PURGE_RED then
+                    core:Print(mod.L["%s. PURGE RED (%s)"]:format("b", sPlayers))
+                elseif ePurgeType == PURGE_GREEN then
+                    core:Print(mod.L["%s. PURGE GREEN (%s)"]:format("c", sPlayers))
+                end
             end
         end
     end
