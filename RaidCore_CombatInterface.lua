@@ -83,7 +83,7 @@ local _bRunning = false
 local _tScanTimer = nil
 local _CommChannelTimer = nil
 local _DelayShowShortcutBar = nil
-local _nCommChannelRetry = 1
+local _nCommChannelRetry = 5
 local _tAllUnits = {}
 local _tTrackedUnits = {}
 local _tMembers = {}
@@ -160,8 +160,11 @@ local function ExtraLog2Text(k, nRefTime, tParam)
         sResult = tParam[1]
     elseif k == "SendMessageResult" then
         sResult = ("sResult=\"%s\" MsgId=%d"):format(tParam[1], tParam[2])
-    elseif k == "JoinResult" then
-        sResult = ("Result=\"%s\""):format(tParam[1])
+    elseif k == "JoinChannelTry" then
+        sResult = ("ChannelName=\"%s\" ChannelType=\"%s\""):format(tParam[1], tParam[2])
+    elseif k == "JoinChannelStatus" then
+        local sFormat = "eResult=\"%s\""
+        sResult = sFormat:format(tParam[1])
     elseif k == "OnCombatLogHeal" then
         local sFormat = "CasterId=%s TargetId=%s sCasterName=\"%s\" sTargetName=\"%s\" nHealAmount=%u nOverHeal=%u nSpellId=%u"
         sResult = sFormat:format(tostring(tParam[1]), tostring(tParam[2]), tParam[3], tParam[4], tParam[5], tParam[6], tParam[7])
@@ -401,30 +404,35 @@ end
 ----------------------------------------------------------------------------------------------------
 -- ICCom functions.
 ----------------------------------------------------------------------------------------------------
-local function RetryJoinRaidCoreChannel()
-    -- Invalid previous try.
-    _RaidCoreChannelComm = nil
+function RaidCore:CI_JoinChannelTry()
+    local eChannelType = ICCommLib.CodeEnumICCommChannelType.Group
+    local sChannelName = "RaidCore"
+
+    -- Log this try.
+    Log:Add("JoinChannelTry", sChannelName, "Group")
+    -- Request to join the channel.
+    _RaidCoreChannelComm = ICCommLib.JoinChannel(sChannelName, eChannelType)
     -- Start a timer to retry to join.
-    _CommChannelTimer = ApolloTimer.Create(_nCommChannelRetry, false, "CI_JoinRaidCoreChannel", RaidCore)
-    _nCommChannelRetry = _nCommChannelRetry + 1
-    if _nCommChannelRetry > 30 then
-        _nCommChannelRetry = 30
+    _CommChannelTimer = ApolloTimer.Create(_nCommChannelRetry, false, "CI_JoinChannelTry", RaidCore)
+    _nCommChannelRetry = _nCommChannelRetry < 30 and _nCommChannelRetry + 5 or 30
+
+    if _RaidCoreChannelComm then
+        _RaidCoreChannelComm:SetJoinResultFunction("CI_OnJoinResultFunction", RaidCore)
     end
 end
 
-function RaidCore:CI_JoinRaidCoreChannel()
-    if _RaidCoreChannelComm == nil then
-        Log:Add("JoinRaidCoreChannel")
-        local eChannelType = ICCommLib.CodeEnumICCommChannelType.Group
-        _RaidCoreChannelComm = ICCommLib.JoinChannel("RaidCoreChannel", eChannelType)
-        if _RaidCoreChannelComm:IsReady() then
-            Log:Add("ChannelCommStatus", "Join success")
-            _RaidCoreChannelComm:SetReceivedMessageFunction("CI_OnReceivedMessage", RaidCore)
-            _RaidCoreChannelComm:SetSendMessageResultFunction("CI_OnSendMessageResult", RaidCore)
-        else
-            Log:Add("ChannelCommStatus", "Join failed")
-            -- Retry Join Channel later.
-            RetryJoinRaidCoreChannel()
+function RaidCore:CI_OnJoinResultFunction(tChannel, eResult)
+    if eResult == ICCommLib.CodeEnumICCommJoinResult.Join then
+        Log:Add("JoinChannelStatus", "Join")
+        _CommChannelTimer:Stop()
+        _RaidCoreChannelComm:SetReceivedMessageFunction("CI_OnReceivedMessage", RaidCore)
+        _RaidCoreChannelComm:SetSendMessageResultFunction("CI_OnSendMessageResult", RaidCore)
+    else
+        for sJoinResult, ResultId in next, ICCommLib.CodeEnumICCommJoinResult do
+            if ResultId == eResult then
+                Log:Add("JoinChannelStatus", sJoinResult)
+                break
+            end
         end
     end
 end
@@ -438,9 +446,8 @@ function RaidCore:CombatInterface_Init()
     _tMembers = {}
     _tScanTimer = ApolloTimer.Create(SCAN_PERIOD, true, "CI_OnScanUpdate", self)
     _tScanTimer:Stop()
-    _nCommChannelRetry = 1
 
-    self:CI_JoinRaidCoreChannel()
+    _CommChannelTimer = ApolloTimer.Create(10, false, "CI_JoinChannelTry", RaidCore)
     -- Permanent registering.
     RegisterEventHandler("ChangeWorld", "CI_OnChangeWorld", self)
     RegisterEventHandler("SubZoneChanged", "CI_OnSubZoneChanged", self)
