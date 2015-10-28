@@ -225,6 +225,6 @@ end
 
 function mod:OnDatachron(sMessage)
     if sMessage:find(self.L["The Phageborn Convergence begins gathering its power"]) then
-        mod:AddTimerBar("NextP2", "Next P2", 60, mod:GetSetting("SoundPhase2CountDown"))
+        mod:AddTimerBar("NextP2", "Next P2", 82.5, mod:GetSetting("SoundPhase2CountDown"))
     end
 end
