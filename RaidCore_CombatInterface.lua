@@ -163,7 +163,7 @@ local function ExtraLog2Text(k, nRefTime, tParam)
     elseif k == "JoinChannelTry" then
         sResult = ("ChannelName=\"%s\" ChannelType=\"%s\""):format(tParam[1], tParam[2])
     elseif k == "JoinChannelStatus" then
-        local sFormat = "eResult=\"%s\""
+        local sFormat = "Result=\"%s\""
         sResult = sFormat:format(tParam[1])
     elseif k == "OnCombatLogHeal" then
         local sFormat = "CasterId=%s TargetId=%s sCasterName=\"%s\" sTargetName=\"%s\" nHealAmount=%u nOverHeal=%u nSpellId=%u"
@@ -404,6 +404,13 @@ end
 ----------------------------------------------------------------------------------------------------
 -- ICCom functions.
 ----------------------------------------------------------------------------------------------------
+local function JoinSuccess()
+    Log:Add("JoinChannelStatus", "Join Success")
+    _CommChannelTimer:Stop()
+    _RaidCoreChannelComm:SetReceivedMessageFunction("CI_OnReceivedMessage", RaidCore)
+    _RaidCoreChannelComm:SetSendMessageResultFunction("CI_OnSendMessageResult", RaidCore)
+end
+
 function RaidCore:CI_JoinChannelTry()
     local eChannelType = ICCommLib.CodeEnumICCommChannelType.Group
     local sChannelName = "RaidCore"
@@ -417,16 +424,18 @@ function RaidCore:CI_JoinChannelTry()
     _nCommChannelRetry = _nCommChannelRetry < 30 and _nCommChannelRetry + 5 or 30
 
     if _RaidCoreChannelComm then
-        _RaidCoreChannelComm:SetJoinResultFunction("CI_OnJoinResultFunction", RaidCore)
+        if _RaidCoreChannelComm:IsReady() then
+            JoinSuccess()
+        else
+            Log:Add("JoinChannelStatus", "In Progress")
+            _RaidCoreChannelComm:SetJoinResultFunction("CI_OnJoinResultFunction", RaidCore)
+        end
     end
 end
 
 function RaidCore:CI_OnJoinResultFunction(tChannel, eResult)
     if eResult == ICCommLib.CodeEnumICCommJoinResult.Join then
-        Log:Add("JoinChannelStatus", "Join")
-        _CommChannelTimer:Stop()
-        _RaidCoreChannelComm:SetReceivedMessageFunction("CI_OnReceivedMessage", RaidCore)
-        _RaidCoreChannelComm:SetSendMessageResultFunction("CI_OnSendMessageResult", RaidCore)
+        JoinSuccess()
     else
         for sJoinResult, ResultId in next, ICCommLib.CodeEnumICCommJoinResult do
             if ResultId == eResult then
@@ -447,7 +456,6 @@ function RaidCore:CombatInterface_Init()
     _tScanTimer = ApolloTimer.Create(SCAN_PERIOD, true, "CI_OnScanUpdate", self)
     _tScanTimer:Stop()
 
-    _CommChannelTimer = ApolloTimer.Create(10, false, "CI_JoinChannelTry", RaidCore)
     -- Permanent registering.
     RegisterEventHandler("ChangeWorld", "CI_OnChangeWorld", self)
     RegisterEventHandler("SubZoneChanged", "CI_OnSubZoneChanged", self)

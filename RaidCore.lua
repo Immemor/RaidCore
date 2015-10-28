@@ -265,6 +265,7 @@ function RaidCore:OnDocLoaded()
     self:BarManagersInit(self.db.profile.BarsManagers)
     self:DrawManagersInit(self.db.profile.DrawManagers)
     self:GUI_init(RAIDCORE_CURRENT_VERSION)
+    self:CI_JoinChannelTry()
 
     -- Register handlers for events, slash commands and timer, etc.
     Apollo.RegisterSlashCommand("raidc", "OnRaidCoreOn", self)
