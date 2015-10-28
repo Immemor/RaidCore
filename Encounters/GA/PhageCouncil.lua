@@ -27,6 +27,7 @@ mod:RegisterEnglishLocale({
     ["Ersoth Curseform"] = "Ersoth Curseform",
     -- Datachron messages.
     ["The Phageborn Convergence begins gathering its power"] = "The Phageborn Convergence begins gathering its power",
+    ["Noxmind the Insidious prepares to equalize the Convergence!"] = "Noxmind the Insidious prepares to equalize the Convergence!",
     -- Cast.
     ["Teleport"] = "Teleport",
     ["Channeling Energy"] = "Channeling Energy",
@@ -34,6 +35,7 @@ mod:RegisterEnglishLocale({
     ["Stitching Strain"] = "Stitching Strain",
     -- Timer bars.
     ["Next P2"] = "Next P2",
+    ["Next equalization"] = "Next equalization",
     ["P2: Timeout 20 IA"] = "P2: Timeout 20 IA",
     ["P2: Timeout mini adds"] = "P2: Timeout mini adds",
     ["P2: Timeout subdue"] = "P2: Timeout subdue",
@@ -56,6 +58,7 @@ mod:RegisterFrenchLocale({
     ["Ersoth Curseform"] = "Ersoth le Maudisseur",
     -- Datachron messages.
     ["The Phageborn Convergence begins gathering its power"] = "La Convergence néophage commence à rassembler son énergie !",
+    ["Noxmind the Insidious prepares to equalize the Convergence!"] = "Toxultime l'Insidieux se prépare à égaliser la Convergence !",
     -- Cast.
     ["Teleport"] = "Se téléporter",
     ["Channeling Energy"] = "Canalisation d'énergie",
@@ -63,6 +66,7 @@ mod:RegisterFrenchLocale({
     ["Stitching Strain"] = "Pression de suture",
     -- Timer bars.
     ["Next P2"] = "Prochaine P2",
+    ["Next equalization"] = "Prochaine égalisation",
     ["P2: Timeout 20 IA"] = "P2: Timeout 20 IA",
     ["P2: Timeout mini adds"] = "P2: Timeout mini adds",
     ["P2: Timeout subdue"] = "P2: Timeout désarmement",
@@ -100,19 +104,23 @@ mod:RegisterDefaultSetting("SoundInterruptTerax")
 -- Timers default configs.
 mod:RegisterDefaultTimerBarConfigs({
     ["NextP2"] = { sColor = "xkcdBluishPurple" },
+    ["NextEqualize"] = { sColor = "xkcdEasterPurple" },
     ["P2Timeout"] = { sColor = "xkcdBloodOrange" },
 })
 
 ----------------------------------------------------------------------------------------------------
 -- Constants.
 ----------------------------------------------------------------------------------------------------
+local DEFAULT_EQUALIZATION_DURATION = 37
 
 ----------------------------------------------------------------------------------------------------
 -- Locals.
 ----------------------------------------------------------------------------------------------------
+local GetGameTime = GameLib.GetGameTime
 local GetUnitById = GameLib.GetUnitById
 local GetPlayerUnit = GameLib.GetPlayerUnit
 local tBossesId
+local nNextP2Time
 
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
@@ -120,6 +128,8 @@ local tBossesId
 function mod:OnBossEnable()
     tBossesId = {}
     mod:AddTimerBar("NextP2", "Next P2", 90, mod:GetSetting("SoundPhase2CountDown"))
+    nNextP2Time = GetGameTime() + 90
+    mod:AddTimerBar("NextEqualize", "Next equalization", 31.5)
 end
 
 function mod:OnUnitCreated(nId, tUnit, sName)
@@ -225,6 +235,15 @@ end
 
 function mod:OnDatachron(sMessage)
     if sMessage:find(self.L["The Phageborn Convergence begins gathering its power"]) then
+        nNextP2Time = GetGameTime() + 82.5
         mod:AddTimerBar("NextP2", "Next P2", 82.5, mod:GetSetting("SoundPhase2CountDown"))
+        mod:AddTimerBar("NextEqualize", "Next equalization", DEFAULT_EQUALIZATION_DURATION)
+    elseif sMessage:find(self.L["Noxmind the Insidious prepares to equalize the Convergence!"]) then
+        local nNextEqualize = DEFAULT_EQUALIZATION_DURATION
+        local nRemainTimeBeforeP2 = nNextP2Time - GetGameTime()
+        if nNextEqualize > nRemainTimeBeforeP2 then
+            nNextEqualize = nRemainTimeBeforeP2 + DEFAULT_EQUALIZATION_DURATION
+        end
+        mod:AddTimerBar("NextEqualize", "Next equalization", nNextEqualize)
     end
 end
