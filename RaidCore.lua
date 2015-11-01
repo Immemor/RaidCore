@@ -159,6 +159,7 @@ end
 function RaidCore:OnInitialize()
     _tEncounterHookHandlers = {
         ["OnUnitDestroyed"] = self.OnEncounterHookUnitDestroyed,
+        ["OnReceivedMessage"] = self.OnReceivedMessage,
     }
     _tMainFSMHandlers = {
         [MAIN_FSM__SEARCH] = {
