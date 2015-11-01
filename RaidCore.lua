@@ -568,6 +568,11 @@ function RaidCore:ResetAll()
 end
 
 function RaidCore:WipeCheck()
+    local tPlayerDeathState = GameLib.GetPlayerDeathState()
+
+    if tPlayerDeathState and not tPlayerDeathState.bAcceptCasterRez then
+        return
+    end
     for i = 1, GroupLib.GetMemberCount() do
         local tUnit = GroupLib.GetUnitForGroupMember(i)
         if tUnit and tUnit:IsInCombat() then
