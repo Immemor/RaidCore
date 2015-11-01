@@ -418,6 +418,7 @@ function mod:OnBossEnable()
     nAvatusId = nil
     nMainPhaseCount = 1
     nHoloCannonActivationTime = nil
+    bIsProtectionBarrierEnable = false
     bDisplayHandsPictures = false
     nLastSupportCannonPopTime = 0
     nLastBuffPurgeTime = 0
