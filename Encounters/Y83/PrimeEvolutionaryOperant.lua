@@ -81,7 +81,7 @@ mod:RegisterDefaultTimerBarConfigs({
 local GetUnitById = GameLib.GetUnitById
 local GetGameTime = GameLib.GetGameTime
 local GetPlayerUnit = GameLib.GetPlayerUnit
-local GetPlayerByName = GameLib.GetPlayerByName
+local GetPlayerUnitByName = GameLib.GetPlayerUnitByName
 local NewVector3 = Vector3.New
 
 ----------------------------------------------------------------------------------------------------
@@ -217,7 +217,7 @@ function mod:OnDatachron(sMessage)
         -- Sometime it's 26s, sometime 27s or 28s.
         mod:AddTimerBar("NEXT_IRRADIATE", "~Next irradiate", 26, mod:GetSetting("SoundNextIrradiateCountDown"))
         if mod:GetSetting("LineRadiation") then
-            local tMemberUnit = GetPlayerByName(sPlayerNameIrradiate)
+            local tMemberUnit = GetPlayerUnitByName(sPlayerNameIrradiate)
             if tMemberUnit then
                 local nMemberId = tMemberUnit:GetId()
                 local nPlayerId = GetPlayerUnit():GetId()
