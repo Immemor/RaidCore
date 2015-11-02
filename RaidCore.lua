@@ -157,9 +157,9 @@ function RaidCore:Print(sMessage)
 end
 
 function RaidCore:OnInitialize()
+    -- In Combat Only!
     _tEncounterHookHandlers = {
         ["OnUnitDestroyed"] = self.OnEncounterHookUnitDestroyed,
-        ["OnReceivedMessage"] = self.OnReceivedMessage,
     }
     _tMainFSMHandlers = {
         [MAIN_FSM__SEARCH] = {
@@ -168,9 +168,11 @@ function RaidCore:OnInitialize()
             ["OnUnitCreated"] = self.SEARCH_OnUnitCreated,
             ["OnEnteredCombat"] = self.SEARCH_OnEnteredCombat,
             ["OnUnitDestroyed"] = self.SEARCH_OnUnitDestroyed,
+            ["OnReceivedMessage"] = self.SEARCH_OnReceivedMessage,
         },
         [MAIN_FSM__RUNNING] = {
             ["OnEnteredCombat"] = self.RUNNING_OnEnteredCombat,
+            ["OnReceivedMessage"] = self.RUNNING_OnReceivedMessage,
         },
     }
     _eCurrentFSM = MAIN_FSM__SEARCH
@@ -279,11 +281,6 @@ function RaidCore:SendMessage(tMessage, tDPlayerId)
     assert(type(tMessage) == "table")
     tMessage.sender = GetPlayerUnit():GetName()
     self:CombatInterface_SendMessage(JSON.encode(tMessage), tDPlayerId)
-end
-
-function RaidCore:OnReceivedMessage(sMessage, sSender)
-    local tMessage = JSON.decode(sMessage)
-    self:ProcessMessage(tMessage, sSender)
 end
 
 function RaidCore:ProcessMessage(tMessage, sSender)
@@ -812,6 +809,16 @@ end
 function RaidCore:SEARCH_OnUnitDestroyed(nId, tUnit, sName)
     RemoveDelayedUnit(nId, tUnit)
     self:AutoCleanUnitDestroyed(nId, tUnit, sName)
+end
+
+function RaidCore:SEARCH_OnReceivedMessage(sMessage, sSender)
+    local tMessage = JSON.decode(sMessage)
+    self:ProcessMessage(tMessage, sSender)
+end
+
+function RaidCore:RUNNING_OnReceivedMessage(sMessage, sSender)
+    local tMessage = JSON.decode(sMessage)
+    self:ProcessMessage(tMessage, sSender)
 end
 
 function RaidCore:RUNNING_OnEnteredCombat(nId, tUnit, sName, bInCombat)
