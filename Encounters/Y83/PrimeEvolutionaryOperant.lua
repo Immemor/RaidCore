@@ -49,7 +49,7 @@ mod:RegisterEnglishLocale({
 })
 mod:RegisterFrenchLocale({
     -- Unit names.
-    ["Prime Evolutionary Operant"] = "Premier purificateur",
+    ["Prime Evolutionary Operant"] = "Opérateur de la Primo Évolution",
     ["Prime Phage Distributor"] = "Distributeur de Primo Phage",
     ["Organic Incinerator"] = "Incinérateur organique",
     -- Datachron messages.
