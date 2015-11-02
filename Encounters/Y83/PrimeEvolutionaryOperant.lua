@@ -40,6 +40,7 @@ mod:RegisterEnglishLocale({
     ["A Prime Purifier has been corrupted!"] = "A Prime Purifier has been corrupted!",
     ["INITIATING DECONTAMINATION SEQUENCE"] = "INITIATING DECONTAMINATION SEQUENCE",
     -- Cast
+    ["Disintegrate"] = "Disintegrate",
     ["Digitize"] = "Digitize",
     ["Strain Injection"] = "Strain Injection",
     ["Corruption Spike"] = "Corruption Spike",
@@ -53,6 +54,7 @@ mod:RegisterFrenchLocale({
     ["Prime Phage Distributor"] = "Distributeur de Primo Phage",
     ["Organic Incinerator"] = "Incinérateur organique",
     -- Datachron messages.
+    ["Disintegrate"] = "Désintégration",
     ["(.*) is being irradiated"] = "(.*) est irradiée.",
     ["ENGAGING TECHNOPHAGE TRASMISSION"] = "ENCLENCHEMENT DE LA TRANSMISSION DU TECHNOPHAGE",
     -- Bars messages.
@@ -199,9 +201,6 @@ function mod:OnUnitCreated(nId, tUnit, sName)
         nPrimeDistributorId = nId
     elseif self.L["Organic Incinerator"] == sName then
         core:WatchUnit(tUnit)
-        if mod:GetSetting("OrganicIncineratorBeam") then
-            core:AddSimpleLine("Orga.Inc. beam", nId, 0, 65, 0, 10, "red")
-        end
     end
 end
 
@@ -222,8 +221,7 @@ function mod:OnDatachron(sMessage)
                 local nMemberId = tMemberUnit:GetId()
                 local nPlayerId = GetPlayerUnit():GetId()
                 if nMemberId ~= nPlayerId then
-                    local o = core:AddLineBetweenUnits("RADIATION", nPlayerId, nMemberId, 4, "cyan", 18)
-                    o:SetSprite("CRB_MinimapSprites:sprMM_QuestArrow", 15)
+                    local o = core:AddLineBetweenUnits("RADIATION", nPlayerId, nMemberId, 3, "cyan")
                     o:SetMinLengthVisible(10)
                 end
             end
@@ -267,8 +265,7 @@ function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
         if nRadiationEndTime < nCurrentTime then
             nRadiationEndTime = nCurrentTime + 12
             if mod:GetSetting("LineRadiation") then
-                local o = core:AddLineBetweenUnits("RADIATION", nPlayerId, tUnit:GetPosition(), 4, "cyan", 18)
-                o:SetSprite("CRB_MinimapSprites:sprMM_QuestArrow", 15)
+                local o = core:AddLineBetweenUnits("RADIATION", nPlayerId, tUnit:GetPosition(), 3, "cyan")
                 o:SetMinLengthVisible(10)
                 mod:ScheduleTimer(function()
                     core:RemoveLineBetweenUnits("RADIATION")
@@ -321,6 +318,15 @@ function mod:OnBuffUpdate(nId, nSpellId, nNewStack, fTimeRemaining)
         if nRemain == 2 or nRemain == 1 then
             local sColor = nRemain == 2 and "blue" or "red"
             core:AddMsg("WARNING", self.L["%u STACKS BEFORE CORRUPTION"]:format(nRemain), 4, nil, sColor)
+        end
+    end
+end
+
+function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
+    if self.L["Organic Incinerator"] == sName then
+        local line = core:GetSimpleLine("Orga.Inc. beam")
+        if not line and mod:GetSetting("OrganicIncineratorBeam") then
+            core:AddSimpleLine("Orga.Inc. beam", nId, 0, 65, 0, 10, "red")
         end
     end
 end
