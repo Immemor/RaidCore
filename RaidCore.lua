@@ -343,31 +343,39 @@ end
 ---------------------------------------------------------------------------------------------------
 ---- ConfigForm_General Functions
 -----------------------------------------------------------------------------------------------------
--- on SlashCommand "/raidcore"
 function RaidCore:OnRaidCoreOn(cmd, args)
-    local tAllParams = {}
-    for sOneParam in string.gmatch(args, "[^%s]+") do
-        table.insert(tAllParams, sOneParam)
+    local tArgc = {}
+    for sWord in string.gmatch(args, "[^%s]+") do
+        table.insert(tArgc, sWord)
+    end
+    -- Default command.
+    local command = "config"
+    -- Extract the first argument.
+    if #tArgc >= 1 then
+        command = string.lower(tArgc[1])
+        table.remove(tArgc, 1)
     end
 
-    if tAllParams[1] == nil or tAllParams[1] == "config" then
-        self:DisplayMainWindow()
-    elseif (tAllParams[1] == "reset") then
-        self:ResetAll()
-    elseif (tAllParams[1] == "version") then
-        self:Print("Version : " .. ADDON_DATE_VERSION)
-    elseif (tAllParams[1] == "versioncheck") then
-        self:VersionCheck()
-    elseif (tAllParams[1] == "pull") then
-        local time = tonumber(tAllParams[2]) or 10
-        self:LaunchPull(time)
-    elseif (tAllParams[1] == "break") then
-        local time = tonumber(tAllParams[2]) or 600
-        self:LaunchBreak(time)
-    elseif (tAllParams[1] == "summon") then
-        self:SyncSummon()
+    local tCMD2function = {
+        ["config"] = self.DisplayMainWindow,
+        ["reset"] = self.ResetAll,
+        ["versioncheck"] = self.VersionCheck,
+        ["pull"] = self.LaunchPull,
+        ["break"] = self.LaunchBreak,
+        ["summon"] = self.SyncSummon,
+    }
+
+    local func = tCMD2function[command]
+    if func then
+        func(self, tArgc)
     else
-        self:Print(("Unknown command: %s"):format(tAllParams[1]))
+        self:Print(("Unknown command: %s"):format(command))
+        local tAllCommands = {}
+        for k, v in pairs(tCMD2function) do
+            table.insert(tAllCommands, k)
+        end
+        local sAllCommands = table.concat(tAllCommands, ", ")
+        self:Print(("Available commands are: %s"):format(sAllCommands))
     end
 end
 
@@ -476,7 +484,7 @@ function RaidCore:UpdateWorldMarker(key, sText, tPosition)
         end
     end
 
-    if tPosition then 
+    if tPosition then
         self.worldmarker[key]:SetWorldLocation(tPosition)
     end
 end
@@ -650,34 +658,40 @@ function RaidCore:VersionCheck()
     end
 end
 
-function RaidCore:LaunchPull(time)
-    if time and time > 2 then
-        local msg = {
-            action = "LaunchPull",
-            cooldown = time,
-        }
-        self:SendMessage(msg)
-        self:ProcessMessage(msg)
-    end
+function RaidCore:LaunchPull(tArgc)
+    local nTime = #tArgc >= 1 and tonumber(tArgc[1])
+    nTime = nTime and nTime > 2 and nTime or 10
+    local msg = {
+        action = "LaunchPull",
+        cooldown = nTime,
+    }
+    self:SendMessage(msg)
+    self:ProcessMessage(msg)
 end
 
-function RaidCore:LaunchBreak(time)
+function RaidCore:LaunchBreak(tArgc)
     local sPlayerName = GetPlayerUnit():GetName()
     if not self:isRaidManagement(sPlayerName) then
         self:Print("You must be a raid leader or assistant to use this command!")
     else
-        if time then
-            local msg = {
-                action = "LaunchBreak",
-                cooldown = time
-            }
-            self:SendMessage(msg)
-            self:ProcessMessage(msg)
-            if time > 0 and self.db.profile.bReadyCheckOnBreakTimeout then
-                self:ScheduleTimer(function()
-                    GroupLib.ReadyCheck(self.db.profile.sReadyCheckMessage or "")
-                end, time)
-            end
+        local nTime = #tArgc >= 1 and tonumber(tArgc[1])
+        nTime = nTime and nTime > 2 and nTime or 600
+        local msg = {
+            action = "LaunchBreak",
+            cooldown = nTime
+        }
+        self:SendMessage(msg)
+        self:ProcessMessage(msg)
+        -- Cancel previous timer if started.
+        if self.LaunchBreakTimerId then
+            self:CancelTimer(self.LaunchBreakTimerId)
+        end
+        -- Start a timer for Ready Check call..
+        if nTime > 0 and self.db.profile.bReadyCheckOnBreakTimeout then
+            self.LaunchBreakTimerId = self:ScheduleTimer(function()
+                self.LaunchBreakTimerId = nil
+                GroupLib.ReadyCheck(self.db.profile.sReadyCheckMessage or "")
+            end, nTime)
         end
     end
 end
