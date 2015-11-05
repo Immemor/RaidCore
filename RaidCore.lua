@@ -243,7 +243,7 @@ function RaidCore:OnInitialize()
     -- Do additional initialization.
     self.mark = {}
     self.worldmarker = {}
-    _tWipeTimer = ApolloTimer.Create(0.5, true, "WipeCheck", self)
+    _tWipeTimer = ApolloTimer.Create(0.5, true, "RUNNING_WipeCheck", self)
     _tWipeTimer:Stop()
     self.lines = {}
     -- Initialize the Zone Detection.
@@ -569,30 +569,6 @@ function RaidCore:ResetAll()
     self:ResetLines()
 end
 
-function RaidCore:WipeCheck()
-    local tPlayerDeathState = GameLib.GetPlayerDeathState()
-
-    if tPlayerDeathState and not tPlayerDeathState.bAcceptCasterRez then
-        return
-    end
-    for i = 1, GroupLib.GetMemberCount() do
-        local tUnit = GroupLib.GetUnitForGroupMember(i)
-        if tUnit and tUnit:IsInCombat() then
-            return
-        end
-    end
-    self:CombatInterface_Activate("DetectAll")
-    _bIsEncounterInProgress = false
-    if _tCurrentEncounter then
-        _tCurrentEncounter:Disable()
-        _tCurrentEncounter = nil
-    end
-    self:ResetAll()
-    -- Set the FSM in SEARCH mode.
-    _eCurrentFSM = MAIN_FSM__SEARCH
-    self:SEARCH_OnCheckMapZone()
-end
-
 function RaidCore:VersionCheckResults()
     local nMaxVersion = ADDON_DATE_VERSION
     for _, v in next, VCReply do
@@ -843,6 +819,30 @@ end
 
 function RaidCore:RUNNING_OnUnitDestroyed(nId, tUnit, sName)
     self:AutoCleanUnitDestroyed(nId, tUnit, sName)
+end
+
+function RaidCore:RUNNING_WipeCheck()
+    local tPlayerDeathState = GameLib.GetPlayerDeathState()
+
+    if tPlayerDeathState and not tPlayerDeathState.bAcceptCasterRez then
+        return
+    end
+    for i = 1, GroupLib.GetMemberCount() do
+        local tUnit = GroupLib.GetUnitForGroupMember(i)
+        if tUnit and tUnit:IsInCombat() then
+            return
+        end
+    end
+    self:CombatInterface_Activate("DetectAll")
+    _bIsEncounterInProgress = false
+    if _tCurrentEncounter then
+        _tCurrentEncounter:Disable()
+        _tCurrentEncounter = nil
+    end
+    self:ResetAll()
+    -- Set the FSM in SEARCH mode.
+    _eCurrentFSM = MAIN_FSM__SEARCH
+    self:SEARCH_OnCheckMapZone()
 end
 
 ----------------------------------------------------------------------------------------------------
