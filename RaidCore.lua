@@ -20,6 +20,7 @@ local Log = Apollo.GetPackage("Log-1.0").tPackage
 -- Copy of few objects to reduce the cpu load.
 -- Because all local objects are faster.
 ----------------------------------------------------------------------------------------------------
+local GetPlayerUnitByName = GameLib.GetPlayerUnitByName
 local GetPlayerUnit = GameLib.GetPlayerUnit
 local GetUnitById = GameLib.GetUnitById
 local GetCurrentZoneMap = GameLib.GetCurrentZoneMap
@@ -67,11 +68,8 @@ local empCD, empTimer = 5, nil
 -- Privates functions
 ----------------------------------------------------------------------------------------------------
 local function OnEncounterHookGeneric(sMethod, ...)
-    local fHook = _tEncounterHookHandlers[sMethod]
     local fEncounter = _tCurrentEncounter[sMethod]
-    if fHook then
-        fHook(RaidCore, ...)
-    elseif fEncounter then
+    if fEncounter then
         fEncounter(_tCurrentEncounter, ...)
     end
 end
@@ -280,102 +278,92 @@ function RaidCore:SendMessage(tMessage, tDPlayerId)
     self:CombatInterface_SendMessage(JSON.encode(tMessage), tDPlayerId)
 end
 
-function RaidCore:ProcessMessage(tMessage, sSender)
+function RaidCore:ProcessMessage(tMessage, nSenderId)
     if type(tMessage) ~= "table" or type(tMessage.action) ~= "string" then
         -- Silent error.
         return
     end
 
-    if tMessage.action == "VersionCheckRequest" then
-        local msg = {
-            action = "VersionCheckReply",
-            version = ADDON_DATE_VERSION,
-            tag = RAIDCORE_CURRENT_VERSION,
-        }
-        self:SendMessage(msg)
-    elseif tMessage.action == "VersionCheckReply" then
-        if tMessage.sender and tMessage.version and VCtimer then
-            VCReply[tMessage.sender] = tMessage.version
-        end
-    elseif tMessage.action == "NewestVersion" then
-        if tMessage.version and ADDON_DATE_VERSION < tMessage.version then
-            self:Print("Your RaidCore version is outdated. Please get " .. tMessage.version)
-        end
-    elseif tMessage.action == "LaunchPull" then
-        if tMessage.cooldown then
-            local tOptions = { bEmphasize = true }
-            self:AddTimerBar("PULL", "PULL", tMessage.cooldown, nil, tOptions)
-            self:AddMsg("PULL", ("PULL in %s"):format(tMessage.cooldown), 2, MYCOLORS["Green"])
-        end
-    elseif tMessage.action == "LaunchBreak" then
-        if tMessage.cooldown and tMessage.cooldown > 0 then
-            local tOptions = { bEmphasize = true }
-            self:AddTimerBar("BREAK", "BREAK", tMessage.cooldown, nil, tOptions)
-            self:AddMsg("BREAK", ("BREAK for %ss"):format(tMessage.cooldown), 5, MYCOLORS["Green"])
-            self:PlaySound("Long")
-        else
-            self:RemoveTimerBar("BREAK")
-            self:RemoveMsg("BREAK")
-        end
-    elseif tMessage.action == "SyncSummon" then
-        if not self.db.profile.bAcceptSummons or not self:isRaidManagement(strSender) then
-            return false
-        end
-        self:Print(tMessage.sender .. " requested that you accept a summon. Attempting to accept now.")
-        local CSImsg = CSIsLib.GetActiveCSI()
-        if not CSImsg or not CSImsg["strContext"] then return end
+    local tAction2function = {
+        ["VersionCheckRequest"] = self.VersionCheckRequest,
+        ["VersionCheckReply"] = self.VersionCheckReply,
+        ["NewestVersion"] = self.NewestVersionRequest,
+        ["LaunchPull"] = self.LaunchPullRequest,
+        ["LaunchBreak"] = self.LaunchBreakRequest,
+        ["SyncSummon"] = self.SyncSummonRequest,
+        ["Encounter_IND"] = self.EncounterInd,
+    }
+    local func = tAction2function[tMessage.action]
+    if func then
+        func(self, tMessage, nSenderId)
+    end
+end
 
-        if CSImsg["strContext"] == "Teleport to your group member?" then
-            if CSIsLib.IsCSIRunning() then
-                CSIsLib.CSIProcessInteraction(true)
-            end
+function RaidCore:VersionCheckRequest(tMessage, nSenderId)
+    local msg = {
+        action = "VersionCheckReply",
+        version = ADDON_DATE_VERSION,
+        tag = RAIDCORE_CURRENT_VERSION,
+    }
+    self:SendMessage(msg, nSenderId)
+end
+
+function RaidCore:VersionCheckReply(tMessage, nSenderId)
+    if tMessage.sender and tMessage.version and VCtimer then
+        VCReply[tMessage.sender] = tMessage.version
+    end
+end
+
+function RaidCore:NewestVersionRequest(tMessage, nSenderId)
+    if tMessage.version and ADDON_DATE_VERSION < tMessage.version then
+        self:Print("Your RaidCore version is outdated. Please get " .. tMessage.version)
+    end
+end
+
+function RaidCore:LaunchPullRequest(tMessage, nSenderId)
+    if tMessage.cooldown then
+        local tOptions = { bEmphasize = true }
+        self:AddTimerBar("PULL", "PULL", tMessage.cooldown, nil, tOptions)
+        self:AddMsg("PULL", ("PULL in %s"):format(tMessage.cooldown), 2, MYCOLORS["Green"])
+    end
+end
+
+function RaidCore:LaunchBreakRequest(tMessage, nSenderId)
+    if tMessage.cooldown and tMessage.cooldown > 0 then
+        local tOptions = { bEmphasize = true }
+        self:AddTimerBar("BREAK", "BREAK", tMessage.cooldown, nil, tOptions)
+        self:AddMsg("BREAK", ("BREAK for %ss"):format(tMessage.cooldown), 5, MYCOLORS["Green"])
+        self:PlaySound("Long")
+    else
+        self:RemoveTimerBar("BREAK")
+        self:RemoveMsg("BREAK")
+    end
+end
+
+function RaidCore:SyncSummonRequest(tMessage, nSenderId)
+    if not self.db.profile.bAcceptSummons or not self:isRaidManagement(strSender) then
+        return false
+    end
+    self:Print(tMessage.sender .. " requested that you accept a summon. Attempting to accept now.")
+    local CSImsg = CSIsLib.GetActiveCSI()
+    if not CSImsg or not CSImsg["strContext"] then return end
+
+    if CSImsg["strContext"] == "Teleport to your group member?" then
+        if CSIsLib.IsCSIRunning() then
+            CSIsLib.CSIProcessInteraction(true)
         end
-    elseif tMessage.action == "Encounter_IND" then
-        if _tCurrentEncounter and _tCurrentEncounter.ReceiveIndMessage then
-            _tCurrentEncounter:ReceiveIndMessage(tMessage.sender, tMessage.reason, tMessage.data)
-        end
+    end
+end
+
+function RaidCore:EncounterInd(tMessage, nSenderId)
+    if _tCurrentEncounter and _tCurrentEncounter.ReceiveIndMessage then
+        _tCurrentEncounter:ReceiveIndMessage(tMessage.sender, tMessage.reason, tMessage.data)
     end
 end
 
 ---------------------------------------------------------------------------------------------------
----- ConfigForm_General Functions
+---- Some Functions
 -----------------------------------------------------------------------------------------------------
-function RaidCore:OnRaidCoreOn(cmd, args)
-    local tArgc = {}
-    for sWord in string.gmatch(args, "[^%s]+") do
-        table.insert(tArgc, sWord)
-    end
-    -- Default command.
-    local command = "config"
-    -- Extract the first argument.
-    if #tArgc >= 1 then
-        command = string.lower(tArgc[1])
-        table.remove(tArgc, 1)
-    end
-
-    local tCMD2function = {
-        ["config"] = self.DisplayMainWindow,
-        ["reset"] = self.ResetAll,
-        ["versioncheck"] = self.VersionCheck,
-        ["pull"] = self.LaunchPull,
-        ["break"] = self.LaunchBreak,
-        ["summon"] = self.SyncSummon,
-    }
-
-    local func = tCMD2function[command]
-    if func then
-        func(self, tArgc)
-    else
-        self:Print(("Unknown command: %s"):format(command))
-        local tAllCommands = {}
-        for k, v in pairs(tCMD2function) do
-            table.insert(tAllCommands, k)
-        end
-        local sAllCommands = table.concat(tAllCommands, ", ")
-        self:Print(("Available commands are: %s"):format(sAllCommands))
-    end
-end
-
 function RaidCore:isPublicEventObjectiveActive(objectiveString)
     local activeEvents = PublicEvent:GetActiveEvents()
     if activeEvents == nil then
@@ -569,6 +557,86 @@ function RaidCore:ResetAll()
     self:ResetLines()
 end
 
+function RaidCore:isRaidManagement(strName)
+    if not GroupLib.InGroup() then return false end
+    for nIdx=0, GroupLib.GetMemberCount() do
+        local tGroupMember = GroupLib.GetGroupMember(nIdx)
+        if tGroupMember and tGroupMember["strCharacterName"] == strName then
+            if tGroupMember["bIsLeader"] or tGroupMember["bRaidAssistant"] then
+                return true
+            else
+                return false
+            end
+        end
+    end
+    return false -- just in case
+end
+
+function RaidCore:AutoCleanUnitDestroyed(nId, tUnit, sName)
+    self:RemoveUnit(nId)
+    if self.mark[nId] then
+        local markFrame = self.mark[nId].frame
+        markFrame:SetUnit(nil)
+        markFrame:Destroy()
+        self.mark[nId] = nil
+    end
+end
+
+----------------------------------------------------------------------------------------------------
+-- Commands Line:
+----------------------------------------------------------------------------------------------------
+function RaidCore:OnRaidCoreOn(cmd, args)
+    local tArgc = {}
+    for sWord in string.gmatch(args, "[^%s]+") do
+        table.insert(tArgc, sWord)
+    end
+    -- Default command.
+    local command = "config"
+    -- Extract the first argument.
+    if #tArgc >= 1 then
+        command = string.lower(tArgc[1])
+        table.remove(tArgc, 1)
+    end
+
+    local tCMD2function = {
+        ["config"] = self.DisplayMainWindow,
+        ["reset"] = self.ResetAll,
+        ["versioncheck"] = self.VersionCheck,
+        ["pull"] = self.LaunchPull,
+        ["break"] = self.LaunchBreak,
+        ["summon"] = self.SyncSummon,
+    }
+
+    local func = tCMD2function[command]
+    if func then
+        func(self, tArgc)
+    else
+        self:Print(("Unknown command: %s"):format(command))
+        local tAllCommands = {}
+        for k, v in pairs(tCMD2function) do
+            table.insert(tAllCommands, k)
+        end
+        local sAllCommands = table.concat(tAllCommands, ", ")
+        self:Print(("Available commands are: %s"):format(sAllCommands))
+    end
+end
+
+function RaidCore:VersionCheck()
+    if VCtimer then
+        self:Print(self.L["VersionCheck already running ..."])
+    elseif GroupLib.GetMemberCount() == 0 then
+        self:Print(self.L["Command available only in group."])
+    else
+        self:Print(self.L["Checking version on group member."])
+        VCReply[GetPlayerUnit():GetName()] = ADDON_DATE_VERSION
+        local msg = {
+            action = "VersionCheckRequest",
+        }
+        VCtimer = ApolloTimer.Create(5, false, "VersionCheckResults", self)
+        self:SendMessage(msg)
+    end
+end
+
 function RaidCore:VersionCheckResults()
     local nMaxVersion = ADDON_DATE_VERSION
     for _, v in next, VCReply do
@@ -613,22 +681,6 @@ function RaidCore:VersionCheckResults()
     self:SendMessage(msg)
     self:ProcessMessage(msg)
     VCtimer = nil
-end
-
-function RaidCore:VersionCheck()
-    if VCtimer then
-        self:Print(self.L["VersionCheck already running ..."])
-    elseif GroupLib.GetMemberCount() == 0 then
-        self:Print(self.L["Command available only in group."])
-    else
-        self:Print(self.L["Checking version on group member."])
-        VCReply[GetPlayerUnit():GetName()] = ADDON_DATE_VERSION
-        local msg = {
-            action = "VersionCheckRequest",
-        }
-        VCtimer = ApolloTimer.Create(5, false, "VersionCheckResults", self)
-        self:SendMessage(msg)
-    end
 end
 
 function RaidCore:LaunchPull(tArgc)
@@ -679,31 +731,6 @@ function RaidCore:SyncSummon()
         action = "SyncSummon",
     }
     self:SendMessage(msg)
-end
-
-function RaidCore:isRaidManagement(strName)
-    if not GroupLib.InGroup() then return false end
-    for nIdx=0, GroupLib.GetMemberCount() do
-        local tGroupMember = GroupLib.GetGroupMember(nIdx)
-        if tGroupMember and tGroupMember["strCharacterName"] == strName then
-            if tGroupMember["bIsLeader"] or tGroupMember["bRaidAssistant"] then
-                return true
-            else
-                return false
-            end
-        end
-    end
-    return false -- just in case
-end
-
-function RaidCore:AutoCleanUnitDestroyed(nId, tUnit, sName)
-    self:RemoveUnit(nId)
-    if self.mark[nId] then
-        local markFrame = self.mark[nId].frame
-        markFrame:SetUnit(nil)
-        markFrame:Destroy()
-        self.mark[nId] = nil
-    end
 end
 
 ----------------------------------------------------------------------------------------------------
@@ -798,14 +825,14 @@ function RaidCore:SEARCH_OnUnitDestroyed(nId, tUnit, sName)
     self:AutoCleanUnitDestroyed(nId, tUnit, sName)
 end
 
-function RaidCore:SEARCH_OnReceivedMessage(sMessage, sSender)
+function RaidCore:SEARCH_OnReceivedMessage(sMessage, nSenderId)
     local tMessage = JSON.decode(sMessage)
-    self:ProcessMessage(tMessage, sSender)
+    self:ProcessMessage(tMessage, nSenderId)
 end
 
-function RaidCore:RUNNING_OnReceivedMessage(sMessage, sSender)
+function RaidCore:RUNNING_OnReceivedMessage(sMessage, nSenderId)
     local tMessage = JSON.decode(sMessage)
-    self:ProcessMessage(tMessage, sSender)
+    self:ProcessMessage(tMessage, nSenderId)
 end
 
 function RaidCore:RUNNING_OnEnteredCombat(nId, tUnit, sName, bInCombat)

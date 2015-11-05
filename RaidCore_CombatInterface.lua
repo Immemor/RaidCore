@@ -154,7 +154,7 @@ local function ExtraLog2Text(k, nRefTime, tParam)
         local sFormat = "sMsg=\"%s\" to=\"%s\""
         sResult = sFormat:format(tParam[1], tostring(tParam[2]))
     elseif k == "OnReceivedMessage" then
-        local sFormat = "sMsg=\"%s\" Sender=%s"
+        local sFormat = "sMsg=\"%s\" SenderId=%s"
         sResult = sFormat:format(tParam[1], tostring(tParam[2]))
     elseif k == "ChannelCommStatus" then
         sResult = tParam[1]
@@ -695,7 +695,8 @@ function RaidCore:CI_OnChatMessage(tChannelCurrent, tMessage)
 end
 
 function RaidCore:CI_OnReceivedMessage(sChannel, sMessage, sSender)
-    ManagerCall("OnReceivedMessage", sMessage, sSender)
+    local nSenderId = sSender and GetPlayerUnitByName(sSender)
+    ManagerCall("OnReceivedMessage", sMessage, nSenderId)
 end
 
 function RaidCore:CI_OnSendMessageResult(iccomm, eResult, nMessageId)
