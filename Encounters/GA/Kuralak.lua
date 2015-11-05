@@ -151,22 +151,25 @@ function mod:OnBossEnable()
 end
 
 function mod:OnUnitCreated(nId, tUnit, sName)
+    local nHealth = tUnit:GetHealth()
     if sName == self.L["Kuralak the Defiler"] then
-        core:AddUnit(tUnit)
-        core:WatchUnit(tUnit)
-        -- TODO: Remove this init, when values will be found.
-        if EGG_BEST_POSITIONS == nil then
-            local tPosition = tUnit:GetPosition()
-            local nDistance = 9.5
-            local tRad = { 0, 180, 90, 270, 45, 135, 225, 315 }
-            EGG_BEST_POSITIONS = {}
-            for i = 1, #tRad do
-                local nRad = math.rad(tRad[i])
-                EGG_BEST_POSITIONS[i] = {
-                    x = tPosition.x + math.cos(nRad) * nDistance,
-                    y = tPosition.y,
-                    z = tPosition.z - math.sin(nRad) * nDistance,
-                }
+        if nHealth then
+            core:AddUnit(tUnit)
+            core:WatchUnit(tUnit)
+            -- TODO: Remove this init, when values will be found.
+            if EGG_BEST_POSITIONS == nil then
+                local tPosition = tUnit:GetPosition()
+                local nDistance = 9.5
+                local tRad = { 0, 180, 90, 270, 45, 135, 225, 315 }
+                EGG_BEST_POSITIONS = {}
+                for i = 1, #tRad do
+                    local nRad = math.rad(tRad[i])
+                    EGG_BEST_POSITIONS[i] = {
+                        x = tPosition.x + math.cos(nRad) * nDistance,
+                        y = tPosition.y,
+                        z = tPosition.z - math.sin(nRad) * nDistance,
+                    }
+                end
             end
         end
     end
