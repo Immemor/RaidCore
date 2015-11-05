@@ -121,7 +121,7 @@ local function DrawSnakePieceLines()
         local nObisidianMostClosedDistance = nil
 
         for i, nId in ipairs(tObsidianList) do
-            local nDistance = mod:GetDistanceBetweenUnits(nId, nLastSnakePieceId)
+            local nDistance = mod:GetDistanceBetweenUnits(GetUnitById(nId), GetUnitById(nLastSnakePieceId))
             if not nObisidianMostClosedDistance or nObisidianMostClosedDistance > nDistance then
                 nObisidianMostClosedDistance = nDistance
                 nObisidianMostClosedId = nId
