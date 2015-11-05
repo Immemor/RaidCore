@@ -77,7 +77,7 @@ function mod:OnDatachron(sMessage)
         if tRockslideUnit then
             local nRockslideId = tRockslideUnit:GetId()
             local nId = tUnit:GetId()
-            core:AddLineBetweenUnits("FOCUS", nId, nRockslideId, "Blue")
+            core:AddLineBetweenUnits("FOCUS", nId, nRockslideId, 4, "blue")
             core:AddPicture("FOCUS", nId, "RaidCore_Draw:Crosshair", 30)
         end
     end
