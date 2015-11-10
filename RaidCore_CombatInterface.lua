@@ -28,6 +28,7 @@ local Log = Apollo.GetPackage("Log-1.0").tPackage
 ----------------------------------------------------------------------------------------------------
 local RegisterEventHandler = Apollo.RegisterEventHandler
 local RemoveEventHandler = Apollo.RemoveEventHandler
+local GetPlayerUnitByName = GameLib.GetPlayerUnitByName
 local GetGameTime = GameLib.GetGameTime
 local GetPlayerUnit = GameLib.GetPlayerUnit
 local GetUnitById = GameLib.GetUnitById
