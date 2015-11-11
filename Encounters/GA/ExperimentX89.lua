@@ -30,7 +30,7 @@ mod:RegisterEnglishLocale({
     ["Little bomb on %s"] = "Little bomb on %s",
     -- Message bars.
     ["KNOCKBACK"] = "KNOCKBACK",
-    ["BEAM"] = "BEAM",
+    ["SPEW"] = "SPEW",
     ["SHOCKWAVE"] = "SHOCKWAVE",
 })
 mod:RegisterFrenchLocale({
@@ -48,7 +48,7 @@ mod:RegisterFrenchLocale({
     ["Little bomb on %s"] = "Petite bombe sur %s",
     -- Message bars.
     ["KNOCKBACK"] = "KNOCKBACK",
-    ["BEAM"] = "LASER",
+    ["SPEW"] = "CRACHAT",
     ["SHOCKWAVE"] = "ONDE DE CHOC",
 })
 mod:RegisterGermanLocale({
@@ -64,7 +64,7 @@ mod:RegisterGermanLocale({
     -- Timer bars.
     -- Message bars.
     ["KNOCKBACK"] = "RÜCKSTOß",
-    ["BEAM"] = "LASER",
+    ["SPEW"] = "ERBROCHENES",
     ["SHOCKWAVE"] = "SCHOCKWELLE",
 })
 -- Default settings.
@@ -118,7 +118,7 @@ function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
         if sCastName == self.L["Resounding Shout"] then
             mod:AddMsg("KNOCKBACK", "KNOCKBACK", 3, "Alert")
         elseif sCastName == self.L["Repugnant Spew"] then
-            mod:AddMsg("BEAM", "BEAM", 3, "Info")
+            mod:AddMsg("SPEW", "SPEW", 3, "Info")
         end
     end
 end
