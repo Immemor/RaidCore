@@ -178,9 +178,9 @@ function mod:OnUnitCreated(nId, tUnit, sName)
         core:AddUnit(tUnit)
         core:WatchUnit(tUnit)
         if mod:GetSetting("LineSafeZoneOhmna") then
-            core:AddLine("Ohmna1", 2, tUnit, nil, 3, 25, 0)
-            core:AddLine("Ohmna2", 2, tUnit, nil, 1, 25, 120)
-            core:AddLine("Ohmna3", 2, tUnit, nil, 1, 25, -120)
+            code:AddSimpleLine("Ohmna1", nId, nil, 25, 0, nil, "xkcdGreen", 20)
+            code:AddSimpleLine("Ohmna2", nId, nil, 25, 120, nil, "xkcdBlue", 20)
+            code:AddSimpleLine("Ohmna3", nId, nil, 25, -120, nil, "xkcdBlue", 20)
         end
     elseif sName == self.L["Tentacle of Ohmna"] then
         if not OhmnaP4 then
@@ -195,7 +195,7 @@ function mod:OnUnitCreated(nId, tUnit, sName)
             core:MarkUnit(tUnit, 0)
         end
         if mod:GetSetting("LineRavenousMaw") then
-            core:AddLine(nId, 2, tUnit, nil, 3, 25, 0)
+            code:AddSimpleLine(nId, nId, nil, 25, 0, nil, "xkcdBrightYellow", 20)
         end
     end
 end
