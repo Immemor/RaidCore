@@ -144,6 +144,7 @@ mod:RegisterGermanLocale({
 })
 -- Default settings.
 mod:RegisterDefaultSetting("LineOnModulesMidphase")
+mod:RegisterDefaultSetting("LineBetweenSystemDaemon")
 mod:RegisterDefaultSetting("SoundWave")
 mod:RegisterDefaultSetting("SoundPhase2Soon")
 mod:RegisterDefaultSetting("SoundPhase2")
@@ -189,6 +190,8 @@ local PILLARS_POSITIONS = {
         ["S4"] = { x = 166.56, y = -225.94, z = -174.30 },
     },
 }
+local THRESHOLD_SD_TOO_CLOSE_NOTICE = 60
+local THRESHOLD_SD_TOO_CLOSE_WARNING = 55
 
 ----------------------------------------------------------------------------------------------------
 -- locals.
@@ -202,15 +205,29 @@ local phase2count = 0
 local prev = 0
 local playerName
 local nLastPurgeTime
+local nNullSystemDaemonId
+local nBinarySystemDaemonId
 
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
+local function addLineBetweenSystemDaemon(SDa, SDb)
+    if SDa and SDb and mod:GetSetting("LineBetweenSystemDaemon") then
+        local notice = core:AddLineBetweenUnits("SystemDaemonTooClose_notice", SDa, SDb, 4, "xkcdOrange")
+        notice:SetMaxLengthVisible(THRESHOLD_SD_TOO_CLOSE_NOTICE)
+        notice:SetMinLengthVisible(THRESHOLD_SD_TOO_CLOSE_WARNING)
+        local warn = core:AddLineBetweenUnits("SystemDaemonTooClose_warn", SDa, SDb, 8, "xkcdRed")
+        warn:SetMaxLengthVisible(THRESHOLD_SD_TOO_CLOSE_WARNING)
+    end
+end
+
 function mod:OnBossEnable()
     sdwaveCount, probeCount = 0, 0
     phase2warn, phase2 = false, false
     phase2count = 0
     nLastPurgeTime = 0
+    nNullSystemDaemonId = nil
+    nBinarySystemDaemonId = nil
     playerName = GameLib.GetPlayerUnit():GetName()
 
     if mod:GetSetting("OtherDisconnectTimer") then
@@ -272,10 +289,14 @@ function mod:OnUnitCreated(nId, unit, sName)
         core:AddUnit(unit)
         core:WatchUnit(unit)
         core:MarkUnit(unit, 0, self.L["MARKER south"])
+        nNullSystemDaemonId = nId
+        addLineBetweenSystemDaemon(nNullSystemDaemonId, nBinarySystemDaemonId)
     elseif sName == self.L["Binary System Daemon"] then
         core:AddUnit(unit)
         core:WatchUnit(unit)
         core:MarkUnit(unit, 0, self.L["MARKER north"])
+        nBinarySystemDaemonId = nId
+        addLineBetweenSystemDaemon(nNullSystemDaemonId, nBinarySystemDaemonId)
     end
 end
 
