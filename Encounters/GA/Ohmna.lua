@@ -188,7 +188,10 @@ function mod:OnUnitCreated(nId, tUnit, sName)
             mod:AddTimerBar("OTENT", "Next Tentacles", 20)
         end
     elseif sName == self.L["Ravenous Maw of the Dreadphage"] then
+        -- Phase 3: 3 units will pop.
         if mod:GetSetting("OtherRavenousMawMarker") then
+            core:AddUnit(tUnit)
+            core:WatchUnit(tUnit)
             core:MarkUnit(tUnit, 0)
         end
         if mod:GetSetting("LineRavenousMaw") then
