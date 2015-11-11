@@ -112,6 +112,14 @@ mod:RegisterDefaultTimerBarConfigs({
 -- Constants.
 ----------------------------------------------------------------------------------------------------
 local DEFAULT_EQUALIZATION_DURATION = 37
+local DEBUFFID_CHANNELING_ENERGY = 59721
+local PHASE1_DURATION = 60
+local PHASE2_DURATION = 29.5
+local PHASE2_TYPE_GOLGOX = 1
+local PHASE2_TYPE_TERAX = 2
+local PHASE2_TYPE_ERSOTH = 3
+local PHASE2_TYPE_NOXMIND = 4
+local PHASE2_TYPE_VRATORG = 5
 
 ----------------------------------------------------------------------------------------------------
 -- Locals.
@@ -121,14 +129,16 @@ local GetUnitById = GameLib.GetUnitById
 local GetPlayerUnit = GameLib.GetPlayerUnit
 local tBossesId
 local nNextP2Time
+local nNextEqualization
 
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
     tBossesId = {}
-    mod:AddTimerBar("NextP2", "Next P2", 90, mod:GetSetting("SoundPhase2CountDown"))
-    nNextP2Time = GetGameTime() + 90
+    eBossPhase2 = nil
+    nNextP2Time = GetGameTime() + 87
+    mod:AddTimerBar("NextP2", "Next P2", 87, mod:GetSetting("SoundPhase2CountDown"))
     mod:AddTimerBar("NextEqualize", "Next equalization", 31.5)
 end
 
@@ -156,6 +166,7 @@ function mod:OnUnitDestroyed(nId, tUnit, sName)
     if sName == self.L["Noxmind the Insidious"] then
         core:RemoveSimpleLine("Wave" .. nId)
     end
+    tBossesId[sName] = nil
 end
 
 function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
@@ -174,12 +185,14 @@ function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
         if sName == self.L["Golgox the Lifecrusher"] then
             if self.L["Teleport"] == sCastName then
                 mod:AddMsg("InfoPhase", "Phase 2: GOLGOX! (20 IA)", 5, nil, "blue")
-                mod:AddTimerBar("P2Timeout", "P2: Timeout 20 IA", 29.5)
+                mod:AddTimerBar("P2Timeout", "P2: Timeout 20 IA", PHASE2_DURATION)
+                eBossPhase2 = PHASE2_TYPE_GOLGOX
             end
         elseif sName == self.L["Terax Blightweaver"] then
             if self.L["Teleport"] == sCastName then
                 mod:AddMsg("InfoPhase", "Phase 2: TERAX! (Mini adds)", 5, nil, "blue")
-                mod:AddTimerBar("P2Timeout", "P2: Timeout mini adds", 29.5)
+                mod:AddTimerBar("P2Timeout", "P2: Timeout mini adds", PHASE2_DURATION)
+                eBossPhase2 = PHASE2_TYPE_TERAX
             elseif self.L["Stitching Strain"] == sCastName then
                 local tUnit = GetUnitById(nId)
                 if self:GetDistanceBetweenUnits(GetPlayerUnit(), tUnit) < 35 then
@@ -192,7 +205,8 @@ function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
         elseif sName == self.L["Ersoth Curseform"] then
             if self.L["Teleport"] == sCastName then
                 mod:AddMsg("InfoPhase", "Phase 2: ERSOTH! (Subdue)", 5, nil, "blue")
-                mod:AddTimerBar("P2Timeout", "P2: Timeout subdue", 29.5)
+                mod:AddTimerBar("P2Timeout", "P2: Timeout subdue", PHASE2_DURATION)
+                eBossPhase2 = PHASE2_TYPE_ERSOTH
             elseif self.L["Gathering Energy"] == sCastName then
                 if mod:GetSetting("CircleErsothInterruptDist") then
                     core:AddPolygon("ErsothCircle1", nId, 10, 0, 3, "red", 20)
@@ -203,12 +217,14 @@ function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
         elseif sName == self.L["Noxmind the Insidious"] then
             if self.L["Teleport"] == sCastName then
                 mod:AddMsg("InfoPhase", "Phase 2: NOXMIND! (Pillars)", 5, nil, "blue")
-                mod:AddTimerBar("P2Timeout", "P2: Timeout pillars", 29.5)
+                mod:AddTimerBar("P2Timeout", "P2: Timeout pillars", PHASE2_DURATION)
+                eBossPhase2 = PHASE2_TYPE_NOXMIND
             end
         elseif sName == self.L["Fleshmonger Vratorg"] then
             if self.L["Teleport"] == sCastName then
                 mod:AddMsg("InfoPhase", "Phase 2: VRATORG! (Shield)", 5, nil, "blue")
-                mod:AddTimerBar("P2Timeout", "P2: Timeout shield", 29.5)
+                mod:AddTimerBar("P2Timeout", "P2: Timeout shield", PHASE2_DURATION)
+                eBossPhase2 = PHASE2_TYPE_VRATORG
             end
         end
     end
@@ -229,21 +245,40 @@ function mod:OnCastEnd(nId, sCastName, bInterrupted, nCastEndTime, sName)
                 core:RemovePolygon("ErsothCircle2")
                 core:RemovePolygon("ErsothCircle3")
             end
+            if eBossPhase2 then
+                -- Next Equalization is at:
+                --  * Just after the MoO, when this last is interrupted interrupted.
+                --    In other words, at the end of the "Channeling Energy", which
+                --    is in same time as the end of "Gathering Energy".
+                --  * Or 5 seconds after the end of the "Channeling Energy" when
+                --    this last haven't been interrupted.
+                --    Note: "Gathering Energy" cast end is reached before the "Channeling Energy".
+                nNextEqualization = bInterrupted and 15 or 5
+                eBossPhase2 = nil
+            end
+        elseif self.L["Channeling Energy"] == sCastName then
+            if not nNextP2Time then
+                nNextP2Time = GetGameTime() + PHASE1_DURATION
+                mod:AddTimerBar("NextP2", "Next P2", PHASE1_DURATION, mod:GetSetting("SoundPhase2CountDown"))
+                if tBossesId[self.L["Noxmind the Insidious"]] then
+                    mod:AddTimerBar("NextEqualize", "Next equalization", nNextEqualization)
+                end
+            end
         end
     end
 end
 
 function mod:OnDatachron(sMessage)
     if sMessage:find(self.L["The Phageborn Convergence begins gathering its power"]) then
-        nNextP2Time = GetGameTime() + 82.5
-        mod:AddTimerBar("NextP2", "Next P2", 82.5, mod:GetSetting("SoundPhase2CountDown"))
-        mod:AddTimerBar("NextEqualize", "Next equalization", DEFAULT_EQUALIZATION_DURATION)
+        nNextP2Time = nil
+        -- 15 is the MoO duration.
+        nNextEqualization = 15
+        mod:RemoveTimerBar("NextP2")
+        mod:RemoveTimerBar("NextEqualize")
     elseif sMessage:find(self.L["Noxmind the Insidious prepares to equalize the Convergence!"]) then
-        local nNextEqualize = DEFAULT_EQUALIZATION_DURATION
         local nRemainTimeBeforeP2 = nNextP2Time - GetGameTime()
-        if nNextEqualize > nRemainTimeBeforeP2 then
-            nNextEqualize = nRemainTimeBeforeP2 + DEFAULT_EQUALIZATION_DURATION
+        if DEFAULT_EQUALIZATION_DURATION < nRemainTimeBeforeP2 then
+            mod:AddTimerBar("NextEqualize", "Next equalization", DEFAULT_EQUALIZATION_DURATION)
         end
-        mod:AddTimerBar("NextEqualize", "Next equalization", nNextEqualize)
     end
 end
