@@ -60,8 +60,6 @@ mod:RegisterEnglishLocale({
     ["INTERRUPT !"] = "INTERRUPT !",
     ["PURGE ON YOU"] = "PURGE ON YOU",
     ["Probe Spawn"] = "Probe Spawn",
-    ["YOU ARE NEXT ON NORTH !"] = "YOU ARE NEXT ON NORTH !",
-    ["YOU ARE NEXT ON SOUTH !"] = "YOU ARE NEXT ON SOUTH !",
 })
 mod:RegisterFrenchLocale({
     -- Unit names.
@@ -103,11 +101,9 @@ mod:RegisterFrenchLocale({
     ["INTERRUPT NORTH"] = "INTÉRROMPRE NORD",
     ["INTERRUPT SOUTH"] = "INTÉRROMPRE SUD",
     ["PURGE NEAR YOU!"] = "PURGE PROCHE DE VOUS !",
-    --["INTERRUPT !"] = "INTERRUPT !", -- TODO: French translation missing !!!!
-    --["PURGE ON YOU"] = "PURGE ON YOU", -- TODO: French translation missing !!!!
-    --["Probe Spawn"] = "Probe Spawn", -- TODO: French translation missing !!!!
-    --["YOU ARE NEXT ON NORTH !"] = "YOU ARE NEXT ON NORTH !", -- TODO: French translation missing !!!!
-    --["YOU ARE NEXT ON SOUTH !"] = "YOU ARE NEXT ON SOUTH !", -- TODO: French translation missing !!!!
+    ["INTERRUPT !"] = "INTERROMPRE !",
+    ["PURGE ON YOU"] = "PURGE SUR VOUS",
+    ["Probe Spawn"] = "Sonde Spawn",
 })
 mod:RegisterGermanLocale({
     -- Unit names.
@@ -145,8 +141,6 @@ mod:RegisterGermanLocale({
     ["INTERRUPT !"] = "UNTERBRECHEN !",
     ["PURGE ON YOU"] = "STEHEN BLEIBEN !!!",
     ["Probe Spawn"] = "Sonde Spawn",
-    ["YOU ARE NEXT ON NORTH !"] = "DU BIST DER NÄCHSTE IM NORDEN !",
-    ["YOU ARE NEXT ON SOUTH !"] = "DU BIST DER NÄCHSTE IM SÜDEN !",
 })
 -- Default settings.
 mod:RegisterDefaultSetting("LineOnModulesMidphase")
