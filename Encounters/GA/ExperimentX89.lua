@@ -131,7 +131,7 @@ function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
         local sText = self.L["Little bomb on %s"]:format(tUnit:GetName())
         if mod:GetSetting("LineLittleBomb") then
             local o = core:AddLineBetweenUnits("LittleBomb", nExperimentX89Id, nId, nil, "blue")
-            o:SetMaxLengthVisible(50)
+            o:SetMaxLengthVisible(40)
         end
         if mod:GetSetting("PictureLittleBomb") then
             core:AddPicture("LittleBomb", nId, "Crosshair", 20, 0, 0, nil, "blue")
@@ -149,7 +149,7 @@ function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
         local sText = self.L["Big bomb on %s"]:format(tUnit:GetName())
         if mod:GetSetting("LineBigBomb") then
             local o = core:AddLineBetweenUnits("BigBomb", nExperimentX89Id, nId, nil, "red")
-            o:SetMaxLengthVisible(50)
+            o:SetMaxLengthVisible(40)
         end
         if mod:GetSetting("PictureBigBomb") then
             core:AddPicture("BigBomb", nId, "Crosshair", 40, 0, 0, nil, "red")
