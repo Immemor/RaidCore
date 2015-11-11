@@ -58,7 +58,7 @@ mod:RegisterFrenchLocale({
     ["Next eggs"] = "Prochain oeufs",
     ["Next switch tank"] = "Prochain changement de tank",
     ["Next vanish"] = "Prochaine disparition",
-    ["P2 SOON !"] = "P2 SOON !",
+    ["P2 SOON !"] = "P2 PROCHE !",
     ["PHASE 2 !"] = "PHASE 2 !",
     ["VANISH"] = "DISPARITION",
     ["OUTBREAK"] = "INVASION",
@@ -106,6 +106,8 @@ mod:RegisterDefaultSetting("OtherRecommendedPositions")
 -- Timers default configs.
 mod:RegisterDefaultTimerBarConfigs({
     ["EGGS"] = { sColor = "xkcdOrangered" },
+    ["VANISH"] = { sColor = "xkcdReddishPink" },
+    ["OUTBREAK"] = { sColor = "xkcdBlueyGreen" },
 })
 
 ----------------------------------------------------------------------------------------------------
