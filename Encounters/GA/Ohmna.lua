@@ -173,14 +173,14 @@ function mod:OnBossEnable()
     end
 end
 
-function mod:OnUnitCreated(nId, unit, sName)
+function mod:OnUnitCreated(nId, tUnit, sName)
     if sName == self.L["Dreadphage Ohmna"] then
-        core:AddUnit(unit)
-        core:WatchUnit(unit)
+        core:AddUnit(tUnit)
+        core:WatchUnit(tUnit)
         if mod:GetSetting("LineSafeZoneOhmna") then
-            core:AddLine("Ohmna1", 2, unit, nil, 3, 25, 0)
-            core:AddLine("Ohmna2", 2, unit, nil, 1, 25, 120)
-            core:AddLine("Ohmna3", 2, unit, nil, 1, 25, -120)
+            core:AddLine("Ohmna1", 2, tUnit, nil, 3, 25, 0)
+            core:AddLine("Ohmna2", 2, tUnit, nil, 1, 25, 120)
+            core:AddLine("Ohmna3", 2, tUnit, nil, 1, 25, -120)
         end
     elseif sName == self.L["Tentacle of Ohmna"] then
         if not OhmnaP4 then
@@ -189,10 +189,10 @@ function mod:OnUnitCreated(nId, unit, sName)
         end
     elseif sName == self.L["Ravenous Maw of the Dreadphage"] then
         if mod:GetSetting("OtherRavenousMawMarker") then
-            core:MarkUnit(unit, 0)
+            core:MarkUnit(tUnit, 0)
         end
         if mod:GetSetting("LineRavenousMaw") then
-            core:AddLine(nId, 2, unit, nil, 3, 25, 0)
+            core:AddLine(nId, 2, tUnit, nil, 3, 25, 0)
         end
     end
 end
