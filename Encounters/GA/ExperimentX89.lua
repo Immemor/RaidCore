@@ -138,7 +138,7 @@ function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
         end
         mod:AddMsg("LittleBomb", sText:upper(), 3, nil, "blue")
         local bCountDownLittleBomb = mod:GetSetting("SoundLittleBomb") and bIsItself
-        mod:AddTimerBar("LittleBomb", sText, fTimeRemaining, bCountDownLittleBomb)
+        mod:AddTimerBar("LittleBomb", sText, fTimeRemaining - 1, bCountDownLittleBomb)
         if bIsItself then
             if mod:GetSetting("SoundLittleBomb") then
                 core:PlaySound("RunAway")
@@ -156,7 +156,7 @@ function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
         end
         mod:AddMsg("BigBomb", sText:upper(), 3, nil, "red")
         local bCountDownBigBomb = mod:GetSetting("SoundBigBomb") and bIsItself
-        mod:AddTimerBar("BigBomb", sText, fTimeRemaining, bCountDownBigBomb)
+        mod:AddTimerBar("BigBomb", sText, fTimeRemaining - 2, bCountDownBigBomb)
         if bIsItself then
             if mod:GetSetting("SoundBigBomb") then
                 core:PlaySound("RunAway")
