@@ -195,7 +195,7 @@ function mod:OnUnitCreated(nId, tUnit, sName)
             core:MarkUnit(tUnit, 0)
         end
         if mod:GetSetting("LineRavenousMaw") then
-            code:AddSimpleLine(nId, nId, nil, 25, 0, nil, "xkcdBrightYellow", 20)
+            core:AddSimpleLine(nId, nId, nil, 25, 0, nil, "xkcdBrightYellow", 20)
         end
     end
 end
