@@ -190,8 +190,8 @@ local PILLARS_POSITIONS = {
         ["S4"] = { x = 166.56, y = -225.94, z = -174.30 },
     },
 }
-local THRESHOLD_SD_TOO_CLOSE_NOTICE = 60
-local THRESHOLD_SD_TOO_CLOSE_WARNING = 55
+local THRESHOLD_SD_TOO_CLOSE_NOTICE = 67
+local THRESHOLD_SD_TOO_CLOSE_WARNING = 62
 
 ----------------------------------------------------------------------------------------------------
 -- locals.
