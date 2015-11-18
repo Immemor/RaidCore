@@ -188,13 +188,13 @@ function mod:OnDebuffRemove(nId, nSpellId)
     end
 end
 
-function mod:OnUnitCreated(nId, unit, sName)
+function mod:OnUnitCreated(nId, tUnit, sName)
     local nHealth = tUnit:GetHealth()
 
     if sName == self.L["Visceralus"] then
         if nHealth then 
-            core:AddUnit(unit)
-            core:WatchUnit(unit)
+            core:AddUnit(tUnit)
+            core:WatchUnit(tUnit)
             if mod:GetSetting("LineCleaveVisceralus") then
                 core:AddSimpleLine("Visc1", nId, 0, 25, 0, 4, "blue", 10)
                 core:AddSimpleLine("Visc2", nId, 0, 25, 72, 4, "green", 20)
@@ -205,11 +205,11 @@ function mod:OnUnitCreated(nId, unit, sName)
         end
     elseif sName == self.L["Mnemesis"] then
         if nHealth then 
-            core:WatchUnit(unit)
-            core:AddUnit(unit)
+            core:WatchUnit(tUnit)
+            core:AddUnit(tUnit)
         end
     elseif sName == self.L["Essence of Life"] then
-        core:AddUnit(unit)
+        core:AddUnit(tUnit)
         if not bIsMidPhase then
             bIsMidPhase = true
             if mod:GetSetting("OtherDirectionMarkers") then
@@ -221,16 +221,13 @@ function mod:OnUnitCreated(nId, unit, sName)
             core:RemoveTimerBar("DEFRAG")
         end
     elseif sName == self.L["Essence of Logic"] then
-        core:AddUnit(unit)
+        core:AddUnit(tUnit)
     elseif sName == self.L["Alphanumeric Hash"] then
-        local unitId = unit:GetId()
-        if unitId then
-            if mod:GetSetting("LineTetrisBlocks") then
-                core:AddSimpleLine(unitId, unitId, 0, 20, 0, 10, "red")
-            end
+        if mod:GetSetting("LineTetrisBlocks") then
+            core:AddSimpleLine(nId, nId, 0, 20, 0, 10, "red")
         end
     elseif sName == self.L["Life Force"] and mod:GetSetting("LineLifeOrbs") then
-        core:AddPixie(unit:GetId(), 2, unit, nil, "Blue", 3, 15, 0)
+        core:AddPixie(nId, 2, tUnit, nil, "Blue", 3, 15, 0)
     end
 end
 
