@@ -46,6 +46,8 @@ mod:RegisterEnglishLocale({
     ["Next probe #%u"] = "Next probe #%u",
     ["Next wave: Mobs"] = "Next wave: Mobs",
     ["Next wave: Miniboss"] = "Next wave: Miniboss",
+    ["Next purge on south daemon"] = "Next purge on south daemon",
+    ["Next purge on north daemon"] = "Next purge on north daemon",
     ["Next black IC"] = "Next black IC",
     -- Message bars.
     ["WAVE: MINIBOSS !"] = "WAVE: MINIBOSS !",
@@ -90,6 +92,8 @@ mod:RegisterFrenchLocale({
     ["Next probe #%u"] = "Prochaine sonde n°%u",
     ["Next wave: Mobs"] = "Prochaine vague: mobs",
     ["Next wave: Miniboss"] = "Prochaine vague: Miniboss",
+    ["Next purge on south daemon"] = "Prochaine purge sur le daemon sud",
+    ["Next purge on north daemon"] = "Prochaine purge sur le daemon nord",
     ["Next black IC"] = "Next CI noir",
     -- Message bars.
     ["WAVE: MINIBOSS !"] = "VAGUE: MINIBOSS !",
@@ -329,6 +333,20 @@ function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
     elseif sName == self.L["Null System Daemon"] and sCastName == self.L["Power Surge"] then
         if phase2 and self:GetDistanceBetweenUnits(GameLib.GetPlayerUnit(), tUnit) < 40 then
             mod:AddMsg("SURGE", "INTERRUPT SOUTH", 5, mod:GetSetting("SoundPowerSurge") and "Alert")
+        end
+    elseif sCastName == "Purge" then
+        if self:GetDistanceBetweenUnits(GameLib.GetPlayerUnit(), tUnit) < 40 then
+            if sName == self.L["Null System Daemon"] then
+                mod:AddTimerBar("PURGE_NULL", "Next purge on south daemon", 27)
+            elseif sName == self.L["Binary System Daemon"] then
+                mod:AddTimerBar("PURGE_BINARY", "Next purge on north daemon", 27)
+            end
+        elseif phase2 then
+            if sName == self.L["Null System Daemon"] then
+                mod:AddTimerBar("PURGE_NULL", "Next purge on south daemon", 27)
+            elseif sName == self.L["Binary System Daemon"] then
+                mod:AddTimerBar("PURGE_BINARY", "Next purge on north daemon", 27)
+            end
         end
     elseif sName == self.L["Defragmentation Unit"] then
         if GetCurrentSubZoneName():find("Infinite Generator Core") and sCastName == self.L["Black IC"] then
