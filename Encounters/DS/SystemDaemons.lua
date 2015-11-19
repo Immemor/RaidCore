@@ -147,6 +147,7 @@ mod:RegisterGermanLocale({
     ["Probe Spawn"] = "Sonde Spawn",
 })
 -- Default settings.
+mod:RegisterDefaultSetting("TimerNextPurge", false)
 mod:RegisterDefaultSetting("LineOnModulesMidphase")
 mod:RegisterDefaultSetting("LineBetweenSystemDaemon")
 mod:RegisterDefaultSetting("SoundWave")
@@ -335,17 +336,19 @@ function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
             mod:AddMsg("SURGE", "INTERRUPT SOUTH", 5, mod:GetSetting("SoundPowerSurge") and "Alert")
         end
     elseif sCastName == "Purge" then
-        if self:GetDistanceBetweenUnits(GameLib.GetPlayerUnit(), tUnit) < 40 then
-            if sName == self.L["Null System Daemon"] then
-                mod:AddTimerBar("PURGE_NULL", "Next purge on south daemon", 27)
-            elseif sName == self.L["Binary System Daemon"] then
-                mod:AddTimerBar("PURGE_BINARY", "Next purge on north daemon", 27)
-            end
-        elseif phase2 then
-            if sName == self.L["Null System Daemon"] then
-                mod:AddTimerBar("PURGE_NULL", "Next purge on south daemon", 27)
-            elseif sName == self.L["Binary System Daemon"] then
-                mod:AddTimerBar("PURGE_BINARY", "Next purge on north daemon", 27)
+        if mod:GetSetting("TimerNextPurge") then
+            if self:GetDistanceBetweenUnits(GameLib.GetPlayerUnit(), tUnit) < 40 then
+                if sName == self.L["Null System Daemon"] then
+                    mod:AddTimerBar("PURGE_NULL", "Next purge on south daemon", 27)
+                elseif sName == self.L["Binary System Daemon"] then
+                    mod:AddTimerBar("PURGE_BINARY", "Next purge on north daemon", 27)
+                end
+            elseif phase2 then
+                if sName == self.L["Null System Daemon"] then
+                    mod:AddTimerBar("PURGE_NULL", "Next purge on south daemon", 27)
+                elseif sName == self.L["Binary System Daemon"] then
+                    mod:AddTimerBar("PURGE_BINARY", "Next purge on north daemon", 27)
+                end
             end
         end
     elseif sName == self.L["Defragmentation Unit"] then

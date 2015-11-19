@@ -59,10 +59,11 @@ end
 
 -- Register a default setting which will be saved in user profile file.
 -- @param sKey  key to save/restore and use a setting.
-function EncounterPrototype:RegisterDefaultSetting(sKey)
+-- @param bDefaultSetting  default setting.
+function EncounterPrototype:RegisterDefaultSetting(sKey, bDefaultSetting)
     assert(sKey)
     assert(self.tDefaultSettings[sKey] == nil)
-    self.tDefaultSettings[sKey] = true
+    self.tDefaultSettings[sKey] = bDefaultSetting == nil or bDefaultSetting
 end
 
 -- Add a message to screen.
