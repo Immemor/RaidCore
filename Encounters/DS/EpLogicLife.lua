@@ -132,6 +132,7 @@ local MID_POSITIONS = {
 ----------------------------------------------------------------------------------------------------
 -- Locals.
 ----------------------------------------------------------------------------------------------------
+local GetUnitById = GameLib.GetUnitById
 local GetPlayerUnit = GameLib.GetPlayerUnit
 local bIsMidPhase = false
 
