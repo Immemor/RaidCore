@@ -138,6 +138,7 @@ function EncounterPrototype:OnEnable()
         end
     end
     -- TODO: Redefine this part.
+    self.tDispelInfo = {}
     if self.SetupOptions then self:SetupOptions() end
     if type(self.OnBossEnable) == "function" then self:OnBossEnable() end
 end
@@ -146,6 +147,7 @@ function EncounterPrototype:OnDisable()
     if type(self.OnBossDisable) == "function" then self:OnBossDisable() end
     self:CancelAllTimers()
     if type(self.OnWipe) == "function" then self:OnWipe() end
+    self.tDispelInfo = nil
 end
 
 function EncounterPrototype:Reboot(isWipe)
@@ -199,6 +201,32 @@ function EncounterPrototype:GetDistanceBetweenUnits(tUnitFrom, tUnitTo)
         end
     end
     return r
+end
+
+function EncounterPrototype:IsSpell2Dispel(nId)
+    if self.tDispelInfo[nId] then
+        for k,v in next, self.tDispelInfo[nId] do
+            return true
+        end
+    end
+    return false
+end
+
+function EncounterPrototype:AddSpell2Dispel(nId, nSpellId)
+    if not self.tDispelInfo[nId] then
+        self.tDispelInfo[nId] = {}
+    end
+    self.tDispelInfo[nId][nSpellId] = true
+    RaidCore:AddPicture(("DISPEL%d"):format(nId), nId, "DispelWord", 30)
+end
+
+function EncounterPrototype:RemoveSpell2Dispel(nId, nSpellId)
+    if self.tDispelInfo[nId] and self.tDispelInfo[nId][nSpellId] then
+        self.tDispelInfo[nId][nSpellId] = nil
+    end
+    if not self:IsSpell2Dispel(nId) then
+        RaidCore:RemovePicture(("DISPEL%d"):format(nId))
+    end
 end
 
 function EncounterPrototype:SendIndMessage(sReason, tData)
