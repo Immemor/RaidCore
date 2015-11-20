@@ -21,6 +21,7 @@ mod:RegisterEnglishLocale({
     ["Essence of Logic"] = "Essence of Logic",
     ["Alphanumeric Hash"] = "Alphanumeric Hash",
     ["Life Force"] = "Life Force",
+    ["Wild Brambles"] = "Wild Brambles",
     ["Mnemesis"] = "Mnemesis",
     ["Visceralus"] = "Visceralus",
     -- Datachron messages.
@@ -30,16 +31,14 @@ mod:RegisterEnglishLocale({
     ["Defragment"] = "Defragment",
     -- Timer bars.
     ["Next defragment"] = "Next defragment",
+    ["Next thorns"] = "Next thorns",
     ["Avatus incoming"] = "Avatus incoming",
     ["Enrage"] = "Enrage",
     -- Message bars.
     ["SPREAD"] = "SPREAD",
     ["No-Healing Debuff!"] = "No-Healing Debuff!",
-    ["NO HEAL DEBUFF"] = "NO HEAL\nDEBUFF",
     ["SNAKE ON YOU!"] = "SNAKE ON YOU!",
     ["SNAKE ON %s!"] = "SNAKE ON %s!",
-    ["SNAKE"] = "SNAKE",
-    ["THORNS DEBUFF"] = "THORNS\nDEBUFF",
     ["MARKER North"] = "North",
     ["MARKER South"] = "South",
     ["MARKER East"] = "East",
@@ -51,6 +50,7 @@ mod:RegisterFrenchLocale({
     ["Essence of Logic"] = "Essence de logique",
     ["Alphanumeric Hash"] = "Alphanumeric Hash",
     ["Life Force"] = "Force vitale",
+    ["Wild Brambles"] = "Ronces sauvages",
     ["Mnemesis"] = "Mnémésis",
     ["Visceralus"] = "Visceralus",
     -- Datachron messages.
@@ -60,16 +60,14 @@ mod:RegisterFrenchLocale({
     ["Defragment"] = "Défragmentation",
     -- Timer bars.
     ["Next defragment"] = "Prochaine defragmentation",
+    ["Next thorns"] = "Prochaine épine",
     ["Avatus incoming"] = "Avatus arrivé",
     ["Enrage"] = "Enrage",
     -- Message bars.
     ["SPREAD"] = "SEPAREZ-VOUS",
     ["No-Healing Debuff!"] = "No-Healing Debuff!",
-    ["NO HEAL DEBUFF"] = "NO HEAL\nDEBUFF",
     ["SNAKE ON YOU!"] = "SERPENT SUR VOUS!",
     ["SNAKE ON %s!"] = "SERPENT SUR %s!",
-    ["SNAKE"] = "SERPENT",
-    ["THORNS DEBUFF"] = "ÉPINE",
     ["MARKER North"] = "Nord",
     ["MARKER South"] = "Sud",
     ["MARKER East"] = "Est",
@@ -112,6 +110,7 @@ mod:RegisterDefaultSetting("PolygonDefrag")
 -- Timers default configs.
 mod:RegisterDefaultTimerBarConfigs({
     ["DEFRAG"] = { sColor = "xkcdAlgaeGreen" },
+    ["THORNS"] = { sColor = "xkcdAlgaeGreen" },
     ["AVATUS_INCOMING"] = { sColor = "xkcdAmethyst" },
     ["ENRAGE"] = { sColor = "xkcdBloodRed" },
 })
@@ -132,15 +131,19 @@ local MID_POSITIONS = {
 ----------------------------------------------------------------------------------------------------
 -- Locals.
 ----------------------------------------------------------------------------------------------------
+local GetGameTime = GameLib.GetGameTime
 local GetUnitById = GameLib.GetUnitById
 local GetPlayerUnit = GameLib.GetPlayerUnit
 local bIsMidPhase = false
+local nLastThornsTime
 
 ---------------------------------------------------------------------------------------------------
 -- Encounter description.
 ---------------------------------------------------------------------------------------------------
+
 function mod:OnBossEnable()
     bIsMidPhase = false
+    nLastThornsTime = 0
 
     mod:AddTimerBar("DEFRAG", "Next defragment", 21, mod:GetSetting("SoundDefrag"))
     mod:AddTimerBar("AVATUS_INCOMING", "Avatus incoming", 480, mod:GetSetting("SoundEnrageCountDown"))
@@ -163,34 +166,35 @@ function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
             mod:AddMsg("SNAKE", self.L["SNAKE ON %s!"]:format(sName), 5, mod:GetSetting("SoundSnakeOnOther") and "Info")
         end
         if mod:GetSetting("OtherSnakePlayerMarkers") then
-            core:MarkUnit(tUnit, nil, self.L["SNAKE"]) 
+            core:AddPicture(("SNAKE_TARGET_%d"):format(nId), nId, "Crosshair", 40, nil, nil, nil, "red")
         end
     elseif DEBUFF__LIFE_FORCE_SHACKLE == nSpellId then
         if mod:GetSetting("OtherNoHealDebuffPlayerMarkers") then
-            core:MarkUnit(tUnit, nil, self.L["NO HEAL DEBUFF"])
+            mod:AddSpell2Dispel(nId, DEBUFF__LIFE_FORCE_SHACKLE)
         end
         if tUnit == GetPlayerUnit() then
             mod:AddMsg("NOHEAL", "No-Healing Debuff!", 5, mod:GetSetting("SoundNoHealDebuff") and "Alarm")
         end
     elseif DEBUFF__THORNS == nSpellId then
         if mod:GetSetting("OtherRootedPlayersMarkers") then
-            core:MarkUnit(tUnit, nil, self.L["THORNS DEBUFF"])
+            mod:AddSpell2Dispel(nId, DEBUFF__THORNS)
         end
     end
 end
 
 function mod:OnDebuffRemove(nId, nSpellId)
     if DEBUFF__SNAKE_SNACK == nSpellId then
-        core:DropMark(nId)
+        core:RemovePicture(("SNAKE_TARGET_%d"):format(nId))
     elseif DEBUFF__LIFE_FORCE_SHACKLE == nSpellId then
-        core:DropMark(nId)
+        mod:RemoveSpell2Dispel(nId, DEBUFF__LIFE_FORCE_SHACKLE)
     elseif DEBUFF__THORNS == nSpellId then
-        core:DropMark(nId)
+        mod:RemoveSpell2Dispel(nId, DEBUFF__THORNS)
     end
 end
 
 function mod:OnUnitCreated(nId, tUnit, sName)
     local nHealth = tUnit:GetHealth()
+    local nCurrentTime = GetGameTime()
 
     if sName == self.L["Visceralus"] then
         if nHealth then 
@@ -220,6 +224,7 @@ function mod:OnUnitCreated(nId, tUnit, sName)
                 core:SetWorldMarker("WEST", self.L["MARKER West"], MID_POSITIONS["west"])
             end
             core:RemoveTimerBar("DEFRAG")
+            core:RemoveTimerBar("THORNS")
         end
     elseif sName == self.L["Essence of Logic"] then
         core:AddUnit(tUnit)
@@ -229,6 +234,11 @@ function mod:OnUnitCreated(nId, tUnit, sName)
         end
     elseif sName == self.L["Life Force"] and mod:GetSetting("LineLifeOrbs") then
         core:AddPixie(nId, 2, tUnit, nil, "Blue", 3, 15, 0)
+    elseif sName == self.L["Wild Brambles"] then
+        if nLastThornsTime + 5 < nCurrentTime then
+            nLastThornsTime = nCurrentTime
+            mod:AddTimerBar("THORNS", "Next thorns", 30)
+        end
     end
 end
 
@@ -244,9 +254,10 @@ function mod:OnUnitDestroyed(nId, tUnit, sName)
 end
 
 function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
+    local tUnit = GetUnitById(nId)
+
     if self.L["Visceralus"] == sName then
         if self.L["Blinding Light"] == sCastName then
-            local tUnit = GetUnitById(nId)
             if self:GetDistanceBetweenUnits(tUnit, GetPlayerUnit()) < 33 then
                 mod:AddMsg("BLIND", "Blinding Light", 5, mod:GetSetting("SoundBlindingLight") and "Beware")
             end
@@ -254,12 +265,20 @@ function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
     elseif self.L["Mnemesis"] == sName then
         if self.L["Defragment"] == sCastName then
             mod:AddMsg("DEFRAG", "SPREAD", 3, mod:GetSetting("SoundDefrag") and "Alarm")
-            mod:AddTimerBar("DEFRAG", "Next defragment", 40, mod:GetSetting("SoundDefrag"))
+            mod:AddTimerBar("DEFRAG", "Next defragment", 50, mod:GetSetting("SoundDefrag"))
             if mod:GetSetting("PolygonDefrag") then
                 core:AddPolygon("DEFRAG_SQUARE", GetPlayerUnit():GetId(), 13, 0, 4, "xkcdBloodOrange", 4)
-                self:ScheduleTimer(function()
+                local nRepeatingTimerId = self:ScheduleRepeatingTimer(function(tMnemesisUnit)
+                    local square = core:GetPolygon("DEFRAG_SQUARE")
+                    local bIsMOO = tMnemesisUnit:IsInCCState(Unit.CodeEnumCCState.Vulnerability)
+                    if square and bIsMOO then
+                        square:SetColor("8000ff00")
+                    end
+                end, 1, tUnit)
+                self:ScheduleTimer(function(SquareRepeatingTimerId)
                     core:RemovePolygon("DEFRAG_SQUARE")
-                end, 10)
+                    self:CancelTimer(SquareRepeatingTimerId)
+                end, 10, nRepeatingTimerId)
             end
         end
     end
