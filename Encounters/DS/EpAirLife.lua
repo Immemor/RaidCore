@@ -48,7 +48,6 @@ mod:RegisterEnglishLocale({
     ["Midphase Ending"] = "Midphase Ending",
     ["Next Healing Tree"] = "Next Healing Tree",
     ["No-Healing Debuff!"] = "No-Healing Debuff!",
-    ["NO HEAL DEBUFF"] = "NO HEAL",
     ["Lightning"] = "Lightning",
     ["Lightning on %s"] = "Lightning on %s",
 })
@@ -75,7 +74,6 @@ mod:RegisterFrenchLocale({
     ["Midphase Ending"] = "Phase Milieu Fin",
     ["Next Healing Tree"] = "Prochain Arbres à Soigner",
     ["No-Healing Debuff!"] = "Aucun-Soin Debuff!",
-    ["NO HEAL DEBUFF"] = "NO HEAL",
     ["Lightning"] = "Foudre",
     ["Lightning on %s"] = "Foudre sur %s",
 })
@@ -273,7 +271,7 @@ function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
         core:AddUnit(tUnit)
     elseif nSpellId == DEBUFFID_LIFE_FORCE_SHACKLE then
         if mod:GetSetting("OtherNoHealDebuffPlayerMarkers") then
-            core:MarkUnit(tUnit, nil, self.L["NO HEAL DEBUFF"])
+            mod:AddSpell2Dispel(nId, DEBUFFID_LIFE_FORCE_SHACKLE)
         end
         if nId == nPlayerId and mod:GetSetting("OtherNoHealDebuff") then
             local sSound = mod:GetSetting("SoundNoHealDebuff") and "Alarm"
@@ -301,7 +299,7 @@ function mod:OnDebuffRemove(nId, nSpellId)
         core:DropMark(nId)
         core:RemoveUnit(nId)
     elseif nSpellId == DEBUFFID_LIFE_FORCE_SHACKLE then
-        core:DropMark(nId)
+        mod:RemoveSpell2Dispel(nId, DEBUFFID_LIFE_FORCE_SHACKLE)
     elseif nSpellId == DEBUFFID_LIGHTNING_STRIKE then
         local sKey = ("LIGHTNING %d"):format(nId)
         core:DropPixie(sKey)

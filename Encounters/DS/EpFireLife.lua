@@ -158,7 +158,7 @@ function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
             mod:AddMsg("NOHEAL", "No-Healing DEBUFF!", 3, mod:GetSetting("SoundNoHealDebuff") and "Alarm")
         end
         if mod:GetSetting("PictureLifeForceShackle") then
-            core:AddPicture("NOHEAL" .. nId, nId, "Crosshair", 30, nil, nil, nil, "xkcdBarbiePink")
+            mod:AddSpell2Dispel(nId, DEBUFFID_LIFE_FORCE_SHACKLE)
         end
     end
 end
@@ -169,7 +169,7 @@ function mod:OnDebuffRemove(nId, nSpellId)
     elseif nSpellId == DEBUFFID_PRIMAL_ENTANGLEMENT2 then
         core:RemovePicture("BEFORE_ROOT" .. nId)
     elseif nSpellId == DEBUFFID_LIFE_FORCE_SHACKLE then
-        core:RemovePicture("NOHEAL" .. nId)
+        mod:RemoveSpell2Dispel(nId, DEBUFFID_LIFE_FORCE_SHACKLE)
     end
 end
 
