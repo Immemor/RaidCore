@@ -42,6 +42,7 @@ mod:RegisterFrenchLocale({
 mod:RegisterGermanLocale({
 })
 -- Default settings.
+mod:RegisterDefaultSetting("PathOfSandsKeeper")
 mod:RegisterDefaultSetting("LinePathOfInvisibleUnit")
 mod:RegisterDefaultSetting("SoundDessicateInterrupt")
 mod:RegisterDefaultSetting("OtherMarkerAntlion")
@@ -56,6 +57,8 @@ mod:RegisterDefaultSetting("OtherMarkerAntlion")
 local GetPlayerUnit = GameLib.GetPlayerUnit
 local GetUnitById = GameLib.GetUnitById
 local GetGameTime = GameLib.GetGameTime
+local tKoS_Position
+local bKoS_bInCombat
 
 -- Is the player is far from the Keeper Of Sands.
 -- @param tKeeperUnit  unit object which represent the Keeper of Sands.
@@ -67,22 +70,39 @@ end
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
-function mod:OnBossEnable()
+local function ManagerKeeperOfSandsLine()
+    if mod:GetSetting("PathOfSandsKeeper") then
+        if not bKoS_bInCombat and tKoS_Position then
+            local nPlayerId = GetPlayerUnit():GetId()
+            local line = core:AddLineBetweenUnits("Path2KoS", nPlayerId, tKoS_Position, 6, "red")
+            line:SetMinLengthVisible(60)
+        else
+            core:RemoveLineBetweenUnits("Path2KoS")
+        end
+    end
 end
 
-function mod:OnUnitCreated(nId, unit, sName)
+function mod:OnBossEnable()
+    tKoS_Position = nil
+    bKoS_bInCombat = false
+end
+
+function mod:OnUnitCreated(nId, tUnit, sName)
     if sName == self.L["Keeper of Sands"] then
-        core:AddUnit(unit)
-        core:WatchUnit(unit)
+        core:AddUnit(tUnit)
+        core:WatchUnit(tUnit)
+        tKoS_Position = tUnit:GetPosition()
+        mod:SendIndMessage("KeeperOfSands_Position", tKoS_Position)
+        ManagerKeeperOfSandsLine()
     elseif sName == self.L["Infomatrix Antlion"] then
-        core:AddUnit(unit)
+        core:AddUnit(tUnit)
         if mod:GetSetting("OtherMarkerAntlion") then
-            core:MarkUnit(unit)
+            core:MarkUnit(tUnit)
         end
     elseif sName == self.L["BEAX"] then
         if mod:GetSetting("LinePathOfInvisibleUnit") then
-            if IsInRangeOfKeeper(unit) then
-                local tPosition = unit:GetPosition()
+            if IsInRangeOfKeeper(tUnit) then
+                local tPosition = tUnit:GetPosition()
                 local sKey1 = ("BEAX %d-%d"):format(nId, 1)
                 local sKey2 = ("BEAX %d-%d"):format(nId, 2)
                 -- Avoid the rotation of the circles through the Position instead the nId.
@@ -90,6 +110,14 @@ function mod:OnUnitCreated(nId, unit, sName)
                 core:AddPolygon(sKey2, tPosition, 15, 0, 3, "xkcdBluishPurple", 16)
             end
         end
+    end
+end
+
+function mod:OnEnteredCombat(nId, tUnit, sName, bInCombat)
+    if sName == self.L["Keeper of Sands"] then
+        bKoS_bInCombat = bInCombat
+        mod:SendIndMessage("KeeperOfSands_bInCombat", bKoS_bInCombat)
+        ManagerKeeperOfSandsLine()
     end
 end
 
@@ -114,5 +142,16 @@ function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
                 mod:AddMsg("EXHAUST", "WARNING: KNOCK-BACK", 3, "Info")
             end
         end
+    end
+end
+
+function mod:ReceiveIndMessage(sFrom, sReason, data)
+    if "KeeperOfSands_Position" == sReason then
+        tKoS_Position = data
+        ManagerKeeperOfSandsLine()
+    end
+    if "KeeperOfSands_bInCombat" == sReason then
+        bKoS_bInCombat = data
+        ManagerKeeperOfSandsLine()
     end
 end
