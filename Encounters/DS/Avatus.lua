@@ -215,6 +215,7 @@ mod:RegisterDefaultSetting("OtherDirectionMarkers")
 mod:RegisterDefaultSetting("OtherGreenRoomMarkers")
 mod:RegisterDefaultSetting("OtherPurgeList")
 mod:RegisterDefaultSetting("OtherPurgeMessages")
+mod:RegisterDefaultSetting("OtherPurgeNames")
 mod:RegisterDefaultSetting("OtherMobiusHealthMessages")
 -- Timers default configs.
 mod:RegisterDefaultTimerBarConfigs({
@@ -295,6 +296,7 @@ local SetTargetUnit = GameLib.SetTargetUnit
 local GetPlayerUnitByName = GameLib.GetPlayerUnitByName
 local nCurrentPhase
 local tBlueRoomPurgeList
+local tBlueRoomPurgeOrderedList
 local tHoloHandsList
 local bIsHoloHand
 local nPurgeCount
@@ -344,29 +346,36 @@ local function RefreshHoloHandPictures()
     end
 end
 
+local function BuildBlueRoomPurgeOrderedList()
+    for ePurgeType = PURGE_BLUE, PURGE_GREEN do
+        if next(tBlueRoomPurgeList[ePurgeType]) then
+            local tCopy = {}
+            for k, v in next, tBlueRoomPurgeList[ePurgeType] do
+                tCopy[k] = v
+            end
+
+            local tOrdered = {}
+            while next(tCopy) do
+                local f = nil
+                for key, val in next, tCopy do
+                    if f == nil or tCopy[f] > val then
+                        f = key
+                    end
+                end
+                table.insert(tOrdered, f:gmatch("%a+")())
+                tCopy[f] = nil
+            end
+            tBlueRoomPurgeOrderedList[ePurgeType] = tOrdered
+        end
+    end
+end
+
 local function DisplayPurgeList()
     if mod:GetSetting("OtherPurgeList") then
         core:Print("====== PURGE LIST ======")
         for ePurgeType = PURGE_BLUE, PURGE_GREEN do
-            if next(tBlueRoomPurgeList[ePurgeType]) then
-                local tCopy = {}
-                for k, v in next, tBlueRoomPurgeList[ePurgeType] do
-                    tCopy[k] = v
-                end
-
-                local tOrdered = {}
-                while next(tCopy) do
-                    local f = nil
-                    for key, val in next, tCopy do
-                        if f == nil or tCopy[f] > val then
-                            f = key
-                        end
-                    end
-                    table.insert(tOrdered, f:gmatch("%a+")())
-                    tCopy[f] = nil
-                end
-
-                local sPlayers = table.concat(tOrdered, ", ")
+            if next(tBlueRoomPurgeOrderedList[ePurgeType]) then
+                local sPlayers = table.concat(tBlueRoomPurgeOrderedList[ePurgeType], ", ")
                 if ePurgeType == PURGE_BLUE then
                     core:Print(mod.L["%s. PURGE BLUE (%s)"]:format("a", sPlayers))
                 elseif ePurgeType == PURGE_RED then
@@ -399,6 +408,11 @@ function mod:OnBossEnable()
     SetMarkersByPhase(MAIN_PHASE)
     bWarningSwitchPhaseDone = false
     tBlueRoomPurgeList = {
+        [PURGE_BLUE] = {},
+        [PURGE_RED] = {},
+        [PURGE_GREEN] = {},
+    }
+    tBlueRoomPurgeOrderedList = {
         [PURGE_BLUE] = {},
         [PURGE_RED] = {},
         [PURGE_GREEN] = {},
@@ -629,7 +643,19 @@ function mod:OnBuffAdd(nId, nSpellId, nStack, fTimeRemaining)
             end
             if nCurrentPhase == BLUE_PHASE and mod:GetSetting("OtherPurgeMessages") then
                 local a = bIsPurgeSync and nPurgeCycleCount or nPurgeCount
-                local b = bIsPurgeSync and nPurgeCycleCountPerColor[ePurgeType] or "NA"
+                local b = nil
+                if bIsPurgeSync then
+                    if mod:GetSetting("OtherPurgeNames") then
+                        local index = nPurgeCycleCountPerColor[ePurgeType]
+                        b = tBlueRoomPurgeOrderedList[ePurgeType][index]
+                    end
+                    if not b then
+                        b = nPurgeCycleCountPerColor[ePurgeType]
+                    end
+                end
+                if not b then
+                    b = "NA"
+                end
                 a = tostring(a)
                 b = tostring(b)
                 if ePurgeType == PURGE_GREEN then
@@ -768,6 +794,7 @@ function mod:OnShowShortcutBar(tIconFloatingSpellBar)
         local ePurgeType = PURGE_LIST_IN_BLUE_ROOM[sIcon1]
         if ePurgeType then
             tBlueRoomPurgeList[ePurgeType][GetPlayerUnit():GetName()] = GetGameTime()
+            BuildBlueRoomPurgeOrderedList()
             mod:SendIndMessage("PURGE_TYPE", ePurgeType)
         end
     end
@@ -799,5 +826,6 @@ function mod:ReceiveIndMessage(sFrom, sReason, data)
         end
     elseif "PURGE_TYPE" == sReason then
         tBlueRoomPurgeList[data][sFrom] = GetGameTime()
+        BuildBlueRoomPurgeOrderedList()
     end
 end
