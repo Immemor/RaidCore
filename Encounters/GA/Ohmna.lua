@@ -178,9 +178,9 @@ function mod:OnUnitCreated(nId, tUnit, sName)
         core:AddUnit(tUnit)
         core:WatchUnit(tUnit)
         if mod:GetSetting("LineSafeZoneOhmna") then
-            code:AddSimpleLine("Ohmna1", nId, nil, 25, 0, nil, "xkcdGreen", 20)
-            code:AddSimpleLine("Ohmna2", nId, nil, 25, 120, nil, "xkcdBlue", 20)
-            code:AddSimpleLine("Ohmna3", nId, nil, 25, -120, nil, "xkcdBlue", 20)
+            core:AddSimpleLine("Ohmna1", nId, nil, 25, 0, nil, "xkcdGreen", 20)
+            core:AddSimpleLine("Ohmna2", nId, nil, 25, 120, nil, "xkcdBlue", 20)
+            core:AddSimpleLine("Ohmna3", nId, nil, 25, -120, nil, "xkcdBlue", 20)
         end
     elseif sName == self.L["Tentacle of Ohmna"] then
         if not OhmnaP4 then
