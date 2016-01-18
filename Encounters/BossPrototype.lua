@@ -168,6 +168,10 @@ function EncounterPrototype:RegisterFrenchLocale(Locales)
     RegisterLocale(self, "frFR", Locales)
 end
 
+function EncounterPrototype:RegisterChineseLocale(Locales)
+    RegisterLocale(self, "zhHK", Locales)
+end
+
 -- Get setting value through the key.
 -- @param sKey  index in the array.
 -- @return  the key itself or false.

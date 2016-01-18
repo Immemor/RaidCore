@@ -6,7 +6,7 @@
 -- AceLocale-3.0.lua by Kaelten
 -------------------------------------------------------------------------------
 
-local MAJOR, MINOR = "Gemini:Locale-1.0", 4
+local MAJOR, MINOR = "Gemini:Locale-1.0", 5
 local APkg = Apollo.GetPackage(MAJOR)
 if APkg and (APkg.nVersion or 0) >= MINOR then
 	return -- no upgrade is needed
@@ -22,6 +22,7 @@ local ktLocales = {
 	[2] = "deDE",
 	[3] = "frFR",
 	[4] = "koKR",
+	[5] = "zhHK",
 }
 
 -- access to read the locale.languageId console variable has been disabled
@@ -40,6 +41,11 @@ local function GetLocale()
 		return ktLocales[3]
 	end
 	
+	-- Chinese
+	if strCancel == "XXXXXXX" then
+		return ktLocales[5]
+	end
+
 	-- Other
 	return ktLocales[1]
 --	return ktLocales[(Apollo.GetConsoleVariable("locale.languageId") or 1)]
