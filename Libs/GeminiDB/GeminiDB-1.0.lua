@@ -32,7 +32,7 @@
 -- end
 -- @class file
 -- @name GeminiDB-1.0.lua
-local MAJOR, MINOR = "Gemini:DB-1.0", 6
+local MAJOR, MINOR = "Gemini:DB-1.0", 7
 local APkg = Apollo.GetPackage(MAJOR)
 if APkg and (APkg.nVersion or 0) >= MINOR then
 	return -- no upgrade is needed
@@ -282,7 +282,7 @@ local preserve_keys = {
 }
 
 local realmKey = GameLib.GetRealmName()
-local charKey = GameLib.GetAccountRealmCharacter().strCharacter .. " - " .. realmKey
+local charKey = GameLib.GetPlayerCharacterName() .. " - " .. realmKey
 local localeKey = GetLocale():lower()
 
 local function populateKeys(self)
