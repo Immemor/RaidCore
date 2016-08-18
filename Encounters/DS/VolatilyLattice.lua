@@ -5,7 +5,7 @@
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
 -- Description:
---   TODO
+-- TODO
 ----------------------------------------------------------------------------------------------------
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local mod = core:NewEncounter("Lattice", 52, 98, 116)
@@ -38,7 +38,7 @@ mod:RegisterEnglishLocale({
     ["P2: JUMP PHASE"] = "P2: JUMP PHASE",
     ["LASER"] = "LASER",
     ["BEAM on %s"] = "BEAM on %s",
-})
+  })
 mod:RegisterFrenchLocale({
     -- Unit names.
     ["Avatus"] = "Avatus",
@@ -62,7 +62,7 @@ mod:RegisterFrenchLocale({
     ["P2: JUMP PHASE"] = "P2: PHASE SAUTER",
     ["LASER"] = "LASER",
     ["BEAM on %s"] = "LASER sur %s",
-})
+  })
 mod:RegisterGermanLocale({
     -- Unit names.
     ["Avatus"] = "Avatus",
@@ -72,7 +72,7 @@ mod:RegisterGermanLocale({
     -- Cast.
     ["Null and Void"] = "Unordnung und Chaos",
     -- Bar and messages.
-})
+  })
 -- Default settings.
 mod:RegisterDefaultSetting("LineDataDevourers")
 mod:RegisterDefaultSetting("SoundBeamOnYou")
@@ -91,7 +91,7 @@ mod:RegisterDefaultTimerBarConfigs({
     ["BEAM"] = { sColor = "xkcdLipstickRed" },
     ["PILLAR_TIMEOUT"] = { sColor = "xkcdAppleGreen" },
     ["P2"] = { sColor = "xkcdBabyPurple" },
-})
+  })
 
 ----------------------------------------------------------------------------------------------------
 -- Constants.
@@ -108,70 +108,70 @@ local nDataDevourerLastPopTime
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    nDataDevourerLastPopTime = 0
-    mod:AddTimerBar("ENRAGE", "Enrage", 576)
-    mod:AddTimerBar("DATA_DEVOURER", "Next Data Devourer", 10)
-    mod:AddTimerBar("NEXT_PILLAR", "Next Pillar", 45)
+  nDataDevourerLastPopTime = 0
+  mod:AddTimerBar("ENRAGE", "Enrage", 576)
+  mod:AddTimerBar("DATA_DEVOURER", "Next Data Devourer", 10)
+  mod:AddTimerBar("NEXT_PILLAR", "Next Pillar", 45)
 end
 
 function mod:OnUnitCreated(nId, unit, sName)
-    if sName == self.L["Data Devourer"] then
-        if mod:GetSetting("LineDataDevourers") then
-            local line = core:AddLineBetweenUnits(nId, GetPlayerUnit():GetId(), nId, 5, "blue")
-            line:SetMaxLengthVisible(45)
-        end
-        local nCurrentTime = GetGameTime()
-        if nDataDevourerLastPopTime + 13 < nCurrentTime then
-            nDataDevourerLastPopTime = nCurrentTime
-            mod:AddTimerBar("DATA_DEVOURER", "Next Data Devourer", 15)
-        end
-    elseif self.L["Obstinate Logic Wall"] == sName then
-        mod:RemoveTimerBar("PILLAR_TIMEOUT")
-        core:AddUnit(unit)
-        if mod:GetSetting("OtherLogicWallMarkers") then
-            core:MarkUnit(unit)
-        end
+  if sName == self.L["Data Devourer"] then
+    if mod:GetSetting("LineDataDevourers") then
+      local line = core:AddLineBetweenUnits(nId, GetPlayerUnit():GetId(), nId, 5, "blue")
+      line:SetMaxLengthVisible(45)
     end
+    local nCurrentTime = GetGameTime()
+    if nDataDevourerLastPopTime + 13 < nCurrentTime then
+      nDataDevourerLastPopTime = nCurrentTime
+      mod:AddTimerBar("DATA_DEVOURER", "Next Data Devourer", 15)
+    end
+  elseif self.L["Obstinate Logic Wall"] == sName then
+    mod:RemoveTimerBar("PILLAR_TIMEOUT")
+    core:AddUnit(unit)
+    if mod:GetSetting("OtherLogicWallMarkers") then
+      core:MarkUnit(unit)
+    end
+  end
 end
 
 function mod:OnUnitDestroyed(nId, tUnit, sName)
-    if sName == self.L["Data Devourer"] then
-        core:RemoveLineBetweenUnits(nId)
-    end
+  if sName == self.L["Data Devourer"] then
+    core:RemoveLineBetweenUnits(nId)
+  end
 end
 
 function mod:OnDatachron(sMessage)
-    local sPlayerFocused = sMessage:match(self.L["Avatus sets his focus on [PlayerName]!"])
-    if sPlayerFocused then
-        local tPlayerUnit = GameLib.GetPlayerUnitByName(sPlayerFocused)
-        local nPlayerId = tPlayerUnit:GetId()
-        if nPlayerId and mod:GetSetting("OtherPlayerBeamMarkers") then
-            core:MarkUnit(tPlayerUnit, nil, self.L["LASER"])
-            self:ScheduleTimer(function(nPlayerId)
-                core:DropMark(nPlayerId)
-            end, 15, nPlayerId)
-        end
-        local sText = self.L["BEAM on %s"]:format(sPlayerFocused)
-        if nPlayerId == GetPlayerUnit():GetId() then
-            mod:AddMsg("BEAM", sText, 5, mod:GetSetting("SoundBeamOnYou") and "RunAway")
-        else
-            mod:AddMsg("BEAM", sText, 5, mod:GetSetting("SoundBeamOnOther") and "Info", "Blue")
-        end
-        mod:AddTimerBar("BEAM", sText, 15)
+  local sPlayerFocused = sMessage:match(self.L["Avatus sets his focus on [PlayerName]!"])
+  if sPlayerFocused then
+    local tPlayerUnit = GameLib.GetPlayerUnitByName(sPlayerFocused)
+    local nPlayerId = tPlayerUnit:GetId()
+    if nPlayerId and mod:GetSetting("OtherPlayerBeamMarkers") then
+      core:MarkUnit(tPlayerUnit, nil, self.L["LASER"])
+      self:ScheduleTimer(function(nPlayerId)
+          core:DropMark(nPlayerId)
+          end, 15, nPlayerId)
+      end
+      local sText = self.L["BEAM on %s"]:format(sPlayerFocused)
+      if nPlayerId == GetPlayerUnit():GetId() then
+        mod:AddMsg("BEAM", sText, 5, mod:GetSetting("SoundBeamOnYou") and "RunAway")
+      else
+        mod:AddMsg("BEAM", sText, 5, mod:GetSetting("SoundBeamOnOther") and "Info", "Blue")
+      end
+      mod:AddTimerBar("BEAM", sText, 15)
     elseif sMessage == self.L["Avatus prepares to delete all"] then
-        mod:AddMsg("PILLAR_TIMEOUT", "Pillar Timeout", 5, mod:GetSetting("SoundBigCast") and "Beware")
-        mod:AddTimerBar("PILLAR_TIMEOUT", "Pillar Timeout", 10)
-        mod:AddTimerBar("NEXT_PILLAR", "Next Pillar", 50)
+      mod:AddMsg("PILLAR_TIMEOUT", "Pillar Timeout", 5, mod:GetSetting("SoundBigCast") and "Beware")
+      mod:AddTimerBar("PILLAR_TIMEOUT", "Pillar Timeout", 10)
+      mod:AddTimerBar("NEXT_PILLAR", "Next Pillar", 50)
     elseif sMessage == self.L["Secure Sector Enhancement"] then
-        mod:AddMsg("P2", "P2: SHIELD PHASE", 5, mod:GetSetting("SoundShieldPhase") and "Alert")
-        mod:AddTimerBar("P2", "Explosion", 15, mod:GetSetting("SoundLaserCountDown"))
-        mod:AddTimerBar("BEAM", "Next Beam", 44)
-        mod:AddTimerBar("DATA_DEVOURER", "Next Data Devourer", 53)
-        mod:AddTimerBar("NEXT_PILLAR", "Next Pillar", 58)
+      mod:AddMsg("P2", "P2: SHIELD PHASE", 5, mod:GetSetting("SoundShieldPhase") and "Alert")
+      mod:AddTimerBar("P2", "Explosion", 15, mod:GetSetting("SoundLaserCountDown"))
+      mod:AddTimerBar("BEAM", "Next Beam", 44)
+      mod:AddTimerBar("DATA_DEVOURER", "Next Data Devourer", 53)
+      mod:AddTimerBar("NEXT_PILLAR", "Next Pillar", 58)
     elseif sMessage == self.L["Vertical Locomotion Enhancement"] then
-        mod:AddMsg("P2", "P2: JUMP PHASE", 5, mod:GetSetting("SoundJumpPhase") and "Alert")
-        mod:AddTimerBar("BEAM", "Next Beam", 58)
-        mod:AddTimerBar("DATA_DEVOURER", "Next Data Devourer", 68)
-        mod:AddTimerBar("NEXT_PILLAR", "Next Pillar", 75)
+      mod:AddMsg("P2", "P2: JUMP PHASE", 5, mod:GetSetting("SoundJumpPhase") and "Alert")
+      mod:AddTimerBar("BEAM", "Next Beam", 58)
+      mod:AddTimerBar("DATA_DEVOURER", "Next Data Devourer", 68)
+      mod:AddTimerBar("NEXT_PILLAR", "Next Pillar", 75)
     end
-end
+  end

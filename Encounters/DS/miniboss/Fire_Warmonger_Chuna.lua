@@ -5,7 +5,7 @@
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
 -- Description:
---   TODO
+-- TODO
 ----------------------------------------------------------------------------------------------------
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local mod = core:NewEncounter("WarmongerChuna", 52, 98, 110)
@@ -28,7 +28,7 @@ mod:RegisterEnglishLocale({
     ["Bombs"] = "Bombs",
     ["ELEMENTALS SOON"] = "ELEMENTALS SOON",
     ["FIRE ELEMENTALS"] = "FIRE ELEMENTALS",
-})
+  })
 mod:RegisterFrenchLocale({
     -- Unit names.
     ["Warmonger Chuna"] = "Guerroyeuse Chuna",
@@ -42,7 +42,7 @@ mod:RegisterFrenchLocale({
     ["Bombs"] = "Bombes",
     ["ELEMENTALS SOON"] = "ÉLÉMENTAIRES BIENTÔT",
     ["FIRE ELEMENTALS"] = "ÉLÉMENTAIRES DE FEU",
-})
+  })
 mod:RegisterGermanLocale({
     -- Unit names.
     ["Warmonger Chuna"] = "Kriegstreiberin Chuna",
@@ -50,13 +50,13 @@ mod:RegisterGermanLocale({
     -- Cast.
     ["Conjure Fire Elementals"] = "Feuerelementare beschwören",
     -- Bar and messages.
-})
+  })
 -- Timers default configs.
 mod:RegisterDefaultTimerBarConfigs({
     ["BOMBS"] = { sColor = "xkcdLightRed" },
     ["TOTEM"] = { sColor = "xkcdBloodOrange" },
     ["BUBBLE"] = { sColor = "xkcdBabyBlue" },
-})
+  })
 
 ----------------------------------------------------------------------------------------------------
 -- Constants.
@@ -73,54 +73,54 @@ local bIsFirstFireRoom
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    nPreviousBombPopDate, nPreviousTotemPopDate  = 0, 0
-    bIsFirstFireRoom = true
+  nPreviousBombPopDate, nPreviousTotemPopDate = 0, 0
+  bIsFirstFireRoom = true
 end
 
 function mod:OnUnitCreated(nId, tUnit, sUnitName)
-    local nCurrentTime = GetGameTime()
+  local nCurrentTime = GetGameTime()
 
-    if self.L["Warmonger Chuna"] == sUnitName then
-        core:AddUnit(tUnit)
-        core:WatchUnit(tUnit)
-    elseif self.L["Conjured Fire Bomb"] == sUnitName then
-        if nPreviousBombPopDate + 8 < nCurrentTime then
-            mod:AddTimerBar("BOMBS", "Bombs", 22.5)
-            nPreviousBombPopDate = nCurrentTime
-        end
-    elseif self.L["Conjured Fire Totem"] == sUnitName then
-        if nPreviousTotemPopDate + 8 < nCurrentTime then
-            mod:AddTimerBar("TOTEM", "Conjured Fire Totem", 26)
-            nPreviousTotemPopDate = nCurrentTime
-        end
+  if self.L["Warmonger Chuna"] == sUnitName then
+    core:AddUnit(tUnit)
+    core:WatchUnit(tUnit)
+  elseif self.L["Conjured Fire Bomb"] == sUnitName then
+    if nPreviousBombPopDate + 8 < nCurrentTime then
+      mod:AddTimerBar("BOMBS", "Bombs", 22.5)
+      nPreviousBombPopDate = nCurrentTime
     end
+  elseif self.L["Conjured Fire Totem"] == sUnitName then
+    if nPreviousTotemPopDate + 8 < nCurrentTime then
+      mod:AddTimerBar("TOTEM", "Conjured Fire Totem", 26)
+      nPreviousTotemPopDate = nCurrentTime
+    end
+  end
 end
 
 function mod:OnHealthChanged(nId, nPourcent, sName)
-    if self.L["Warmonger Chuna"] == sName then
-        if nPourcent == 67 or nPourcent == 34 then
-            mod:AddMsg("ELEMENTALS", "ELEMENTALS SOON", 5)
-        end
+  if self.L["Warmonger Chuna"] == sName then
+    if nPourcent == 67 or nPourcent == 34 then
+      mod:AddMsg("ELEMENTALS", "ELEMENTALS SOON", 5)
     end
+  end
 end
 
 function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
-    if self.L["Warmonger Chuna"] == sName then
-        if self.L["Conjure Fire Elementals"] == sCastName then
-            mod:AddMsg("ELEMENTALS", "FIRE ELEMENTALS", 5)
-        elseif self.L["Fire Room"] == sCastName then
-            if bIsFirstFireRoom == false then
-                core:PlaySound("Long")
-            end
-            bIsFirstFireRoom = false
-        end
+  if self.L["Warmonger Chuna"] == sName then
+    if self.L["Conjure Fire Elementals"] == sCastName then
+      mod:AddMsg("ELEMENTALS", "FIRE ELEMENTALS", 5)
+    elseif self.L["Fire Room"] == sCastName then
+      if bIsFirstFireRoom == false then
+        core:PlaySound("Long")
+      end
+      bIsFirstFireRoom = false
     end
+  end
 end
 
 function mod:OnCastEnd(nId, sCastName, bInterrupted, nCastEndTime, sName)
-    if self.L["Warmonger Chuna"] == sName then
-        if self.L["Fire Room"] == sCastName then
-            mod:AddTimerBar("BUBBLE", "Safe Bubble", 50, true)
-        end
+  if self.L["Warmonger Chuna"] == sName then
+    if self.L["Fire Room"] == sCastName then
+      mod:AddTimerBar("BUBBLE", "Safe Bubble", 50, true)
     end
+  end
 end

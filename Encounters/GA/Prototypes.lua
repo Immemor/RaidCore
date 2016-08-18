@@ -5,7 +5,7 @@
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
 -- Description:
---   TODO
+-- TODO
 ----------------------------------------------------------------------------------------------------
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local mod = core:NewEncounter("Prototypes", 67, 147, 149)
@@ -16,7 +16,7 @@ if not mod then return end
 ----------------------------------------------------------------------------------------------------
 mod:RegisterTrigMob("ANY", {
     "Phagetech Commander", "Phagetech Augmentor", "Phagetech Protector", "Phagetech Fabricator",
-})
+  })
 mod:RegisterEnglishLocale({
     -- Unit names.
     ["Phagetech Commander"] = "Phagetech Commander",
@@ -39,7 +39,7 @@ mod:RegisterEnglishLocale({
     ["BOTS !!"] = "BOTS !!",
     ["BERSERK"] = "BERSERK",
     ["Singularity"] = "Singularity",
-})
+  })
 mod:RegisterFrenchLocale({
     -- Unit names.
     ["Phagetech Commander"] = "Commandant technophage",
@@ -62,7 +62,7 @@ mod:RegisterFrenchLocale({
     ["BOTS !!"] = "BOTS !!",
     ["BERSERK"] = "BERSERK",
     ["Singularity"] = "Singularité",
-})
+  })
 mod:RegisterGermanLocale({
     -- Unit names.
     ["Phagetech Commander"] = "Phagentech-Kommandant",
@@ -85,11 +85,11 @@ mod:RegisterGermanLocale({
     ["BOTS !!"] = "BOTS !!",
     ["BERSERK"] = "BERSERK",
     ["Singularity"] = "SINGULARITÄT",
-})
+  })
 -- Default settings.
 -- Timers default configs.
 mod:RegisterDefaultTimerBarConfigs({
-})
+  })
 
 ----------------------------------------------------------------------------------------------------
 -- Constants.
@@ -104,42 +104,42 @@ local protoFirst = true
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    protoFirst = true
+  protoFirst = true
 end
 
 function mod:OnUnitCreated(nId, tUnit, sName)
-    if sName == self.L["Phagetech Commander"] or sName == self.L["Phagetech Augmentor"]
-        or sName == self.L["Phagetech Protector"] or sName == self.L["Phagetech Fabricator"] then
-        core:AddUnit(tUnit)
-        core:WatchUnit(tUnit)
-    end
+  if sName == self.L["Phagetech Commander"] or sName == self.L["Phagetech Augmentor"]
+  or sName == self.L["Phagetech Protector"] or sName == self.L["Phagetech Fabricator"] then
+    core:AddUnit(tUnit)
+    core:WatchUnit(tUnit)
+  end
 end
 
 function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
-    if sName == self.L["Phagetech Augmentor"] then
-        if sCastName == self.L["Summon Repairbot"] then
-            mod:AddMsg("BOTS", "BOTS !!", 5, "Alert")
-        end
-    elseif sName == self.L["Phagetech Fabricator"] then
-        if sCastName == self.L["Summon Destructobot"] then
-            mod:AddMsg("BOTS", "BOTS !!", 5, "Alert")
-        end
+  if sName == self.L["Phagetech Augmentor"] then
+    if sCastName == self.L["Summon Repairbot"] then
+      mod:AddMsg("BOTS", "BOTS !!", 5, "Alert")
     end
+  elseif sName == self.L["Phagetech Fabricator"] then
+    if sCastName == self.L["Summon Destructobot"] then
+      mod:AddMsg("BOTS", "BOTS !!", 5, "Alert")
+    end
+  end
 end
 
 function mod:OnDatachron(sMessage)
-    if sMessage:find(self.L["Phagetech Commander is now active!"]) then
-        mod:AddTimerBar("PROTO", "[2] TP + CROSS + BOTS", protoFirst and 20 or 60)
-        if protoFirst then
-            protoFirst = nil
-            mod:AddTimerBar("BERSERK", "BERSERK", 585)
-        end
-    elseif sMessage:find(self.L["Phagetech Augmentor is now active!"]) then
-        mod:AddTimerBar("PROTO", "[3] SINGULARITY + WAVES", 60)
-    elseif sMessage:find(self.L["Phagetech Protector is now active!"]) then
-        mod:AddTimerBar("SINGU", "Singularity", 5)
-        mod:AddTimerBar("PROTO", "[4] SOAK + BOTS", 60)
-    elseif sMessage:find(self.L["Phagetech Fabricator is now active!"]) then
-        mod:AddTimerBar("PROTO", "[1] LINK + KICK", 60)
+  if sMessage:find(self.L["Phagetech Commander is now active!"]) then
+    mod:AddTimerBar("PROTO", "[2] TP + CROSS + BOTS", protoFirst and 20 or 60)
+    if protoFirst then
+      protoFirst = nil
+      mod:AddTimerBar("BERSERK", "BERSERK", 585)
     end
+  elseif sMessage:find(self.L["Phagetech Augmentor is now active!"]) then
+    mod:AddTimerBar("PROTO", "[3] SINGULARITY + WAVES", 60)
+  elseif sMessage:find(self.L["Phagetech Protector is now active!"]) then
+    mod:AddTimerBar("SINGU", "Singularity", 5)
+    mod:AddTimerBar("PROTO", "[4] SOAK + BOTS", 60)
+  elseif sMessage:find(self.L["Phagetech Fabricator is now active!"]) then
+    mod:AddTimerBar("PROTO", "[1] LINK + KICK", 60)
+  end
 end

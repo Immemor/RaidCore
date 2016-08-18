@@ -5,7 +5,7 @@
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
 -- Description:
---   TODO
+-- TODO
 ----------------------------------------------------------------------------------------------------
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local mod = core:NewEncounter("EpAirEarth", 52, 98, 117)
@@ -37,7 +37,7 @@ mod:RegisterEnglishLocale({
     -- Message bars.
     ["EARTH"] = "EARTH",
     ["JUMP !"] = "JUMP, JUMP, JUMP, JUMP !!!"
-})
+  })
 mod:RegisterFrenchLocale({
     -- Unit names.
     ["Megalith"] = "Mégalithe",
@@ -58,7 +58,7 @@ mod:RegisterFrenchLocale({
     -- Message bars.
     ["EARTH"] = "TERRE",
     ["JUMP !"] = "SAUTEZ, SAUTEZ, SAUTEZ, SAUTEZ !!!"
-})
+  })
 mod:RegisterGermanLocale({
     -- Unit names.
     ["Megalith"] = "Megalith",
@@ -70,7 +70,7 @@ mod:RegisterGermanLocale({
     ["Raw Power"] = "Rohe Kraft",
     -- Timer bars.
     -- Message bars.
-})
+  })
 -- Default settings.
 mod:RegisterDefaultSetting("LineTornado")
 mod:RegisterDefaultSetting("LineCleaveAileron")
@@ -86,7 +86,7 @@ mod:RegisterDefaultTimerBarConfigs({
     ["TORNADO"] = { sColor = "xkcdBrightSkyBlue" },
     ["RAWPOWER"] = { sColor = "xkcdBrownishRed" },
     ["FIERCE_SWIPE"] = { sColor = "xkcdBurntYellow" },
-})
+  })
 
 ----------------------------------------------------------------------------------------------------
 -- Constants.
@@ -102,74 +102,74 @@ local bMidPhase = false
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    local nTime = GetGameTime()
-    nStartTime = nTime
-    nRefTime = nTime
-    bMidPhase = false
+  local nTime = GetGameTime()
+  nStartTime = nTime
+  nRefTime = nTime
+  bMidPhase = false
 
-    mod:AddTimerBar("SUPERCELL", "Next supercell", 65, mod:GetSetting("SoundSupercell"))
-    mod:AddTimerBar("TORNADO", "Next tornado", 16, mod:GetSetting("SoundTornadoCountDown"))
-    mod:AddTimerBar("FIERCE_SWIPE", "Next fierce swipe", 16)
+  mod:AddTimerBar("SUPERCELL", "Next supercell", 65, mod:GetSetting("SoundSupercell"))
+  mod:AddTimerBar("TORNADO", "Next tornado", 16, mod:GetSetting("SoundTornadoCountDown"))
+  mod:AddTimerBar("FIERCE_SWIPE", "Next fierce swipe", 16)
 end
 
 function mod:OnUnitCreated(nId, unit, sName)
-    if sName == self.L["Megalith"] then
-        core:AddUnit(unit)
-        core:WatchUnit(unit)
-        core:MarkUnit(unit, nil, self.L["EARTH"])
-    elseif sName == self.L["Aileron"] then
-        if mod:GetSetting("LineCleaveAileron") then
-            core:AddPixie(unit:GetId(), 2, unit, nil, "Green", 10, 15, 0)
-        end
-        core:AddUnit(unit)
-        core:WatchUnit(unit)
-    elseif sName == self.L["Air Column"] then
-        if mod:GetSetting("LineTornado") then
-            core:AddLine(unit:GetId(), 2, unit, nil, 3, 30, 0, 10)
-        end
-        if GetGameTime() > nStartTime + 10 then
-            mod:AddTimerBar("TORNADO", "Next tornado", 17, mod:GetSetting("SoundTornadoCountDown"))
-        end
+  if sName == self.L["Megalith"] then
+    core:AddUnit(unit)
+    core:WatchUnit(unit)
+    core:MarkUnit(unit, nil, self.L["EARTH"])
+  elseif sName == self.L["Aileron"] then
+    if mod:GetSetting("LineCleaveAileron") then
+      core:AddPixie(unit:GetId(), 2, unit, nil, "Green", 10, 15, 0)
     end
+    core:AddUnit(unit)
+    core:WatchUnit(unit)
+  elseif sName == self.L["Air Column"] then
+    if mod:GetSetting("LineTornado") then
+      core:AddLine(unit:GetId(), 2, unit, nil, 3, 30, 0, 10)
+    end
+    if GetGameTime() > nStartTime + 10 then
+      mod:AddTimerBar("TORNADO", "Next tornado", 17, mod:GetSetting("SoundTornadoCountDown"))
+    end
+  end
 end
 
 function mod:OnUnitDestroyed(nId, tUnit, sName)
-    if sName == self.L["Air Column"] then
-        core:DropLine(nId)
-    end
+  if sName == self.L["Air Column"] then
+    core:DropLine(nId)
+  end
 end
 
 function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
-    if self.L["Megalith"] == sName then
-        if self.L["Raw Power"] == sCastName then
-            bMidPhase = true
-            mod:AddMsg("RAW", sCastName:upper(), 5, mod:GetSetting("SoundMidphase") and "Alert")
-        elseif self.L["Fierce Swipe"] == sCastName then
-            mod:AddTimerBar("FIERCE_SWIPE", "Next fierce swipe", 16.5)
-        end
-    elseif self.L["Aileron"] == sName then
-        if self.L["Supercell"] == sCastName then
-            local timeOfEvent = GetGameTime()
-            if timeOfEvent - nRefTime > 30 then
-                nRefTime = timeOfEvent
-                mod:AddMsg("SUPERCELL", sCastName:upper(), 5, mod:GetSetting("SoundSupercell") and "Alarm")
-                mod:AddTimerBar("SUPERCELL", "Next supercell", 80)
-            end
-        end
+  if self.L["Megalith"] == sName then
+    if self.L["Raw Power"] == sCastName then
+      bMidPhase = true
+      mod:AddMsg("RAW", sCastName:upper(), 5, mod:GetSetting("SoundMidphase") and "Alert")
+    elseif self.L["Fierce Swipe"] == sCastName then
+      mod:AddTimerBar("FIERCE_SWIPE", "Next fierce swipe", 16.5)
     end
+  elseif self.L["Aileron"] == sName then
+    if self.L["Supercell"] == sCastName then
+      local timeOfEvent = GetGameTime()
+      if timeOfEvent - nRefTime > 30 then
+        nRefTime = timeOfEvent
+        mod:AddMsg("SUPERCELL", sCastName:upper(), 5, mod:GetSetting("SoundSupercell") and "Alarm")
+        mod:AddTimerBar("SUPERCELL", "Next supercell", 80)
+      end
+    end
+  end
 end
 
 function mod:OnDatachron(sMessage)
-    if sMessage:find(self.L["The ground shudders beneath Megalith"]) then
-        if mod:GetSetting("SoundQuakeJump") then
-            core:PlaySound("Beware")
-        end
-        if mod:GetSetting("OtherQuakeWarnings") then
-            mod:AddMsg("QUAKE1", "JUMP !", 2)
-            mod:AddMsg("QUAKE2", "JUMP !", 2)
-        end
-    elseif sMessage:find(self.L["fractured crust leaves it exposed"]) and bMidPhase then
-        bMidPhase = false
-        mod:AddTimerBar("RAWPOWER", "Next raw power", 60, mod:GetSetting("SoundMidphase"))
+  if sMessage:find(self.L["The ground shudders beneath Megalith"]) then
+    if mod:GetSetting("SoundQuakeJump") then
+      core:PlaySound("Beware")
     end
+    if mod:GetSetting("OtherQuakeWarnings") then
+      mod:AddMsg("QUAKE1", "JUMP !", 2)
+      mod:AddMsg("QUAKE2", "JUMP !", 2)
+    end
+  elseif sMessage:find(self.L["fractured crust leaves it exposed"]) and bMidPhase then
+    bMidPhase = false
+    mod:AddTimerBar("RAWPOWER", "Next raw power", 60, mod:GetSetting("SoundMidphase"))
+  end
 end

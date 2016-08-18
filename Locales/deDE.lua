@@ -7,4 +7,3 @@
 local GeminiLocale = Apollo.GetPackage("Gemini:Locale-1.0").tPackage
 local L = GeminiLocale:NewLocale("RaidCore", "deDE", false, true)
 if not L then return end
-

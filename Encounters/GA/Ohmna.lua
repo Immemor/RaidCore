@@ -5,7 +5,7 @@
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
 -- Description:
---   TODO
+-- TODO
 ----------------------------------------------------------------------------------------------------
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local mod = core:NewEncounter("Ohmna", 67, 147, 149)
@@ -48,7 +48,7 @@ mod:RegisterEnglishLocale({
     ["SWITCH TANK"] = "SWITCH TANK",
     ["BIG SPEW"] = "BIG SPEW",
     ["NEXT BIG SPEW"] = "NEXT BIG SPEW",
-})
+  })
 mod:RegisterFrenchLocale({
     -- Unit names.
     ["Dreadphage Ohmna"] = "Ohmna la Terriphage",
@@ -82,7 +82,7 @@ mod:RegisterFrenchLocale({
     ["SWITCH TANK"] = "CHANGEMENT TANK",
     ["BIG SPEW"] = "TORRENT",
     ["NEXT BIG SPEW"] = "PROCHAIN TORRENT",
-})
+  })
 mod:RegisterGermanLocale({
     -- Unit names.
     ["Dreadphage Ohmna"] = "Schreckensphage Ohmna",
@@ -116,7 +116,7 @@ mod:RegisterGermanLocale({
     ["SWITCH TANK"] = "AGGRO ZIEHEN !!!",
     ["BIG SPEW"] = "GROßES BRECHEN",
     ["NEXT BIG SPEW"] = "NÄCHSTES GROßES BRECHEN",
-})
+  })
 -- Default settings.
 mod:RegisterDefaultSetting("LineSafeZoneOhmna")
 mod:RegisterDefaultSetting("LineRavenousMaw")
@@ -124,7 +124,7 @@ mod:RegisterDefaultSetting("SoundBigSpew")
 mod:RegisterDefaultSetting("OtherRavenousMawMarker")
 -- Timers default configs.
 mod:RegisterDefaultTimerBarConfigs({
-})
+  })
 
 ----------------------------------------------------------------------------------------------------
 -- Constants.
@@ -137,152 +137,152 @@ local pilarCount, boreCount, submergeCount = 0, 0, 0
 local firstPull, OhmnaP3, OhmnaP4 = true, false, false
 
 local function getMax(t)
-    local max_val, key = -1000, ""
-    for k, v in pairs(t) do
-        if max_val < v then
-            max_val, key = v, k
-        elseif max_val == v then
-            key = key .. " / " .. k
-        end
+  local max_val, key = -1000, ""
+  for k, v in pairs(t) do
+    if max_val < v then
+      max_val, key = v, k
+    elseif max_val == v then
+      key = key .. " / " .. k
     end
-    return max_val, key
+  end
+  return max_val, key
 end
 
 local function getMin(t)
-    local min_val, key = 1000, ""
-    for k, v in pairs(t) do
-        -- Ignore pillars that are on 0%
-        if min_val > v and v > 0 then
-            min_val, key = v, k
-        elseif min_val == v then
-            key = key .. " / " .. k
-        end
+  local min_val, key = 1000, ""
+  for k, v in pairs(t) do
+    -- Ignore pillars that are on 0%
+    if min_val > v and v > 0 then
+      min_val, key = v, k
+    elseif min_val == v then
+      key = key .. " / " .. k
     end
-    return min_val, key
+  end
+  return min_val, key
 end
 
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    pilarCount, boreCount, submergeCount = 1, 0, 0
-    firstPull, OhmnaP3, OhmnaP4 = true, false, false
-    mod:AddTimerBar("OPILAR", self.L["PILLAR %u"]:format(pilarCount), 25)
-    if self:Tank() then
-        mod:AddTimerBar("OBORE", "SWITCH TANK", 45)
-    end
+  pilarCount, boreCount, submergeCount = 1, 0, 0
+  firstPull, OhmnaP3, OhmnaP4 = true, false, false
+  mod:AddTimerBar("OPILAR", self.L["PILLAR %u"]:format(pilarCount), 25)
+  if self:Tank() then
+    mod:AddTimerBar("OBORE", "SWITCH TANK", 45)
+  end
 end
 
 function mod:OnUnitCreated(nId, tUnit, sName)
-    if sName == self.L["Dreadphage Ohmna"] then
-        core:AddUnit(tUnit)
-        core:WatchUnit(tUnit)
-        if mod:GetSetting("LineSafeZoneOhmna") then
-            core:AddSimpleLine("Ohmna1", nId, nil, 25, 0, nil, "xkcdGreen", 20)
-            core:AddSimpleLine("Ohmna2", nId, nil, 25, 120, nil, "xkcdBlue", 20)
-            core:AddSimpleLine("Ohmna3", nId, nil, 25, -120, nil, "xkcdBlue", 20)
-        end
-    elseif sName == self.L["Tentacle of Ohmna"] then
-        if not OhmnaP4 then
-            mod:AddMsg("OTENT", "Tentacles", 5, "Info", "Blue")
-            mod:AddTimerBar("OTENT", "Next Tentacles", 20)
-        end
-    elseif sName == self.L["Ravenous Maw of the Dreadphage"] then
-        -- Phase 3: 3 units will pop.
-        if mod:GetSetting("OtherRavenousMawMarker") then
-            core:AddUnit(tUnit)
-            core:WatchUnit(tUnit)
-            core:MarkUnit(tUnit, 0)
-        end
-        if mod:GetSetting("LineRavenousMaw") then
-            core:AddSimpleLine(nId, nId, nil, 25, 0, nil, "xkcdBrightYellow", 20)
-        end
+  if sName == self.L["Dreadphage Ohmna"] then
+    core:AddUnit(tUnit)
+    core:WatchUnit(tUnit)
+    if mod:GetSetting("LineSafeZoneOhmna") then
+      core:AddSimpleLine("Ohmna1", nId, nil, 25, 0, nil, "xkcdGreen", 20)
+      core:AddSimpleLine("Ohmna2", nId, nil, 25, 120, nil, "xkcdBlue", 20)
+      core:AddSimpleLine("Ohmna3", nId, nil, 25, -120, nil, "xkcdBlue", 20)
     end
+  elseif sName == self.L["Tentacle of Ohmna"] then
+    if not OhmnaP4 then
+      mod:AddMsg("OTENT", "Tentacles", 5, "Info", "Blue")
+      mod:AddTimerBar("OTENT", "Next Tentacles", 20)
+    end
+  elseif sName == self.L["Ravenous Maw of the Dreadphage"] then
+    -- Phase 3: 3 units will pop.
+    if mod:GetSetting("OtherRavenousMawMarker") then
+      core:AddUnit(tUnit)
+      core:WatchUnit(tUnit)
+      core:MarkUnit(tUnit, 0)
+    end
+    if mod:GetSetting("LineRavenousMaw") then
+      core:AddSimpleLine(nId, nId, nil, 25, 0, nil, "xkcdBrightYellow", 20)
+    end
+  end
 end
 
 function mod:OnHealthChanged(nId, nPourcent, sName)
-    if sName == self.L["Dreadphage Ohmna"] then
-        if nPourcent == 52 then
-            mod:AddMsg("OP2", "P2 SOON !", 5, "Alert")
-        elseif nPourcent == 20 then
-            mod:AddMsg("OP3", "P3 SOON !", 5, "Alert")
-        elseif nPourcent == 17 then
-            mod:AddMsg("OP3", "P3 REALLY SOON !", 5, "Alert")
-        end
+  if sName == self.L["Dreadphage Ohmna"] then
+    if nPourcent == 52 then
+      mod:AddMsg("OP2", "P2 SOON !", 5, "Alert")
+    elseif nPourcent == 20 then
+      mod:AddMsg("OP3", "P3 SOON !", 5, "Alert")
+    elseif nPourcent == 17 then
+      mod:AddMsg("OP3", "P3 REALLY SOON !", 5, "Alert")
     end
+  end
 end
 
 function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
-    if sName == self.L["Dreadphage Ohmna"] then
-        if sCastName == self.L["Erupt"] then
-            if OhmnaP3 then return end
-            local pilarActivated = self:OhmnaPE(pilarCount % 2)
-            mod:AddTimerBar("OPILAR", self.L["PILLAR %u : %s"]:format(pilarCount, pilarActivated), 32)
-            if self:Tank() then
-                mod:AddTimerBar("OBORE", "SWITCH TANK", 45)
-            end
-        elseif sCastName == self.L["Genetic Torrent"] then
-            mod:AddMsg("SPEW", "BIG SPEW", 5, mod:GetSetting("SoundBigSpew") and "RunAway")
-            mod:AddTimerBar("OSPEW", "NEXT BIG SPEW", OhmnaP4 and 40 or 60)
-        end
+  if sName == self.L["Dreadphage Ohmna"] then
+    if sCastName == self.L["Erupt"] then
+      if OhmnaP3 then return end
+      local pilarActivated = self:OhmnaPE(pilarCount % 2)
+      mod:AddTimerBar("OPILAR", self.L["PILLAR %u : %s"]:format(pilarCount, pilarActivated), 32)
+      if self:Tank() then
+        mod:AddTimerBar("OBORE", "SWITCH TANK", 45)
+      end
+    elseif sCastName == self.L["Genetic Torrent"] then
+      mod:AddMsg("SPEW", "BIG SPEW", 5, mod:GetSetting("SoundBigSpew") and "RunAway")
+      mod:AddTimerBar("OSPEW", "NEXT BIG SPEW", OhmnaP4 and 40 or 60)
     end
+  end
 end
 
 function mod:OhmnaPE(lowest)
-    local tStatus = {}
-    local strResult = ""
-    local max_val
-    local tActiveEvents = PublicEvent.GetActiveEvents()
-    for idx, peEvent in pairs(tActiveEvents) do
-        for idObjective, peObjective in pairs(peEvent:GetObjectives()) do
-            if peObjective:GetShortDescription() == self.L["North Power Core Energy"] then
-                tStatus["NORTH"] = peObjective:GetCount()
-            elseif peObjective:GetShortDescription() == self.L["South Power Core Energy"] then
-                tStatus["SOUTH"] = peObjective:GetCount()
-            elseif peObjective:GetShortDescription() == self.L["East Power Core Energy"] then
-                tStatus["EAST"] = peObjective:GetCount()
-            elseif peObjective:GetShortDescription() == self.L["West Power Core Energy"] then
-                tStatus["WEST"] = peObjective:GetCount()
-            end
-        end
+  local tStatus = {}
+  local strResult = ""
+  local max_val
+  local tActiveEvents = PublicEvent.GetActiveEvents()
+  for idx, peEvent in pairs(tActiveEvents) do
+    for idObjective, peObjective in pairs(peEvent:GetObjectives()) do
+      if peObjective:GetShortDescription() == self.L["North Power Core Energy"] then
+        tStatus["NORTH"] = peObjective:GetCount()
+      elseif peObjective:GetShortDescription() == self.L["South Power Core Energy"] then
+        tStatus["SOUTH"] = peObjective:GetCount()
+      elseif peObjective:GetShortDescription() == self.L["East Power Core Energy"] then
+        tStatus["EAST"] = peObjective:GetCount()
+      elseif peObjective:GetShortDescription() == self.L["West Power Core Energy"] then
+        tStatus["WEST"] = peObjective:GetCount()
+      end
     end
+  end
 
-    if lowest == 1 then
-        max_val, strResult = getMin(tStatus)
-    else
-        max_val, strResult = getMax(tStatus)
-    end
+  if lowest == 1 then
+    max_val, strResult = getMin(tStatus)
+  else
+    max_val, strResult = getMax(tStatus)
+  end
 
-    return strResult
+  return strResult
 end
 
 function mod:OnDatachron(sMessage)
-    if sMessage:find(self.L["A plasma leech begins draining"]) then
-        if OhmnaP3 then return end
-        pilarCount = pilarCount + 1
-        if submergeCount < 2 and pilarCount > 4 then
-            mod:AddTimerBar("OPILAR", "PHASE 2", firstPull and 27 or 22)
-            firstPull = false
-        else
-            local pilarActivated = self:OhmnaPE(pilarCount % 2)
-            mod:AddTimerBar("OPILAR", self.L["PILLAR %u : %s"]:format(pilarCount, pilarActivated), 25)
-        end
-    elseif sMessage:find(self.L["Dreadphage Ohmna submerges"]) then
-        pilarCount, boreCount = 1, 0
-        submergeCount = submergeCount + 1
-        core:RemoveTimerBar("OTENT")
-    elseif sMessage:find(self.L["Dreadphage Ohmna is bored"]) then
-        boreCount = boreCount + 1
-        if boreCount < 2 and self:Tank() then
-            mod:AddTimerBar("OBORE", "SWITCH TANK", 42)
-        end
-    elseif sMessage:find(self.L["The Archives tremble as Dreadphage Ohmna"]) then
-        mod:AddMsg("OP2", "P2: TENTACLES", 5, "Alert")
-    elseif sMessage:find(self.L["The Archives quake with the furious might"]) then
-        mod:AddMsg("OP3", "P3: RAVENOUS", 5, "Alert")
-        OhmnaP3 = true
-        core:RemoveTimerBar("OPILAR")
-        core:RemoveTimerBar("OBORE")
-        mod:AddTimerBar("OSPEW", "NEXT BIG SPEW", 45)
+  if sMessage:find(self.L["A plasma leech begins draining"]) then
+    if OhmnaP3 then return end
+    pilarCount = pilarCount + 1
+    if submergeCount < 2 and pilarCount > 4 then
+      mod:AddTimerBar("OPILAR", "PHASE 2", firstPull and 27 or 22)
+      firstPull = false
+    else
+      local pilarActivated = self:OhmnaPE(pilarCount % 2)
+      mod:AddTimerBar("OPILAR", self.L["PILLAR %u : %s"]:format(pilarCount, pilarActivated), 25)
     end
+  elseif sMessage:find(self.L["Dreadphage Ohmna submerges"]) then
+    pilarCount, boreCount = 1, 0
+    submergeCount = submergeCount + 1
+    core:RemoveTimerBar("OTENT")
+  elseif sMessage:find(self.L["Dreadphage Ohmna is bored"]) then
+    boreCount = boreCount + 1
+    if boreCount < 2 and self:Tank() then
+      mod:AddTimerBar("OBORE", "SWITCH TANK", 42)
+    end
+  elseif sMessage:find(self.L["The Archives tremble as Dreadphage Ohmna"]) then
+    mod:AddMsg("OP2", "P2: TENTACLES", 5, "Alert")
+  elseif sMessage:find(self.L["The Archives quake with the furious might"]) then
+    mod:AddMsg("OP3", "P3: RAVENOUS", 5, "Alert")
+    OhmnaP3 = true
+    core:RemoveTimerBar("OPILAR")
+    core:RemoveTimerBar("OBORE")
+    mod:AddTimerBar("OSPEW", "NEXT BIG SPEW", 45)
+  end
 end
