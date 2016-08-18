@@ -57,6 +57,11 @@ local DEFAULT_SETTINGS = {
     tAnchorPoints = { 0.25, 0.5, 0.25, 0.5 },
     tSizingMinimum = { 150, 250 },
   },
+  ["Progress"] = {
+    nBarHeight = 25,
+    tAnchorPoints = { 0.25, 0.5, 0.25, 0.5 },
+    tSizingMinimum = { 150, 250 },
+  },
   ["Message"] = {
     bAutofadeEnable = true,
     tAnchorPoints = { 0.5, 0.5, 0.5, 0.5 },
@@ -392,6 +397,104 @@ function TimerManager:OnTimerUpdate()
 end
 
 ----------------------------------------------------------------------------------------------------
+-- Progress Class.
+----------------------------------------------------------------------------------------------------
+local ProgressManager = NewManager("Progress")
+
+function ProgressManager:AddBar(sKey, sText, tUpdate, tOptions, tCallback)
+  assert(type(sKey) == "string")
+  assert(type(sText) == "string")
+  assert(tUpdate and tUpdate.fHandler)
+  assert(not tCallback or tCallback.fHandler)
+  local nProgress = 0
+  if tUpdate.tClass then
+    nProgress = tUpdate.fHandler(tUpdate.tClass, 0)
+  else
+    nProgress = tUpdate.fHandler(0)
+  end
+  if nProgress < 100 then
+    -- Manage windows objects.
+    local wndMain = nil
+    if self.tBars[sKey] then
+      wndMain = self.tBars[sKey].wndMain
+    else
+      wndMain = Apollo.LoadForm(RaidCore.xmlDoc, "BarProgressTemplate", self.wndParent, self)
+    end
+    local wndBar = wndMain:FindChild("Border"):FindChild("bg")
+    local wndText = wndBar:FindChild("Text")
+    local wndProgress = wndBar:FindChild("Progress")
+    local wndProgressBar = wndBar:FindChild("ProgressBar")
+    wndMain:SetData(nProgress)
+    -- Manage bar itself.
+    wndMain:SetAnchorOffsets(0, 0, 0, self.tSettings.nBarHeight)
+    wndProgressBar:SetMax(100)
+    wndProgressBar:SetProgress(nProgress)
+    wndProgress:SetText(("%.1f%%"):format(nProgress))
+    wndText:SetText(sText)
+    if tOptions then
+      if tOptions.sColor then
+        wndProgressBar:SetBarColor(tOptions.sColor)
+      end
+    end
+
+    self.tBars[sKey] = {
+      -- About timer itself.
+      sText = sText,
+      EnableCountDown = EnableCountDown,
+      -- Get progress
+      tUpdate = tUpdate,
+      tCallback = tCallback,
+      -- Windows objects.
+      wndMain = wndMain,
+      wndText = wndText,
+      wndProgress = wndProgress,
+      wndProgressBar = wndProgressBar,
+      nPrevProgress = nProgress
+    }
+    ArrangeBar(self)
+    TimerStart()
+  else
+    -- Delete the bar, check if exist is done in this function.
+    self:RemoveBar(sKey)
+  end
+end
+
+function ProgressManager:OnTimerUpdate()
+  local Timeout = {}
+
+  -- Update each bar progress
+  for sKey, tBar in next, self.tBars do
+    local nProgress = 0
+    if tBar.tUpdate.tClass then
+      nProgress = tBar.tUpdate.fHandler(tBar.tUpdate.tClass, tBar.nPrevProgress)
+    else
+      nProgress = tBar.tUpdate.fHandler(tBar.nPrevProgress)
+    end
+    if nProgress < 100 then
+      tBar.wndMain:SetData(nProgress)
+      tBar.wndProgressBar:SetProgress(nProgress)
+      tBar.wndProgress:SetText(("%.1f%%"):format(nProgress))
+      tBar.nPrevProgress = nProgress
+    else
+      if tBar.tCallback then
+        table.insert(Timeout, tBar.tCallback)
+      end
+      self:RemoveBar(sKey)
+    end
+  end
+  -- Process all callback of ended timer.
+  for _, tCallback in next, Timeout do
+    if tCallback.tClass then
+      -- Call a function in a class.
+      tCallback.fHandler(tCallback.tClass, tCallback.tData)
+    else
+      -- Call a function ouside a class.
+      tCallback.fHandler(tCallback.tData)
+    end
+  end
+end
+
+----------------------------------------------------------------------------------------------------
 -- UnitManager Class.
 ----------------------------------------------------------------------------------------------------
 local UnitManager = NewManager("Health")
@@ -607,6 +710,20 @@ end
 
 function RaidCore:RemoveTimerBar(sKey)
   TimerManager:RemoveBar(sKey)
+end
+
+-- Add a timer bar on screen.
+-- @param sKey timer identification, can be used to overwrite a timer.
+-- @param sText Text to display in the timer bar.
+-- @param tUpdate structure about a update action to do get the progress from.
+-- @param tOptions structure with many graphical options.
+-- @param tCallback structure about a callback action to do when the progress is full.
+function RaidCore:AddProgressBar(sKey, sText, tUpdate, tOptions, tCallback)
+  ProgressManager:_AddBar(sKey, sText, tUpdate, tOptions, tCallback)
+end
+
+function RaidCore:RemoveProgressBar(sKey)
+  ProgressManager:RemoveBar(sKey)
 end
 
 function RaidCore:AddUnit(tUnit)

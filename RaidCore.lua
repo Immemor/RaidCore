@@ -877,10 +877,18 @@ function RaidCore:LaunchBreak(tArgc)
     local tPlayerUnit = GetPlayerUnit()
     local nPlayerId = tPlayerUnit:GetId()
     local nRandomGreen = math.random()
+    local function GetProgress(nProgress)
+      return nProgress + 1.3
+    end
+    local function GetProgress2(nProgress)
+      return nProgress + 0.5
+    end
     self:AddTimerBar("TEST1", "End of test scenario", 60, nil, { sColor = "red" })
     self:AddTimerBar("TEST2", "Timer with count down", 8, nil, { sColor = "blue", bEmphasize = true })
     self:AddTimerBar("TEST3", "Timer for a static circle", 15, nil, { sColor = "xkcdBarneyPurple" })
     self:AddTimerBar("TEST4", "Timer for the crosshair on you", 30, nil, { sColor = "xkcdBrown" })
+    self:AddProgressBar("PROGRESS", "Progress", { fHandler = GetProgress }, nil)
+    self:AddProgressBar("PROGRESS2", "Progress2", { fHandler = GetProgress2 }, nil)
     self:AddUnit(GetPlayerUnit())
     self:AddMsg("TEST1", self.L["Start test scenario"], 5, "red")
     for i = 1, 36 do
@@ -913,4 +921,7 @@ function RaidCore:LaunchBreak(tArgc)
         self:RemoveTimerBar("TEST2")
         self:RemoveTimerBar("TEST3")
         self:RemoveTimerBar("TEST4")
+        self:RemoveProgressBar("PROGRESS")
+        self:RemoveProgressBar("PROGRESS2")
+
       end
