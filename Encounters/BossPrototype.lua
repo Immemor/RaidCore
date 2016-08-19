@@ -66,6 +66,39 @@ function EncounterPrototype:RegisterDefaultSetting(sKey, bDefaultSetting)
   self.tDefaultSettings[sKey] = bDefaultSetting == nil or bDefaultSetting
 end
 
+-- Register events to a single unit or a list of units
+-- @param sUnitName String or table of Strings of unit names.
+-- @param tEventsHandlers Table of Events/Handlers pairs
+function EncounterPrototype:RegisterUnitEvents(sUnitName, tEventsHandlers)
+  assert(type(sUnitName) == "string" or type(sUnitName) == "table")
+  if type(sUnitName) == "table" then
+    for _, sName in pairs(sUnitName) do
+      for sMethodName, fHander in pairs(tEventsHandlers) do
+        self:RegisterUnitEvent(sName, sMethodName, fHander)
+      end
+    end
+  else
+    for sMethodName, fHander in pairs(tEventsHandlers) do
+      self:RegisterUnitEvent(sUnitName, sMethodName, fHander)
+    end
+  end
+end
+
+-- Register events to a single unit
+-- @param sUnitName Name of the unit
+-- @param sMethodName Name of the event
+-- @param fHandler Function to handle the event
+--
+-- Note: If the English translation is not found, the current string will be used like that.
+function EncounterPrototype:RegisterUnitEvent(sUnitName, sMethodName, fHandler)
+  assert(type(sUnitName) == "string")
+  assert(type(sMethodName) == "string")
+  assert(type(fHandler) == "function")
+  self.tUnitEvents[sMethodName] = self.tUnitEvents[sMethodName] or {}
+  self.tUnitEvents[sMethodName][self.L[sUnitName]] = self.tUnitEvents[sMethodName][self.L[sUnitName]] or {}
+  table.insert(self.tUnitEvents[sMethodName][self.L[sUnitName]], fHandler)
+end
+
 -- Add a message to screen.
 -- @param sKey Index which will be used to match on AddMsg.
 -- @param sEnglishText English text to search in language dictionnary.
@@ -357,5 +390,6 @@ function RaidCore:NewEncounter(name, continentId, parentMapId, mapId)
   new.L = GeminiLocale:GetLocale("RaidCore_" .. name)
   -- Create a empty array for settings.
   new.tDefaultSettings = {}
+  new.tUnitEvents = {}
   return new
 end

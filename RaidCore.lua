@@ -72,6 +72,31 @@ local function OnEncounterHookGeneric(sMethod, ...)
   if fEncounter then
     fEncounter(_tCurrentEncounter, ...)
   end
+
+  if _tCurrentEncounter and _tCurrentEncounter.tUnitEvents and _tCurrentEncounter.tUnitEvents[sMethod] then
+    local tEncounter = nil
+    if sMethod == "OnUnitCreated" then
+      local nId, tUnit, sName = ...
+      tEncounter = _tCurrentEncounter.tUnitEvents[sMethod][sName]
+    elseif sMethod == "OnUnitDestroyed" then
+      local nId, tUnit, sName = ...
+      tEncounter = _tCurrentEncounter.tUnitEvents[sMethod][sName]
+    elseif sMethod == "OnCastStart" then
+      local nId, sCastName, nCastEndTime, sName = ...
+      tEncounter = _tCurrentEncounter.tUnitEvents[sMethod][sName]
+    elseif sMethod == "OnCastEnd" then
+      local nId, sCastName, isInterrupted, nCastEndTime, sName = ...
+      tEncounter = _tCurrentEncounter.tUnitEvents[sMethod][sName]
+    elseif sMethod == "OnHealthChanged" then
+      local nId, nPourcent, sName = ...
+      tEncounter = _tCurrentEncounter.tUnitEvents[sMethod][sName]
+    end
+    if tEncounter then
+      for _, fEncounter in pairs(tEncounter) do
+        fEncounter(_tCurrentEncounter, ...)
+      end
+    end
+  end
 end
 
 local function RemoveDelayedUnit(nId, sName)
