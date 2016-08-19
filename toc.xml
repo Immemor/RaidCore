@@ -62,4 +62,10 @@
     <Script Name="Encounters/DS/Avatus.lua"/>
     <!-- Encounters: Core-Y83 -->
     <Script Name="Encounters/Y83/PrimeEvolutionaryOperant.lua"/>
+    <!-- Encounters: Redmoon Terror -->
+    <Script Name="Encounters/RMT/Shredder.lua"/>
+    <Script Name="Encounters/RMT/Robomination.lua"/>
+    <Script Name="Encounters/RMT/Engineers.lua"/>
+    <Script Name="Encounters/RMT/Mordechai.lua"/>
+    <Script Name="Encounters/RMT/miniboss/Lockjaw.lua"/>
 </Addon>
