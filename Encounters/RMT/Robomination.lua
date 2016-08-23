@@ -101,6 +101,7 @@ function mod:OnDatachron(sMessage)
       sSound = mod:GetSetting("SoundSnakeNear") and sSound
       sSnakeOnX = self.L["SNAKE NEAR YOU ON %s"]:format(sSnakeTarget:GetName())
     else
+      sSound = nil
       sSnakeOnX = self.L["SNAKE ON %s"]:format(sSnakeTarget:GetName())
     end
     -- mod:AddTimerBar("SNAKE_TIMER", sSnakeOnX, 11)
