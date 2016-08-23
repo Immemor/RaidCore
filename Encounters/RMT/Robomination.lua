@@ -40,6 +40,22 @@ local MAZE_PHASE = 2
 local FIRST_SNAKE_TIMER = 7.5
 local SNAKE_TIMER = 17.5
 local FIRST_INCINERATE_TIMER = 18.5
+local COMPACTORS_EDGE = {
+  { y = -203.4208984375, x = 0.71257400512695, z = -1349.8697509766 },
+  { y = -203.4208984375, x = 10.955376625061, z = -1339.6927490234 },
+  { y = -203.4208984375, x = -19.743923187256, z = -1339.6927490234 },
+  { y = -203.4208984375, x = -9.5010261535645, z = -1349.8697509766 },
+  { y = -203.4208984375, x = 0.71258544921875, z = -1319.4196777344 },
+  { y = -203.4208984375, x = 10.955380439758, z = -1329.5698242188 },
+  { y = -203.4208984375, x = -19.743919372559, z = -1329.5698242188 },
+  { y = -203.4208984375, x = -9.5010147094727, z = -1319.4196777344 },
+}
+local COMPACTORS_CORNER = {
+  { y = -203.4208984375, x = 10.955372810364, z = -1349.8697509766 },
+  { y = -203.4208984375, x = -19.743927001953, z = -1349.8697509766 },
+  { y = -203.4208984375, x = -19.743915557861, z = -1319.4196777344 },
+  { y = -203.4208984375, x = 10.95538520813, z = -1319.4196777344 },
+}
 ----------------------------------------------------------------------------------------------------
 -- Locals.
 ----------------------------------------------------------------------------------------------------
@@ -55,6 +71,8 @@ mod:RegisterDefaultSetting("SoundSnake")
 mod:RegisterDefaultSetting("SoundSnakeNear")
 mod:RegisterDefaultSetting("SoundPhaseChange")
 mod:RegisterDefaultSetting("SoundPhaseChangeClose")
+mod:RegisterDefaultSetting("CompactorGridCorner")
+mod:RegisterDefaultSetting("CompactorGridEdge", false)
 
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
@@ -63,6 +81,7 @@ function mod:OnBossEnable()
   phase = DPS_PHASE
   mod:AddTimerBar("ARMS_TIMER", "Arms spawning in", 45)
   mod:AddTimerBar("NEXT_SNAKE_TIMER", "Next snake in", FIRST_SNAKE_TIMER)
+  mod:DrawCompactorGrid()
 end
 
 function mod:OnDatachron(sMessage)
@@ -93,10 +112,12 @@ function mod:OnDatachron(sMessage)
     core:RemoveMsg("ROBO_MAZE")
     mod:RemoveTimerBar("NEXT_SNAKE_TIMER")
     mod:AddMsg("ROBO_MAZE", "RUN TO THE CENTER !", 5, mod:GetSetting("SoundSnakeNear") and "Info")
+    mod:RemoveCompactorGrid()
   elseif self.L["The Robomination erupts back into the fight"] == sMessage then
     phase = DPS_PHASE
     mod:AddTimerBar("NEXT_SNAKE_TIMER", "Next snake in", FIRST_SNAKE_TIMER)
     mod:AddTimerBar("NEXT_INCINERATE_TIMER", "Next incinerate in", FIRST_INCINERATE_TIMER)
+    mod:DrawCompactorGrid()
   end
 end
 
@@ -109,6 +130,33 @@ end
 -- core:AddPicture("SNAKE_CROSSHAIR", nId, "Crosshair", 20)
 -- end
 -- end
+
+function mod:DrawCompactorGrid()
+  mod:HelperCompactorGrid(COMPACTORS_EDGE, false, true)
+  mod:HelperCompactorGrid(COMPACTORS_CORNER, true, true)
+end
+
+function mod:RemoveCompactorGrid()
+  mod:HelperCompactorGrid(COMPACTORS_EDGE, false, false)
+  mod:HelperCompactorGrid(COMPACTORS_CORNER, true, false)
+end
+
+function mod:HelperCompactorGrid(compactors, isCorner, isAdding)
+  local color = (isCorner == true and "Green") or "Red"
+  local idString = (isCorner == true and "COMPACTOR_CORNER_%d") or "COMPACTOR_EDGE_%d"
+  local setting = (isCorner == true and "CompactorGridCorner") or "CompactorGridEdge"
+  if not mod:GetSetting(setting) then
+    return
+  end
+  for i, position in pairs(compactors) do
+    local id = string.format(idString, i)
+    if isAdding then
+      core:AddPolygon(id, position, 7, 45, 4, color, 4)
+    else
+      core:RemovePolygon(id)
+    end
+  end
+end
 
 function mod:OnDebuffRemove(nId, nSpellId, nStack, fTimeRemaining)
   if nSpellId == DEBUFF_SNAKE then
@@ -138,11 +186,3 @@ mod:RegisterUnitEvents("Robomination",{
     end,
   }
 )
-
--- mod:RegisterUnitEvents("Trash Compactor",{
--- ["OnUnitCreated"] = function (self, nId, tUnit, sName)
--- core:WatchUnit(tUnit)
--- core:AddPolygon(nId, nId, 7.5, 45, 6, "Green", 4)
--- end,
--- }
--- )
