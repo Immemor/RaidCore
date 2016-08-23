@@ -76,7 +76,6 @@ mod:RegisterDefaultSetting("SoundPhaseChange")
 mod:RegisterDefaultSetting("SoundPhaseChangeClose")
 mod:RegisterDefaultSetting("CompactorGridCorner")
 mod:RegisterDefaultSetting("CompactorGridEdge", false)
-
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
