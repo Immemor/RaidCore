@@ -124,16 +124,6 @@ function mod:OnDatachron(sMessage)
   end
 end
 
-function mod:OnUnitCreated (nId, tUnit, sName)
-
-end
-
--- function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
--- if nSpellId == DEBUFF_SNAKE then
--- core:AddPicture("SNAKE_CROSSHAIR", nId, "Crosshair", 20)
--- end
--- end
-
 function mod:DrawCompactorGrid()
   mod:HelperCompactorGrid(COMPACTORS_EDGE, false, true)
   mod:HelperCompactorGrid(COMPACTORS_CORNER, true, true)
