@@ -262,9 +262,9 @@ function RaidCore:GUI_init(sVersion)
     LogicEarth = Apollo.LoadForm(self.xmlDoc, "ConfigForm_EpLogicEarth", self.wndEncounterTarget, self),
     LogicLife = Apollo.LoadForm(self.xmlDoc, "ConfigForm_EpLogicLife", self.wndEncounterTarget, self),
     LogicWater = Apollo.LoadForm(self.xmlDoc, "ConfigForm_EpLogicWater", self.wndEncounterTarget, self),
-    Shredder = Apollo.LoadForm(self.xmlDoc, "ConfigForm_Shredder", self.wndEncounterTarget, self),
     Avatus = Apollo.LoadForm(self.xmlDoc, "ConfigForm_Avatus", self.wndEncounterTarget, self),
     Shredder = Apollo.LoadForm(self.xmlDoc, "ConfigForm_Shredder", self.wndEncounterTarget, self),
+    MinibossesRedmoon = Apollo.LoadForm(self.xmlDoc, "ConfigForm_MinibossesRedmoon", self.wndEncounterTarget, self),
     Robomination = Apollo.LoadForm(self.xmlDoc, "ConfigForm_Robomination", self.wndEncounterTarget, self),
   }
   -- Initialize Left Menu in Main RaidCore window.
