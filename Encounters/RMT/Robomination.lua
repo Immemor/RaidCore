@@ -23,8 +23,8 @@ mod:RegisterEnglishLocale({
     ["Flailing Arm"] = "Flailing Arm",
     --Datachron
     ["Robomination tries to crush"] = "Robomination tries to crush",
-    ["The Robomination sinks down into the trash"] = "The Robomination sinks down into the trash",
-    ["The Robomination erupts back into the fight"] = "The Robomination erupts back into the fight",
+    ["The Robomination sinks down into the trash."] = "The Robomination sinks down into the trash.",
+    ["The Robomination erupts back into the fight!"] = "The Robomination erupts back into the fight!",
     --Message bars
     ["SNAKE ON %s"] = "SNAKE ON %s",
     ["SNAKE ON YOU"] = "SNAKE ON YOU",
@@ -64,7 +64,7 @@ local GetPlayerUnitByName = GameLib.GetPlayerUnitByName
 local GetPlayerUnit = GameLib.GetPlayerUnit
 local phase
 ----------------------------------------------------------------------------------------------------
--- Settings
+-- Settings.
 ----------------------------------------------------------------------------------------------------
 mod:RegisterDefaultSetting("CrosshairSnake")
 mod:RegisterDefaultSetting("SoundSnake")
@@ -107,13 +107,13 @@ function mod:OnDatachron(sMessage)
     mod:RemoveTimerBar("NEXT_SNAKE_TIMER")
     mod:AddTimerBar("NEXT_SNAKE_TIMER", "Next snake in", SNAKE_TIMER)
     mod:AddMsg("SNAKE_MSG", sSnakeOnX, 5, sSound, "Blue")
-  elseif self.L["The Robomination sinks down into the trash"] == sMessage then
+  elseif self.L["The Robomination sinks down into the trash."] == sMessage then
     phase = MAZE_PHASE
     core:RemoveMsg("ROBO_MAZE")
     mod:RemoveTimerBar("NEXT_SNAKE_TIMER")
     mod:AddMsg("ROBO_MAZE", "RUN TO THE CENTER !", 5, mod:GetSetting("SoundSnakeNear") and "Info")
     mod:RemoveCompactorGrid()
-  elseif self.L["The Robomination erupts back into the fight"] == sMessage then
+  elseif self.L["The Robomination erupts back into the fight!"] == sMessage then
     phase = DPS_PHASE
     mod:AddTimerBar("NEXT_SNAKE_TIMER", "Next snake in", FIRST_SNAKE_TIMER)
     mod:AddTimerBar("NEXT_INCINERATE_TIMER", "Next incinerate in", FIRST_INCINERATE_TIMER)
