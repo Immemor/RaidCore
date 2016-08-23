@@ -34,6 +34,8 @@ mod:RegisterEnglishLocale({
     ["Putrid Pouncer"] = "Putrid Pouncer",
     ["Risen Redmoon Plunderer"] = "Risen Redmoon Plunderer",
     ["Risen Redmoon Cadet"] = "Risen Redmoon Cadet",
+    ["Tether Anchor"] = "Tether Anchor",
+    ["Junk Trap"] = "Junk Trap",
     -- Datachron messages.
     ["WARNING: THE SHREDDER IS STARTING!"] = "WARNING: THE SHREDDER IS STARTING!",
     --Cast names
@@ -77,6 +79,7 @@ mod:RegisterDefaultSetting("LineSawblade")
 mod:RegisterDefaultSetting("SquareTethers")
 mod:RegisterDefaultSetting("CrosshairAdds")
 mod:RegisterDefaultSetting("CrosshairPriority")
+mod:RegisterDefaultSetting("CrosshairTether")
 mod:RegisterDefaultSetting("SoundAdds")
 mod:RegisterDefaultSetting("SoundMiniboss")
 mod:RegisterDefaultSetting("SoundNecroticLash")
@@ -310,6 +313,18 @@ mod:RegisterUnitEvents({"Regor the Rancid", "Braugh the Bloated"},{
         core:RemoveMsg("MINIBOSS")
         mod:AddMsg("MINIBOSS", "INTERRUPT MINIBOSS!", 5, mod:GetSetting("SoundMinibossCast") and "Inferno")
       end
+    end,
+  }
+)
+
+mod:RegisterUnitEvents("Tether Anchor",{
+    ["OnUnitCreated"] = function (self, nId, tUnit, sName)
+      if mod:GetSetting("CrosshairTether") then
+        core:AddPicture(nId, nId, "Crosshair", 25, 0, 0, nil, "FFFFF569")
+      end
+    end,
+    ["OnUnitDestroyed"] = function (self, nId, tUnit, sName)
+      core:RemovePicture(nId)
     end,
   }
 )
