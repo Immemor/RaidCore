@@ -76,6 +76,7 @@ mod:RegisterFrenchLocale({
 mod:RegisterDefaultSetting("LineSawblade")
 mod:RegisterDefaultSetting("SquareTethers")
 mod:RegisterDefaultSetting("CrosshairAdds")
+mod:RegisterDefaultSetting("CrosshairPriority")
 mod:RegisterDefaultSetting("SoundAdds")
 mod:RegisterDefaultSetting("SoundMiniboss")
 mod:RegisterDefaultSetting("SoundNecroticLash")
@@ -225,6 +226,15 @@ mod:RegisterUnitEvents({
     ["OnHealthChanged"] = function (self, nId, nPourcent, sName)
       if nPourcent <= 1 and mod:GetSetting("CrosshairAdds") then
         core:AddPicture(nId, nId, "Crosshair", 20)
+      end
+    end,
+  }
+)
+
+mod:RegisterUnitEvents({ "Bilious Brute", "Noxious Nabber" },{
+    ["OnUnitCreated"] = function (self, nId, tUnit, sName)
+      if mod:GetSetting("CrosshairPriority") then
+        core:AddPicture(nId, nId, "Crosshair", 30, 0, 0, nil, "red")
       end
     end,
   }
