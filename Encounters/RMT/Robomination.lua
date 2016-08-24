@@ -116,8 +116,10 @@ function mod:OnDatachron(sMessage)
       sSound = nil
       sSnakeOnX = self.L["SNAKE ON %s"]:format(sSnakeTarget:GetName())
     end
-    -- mod:AddTimerBar("SNAKE_TIMER", sSnakeOnX, 11)
-    core:AddPicture("SNAKE_CROSSHAIR", sSnakeTarget:GetId(), "Crosshair", 20)
+
+    if mod:GetSetting("CrosshairSnake") then
+      core:AddPicture("SNAKE_CROSSHAIR", sSnakeTarget:GetId(), "Crosshair", 20)
+    end
 
     mod:RemoveTimerBar("NEXT_SNAKE_TIMER")
     mod:AddTimerBar("NEXT_SNAKE_TIMER", "Next snake in", SNAKE_TIMER)
