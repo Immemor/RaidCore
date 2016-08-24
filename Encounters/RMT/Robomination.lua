@@ -23,8 +23,10 @@ mod:RegisterEnglishLocale({
     ["Flailing Arm"] = "Flailing Arm",
     --Casts
     ["Cannon Fire"] = "Cannon Fire",
+    ["Incineration Laser"] = "Incineration Laser",
     --Datachron
     ["Robomination tries to crush"] = "Robomination tries to crush",
+    ["The Robomination tries to incinerate"] = "The Robomination tries to incinerate",
     ["The Robomination sinks down into the trash."] = "The Robomination sinks down into the trash.",
     ["The Robomination erupts back into the fight!"] = "The Robomination erupts back into the fight!",
     --Message bars
@@ -32,6 +34,8 @@ mod:RegisterEnglishLocale({
     ["SNAKE ON YOU"] = "SNAKE ON YOU",
     ["SNAKE NEAR YOU ON %s"] = "SNAKE NEAR YOU ON %s",
     ["Cannon arm spawned"] = "Cannon arm spawned",
+    ["LASER ON %s"] = "LASER ON %s",
+    ["LASER ON YOU"] = "LASER ON YOU",
   })
 ----------------------------------------------------------------------------------------------------
 -- Constants.
@@ -43,6 +47,7 @@ local MAZE_PHASE = 2
 local FIRST_SNAKE_TIMER = 7.5
 local SNAKE_TIMER = 17.5
 local FIRST_INCINERATE_TIMER = 18.5
+local INCINERATE_TIMER = 42.5
 local COMPACTORS_EDGE = {
   { y = -203.4208984375, x = 0.71257400512695, z = -1349.8697509766 },
   { y = -203.4208984375, x = 10.955376625061, z = -1339.6927490234 },
@@ -81,6 +86,8 @@ mod:RegisterDefaultSetting("CompactorGridCorner")
 mod:RegisterDefaultSetting("CompactorGridEdge", false)
 mod:RegisterDefaultSetting("SoundArmSpawn")
 mod:RegisterDefaultSetting("SoundCannonInterrupt")
+mod:RegisterDefaultSetting("SoundLaser")
+mod:RegisterDefaultSetting("CrosshairLaser")
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
@@ -119,6 +126,7 @@ function mod:OnDatachron(sMessage)
     phase = MAZE_PHASE
     core:RemoveMsg("ROBO_MAZE")
     mod:RemoveTimerBar("NEXT_SNAKE_TIMER")
+    mod:RemoveTimerBar("NEXT_INCINERATE_TIMER")
     mod:AddMsg("ROBO_MAZE", "RUN TO THE CENTER !", 5, mod:GetSetting("SoundSnakeNear") and "Info")
     mod:RemoveCompactorGrid()
   elseif self.L["The Robomination erupts back into the fight!"] == sMessage then
@@ -126,6 +134,24 @@ function mod:OnDatachron(sMessage)
     mod:AddTimerBar("NEXT_SNAKE_TIMER", "Next snake in", FIRST_SNAKE_TIMER)
     mod:AddTimerBar("NEXT_INCINERATE_TIMER", "Next incinerate in", FIRST_INCINERATE_TIMER)
     mod:DrawCompactorGrid()
+  elseif sMessage:find(self.L["Robomination tries to incinerate"]) then
+    local tLaserTarget = GetPlayerUnitByName(string.match(sMessage, self.L["Robomination tries to incinerate"].." ".."([^%s]+%s+)$"))
+    local bIsOnMyself = sSnakeTarget == GetPlayerUnit()
+    local sSound = mod:GetSetting("SoundLaser") == true and "Burn"
+    local sLaserOnX = ""
+    if bIsOnMyself then
+      sLaserOnX = self.L["LASER ON YOU"]
+    else
+      sLaserOnX = self.L["LASER ON %s"]:format(sSnakeTarget:GetName())
+    end
+
+    if mod:GetSetting("CrosshairLaser") then
+      core:AddPicture("LASER_CROSSHAIR", tLaserTarget:GetId(), "Crosshair", 30, 0, 0, nil, "Red")
+    end
+
+    mod:RemoveTimerBar("NEXT_INCINERATE_TIMER")
+    mod:AddTimerBar("NEXT_INCINERATE_TIMER", "Next laser in", INCINERATE_TIMER, mod:GetSetting("SoundLaser"))
+    mod:AddMsg("LASER_MSG", sLaserOnX, 5, sSound, "Red")
   end
 end
 
@@ -186,6 +212,11 @@ mod:RegisterUnitEvents("Robomination",{
     ["OnHealthChanged"] = function (self, nId, nPourcent, sName)
       if nPourcent >= 75.5 and nPourcent <= 76.5 then
         mod:AddMsg("ROBO_MAZE", "MAZE SOON !", 5, mod:GetSetting("SoundPhaseChangeClose") and "Info")
+      end
+    end,
+    ["OnCastEnd"] = function (self, nId, sCastName, isInterrupted, nCastEndTime, sName)
+      if self.L["Incineration Laser"] == sCastName then
+        core:RemovePicture("LASER_CROSSHAIR")
       end
     end,
   }
