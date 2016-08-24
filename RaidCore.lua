@@ -30,9 +30,9 @@ local next, pcall = next, pcall
 -- Constants.
 ----------------------------------------------------------------------------------------------------
 -- Should be 5.23 when replacement tokens will works (see #88 issue).
-local RAIDCORE_CURRENT_VERSION = "6.1"
+local RAIDCORE_CURRENT_VERSION = "6"
 -- Should be deleted.
-local ADDON_DATE_VERSION = 15112501
+local ADDON_DATE_VERSION = 16082301
 -- Sometimes Carbine have inserted some no-break-space, for fun.
 -- Behavior seen with French language. This problem is not present in English.
 local NO_BREAK_SPACE = string.char(194, 160)
@@ -67,36 +67,44 @@ local empCD, empTimer = 5, nil
 ----------------------------------------------------------------------------------------------------
 -- Privates functions
 ----------------------------------------------------------------------------------------------------
+local function OnEncounterUnitEvents(sMethod, ...)
+  if _tCurrentEncounter == nil or _tCurrentEncounter.tUnitEvents == nil or
+  _tCurrentEncounter.tUnitEvents[sMethod] == nil then
+    return
+  end
+
+  local tEncounter = nil
+  if sMethod == "OnUnitCreated" then
+    local nId, tUnit, sName = ...
+    tEncounter = _tCurrentEncounter.tUnitEvents[sMethod][sName]
+  elseif sMethod == "OnUnitDestroyed" then
+    local nId, tUnit, sName = ...
+    tEncounter = _tCurrentEncounter.tUnitEvents[sMethod][sName]
+  elseif sMethod == "OnCastStart" then
+    local nId, sCastName, nCastEndTime, sName = ...
+    tEncounter = _tCurrentEncounter.tUnitEvents[sMethod][sName]
+  elseif sMethod == "OnCastEnd" then
+    local nId, sCastName, isInterrupted, nCastEndTime, sName = ...
+    tEncounter = _tCurrentEncounter.tUnitEvents[sMethod][sName]
+  elseif sMethod == "OnHealthChanged" then
+    local nId, nPourcent, sName = ...
+    tEncounter = _tCurrentEncounter.tUnitEvents[sMethod][sName]
+  end
+
+  if tEncounter then
+    for _, fEncounter in pairs(tEncounter) do
+      fEncounter(_tCurrentEncounter, ...)
+    end
+  end
+end
+
 local function OnEncounterHookGeneric(sMethod, ...)
   local fEncounter = _tCurrentEncounter[sMethod]
   if fEncounter then
     fEncounter(_tCurrentEncounter, ...)
   end
 
-  if _tCurrentEncounter and _tCurrentEncounter.tUnitEvents and _tCurrentEncounter.tUnitEvents[sMethod] then
-    local tEncounter = nil
-    if sMethod == "OnUnitCreated" then
-      local nId, tUnit, sName = ...
-      tEncounter = _tCurrentEncounter.tUnitEvents[sMethod][sName]
-    elseif sMethod == "OnUnitDestroyed" then
-      local nId, tUnit, sName = ...
-      tEncounter = _tCurrentEncounter.tUnitEvents[sMethod][sName]
-    elseif sMethod == "OnCastStart" then
-      local nId, sCastName, nCastEndTime, sName = ...
-      tEncounter = _tCurrentEncounter.tUnitEvents[sMethod][sName]
-    elseif sMethod == "OnCastEnd" then
-      local nId, sCastName, isInterrupted, nCastEndTime, sName = ...
-      tEncounter = _tCurrentEncounter.tUnitEvents[sMethod][sName]
-    elseif sMethod == "OnHealthChanged" then
-      local nId, nPourcent, sName = ...
-      tEncounter = _tCurrentEncounter.tUnitEvents[sMethod][sName]
-    end
-    if tEncounter then
-      for _, fEncounter in pairs(tEncounter) do
-        fEncounter(_tCurrentEncounter, ...)
-      end
-    end
-  end
+  OnEncounterUnitEvents(sMethod, ...)
 end
 
 local function RemoveDelayedUnit(nId, sName)
