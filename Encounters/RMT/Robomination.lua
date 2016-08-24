@@ -24,6 +24,7 @@ mod:RegisterEnglishLocale({
     --Casts
     ["Cannon Fire"] = "Cannon Fire",
     ["Incineration Laser"] = "Incineration Laser",
+    ["Noxious Belch"] = "Noxious Belch",
     --Datachron
     ["Robomination tries to crush"] = "Robomination tries to crush",
     ["The Robomination tries to incinerate"] = "The Robomination tries to incinerate",
@@ -88,6 +89,7 @@ mod:RegisterDefaultSetting("SoundArmSpawn")
 mod:RegisterDefaultSetting("SoundCannonInterrupt")
 mod:RegisterDefaultSetting("SoundLaser")
 mod:RegisterDefaultSetting("CrosshairLaser")
+mod:RegisterDefaultSetting("SoundSpew")
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
@@ -221,6 +223,11 @@ mod:RegisterUnitEvents("Robomination",{
     ["OnHealthChanged"] = function (self, nId, nPourcent, sName)
       if nPourcent >= 75.5 and nPourcent <= 76.5 then
         mod:AddMsg("ROBO_MAZE", "MAZE SOON !", 5, mod:GetSetting("SoundPhaseChangeClose") and "Info")
+      end
+    end,
+    ["OnCastStart"] = function (self, nId, sCastName, nCastEndTime, sName)
+      if self.L["Noxious Belch"] == sCastName then
+        mod:AddMsg("SPEW_MSG", "Spew!", 4, mod:GetSetting("SoundSpew") == true and "Beware")
       end
     end,
     ["OnCastEnd"] = function (self, nId, sCastName, isInterrupted, nCastEndTime, sName)
