@@ -21,6 +21,8 @@ mod:RegisterEnglishLocale({
     ["Trash Compactor"] = "Trash Compactor",
     ["Cannon Arm"] = "Cannon Arm",
     ["Flailing Arm"] = "Flailing Arm",
+    --Casts
+    ["Cannon Fire"] = "Cannon Fire",
     --Datachron
     ["Robomination tries to crush"] = "Robomination tries to crush",
     ["The Robomination sinks down into the trash."] = "The Robomination sinks down into the trash.",
@@ -29,6 +31,7 @@ mod:RegisterEnglishLocale({
     ["SNAKE ON %s"] = "SNAKE ON %s",
     ["SNAKE ON YOU"] = "SNAKE ON YOU",
     ["SNAKE NEAR YOU ON %s"] = "SNAKE NEAR YOU ON %s",
+    ["Cannon arm spawned"] = "Cannon arm spawned",
   })
 ----------------------------------------------------------------------------------------------------
 -- Constants.
@@ -76,6 +79,8 @@ mod:RegisterDefaultSetting("SoundPhaseChange")
 mod:RegisterDefaultSetting("SoundPhaseChangeClose")
 mod:RegisterDefaultSetting("CompactorGridCorner")
 mod:RegisterDefaultSetting("CompactorGridEdge", false)
+mod:RegisterDefaultSetting("SoundArmSpawn")
+mod:RegisterDefaultSetting("SoundCannonInterrupt")
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
@@ -162,6 +167,12 @@ mod:RegisterUnitEvents("Cannon Arm",{
       core:WatchUnit(tUnit)
       if phase == DPS_PHASE then
         mod:AddTimerBar("ARMS_TIMER", "Arms spawning in", 45)
+      end
+      mod:AddMsg("ARMS_MSG", self.L["Cannon arm spawned"], 5, mod:GetSetting("SoundArmSpawn") == true and "Info", "Red")
+    end,
+    ["OnCastStart"] = function (self, nId, sCastName, nCastEndTime, sName)
+      if self.L["Cannon Fire"] == sCastName then
+        mod:AddMsg("ARMS_MSG", "INTERRUPT CANNON!", 2, mod:GetSetting("SoundCannonInterrupt") == true and "Inferno")
       end
     end,
   }
