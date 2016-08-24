@@ -84,6 +84,21 @@ function EncounterPrototype:RegisterUnitEvents(sUnitName, tEventsHandlers)
   end
 end
 
+-- Register events to a datachron message
+-- @param sSearchMessage The message or parts of it
+-- @param sMatch "MATCH" or "FIND" for comparing the sSearchMessage
+-- @param fHandler Function to handle the event
+--
+-- Note: If the English translation is not found, the current string will be used like that.
+function EncounterPrototype:RegisterDatachronEvent(sSearchMessage, sMatch, fHandler)
+  assert(type(sSearchMessage) == "string")
+  assert(type(fHandler) == "function")
+  assert(sMatch == "MATCH" or sMatch == "FIND")
+  sSearchMessage = self.L[sSearchMessage]
+  self.tDatachronEvents[sSearchMessage] = self.tDatachronEvents[sSearchMessage] or {}
+  table.insert(self.tDatachronEvents[sSearchMessage], {fHandler = fHandler, bMatch = sMatch == "MATCH"})
+end
+
 -- Register events to a single unit
 -- @param sUnitName Name of the unit
 -- @param sMethodName Name of the event
@@ -391,5 +406,6 @@ function RaidCore:NewEncounter(name, continentId, parentMapId, mapId)
   -- Create a empty array for settings.
   new.tDefaultSettings = {}
   new.tUnitEvents = {}
+  new.tDatachronEvents = {}
   return new
 end

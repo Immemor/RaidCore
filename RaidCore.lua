@@ -98,6 +98,23 @@ local function OnEncounterUnitEvents(sMethod, ...)
   end
 end
 
+local function OnEncounterDatachronEvents(sMethod, ...)
+  if sMethod ~= "OnDatachron" or _tCurrentEncounter == nil or
+  _tCurrentEncounter.tDatachronEvents == nil then
+    return
+  end
+
+  for sSearchMessage, tEvent in pairs(_tCurrentEncounter.tDatachronEvents) do
+    local sMessage = ...
+    local bMatch = tEvent.bMatch
+    local fHandler = tEvent.fHandler
+    if (bMatch == true and sSearchMessage == sMessage) or
+    (bMatch == false and sMessage:find(sSearchMessage)) then
+      fHandler(_tCurrentEncounter, ...)
+    end
+  end
+end
+
 local function OnEncounterHookGeneric(sMethod, ...)
   local fEncounter = _tCurrentEncounter[sMethod]
   if fEncounter then
@@ -105,6 +122,7 @@ local function OnEncounterHookGeneric(sMethod, ...)
   end
 
   OnEncounterUnitEvents(sMethod, ...)
+  OnEncounterDatachronEvents(sMethod, ...)
 end
 
 local function RemoveDelayedUnit(nId, sName)
