@@ -98,62 +98,77 @@ function mod:OnBossEnable()
   mod:DrawCompactorGrid()
 end
 
+function mod:OnCrush(sMessage)
+  local sSnakeTarget = GetPlayerUnitByName(string.match(sMessage, self.L["Robomination tries to crush"].." ".."([^%s]+%s[^!]+)!$"))
+  local bIsOnMyself = sSnakeTarget == GetPlayerUnit()
+  local bSnakeNearYou = not bIsOnMyself and mod:GetDistanceBetweenUnits(GetPlayerUnit(), sSnakeTarget) < 7.5
+  local sSound = "RunAway"
+  local sSnakeOnX = ""
+  if bIsOnMyself then
+    sSound = mod:GetSetting("SoundSnake") and sSound
+    sSnakeOnX = self.L["SNAKE ON YOU"]
+  elseif bSnakeNearYou then
+    sSound = mod:GetSetting("SoundSnakeNear") and sSound
+    sSnakeOnX = self.L["SNAKE NEAR YOU ON %s"]:format(sSnakeTarget:GetName())
+  else
+    sSound = nil
+    sSnakeOnX = self.L["SNAKE ON %s"]:format(sSnakeTarget:GetName())
+  end
+
+  if mod:GetSetting("CrosshairSnake") then
+    core:AddPicture("SNAKE_CROSSHAIR", sSnakeTarget:GetId(), "Crosshair", 20)
+  end
+
+  mod:RemoveTimerBar("NEXT_SNAKE_TIMER")
+  mod:AddTimerBar("NEXT_SNAKE_TIMER", "Next snake in", SNAKE_TIMER)
+  mod:AddMsg("SNAKE_MSG", sSnakeOnX, 5, sSound, "Blue")
+end
+
+function mod:OnSink(sMessage)
+  phase = MAZE_PHASE
+  core:RemoveMsg("ROBO_MAZE")
+  mod:RemoveTimerBar("NEXT_SNAKE_TIMER")
+  mod:RemoveTimerBar("NEXT_INCINERATE_TIMER")
+  mod:AddMsg("ROBO_MAZE", "RUN TO THE CENTER !", 5, mod:GetSetting("SoundSnakeNear") and "Info")
+  mod:RemoveCompactorGrid()
+end
+
+function mod:OnErupt(sMessage)
+  phase = DPS_PHASE
+  mod:AddTimerBar("NEXT_SNAKE_TIMER", "Next snake in", FIRST_SNAKE_TIMER)
+  mod:AddTimerBar("NEXT_INCINERATE_TIMER", "Next incinerate in", FIRST_INCINERATE_TIMER)
+  mod:DrawCompactorGrid()
+end
+
+function mod:OnIncinerate(sMessage)
+  local tLaserTarget = GetPlayerUnitByName(string.match(sMessage, self.L["Robomination tries to incinerate"].." ".."([^%s]+%s+)$"))
+  local bIsOnMyself = sSnakeTarget == GetPlayerUnit()
+  local sSound = mod:GetSetting("SoundLaser") == true and "Burn"
+  local sLaserOnX = ""
+  if bIsOnMyself then
+    sLaserOnX = self.L["LASER ON YOU"]
+  else
+    sLaserOnX = self.L["LASER ON %s"]:format(sSnakeTarget:GetName())
+  end
+
+  if mod:GetSetting("CrosshairLaser") then
+    core:AddPicture("LASER_CROSSHAIR", tLaserTarget:GetId(), "Crosshair", 30, 0, 0, nil, "Red")
+  end
+
+  mod:RemoveTimerBar("NEXT_INCINERATE_TIMER")
+  mod:AddTimerBar("NEXT_INCINERATE_TIMER", "Next laser in", INCINERATE_TIMER, mod:GetSetting("SoundLaser"))
+  mod:AddMsg("LASER_MSG", sLaserOnX, 5, sSound, "Red")
+end
+
 function mod:OnDatachron(sMessage)
-  --The Robomination tries to incinerate x
   if sMessage:find(self.L["Robomination tries to crush"]) then
-    local sSnakeTarget = GetPlayerUnitByName(string.match(sMessage, self.L["Robomination tries to crush"].." ".."([^%s]+%s[^!]+)!$"))
-    local bIsOnMyself = sSnakeTarget == GetPlayerUnit()
-    local bSnakeNearYou = not bIsOnMyself and mod:GetDistanceBetweenUnits(GetPlayerUnit(), sSnakeTarget) < 7.5
-    local sSound = "RunAway"
-    local sSnakeOnX = ""
-    if bIsOnMyself then
-      sSound = mod:GetSetting("SoundSnake") and sSound
-      sSnakeOnX = self.L["SNAKE ON YOU"]
-    elseif bSnakeNearYou then
-      sSound = mod:GetSetting("SoundSnakeNear") and sSound
-      sSnakeOnX = self.L["SNAKE NEAR YOU ON %s"]:format(sSnakeTarget:GetName())
-    else
-      sSound = nil
-      sSnakeOnX = self.L["SNAKE ON %s"]:format(sSnakeTarget:GetName())
-    end
-
-    if mod:GetSetting("CrosshairSnake") then
-      core:AddPicture("SNAKE_CROSSHAIR", sSnakeTarget:GetId(), "Crosshair", 20)
-    end
-
-    mod:RemoveTimerBar("NEXT_SNAKE_TIMER")
-    mod:AddTimerBar("NEXT_SNAKE_TIMER", "Next snake in", SNAKE_TIMER)
-    mod:AddMsg("SNAKE_MSG", sSnakeOnX, 5, sSound, "Blue")
+    mod:OnCrush(sMessage)
   elseif self.L["The Robomination sinks down into the trash."] == sMessage then
-    phase = MAZE_PHASE
-    core:RemoveMsg("ROBO_MAZE")
-    mod:RemoveTimerBar("NEXT_SNAKE_TIMER")
-    mod:RemoveTimerBar("NEXT_INCINERATE_TIMER")
-    mod:AddMsg("ROBO_MAZE", "RUN TO THE CENTER !", 5, mod:GetSetting("SoundSnakeNear") and "Info")
-    mod:RemoveCompactorGrid()
+    mod:OnSink(sMessage)
   elseif self.L["The Robomination erupts back into the fight!"] == sMessage then
-    phase = DPS_PHASE
-    mod:AddTimerBar("NEXT_SNAKE_TIMER", "Next snake in", FIRST_SNAKE_TIMER)
-    mod:AddTimerBar("NEXT_INCINERATE_TIMER", "Next incinerate in", FIRST_INCINERATE_TIMER)
-    mod:DrawCompactorGrid()
+    mod:OnErupt(sMessage)
   elseif sMessage:find(self.L["Robomination tries to incinerate"]) then
-    local tLaserTarget = GetPlayerUnitByName(string.match(sMessage, self.L["Robomination tries to incinerate"].." ".."([^%s]+%s+)$"))
-    local bIsOnMyself = sSnakeTarget == GetPlayerUnit()
-    local sSound = mod:GetSetting("SoundLaser") == true and "Burn"
-    local sLaserOnX = ""
-    if bIsOnMyself then
-      sLaserOnX = self.L["LASER ON YOU"]
-    else
-      sLaserOnX = self.L["LASER ON %s"]:format(sSnakeTarget:GetName())
-    end
-
-    if mod:GetSetting("CrosshairLaser") then
-      core:AddPicture("LASER_CROSSHAIR", tLaserTarget:GetId(), "Crosshair", 30, 0, 0, nil, "Red")
-    end
-
-    mod:RemoveTimerBar("NEXT_INCINERATE_TIMER")
-    mod:AddTimerBar("NEXT_INCINERATE_TIMER", "Next laser in", INCINERATE_TIMER, mod:GetSetting("SoundLaser"))
-    mod:AddMsg("LASER_MSG", sLaserOnX, 5, sSound, "Red")
+    mod:OnIncinerate(sMessage)
   end
 end
 
