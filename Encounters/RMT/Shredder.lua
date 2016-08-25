@@ -46,6 +46,8 @@ mod:RegisterEnglishLocale({
     ["Deathwail"] = "Deathwail",
     ["Necrotic Lash"] = "Necrotic Lash",
     ["Swabbie Swoop"] = "Swabbie Swoop",
+    --Messages
+    ["%d BILE STACKS!"] = "%d BILE STACKS!",
   })
 
 mod:RegisterFrenchLocale({
@@ -84,7 +86,7 @@ mod:RegisterDefaultSetting("SoundAdds")
 mod:RegisterDefaultSetting("SoundMiniboss")
 mod:RegisterDefaultSetting("SoundNecroticLash")
 mod:RegisterDefaultSetting("SoundMinibossCast")
-
+mod:RegisterDefaultSetting("SoundOozeStacksWarning")
 ----------------------------------------------------------------------------------------------------
 -- Constants.
 ----------------------------------------------------------------------------------------------------
@@ -113,6 +115,7 @@ local NO_BREAK_SPACE = string.char(194, 160)
 local WALKING = 0
 local SHREDDER = 1
 local ADD_PHASES = circular{ 11, 45, 66, 0 }
+local DEBUFF_OOZING_BILE = 84321
 ----------------------------------------------------------------------------------------------------
 -- Locals.
 ----------------------------------------------------------------------------------------------------
@@ -132,6 +135,14 @@ function mod:OnBossEnable()
   phase = WALKING
   addPhase = 4
   previousAddPhase = 0
+end
+
+function mod:OnDebuffUpdate(nId, nSpellId, nStack, fTimeRemaining)
+  if DEBUFF_OOZING_BILE == nSpellId then
+    if GameLib.GetPlayerUnit():GetId() == nId and nStack >= 8 then
+      mod:AddMsg("OOZE_MSG", string.format(self.L["%d BILE STACKS!"], nStack), 5, nStack == 8 and mod:GetSetting("SoundOozeStacksWarning") and "Beware")
+    end
+  end
 end
 
 function mod:GetClosestNabber()
