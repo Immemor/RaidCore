@@ -103,7 +103,7 @@ end
 mod:RegisterDatachronEvent("Robomination tries to crush", "FIND", function (self, sMessage)
     local sSnakeTarget = GetPlayerUnitByName(string.match(sMessage, self.L["Robomination tries to crush"].." ".."([^%s]+%s[^!]+)!$"))
     local bIsOnMyself = sSnakeTarget == GetPlayerUnit()
-    local bSnakeNearYou = not bIsOnMyself and mod:GetDistanceBetweenUnits(GetPlayerUnit(), sSnakeTarget) < 7.5
+    local bSnakeNearYou = not bIsOnMyself and mod:GetDistanceBetweenUnits(GetPlayerUnit(), sSnakeTarget) < 10
     local sSound = "RunAway"
     local sSnakeOnX = ""
     if bIsOnMyself then
