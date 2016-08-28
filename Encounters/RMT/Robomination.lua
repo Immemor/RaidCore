@@ -146,14 +146,14 @@ mod:RegisterDatachronEvent("The Robomination erupts back into the fight!", "MATC
 )
 
 mod:RegisterDatachronEvent("Robomination tries to incinerate", "FIND", function (self, sMessage)
-    local tLaserTarget = GetPlayerUnitByName(string.match(sMessage, self.L["Robomination tries to incinerate"].." ".."([^%s]+%s+)$"))
-    local bIsOnMyself = sSnakeTarget == GetPlayerUnit()
+    local tLaserTarget = GetPlayerUnitByName(string.match(sMessage, self.L["Robomination tries to incinerate"].." ".."([^%s]+%s.+)$"))
+    local bIsOnMyself = tLaserTarget == GetPlayerUnit()
     local sSound = mod:GetSetting("SoundLaser") == true and "Burn"
     local sLaserOnX = ""
     if bIsOnMyself then
       sLaserOnX = self.L["LASER ON YOU"]
     else
-      sLaserOnX = self.L["LASER ON %s"]:format(sSnakeTarget:GetName())
+      sLaserOnX = self.L["LASER ON %s"]:format(tLaserTarget:GetName())
     end
 
     if mod:GetSetting("CrosshairLaser") then
