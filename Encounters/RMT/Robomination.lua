@@ -45,6 +45,7 @@ mod:RegisterEnglishLocale({
     ["INTERRUPT CANNON!"] = "INTERRUPT CANNON!",
     ["Next incinerate in"] = "Next incinerate in",
     ["Spew!"] = "Spew!",
+    ["Next spew in"] = "Next spew in",
   })
 ----------------------------------------------------------------------------------------------------
 -- Constants.
@@ -57,6 +58,9 @@ local FIRST_SNAKE_TIMER = 7.5
 local SNAKE_TIMER = 17.5
 local FIRST_INCINERATE_TIMER = 18.5
 local INCINERATE_TIMER = 42.5
+local FIRST_SPEW_TIMER = 15.6
+local SPEW_TIMER = 31.75
+local MAZE_SPEW_TIMER = 10
 local COMPACTORS_EDGE = {
   { y = -203.4208984375, x = 0.71257400512695, z = -1349.8697509766 },
   { y = -203.4208984375, x = 10.955376625061, z = -1339.6927490234 },
@@ -106,6 +110,7 @@ function mod:OnBossEnable()
   phase = DPS_PHASE
   mod:AddTimerBar("ARMS_TIMER", self.L["Arms spawning in"], 45)
   mod:AddTimerBar("NEXT_SNAKE_TIMER", self.L["Next snake in"], FIRST_SNAKE_TIMER)
+  core:AddTimerBar("NEXT_SPEW_TIMER", self.L["Next spew in"], FIRST_SPEW_TIMER, nil, { sColor = "green" })
   mod:DrawCompactorGrid()
 end
 
@@ -146,6 +151,9 @@ mod:RegisterDatachronEvent("The Robomination sinks down into the trash.", "MATCH
     core:RemoveMsg("ROBO_MAZE")
     mod:RemoveTimerBar("NEXT_SNAKE_TIMER")
     mod:RemoveTimerBar("NEXT_INCINERATE_TIMER")
+    mod:RemoveTimerBar("NEXT_SPEW_TIMER")
+    mod:RemoveTimerBar("ARMS_TIMER")
+
     mod:AddMsg("ROBO_MAZE", self.L["RUN TO THE CENTER!"], 5, mod:GetSetting("SoundSnakeNear") == true and "Info")
     mod:RemoveCompactorGrid()
   end
@@ -154,6 +162,7 @@ mod:RegisterDatachronEvent("The Robomination sinks down into the trash.", "MATCH
 mod:RegisterDatachronEvent("The Robomination erupts back into the fight!", "MATCH", function (self, sMessage)
     phase = DPS_PHASE
     mod:AddTimerBar("NEXT_SNAKE_TIMER", self.L["Next snake in"], FIRST_SNAKE_TIMER)
+    core:AddTimerBar("NEXT_SPEW_TIMER", self.L["Next spew in"], MAZE_SPEW_TIMER, nil, { sColor = "green" })
     core:AddTimerBar("NEXT_INCINERATE_TIMER", self.L["Next incinerate in"], FIRST_INCINERATE_TIMER, nil, { sColor = "red", bEmphasize = mod:GetSetting("SoundLaser") })
     mod:DrawCompactorGrid()
   end
@@ -252,6 +261,8 @@ mod:RegisterUnitEvents("Robomination",{
     end,
     ["OnCastStart"] = function (self, nId, sCastName, nCastEndTime, sName)
       if self.L["Noxious Belch"] == sCastName then
+        mod:RemoveTimerBar("NEXT_SPEW_TIMER")
+        core:AddTimerBar("NEXT_SPEW_TIMER", self.L["Next spew in"], SPEW_TIMER, nil, { sColor = "green" })
         mod:AddMsg("SPEW_MSG", self.L["Spew!"], 4, mod:GetSetting("SoundSpew") == true and "Beware")
       end
     end,
