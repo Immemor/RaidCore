@@ -109,7 +109,7 @@ mod:RegisterDefaultSetting("SoundSpew")
 function mod:OnBossEnable()
   phase = DPS_PHASE
   mod:AddTimerBar("ARMS_TIMER", self.L["Arms spawning in"], 45)
-  mod:AddTimerBar("NEXT_SNAKE_TIMER", self.L["Next snake in"], FIRST_SNAKE_TIMER)
+  core:AddTimerBar("NEXT_SNAKE_TIMER", self.L["Next snake in"], FIRST_SNAKE_TIMER, nil, { sColor = "xkcdBrown" })
   core:AddTimerBar("NEXT_SPEW_TIMER", self.L["Next spew in"], FIRST_SPEW_TIMER, nil, { sColor = "green" })
   mod:DrawCompactorGrid()
 end
@@ -141,7 +141,8 @@ mod:RegisterDatachronEvent("Robomination tries to crush", "FIND", function (self
     end
 
     mod:RemoveTimerBar("NEXT_SNAKE_TIMER")
-    mod:AddTimerBar("NEXT_SNAKE_TIMER", self.L["Next snake in"], SNAKE_TIMER)
+    core:AddTimerBar("NEXT_SNAKE_TIMER", self.L["Next snake in"], SNAKE_TIMER, nil, { sColor = "xkcdBrown" })
+
     mod:AddMsg("SNAKE_MSG", sSnakeOnX, 5, sSound, "Blue")
   end
 )
@@ -161,7 +162,7 @@ mod:RegisterDatachronEvent("The Robomination sinks down into the trash.", "MATCH
 
 mod:RegisterDatachronEvent("The Robomination erupts back into the fight!", "MATCH", function (self, sMessage)
     phase = DPS_PHASE
-    mod:AddTimerBar("NEXT_SNAKE_TIMER", self.L["Next snake in"], FIRST_SNAKE_TIMER)
+    core:AddTimerBar("NEXT_SNAKE_TIMER", self.L["Next snake in"], FIRST_SNAKE_TIMER, nil, { sColor = "xkcdBrown" })
     core:AddTimerBar("NEXT_SPEW_TIMER", self.L["Next spew in"], MAZE_SPEW_TIMER, nil, { sColor = "green" })
     core:AddTimerBar("NEXT_INCINERATE_TIMER", self.L["Next incinerate in"], FIRST_INCINERATE_TIMER, nil, { sColor = "red", bEmphasize = mod:GetSetting("SoundLaser") })
     mod:DrawCompactorGrid()
