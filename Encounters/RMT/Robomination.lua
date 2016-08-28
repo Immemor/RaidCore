@@ -21,6 +21,7 @@ mod:RegisterEnglishLocale({
     ["Trash Compactor"] = "Trash Compactor",
     ["Cannon Arm"] = "Cannon Arm",
     ["Flailing Arm"] = "Flailing Arm",
+    ["Scanning Eye"] = "Scanning Eye",
     --Casts
     ["Cannon Fire"] = "Cannon Fire",
     ["Incineration Laser"] = "Incineration Laser",
@@ -33,10 +34,17 @@ mod:RegisterEnglishLocale({
     --Message bars
     ["SNAKE ON %s"] = "SNAKE ON %s",
     ["SNAKE ON YOU"] = "SNAKE ON YOU",
-    ["SNAKE NEAR YOU ON %s"] = "SNAKE NEAR YOU ON %s",
+    ["SNAKE NEAR ON %s"] = "SNAKE NEAR YOU ON %s",
+    ["Next snake in"] = "Next snake in",
     ["Cannon arm spawned"] = "Cannon arm spawned",
+    ["Arms spawning in"] = "Arms spawning in",
     ["LASER ON %s"] = "LASER ON %s",
     ["LASER ON YOU"] = "LASER ON YOU",
+    ["RUN TO THE CENTER!"] = "RUN TO THE CENTER!",
+    ["MAZE SOON!"] = "MAZE SOON!",
+    ["INTERRUPT CANNON!"] = "INTERRUPT CANNON!",
+    ["Next incinerate in"] = "Next incinerate in",
+    ["Spew!"] = "Spew!",
   })
 ----------------------------------------------------------------------------------------------------
 -- Constants.
@@ -96,8 +104,8 @@ mod:RegisterDefaultSetting("SoundSpew")
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
   phase = DPS_PHASE
-  mod:AddTimerBar("ARMS_TIMER", "Arms spawning in", 45)
-  mod:AddTimerBar("NEXT_SNAKE_TIMER", "Next snake in", FIRST_SNAKE_TIMER)
+  mod:AddTimerBar("ARMS_TIMER", self.L["Arms spawning in"], 45)
+  mod:AddTimerBar("NEXT_SNAKE_TIMER", self.L["Next snake in"], FIRST_SNAKE_TIMER)
   mod:DrawCompactorGrid()
 end
 
@@ -128,7 +136,7 @@ mod:RegisterDatachronEvent("Robomination tries to crush", "FIND", function (self
     end
 
     mod:RemoveTimerBar("NEXT_SNAKE_TIMER")
-    mod:AddTimerBar("NEXT_SNAKE_TIMER", "Next snake in", SNAKE_TIMER)
+    mod:AddTimerBar("NEXT_SNAKE_TIMER", self.L["Next snake in"], SNAKE_TIMER)
     mod:AddMsg("SNAKE_MSG", sSnakeOnX, 5, sSound, "Blue")
   end
 )
@@ -138,15 +146,15 @@ mod:RegisterDatachronEvent("The Robomination sinks down into the trash.", "MATCH
     core:RemoveMsg("ROBO_MAZE")
     mod:RemoveTimerBar("NEXT_SNAKE_TIMER")
     mod:RemoveTimerBar("NEXT_INCINERATE_TIMER")
-    mod:AddMsg("ROBO_MAZE", "RUN TO THE CENTER !", 5, mod:GetSetting("SoundSnakeNear") and "Info")
+    mod:AddMsg("ROBO_MAZE", self.L["RUN TO THE CENTER!"], 5, mod:GetSetting("SoundSnakeNear") == true and "Info")
     mod:RemoveCompactorGrid()
   end
 )
 
 mod:RegisterDatachronEvent("The Robomination erupts back into the fight!", "MATCH", function (self, sMessage)
     phase = DPS_PHASE
-    mod:AddTimerBar("NEXT_SNAKE_TIMER", "Next snake in", FIRST_SNAKE_TIMER)
-    core:AddTimerBar("NEXT_INCINERATE_TIMER", "Next laser in", FIRST_INCINERATE_TIMER, nil, { sColor = "red", bEmphasize = mod:GetSetting("SoundLaser") })
+    mod:AddTimerBar("NEXT_SNAKE_TIMER", self.L["Next snake in"], FIRST_SNAKE_TIMER)
+    core:AddTimerBar("NEXT_INCINERATE_TIMER", self.L["Next incinerate in"], FIRST_INCINERATE_TIMER, nil, { sColor = "red", bEmphasize = mod:GetSetting("SoundLaser") })
     mod:DrawCompactorGrid()
   end
 )
@@ -167,7 +175,7 @@ mod:RegisterDatachronEvent("Robomination tries to incinerate", "FIND", function 
     end
 
     mod:RemoveTimerBar("NEXT_INCINERATE_TIMER")
-    core:AddTimerBar("NEXT_INCINERATE_TIMER", "Next incinerate in", INCINERATE_TIMER, nil, { sColor = "red", bEmphasize = mod:GetSetting("SoundLaser") })
+    core:AddTimerBar("NEXT_INCINERATE_TIMER", self.L["Next incinerate in"], INCINERATE_TIMER, nil, { sColor = "red", bEmphasize = mod:GetSetting("SoundLaser") })
     mod:AddMsg("LASER_MSG", sLaserOnX, 5, sSound, "Red")
   end
 )
@@ -221,13 +229,13 @@ mod:RegisterUnitEvents("Cannon Arm",{
     ["OnUnitCreated"] = function (self, nId, tUnit, sName)
       core:WatchUnit(tUnit)
       if phase == DPS_PHASE then
-        mod:AddTimerBar("ARMS_TIMER", "Arms spawning in", 45)
+        mod:AddTimerBar("ARMS_TIMER", self.L["Arms spawning in"], 45)
       end
       mod:AddMsg("ARMS_MSG", self.L["Cannon arm spawned"], 5, mod:GetSetting("SoundArmSpawn") == true and "Info", "Red")
     end,
     ["OnCastStart"] = function (self, nId, sCastName, nCastEndTime, sName)
       if self.L["Cannon Fire"] == sCastName then
-        mod:AddMsg("ARMS_MSG", "INTERRUPT CANNON!", 2, mod:GetSetting("SoundCannonInterrupt") == true and "Inferno")
+        mod:AddMsg("ARMS_MSG", self.L["INTERRUPT CANNON!"], 2, mod:GetSetting("SoundCannonInterrupt") == true and "Inferno")
       end
     end,
   }
@@ -239,12 +247,12 @@ mod:RegisterUnitEvents("Robomination",{
     end,
     ["OnHealthChanged"] = function (self, nId, nPourcent, sName)
       if nPourcent >= 75.5 and nPourcent <= 76.5 then
-        mod:AddMsg("ROBO_MAZE", "MAZE SOON !", 5, mod:GetSetting("SoundPhaseChangeClose") and "Info")
+        mod:AddMsg("ROBO_MAZE", self.L["MAZE SOON!"], 5, mod:GetSetting("SoundPhaseChangeClose") and "Info")
       end
     end,
     ["OnCastStart"] = function (self, nId, sCastName, nCastEndTime, sName)
       if self.L["Noxious Belch"] == sCastName then
-        mod:AddMsg("SPEW_MSG", "Spew!", 4, mod:GetSetting("SoundSpew") == true and "Beware")
+        mod:AddMsg("SPEW_MSG", self.L["Spew!"], 4, mod:GetSetting("SoundSpew") == true and "Beware")
       end
     end,
     ["OnCastEnd"] = function (self, nId, sCastName, isInterrupted, nCastEndTime, sName)
