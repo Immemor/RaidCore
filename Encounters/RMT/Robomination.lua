@@ -140,7 +140,7 @@ mod:RegisterDatachronEvent("The Robomination sinks down into the trash.", "MATCH
 mod:RegisterDatachronEvent("The Robomination erupts back into the fight!", "MATCH", function (self, sMessage)
     phase = DPS_PHASE
     mod:AddTimerBar("NEXT_SNAKE_TIMER", "Next snake in", FIRST_SNAKE_TIMER)
-    mod:AddTimerBar("NEXT_INCINERATE_TIMER", "Next incinerate in", FIRST_INCINERATE_TIMER)
+    mod:AddTimerBar("NEXT_INCINERATE_TIMER", "Next incinerate in", FIRST_INCINERATE_TIMER, mod:GetSetting("SoundLaser"))
     mod:DrawCompactorGrid()
   end
 )
