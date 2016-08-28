@@ -199,6 +199,18 @@ function mod:OnDebuffRemove(nId, nSpellId, nStack, fTimeRemaining)
   end
 end
 
+mod:RegisterUnitEvents({
+    "Cannon Arm",
+    "Flailing Arm",
+    "Robomination",
+    "Scanning Eye",
+    },{
+    ["OnUnitCreated"] = function (self, nId, tUnit, sName)
+      core:AddUnit(tUnit)
+    end,
+  }
+)
+
 mod:RegisterUnitEvents("Cannon Arm",{
     ["OnUnitCreated"] = function (self, nId, tUnit, sName)
       core:WatchUnit(tUnit)
@@ -217,7 +229,6 @@ mod:RegisterUnitEvents("Cannon Arm",{
 
 mod:RegisterUnitEvents("Robomination",{
     ["OnUnitCreated"] = function (self, nId, tUnit, sName)
-      core:AddUnit(tUnit)
       core:WatchUnit(tUnit)
     end,
     ["OnHealthChanged"] = function (self, nId, nPourcent, sName)
