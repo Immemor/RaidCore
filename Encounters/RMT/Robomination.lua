@@ -81,6 +81,7 @@ local phase
 mod:RegisterDefaultSetting("CrosshairSnake")
 mod:RegisterDefaultSetting("SoundSnake")
 mod:RegisterDefaultSetting("SoundSnakeNear")
+mod:RegisterDefaultSetting("SoundSnakeNearAlt", false)
 mod:RegisterDefaultSetting("SoundPhaseChange")
 mod:RegisterDefaultSetting("SoundPhaseChangeClose")
 mod:RegisterDefaultSetting("CompactorGridCorner")
@@ -104,16 +105,21 @@ mod:RegisterDatachronEvent("Robomination tries to crush", "FIND", function (self
     local sSnakeTarget = GetPlayerUnitByName(string.match(sMessage, self.L["Robomination tries to crush"].." ".."([^%s]+%s[^!]+)!$"))
     local bIsOnMyself = sSnakeTarget == GetPlayerUnit()
     local bSnakeNearYou = not bIsOnMyself and mod:GetDistanceBetweenUnits(GetPlayerUnit(), sSnakeTarget) < 10
-    local sSound = "RunAway"
+    local sSound = nil
     local sSnakeOnX = ""
     if bIsOnMyself then
-      sSound = mod:GetSetting("SoundSnake") and sSound
+      sSound = mod:GetSetting("SoundSnake") == true and "RunAway"
       sSnakeOnX = self.L["SNAKE ON YOU"]
     elseif bSnakeNearYou then
-      sSound = mod:GetSetting("SoundSnakeNear") and sSound
-      sSnakeOnX = self.L["SNAKE NEAR YOU ON %s"]:format(sSnakeTarget:GetName())
+      if mod:GetSetting("SoundSnakeNear") then
+        if mod:GetSetting("SoundSnakeNearAlt") then
+          sSound = "Alarm"
+        else
+          sSound = "RunAway"
+        end
+      end
+      sSnakeOnX = self.L["SNAKE NEAR ON %s"]:format(sSnakeTarget:GetName())
     else
-      sSound = nil
       sSnakeOnX = self.L["SNAKE ON %s"]:format(sSnakeTarget:GetName())
     end
 
