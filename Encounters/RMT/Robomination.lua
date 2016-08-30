@@ -277,7 +277,9 @@ mod:RegisterUnitEvents("Cannon Arm",{
     end,
     ["OnCastStart"] = function (self, nId, sCastName, nCastEndTime, sName)
       if self.L["Cannon Fire"] == sCastName then
-        mod:AddMsg("ARMS_MSG", self.L["INTERRUPT CANNON!"], 2, mod:GetSetting("SoundCannonInterrupt") == true and "Inferno")
+        if mod:GetDistanceBetweenUnits(GetPlayerUnit(), GetUnitById(nId)) < 45 then
+          mod:AddMsg("ARMS_MSG", self.L["INTERRUPT CANNON!"], 2, mod:GetSetting("SoundCannonInterrupt") == true and "Inferno")
+        end
       end
     end,
   }
