@@ -132,7 +132,7 @@ mod:RegisterDatachronEvent("Robomination tries to crush", "FIND", function (self
     elseif bSnakeNearYou then
       if mod:GetSetting("SoundSnakeNear") then
         if mod:GetSetting("SoundSnakeNearAlt") then
-          sSound = "Alarm"
+          sSound = "Destruction"
         else
           sSound = "RunAway"
         end
