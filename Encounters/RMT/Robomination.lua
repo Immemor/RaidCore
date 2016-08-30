@@ -160,6 +160,7 @@ mod:RegisterDatachronEvent("The Robomination sinks down into the trash.", "MATCH
     mod:RemoveTimerBar("NEXT_INCINERATE_TIMER")
     mod:RemoveTimerBar("NEXT_SPEW_TIMER")
     mod:RemoveTimerBar("ARMS_TIMER")
+    core:RemovePicture("SNAKE_CROSSHAIR")
 
     mod:AddMsg("ROBO_MAZE", self.L["RUN TO THE CENTER!"], 5, mod:GetSetting("SoundSnakeNear") == true and "Info")
     mod:RemoveCompactorGrid()
