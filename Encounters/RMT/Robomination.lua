@@ -54,6 +54,7 @@ local NO_BREAK_SPACE = string.char(194, 160)
 local DEBUFF_SNAKE = 75126
 local DPS_PHASE = 1
 local MAZE_PHASE = 2
+local MID_MAZE_PHASE = 3
 local FIRST_SNAKE_TIMER = 7.5
 local SNAKE_TIMER = 17.5
 local FIRST_INCINERATE_TIMER = 18.5
@@ -87,6 +88,8 @@ local GetPlayerUnit = GameLib.GetPlayerUnit
 -- Locals.
 ----------------------------------------------------------------------------------------------------
 local phase
+local mazeArms
+local roboUnit
 ----------------------------------------------------------------------------------------------------
 -- Settings.
 ----------------------------------------------------------------------------------------------------
@@ -103,11 +106,14 @@ mod:RegisterDefaultSetting("SoundCannonInterrupt")
 mod:RegisterDefaultSetting("SoundLaser")
 mod:RegisterDefaultSetting("CrosshairLaser")
 mod:RegisterDefaultSetting("SoundSpew")
+mod:RegisterDefaultSetting("LineRoboMaze")
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
   phase = DPS_PHASE
+  mazeArms = 0
+  roboUnit = nil
   mod:AddTimerBar("ARMS_TIMER", self.L["Arms spawning in"], 45)
   core:AddTimerBar("NEXT_SNAKE_TIMER", self.L["Next snake in"], FIRST_SNAKE_TIMER, nil, { sColor = "xkcdBrown" })
   core:AddTimerBar("NEXT_SPEW_TIMER", self.L["Next spew in"], FIRST_SPEW_TIMER, nil, { sColor = "green" })
@@ -162,6 +168,7 @@ mod:RegisterDatachronEvent("The Robomination sinks down into the trash.", "MATCH
 
 mod:RegisterDatachronEvent("The Robomination erupts back into the fight!", "MATCH", function (self, sMessage)
     phase = DPS_PHASE
+    core:RemoveLineBetweenUnits("ROBO_MAZE_LINE")
     core:AddTimerBar("NEXT_SNAKE_TIMER", self.L["Next snake in"], FIRST_SNAKE_TIMER, nil, { sColor = "xkcdBrown" })
     core:AddTimerBar("NEXT_SPEW_TIMER", self.L["Next spew in"], MAZE_SPEW_TIMER, nil, { sColor = "green" })
     core:AddTimerBar("NEXT_INCINERATE_TIMER", self.L["Next incinerate in"], FIRST_INCINERATE_TIMER, nil, { sColor = "red", bEmphasize = mod:GetSetting("SoundLaser") })
@@ -235,6 +242,30 @@ mod:RegisterUnitEvents({
   }
 )
 
+mod:RegisterUnitEvents("Scanning Eye",{
+    ["OnUnitDestroyed"] = function (self, nId, tUnit, sName)
+      phase = MID_MAZE_PHASE
+    end,
+  }
+)
+
+mod:RegisterUnitEvents({"Cannon Arm", "Flailing Arm"},{
+    ["OnUnitCreated"] = function (self, nId, tUnit, sName)
+      if phase == MID_MAZE_PHASE then
+        mazeArms = mazeArms + 1
+      end
+    end,
+    ["OnUnitDestroyed"] = function (self, nId, tUnit, sName)
+      if phase == MID_MAZE_PHASE then
+        mazeArms = mazeArms - 1
+        if mazeArms == 0 and mod:GetSetting("LineRoboMaze") then
+          core:AddLineBetweenUnits("ROBO_MAZE_LINE", GetPlayerUnit():GetId(), roboUnit:GetId(), 8)
+        end
+      end
+    end,
+  }
+)
+
 mod:RegisterUnitEvents("Cannon Arm",{
     ["OnUnitCreated"] = function (self, nId, tUnit, sName)
       core:WatchUnit(tUnit)
@@ -254,6 +285,7 @@ mod:RegisterUnitEvents("Cannon Arm",{
 mod:RegisterUnitEvents("Robomination",{
     ["OnUnitCreated"] = function (self, nId, tUnit, sName)
       core:WatchUnit(tUnit)
+      roboUnit = tUnit
     end,
     ["OnHealthChanged"] = function (self, nId, nPourcent, sName)
       if nPourcent >= 75.5 and nPourcent <= 76.5 then
