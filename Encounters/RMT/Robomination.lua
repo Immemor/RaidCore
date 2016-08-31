@@ -84,13 +84,14 @@ local COMPACTORS_CORNER = {
 ----------------------------------------------------------------------------------------------------
 local GetUnitById = GameLib.GetUnitById
 local GetPlayerUnitByName = GameLib.GetPlayerUnitByName
-local GetPlayerUnit = GameLib.GetPlayerUnit
 ----------------------------------------------------------------------------------------------------
 -- Locals.
 ----------------------------------------------------------------------------------------------------
 local phase
 local mazeArmCount
 local roboUnit
+local cannonArms
+local playerUnit
 ----------------------------------------------------------------------------------------------------
 -- Settings.
 ----------------------------------------------------------------------------------------------------
@@ -104,6 +105,7 @@ mod:RegisterDefaultSetting("CompactorGridCorner")
 mod:RegisterDefaultSetting("CompactorGridEdge", false)
 mod:RegisterDefaultSetting("SoundArmSpawn")
 mod:RegisterDefaultSetting("SoundCannonInterrupt")
+mod:RegisterDefaultSetting("LineCannonArm")
 mod:RegisterDefaultSetting("SoundLaser")
 mod:RegisterDefaultSetting("CrosshairLaser")
 mod:RegisterDefaultSetting("SoundSpew")
@@ -115,6 +117,8 @@ function mod:OnBossEnable()
   phase = DPS_PHASE
   mazeArmCount = 0
   roboUnit = nil
+  cannonArms = {}
+  playerUnit = GameLib.GetPlayerUnit()
   mod:AddTimerBar("NEXT_ARMS_TIMER", self.L["Arms spawning in"], ARMS_TIMER)
   core:AddTimerBar("NEXT_SNAKE_TIMER", self.L["Next snake in"], FIRST_SNAKE_TIMER, nil, { sColor = "xkcdBrown" })
   core:AddTimerBar("NEXT_SPEW_TIMER", self.L["Next spew in"], FIRST_SPEW_TIMER, nil, { sColor = "green" })
@@ -123,8 +127,8 @@ end
 
 mod:RegisterDatachronEvent("Robomination tries to crush", "FIND", function (self, sMessage)
     local sSnakeTarget = GetPlayerUnitByName(string.match(sMessage, self.L["Robomination tries to crush"].." ".."([^%s]+%s[^!]+)!$"))
-    local bIsOnMyself = sSnakeTarget == GetPlayerUnit()
-    local bSnakeNearYou = not bIsOnMyself and mod:GetDistanceBetweenUnits(GetPlayerUnit(), sSnakeTarget) < 10
+    local bIsOnMyself = sSnakeTarget == playerUnit
+    local bSnakeNearYou = not bIsOnMyself and mod:GetDistanceBetweenUnits(playerUnit, sSnakeTarget) < 10
     local sSound = nil
     local sSnakeOnX = ""
     if bIsOnMyself then
@@ -165,6 +169,7 @@ mod:RegisterDatachronEvent("The Robomination sinks down into the trash.", "MATCH
 
     mod:AddMsg("ROBO_MAZE", self.L["RUN TO THE CENTER!"], 5, mod:GetSetting("SoundSnakeNear") == true and "Info")
     mod:RemoveCompactorGrid()
+    mod:RemoveCannonArmLines()
   end
 )
 
@@ -181,7 +186,7 @@ mod:RegisterDatachronEvent("The Robomination erupts back into the fight!", "MATC
 
 mod:RegisterDatachronEvent("Robomination tries to incinerate", "FIND", function (self, sMessage)
     local tLaserTarget = GetPlayerUnitByName(string.match(sMessage, self.L["Robomination tries to incinerate"].." ".."([^%s]+%s.+)$"))
-    local bIsOnMyself = tLaserTarget == GetPlayerUnit()
+    local bIsOnMyself = tLaserTarget == playerUnit
     local sSound = mod:GetSetting("SoundLaser") == true and "Burn"
     local sLaserOnX = ""
     if bIsOnMyself then
@@ -261,17 +266,40 @@ mod:RegisterUnitEvents({"Cannon Arm", "Flailing Arm"},{
     ["OnUnitDestroyed"] = function (self, nId, tUnit, sName)
       if phase == MID_MAZE_PHASE then
         mazeArmCount = mazeArmCount - 1
-        if mazeArmCount == 0 and mod:GetSetting("LineRoboMaze") then
-          core:AddLineBetweenUnits("ROBO_MAZE_LINE", GetPlayerUnit():GetId(), roboUnit:GetId(), 8)
+        if mazeArmCount == 0 then
+          mod:RedrawCannonArmLines()
+          if mod:GetSetting("LineRoboMaze") then
+            core:AddLineBetweenUnits("ROBO_MAZE_LINE", playerUnit:GetId(), roboUnit:GetId(), 8)
+          end
         end
       end
     end,
   }
 )
 
+function mod:RedrawCannonArmLines()
+  if mod:GetSetting("LineCannonArm") then
+    for nId, tUnit in pairs(cannonArms) do
+      core:AddLineBetweenUnits(string.format("CANNON_ARM_LINE %d", nId), playerUnit:GetId(), nId, 5)
+    end
+  end
+end
+
+function mod:RemoveCannonArmLines()
+  if mod:GetSetting("LineCannonArm") then
+    for nId, tUnit in pairs(cannonArms) do
+      core:RemoveLineBetweenUnits(string.format("CANNON_ARM_LINE %d", nId))
+    end
+  end
+end
+
 mod:RegisterUnitEvents("Cannon Arm",{
     ["OnUnitCreated"] = function (self, nId, tUnit, sName)
+      cannonArms[nId] = tUnit
       core:WatchUnit(tUnit)
+      if mod:GetSetting("LineCannonArm") then
+        core:AddLineBetweenUnits(string.format("CANNON_ARM_LINE %d", nId), playerUnit:GetId(), nId, 5)
+      end
       if phase == DPS_PHASE then
         mod:AddTimerBar("NEXT_ARMS_TIMER", self.L["Arms spawning in"], ARMS_TIMER)
       end
@@ -279,10 +307,14 @@ mod:RegisterUnitEvents("Cannon Arm",{
     end,
     ["OnCastStart"] = function (self, nId, sCastName, nCastEndTime, sName)
       if self.L["Cannon Fire"] == sCastName then
-        if mod:GetDistanceBetweenUnits(GetPlayerUnit(), GetUnitById(nId)) < 45 then
+        if mod:GetDistanceBetweenUnits(playerUnit, GetUnitById(nId)) < 45 then
           mod:AddMsg("ARMS_MSG", self.L["INTERRUPT CANNON!"], 2, mod:GetSetting("SoundCannonInterrupt") == true and "Inferno")
         end
       end
+    end,
+    ["OnUnitDestroyed"] = function (self, nId, tUnit, sName)
+      cannonArms[nId] = nil
+      core:RemoveLineBetweenUnits(string.format("CANNON_ARM_LINE %d", nId))
     end,
   }
 )
