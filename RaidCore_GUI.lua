@@ -56,6 +56,9 @@ end
 local function CopyLog2Clipboard(tDumpLog)
   local JSONPackage = Apollo.GetPackage("Lib:dkJSON-2.5").tPackage
   local sJSONData = JSONPackage.encode(tDumpLog)
+  sJSONData = sJSONData:gsub("%],%[", "],\n [")
+  sJSONData = sJSONData:gsub("%[%[", "[\n [")
+  sJSONData = sJSONData:gsub("%]%]", "]\n]")
   if sJSONData then
     local JSONLen = sJSONData:len()
     if JSONLen < 1000 then
