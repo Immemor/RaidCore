@@ -34,7 +34,7 @@ mod:RegisterEnglishLocale({
     --Message bars
     ["SNAKE ON %s"] = "SNAKE ON %s",
     ["SNAKE ON YOU"] = "SNAKE ON YOU",
-    ["SNAKE NEAR ON %s"] = "SNAKE NEAR gON %s",
+    ["SNAKE NEAR ON %s"] = "SNAKE NEAR ON %s",
     ["Next snake in"] = "Next snake in",
     ["Cannon arm spawned"] = "Cannon arm spawned",
     ["Arms spawning in"] = "Arms spawning in",
