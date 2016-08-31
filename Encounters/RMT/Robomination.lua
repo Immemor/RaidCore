@@ -62,6 +62,7 @@ local INCINERATE_TIMER = 42.5
 local FIRST_SPEW_TIMER = 15.6
 local SPEW_TIMER = 31.75
 local MAZE_SPEW_TIMER = 10
+local ARMS_TIMER = 45
 local COMPACTORS_EDGE = {
   { y = -203.4208984375, x = 0.71257400512695, z = -1349.8697509766 },
   { y = -203.4208984375, x = 10.955376625061, z = -1339.6927490234 },
@@ -114,7 +115,7 @@ function mod:OnBossEnable()
   phase = DPS_PHASE
   mazeArms = 0
   roboUnit = nil
-  mod:AddTimerBar("ARMS_TIMER", self.L["Arms spawning in"], 45)
+  mod:AddTimerBar("NEXT_ARMS_TIMER", self.L["Arms spawning in"], ARMS_TIMER)
   core:AddTimerBar("NEXT_SNAKE_TIMER", self.L["Next snake in"], FIRST_SNAKE_TIMER, nil, { sColor = "xkcdBrown" })
   core:AddTimerBar("NEXT_SPEW_TIMER", self.L["Next spew in"], FIRST_SPEW_TIMER, nil, { sColor = "green" })
   mod:DrawCompactorGrid()
@@ -159,7 +160,7 @@ mod:RegisterDatachronEvent("The Robomination sinks down into the trash.", "MATCH
     mod:RemoveTimerBar("NEXT_SNAKE_TIMER")
     mod:RemoveTimerBar("NEXT_INCINERATE_TIMER")
     mod:RemoveTimerBar("NEXT_SPEW_TIMER")
-    mod:RemoveTimerBar("ARMS_TIMER")
+    mod:RemoveTimerBar("NEXT_ARMS_TIMER")
     core:RemovePicture("SNAKE_CROSSHAIR")
 
     mod:AddMsg("ROBO_MAZE", self.L["RUN TO THE CENTER!"], 5, mod:GetSetting("SoundSnakeNear") == true and "Info")
@@ -173,6 +174,7 @@ mod:RegisterDatachronEvent("The Robomination erupts back into the fight!", "MATC
     core:AddTimerBar("NEXT_SNAKE_TIMER", self.L["Next snake in"], FIRST_SNAKE_TIMER, nil, { sColor = "xkcdBrown" })
     core:AddTimerBar("NEXT_SPEW_TIMER", self.L["Next spew in"], MAZE_SPEW_TIMER, nil, { sColor = "green" })
     core:AddTimerBar("NEXT_INCINERATE_TIMER", self.L["Next incinerate in"], FIRST_INCINERATE_TIMER, nil, { sColor = "red", bEmphasize = mod:GetSetting("SoundLaser") })
+    mod:AddTimerBar("NEXT_ARMS_TIMER", self.L["Arms spawning in"], ARMS_TIMER)
     mod:DrawCompactorGrid()
   end
 )
@@ -271,7 +273,7 @@ mod:RegisterUnitEvents("Cannon Arm",{
     ["OnUnitCreated"] = function (self, nId, tUnit, sName)
       core:WatchUnit(tUnit)
       if phase == DPS_PHASE then
-        mod:AddTimerBar("ARMS_TIMER", self.L["Arms spawning in"], 45)
+        mod:AddTimerBar("NEXT_ARMS_TIMER", self.L["Arms spawning in"], ARMS_TIMER)
       end
       mod:AddMsg("ARMS_MSG", self.L["Cannon arm spawned"], 5, mod:GetSetting("SoundArmSpawn") == true and "Info", "Red")
     end,
