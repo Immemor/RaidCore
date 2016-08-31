@@ -51,7 +51,7 @@ mod:RegisterUnitEvents("Chief Warden Lockjaw",{
 mod:RegisterUnitEvents("Blaze Shackle",{
     ["OnUnitCreated"] = function (self, nId, tUnit, sName)
       if mod:GetSetting("CrosshairTethers") then
-        core:AddPicture(nId, nId, "Crosshair", 15)
+        core:AddPicture(nId, nId, "Crosshair", 25)
       end
     end,
     ["OnUnitDestroyed"] = function (self, nId, tUnit, sName)
