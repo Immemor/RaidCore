@@ -34,7 +34,7 @@ mod:RegisterEnglishLocale({
     --Message bars
     ["SNAKE ON %s"] = "SNAKE ON %s",
     ["SNAKE ON YOU"] = "SNAKE ON YOU",
-    ["SNAKE NEAR ON %s"] = "SNAKE NEAR ON %s",
+    ["SNAKE NEAR ON %s"] = "SNAKE NEAR gON %s",
     ["Next snake in"] = "Next snake in",
     ["Cannon arm spawned"] = "Cannon arm spawned",
     ["Arms spawning in"] = "Arms spawning in",
@@ -89,7 +89,7 @@ local GetPlayerUnit = GameLib.GetPlayerUnit
 -- Locals.
 ----------------------------------------------------------------------------------------------------
 local phase
-local mazeArms
+local mazeArmCount
 local roboUnit
 ----------------------------------------------------------------------------------------------------
 -- Settings.
@@ -113,7 +113,7 @@ mod:RegisterDefaultSetting("LineRoboMaze")
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
   phase = DPS_PHASE
-  mazeArms = 0
+  mazeArmCount = 0
   roboUnit = nil
   mod:AddTimerBar("NEXT_ARMS_TIMER", self.L["Arms spawning in"], ARMS_TIMER)
   core:AddTimerBar("NEXT_SNAKE_TIMER", self.L["Next snake in"], FIRST_SNAKE_TIMER, nil, { sColor = "xkcdBrown" })
@@ -255,13 +255,13 @@ mod:RegisterUnitEvents("Scanning Eye",{
 mod:RegisterUnitEvents({"Cannon Arm", "Flailing Arm"},{
     ["OnUnitCreated"] = function (self, nId, tUnit, sName)
       if phase == MID_MAZE_PHASE then
-        mazeArms = mazeArms + 1
+        mazeArmCount = mazeArmCount + 1
       end
     end,
     ["OnUnitDestroyed"] = function (self, nId, tUnit, sName)
       if phase == MID_MAZE_PHASE then
-        mazeArms = mazeArms - 1
-        if mazeArms == 0 and mod:GetSetting("LineRoboMaze") then
+        mazeArmCount = mazeArmCount - 1
+        if mazeArmCount == 0 and mod:GetSetting("LineRoboMaze") then
           core:AddLineBetweenUnits("ROBO_MAZE_LINE", GetPlayerUnit():GetId(), roboUnit:GetId(), 8)
         end
       end
