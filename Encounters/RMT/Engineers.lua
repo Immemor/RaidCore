@@ -27,10 +27,8 @@ mod:RegisterEnglishLocale({
     ["Cooling Turbine"] = "Cooling Turbine",
     ["Spark Plug"] = "Spark Plug",
     ["Lubricant Nozzle"] = "Lubricant Nozzle",
-    -- Engineer
-    ["Head Engineer Orvulgh"] = "Head Engineer Orvulgh",
-    -- Warrior
-    ["Chief Engineer Wilbargh"] = "Chief Engineer Wilbargh",
+    ["Head Engineer Orvulgh"] = "Head Engineer Orvulgh", -- Engineer
+    ["Chief Engineer Wilbargh"] = "Chief Engineer Wilbargh", -- Warrior
     ["Air Current"] = "Air Current",
     ["Friendly Invisible Unit for Fields"] = "Friendly Invisible Unit for Fields",
     ["Hostile Invisible Unit for Fields (0 hit radius)"] = "Hostile Invisible Unit for Fields (0 hit radius)",
@@ -72,7 +70,7 @@ end
 
 function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
   if DEBUFF_ION_CLASH == nSpellId then
-    mod:AddMsg("ION_CLASH_MSG", "KITE THE ORB", 5, "RunAway")
+    mod:AddMsg("ION_CLASH_MSG", "KITE THE FIRE ORB", 5, "RunAway")
     core:AddPicture(nId, nId, "Crosshair", 20)
   end
   if DEBUFF_UNSTABLE_VOLTAGE == nSpellId then
