@@ -27,16 +27,16 @@ mod:RegisterEnglishLocale({
     ["Cooling Turbine"] = "Cooling Turbine",
     ["Spark Plug"] = "Spark Plug",
     ["Lubricant Nozzle"] = "Lubricant Nozzle",
-	-- Engineer
+    -- Engineer
     ["Head Engineer Orvulgh"] = "Head Engineer Orvulgh",
-	-- Warrior
+    -- Warrior
     ["Chief Engineer Wilbargh"] = "Chief Engineer Wilbargh",
     ["Air Current"] = "Air Current",
     ["Friendly Invisible Unit for Fields"] = "Friendly Invisible Unit for Fields",
     ["Hostile Invisible Unit for Fields (0 hit radius)"] = "Hostile Invisible Unit for Fields (0 hit radius)",
     -- Cast names
     ["Liquidate"] = "Liquidate",
-	["Electroshock"] = "Electroshock",
+    ["Electroshock"] = "Electroshock",
     -- Datachron
     ["suffers from Electroshock"] = "suffers from Electroshock",
   })
@@ -73,7 +73,7 @@ end
 function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
   if DEBUFF_ION_CLASH == nSpellId then
     mod:AddMsg("ION_CLASH_MSG", "KITE THE ORB", 5, "RunAway")
-	core:AddPicture(nId, nId, "Crosshair", 20)
+    core:AddPicture(nId, nId, "Crosshair", 20)
   end
   if DEBUFF_UNSTABLE_VOLTAGE == nSpellId then
     mod:AddMsg("UNSTABLE_VOLTAGE_MSG", "GET AWAY FROM THE CENTER", 5, "RunAway")
@@ -113,7 +113,7 @@ mod:RegisterUnitEvents("Chief Engineer Wilbargh",{
     ["OnCastStart"] = function (self, nId, sCastName, nCastEndTime, sName)
       if self.L["Liquidate"] == sCastName then
         --Stack
-		mod:AddMsg("LIQUIDATE_MSG", "Stack", 5, "Info")
+        mod:AddMsg("LIQUIDATE_MSG", "Stack", 5, "Info")
       end
     end,
   }
@@ -123,7 +123,7 @@ mod:RegisterUnitEvents("Chief Engineer Wilbargh",{
 mod:RegisterUnitEvents("Head Engineer Orvulgh",{
     ["OnCastStart"] = function (self, nId, sCastName, nCastEndTime, sName)
       if self.L["Electroshock"] == sCastName then
-		mod:AddMsg("ELECTROSHOCK_CAST_MSG", "Electroshock", 5, "Info")
+        mod:AddMsg("ELECTROSHOCK_CAST_MSG", "Electroshock", 5, "Info")
 
       end
     end,
