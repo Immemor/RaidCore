@@ -52,6 +52,7 @@ local GetGameTime = GameLib.GetGameTime
 local DEBUFF_ION_CLASH = 84051
 local DEBUFF_UNSTABLE_VOLTAGE = 84045
 
+-- Timers
 local FIRST_ELECTROSHOCK_TIMER = 12
 local ELECTROSHOCK_TIMER = 20
 
