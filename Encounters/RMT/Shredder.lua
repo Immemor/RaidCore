@@ -48,6 +48,11 @@ mod:RegisterEnglishLocale({
     ["Swabbie Swoop"] = "Swabbie Swoop",
     --Messages
     ["%d BILE STACKS!"] = "%d BILE STACKS!",
+    ["SAW IN MIDDLE"] = "SAW IN MIDDLE",
+    ["SAFE SPOT %s"] = "SAFE SPOT %s",
+    ["LEFT"] = "LEFT",
+    ["MIDDLE"] = "MIDDLE",
+    ["RIGHT"] = "RIGHT",
   })
 
 mod:RegisterFrenchLocale({
@@ -87,6 +92,8 @@ mod:RegisterDefaultSetting("SoundMiniboss")
 mod:RegisterDefaultSetting("SoundNecroticLash")
 mod:RegisterDefaultSetting("SoundMinibossCast")
 mod:RegisterDefaultSetting("SoundOozeStacksWarning")
+mod:RegisterDefaultSetting("SoundMidSawWarning")
+mod:RegisterDefaultSetting("SoundSawSafeSpot")
 ----------------------------------------------------------------------------------------------------
 -- Constants.
 ----------------------------------------------------------------------------------------------------
@@ -116,6 +123,18 @@ local WALKING = 0
 local SHREDDER = 1
 local ADD_PHASES = circular{ 11, 45, 66, 0 }
 local DEBUFF_OOZING_BILE = 84321
+local WEST_POSITION = -42
+local MIDDLE_WEST_POSITION = -28
+local MIDDLE_EAST_POSITION = -14
+local EAST_POSITION = 0
+local SAW_WEST = 1
+local SAW_MID = 2
+local SAW_WEST = 4
+local SAW_SAFESPOT = {
+  [3] = "LEFT", --SAW_WEST + SAW_MID
+  [5] = "MIDDLE", --SAW_WEST + SAW_EAST
+  [6] = "RIGHT", --SAW_MID + SAW_EAST
+}
 ----------------------------------------------------------------------------------------------------
 -- Locals.
 ----------------------------------------------------------------------------------------------------
@@ -126,6 +145,8 @@ local tNabberList
 local phase
 local addPhase
 local previousAddPhase
+local firstShredderSaw
+local secondShredderSaw
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 -----------------------------------------------------------------------------------------------------
@@ -135,6 +156,8 @@ function mod:OnBossEnable()
   phase = WALKING
   addPhase = 4
   previousAddPhase = 0
+  firstShredderSaw = nil
+  secondShredderSaw = nil
 end
 
 function mod:OnDebuffUpdate(nId, nSpellId, nStack, fTimeRemaining)
@@ -210,6 +233,8 @@ function mod:PhaseChange()
   else
     sText = sText.." South"
     phase = SHREDDER
+    firstShredderSaw = nil
+    secondShredderSaw = nil
   end
   mod:AddProgressBar("WALKING_PROGRESS", sText, mod.GetWalkingProgress, mod, mod.PhaseChange)
 end
@@ -279,10 +304,45 @@ mod:RegisterUnitEvents("Swabbie Ski'Li",{
   }
 )
 
+function mod:DetermineSawLocation(tUnit)
+  local x = tUnit:GetPosition().x
+  if WEST_POSITION < x and x < MIDDLE_WEST_POSITION then
+    return SAW_WEST
+  elseif MIDDLE_WEST_POSITION < x and x < MIDDLE_EAST_POSITION then
+    return SAW_MID
+  elseif MIDDLE_EAST_POSITION < x and x < EAST_POSITION then
+    return SAW_EAST
+  end
+end
+
+function mod:HandleShredderSaw(sawLocation)
+  if firstShredderSaw == nil then
+    firstShredderSaw = sawLocation
+    return
+  elseif secondShredderSaw == nil then
+    secondShredderSaw = sawLocation
+  else
+    return
+  end
+
+  local safeSpotLocation = SAW_SAFESPOT[firstShredderSaw + secondShredderSaw]
+  local message = string.format(self.L["SAFE SPOT %s"], self.L[safeSpotLocation])
+  local sound = mod:GetSetting("SoundSawSafeSpot") == true and "Info"
+  mod:AddMsg("SAW_MSG", message, 5, sound)
+end
+
 mod:RegisterUnitEvents("Sawblade",{
     ["OnUnitCreated"] = function (self, nId, tUnit, sName)
       if mod:GetSetting("LineSawblade") then
         core:AddPixie(nId, 2, tUnit, nil, "Red", 10, 60, 0)
+      end
+      local sawLocation = mod:DetermineSawLocation(tUnit)
+      if phase == WALKING and sawLocation == SAW_MID then
+        mod:AddMsg("SAW_MSG", self.L["SAW IN MIDDLE"], 5,
+          mod:GetSetting("SoundMidSawWarning") == true and "Beware"
+        )
+      elseif phase == SHREDDER then
+        mod:HandleShredderSaw(sawLocation)
       end
     end,
     ["OnUnitDestroyed"] = function (self, nId, tUnit, sName)
