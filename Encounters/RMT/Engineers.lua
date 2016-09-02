@@ -122,7 +122,6 @@ mod:RegisterUnitEvents("Head Engineer Orvulgh",{
     ["OnCastStart"] = function (self, nId, sCastName, nCastEndTime, sName)
       if self.L["Electroshock"] == sCastName then
         mod:AddMsg("ELECTROSHOCK_CAST_MSG", "Electroshock", 5, "Info")
-
       end
     end,
   }
