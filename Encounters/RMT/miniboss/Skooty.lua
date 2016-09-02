@@ -17,9 +17,9 @@ if not mod then return end
 mod:RegisterTrigMob("ALL", { "Assistant Technician Skooty" })
 mod:RegisterEnglishLocale({
     ["Assistant Technician Skooty"] = "Assistant Technician Skooty",
-	["Hostile Invisible Unit for Fields (0 hit radius)"] = "Hostile Invisible Unit for Fields (0 hit radius)",
+    ["Hostile Invisible Unit for Fields (0 hit radius)"] = "Hostile Invisible Unit for Fields (0 hit radius)",
     ["Pulse Cannon"] = "Pulse Cannon",
-	["Jumpstart Charge"] = "Jumpstart Charge",
+    ["Jumpstart Charge"] = "Jumpstart Charge",
   })
 ----------------------------------------------------------------------------------------------------
 -- Settings.
@@ -46,11 +46,11 @@ mod:RegisterUnitEvents("Assistant Technician Skooty",{
       core:AddUnit(tUnit)
       core:WatchUnit(tUnit)
     end,
-	["OnCastStart"] = function (self, nId, sCastName, nCastEndTime, sName)
+    ["OnCastStart"] = function (self, nId, sCastName, nCastEndTime, sName)
       if self.L["Pulse Cannon"] == sCastName then
         mod:AddMsg("PULSECANNON", "GET OUT", 5, "RunAway")
       end
-	end,
+    end,
   }
 )
 

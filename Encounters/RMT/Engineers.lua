@@ -113,7 +113,7 @@ mod:RegisterUnitEvents("Chief Engineer Wilbargh",{
     ["OnCastStart"] = function (self, nId, sCastName, nCastEndTime, sName)
       if self.L["Liquidate"] == sCastName then
         --Stack
-		mod:AddMsg("LIQUIDATE", "Stack", 5, "Info")
+		mod:AddMsg("LIQUIDATE_MSG", "Stack", 5, "Info")
       end
     end,
   }
@@ -123,8 +123,8 @@ mod:RegisterUnitEvents("Chief Engineer Wilbargh",{
 mod:RegisterUnitEvents("Head Engineer Orvulgh",{
     ["OnCastStart"] = function (self, nId, sCastName, nCastEndTime, sName)
       if self.L["Electroshock"] == sCastName then
-		mod:AddMsg("Electroshock", "Electroshock", 5, "Info")
-		
+		mod:AddMsg("ELECTROSHOCK_CAST_MSG", "Electroshock", 5, "Info")
+
       end
     end,
   }

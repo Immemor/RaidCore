@@ -17,9 +17,9 @@ if not mod then return end
 mod:RegisterTrigMob("ALL", { "Chief Engine Scrubber Thrag" })
 mod:RegisterEnglishLocale({
     ["Chief Engine Scrubber Thrag"] = "Chief Engine Scrubber Thrag",
-	["Hostile Invisible Unit for Fields (0 hit radius)"] = "Hostile Invisible Unit for Fields (0 hit radius)",
-    ["Gigavolt"] = "Gigavolt",	
-	["Jumpstart Charge"] = "Jumpstart Charge",
+    ["Hostile Invisible Unit for Fields (0 hit radius)"] = "Hostile Invisible Unit for Fields (0 hit radius)",
+    ["Gigavolt"] = "Gigavolt",
+    ["Jumpstart Charge"] = "Jumpstart Charge",
   })
 ----------------------------------------------------------------------------------------------------
 -- Settings.
@@ -46,11 +46,11 @@ mod:RegisterUnitEvents("Chief Engine Scrubber Thrag",{
       core:AddUnit(tUnit)
       core:WatchUnit(tUnit)
     end,
-	["OnCastStart"] = function (self, nId, sCastName, nCastEndTime, sName)
+    ["OnCastStart"] = function (self, nId, sCastName, nCastEndTime, sName)
       if self.L["Gigavolt"] == sCastName then
         mod:AddMsg("GIGAVOLT", "GET OUT", 5, "RunAway")
       end
-	end,
+    end,
   }
 )
 
