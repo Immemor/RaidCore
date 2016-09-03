@@ -62,6 +62,13 @@ local CORE_NAMES = {
   ["Spark Plug"] = SPARK_PLUG,
   ["Lubricant Nozzle"] = LUBRICANT_NOZZLE
 }
+--shorten these
+local CORE_NICKNAMES = {
+  [FUSION_CORE] = "Fusion Core",
+  [COOLING_TURBINE] = "Cooling Turbine",
+  [SPARK_PLUG] = "Spark Plug",
+  [LUBRICANT_NOZZLE] = "Lubricant Nozzle"
+}
 
 local WARRIOR = 1
 local ENGINEER = 2
@@ -72,6 +79,14 @@ local ENGINEER_NAMES = {
 local ENGINEER_START_LOCATION = {
   [WARRIOR] = SPARK_PLUG,
   [ENGINEER] = COOLING_TURBINE,
+}
+local ENGINEER_TIMER_NAMES = {
+  [WARRIOR] = "OnWarriorLocationTimer",
+  [ENGINEER] = "OnEngineerLocationTimer",
+}
+local ENGINEER_NICKNAMES = {
+  [WARRIOR] = "Warrior",
+  [ENGINEER] = "Engineer",
 }
 ----------------------------------------------------------------------------------------------------
 -- Locals.
@@ -90,7 +105,6 @@ local engineerUnits
 function mod:OnBossEnable()
   coreUnits = {}
   engineerUnits = {}
-
   --locales
   for name, id in pairs(CORE_NAMES) do
     CORE_NAMES[name] = nil
@@ -102,31 +116,31 @@ function mod:OnBossEnable()
   end
 end
 
-function mod:GetCurrentPlatform(tUnit, sName)
-  local i
+function mod:CheckBossLocation(engineerId)
+  if engineerUnits[engineerId].firstCheck then
+    engineerUnits[engineerId].firstCheck = false
+    return
+  end
+
   local shortestDistance = 100000
   local currentDistance
-  local currentPlatform
-  for i=1,4,1
-  do
-    currentDistance = mod:GetDistanceBetweenUnits(tUnit, BUFF_STATIONS[i])
+  for coreId, coreUnit in pairs(coreUnits) do
+    currentDistance = mod:GetDistanceBetweenUnits(
+      engineerUnits[engineerId].unit, coreUnit
+    )
     if shortestDistance > currentDistance then
       shortestDistance = currentDistance
-      currentPlatform = BUFF_STATIONS[i]
+      engineerUnits[engineerId].location = coreId
     end
   end
+end
 
-  -- Engineer
-  if sName == self.L["Head Engineer Orvulgh"] then
-    currentEngineerPlatform = currentPlatform
-  end
+function mod:OnWarriorLocationTimer()
+  mod:CheckBossLocation(WARRIOR)
+end
 
-  -- Warrior
-  if sName == self.L["Chief Engineer Wilbargh"] then
-    currentEngineerPlatform = currentPlatform
-  end
-  Print("Engineer Platform: " .. currentEngineerPlatform)
-  Print("Warrior Platform: " .. currentWarriorPlatform)
+function mod:OnEngineerLocationTimer()
+  mod:CheckBossLocation(ENGINEER)
 end
 
 function mod:OnBuffAdd(nId, nSpellId, nStack, fTimeRemaining)
@@ -175,9 +189,12 @@ mod:RegisterUnitEvents({
       if CORE_NAMES[sName] ~= nil then
         coreUnits[CORE_NAMES[sName]] = tUnit
       elseif ENGINEER_NAMES[sName] ~= nil then
-        engineerUnits[ENGINEER_NAMES[sName]] = {
+        local id = ENGINEER_NAMES[sName]
+        engineerUnits[id] = {
           unit = tUnit,
-          location = ENGINEER_START_LOCATION[ENGINEER_NAMES[sName]],
+          location = ENGINEER_START_LOCATION[id],
+          timer = ApolloTimer.Create(1.5, false, ENGINEER_TIMER_NAMES[id], mod),
+          firstCheck = true,
         }
       end
     end,
@@ -194,11 +211,10 @@ mod:RegisterUnitEvents("Chief Engineer Wilbargh",{
     end,
     ["OnUnitCreated"] = function (self, nId, tUnit, sName)
       core:AddUnit(tUnit)
-      mod:GetCurrentPlatform(tUnit, sName)
     end,
     ["OnCastEnd"] = function (self, nId, sCastName, nCastEndTime, sName)
       if self.L["Rocket Jump"] == sCastName then
-        mod:GetCurrentPlatform(tUnit, sName)
+        engineerUnits[WARRIOR].timer:Start()
       end
     end,
   }
@@ -213,11 +229,10 @@ mod:RegisterUnitEvents("Head Engineer Orvulgh",{
     end,
     ["OnUnitCreated"] = function (self, nId, tUnit, sName)
       core:AddUnit(tUnit)
-      mod:GetCurrentPlatform(tUnit, sName)
     end,
     ["OnCastEnd"] = function (self, nId, sCastName, nCastEndTime, sName)
       if self.L["Rocket Jump"] == sCastName then
-        mod:GetCurrentPlatform(tUnit, sName)
+        engineerUnits[ENGINEER].timer:Start()
       end
     end,
   }
