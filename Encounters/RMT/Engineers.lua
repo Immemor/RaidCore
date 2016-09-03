@@ -32,11 +32,15 @@ mod:RegisterEnglishLocale({
     ["Air Current"] = "Air Current",
     ["Friendly Invisible Unit for Fields"] = "Friendly Invisible Unit for Fields",
     ["Hostile Invisible Unit for Fields (0 hit radius)"] = "Hostile Invisible Unit for Fields (0 hit radius)",
+    ["Discharged Plasma"] = "Discharged Plasma", -- Fire Orb
     -- Cast names
     ["Liquidate"] = "Liquidate",
     ["Electroshock"] = "Electroshock",
     -- Datachron
     ["suffers from Electroshock"] = "suffers from Electroshock",
+    -- Messages
+    ["%s SWAP TO WARRIOR"] = "%s SWAP TO WARRIOR",
+    ["YOU SWAP TO WARRIOR"] = "YOU SWAP TO WARRIOR",
   })
 ----------------------------------------------------------------------------------------------------
 -- Constants.
@@ -132,19 +136,23 @@ function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
 end
 
 function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
+  --[=====[
   if DEBUFF_ION_CLASH == nSpellId then
-    mod:AddMsg("ION_CLASH_MSG", "KITE THE FIRE ORB", 5, "RunAway")
+    mod:AddMsg("DISCHARGED_PLASMA_MSG", "KITE THE FIRE ORB", 5, "RunAway")
     core:AddPicture(nId, nId, "Crosshair", 20)
   end
   if DEBUFF_UNSTABLE_VOLTAGE == nSpellId then
     mod:AddMsg("UNSTABLE_VOLTAGE_MSG", "GET AWAY FROM THE CENTER", 5, "RunAway")
   end
+  --]=====]
 end
 
 function mod:OnDebuffRemove(nId, nSpellId, nStack, fTimeRemaining)
+  --[=====[
   if nSpellId == DEBUFF_ION_CLASH then
     core:RemovePicture(nId)
   end
+  --]=====]
 end
 
 function mod:OnUnitDestroyed(nId, tUnit, sName)
@@ -211,6 +219,13 @@ mod:RegisterUnitEvents("Head Engineer Orvulgh",{
       if self.L["Rocket Jump"] == sCastName then
         mod:GetCurrentPlatform(tUnit, sName)
       end
+    end,
+  }
+)
+
+mod:RegisterUnitEvents("Discharged Plasma",{
+    ["OnUnitCreated"] = function (self, nId, tUnit, sName)
+      mod:AddMsg("DISCHARGED_PLASMA_MSG", "KITE THE FIRE ORB", 5, "RunAway")
     end,
   }
 )
