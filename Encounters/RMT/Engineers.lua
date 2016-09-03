@@ -41,14 +41,6 @@ mod:RegisterEnglishLocale({
 ----------------------------------------------------------------------------------------------------
 -- Constants.
 ----------------------------------------------------------------------------------------------------
-
-----------------------------------------------------------------------------------------------------
--- Locals.
-----------------------------------------------------------------------------------------------------
-local GetUnitById = GameLib.GetUnitById
-local GetPlayerUnit = GameLib.GetPlayerUnit
-local GetGameTime = GameLib.GetGameTime
-
 local DEBUFF_ION_CLASH = 84051
 local DEBUFF_UNSTABLE_VOLTAGE = 84045
 
@@ -56,11 +48,48 @@ local DEBUFF_UNSTABLE_VOLTAGE = 84045
 local FIRST_ELECTROSHOCK_TIMER = 12
 local ELECTROSHOCK_TIMER = 20
 
+local BUFF_STATIONS = {self.L["Spark Plug"], self.L["Cooling Turbine"], self.L["Fusion Core"], self.L["Lubricant Nozzle"]}
+----------------------------------------------------------------------------------------------------
+-- Locals.
+----------------------------------------------------------------------------------------------------
+local GetUnitById = GameLib.GetUnitById
+local GetPlayerUnit = GameLib.GetPlayerUnit
+local GetGameTime = GameLib.GetGameTime
+
+local currentWarriorPlatform
+local currentEngineerPlatform
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
 
+end
+
+function mod:GetCurrentPlatform(tUnit, sName)
+  local i
+  local shortestDistance = 100000
+  local currentDistance
+  local currentPlatform
+  for i=1,4,1
+  do
+    currentDistance = mod:GetDistanceBetweenUnits(tUnit, BUFF_STATIONS[i])
+    if shortestDistance > currentDistance then
+      shortestDistance = currentDistance
+      currentPlatform = BUFF_STATIONS[i]
+    end
+  end
+
+  -- Engineer
+  if sName == self.L["Head Engineer Orvulgh"] then
+    currentEngineerPlatform = currentPlatform
+  end
+
+  -- Warrior
+  if sName == self.L["Chief Engineer Wilbargh"] then
+    currentEngineerPlatform = currentPlatform
+  end
+  Print("Engineer Platform: " .. currentEngineerPlatform)
+  Print("Warrior Platform: " .. currentWarriorPlatform)
 end
 
 function mod:OnBuffAdd(nId, nSpellId, nStack, fTimeRemaining)
@@ -115,6 +144,14 @@ mod:RegisterUnitEvents("Chief Engineer Wilbargh",{
         mod:AddMsg("LIQUIDATE_MSG", "Stack", 5, "Info")
       end
     end,
+    ["OnUnitCreated"] = function (self, nId, tUnit, sName)
+      mod:GetCurrentPlatform(tUnit, sName)
+    end,
+    ["OnCastEnd"] = function (self, nId, sCastName, nCastEndTime, sName)
+      if self.L["Rocket Jump"] == sCastName then
+        mod:GetCurrentPlatform(tUnit, sName)
+      end
+    end,
   }
 )
 
@@ -123,6 +160,14 @@ mod:RegisterUnitEvents("Head Engineer Orvulgh",{
     ["OnCastStart"] = function (self, nId, sCastName, nCastEndTime, sName)
       if self.L["Electroshock"] == sCastName then
         mod:AddMsg("ELECTROSHOCK_CAST_MSG", "Electroshock", 5, "Info")
+      end
+    end,
+    ["OnUnitCreated"] = function (self, nId, tUnit, sName)
+      mod:GetCurrentPlatform(tUnit, sName)
+    end,
+    ["OnCastEnd"] = function (self, nId, sCastName, nCastEndTime, sName)
+      if self.L["Rocket Jump"] == sCastName then
+        mod:GetCurrentPlatform(tUnit, sName)
       end
     end,
   }
