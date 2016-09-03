@@ -266,6 +266,7 @@ function RaidCore:GUI_init(sVersion)
     Shredder = Apollo.LoadForm(self.xmlDoc, "ConfigForm_Shredder", self.wndEncounterTarget, self),
     MinibossesRedmoon = Apollo.LoadForm(self.xmlDoc, "ConfigForm_MinibossesRedmoon", self.wndEncounterTarget, self),
     Robomination = Apollo.LoadForm(self.xmlDoc, "ConfigForm_Robomination", self.wndEncounterTarget, self),
+	Engineers = Apollo.LoadForm(self.xmlDoc, "ConfigForm_Engineers", self.wndEncounterTarget, self),
   }
   -- Initialize Left Menu in Main RaidCore window.
   local wndGeneralButton = self.wndMain:FindChild("Static"):FindChild("General")
