@@ -130,7 +130,6 @@ mod:RegisterUnitEvents({
     "Lubricant Nozzle"
     },{
     ["OnUnitCreated"] = function (self, nId, tUnit, sName)
-      core:AddUnit(tUnit)
       core:WatchUnit(tUnit)
     end,
   }
@@ -145,6 +144,7 @@ mod:RegisterUnitEvents("Chief Engineer Wilbargh",{
       end
     end,
     ["OnUnitCreated"] = function (self, nId, tUnit, sName)
+      core:AddUnit(tUnit)
       mod:GetCurrentPlatform(tUnit, sName)
     end,
     ["OnCastEnd"] = function (self, nId, sCastName, nCastEndTime, sName)
@@ -163,6 +163,7 @@ mod:RegisterUnitEvents("Head Engineer Orvulgh",{
       end
     end,
     ["OnUnitCreated"] = function (self, nId, tUnit, sName)
+      core:AddUnit(tUnit)
       mod:GetCurrentPlatform(tUnit, sName)
     end,
     ["OnCastEnd"] = function (self, nId, sCastName, nCastEndTime, sName)
