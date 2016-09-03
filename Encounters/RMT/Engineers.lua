@@ -48,7 +48,27 @@ local DEBUFF_UNSTABLE_VOLTAGE = 84045
 local FIRST_ELECTROSHOCK_TIMER = 12
 local ELECTROSHOCK_TIMER = 20
 
-local BUFF_STATIONS = {self.L["Spark Plug"], self.L["Cooling Turbine"], self.L["Fusion Core"], self.L["Lubricant Nozzle"]}
+local FUSION_CORE = 1
+local COOLING_TURBINE = 2
+local SPARK_PLUG = 3
+local LUBRICANT_NOZZLE = 4
+local CORE_NAMES = {
+  ["Fusion Core"] = FUSION_CORE,
+  ["Cooling Turbine"] = COOLING_TURBINE,
+  ["Spark Plug"] = SPARK_PLUG,
+  ["Lubricant Nozzle"] = LUBRICANT_NOZZLE
+}
+
+local WARRIOR = 1
+local ENGINEER = 2
+local ENGINEER_NAMES = {
+  ["Chief Engineer Wilbargh"] = WARRIOR,
+  ["Head Engineer Orvulgh"] = ENGINEER,
+}
+local ENGINEER_START_LOCATION = {
+  [WARRIOR] = SPARK_PLUG,
+  [ENGINEER] = COOLING_TURBINE,
+}
 ----------------------------------------------------------------------------------------------------
 -- Locals.
 ----------------------------------------------------------------------------------------------------
@@ -58,11 +78,24 @@ local GetGameTime = GameLib.GetGameTime
 
 local currentWarriorPlatform
 local currentEngineerPlatform
+local coreUnits
+local engineerUnits
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
+  coreUnits = {}
+  engineerUnits = {}
 
+  --locales
+  for name, id in pairs(CORE_NAMES) do
+    CORE_NAMES[name] = nil
+    CORE_NAMES[self.L[name]] = id
+  end
+  for name, id in pairs(ENGINEER_NAMES) do
+    ENGINEER_NAMES[name] = nil
+    ENGINEER_NAMES[self.L[name]] = id
+  end
 end
 
 function mod:GetCurrentPlatform(tUnit, sName)
@@ -131,6 +164,14 @@ mod:RegisterUnitEvents({
     },{
     ["OnUnitCreated"] = function (self, nId, tUnit, sName)
       core:WatchUnit(tUnit)
+      if CORE_NAMES[sName] ~= nil then
+        coreUnits[CORE_NAMES[sName]] = tUnit
+      elseif ENGINEER_NAMES[sName] ~= nil then
+        engineerUnits[ENGINEER_NAMES[sName]] = {
+          unit = tUnit,
+          location = ENGINEER_START_LOCATION[ENGINEER_NAMES[sName]],
+        }
+      end
     end,
   }
 )
