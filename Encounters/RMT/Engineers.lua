@@ -37,7 +37,7 @@ mod:RegisterEnglishLocale({
     ["Liquidate"] = "Liquidate",
     ["Electroshock"] = "Electroshock",
     -- Datachron
-    ["suffers from Electroshock"] = "suffers from Electroshock",
+    ["(.*) suffers from Electroshock"] = "(.*) suffers from Electroshock",
     -- Messages
     ["%s SWAP TO WARRIOR"] = "%s SWAP TO WARRIOR",
     ["YOU SWAP TO WARRIOR"] = "YOU SWAP TO WARRIOR",
@@ -177,6 +177,23 @@ function mod:OnUnitCreated(nId, unit, sName)
 
 end
 
+function mod:OnDatachron(sMessage)
+  local sPlayerNameElectroshock = sMessage:match(self.L["(.*) suffers from Electroshock"])
+  if sPlayerNameElectroshock then
+    local bIsOnMyself = sPlayerNameElectroshock == playerUnit
+    local sSound = "Info"
+    local sElectroshockOnX = ""
+    if bIsOnMyself then
+      sElectroshockOnX = self.L["YOU SWAP TO WARRIOR"]
+      sSound = "RunAway"
+    else
+      sElectroshockOnX = self.L["%s SWAP TO WARRIOR"]:format(sPlayerNameElectroshock)
+    end
+
+    mod:AddMsg("ELECTROSHOCK_MSG", sElectroshockOnX, 5, sSound, "Red")
+  end
+end
+
 mod:RegisterUnitEvents({
     "Head Engineer Orvulgh", "Chief Engineer Wilbargh",
     "Fusion Core",
@@ -243,21 +260,6 @@ mod:RegisterUnitEvents("Discharged Plasma",{
       mod:AddMsg("DISCHARGED_PLASMA_MSG", "KITE THE FIRE ORB", 5, "RunAway")
     end,
   }
-)
-
-mod:RegisterDatachronEvent("suffers from Electroshock", "FIND", function (self, sMessage)
-    local tElectroshockTarget = GetPlayerUnitByName(string.match(sMessage, "([^%s]+%s[^%s]+)".." "..self.L["suffers from Electroshock"]))
-    local bIsOnMyself = tElectroshockTarget == playerUnit
-    local sSound = "Info"
-    local sElectroshockOnX = ""
-    if bIsOnMyself then
-      sElectroshockOnX = self.L["YOU SWAP TO WARRIOR"]
-    else
-      sElectroshockOnX = self.L["%s SWAP TO WARRIOR"]:format(tElectroshockTarget:GetName())
-    end
-
-    mod:AddMsg("ELECTROSHOCK_MSG", sElectroshockOnX, 5, sSound, "Red")
-  end
 )
 
 -- mod:RegisterUnitEvents({"Friendly Invisible Unit for Fields"},{
