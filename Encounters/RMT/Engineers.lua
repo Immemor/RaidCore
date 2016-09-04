@@ -249,8 +249,8 @@ mod:RegisterUnitEvents("Chief Engineer Wilbargh",{
     ["OnCastStart"] = function (self, nId, sCastName, nCastEndTime, sName)
       if self.L["Liquidate"] == sCastName then
         --Stack
-        if mod:IsPlayerClose(engineerUnits[WARRIOR].unit) and mod:GetSetting("Liquidate") then
-          mod:AddMsg("LIQUIDATE_MSG", "Stack", 5, "Info")
+        if mod:IsPlayerClose(engineerUnits[WARRIOR].unit) then
+          mod:AddMsg("LIQUIDATE_MSG", "Stack", 5, mod:GetSetting("Liquidate") == true and "Info")
         end
       end
     end,
@@ -275,8 +275,8 @@ mod:RegisterUnitEvents("Chief Engineer Wilbargh",{
 mod:RegisterUnitEvents("Head Engineer Orvulgh",{
     ["OnCastStart"] = function (self, nId, sCastName, nCastEndTime, sName)
       if self.L["Electroshock"] == sCastName then
-        if mod:IsPlayerClose(engineerUnits[ENGINEER].unit) and mod:GetSetting("Electroshock") then
-          mod:AddMsg("ELECTROSHOCK_CAST_MSG", "Electroshock", 5, "Beware")
+        if mod:IsPlayerClose(engineerUnits[ENGINEER].unit) then
+          mod:AddMsg("ELECTROSHOCK_CAST_MSG", "Electroshock", 5, mod:GetSetting("Electroshock") == true and "Beware")
         end
       end
     end,
@@ -299,8 +299,8 @@ mod:RegisterUnitEvents("Head Engineer Orvulgh",{
 
 mod:RegisterUnitEvents("Discharged Plasma",{
     ["OnUnitCreated"] = function (self, nId, tUnit, sName)
-      if mod:IsPlayerClose(tUnit) and mod:GetSetting("FireOrb") then
-        mod:AddMsg("DISCHARGED_PLASMA_MSG", "KITE THE FIRE ORB", 5, "RunAway")
+      if mod:IsPlayerClose(tUnit) then
+        mod:AddMsg("DISCHARGED_PLASMA_MSG", "KITE THE FIRE ORB", 5, mod:GetSetting("FireOrb") == true and "RunAway")
         local tOrbTarget = tUnit:GetTarget()
         --Print(tOrbTarget)
       end
