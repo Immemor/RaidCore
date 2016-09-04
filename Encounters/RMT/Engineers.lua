@@ -49,8 +49,13 @@ local DEBUFF_ION_CLASH = 84051
 local DEBUFF_UNSTABLE_VOLTAGE = 84045
 
 -- Timers
-local FIRST_ELECTROSHOCK_TIMER = 12
-local ELECTROSHOCK_TIMER = 20
+local FIRST_ELECTROSHOCK_TIMER = 11
+local ELECTROSHOCK_TIMER = 18
+local JUMP_ELECTROSHOCK_TIMER = 17
+
+local FIRST_LIQUIDATE_TIMER = 14
+local LIQUIDATE_TIMER = 22
+local JUMP_LIQUIDATE_TIMER = 17
 
 local FUSION_CORE = 1
 local COOLING_TURBINE = 2
@@ -127,6 +132,8 @@ function mod:OnBossEnable()
   if mod:GetSetting("CoreHealth") then
     timer = ApolloTimer.Create(1, false, "RegisterCoreHealth", mod)
   end
+  mod:AddTimerBar("NEXT_ELEKTROSHOCK_TIMER", "Next Electroshock in", FIRST_ELECTROSHOCK_TIMER)
+  mod:AddTimerBar("NEXT_LIQUIDATE_TIMER", "Next Liquidate in", FIRST_LIQUIDATE_TIMER)
 end
 
 function mod:RegisterCoreHealth()
@@ -241,7 +248,7 @@ mod:RegisterUnitEvents("Chief Engineer Wilbargh",{
     ["OnCastStart"] = function (self, nId, sCastName, nCastEndTime, sName)
       if self.L["Liquidate"] == sCastName then
         --Stack
-        if mod:GetDistanceBetweenUnits(GetPlayerUnit(), engineerUnits[WARRIOR]) < 75 and mod:GetSetting("Liquidate") then
+        if mod:GetDistanceBetweenUnits(GetPlayerUnit(), engineerUnits[WARRIOR].unit) < 75 and mod:GetSetting("Liquidate") then
           mod:AddMsg("LIQUIDATE_MSG", "Stack", 5, "Info")
         end
       end
@@ -252,6 +259,12 @@ mod:RegisterUnitEvents("Chief Engineer Wilbargh",{
     ["OnCastEnd"] = function (self, nId, sCastName, nCastEndTime, sName)
       if self.L["Rocket Jump"] == sCastName then
         engineerUnits[WARRIOR].timer:Start()
+        mod:RemoveTimerBar("NEXT_LIQUIDATE_TIMER")
+        mod:AddTimerBar("NEXT_LIQUIDATE_TIMER", "Next Liquidate in", JUMP_LIQUIDATE_TIMER)
+      end
+      if self.L["Liquidate"] == sCastName then
+        mod:RemoveTimerBar("NEXT_LIQUIDATE_TIMER")
+        mod:AddTimerBar("NEXT_LIQUIDATE_TIMER", "Next Liquidate in", LIQUIDATE_TIMER)
       end
     end,
   }
@@ -261,8 +274,8 @@ mod:RegisterUnitEvents("Chief Engineer Wilbargh",{
 mod:RegisterUnitEvents("Head Engineer Orvulgh",{
     ["OnCastStart"] = function (self, nId, sCastName, nCastEndTime, sName)
       if self.L["Electroshock"] == sCastName then
-        if mod:GetDistanceBetweenUnits(GetPlayerUnit(), engineerUnits[ENGINEER]) < 75 and mod:GetSetting("Electroshock") then
-          mod:AddMsg("ELECTROSHOCK_CAST_MSG", "Electroshock", 5, "Info")
+        if mod:GetDistanceBetweenUnits(GetPlayerUnit(), engineerUnits[ENGINEER].unit) < 75 and mod:GetSetting("Electroshock") then
+          mod:AddMsg("ELECTROSHOCK_CAST_MSG", "Electroshock", 5, "Beware")
         end
       end
     end,
@@ -272,6 +285,12 @@ mod:RegisterUnitEvents("Head Engineer Orvulgh",{
     ["OnCastEnd"] = function (self, nId, sCastName, nCastEndTime, sName)
       if self.L["Rocket Jump"] == sCastName then
         engineerUnits[ENGINEER].timer:Start()
+        mod:RemoveTimerBar("NEXT_ELEKTROSHOCK_TIMER")
+        mod:AddTimerBar("NEXT_ELEKTROSHOCK_TIMER", "Next Electroshock in", JUMP_ELECTROSHOCK_TIMER)
+      end
+      if self.L["Electroshock"] == sCastName then
+        mod:RemoveTimerBar("NEXT_ELEKTROSHOCK_TIMER")
+        mod:AddTimerBar("NEXT_ELEKTROSHOCK_TIMER", "Next Electroshock in", ELECTROSHOCK_TIMER)
       end
     end,
   }
