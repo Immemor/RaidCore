@@ -37,7 +37,7 @@ mod:RegisterEnglishLocale({
     ["Liquidate"] = "Liquidate",
     ["Electroshock"] = "Electroshock",
     -- Datachron
-    ["suffers from Electroshock"] = "suffers from Electroshock",
+    ["([^%s]+%s[^%s]+) suffers from Electroshock"] = "([^%s]+%s[^%s]+) suffers from Electroshock",
     -- Messages
     ["%s SWAP TO WARRIOR"] = "%s SWAP TO WARRIOR",
     ["YOU SWAP TO WARRIOR"] = "YOU SWAP TO WARRIOR",
@@ -204,15 +204,16 @@ function mod:IsPlayerClose(unit)
   return mod:GetDistanceBetweenUnits(playerunit, unit) < 75
 end
 
-mod:RegisterDatachronEvent("suffers from Electroshock", "FIND", function (self, sMessage)
-    local tElectroshockTarget = string.match(sMessage, "([^%s]+%s[^%s]+)%s" .. self.L["suffers from Electroshock"])
-    local bIsOnMyself = tElectroshockTarget == playerUnit:GetName()
+mod:RegisterDatachronEvent(
+  "([^%s]+%s[^%s]+) suffers from Electroshock", "MATCH",
+  function (self, sMessage, sElectroshockTarget)
+    local bIsOnMyself = sElectroshockTarget == playerUnit:GetName()
     local sElectroshockOnX = ""
     if bIsOnMyself then
       sElectroshockOnX = self.L["YOU SWAP TO WARRIOR"]
       sSound = mod:GetSetting("ElectroshockSwapYou") == true and "RunAway"
     else
-      sElectroshockOnX = self.L["%s SWAP TO WARRIOR"]:format(tElectroshockTarget)
+      sElectroshockOnX = self.L["%s SWAP TO WARRIOR"]:format(sElectroshockTarget)
       sSound = mod:GetSetting("ElectroshockSwap") == true and "Info"
     end
 
