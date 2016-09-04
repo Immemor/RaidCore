@@ -201,7 +201,7 @@ function mod:OnUnitDestroyed(nId, tUnit, sName)
 end
 
 function mod:IsPlayerClose(unit)
-
+  return mod:GetDistanceBetweenUnits(playerunit, unit) < 75
 end
 
 mod:RegisterDatachronEvent("suffers from Electroshock", "FIND", function (self, sMessage)
@@ -249,7 +249,7 @@ mod:RegisterUnitEvents("Chief Engineer Wilbargh",{
     ["OnCastStart"] = function (self, nId, sCastName, nCastEndTime, sName)
       if self.L["Liquidate"] == sCastName then
         --Stack
-        if mod:GetDistanceBetweenUnits(playerunit, engineerUnits[WARRIOR].unit) < 75 and mod:GetSetting("Liquidate") then
+        if mod:IsPlayerClose(engineerUnits[WARRIOR].unit) and mod:GetSetting("Liquidate") then
           mod:AddMsg("LIQUIDATE_MSG", "Stack", 5, "Info")
         end
       end
@@ -275,7 +275,7 @@ mod:RegisterUnitEvents("Chief Engineer Wilbargh",{
 mod:RegisterUnitEvents("Head Engineer Orvulgh",{
     ["OnCastStart"] = function (self, nId, sCastName, nCastEndTime, sName)
       if self.L["Electroshock"] == sCastName then
-        if mod:GetDistanceBetweenUnits(playerUnit, engineerUnits[ENGINEER].unit) < 75 and mod:GetSetting("Electroshock") then
+        if mod:IsPlayerClose(engineerUnits[ENGINEER].unit) and mod:GetSetting("Electroshock") then
           mod:AddMsg("ELECTROSHOCK_CAST_MSG", "Electroshock", 5, "Beware")
         end
       end
@@ -299,7 +299,7 @@ mod:RegisterUnitEvents("Head Engineer Orvulgh",{
 
 mod:RegisterUnitEvents("Discharged Plasma",{
     ["OnUnitCreated"] = function (self, nId, tUnit, sName)
-      if mod:GetDistanceBetweenUnits(playerUnit, tUnit) < 75 and mod:GetSetting("FireOrb") then
+      if mod:IsPlayerClose(tUnit) and mod:GetSetting("FireOrb") then
         mod:AddMsg("DISCHARGED_PLASMA_MSG", "KITE THE FIRE ORB", 5, "RunAway")
         local tOrbTarget = tUnit:GetTarget()
         --Print(tOrbTarget)
