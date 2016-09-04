@@ -106,7 +106,8 @@ local GetGameTime = GameLib.GetGameTime
 
 local currentWarriorPlatform
 local currentEngineerPlatform
-local coreUnits
+--Do not reset coreUnits since they don't get destroyed after each pull
+local coreUnits = {}
 local engineerUnits
 local playerUnit
 local orbUnits
@@ -119,12 +120,16 @@ mod:RegisterDefaultSetting("Electroshock")
 mod:RegisterDefaultSetting("ElectroshockSwap")
 mod:RegisterDefaultSetting("ElectroshockSwapYou")
 mod:RegisterDefaultSetting("FireOrb")
+
+----------------------------------------------------------------------------------------------------
+-- Raw event handlers.
+----------------------------------------------------------------------------------------------------
+Apollo.RegisterEventHandler("UnitDestroyed", "OnUnitDestroyedRaw", mod)
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
   playerUnit = GameLib.GetPlayerUnit()
-  coreUnits = {}
   engineerUnits = {}
   orbUnits = {}
   --locales
@@ -136,17 +141,36 @@ function mod:OnBossEnable()
     ENGINEER_NAMES[name] = nil
     ENGINEER_NAMES[self.L[name]] = id
   end
-  -- This ensures that the core healths get added on the bottom, or else the engineers health will be mixed in with the core healths.
-  if mod:GetSetting("CoreHealth") then
-    ApolloTimer.Create(1, false, "RegisterCoreHealth", mod)
-  end
+
   mod:AddTimerBar("NEXT_ELEKTROSHOCK_TIMER", "Next Electroshock in", FIRST_ELECTROSHOCK_TIMER)
   mod:AddTimerBar("NEXT_LIQUIDATE_TIMER", "Next Liquidate in", FIRST_LIQUIDATE_TIMER)
 end
 
-function mod:RegisterCoreHealth()
+function mod:OnBossDisable()
+  mod:RemoveUnits()
+end
+
+function mod:AddUnits()
+  for engineerId, engineer in pairs(engineerUnits) do
+    core:WatchUnit(engineer.unit)
+    core:AddUnit(engineer.unit)
+  end
   for coreId, coreUnit in pairs(coreUnits) do
-    core:AddUnit(coreUnit)
+    core:WatchUnit(coreUnit)
+    if mod:GetSetting("CoreHealth") then
+      core:AddUnit(coreUnit)
+    end
+  end
+end
+
+function mod:RemoveUnits()
+  for engineerId, engineer in pairs(engineerUnits) do
+    core:RemoveUnit(engineer.unit)
+  end
+  for coreId, coreUnit in pairs(coreUnits) do
+    if mod:GetSetting("CoreHealth") then
+      core:RemoveUnit(coreUnit)
+    end
   end
 end
 
@@ -227,6 +251,13 @@ function mod:IsPlayerClose(unit)
   return mod:GetDistanceBetweenUnits(playerUnit, unit) < 75
 end
 
+function mod:OnUnitDestroyedRaw(tUnit)
+  local sName = tUnit:GetName()
+  if CORE_NAMES[sName] ~= nil then
+    coreUnits[CORE_NAMES[sName]] = nil
+  end
+end
+
 mod:RegisterUnitEvents({
     "Head Engineer Orvulgh", "Chief Engineer Wilbargh",
     "Fusion Core",
@@ -235,7 +266,6 @@ mod:RegisterUnitEvents({
     "Lubricant Nozzle"
     },{
     ["OnUnitCreated"] = function (self, nId, tUnit, sName)
-      core:WatchUnit(tUnit)
       if CORE_NAMES[sName] ~= nil then
         coreUnits[CORE_NAMES[sName]] = tUnit
       elseif ENGINEER_NAMES[sName] ~= nil then
@@ -246,6 +276,9 @@ mod:RegisterUnitEvents({
           timer = ApolloTimer.Create(1.5, false, ENGINEER_TIMER_NAMES[id], mod),
           firstCheck = true,
         }
+      end
+      if #coreUnits == 4 and #engineerUnits == 2 then
+        mod:AddUnits()
       end
     end,
   }
@@ -260,9 +293,6 @@ mod:RegisterUnitEvents("Chief Engineer Wilbargh",{
           mod:AddMsg("LIQUIDATE_MSG", "Stack", 5, mod:GetSetting("Liquidate") == true and "Info")
         end
       end
-    end,
-    ["OnUnitCreated"] = function (self, nId, tUnit, sName)
-      core:AddUnit(tUnit)
     end,
     ["OnCastEnd"] = function (self, nId, sCastName, nCastEndTime, sName)
       if self.L["Rocket Jump"] == sCastName then
@@ -286,9 +316,6 @@ mod:RegisterUnitEvents("Head Engineer Orvulgh",{
           mod:AddMsg("ELECTROSHOCK_CAST_MSG", "Electroshock", 5, mod:GetSetting("Electroshock") == true and "Beware")
         end
       end
-    end,
-    ["OnUnitCreated"] = function (self, nId, tUnit, sName)
-      core:AddUnit(tUnit)
     end,
     ["OnCastEnd"] = function (self, nId, sCastName, nCastEndTime, sName)
       if self.L["Rocket Jump"] == sCastName then
