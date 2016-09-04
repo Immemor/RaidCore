@@ -51,9 +51,9 @@ local DEBUFF_UNSTABLE_VOLTAGE = 84045
 -- Timers
 local FIRST_ELECTROSHOCK_TIMER = 11
 local ELECTROSHOCK_TIMER = 18
-local JUMP_ELECTROSHOCK_TIMER = 17
+local JUMP_ELECTROSHOCK_TIMER = 12
 
-local FIRST_LIQUIDATE_TIMER = 14
+local FIRST_LIQUIDATE_TIMER = 12
 local LIQUIDATE_TIMER = 22
 local JUMP_LIQUIDATE_TIMER = 17
 
@@ -207,13 +207,13 @@ end
 mod:RegisterDatachronEvent("suffers from Electroshock", "FIND", function (self, sMessage)
     local tElectroshockTarget = string.match(sMessage, "([^%s]+%s[^%s]+)%s" .. self.L["suffers from Electroshock"])
     local bIsOnMyself = tElectroshockTarget == playerUnit:GetName()
-    local sSound = "Info"
     local sElectroshockOnX = ""
     if bIsOnMyself then
       sElectroshockOnX = self.L["YOU SWAP TO WARRIOR"]
-      sSound = "RunAway"
+      sSound = mod:GetSetting("ElectroshockSwapYou") == true and "RunAway"
     else
       sElectroshockOnX = self.L["%s SWAP TO WARRIOR"]:format(tElectroshockTarget)
+      sSound = mod:GetSetting("ElectroshockSwap") == true and "Info"
     end
 
     mod:AddMsg("ELECTROSHOCK_MSG", sElectroshockOnX, 5, sSound, "Red")
