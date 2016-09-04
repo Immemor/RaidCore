@@ -41,6 +41,7 @@ mod:RegisterEnglishLocale({
     -- Messages
     ["%s SWAP TO WARRIOR"] = "%s SWAP TO WARRIOR",
     ["YOU SWAP TO WARRIOR"] = "YOU SWAP TO WARRIOR",
+    ["Next Fire Orb in"] = "Next Fire Orb in",
   })
 ----------------------------------------------------------------------------------------------------
 -- Constants.
@@ -52,6 +53,8 @@ local DEBUFF_UNSTABLE_VOLTAGE = 84045
 local FIRST_ELECTROSHOCK_TIMER = 11
 local ELECTROSHOCK_TIMER = 18
 local JUMP_ELECTROSHOCK_TIMER = 12
+local NEXT_FIRE_ORB_TIMER = 24
+local FIRE_ORB_SAFE_TIMER = 14
 
 local FIRST_LIQUIDATE_TIMER = 12
 local LIQUIDATE_TIMER = 22
@@ -104,6 +107,7 @@ local currentEngineerPlatform
 local coreUnits
 local engineerUnits
 local playerUnit
+local orbUnits
 ----------------------------------------------------------------------------------------------------
 -- Settings.
 ----------------------------------------------------------------------------------------------------
@@ -120,6 +124,7 @@ function mod:OnBossEnable()
   playerUnit = GameLib.GetPlayerUnit()
   coreUnits = {}
   engineerUnits = {}
+  orbUnits = {}
   --locales
   for name, id in pairs(CORE_NAMES) do
     CORE_NAMES[name] = nil
@@ -301,14 +306,53 @@ mod:RegisterUnitEvents("Head Engineer Orvulgh",{
 
 mod:RegisterUnitEvents("Discharged Plasma",{
     ["OnUnitCreated"] = function (self, nId, tUnit, sName)
-      if mod:IsPlayerClose(tUnit) then
-        mod:AddMsg("DISCHARGED_PLASMA_MSG", "KITE THE FIRE ORB", 5, mod:GetSetting("FireOrb") == true and "RunAway")
-        local tOrbTarget = tUnit:GetTarget()
-        --Print(tOrbTarget)
-      end
+      core:WatchUnit(tUnit)
+      mod:RemoveTimerBar("NEXT_FIRE_ORB_TIMER")
+      mod:AddTimerBar("NEXT_FIRE_ORB_TIMER", self.L["Next Fire Orb in"], NEXT_FIRE_ORB_TIMER)
+      mod:AddTimerBar(string.format("FIRE_ORB_SAFE_TIMER %d", nId), "Fire Orb is safe to pop in", FIRE_ORB_SAFE_TIMER)
+      local testTimer = ApolloTimer.Create(1, false, "RegisterOrbTarget", mod)
+      testTimer:Start()
+      orbUnits[nId] = {
+        unit = tUnit,
+        checkedTarget = false,
+        popMessageSent = false,
+        timer = testTimer
+      }
+    end,
+    ["OnUnitDestroyed"] = function (self, nId, tUnit, sName)
+      orbUnits[nId] = nil
+      mod:RemoveTimerBar(string.format("FIRE_ORB_SAFE_TIMER %d", nId))
     end,
   }
 )
+
+function mod:RegisterOrbTarget()
+  for orbId, orbUnit in pairs(orbUnits) do
+    if not orbUnit.checkedTarget then
+      orbUnit.checkedTarget = true
+      local target = orbUnit.unit:GetTarget()
+      local isOnMyself = target == playerUnit
+      if isOnMyself then
+        mod:AddMsg("DISCHARGED_PLASMA_MSG", "FIRE ORB ON YOU", 5, mod:GetSetting("FireOrb") == true and "RunAway")
+      else
+        mod:AddMsg("DISCHARGED_PLASMA_MSG", "Fire Orb spawned", 2, mod:GetSetting("FireOrbAlt") == true and "Info")
+    end
+  end
+end
+
+--function mod:OnBuffUpdate(nId, nSpellId, nOldStack, nStack, fTimeRemaining)
+--  if nSpellId == 87214 and nStack > 7 then
+--    local orbUnit = orbUnits[nId]
+--    if not orbUnit.popMessageSent then
+--      orbUnit.popMessageSent = true
+--      local target = orbUnit.unit:GetTarget()
+--      local isOnMyself = target == playerUnit
+--      if isOnMyself then
+--        mod:AddMsg("DISCHARGED_PLASMA_MSG_POP", "POP THE FIRE ORB", 5, mod:GetSetting("FireOrbPop") == true and "Inferno")
+--      end
+--    end
+--  end
+--end
 
 -- mod:RegisterUnitEvents({"Friendly Invisible Unit for Fields"},{
 -- ["OnUnitCreated"] = function (self, nId, tUnit, sName)
