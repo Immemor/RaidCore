@@ -48,6 +48,8 @@ mod:RegisterEnglishLocale({
 ----------------------------------------------------------------------------------------------------
 local DEBUFF_ION_CLASH = 84051
 local DEBUFF_UNSTABLE_VOLTAGE = 84045
+local DEBUFF_ELECTROSHOCK_VULNERABILITY = 83798
+local DEBUFF_DIMINISHING_FUSION_REACTION = 87214
 
 -- Timers
 local FIRST_ELECTROSHOCK_TIMER = 11
@@ -182,6 +184,22 @@ function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
 end
 
 function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
+  if DEBUFF_ELECTROSHOCK_VULNERABILITY == nSpellId then
+    local target = GetUnitById(nId)
+    local targetName = target:GetName()
+    local isOnMyself = targetName == playerUnit:GetName()
+    local sElectroshockOnX = ""
+    local sMessageId = string.format("ELECTROSHOCK_MSG_%s", targetName)
+    if bIsOnMyself then
+      sElectroshockOnX = self.L["YOU SWAP TO WARRIOR"]
+      sSound = mod:GetSetting("ElectroshockSwapYou") == true and "RunAway"
+    else
+      sElectroshockOnX = self.L["%s SWAP TO WARRIOR"]:format(targetName)
+      sSound = mod:GetSetting("ElectroshockSwap") == true and "Info"
+    end
+
+    mod:AddMsg(sMessageId, sElectroshockOnX, 5, sSound, "Red")
+  end
   --[=====[
   if DEBUFF_ION_CLASH == nSpellId then
     mod:AddMsg("DISCHARGED_PLASMA_MSG", "KITE THE FIRE ORB", 5, "RunAway")
@@ -208,24 +226,6 @@ end
 function mod:IsPlayerClose(unit)
   return mod:GetDistanceBetweenUnits(playerUnit, unit) < 75
 end
-
-mod:RegisterDatachronEvent(
-  "([^%s]+%s[^%s]+) suffers from Electroshock", "MATCH",
-  function (self, sMessage, sElectroshockTarget)
-    local bIsOnMyself = sElectroshockTarget == playerUnit:GetName()
-    local sElectroshockOnX = ""
-    local sMessageId = string.format("ELECTROSHOCK_MSG_%s", sElectroshockTarget)
-    if bIsOnMyself then
-      sElectroshockOnX = self.L["YOU SWAP TO WARRIOR"]
-      sSound = mod:GetSetting("ElectroshockSwapYou") == true and "RunAway"
-    else
-      sElectroshockOnX = self.L["%s SWAP TO WARRIOR"]:format(sElectroshockTarget)
-      sSound = mod:GetSetting("ElectroshockSwap") == true and "Info"
-    end
-
-    mod:AddMsg(sMessageId, sElectroshockOnX, 5, sSound, "Red")
-  end
-)
 
 mod:RegisterUnitEvents({
     "Head Engineer Orvulgh", "Chief Engineer Wilbargh",
@@ -336,6 +336,7 @@ function mod:RegisterOrbTarget()
         mod:AddMsg("DISCHARGED_PLASMA_MSG", "FIRE ORB ON YOU", 5, mod:GetSetting("FireOrb") == true and "RunAway")
       else
         mod:AddMsg("DISCHARGED_PLASMA_MSG", "Fire Orb spawned", 2, mod:GetSetting("FireOrbAlt") == true and "Info")
+      end
     end
   end
 end
