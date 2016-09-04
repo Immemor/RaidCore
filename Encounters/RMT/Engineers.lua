@@ -131,7 +131,7 @@ function mod:OnBossEnable()
   end
   -- This ensures that the core healths get added on the bottom, or else the engineers health will be mixed in with the core healths.
   if mod:GetSetting("CoreHealth") then
-    timer = ApolloTimer.Create(1, false, "RegisterCoreHealth", mod)
+    ApolloTimer.Create(1, false, "RegisterCoreHealth", mod)
   end
   mod:AddTimerBar("NEXT_ELEKTROSHOCK_TIMER", "Next Electroshock in", FIRST_ELECTROSHOCK_TIMER)
   mod:AddTimerBar("NEXT_LIQUIDATE_TIMER", "Next Liquidate in", FIRST_LIQUIDATE_TIMER)
