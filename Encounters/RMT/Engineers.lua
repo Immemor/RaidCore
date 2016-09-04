@@ -205,7 +205,7 @@ function mod:IsPlayerClose(unit)
 end
 
 mod:RegisterDatachronEvent("suffers from Electroshock", "FIND", function (self, sMessage)
-    local tElectroshockTarget = string.match(sMessage, "([^%s]+%s[^%s]+)" .. " " .. self.L["suffers from Electroshock"])
+    local tElectroshockTarget = string.match(sMessage, "([^%s]+%s[^%s]+)%s" .. self.L["suffers from Electroshock"])
     local bIsOnMyself = tElectroshockTarget == playerUnit:GetName()
     local sSound = "Info"
     local sElectroshockOnX = ""
