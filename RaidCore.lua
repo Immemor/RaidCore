@@ -89,6 +89,9 @@ local function OnEncounterUnitEvents(sMethod, ...)
   elseif sMethod == "OnHealthChanged" then
     local nId, nPourcent, sName = ...
     tEncounter = _tCurrentEncounter.tUnitEvents[sMethod][sName]
+  elseif sMethod == "OnEnteredCombat" then
+    local nId, tUnit, sName, bInCombat = ...
+    tEncounter = _tCurrentEncounter.tUnitEvents[sMethod][sName]
   end
 
   if tEncounter then
