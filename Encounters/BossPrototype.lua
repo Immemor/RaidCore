@@ -93,10 +93,10 @@ end
 function EncounterPrototype:RegisterDatachronEvent(sSearchMessage, sMatch, fHandler)
   assert(type(sSearchMessage) == "string")
   assert(type(fHandler) == "function")
-  assert(sMatch == "MATCH" or sMatch == "FIND")
+  assert(sMatch == "MATCH" or sMatch == "FIND" or sMatch == "EQUAL")
   sSearchMessage = self.L[sSearchMessage]
   self.tDatachronEvents[sSearchMessage] = self.tDatachronEvents[sSearchMessage] or {}
-  table.insert(self.tDatachronEvents[sSearchMessage], {fHandler = fHandler, bMatch = sMatch == "MATCH"})
+  table.insert(self.tDatachronEvents[sSearchMessage], {fHandler = fHandler, sMatch = sMatch })
 end
 
 -- Register events to a single unit

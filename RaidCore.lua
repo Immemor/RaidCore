@@ -107,11 +107,20 @@ local function OnEncounterDatachronEvents(sMethod, ...)
   for sSearchMessage, tEvents in pairs(_tCurrentEncounter.tDatachronEvents) do
     for _, tEvent in pairs(tEvents) do
       local sMessage = ...
-      local bMatch = tEvent.bMatch
+      local sMatch = tEvent.sMatch
       local fHandler = tEvent.fHandler
-      if (bMatch == true and sSearchMessage == sMessage) or
-      (bMatch == false and sMessage:find(sSearchMessage)) then
-        fHandler(_tCurrentEncounter, ...)
+      local result = nil
+
+      if sMatch == "EQUAL" then
+        result = sSearchMessage == sMessage
+      elseif sMatch == "FIND" then
+        result = sMessage:find(sSearchMessage)
+      elseif sMatch == "MATCH" then
+        result = sMessage:match(sSearchMessage)
+      end
+
+      if result ~= nil then
+        fHandler(_tCurrentEncounter, sMessage, result)
       end
     end
   end
