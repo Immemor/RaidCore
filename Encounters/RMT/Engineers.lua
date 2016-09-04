@@ -209,6 +209,7 @@ mod:RegisterDatachronEvent(
   function (self, sMessage, sElectroshockTarget)
     local bIsOnMyself = sElectroshockTarget == playerUnit:GetName()
     local sElectroshockOnX = ""
+    local sMessageId = string.format("ELECTROSHOCK_MSG_%s", sElectroshockTarget)
     if bIsOnMyself then
       sElectroshockOnX = self.L["YOU SWAP TO WARRIOR"]
       sSound = mod:GetSetting("ElectroshockSwapYou") == true and "RunAway"
@@ -217,7 +218,7 @@ mod:RegisterDatachronEvent(
       sSound = mod:GetSetting("ElectroshockSwap") == true and "Info"
     end
 
-    mod:AddMsg("ELECTROSHOCK_MSG", sElectroshockOnX, 5, sSound, "Red")
+    mod:AddMsg(sMessageId, sElectroshockOnX, 5, sSound, "Red")
   end
 )
 
