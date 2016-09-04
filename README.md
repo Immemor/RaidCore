@@ -7,6 +7,4 @@ Raidcore is a boss-mods addon for Wildstar game, it's intend to:
 
 Please open an issue if you notice problems, or if you have a idea of improvement.
 
-Bloodpact, if you ever manage to read this, fuck you.
-
 All rights reserved.
