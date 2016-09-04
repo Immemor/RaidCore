@@ -201,7 +201,7 @@ function mod:OnUnitDestroyed(nId, tUnit, sName)
 end
 
 function mod:IsPlayerClose(unit)
-  return mod:GetDistanceBetweenUnits(playerunit, unit) < 75
+  return mod:GetDistanceBetweenUnits(playerUnit, unit) < 75
 end
 
 mod:RegisterDatachronEvent(
