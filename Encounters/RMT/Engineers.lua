@@ -100,6 +100,15 @@ local currentEngineerPlatform
 local coreUnits
 local engineerUnits
 ----------------------------------------------------------------------------------------------------
+-- Settings.
+----------------------------------------------------------------------------------------------------
+mod:RegisterDefaultSetting("CoreHealth", false)
+mod:RegisterDefaultSetting("Liquidate")
+mod:RegisterDefaultSetting("Electroshock")
+mod:RegisterDefaultSetting("ElectroshockSwap")
+mod:RegisterDefaultSetting("ElectroshockSwapYou")
+mod:RegisterDefaultSetting("FireOrb")
+----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
@@ -113,6 +122,16 @@ function mod:OnBossEnable()
   for name, id in pairs(ENGINEER_NAMES) do
     ENGINEER_NAMES[name] = nil
     ENGINEER_NAMES[self.L[name]] = id
+  end
+  -- This ensures that the core healths get added on the bottom, or else the engineers health will be mixed in with the core healths.
+  if mod:GetSetting("CoreHealth") then
+    timer = ApolloTimer.Create(1, false, "RegisterCoreHealth", mod)
+  end
+end
+
+function mod:RegisterCoreHealth()
+  for coreId, coreUnit in pairs(coreUnits) do
+    core:AddUnit(coreUnit)
   end
 end
 
@@ -222,7 +241,9 @@ mod:RegisterUnitEvents("Chief Engineer Wilbargh",{
     ["OnCastStart"] = function (self, nId, sCastName, nCastEndTime, sName)
       if self.L["Liquidate"] == sCastName then
         --Stack
-        mod:AddMsg("LIQUIDATE_MSG", "Stack", 5, "Info")
+        if mod:GetDistanceBetweenUnits(GetPlayerUnit(), engineerUnits[WARRIOR]) < 75 and mod:GetSetting("Liquidate") then
+          mod:AddMsg("LIQUIDATE_MSG", "Stack", 5, "Info")
+        end
       end
     end,
     ["OnUnitCreated"] = function (self, nId, tUnit, sName)
@@ -240,7 +261,9 @@ mod:RegisterUnitEvents("Chief Engineer Wilbargh",{
 mod:RegisterUnitEvents("Head Engineer Orvulgh",{
     ["OnCastStart"] = function (self, nId, sCastName, nCastEndTime, sName)
       if self.L["Electroshock"] == sCastName then
-        mod:AddMsg("ELECTROSHOCK_CAST_MSG", "Electroshock", 5, "Info")
+        if mod:GetDistanceBetweenUnits(GetPlayerUnit(), engineerUnits[ENGINEER]) < 75 and mod:GetSetting("Electroshock") then
+          mod:AddMsg("ELECTROSHOCK_CAST_MSG", "Electroshock", 5, "Info")
+        end
       end
     end,
     ["OnUnitCreated"] = function (self, nId, tUnit, sName)
@@ -256,9 +279,11 @@ mod:RegisterUnitEvents("Head Engineer Orvulgh",{
 
 mod:RegisterUnitEvents("Discharged Plasma",{
     ["OnUnitCreated"] = function (self, nId, tUnit, sName)
-      mod:AddMsg("DISCHARGED_PLASMA_MSG", "KITE THE FIRE ORB", 5, "RunAway")
-      local tOrbTarget = tUnit:GetTarget()
-      Print(tOrbTarget)
+      if mod:GetDistanceBetweenUnits(GetPlayerUnit(), tUnit) < 75 and mod:GetSetting("FireOrb") then
+        mod:AddMsg("DISCHARGED_PLASMA_MSG", "KITE THE FIRE ORB", 5, "RunAway")
+        local tOrbTarget = tUnit:GetTarget()
+        --Print(tOrbTarget)
+      end
     end,
   }
 )
