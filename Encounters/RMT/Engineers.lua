@@ -297,18 +297,6 @@ function mod:IsUnitFacingOtherUnit(unit, otherUnit)
   Print(tostring(facingDifference))
 
   return math.abs(facingDifference.x) < ELECTROSHOCK_X_TOLERANCE and math.abs(facingDifference.z) < ELECTROSHOCK_Z_TOLERANCE
-  --local unitCoords = unit:GetPosition()
-  --local unitHeading = unit:GetHeading()
-  --local otherUnitCoords = otherUnit:GetPosition()
-
-  --local deltaX = otherUnitCoords['x'] - unitCoords['x']
-  --local deltaZ = otherUnitCoords['z'] - unitCoords['z']
-
-  --local vectorDirection = math.atan(deltaX / deltaZ)
-
-  --local isFacing = math.abs(vectorDirection - unitHeading) < 0.01
-  --Print("vector direction: "..vectorDirection.." unitHeading: "..unitHeading)
-  --return isFacing
 end
 
 -- Engineer
@@ -318,8 +306,9 @@ mod:RegisterUnitEvents("Head Engineer Orvulgh",{
         if mod:IsPlayerClose(engineerUnits[ENGINEER].unit) then
           mod:AddMsg("ELECTROSHOCK_CAST_MSG", self.L["Electroshock"], 5, mod:GetSetting("Electroshock") == true and "Beware")
         end
-        local timer = ApolloTimer.Create(0.5, false, "CheckEngineerTarget", mod)
-        timer:Start()
+        if mod:IsUnitFacingOtherUnit(engineerUnits[ENGINEER].unit, playerUnit) then
+          Print("HE IS FACING ME!")
+        end
       end
     end,
     ["OnCastEnd"] = function (self, id, castName, castEndTime, name)
@@ -334,12 +323,6 @@ mod:RegisterUnitEvents("Head Engineer Orvulgh",{
     end,
   }
 )
-
-function mod:CheckEngineerTarget()
-  if mod:IsUnitFacingOtherUnit(engineerUnits[ENGINEER].unit, playerUnit) then
-    Print("HE IS FACING ME!")
-  end
-end
 
 mod:RegisterUnitEvents("Discharged Plasma",{
     ["OnUnitCreated"] = function (self, id, unit, name)
