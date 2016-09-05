@@ -137,6 +137,7 @@ Apollo.RegisterEventHandler("UnitDestroyed", "OnUnitDestroyedRaw", mod)
 function mod:OnBossEnable()
   player = {}
   player.unit = GameLib.GetPlayerUnit()
+  player.location = 0
   engineerUnits = {}
   orbUnits = {}
   --locales
@@ -235,8 +236,9 @@ function mod:OnDebuffAdd(id, spellId, stack, timeRemaining)
   end
 end
 
-function mod:IsPlayerClose(unit)
-  return mod:GetDistanceBetweenUnits(player.unit, unit) < 75
+function mod:IsPlayerOnPlatform(coreId)
+  player.location = mod:GetUnitPlatform(player.unit)
+  return player.location == coreId
 end
 
 function mod:OnUnitDestroyedRaw(unit)
@@ -299,7 +301,7 @@ mod:RegisterUnitEvents({
 mod:RegisterUnitEvents("Chief Engineer Wilbargh",{
     ["OnCastStart"] = function (self, id, castName, castEndTime, name)
       if self.L["Liquidate"] == castName then
-        if mod:IsPlayerClose(engineerUnits[WARRIOR].unit) then
+        if mod:IsPlayerOnPlatform(engineerUnits[WARRIOR].location) then
           mod:AddMsg("LIQUIDATE_MSG", self.L["liquidate.stack"], 5, mod:GetSetting("SoundLiquidate") == true and "Info")
         end
       end
@@ -335,7 +337,7 @@ mod:RegisterUnitEvents("Head Engineer Orvulgh",{
         if mod:GetSetting("LineElectroshock") then
           core:AddPixie("ELECTROSHOCK_PIXIE", 2, engineerUnits[ENGINEER].unit, nil, "Red", 10, 80, 0)
         end
-        if mod:IsPlayerClose(engineerUnits[ENGINEER].unit) then
+        if mod:IsPlayerOnPlatform(engineerUnits[ENGINEER].location) then
           mod:AddMsg("ELECTROSHOCK_CAST_MSG", self.L["Electroshock"], 5, mod:GetSetting("SoundElectroshock") == true and "Beware")
         end
       end
