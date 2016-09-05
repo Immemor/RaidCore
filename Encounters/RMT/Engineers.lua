@@ -47,7 +47,8 @@ mod:RegisterEnglishLocale({
     ["fire_orb.next"] = "Next Fire Orb in",
     ["fire_orb.you"] = "FIRE ORB ON YOU",
     ["fire_orb.spawned"] = "Fire Orb spawned",
-    ["fire_orb.pop"] = "Fire Orb is safe to pop in",
+    ["fire_orb.pop.timer"] = "Fire Orb is safe to pop in",
+    ["fire_orb.pop.msg"] = "Pop the Fire Orb!",
     ["core.health.high.warning"] = "%s pillar at 85%%!",
     ["core.health.low.warning"] = "%s pillar at 15%%!"
   })
@@ -115,6 +116,8 @@ local coreUnits = {}
 local engineerUnits
 local player
 local orbUnits
+
+local fireOrbTargetTestTimer = ApolloTimer.Create(1, false, "RegisterOrbTarget", mod)
 ----------------------------------------------------------------------------------------------------
 -- Settings.
 ----------------------------------------------------------------------------------------------------
@@ -126,6 +129,7 @@ mod:RegisterDefaultSetting("SoundElectroshockSwap")
 mod:RegisterDefaultSetting("SoundElectroshockSwapYou")
 mod:RegisterDefaultSetting("SoundFireOrb")
 mod:RegisterDefaultSetting("SoundFireOrbAlt")
+mod:RegisterDefaultSetting("SoundFireOrbPop")
 mod:RegisterDefaultSetting("SoundCoreHealthWarning")
 ----------------------------------------------------------------------------------------------------
 -- Raw event handlers.
@@ -358,14 +362,19 @@ mod:RegisterUnitEvents("Head Engineer Orvulgh",{
   }
 )
 
+function mod:PopFireOrb()
+  if mod:IsPlayerOnPlatform(FUSION_CORE) then
+    mod:AddMsg("FIRE_ORB_POP_MSG", self.L["fire_orb.pop.msg"], 5, mod:GetSetting("SoundFireOrbPop") == true and "Alarm")
+  end
+end
+
 mod:RegisterUnitEvents("Discharged Plasma",{
     ["OnUnitCreated"] = function (self, id, unit, name)
       core:WatchUnit(unit)
       mod:RemoveTimerBar("NEXT_FIRE_ORB_TIMER")
       mod:AddTimerBar("NEXT_FIRE_ORB_TIMER", self.L["fire_orb.next"], NEXT_FIRE_ORB_TIMER)
-      mod:AddTimerBar(string.format("FIRE_ORB_SAFE_TIMER %d", id), self.L["fire_orb.pop"], FIRE_ORB_SAFE_TIMER)
-      local testTimer = ApolloTimer.Create(1, false, "RegisterOrbTarget", mod)
-      testTimer:Start()
+      mod:AddTimerBar(string.format("FIRE_ORB_SAFE_TIMER %d", id), self.L["fire_orb.pop.timer"], FIRE_ORB_SAFE_TIMER, false, "Red", mod.PopFireOrb, mod)
+      fireOrbTargetTestTimer:Start()
       orbUnits[id] = {
         unit = unit,
         checkedTarget = false,
@@ -388,7 +397,7 @@ function mod:RegisterOrbTarget()
       local isOnMyself = target == player.unit
       if isOnMyself then
         mod:AddMsg("DISCHARGED_PLASMA_MSG", self.L["fire_orb.you"], 5, mod:GetSetting("SoundFireOrb") == true and "RunAway")
-      else
+      elseif mod:IsPlayerOnPlatform(FUSION_CORE) then
         mod:AddMsg("DISCHARGED_PLASMA_MSG", self.L["fire_orb.spawned"], 2, mod:GetSetting("SoundFireOrbAlt") == true and "Info")
       end
     end
