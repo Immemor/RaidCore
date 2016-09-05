@@ -57,10 +57,10 @@ local DEBUFF_UNSTABLE_VOLTAGE = 84045
 local DEBUFF_ELECTROSHOCK_VULNERABILITY = 83798
 local DEBUFF_DIMINISHING_FUSION_REACTION = 87214
 local BUFF_INSULATION = 83987
-local ELECTROSHOCK_X_TOLERANCE = 0.01
-local ELECTROSHOCK_Z_TOLERANCE = 0.011
+local ELECTROSHOCK_X_TOLERANCE = 0.05
+local ELECTROSHOCK_Z_TOLERANCE = 0.05
 
--- Timers.
+-- Timers
 local FIRST_ELECTROSHOCK_TIMER = 11
 local ELECTROSHOCK_TIMER = 18
 local JUMP_ELECTROSHOCK_TIMER = 12
@@ -70,7 +70,6 @@ local FIRE_ORB_SAFE_TIMER = 14
 local FIRST_LIQUIDATE_TIMER = 12
 local LIQUIDATE_TIMER = 22
 
--- Cores.
 local FUSION_CORE = 1
 local COOLING_TURBINE = 2
 local SPARK_PLUG = 3
@@ -89,7 +88,6 @@ local CORE_NICKNAMES = {
   [LUBRICANT_NOZZLE] = "Lubricant Nozzle"
 }
 
--- Engineers.
 local WARRIOR = 1
 local ENGINEER = 2
 local ENGINEER_NAMES = {
@@ -303,12 +301,8 @@ end
 mod:RegisterUnitEvents("Head Engineer Orvulgh",{
     ["OnCastStart"] = function (self, id, castName, castEndTime, name)
       if self.L["Electroshock"] == castName then
-        if mod:IsPlayerClose(engineerUnits[ENGINEER].unit) then
-          mod:AddMsg("ELECTROSHOCK_CAST_MSG", self.L["Electroshock"], 5, mod:GetSetting("Electroshock") == true and "Beware")
-        end
-        if mod:IsUnitFacingOtherUnit(engineerUnits[ENGINEER].unit, playerUnit) then
-          Print("HE IS FACING ME!")
-        end
+        local timer = ApolloTimer.Create(0.4, false, "CheckEngineerTarget", mod)
+        timer:Start()
       end
     end,
     ["OnCastEnd"] = function (self, id, castName, castEndTime, name)
@@ -323,6 +317,16 @@ mod:RegisterUnitEvents("Head Engineer Orvulgh",{
     end,
   }
 )
+
+function mod:CheckEngineerTarget()
+  if mod:IsPlayerClose(engineerUnits[ENGINEER].unit) then
+    if mod:IsUnitFacingOtherUnit(engineerUnits[ENGINEER].unit, playerUnit) then
+      mod:AddMsg("ELECTROSHOCK_CAST_MSG", "RUN AWAY MOTHERFUCKER", 5, "Inferno")
+    else
+      mod:AddMsg("ELECTROSHOCK_CAST_MSG", self.L["Electroshock"], 5, mod:GetSetting("Electroshock") == true and "Beware")
+    end
+  end
+end
 
 mod:RegisterUnitEvents("Discharged Plasma",{
     ["OnUnitCreated"] = function (self, id, unit, name)
