@@ -57,8 +57,6 @@ local DEBUFF_UNSTABLE_VOLTAGE = 84045
 local DEBUFF_ELECTROSHOCK_VULNERABILITY = 83798
 local DEBUFF_DIMINISHING_FUSION_REACTION = 87214
 local BUFF_INSULATION = 83987
-local ELECTROSHOCK_X_TOLERANCE = 0.05
-local ELECTROSHOCK_Z_TOLERANCE = 0.05
 
 -- Timers
 local FIRST_ELECTROSHOCK_TIMER = 11
@@ -292,17 +290,18 @@ function mod:IsUnitFacingOtherUnit(unit, otherUnit)
   normalized.y = 0
   local facing = Vector3.New(unit:GetFacing())
   local facingDifference = normalized - facing
-  Print(tostring(facingDifference))
 
-  return math.abs(facingDifference.x) < ELECTROSHOCK_X_TOLERANCE and math.abs(facingDifference.z) < ELECTROSHOCK_Z_TOLERANCE
+  return math.abs(facingDifference.x) < 0.01 and math.abs(facingDifference.z) < 0.01
 end
 
 -- Engineer
 mod:RegisterUnitEvents("Head Engineer Orvulgh",{
     ["OnCastStart"] = function (self, id, castName, castEndTime, name)
       if self.L["Electroshock"] == castName then
-        local timer = ApolloTimer.Create(0.4, false, "CheckEngineerTarget", mod)
-        timer:Start()
+        core:AddPixie("ELECTROSHOCK_PIXIE", 2, engineerUnits[ENGINEER].unit, nil, "Red", 10, 60, 0)
+        if mod:IsPlayerClose(engineerUnits[ENGINEER].unit) then
+          mod:AddMsg("ELECTROSHOCK_CAST_MSG", self.L["Electroshock"], 5, mod:GetSetting("Electroshock") == true and "Beware")
+        end
       end
     end,
     ["OnCastEnd"] = function (self, id, castName, castEndTime, name)
@@ -311,22 +310,13 @@ mod:RegisterUnitEvents("Head Engineer Orvulgh",{
         mod:AddTimerBar("NEXT_ELEKTROSHOCK_TIMER", self.L["Next Electroshock in"], JUMP_ELECTROSHOCK_TIMER)
       end
       if self.L["Electroshock"] == castName then
+        core:DropPixie("ELECTROSHOCK_PIXIE")
         mod:RemoveTimerBar("NEXT_ELEKTROSHOCK_TIMER")
         mod:AddTimerBar("NEXT_ELEKTROSHOCK_TIMER", self.L["Next Electroshock in"], ELECTROSHOCK_TIMER)
       end
     end,
   }
 )
-
-function mod:CheckEngineerTarget()
-  if mod:IsPlayerClose(engineerUnits[ENGINEER].unit) then
-    if mod:IsUnitFacingOtherUnit(engineerUnits[ENGINEER].unit, playerUnit) then
-      mod:AddMsg("ELECTROSHOCK_CAST_MSG", "RUN AWAY MOTHERFUCKER", 5, "Inferno")
-    else
-      mod:AddMsg("ELECTROSHOCK_CAST_MSG", self.L["Electroshock"], 5, mod:GetSetting("Electroshock") == true and "Beware")
-    end
-  end
-end
 
 mod:RegisterUnitEvents("Discharged Plasma",{
     ["OnUnitCreated"] = function (self, id, unit, name)
