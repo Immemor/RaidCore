@@ -61,7 +61,6 @@ local FIRE_ORB_SAFE_TIMER = 14
 
 local FIRST_LIQUIDATE_TIMER = 12
 local LIQUIDATE_TIMER = 22
-local JUMP_LIQUIDATE_TIMER = 17
 
 local FUSION_CORE = 1
 local COOLING_TURBINE = 2
@@ -265,7 +264,6 @@ mod:RegisterUnitEvents("Chief Engineer Wilbargh",{
     ["OnCastEnd"] = function (self, nId, sCastName, nCastEndTime, sName)
       if self.L["Rocket Jump"] == sCastName then
         mod:RemoveTimerBar("NEXT_LIQUIDATE_TIMER")
-        mod:AddTimerBar("NEXT_LIQUIDATE_TIMER", "Next Liquidate in", JUMP_LIQUIDATE_TIMER)
       end
       if self.L["Liquidate"] == sCastName then
         mod:RemoveTimerBar("NEXT_LIQUIDATE_TIMER")
