@@ -46,20 +46,20 @@ mod:RegisterDefaultTimerBarConfigs({
 -- Locals.
 ----------------------------------------------------------------------------------------------------
 local function InfiniteTimer2()
-  mod:AddTimerBar("INFINITE2", "Loop Timer outside", 10, nil, InfiniteTimer2)
+  mod:AddTimerBar("INFINITE2", "Loop Timer outside", 10, nil, nil, InfiniteTimer2)
 end
 
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-  mod:AddTimerBar("INFINITE", "Timer in class", 12, false, mod.InfiniteTimer, mod)
-  mod:AddTimerBar("INFINITE2", "Timer outside", 12, nil, InfiniteTimer2)
+  mod:AddTimerBar("INFINITE", "Timer in class", 12, false, nil, mod.InfiniteTimer, mod)
+  mod:AddTimerBar("INFINITE2", "Timer outside", 12, nil, nil, InfiniteTimer2)
   mod:AddTimerBar("LONG", "Long long timer...", 1000)
 end
 
 function mod:InfiniteTimer()
-  mod:AddTimerBar("INFINITE", "Loop Timer in class", 10, false, mod.InfiniteTimer, mod)
+  mod:AddTimerBar("INFINITE", "Loop Timer in class", 10, false, nil, mod.InfiniteTimer, mod)
 end
 
 function mod:OnUnitCreated(nId, unit, sName)

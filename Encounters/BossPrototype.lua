@@ -131,12 +131,13 @@ end
 -- @param sEnglishText English text to search in language dictionnary.
 -- @param nDuration Timer duration.
 -- @param bEmphasize Timer count down requested (nil take the default one).
+-- @param sColor Color for the timer bar (nil take the default one)..
 -- @param fHandler function to call on timeout
 -- @param tClass Class used by callback action on timeout
 -- @param tData Data forwarded by callback action on timeout
 --
 -- Note: If the English translation is not found, the current string will be used like that.
-function EncounterPrototype:AddTimerBar(sKey, sEnglishText, nDuration, bEmphasize, fHandler, tClass, tData)
+function EncounterPrototype:AddTimerBar(sKey, sEnglishText, nDuration, bEmphasize, sColor, fHandler, tClass, tData)
   local tOptions = nil
   local sLocalText = self.L[sEnglishText]
   if self.tDefaultTimerBarsOptions[sKey] then
@@ -146,6 +147,10 @@ function EncounterPrototype:AddTimerBar(sKey, sEnglishText, nDuration, bEmphasiz
   end
   if bEmphasize ~= nil then
     tOptions["bEmphasize"] = bEmphasize and true
+  end
+  if sColor ~= nil then
+    assert(type(sColor) == "string")
+    tOptions["sColor"] = sColor
   end
   local tCallback = nil
   if type(fHandler) == "function" then
