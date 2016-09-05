@@ -332,7 +332,7 @@ mod:RegisterUnitEvents("Head Engineer Orvulgh",{
     ["OnCastStart"] = function (self, id, castName, castEndTime, name)
       if self.L["Electroshock"] == castName then
         if mod:GetSetting("LineElectroshock") then
-          core:AddPixie("ELECTROSHOCK_PIXIE", 2, engineerUnits[ENGINEER].unit, nil, "Red", 10, 60, 0)
+          core:AddPixie("ELECTROSHOCK_PIXIE", 2, engineerUnits[ENGINEER].unit, nil, "Red", 10, 80, 0)
         end
         if mod:IsPlayerClose(engineerUnits[ENGINEER].unit) then
           mod:AddMsg("ELECTROSHOCK_CAST_MSG", self.L["Electroshock"], 5, mod:GetSetting("SoundElectroshock") == true and "Beware")
