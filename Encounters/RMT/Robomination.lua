@@ -27,8 +27,8 @@ mod:RegisterEnglishLocale({
     ["Incineration Laser"] = "Incineration Laser",
     ["Noxious Belch"] = "Noxious Belch",
     -- Datachron.
-    ["Robomination tries to crush"] = "Robomination tries to crush",
-    ["The Robomination tries to incinerate"] = "The Robomination tries to incinerate",
+    ["Robomination tries to crush ([^%s]+%s[^!]+)!$"] = "Robomination tries to crush ([^%s]+%s[^!]+)!$",
+    ["Robomination tries to incinerate ([^%s]+%s.+)$"] = "Robomination tries to incinerate ([^%s]+%s.+)$",
     ["The Robomination sinks down into the trash."] = "The Robomination sinks down into the trash.",
     ["The Robomination erupts back into the fight!"] = "The Robomination erupts back into the fight!",
     -- Messages.
@@ -134,8 +134,8 @@ function mod:OnBossEnable()
   mod:DrawCompactorGrid()
 end
 
-mod:RegisterDatachronEvent("Robomination tries to crush", "FIND", function (self, message)
-    local snakeTarget = GetPlayerUnitByName(string.match(message, self.L["Robomination tries to crush"].." ".."([^%s]+%s[^!]+)!$"))
+mod:RegisterDatachronEvent("Robomination tries to crush ([^%s]+%s[^!]+)!$", "MATCH", function (self, message, snakeTargetName)
+    local snakeTarget = GetPlayerUnitByName(snakeTargetName)
     local isOnMyself = snakeTarget == playerUnit
     local isSnakeNearYou = not isOnMyself and mod:GetDistanceBetweenUnits(playerUnit, snakeTarget) < 10
     local sound = nil
@@ -193,8 +193,8 @@ mod:RegisterDatachronEvent("The Robomination erupts back into the fight!", "EQUA
   end
 )
 
-mod:RegisterDatachronEvent("Robomination tries to incinerate", "FIND", function (self, message)
-    local laserTarget = GetPlayerUnitByName(string.match(message, self.L["Robomination tries to incinerate"].." ".."([^%s]+%s.+)$"))
+mod:RegisterDatachronEvent("Robomination tries to incinerate ([^%s]+%s.+)$", "MATCH", function (self, message, laserTargetName)
+    local laserTarget = GetPlayerUnitByName(laserTargetName)
     local isOnMyself = laserTarget == playerUnit
     local sound = mod:GetSetting("SoundLaser") == true and "Burn"
     local laserOnX = ""
