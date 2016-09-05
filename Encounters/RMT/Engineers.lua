@@ -103,11 +103,13 @@ local ENGINEER_NICKNAMES = {
   [ENGINEER] = "Engineer",
 }
 ----------------------------------------------------------------------------------------------------
--- Locals.
+-- Functions.
 ----------------------------------------------------------------------------------------------------
 local GetUnitById = GameLib.GetUnitById
 local GetGameTime = GameLib.GetGameTime
-
+----------------------------------------------------------------------------------------------------
+-- Locals.
+----------------------------------------------------------------------------------------------------
 --Do not reset coreUnits since they don't get destroyed after each pull
 local coreUnits = {}
 local engineerUnits

@@ -136,11 +136,14 @@ local SAW_SAFESPOT = {
   [6] = "RIGHT", --SAW_MID + SAW_EAST
 }
 ----------------------------------------------------------------------------------------------------
--- Locals.
+-- Functions.
 ----------------------------------------------------------------------------------------------------
 local GetUnitById = GameLib.GetUnitById
 local GetPlayerUnit = GameLib.GetPlayerUnit
 local GetGameTime = GameLib.GetGameTime
+----------------------------------------------------------------------------------------------------
+-- Locals.
+----------------------------------------------------------------------------------------------------
 local phase
 local addPhase
 local previousAddPhase
