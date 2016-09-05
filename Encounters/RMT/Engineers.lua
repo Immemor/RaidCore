@@ -184,24 +184,18 @@ function mod:RemoveUnits()
   end
 end
 
-function mod:CheckBossLocation(engineerId)
+function mod:GetUnitPlatform(unit)
   local shortestDistance = 100000
   local currentDistance
-  local oldLocation = engineerUnits[engineerId].location
-  local newLocation = oldLocation
+  local location = 0
   for coreId, coreUnit in pairs(coreUnits) do
-    currentDistance = mod:GetDistanceBetweenUnits(
-      engineerUnits[engineerId].unit, coreUnit.unit
-    )
+    currentDistance = mod:GetDistanceBetweenUnits(unit, coreUnit.unit)
     if shortestDistance > currentDistance then
       shortestDistance = currentDistance
-      newLocation = coreId
+      location = coreId
     end
   end
-  if newLocation ~= oldLocation then
-    engineerUnits[engineerId].location = newLocation
-    mod:OnEngiChangeLocation(engineerId, oldLocation, newLocation)
-  end
+  return location
 end
 
 function mod:OnEngiChangeLocation(engineerId, oldCoreId, newCoreId)
@@ -209,8 +203,14 @@ end
 
 function mod:OnBuffRemove(id, spellId)
   if spellId == BUFF_INSULATION then
-    mod:CheckBossLocation(ENGINEER)
-    mod:CheckBossLocation(WARRIOR)
+    for engineerId, engineer in pairs(engineerUnits) do
+      local oldLocation = engineerUnits[engineerId].location
+      local newLocation = mod:GetUnitPlatform(engineer.unit)
+      if newLocation ~= oldLocation then
+        engineerUnits[engineerId].location = newLocation
+        mod:OnEngiChangeLocation(engineerId, oldLocation, newLocation)
+      end
+    end
   end
 end
 
