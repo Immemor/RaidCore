@@ -16,10 +16,12 @@ if not mod then return end
 ----------------------------------------------------------------------------------------------------
 mod:RegisterTrigMob("ALL", { "Assistant Technician Skooty" })
 mod:RegisterEnglishLocale({
+    -- Unit names.
     ["Assistant Technician Skooty"] = "Assistant Technician Skooty",
     ["Hostile Invisible Unit for Fields (0 hit radius)"] = "Hostile Invisible Unit for Fields (0 hit radius)",
-    ["Pulse Cannon"] = "Pulse Cannon",
     ["Jumpstart Charge"] = "Jumpstart Charge",
+    -- Cast names.
+    ["Pulse Cannon"] = "Pulse Cannon",
   })
 ----------------------------------------------------------------------------------------------------
 -- Settings.

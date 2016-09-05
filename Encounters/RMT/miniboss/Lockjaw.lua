@@ -16,9 +16,11 @@ if not mod then return end
 ----------------------------------------------------------------------------------------------------
 mod:RegisterTrigMob("ALL", { "Chief Warden Lockjaw" })
 mod:RegisterEnglishLocale({
+    -- Unit names.
     ["Chief Warden Lockjaw"] = "Chief Warden Lockjaw",
     ["Hostile Invisible Unit for Fields (0 hit radius)"] = "Hostile Invisible Unit for Fields (0 hit radius)",
     ["Blaze Shackle"] = "Blaze Shackle",
+    -- Cast names.
     ["Blaze Shackles"] = "Blaze Shackles",
   })
 ----------------------------------------------------------------------------------------------------
@@ -26,20 +28,8 @@ mod:RegisterEnglishLocale({
 ----------------------------------------------------------------------------------------------------
 mod:RegisterDefaultSetting("CrosshairTethers")
 ----------------------------------------------------------------------------------------------------
--- Constants.
-----------------------------------------------------------------------------------------------------
-
-----------------------------------------------------------------------------------------------------
--- Locals.
-----------------------------------------------------------------------------------------------------
-
-----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
-function mod:OnBossEnable()
-
-end
-
 mod:RegisterUnitEvents("Chief Warden Lockjaw",{
     ["OnUnitCreated"] = function (self, id, unit, name)
       core:AddUnit(unit)

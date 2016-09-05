@@ -16,10 +16,12 @@ if not mod then return end
 ----------------------------------------------------------------------------------------------------
 mod:RegisterTrigMob("ALL", { "Chief Engine Scrubber Thrag" })
 mod:RegisterEnglishLocale({
+    -- Unit names.
     ["Chief Engine Scrubber Thrag"] = "Chief Engine Scrubber Thrag",
     ["Hostile Invisible Unit for Fields (0 hit radius)"] = "Hostile Invisible Unit for Fields (0 hit radius)",
-    ["Gigavolt"] = "Gigavolt",
     ["Jumpstart Charge"] = "Jumpstart Charge",
+    -- Cast names.
+    ["Gigavolt"] = "Gigavolt",
   })
 ----------------------------------------------------------------------------------------------------
 -- Settings.

@@ -33,12 +33,12 @@ mod:RegisterEnglishLocale({
     ["Friendly Invisible Unit for Fields"] = "Friendly Invisible Unit for Fields",
     ["Hostile Invisible Unit for Fields (0 hit radius)"] = "Hostile Invisible Unit for Fields (0 hit radius)",
     ["Discharged Plasma"] = "Discharged Plasma", -- Fire Orb
-    -- Cast names
+    -- Cast names.
     ["Liquidate"] = "Liquidate",
     ["Electroshock"] = "Electroshock",
-    -- Datachron
+    -- Datachron.
     ["([^%s]+%s[^%s]+) suffers from Electroshock"] = "([^%s]+%s[^%s]+) suffers from Electroshock",
-    -- Messages
+    -- Messages.
     ["Next Electroshock in"] = "Next Electroshock in",
     ["Next Liquidate in"] = "Next Liquidate in",
     ["Stack"] = "Stack",
@@ -60,7 +60,7 @@ local BUFF_INSULATION = 83987
 local ELECTROSHOCK_X_TOLERANCE = 0.01
 local ELECTROSHOCK_Z_TOLERANCE = 0.011
 
--- Timers
+-- Timers.
 local FIRST_ELECTROSHOCK_TIMER = 11
 local ELECTROSHOCK_TIMER = 18
 local JUMP_ELECTROSHOCK_TIMER = 12
@@ -70,6 +70,7 @@ local FIRE_ORB_SAFE_TIMER = 14
 local FIRST_LIQUIDATE_TIMER = 12
 local LIQUIDATE_TIMER = 22
 
+-- Cores.
 local FUSION_CORE = 1
 local COOLING_TURBINE = 2
 local SPARK_PLUG = 3
@@ -88,6 +89,7 @@ local CORE_NICKNAMES = {
   [LUBRICANT_NOZZLE] = "Lubricant Nozzle"
 }
 
+-- Engineers.
 local WARRIOR = 1
 local ENGINEER = 2
 local ENGINEER_NAMES = {

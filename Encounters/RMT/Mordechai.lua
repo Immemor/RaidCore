@@ -16,6 +16,7 @@ if not mod then return end
 ----------------------------------------------------------------------------------------------------
 mod:RegisterTrigMob("ALL", { "Mordechai Redmoon" })
 mod:RegisterEnglishLocale({
+    -- Unit names.
     ["Mordechai Redmoon"] = "Mordechai Redmoon"
   })
 ----------------------------------------------------------------------------------------------------

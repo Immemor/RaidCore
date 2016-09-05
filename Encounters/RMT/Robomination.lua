@@ -16,22 +16,22 @@ if not mod then return end
 ----------------------------------------------------------------------------------------------------
 mod:RegisterTrigMob("ANY", { "Robomination" })
 mod:RegisterEnglishLocale({
-    --Unit names.
+    -- Unit names.
     ["Robomination"] = "Robomination",
     ["Trash Compactor"] = "Trash Compactor",
     ["Cannon Arm"] = "Cannon Arm",
     ["Flailing Arm"] = "Flailing Arm",
     ["Scanning Eye"] = "Scanning Eye",
-    --Casts
+    -- Cast names.
     ["Cannon Fire"] = "Cannon Fire",
     ["Incineration Laser"] = "Incineration Laser",
     ["Noxious Belch"] = "Noxious Belch",
-    --Datachron
+    -- Datachron.
     ["Robomination tries to crush"] = "Robomination tries to crush",
     ["The Robomination tries to incinerate"] = "The Robomination tries to incinerate",
     ["The Robomination sinks down into the trash."] = "The Robomination sinks down into the trash.",
     ["The Robomination erupts back into the fight!"] = "The Robomination erupts back into the fight!",
-    --Message bars
+    -- Messages.
     ["SNAKE ON %s"] = "SNAKE ON %s",
     ["SNAKE ON YOU"] = "SNAKE ON YOU",
     ["SNAKE NEAR ON %s"] = "SNAKE NEAR ON %s",
@@ -50,19 +50,28 @@ mod:RegisterEnglishLocale({
 ----------------------------------------------------------------------------------------------------
 -- Constants.
 ----------------------------------------------------------------------------------------------------
-local NO_BREAK_SPACE = string.char(194, 160)
+-- Spell ids.
 local DEBUFF_SNAKE = 75126
+
+-- Phases.
 local DPS_PHASE = 1
 local MAZE_PHASE = 2
 local MID_MAZE_PHASE = 3
+
+-- Timers.
 local FIRST_SNAKE_TIMER = 7.5
 local SNAKE_TIMER = 17.5
+
 local FIRST_INCINERATE_TIMER = 18.5
 local INCINERATE_TIMER = 42.5
+
 local FIRST_SPEW_TIMER = 15.6
 local SPEW_TIMER = 31.75
 local MAZE_SPEW_TIMER = 10
+
 local ARMS_TIMER = 45
+
+-- Compactors.
 local COMPACTORS_EDGE = {
   { y = -203.4208984375, x = 0.71257400512695, z = -1349.8697509766 },
   { y = -203.4208984375, x = 10.955376625061, z = -1339.6927490234 },
