@@ -39,9 +39,15 @@ mod:RegisterEnglishLocale({
     -- Datachron
     ["([^%s]+%s[^%s]+) suffers from Electroshock"] = "([^%s]+%s[^%s]+) suffers from Electroshock",
     -- Messages
+    ["Next Electroshock in"] = "Next Electroshock in",
+    ["Next Liquidate in"] = "Next Liquidate in",
+    ["Stack"] = "Stack",
     ["%s SWAP TO WARRIOR"] = "%s SWAP TO WARRIOR",
     ["YOU SWAP TO WARRIOR"] = "YOU SWAP TO WARRIOR",
     ["Next Fire Orb in"] = "Next Fire Orb in",
+    ["FIRE ORB ON YOU"] = "FIRE ORB ON YOU",
+    ["Fire Orb spawned"] = "Fire Orb spawned",
+    ["Fire Orb is safe to pop in"] = "Fire Orb is safe to pop in",
   })
 ----------------------------------------------------------------------------------------------------
 -- Constants.
@@ -51,6 +57,8 @@ local DEBUFF_UNSTABLE_VOLTAGE = 84045
 local DEBUFF_ELECTROSHOCK_VULNERABILITY = 83798
 local DEBUFF_DIMINISHING_FUSION_REACTION = 87214
 local BUFF_INSULATION = 83987
+local ELECTROSHOCK_X_TOLERANCE = 0.01
+local ELECTROSHOCK_Z_TOLERANCE = 0.011
 
 -- Timers
 local FIRST_ELECTROSHOCK_TIMER = 11
@@ -114,7 +122,7 @@ mod:RegisterDefaultSetting("Electroshock")
 mod:RegisterDefaultSetting("ElectroshockSwap")
 mod:RegisterDefaultSetting("ElectroshockSwapYou")
 mod:RegisterDefaultSetting("FireOrb")
-
+mod:RegisterDefaultSetting("FireOrbAlt")
 ----------------------------------------------------------------------------------------------------
 -- Raw event handlers.
 ----------------------------------------------------------------------------------------------------
@@ -136,8 +144,8 @@ function mod:OnBossEnable()
     ENGINEER_NAMES[self.L[name]] = id
   end
 
-  mod:AddTimerBar("NEXT_ELEKTROSHOCK_TIMER", "Next Electroshock in", FIRST_ELECTROSHOCK_TIMER)
-  mod:AddTimerBar("NEXT_LIQUIDATE_TIMER", "Next Liquidate in", FIRST_LIQUIDATE_TIMER)
+  mod:AddTimerBar("NEXT_ELEKTROSHOCK_TIMER", self.L["Next Electroshock in"], FIRST_ELECTROSHOCK_TIMER)
+  mod:AddTimerBar("NEXT_LIQUIDATE_TIMER", self.L["Next Liquidate in"], FIRST_LIQUIDATE_TIMER)
 end
 
 function mod:OnBossDisable()
@@ -257,7 +265,7 @@ mod:RegisterUnitEvents("Chief Engineer Wilbargh",{
     ["OnCastStart"] = function (self, nId, sCastName, nCastEndTime, sName)
       if self.L["Liquidate"] == sCastName then
         if mod:IsPlayerClose(engineerUnits[WARRIOR].unit) then
-          mod:AddMsg("LIQUIDATE_MSG", "Stack", 5, mod:GetSetting("Liquidate") == true and "Info")
+          mod:AddMsg("LIQUIDATE_MSG", self.L["Stack"], 5, mod:GetSetting("Liquidate") == true and "Info")
         end
       end
     end,
@@ -267,40 +275,73 @@ mod:RegisterUnitEvents("Chief Engineer Wilbargh",{
       end
       if self.L["Liquidate"] == sCastName then
         mod:RemoveTimerBar("NEXT_LIQUIDATE_TIMER")
-        mod:AddTimerBar("NEXT_LIQUIDATE_TIMER", "Next Liquidate in", LIQUIDATE_TIMER)
+        mod:AddTimerBar("NEXT_LIQUIDATE_TIMER", self.L["Next Liquidate in"], LIQUIDATE_TIMER)
       end
     end,
   }
 )
+
+function mod:IsUnitFacingOtherUnit(unit, otherUnit)
+  local unitVector = Vector3.New(unit:GetPosition())
+  local otherUnitVector = Vector3.New(otherUnit:GetPosition())
+  local difference = otherUnitVector - unitVector
+  local normalized = difference:Normal()
+  normalized.y = 0
+  local facing = Vector3.New(unit:GetFacing())
+  local facingDifference = normalized - facing
+  Print(tostring(facingDifference))
+
+  return math.abs(facingDifference.x) < ELECTROSHOCK_X_TOLERANCE and math.abs(facingDifference.z) < ELECTROSHOCK_Z_TOLERANCE
+  --local unitCoords = unit:GetPosition()
+  --local unitHeading = unit:GetHeading()
+  --local otherUnitCoords = otherUnit:GetPosition()
+
+  --local deltaX = otherUnitCoords['x'] - unitCoords['x']
+  --local deltaZ = otherUnitCoords['z'] - unitCoords['z']
+
+  --local vectorDirection = math.atan(deltaX / deltaZ)
+
+  --local isFacing = math.abs(vectorDirection - unitHeading) < 0.01
+  --Print("vector direction: "..vectorDirection.." unitHeading: "..unitHeading)
+  --return isFacing
+end
 
 -- Engineer
 mod:RegisterUnitEvents("Head Engineer Orvulgh",{
     ["OnCastStart"] = function (self, nId, sCastName, nCastEndTime, sName)
       if self.L["Electroshock"] == sCastName then
         if mod:IsPlayerClose(engineerUnits[ENGINEER].unit) then
-          mod:AddMsg("ELECTROSHOCK_CAST_MSG", "Electroshock", 5, mod:GetSetting("Electroshock") == true and "Beware")
+          mod:AddMsg("ELECTROSHOCK_CAST_MSG", self.L["Electroshock"], 5, mod:GetSetting("Electroshock") == true and "Beware")
         end
+        local timer = ApolloTimer.Create(0.5, false, "CheckEngineerTarget", mod)
+        timer:Start()
       end
     end,
     ["OnCastEnd"] = function (self, nId, sCastName, nCastEndTime, sName)
       if self.L["Rocket Jump"] == sCastName then
         mod:RemoveTimerBar("NEXT_ELEKTROSHOCK_TIMER")
-        mod:AddTimerBar("NEXT_ELEKTROSHOCK_TIMER", "Next Electroshock in", JUMP_ELECTROSHOCK_TIMER)
+        mod:AddTimerBar("NEXT_ELEKTROSHOCK_TIMER", self.L["Next Electroshock in"], JUMP_ELECTROSHOCK_TIMER)
       end
       if self.L["Electroshock"] == sCastName then
         mod:RemoveTimerBar("NEXT_ELEKTROSHOCK_TIMER")
-        mod:AddTimerBar("NEXT_ELEKTROSHOCK_TIMER", "Next Electroshock in", ELECTROSHOCK_TIMER)
+        mod:AddTimerBar("NEXT_ELEKTROSHOCK_TIMER", self.L["Next Electroshock in"], ELECTROSHOCK_TIMER)
       end
     end,
   }
 )
+
+function mod:CheckEngineerTarget()
+  if mod:IsUnitFacingOtherUnit(engineerUnits[ENGINEER].unit, playerUnit) then
+    Print("HE IS FACING ME!")
+  end
+end
 
 mod:RegisterUnitEvents("Discharged Plasma",{
     ["OnUnitCreated"] = function (self, nId, tUnit, sName)
       core:WatchUnit(tUnit)
       mod:RemoveTimerBar("NEXT_FIRE_ORB_TIMER")
       mod:AddTimerBar("NEXT_FIRE_ORB_TIMER", self.L["Next Fire Orb in"], NEXT_FIRE_ORB_TIMER)
-      mod:AddTimerBar(string.format("FIRE_ORB_SAFE_TIMER %d", nId), "Fire Orb is safe to pop in", FIRE_ORB_SAFE_TIMER)
+      mod:AddTimerBar(string.format("FIRE_ORB_SAFE_TIMER %d", nId), self.L["Fire Orb is safe to pop in"], FIRE_ORB_SAFE_TIMER)
       local testTimer = ApolloTimer.Create(1, false, "RegisterOrbTarget", mod)
       testTimer:Start()
       orbUnits[nId] = {
@@ -324,9 +365,9 @@ function mod:RegisterOrbTarget()
       local target = orbUnit.unit:GetTarget()
       local isOnMyself = target == playerUnit
       if isOnMyself then
-        mod:AddMsg("DISCHARGED_PLASMA_MSG", "FIRE ORB ON YOU", 5, mod:GetSetting("FireOrb") == true and "RunAway")
+        mod:AddMsg("DISCHARGED_PLASMA_MSG", self.L["FIRE ORB ON YOU"], 5, mod:GetSetting("FireOrb") == true and "RunAway")
       else
-        mod:AddMsg("DISCHARGED_PLASMA_MSG", "Fire Orb spawned", 2, mod:GetSetting("FireOrbAlt") == true and "Info")
+        mod:AddMsg("DISCHARGED_PLASMA_MSG", self.L["Fire Orb spawned"], 2, mod:GetSetting("FireOrbAlt") == true and "Info")
       end
     end
   end
