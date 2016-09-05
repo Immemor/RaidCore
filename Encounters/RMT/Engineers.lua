@@ -101,8 +101,6 @@ local ENGINEER_NICKNAMES = {
 local GetUnitById = GameLib.GetUnitById
 local GetGameTime = GameLib.GetGameTime
 
-local currentWarriorPlatform
-local currentEngineerPlatform
 --Do not reset coreUnits since they don't get destroyed after each pull
 local coreUnits = {}
 local engineerUnits
@@ -201,9 +199,6 @@ function mod:OnBuffRemove(nId, nSpellId)
   end
 end
 
-function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
-end
-
 function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
   if DEBUFF_ELECTROSHOCK_VULNERABILITY == nSpellId then
     local target = GetUnitById(nId)
@@ -221,27 +216,6 @@ function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
 
     mod:AddMsg(sMessageId, sElectroshockOnX, 5, sSound, "Red")
   end
-  --[=====[
-  if DEBUFF_ION_CLASH == nSpellId then
-    mod:AddMsg("DISCHARGED_PLASMA_MSG", "KITE THE FIRE ORB", 5, "RunAway")
-    core:AddPicture(nId, nId, "Crosshair", 20)
-  end
-  if DEBUFF_UNSTABLE_VOLTAGE == nSpellId then
-    mod:AddMsg("UNSTABLE_VOLTAGE_MSG", "GET AWAY FROM THE CENTER", 5, "RunAway")
-  end
-  --]=====]
-end
-
-function mod:OnDebuffRemove(nId, nSpellId, nStack, fTimeRemaining)
-  --[=====[
-  if nSpellId == DEBUFF_ION_CLASH then
-    core:RemovePicture(nId)
-  end
-  --]=====]
-end
-
-function mod:OnUnitDestroyed(nId, tUnit, sName)
-
 end
 
 function mod:IsPlayerClose(unit)
@@ -283,7 +257,6 @@ mod:RegisterUnitEvents({
 mod:RegisterUnitEvents("Chief Engineer Wilbargh",{
     ["OnCastStart"] = function (self, nId, sCastName, nCastEndTime, sName)
       if self.L["Liquidate"] == sCastName then
-        --Stack
         if mod:IsPlayerClose(engineerUnits[WARRIOR].unit) then
           mod:AddMsg("LIQUIDATE_MSG", "Stack", 5, mod:GetSetting("Liquidate") == true and "Info")
         end
@@ -360,28 +333,3 @@ function mod:RegisterOrbTarget()
     end
   end
 end
-
---function mod:OnBuffUpdate(nId, nSpellId, nOldStack, nStack, fTimeRemaining)
---  if nSpellId == 87214 and nStack > 7 then
---    local orbUnit = orbUnits[nId]
---    if not orbUnit.popMessageSent then
---      orbUnit.popMessageSent = true
---      local target = orbUnit.unit:GetTarget()
---      local isOnMyself = target == playerUnit
---      if isOnMyself then
---        mod:AddMsg("DISCHARGED_PLASMA_MSG_POP", "POP THE FIRE ORB", 5, mod:GetSetting("FireOrbPop") == true and "Inferno")
---      end
---    end
---  end
---end
-
--- mod:RegisterUnitEvents({"Friendly Invisible Unit for Fields"},{
--- ["OnUnitCreated"] = function (self, nId, tUnit, sName)
--- core:AddPixie(nId, 2, tUnit, nil, "Green", 10, 50, 0)
--- core:AddPixie(nId, 2, tUnit, nil, "Green", 10, 20, 180)
--- end,
--- ["OnUnitDestroyed"] = function (self, nId, tUnit, sName)
--- core:DropPixie(nId)
--- end,
--- }
--- )
