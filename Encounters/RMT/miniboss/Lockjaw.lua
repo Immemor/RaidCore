@@ -41,12 +41,12 @@ function mod:OnBossEnable()
 end
 
 mod:RegisterUnitEvents("Chief Warden Lockjaw",{
-    ["OnUnitCreated"] = function (self, nId, tUnit, sName)
-      core:AddUnit(tUnit)
-      core:WatchUnit(tUnit)
+    ["OnUnitCreated"] = function (self, id, unit, name)
+      core:AddUnit(unit)
+      core:WatchUnit(unit)
     end,
-    ["OnCastStart"] = function (self, nId, sCastName, nCastEndTime, sName)
-      if self.L["Blaze Shackles"] == sCastName then
+    ["OnCastStart"] = function (self, id, castName, castEndTime, name)
+      if self.L["Blaze Shackles"] == castName then
         mod:AddMsg("CIRCLES", "DODGE CIRCLES", 5, "Info")
       end
     end,
@@ -54,13 +54,13 @@ mod:RegisterUnitEvents("Chief Warden Lockjaw",{
 )
 
 mod:RegisterUnitEvents("Blaze Shackle",{
-    ["OnUnitCreated"] = function (self, nId, tUnit, sName)
+    ["OnUnitCreated"] = function (self, id, unit, name)
       if mod:GetSetting("CrosshairTethers") then
-        core:AddPicture(nId, nId, "Crosshair", 25)
+        core:AddPicture(id, id, "Crosshair", 25)
       end
     end,
-    ["OnUnitDestroyed"] = function (self, nId, tUnit, sName)
-      core:RemovePicture(nId)
+    ["OnUnitDestroyed"] = function (self, id, unit, name)
+      core:RemovePicture(id)
     end,
   }
 )

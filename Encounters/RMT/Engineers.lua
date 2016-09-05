@@ -201,29 +201,30 @@ end
 function mod:OnEngiChangeLocation(engineerId, oldCoreId, newCoreId)
 end
 
-function mod:OnBuffRemove(nId, nSpellId)
-  if nSpellId == BUFF_INSULATION then
+function mod:OnBuffRemove(id, spellId)
+  if spellId == BUFF_INSULATION then
     mod:CheckBossLocation(ENGINEER)
     mod:CheckBossLocation(WARRIOR)
   end
 end
 
-function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
-  if DEBUFF_ELECTROSHOCK_VULNERABILITY == nSpellId then
-    local target = GetUnitById(nId)
+function mod:OnDebuffAdd(id, spellId, stack, timeRemaining)
+  if DEBUFF_ELECTROSHOCK_VULNERABILITY == spellId then
+    local target = GetUnitById(id)
     local targetName = target:GetName()
     local isOnMyself = targetName == playerUnit:GetName()
-    local sElectroshockOnX = ""
-    local sMessageId = string.format("ELECTROSHOCK_MSG_%s", targetName)
+    local electroshockOnX = ""
+    local messageId = string.format("ELECTROSHOCK_MSG_%s", targetName)
+    local sound
     if bIsOnMyself then
-      sElectroshockOnX = self.L["YOU SWAP TO WARRIOR"]
-      sSound = mod:GetSetting("ElectroshockSwapYou") == true and "RunAway"
+      electroshockOnX = self.L["YOU SWAP TO WARRIOR"]
+      sound = mod:GetSetting("ElectroshockSwapYou") == true and "RunAway"
     else
-      sElectroshockOnX = self.L["%s SWAP TO WARRIOR"]:format(targetName)
-      sSound = mod:GetSetting("ElectroshockSwap") == true and "Info"
+      electroshockOnX = self.L["%s SWAP TO WARRIOR"]:format(targetName)
+      sound = mod:GetSetting("ElectroshockSwap") == true and "Info"
     end
 
-    mod:AddMsg(sMessageId, sElectroshockOnX, 5, sSound, "Red")
+    mod:AddMsg(messageId, electroshockOnX, 5, sound, "Red")
   end
 end
 
@@ -231,10 +232,10 @@ function mod:IsPlayerClose(unit)
   return mod:GetDistanceBetweenUnits(playerUnit, unit) < 75
 end
 
-function mod:OnUnitDestroyedRaw(tUnit)
-  local sName = tUnit:GetName()
-  if CORE_NAMES[sName] ~= nil then
-    coreUnits[CORE_NAMES[sName]] = nil
+function mod:OnUnitDestroyedRaw(unit)
+  local name = unit:GetName()
+  if CORE_NAMES[name] ~= nil then
+    coreUnits[CORE_NAMES[name]] = nil
   end
 end
 
@@ -245,14 +246,14 @@ mod:RegisterUnitEvents({
     "Spark Plug",
     "Lubricant Nozzle"
     },{
-    ["OnUnitCreated"] = function (self, nId, tUnit, sName)
-      if CORE_NAMES[sName] ~= nil then
-        coreUnits[CORE_NAMES[sName]] = tUnit
-      elseif ENGINEER_NAMES[sName] ~= nil then
-        local id = ENGINEER_NAMES[sName]
-        engineerUnits[id] = {
-          unit = tUnit,
-          location = ENGINEER_START_LOCATION[id],
+    ["OnUnitCreated"] = function (self, id, unit, name)
+      if CORE_NAMES[name] ~= nil then
+        coreUnits[CORE_NAMES[name]] = unit
+      elseif ENGINEER_NAMES[name] ~= nil then
+        local engineerId = ENGINEER_NAMES[name]
+        engineerUnits[engineerId] = {
+          unit = unit,
+          location = ENGINEER_START_LOCATION[engineerId],
         }
       end
       if #coreUnits == 4 and #engineerUnits == 2 then
@@ -264,18 +265,18 @@ mod:RegisterUnitEvents({
 
 -- Warrior
 mod:RegisterUnitEvents("Chief Engineer Wilbargh",{
-    ["OnCastStart"] = function (self, nId, sCastName, nCastEndTime, sName)
-      if self.L["Liquidate"] == sCastName then
+    ["OnCastStart"] = function (self, id, castName, castEndTime, name)
+      if self.L["Liquidate"] == castName then
         if mod:IsPlayerClose(engineerUnits[WARRIOR].unit) then
           mod:AddMsg("LIQUIDATE_MSG", self.L["Stack"], 5, mod:GetSetting("Liquidate") == true and "Info")
         end
       end
     end,
-    ["OnCastEnd"] = function (self, nId, sCastName, nCastEndTime, sName)
-      if self.L["Rocket Jump"] == sCastName then
+    ["OnCastEnd"] = function (self, id, castName, castEndTime, name)
+      if self.L["Rocket Jump"] == castName then
         mod:RemoveTimerBar("NEXT_LIQUIDATE_TIMER")
       end
-      if self.L["Liquidate"] == sCastName then
+      if self.L["Liquidate"] == castName then
         mod:RemoveTimerBar("NEXT_LIQUIDATE_TIMER")
         mod:AddTimerBar("NEXT_LIQUIDATE_TIMER", self.L["Next Liquidate in"], LIQUIDATE_TIMER)
       end
@@ -310,8 +311,8 @@ end
 
 -- Engineer
 mod:RegisterUnitEvents("Head Engineer Orvulgh",{
-    ["OnCastStart"] = function (self, nId, sCastName, nCastEndTime, sName)
-      if self.L["Electroshock"] == sCastName then
+    ["OnCastStart"] = function (self, id, castName, castEndTime, name)
+      if self.L["Electroshock"] == castName then
         if mod:IsPlayerClose(engineerUnits[ENGINEER].unit) then
           mod:AddMsg("ELECTROSHOCK_CAST_MSG", self.L["Electroshock"], 5, mod:GetSetting("Electroshock") == true and "Beware")
         end
@@ -319,12 +320,12 @@ mod:RegisterUnitEvents("Head Engineer Orvulgh",{
         timer:Start()
       end
     end,
-    ["OnCastEnd"] = function (self, nId, sCastName, nCastEndTime, sName)
-      if self.L["Rocket Jump"] == sCastName then
+    ["OnCastEnd"] = function (self, id, castName, castEndTime, name)
+      if self.L["Rocket Jump"] == castName then
         mod:RemoveTimerBar("NEXT_ELEKTROSHOCK_TIMER")
         mod:AddTimerBar("NEXT_ELEKTROSHOCK_TIMER", self.L["Next Electroshock in"], JUMP_ELECTROSHOCK_TIMER)
       end
-      if self.L["Electroshock"] == sCastName then
+      if self.L["Electroshock"] == castName then
         mod:RemoveTimerBar("NEXT_ELEKTROSHOCK_TIMER")
         mod:AddTimerBar("NEXT_ELEKTROSHOCK_TIMER", self.L["Next Electroshock in"], ELECTROSHOCK_TIMER)
       end
@@ -339,23 +340,23 @@ function mod:CheckEngineerTarget()
 end
 
 mod:RegisterUnitEvents("Discharged Plasma",{
-    ["OnUnitCreated"] = function (self, nId, tUnit, sName)
-      core:WatchUnit(tUnit)
+    ["OnUnitCreated"] = function (self, id, unit, name)
+      core:WatchUnit(unit)
       mod:RemoveTimerBar("NEXT_FIRE_ORB_TIMER")
       mod:AddTimerBar("NEXT_FIRE_ORB_TIMER", self.L["Next Fire Orb in"], NEXT_FIRE_ORB_TIMER)
-      mod:AddTimerBar(string.format("FIRE_ORB_SAFE_TIMER %d", nId), self.L["Fire Orb is safe to pop in"], FIRE_ORB_SAFE_TIMER)
+      mod:AddTimerBar(string.format("FIRE_ORB_SAFE_TIMER %d", id), self.L["Fire Orb is safe to pop in"], FIRE_ORB_SAFE_TIMER)
       local testTimer = ApolloTimer.Create(1, false, "RegisterOrbTarget", mod)
       testTimer:Start()
-      orbUnits[nId] = {
-        unit = tUnit,
+      orbUnits[id] = {
+        unit = unit,
         checkedTarget = false,
         popMessageSent = false,
         timer = testTimer
       }
     end,
-    ["OnUnitDestroyed"] = function (self, nId, tUnit, sName)
-      orbUnits[nId] = nil
-      mod:RemoveTimerBar(string.format("FIRE_ORB_SAFE_TIMER %d", nId))
+    ["OnUnitDestroyed"] = function (self, id, unit, name)
+      orbUnits[id] = nil
+      mod:RemoveTimerBar(string.format("FIRE_ORB_SAFE_TIMER %d", id))
     end,
   }
 )

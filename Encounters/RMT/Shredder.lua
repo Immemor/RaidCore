@@ -161,10 +161,10 @@ function mod:OnBossEnable()
   secondShredderSaw = nil
 end
 
-function mod:OnDebuffUpdate(nId, nSpellId, nStack, fTimeRemaining)
-  if DEBUFF_OOZING_BILE == nSpellId then
-    if GameLib.GetPlayerUnit():GetId() == nId and nStack >= 8 then
-      mod:AddMsg("OOZE_MSG", string.format(self.L["%d BILE STACKS!"], nStack), 5, nStack == 8 and mod:GetSetting("SoundOozeStacksWarning") and "Beware")
+function mod:OnDebuffUpdate(id, spellId, stack, timeRemaining)
+  if DEBUFF_OOZING_BILE == spellId then
+    if GameLib.GetPlayerUnit():GetId() == id and stack >= 8 then
+      mod:AddMsg("OOZE_MSG", string.format(self.L["%d BILE STACKS!"], stack), 5, stack == 8 and mod:GetSetting("SoundOozeStacksWarning") and "Beware")
     end
   end
 end
@@ -202,25 +202,25 @@ function mod:NextAddWave()
 end
 
 function mod:PhaseChange()
-  local sText = "Walking "
+  local text = "Walking "
   if phase == SHREDDER then
     phase = WALKING
-    sText = sText.." North"
+    text = text.." North"
     mod:NextAddWave()
   else
-    sText = sText.." South"
+    text = text.." South"
     phase = SHREDDER
     firstShredderSaw = nil
     secondShredderSaw = nil
   end
-  mod:AddProgressBar("WALKING_PROGRESS", sText, mod.GetWalkingProgress, mod, mod.PhaseChange)
+  mod:AddProgressBar("WALKING_PROGRESS", text, mod.GetWalkingProgress, mod, mod.PhaseChange)
 end
 
 function mod:StartProgressBar()
   mod:AddProgressBar("WALKING_PROGRESS", "Walking North", mod.GetWalkingProgress, mod, mod.PhaseChange)
   mod:NextAddWave()
-  _tStartProgressBar:Stop()
-  _tStartProgressBar = nil
+  startProgressBarTimer:Stop()
+  startProgressBarTimer = nil
 end
 
 mod:RegisterUnitEvents({
@@ -233,56 +233,56 @@ mod:RegisterUnitEvents({
     "Risen Redmoon Plunderer",
     "Risen Redmoon Cadet"
     },{
-    ["OnUnitCreated"] = function (self, nId, tUnit, sName)
-      core:WatchUnit(tUnit)
+    ["OnUnitCreated"] = function (self, id, unit, name)
+      core:WatchUnit(unit)
     end,
-    ["OnUnitDestroyed"] = function (self, nId, tUnit, sName)
-      core:RemovePicture(nId)
+    ["OnUnitDestroyed"] = function (self, id, unit, name)
+      core:RemovePicture(id)
     end,
-    ["OnHealthChanged"] = function (self, nId, nPourcent, sName)
-      if nPourcent <= 1 and mod:GetSetting("CrosshairAdds") then
-        core:AddPicture(nId, nId, "Crosshair", 20)
+    ["OnHealthChanged"] = function (self, id, percent, name)
+      if percent <= 1 and mod:GetSetting("CrosshairAdds") then
+        core:AddPicture(id, id, "Crosshair", 20)
       end
     end,
   }
 )
 
 mod:RegisterUnitEvents({ "Bilious Brute", "Noxious Nabber" },{
-    ["OnUnitCreated"] = function (self, nId, tUnit, sName)
+    ["OnUnitCreated"] = function (self, id, unit, name)
       if mod:GetSetting("CrosshairPriority") then
-        core:AddPicture(nId, nId, "Crosshair", 30, 0, 0, nil, "red")
+        core:AddPicture(id, id, "Crosshair", 30, 0, 0, nil, "red")
       end
     end,
   }
 )
 
 mod:RegisterUnitEvents("Swabbie Ski'Li",{
-    ["OnUnitCreated"] = function (self, nId, tUnit, sName)
-      core:AddUnit(tUnit)
-      core:WatchUnit(tUnit)
-      self.swabbieUnit = tUnit
+    ["OnUnitCreated"] = function (self, id, unit, name)
+      core:AddUnit(unit)
+      core:WatchUnit(unit)
+      self.swabbieUnit = unit
     end,
-    ["OnUnitDestroyed"] = function (self, nId, tUnit, sName)
-      core:RemoveUnit(tUnit)
+    ["OnUnitDestroyed"] = function (self, id, unit, name)
+      core:RemoveUnit(unit)
       self:RemoveProgressBar("WALKING_PROGRESS")
       self:RemoveProgressBar("ADDS_PROGRESS")
     end,
-    ["OnCastStart"] = function (self, nId, sCastName, nCastEndTime, sName)
-      if self.L["Risen Repellent"] == sCastName then
+    ["OnCastStart"] = function (self, id, castName, castEndTime, name)
+      if self.L["Risen Repellent"] == castName then
         mod:AddMsg("KNOCKBACK", "KNOCKBACK", 2)
       end
     end,
-    ["OnCastEnd"] = function (self, nId, sCastName, isInterrupted, nCastEndTime, sName)
-      if self.L["Swabbie Swoop"] == sCastName then
-        _tStartProgressBar = ApolloTimer.Create(1, true, "StartProgressBar", mod)
-        _tStartProgressBar:Start()
+    ["OnCastEnd"] = function (self, id, castName, isInterrupted, castEndTime, name)
+      if self.L["Swabbie Swoop"] == castName then
+        startProgressBarTimer = ApolloTimer.Create(1, true, "StartProgressBar", mod)
+        startProgressBarTimer:Start()
       end
     end,
   }
 )
 
-function mod:DetermineSawLocation(tUnit)
-  local x = tUnit:GetPosition().x
+function mod:DetermineSawLocation(unit)
+  local x = unit:GetPosition().x
   if WEST_POSITION < x and x < MIDDLE_WEST_POSITION then
     return SAW_WEST
   elseif MIDDLE_WEST_POSITION < x and x < MIDDLE_EAST_POSITION then
@@ -309,11 +309,11 @@ function mod:HandleShredderSaw(sawLocation)
 end
 
 mod:RegisterUnitEvents("Sawblade",{
-    ["OnUnitCreated"] = function (self, nId, tUnit, sName)
+    ["OnUnitCreated"] = function (self, id, unit, name)
       if mod:GetSetting("LineSawblade") then
-        core:AddPixie(nId, 2, tUnit, nil, "Red", 10, 60, 0)
+        core:AddPixie(id, 2, unit, nil, "Red", 10, 60, 0)
       end
-      local sawLocation = mod:DetermineSawLocation(tUnit)
+      local sawLocation = mod:DetermineSawLocation(unit)
       if phase == WALKING and sawLocation == SAW_MID then
         mod:AddMsg("SAW_MSG", self.L["SAW IN MIDDLE"], 5,
           mod:GetSetting("SoundMidSawWarning") == true and "Beware"
@@ -322,21 +322,21 @@ mod:RegisterUnitEvents("Sawblade",{
         mod:HandleShredderSaw(sawLocation)
       end
     end,
-    ["OnUnitDestroyed"] = function (self, nId, tUnit, sName)
-      core:DropPixie(nId)
+    ["OnUnitDestroyed"] = function (self, id, unit, name)
+      core:DropPixie(id)
     end,
   }
 )
 
 mod:RegisterUnitEvents("Noxious Nabber",{
-    ["OnUnitCreated"] = function (self, nId, tUnit, sName)
+    ["OnUnitCreated"] = function (self, id, unit, name)
       core:RemoveMsg("ADDS_MSG")
       mod:AddMsg("ADDS_MSG", "NOXIOUS NABBER SPAWNED", 5, mod:GetSetting("SoundAdds") and "Info")
     end,
-    ["OnCastStart"] = function (self, nId, sCastName, nCastEndTime, sName)
-      if self.L["Necrotic Lash"] == sCastName then
-        local tUnit = GetUnitById(nId)
-        if mod:GetDistanceBetweenUnits(playerUnit, tUnit) < 45 and sSpellName == sCastName then
+    ["OnCastStart"] = function (self, id, castName, castEndTime, name)
+      if self.L["Necrotic Lash"] == castName then
+        local unit = GetUnitById(id)
+        if mod:GetDistanceBetweenUnits(playerUnit, unit) < 45 and sSpellName == castName then
           mod:AddMsg("NABBER", "INTERRUPT NECROTIC LASH!", 5, mod:GetSetting("SoundNecroticLash") == true and "Inferno")
         end
       end
@@ -345,13 +345,13 @@ mod:RegisterUnitEvents("Noxious Nabber",{
 )
 
 mod:RegisterUnitEvents({"Regor the Rancid", "Braugh the Bloated"},{
-    ["OnUnitCreated"] = function (self, nId, tUnit, sName)
+    ["OnUnitCreated"] = function (self, id, unit, name)
       mod:AddMsg("MINIBOSS", "MINIBOSS SPAWNED", 5, mod:GetSetting("SoundMiniboss") and "Info")
     end,
-    ["OnCastStart"] = function (self, nId, sCastName, nCastEndTime, sName)
-      if self.L["Gravedigger"] == sCastName or
-      self.L["Deathwail"] == sCastName or
-      self.L["Crush"] == sCastName then
+    ["OnCastStart"] = function (self, id, castName, castEndTime, name)
+      if self.L["Gravedigger"] == castName or
+      self.L["Deathwail"] == castName or
+      self.L["Crush"] == castName then
         core:RemoveMsg("MINIBOSS")
         mod:AddMsg("MINIBOSS", "INTERRUPT MINIBOSS!", 5, mod:GetSetting("SoundMinibossCast") and "Inferno")
       end
@@ -360,25 +360,25 @@ mod:RegisterUnitEvents({"Regor the Rancid", "Braugh the Bloated"},{
 )
 
 mod:RegisterUnitEvents("Tether Anchor",{
-    ["OnUnitCreated"] = function (self, nId, tUnit, sName)
+    ["OnUnitCreated"] = function (self, id, unit, name)
       if mod:GetSetting("CrosshairTether") then
-        core:AddPicture(nId, nId, "Crosshair", 25, 0, 0, nil, "FFFFF569")
+        core:AddPicture(id, id, "Crosshair", 25, 0, 0, nil, "FFFFF569")
       end
     end,
-    ["OnUnitDestroyed"] = function (self, nId, tUnit, sName)
-      core:RemovePicture(nId)
+    ["OnUnitDestroyed"] = function (self, id, unit, name)
+      core:RemovePicture(id)
     end,
   }
 )
 
 mod:RegisterUnitEvents("Junk Trap",{
-    ["OnUnitCreated"] = function (self, nId, tUnit, sName)
+    ["OnUnitCreated"] = function (self, id, unit, name)
       if mod:GetSetting("SquareTethers") then
-        core:AddPolygon(nId, nId, 5, 45, 6, nil, 4)
+        core:AddPolygon(id, id, 5, 45, 6, nil, 4)
       end
     end,
-    ["OnUnitDestroyed"] = function (self, nId, tUnit, sName)
-      core:RemovePolygon(nId)
+    ["OnUnitDestroyed"] = function (self, id, unit, name)
+      core:RemovePolygon(id)
     end,
   }
 )

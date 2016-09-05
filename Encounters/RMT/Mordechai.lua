@@ -36,28 +36,28 @@ function mod:OnBossEnable()
 
 end
 
-function mod:OnBuffAdd(nId, nSpellId, nStack, fTimeRemaining)
+function mod:OnBuffAdd(id, spellId, stack, timeRemaining)
 end
 
-function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
+function mod:OnCastStart(id, castName, castEndTime, name)
 end
 
-function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
-
-end
-
-function mod:OnUnitDestroyed(nId, tUnit, sName)
+function mod:OnDebuffAdd(id, spellId, stack, timeRemaining)
 
 end
 
-function mod:OnUnitCreated(nId, unit, sName)
+function mod:OnUnitDestroyed(id, tUnit, name)
+
+end
+
+function mod:OnUnitCreated(id, unit, name)
 
 end
 
 mod:RegisterUnitEvents("Mordechai Redmoon",{
-    ["OnUnitCreated"] = function (self, nId, tUnit, sName)
-      core:AddUnit(tUnit)
-      core:WatchUnit(tUnit)
+    ["OnUnitCreated"] = function (self, id, unit, name)
+      core:AddUnit(unit)
+      core:WatchUnit(unit)
     end,
   }
 )

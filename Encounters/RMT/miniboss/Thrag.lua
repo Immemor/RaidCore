@@ -42,12 +42,12 @@ function mod:OnBossEnable()
 end
 
 mod:RegisterUnitEvents("Chief Engine Scrubber Thrag",{
-    ["OnUnitCreated"] = function (self, nId, tUnit, sName)
-      core:AddUnit(tUnit)
-      core:WatchUnit(tUnit)
+    ["OnUnitCreated"] = function (self, id, unit, name)
+      core:AddUnit(unit)
+      core:WatchUnit(unit)
     end,
-    ["OnCastStart"] = function (self, nId, sCastName, nCastEndTime, sName)
-      if self.L["Gigavolt"] == sCastName then
+    ["OnCastStart"] = function (self, id, castName, castEndTime, name)
+      if self.L["Gigavolt"] == castName then
         mod:AddMsg("GIGAVOLT", "GET OUT", 5, "RunAway")
       end
     end,
@@ -55,14 +55,14 @@ mod:RegisterUnitEvents("Chief Engine Scrubber Thrag",{
 )
 
 mod:RegisterUnitEvents("Jumpstart Charge",{
-    ["OnUnitCreated"] = function (self, nId, tUnit, sName)
-      jumpStarts[nId] = tUnit
-      --core:WatchUnit(tUnit)
-      core:AddLineBetweenUnits(string.format("JUMP_START_LINE %d", nId), playerUnit:GetId(), nId, 5)
+    ["OnUnitCreated"] = function (self, id, unit, name)
+      jumpStarts[id] = unit
+      --core:WatchUnit(unit)
+      core:AddLineBetweenUnits(string.format("JUMP_START_LINE %d", id), playerUnit:GetId(), id, 5)
     end,
-    ["OnUnitDestroyed"] = function (self, nId, tUnit, sName)
-      jumpStarts[nId] = nil
-      core:RemoveLineBetweenUnits(string.format("JUMP_START_LINE %d", nId))
+    ["OnUnitDestroyed"] = function (self, id, unit, name)
+      jumpStarts[id] = nil
+      core:RemoveLineBetweenUnits(string.format("JUMP_START_LINE %d", id))
     end,
   }
 )

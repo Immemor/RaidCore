@@ -125,40 +125,40 @@ function mod:OnBossEnable()
   mod:DrawCompactorGrid()
 end
 
-mod:RegisterDatachronEvent("Robomination tries to crush", "FIND", function (self, sMessage)
-    local sSnakeTarget = GetPlayerUnitByName(string.match(sMessage, self.L["Robomination tries to crush"].." ".."([^%s]+%s[^!]+)!$"))
-    local bIsOnMyself = sSnakeTarget == playerUnit
-    local bSnakeNearYou = not bIsOnMyself and mod:GetDistanceBetweenUnits(playerUnit, sSnakeTarget) < 10
-    local sSound = nil
-    local sSnakeOnX = ""
-    if bIsOnMyself then
-      sSound = mod:GetSetting("SoundSnake") == true and "RunAway"
-      sSnakeOnX = self.L["SNAKE ON YOU"]
-    elseif bSnakeNearYou then
+mod:RegisterDatachronEvent("Robomination tries to crush", "FIND", function (self, message)
+    local snakeTarget = GetPlayerUnitByName(string.match(message, self.L["Robomination tries to crush"].." ".."([^%s]+%s[^!]+)!$"))
+    local isOnMyself = snakeTarget == playerUnit
+    local isSnakeNearYou = not isOnMyself and mod:GetDistanceBetweenUnits(playerUnit, snakeTarget) < 10
+    local sound = nil
+    local snakeOnX = ""
+    if isOnMyself then
+      sound = mod:GetSetting("SoundSnake") == true and "RunAway"
+      snakeOnX = self.L["SNAKE ON YOU"]
+    elseif isSnakeNearYou then
       if mod:GetSetting("SoundSnakeNear") then
         if mod:GetSetting("SoundSnakeNearAlt") then
-          sSound = "Destruction"
+          sound = "Destruction"
         else
-          sSound = "RunAway"
+          sound = "RunAway"
         end
       end
-      sSnakeOnX = self.L["SNAKE NEAR ON %s"]:format(sSnakeTarget:GetName())
+      snakeOnX = self.L["SNAKE NEAR ON %s"]:format(snakeTarget:GetName())
     else
-      sSnakeOnX = self.L["SNAKE ON %s"]:format(sSnakeTarget:GetName())
+      snakeOnX = self.L["SNAKE ON %s"]:format(snakeTarget:GetName())
     end
 
     if mod:GetSetting("CrosshairSnake") then
-      core:AddPicture("SNAKE_CROSSHAIR", sSnakeTarget:GetId(), "Crosshair", 20)
+      core:AddPicture("SNAKE_CROSSHAIR", snakeTarget:GetId(), "Crosshair", 20)
     end
 
     mod:RemoveTimerBar("NEXT_SNAKE_TIMER")
     core:AddTimerBar("NEXT_SNAKE_TIMER", self.L["Next snake in"], SNAKE_TIMER, nil, { sColor = "xkcdBrown" })
 
-    mod:AddMsg("SNAKE_MSG", sSnakeOnX, 5, sSound, "Blue")
+    mod:AddMsg("SNAKE_MSG", snakeOnX, 5, sound, "Blue")
   end
 )
 
-mod:RegisterDatachronEvent("The Robomination sinks down into the trash.", "EQUAL", function (self, sMessage)
+mod:RegisterDatachronEvent("The Robomination sinks down into the trash.", "EQUAL", function (self, message)
     phase = MAZE_PHASE
     core:RemoveMsg("ROBO_MAZE")
     mod:RemoveTimerBar("NEXT_SNAKE_TIMER")
@@ -173,7 +173,7 @@ mod:RegisterDatachronEvent("The Robomination sinks down into the trash.", "EQUAL
   end
 )
 
-mod:RegisterDatachronEvent("The Robomination erupts back into the fight!", "EQUAL", function (self, sMessage)
+mod:RegisterDatachronEvent("The Robomination erupts back into the fight!", "EQUAL", function (self, message)
     phase = DPS_PHASE
     core:RemoveLineBetweenUnits("ROBO_MAZE_LINE")
     core:AddTimerBar("NEXT_SNAKE_TIMER", self.L["Next snake in"], FIRST_SNAKE_TIMER, nil, { sColor = "xkcdBrown" })
@@ -184,24 +184,24 @@ mod:RegisterDatachronEvent("The Robomination erupts back into the fight!", "EQUA
   end
 )
 
-mod:RegisterDatachronEvent("Robomination tries to incinerate", "FIND", function (self, sMessage)
-    local tLaserTarget = GetPlayerUnitByName(string.match(sMessage, self.L["Robomination tries to incinerate"].." ".."([^%s]+%s.+)$"))
-    local bIsOnMyself = tLaserTarget == playerUnit
-    local sSound = mod:GetSetting("SoundLaser") == true and "Burn"
-    local sLaserOnX = ""
-    if bIsOnMyself then
-      sLaserOnX = self.L["LASER ON YOU"]
+mod:RegisterDatachronEvent("Robomination tries to incinerate", "FIND", function (self, message)
+    local laserTarget = GetPlayerUnitByName(string.match(message, self.L["Robomination tries to incinerate"].." ".."([^%s]+%s.+)$"))
+    local isOnMyself = laserTarget == playerUnit
+    local sound = mod:GetSetting("SoundLaser") == true and "Burn"
+    local laserOnX = ""
+    if isOnMyself then
+      laserOnX = self.L["LASER ON YOU"]
     else
-      sLaserOnX = self.L["LASER ON %s"]:format(tLaserTarget:GetName())
+      laserOnX = self.L["LASER ON %s"]:format(laserTarget:GetName())
     end
 
     if mod:GetSetting("CrosshairLaser") then
-      core:AddPicture("LASER_CROSSHAIR", tLaserTarget:GetId(), "Crosshair", 30, 0, 0, nil, "Red")
+      core:AddPicture("LASER_CROSSHAIR", laserTarget:GetId(), "Crosshair", 30, 0, 0, nil, "Red")
     end
 
     mod:RemoveTimerBar("NEXT_INCINERATE_TIMER")
     core:AddTimerBar("NEXT_INCINERATE_TIMER", self.L["Next incinerate in"], INCINERATE_TIMER, nil, { sColor = "red", bEmphasize = mod:GetSetting("SoundLaser") })
-    mod:AddMsg("LASER_MSG", sLaserOnX, 5, sSound, "Red")
+    mod:AddMsg("LASER_MSG", laserOnX, 5, sound, "Red")
   end
 )
 
@@ -232,8 +232,8 @@ function mod:HelperCompactorGrid(compactors, isCorner, isAdding)
   end
 end
 
-function mod:OnDebuffRemove(nId, nSpellId, nStack, fTimeRemaining)
-  if nSpellId == DEBUFF_SNAKE then
+function mod:OnDebuffRemove(id, spellId, stack, timeRemaining)
+  if spellId == DEBUFF_SNAKE then
     core:RemovePicture("SNAKE_CROSSHAIR")
   end
 end
@@ -244,26 +244,26 @@ mod:RegisterUnitEvents({
     "Robomination",
     "Scanning Eye",
     },{
-    ["OnUnitCreated"] = function (self, nId, tUnit, sName)
-      core:AddUnit(tUnit)
+    ["OnUnitCreated"] = function (self, id, unit, name)
+      core:AddUnit(unit)
     end,
   }
 )
 
 mod:RegisterUnitEvents("Scanning Eye",{
-    ["OnUnitDestroyed"] = function (self, nId, tUnit, sName)
+    ["OnUnitDestroyed"] = function (self, id, unit, name)
       phase = MID_MAZE_PHASE
     end,
   }
 )
 
 mod:RegisterUnitEvents({"Cannon Arm", "Flailing Arm"},{
-    ["OnUnitCreated"] = function (self, nId, tUnit, sName)
+    ["OnUnitCreated"] = function (self, id, unit, name)
       if phase == MID_MAZE_PHASE then
         mazeArmCount = mazeArmCount + 1
       end
     end,
-    ["OnUnitDestroyed"] = function (self, nId, tUnit, sName)
+    ["OnUnitDestroyed"] = function (self, id, unit, name)
       if phase == MID_MAZE_PHASE then
         mazeArmCount = mazeArmCount - 1
         if mazeArmCount == 0 then
@@ -279,65 +279,65 @@ mod:RegisterUnitEvents({"Cannon Arm", "Flailing Arm"},{
 
 function mod:RedrawCannonArmLines()
   if mod:GetSetting("LineCannonArm") then
-    for nId, tUnit in pairs(cannonArms) do
-      core:AddLineBetweenUnits(string.format("CANNON_ARM_LINE %d", nId), playerUnit:GetId(), nId, 5)
+    for id, tUnit in pairs(cannonArms) do
+      core:AddLineBetweenUnits(string.format("CANNON_ARM_LINE %d", id), playerUnit:GetId(), id, 5)
     end
   end
 end
 
 function mod:RemoveCannonArmLines()
   if mod:GetSetting("LineCannonArm") then
-    for nId, tUnit in pairs(cannonArms) do
-      core:RemoveLineBetweenUnits(string.format("CANNON_ARM_LINE %d", nId))
+    for id, tUnit in pairs(cannonArms) do
+      core:RemoveLineBetweenUnits(string.format("CANNON_ARM_LINE %d", id))
     end
   end
 end
 
 mod:RegisterUnitEvents("Cannon Arm",{
-    ["OnUnitCreated"] = function (self, nId, tUnit, sName)
-      cannonArms[nId] = tUnit
-      core:WatchUnit(tUnit)
+    ["OnUnitCreated"] = function (self, id, unit, name)
+      cannonArms[id] = unit
+      core:WatchUnit(unit)
       if mod:GetSetting("LineCannonArm") then
-        core:AddLineBetweenUnits(string.format("CANNON_ARM_LINE %d", nId), playerUnit:GetId(), nId, 5)
+        core:AddLineBetweenUnits(string.format("CANNON_ARM_LINE %d", id), playerUnit:GetId(), id, 5)
       end
       if phase == DPS_PHASE then
         mod:AddTimerBar("NEXT_ARMS_TIMER", self.L["Arms spawning in"], ARMS_TIMER)
       end
       mod:AddMsg("ARMS_MSG", self.L["Cannon arm spawned"], 5, mod:GetSetting("SoundArmSpawn") == true and "Info", "Red")
     end,
-    ["OnCastStart"] = function (self, nId, sCastName, nCastEndTime, sName)
-      if self.L["Cannon Fire"] == sCastName then
-        if mod:GetDistanceBetweenUnits(playerUnit, GetUnitById(nId)) < 45 then
+    ["OnCastStart"] = function (self, id, castName, castEndTime, name)
+      if self.L["Cannon Fire"] == castName then
+        if mod:GetDistanceBetweenUnits(playerUnit, GetUnitById(id)) < 45 then
           mod:AddMsg("ARMS_MSG", self.L["INTERRUPT CANNON!"], 2, mod:GetSetting("SoundCannonInterrupt") == true and "Inferno")
         end
       end
     end,
-    ["OnUnitDestroyed"] = function (self, nId, tUnit, sName)
-      cannonArms[nId] = nil
-      core:RemoveLineBetweenUnits(string.format("CANNON_ARM_LINE %d", nId))
+    ["OnUnitDestroyed"] = function (self, id, unit, name)
+      cannonArms[id] = nil
+      core:RemoveLineBetweenUnits(string.format("CANNON_ARM_LINE %d", id))
     end,
   }
 )
 
 mod:RegisterUnitEvents("Robomination",{
-    ["OnUnitCreated"] = function (self, nId, tUnit, sName)
-      core:WatchUnit(tUnit)
-      roboUnit = tUnit
+    ["OnUnitCreated"] = function (self, id, unit, name)
+      core:WatchUnit(unit)
+      roboUnit = unit
     end,
-    ["OnHealthChanged"] = function (self, nId, nPourcent, sName)
-      if nPourcent >= 75.5 and nPourcent <= 76.5 then
+    ["OnHealthChanged"] = function (self, id, percent, name)
+      if percent >= 75.5 and percent <= 76.5 then
         mod:AddMsg("ROBO_MAZE", self.L["MAZE SOON!"], 5, mod:GetSetting("SoundPhaseChangeClose") and "Info")
       end
     end,
-    ["OnCastStart"] = function (self, nId, sCastName, nCastEndTime, sName)
-      if self.L["Noxious Belch"] == sCastName then
+    ["OnCastStart"] = function (self, id, castName, castEndTime, name)
+      if self.L["Noxious Belch"] == castName then
         mod:RemoveTimerBar("NEXT_SPEW_TIMER")
         core:AddTimerBar("NEXT_SPEW_TIMER", self.L["Next spew in"], SPEW_TIMER, nil, { sColor = "green" })
         mod:AddMsg("SPEW_MSG", self.L["Spew!"], 4, mod:GetSetting("SoundSpew") == true and "Beware")
       end
     end,
-    ["OnCastEnd"] = function (self, nId, sCastName, isInterrupted, nCastEndTime, sName)
-      if self.L["Incineration Laser"] == sCastName then
+    ["OnCastEnd"] = function (self, id, castName, isInterrupted, castEndTime, name)
+      if self.L["Incineration Laser"] == castName then
         core:RemovePicture("LASER_CROSSHAIR")
       end
     end,
