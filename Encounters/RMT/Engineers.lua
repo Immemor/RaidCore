@@ -50,6 +50,7 @@ local DEBUFF_ION_CLASH = 84051
 local DEBUFF_UNSTABLE_VOLTAGE = 84045
 local DEBUFF_ELECTROSHOCK_VULNERABILITY = 83798
 local DEBUFF_DIMINISHING_FUSION_REACTION = 87214
+local BUFF_INSULATION = 83987
 
 -- Timers
 local FIRST_ELECTROSHOCK_TIMER = 11
@@ -89,10 +90,6 @@ local ENGINEER_NAMES = {
 local ENGINEER_START_LOCATION = {
   [WARRIOR] = SPARK_PLUG,
   [ENGINEER] = COOLING_TURBINE,
-}
-local ENGINEER_TIMER_NAMES = {
-  [WARRIOR] = "OnWarriorLocationTimer",
-  [ENGINEER] = "OnEngineerLocationTimer",
 }
 local ENGINEER_NICKNAMES = {
   [WARRIOR] = "Warrior",
@@ -175,33 +172,33 @@ function mod:RemoveUnits()
 end
 
 function mod:CheckBossLocation(engineerId)
-  if engineerUnits[engineerId].firstCheck then
-    engineerUnits[engineerId].firstCheck = false
-    return
-  end
-
   local shortestDistance = 100000
   local currentDistance
+  local oldLocation = engineerUnits[engineerId].location
+  local newLocation = oldLocation
   for coreId, coreUnit in pairs(coreUnits) do
     currentDistance = mod:GetDistanceBetweenUnits(
       engineerUnits[engineerId].unit, coreUnit
     )
     if shortestDistance > currentDistance then
       shortestDistance = currentDistance
-      engineerUnits[engineerId].location = coreId
+      newLocation = coreId
     end
+  end
+  if newLocation ~= oldLocation then
+    engineerUnits[engineerId].location = newLocation
+    mod:OnEngiChangeLocation(engineerId, oldLocation, newLocation)
   end
 end
 
-function mod:OnWarriorLocationTimer()
-  mod:CheckBossLocation(WARRIOR)
+function mod:OnEngiChangeLocation(engineerId, oldCoreId, newCoreId)
 end
 
-function mod:OnEngineerLocationTimer()
-  mod:CheckBossLocation(ENGINEER)
-end
-
-function mod:OnBuffAdd(nId, nSpellId, nStack, fTimeRemaining)
+function mod:OnBuffRemove(nId, nSpellId)
+  if nSpellId == BUFF_INSULATION then
+    mod:CheckBossLocation(ENGINEER)
+    mod:CheckBossLocation(WARRIOR)
+  end
 end
 
 function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
@@ -273,8 +270,6 @@ mod:RegisterUnitEvents({
         engineerUnits[id] = {
           unit = tUnit,
           location = ENGINEER_START_LOCATION[id],
-          timer = ApolloTimer.Create(1.5, false, ENGINEER_TIMER_NAMES[id], mod),
-          firstCheck = true,
         }
       end
       if #coreUnits == 4 and #engineerUnits == 2 then
@@ -296,7 +291,6 @@ mod:RegisterUnitEvents("Chief Engineer Wilbargh",{
     end,
     ["OnCastEnd"] = function (self, nId, sCastName, nCastEndTime, sName)
       if self.L["Rocket Jump"] == sCastName then
-        engineerUnits[WARRIOR].timer:Start()
         mod:RemoveTimerBar("NEXT_LIQUIDATE_TIMER")
         mod:AddTimerBar("NEXT_LIQUIDATE_TIMER", "Next Liquidate in", JUMP_LIQUIDATE_TIMER)
       end
@@ -319,7 +313,6 @@ mod:RegisterUnitEvents("Head Engineer Orvulgh",{
     end,
     ["OnCastEnd"] = function (self, nId, sCastName, nCastEndTime, sName)
       if self.L["Rocket Jump"] == sCastName then
-        engineerUnits[ENGINEER].timer:Start()
         mod:RemoveTimerBar("NEXT_ELEKTROSHOCK_TIMER")
         mod:AddTimerBar("NEXT_ELEKTROSHOCK_TIMER", "Next Electroshock in", JUMP_ELECTROSHOCK_TIMER)
       end
