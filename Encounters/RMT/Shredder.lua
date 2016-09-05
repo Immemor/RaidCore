@@ -141,7 +141,6 @@ local SAW_SAFESPOT = {
 local GetUnitById = GameLib.GetUnitById
 local GetPlayerUnit = GameLib.GetPlayerUnit
 local GetGameTime = GameLib.GetGameTime
-local tNabberList
 local phase
 local addPhase
 local previousAddPhase
@@ -152,7 +151,6 @@ local secondShredderSaw
 -----------------------------------------------------------------------------------------------------
 
 function mod:OnBossEnable()
-  tNabberList = {}
   phase = WALKING
   addPhase = 4
   previousAddPhase = 0
@@ -166,23 +164,6 @@ function mod:OnDebuffUpdate(nId, nSpellId, nStack, fTimeRemaining)
       mod:AddMsg("OOZE_MSG", string.format(self.L["%d BILE STACKS!"], nStack), 5, nStack == 8 and mod:GetSetting("SoundOozeStacksWarning") and "Beware")
     end
   end
-end
-
-function mod:GetClosestNabber()
-  --TODO remove this
-  local playerUnit = GetPlayerUnit()
-  for _, nabber in pairs(tNabberList) do
-    local distance_to_nabber = mod:GetDistanceBetweenUnits(playerUnit, nabber["unit"])
-    nabber["distance"] = distance_to_nabber
-  end
-
-  local closest_nabber = tNabberList[next(tNabberList)]
-  for _, nabber in pairs(tNabberList) do
-    if nabber["distance"] < closest_nabber["distance"] and nabber["distance"] < 60 then
-      closest_nabber = nabber
-    end
-  end
-  return closest_nabber
 end
 
 function mod:GetWalkingProgress()
@@ -199,13 +180,6 @@ function mod:GetWalkingProgress()
   local progress = (walkedDistance / WALKING_DISTANCE) * 100
   return progress
 end
---
--- function mod:OnBuffAdd(nId, nSpellId, nStack, fTimeRemaining)
--- local unit = GetUnitById(nId)
--- if self.L["Noxious Nabber"] == unit:GetName() then
---
--- end
--- end
 
 function mod:GetAddSpawnProgess()
   local currentProgress = mod:GetWalkingProgress() - previousAddPhase
@@ -353,20 +327,14 @@ mod:RegisterUnitEvents("Sawblade",{
 
 mod:RegisterUnitEvents("Noxious Nabber",{
     ["OnUnitCreated"] = function (self, nId, tUnit, sName)
-      table.insert(tNabberList, nId, { ["unit"] = tUnit} )
       core:RemoveMsg("ADDS_MSG")
       mod:AddMsg("ADDS_MSG", "NOXIOUS NABBER SPAWNED", 5, mod:GetSetting("SoundAdds") and "Info")
     end,
-    ["OnUnitDestroyed"] = function (self, nId, tUnit, sName)
-      if tNabberList[nId] then
-        tNabberList[nId] = nil
-      end
-    end,
     ["OnCastStart"] = function (self, nId, sCastName, nCastEndTime, sName)
       if self.L["Necrotic Lash"] == sCastName then
-        local sSpellName = self:GetClosestNabber()["unit"]:GetCastName():gsub(NO_BREAK_SPACE, " ")
-        if sSpellName == sCastName then
-          mod:AddMsg("NABBER", "INTERRUPT NECROTIC LASH!", 5, mod:GetSetting("SoundNecroticLash") and "Inferno")
+        local tUnit = GetUnitById(nId)
+        if mod:GetDistanceBetweenUnits(playerUnit, tUnit) < 45 and sSpellName == sCastName then
+          mod:AddMsg("NABBER", "INTERRUPT NECROTIC LASH!", 5, mod:GetSetting("SoundNecroticLash") == true and "Inferno")
         end
       end
     end,

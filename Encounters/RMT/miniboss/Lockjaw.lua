@@ -45,22 +45,22 @@ mod:RegisterUnitEvents("Chief Warden Lockjaw",{
       core:AddUnit(tUnit)
       core:WatchUnit(tUnit)
     end,
+    ["OnCastStart"] = function (self, nId, sCastName, nCastEndTime, sName)
+      if self.L["Blaze Shackles"] == sCastName then
+        mod:AddMsg("CIRCLES", "DODGE CIRCLES", 5, "Info")
+      end
+    end,
   }
 )
 
 mod:RegisterUnitEvents("Blaze Shackle",{
     ["OnUnitCreated"] = function (self, nId, tUnit, sName)
       if mod:GetSetting("CrosshairTethers") then
-        core:AddPicture(nId, nId, "Crosshair", 15)
+        core:AddPicture(nId, nId, "Crosshair", 25)
       end
     end,
     ["OnUnitDestroyed"] = function (self, nId, tUnit, sName)
       core:RemovePicture(nId)
-    end,
-    ["OnCastStart"] = function (self, nId, sCastName, nCastEndTime, sName)
-      if self.L["Blaze Shackles"] == sCastName then
-        mod:AddMsg("CIRCLES", "DODGE CIRCLES", 5, "Info")
-      end
     end,
   }
 )
