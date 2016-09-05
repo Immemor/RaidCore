@@ -8,17 +8,26 @@
 -- TODO
 ----------------------------------------------------------------------------------------------------
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
-local mod = core:NewEncounter("Mordechai", 104, 0, 548)
+local mod = core:NewEncounter("Thrag", 104, 548, 552)
 if not mod then return end
 
 ----------------------------------------------------------------------------------------------------
 -- Registering combat.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterTrigMob("ALL", { "Mordechai Redmoon" })
+mod:RegisterTrigMob("ALL", { "Chief Engine Scrubber Thrag" })
 mod:RegisterEnglishLocale({
     -- Unit names.
-    ["Mordechai Redmoon"] = "Mordechai Redmoon"
+    ["Chief Engine Scrubber Thrag"] = "Chief Engine Scrubber Thrag",
+    ["Hostile Invisible Unit for Fields (0 hit radius)"] = "Hostile Invisible Unit for Fields (0 hit radius)",
+    ["Jumpstart Charge"] = "Jumpstart Charge",
+    -- Cast names.
+    ["Gigavolt"] = "Gigavolt",
   })
+----------------------------------------------------------------------------------------------------
+-- Settings.
+----------------------------------------------------------------------------------------------------
+mod:RegisterDefaultSetting("Gigavolt")
+mod:RegisterDefaultSetting("BombLines")
 ----------------------------------------------------------------------------------------------------
 -- Constants.
 ----------------------------------------------------------------------------------------------------
@@ -26,39 +35,41 @@ mod:RegisterEnglishLocale({
 ----------------------------------------------------------------------------------------------------
 -- Locals.
 ----------------------------------------------------------------------------------------------------
-
-local GetUnitById = GameLib.GetUnitById
-local GetPlayerUnit = GameLib.GetPlayerUnit
-local GetGameTime = GameLib.GetGameTime
+local jumpStarts
+local playerUnit
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-
+  playerUnit = GameLib.GetPlayerUnit()
 end
 
-function mod:OnBuffAdd(id, spellId, stack, timeRemaining)
-end
-
-function mod:OnCastStart(id, castName, castEndTime, name)
-end
-
-function mod:OnDebuffAdd(id, spellId, stack, timeRemaining)
-
-end
-
-function mod:OnUnitDestroyed(id, tUnit, name)
-
-end
-
-function mod:OnUnitCreated(id, unit, name)
-
-end
-
-mod:RegisterUnitEvents("Mordechai Redmoon",{
+mod:RegisterUnitEvents("Chief Engine Scrubber Thrag",{
     ["OnUnitCreated"] = function (self, id, unit, name)
       core:AddUnit(unit)
       core:WatchUnit(unit)
+    end,
+    ["OnCastStart"] = function (self, id, castName, castEndTime, name)
+      if self.L["Gigavolt"] == castName then
+        mod:AddMsg("GIGAVOLT", "GET OUT", 5, mod:GetSetting("Gigavolt") == true and "RunAway")
+      end
+    end,
+  }
+)
+
+mod:RegisterUnitEvents("Jumpstart Charge",{
+    ["OnUnitCreated"] = function (self, id, unit, name)
+      jumpStarts[id] = unit
+      core:WatchUnit(unit)
+      if mod:GetSetting("BombLines") then
+        core:AddLineBetweenUnits(string.format("JUMP_START_LINE %d", id), playerUnit:GetId(), id, 5)
+      end
+    end,
+    ["OnUnitDestroyed"] = function (self, id, unit, name)
+      jumpStarts[id] = nil
+      if mod:GetSetting("BombLines") then
+        core:RemoveLineBetweenUnits(string.format("JUMP_START_LINE %d", id))
+      end
     end,
   }
 )

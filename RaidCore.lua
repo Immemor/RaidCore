@@ -32,7 +32,7 @@ local next, pcall = next, pcall
 -- Should be 5.23 when replacement tokens will works (see #88 issue).
 local RAIDCORE_CURRENT_VERSION = "6"
 -- Should be deleted.
-local ADDON_DATE_VERSION = 16082301
+local ADDON_DATE_VERSION = 16090417
 -- Sometimes Carbine have inserted some no-break-space, for fun.
 -- Behavior seen with French language. This problem is not present in English.
 local NO_BREAK_SPACE = string.char(194, 160)
@@ -89,6 +89,9 @@ local function OnEncounterUnitEvents(sMethod, ...)
   elseif sMethod == "OnHealthChanged" then
     local nId, nPourcent, sName = ...
     tEncounter = _tCurrentEncounter.tUnitEvents[sMethod][sName]
+  elseif sMethod == "OnEnteredCombat" then
+    local nId, tUnit, sName, bInCombat = ...
+    tEncounter = _tCurrentEncounter.tUnitEvents[sMethod][sName]
   end
 
   if tEncounter then
@@ -107,11 +110,20 @@ local function OnEncounterDatachronEvents(sMethod, ...)
   for sSearchMessage, tEvents in pairs(_tCurrentEncounter.tDatachronEvents) do
     for _, tEvent in pairs(tEvents) do
       local sMessage = ...
-      local bMatch = tEvent.bMatch
+      local sMatch = tEvent.sMatch
       local fHandler = tEvent.fHandler
-      if (bMatch == true and sSearchMessage == sMessage) or
-      (bMatch == false and sMessage:find(sSearchMessage)) then
-        fHandler(_tCurrentEncounter, ...)
+      local result = nil
+
+      if sMatch == "EQUAL" then
+        result = sSearchMessage == sMessage
+      elseif sMatch == "FIND" then
+        result = sMessage:find(sSearchMessage)
+      elseif sMatch == "MATCH" then
+        result = sMessage:match(sSearchMessage)
+      end
+
+      if result ~= nil then
+        fHandler(_tCurrentEncounter, sMessage, result)
       end
     end
   end
