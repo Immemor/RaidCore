@@ -113,7 +113,7 @@ local GetGameTime = GameLib.GetGameTime
 --Do not reset coreUnits since they don't get destroyed after each pull
 local coreUnits = {}
 local engineerUnits
-local playerUnit
+local player
 local orbUnits
 ----------------------------------------------------------------------------------------------------
 -- Settings.
@@ -135,7 +135,8 @@ Apollo.RegisterEventHandler("UnitDestroyed", "OnUnitDestroyedRaw", mod)
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-  playerUnit = GameLib.GetPlayerUnit()
+  player = {}
+  player.unit = GameLib.GetPlayerUnit()
   engineerUnits = {}
   orbUnits = {}
   --locales
@@ -218,7 +219,7 @@ function mod:OnDebuffAdd(id, spellId, stack, timeRemaining)
   if DEBUFF_ELECTROSHOCK_VULNERABILITY == spellId then
     local target = GetUnitById(id)
     local targetName = target:GetName()
-    local isOnMyself = targetName == playerUnit:GetName()
+    local isOnMyself = targetName == player.unit:GetName()
     local electroshockOnX = ""
     local messageId = string.format("ELECTROSHOCK_MSG_%s", targetName)
     local sound
@@ -235,7 +236,7 @@ function mod:OnDebuffAdd(id, spellId, stack, timeRemaining)
 end
 
 function mod:IsPlayerClose(unit)
-  return mod:GetDistanceBetweenUnits(playerUnit, unit) < 75
+  return mod:GetDistanceBetweenUnits(player.unit, unit) < 75
 end
 
 function mod:OnUnitDestroyedRaw(unit)
@@ -382,7 +383,7 @@ function mod:RegisterOrbTarget()
     if not orbUnit.checkedTarget then
       orbUnit.checkedTarget = true
       local target = orbUnit.unit:GetTarget()
-      local isOnMyself = target == playerUnit
+      local isOnMyself = target == player.unit
       if isOnMyself then
         mod:AddMsg("DISCHARGED_PLASMA_MSG", self.L["fire_orb.you"], 5, mod:GetSetting("SoundFireOrb") == true and "RunAway")
       else
