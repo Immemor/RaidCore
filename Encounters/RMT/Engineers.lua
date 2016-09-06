@@ -394,6 +394,9 @@ mod:RegisterUnitEvents("Discharged Plasma",{
 )
 
 function mod:RegisterOrbTarget()
+  if orbUnits == nil then
+    return
+  end
   for orbId, orbUnit in pairs(orbUnits) do
     if not orbUnit.checkedTarget then
       orbUnit.checkedTarget = true
