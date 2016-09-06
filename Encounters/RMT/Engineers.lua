@@ -78,13 +78,6 @@ local CORE_NAMES = {
   ["Spark Plug"] = SPARK_PLUG,
   ["Lubricant Nozzle"] = LUBRICANT_NOZZLE
 }
---shorten these
-local CORE_NICKNAMES = {
-  [FUSION_CORE] = "Fusion Core",
-  [COOLING_TURBINE] = "Cooling Turbine",
-  [SPARK_PLUG] = "Spark Plug",
-  [LUBRICANT_NOZZLE] = "Lubricant Nozzle"
-}
 
 local WARRIOR = 1
 local ENGINEER = 2
@@ -95,10 +88,6 @@ local ENGINEER_NAMES = {
 local ENGINEER_START_LOCATION = {
   [WARRIOR] = SPARK_PLUG,
   [ENGINEER] = COOLING_TURBINE,
-}
-local ENGINEER_NICKNAMES = {
-  [WARRIOR] = "Warrior",
-  [ENGINEER] = "Engineer",
 }
 ----------------------------------------------------------------------------------------------------
 -- Functions.
@@ -204,7 +193,7 @@ function mod:GetUnitPlatform(unit)
   return location
 end
 
-function mod:OnEngiChangeLocation(engineerId, oldCoreId, newCoreId)
+function mod:OnEngiChangeLocation()
 end
 
 function mod:OnBuffRemove(_, spellId)
