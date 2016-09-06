@@ -130,114 +130,6 @@ local function Number2ShortString(val)
   return r
 end
 
-function UnitManager:UpdateUnitBar(tBar)
-  local tUnit = GetUnitById(tBar.nId)
-  if tUnit and tUnit:IsValid() then
-    local MaxHealth = tUnit:GetMaxHealth()
-    local Health = tUnit:GetHealth()
-    local sName = tUnit:GetName():gsub(NO_BREAK_SPACE, " ")
-    local bVunerable = tUnit:IsInCCState(VULNERABILITY)
-    if Health and MaxHealth then
-      local nPourcent = 100.0 * Health / MaxHealth
-      if tBar.wndUnitHPProgressBar then
-        -- Update progress bar.
-        tBar.wndUnitHPProgressBar:SetMax(MaxHealth)
-        tBar.wndUnitHPProgressBar:SetProgress(Health)
-        if bVunerable then
-          tBar.wndUnitHPProgressBar:SetBarColor("FF7E00FF")
-          tBar.wndUnit:SetBGColor("A0300062")
-        else
-          tBar.wndUnitHPProgressBar:SetBarColor("FF004000")
-          tBar.wndUnit:SetBGColor("A0131313")
-        end
-        -- Update the percent text.
-        local sPourcentFormat = "%.1f%%"
-        if self.tSettings.bPourcentWith2Digits then
-          sPourcentFormat = "%.2f%%"
-        end
-        tBar.wndUnitHPPercent:SetText(sPourcentFormat:format(nPourcent))
-        -- Update the short health text.
-        tBar.wndUnitHPValue:SetText(Number2ShortString(Health))
-      end
-    elseif tBar.wndUnitHPPercent then
-      tBar.wndUnitHPPercent:SetText("")
-      tBar.wndUnitHPValue:SetText("")
-    end
-    if tBar.wndUnitName then
-      -- Update the name.
-      tBar.wndUnitName:SetText(sName)
-      -- Update the marker indication.
-      if tBar.sMark then
-        tBar.wndMarkValue:SetText(tBar.sMark:sub(1, 4))
-        tBar.wndMark:Show(true)
-      else
-        tBar.wndMark:Show(false)
-      end
-
-      local bProcessMiddleBar = false
-      local nMidDuration, nMidElapsed, sMidName
-      if bVunerable then
-        bProcessMiddleBar = true
-        nMidDuration = tUnit:GetCCStateTotalTime(VULNERABILITY)
-        nMidElapsed = nMidDuration - tUnit:GetCCStateTimeRemaining(VULNERABILITY)
-        tBar.wndCastProgressBar:SetBarColor("xkcdVeryLightPurple")
-        sMidName = "Vunerable"
-      elseif tUnit:IsCasting() then
-        -- Process cast bar
-        nMidDuration = tUnit:GetCastDuration()
-        nMidElapsed = tUnit:GetCastElapsed()
-        sMidName = tUnit:GetCastName()
-        tBar.wndCastProgressBar:SetBarColor("darkgray")
-        if tUnit:IsCasting() and nMidElapsed < nMidDuration then
-          bProcessMiddleBar = true
-        end
-      end
-      if bProcessMiddleBar and self.tSettings.bDisplayCast then
-        tBar.wndCastProgressBar:SetProgress(nMidElapsed)
-        tBar.wndCastProgressBar:SetMax(nMidDuration)
-        tBar.wndCastText:SetText(sMidName)
-        tBar.wndCast:Show(true)
-      else
-        tBar.wndCast:Show(false)
-      end
-      -- Process shield bar
-      local nShieldCapacity = tUnit:GetShieldCapacity()
-      local nShieldCapacityMax = tUnit:GetShieldCapacityMax()
-      if Health ~= 0 and nShieldCapacity and nShieldCapacity ~= 0 and self.tSettings.bDisplayShield then
-        tBar.wndShieldProgressBar:SetProgress(nShieldCapacity)
-        tBar.wndShieldProgressBar:SetMax(nShieldCapacityMax)
-        tBar.wndShieldValue:SetText(Number2ShortString(nShieldCapacity))
-        tBar.wndShield:Show(true)
-      else
-        tBar.wndShield:Show(false)
-      end
-      -- Process absorb bar
-      local nAbsorptionValue = tUnit:GetAbsorptionValue()
-      local nAbsorptionMax = tUnit:GetAbsorptionMax()
-      if Health ~= 0 and nAbsorptionValue and nAbsorptionValue ~= 0 and self.tSettings.bDisplayAbsorb then
-        tBar.wndAbsorbProgressBar:SetProgress(nAbsorptionValue)
-        tBar.wndAbsorbProgressBar:SetMax(nAbsorptionMax)
-        tBar.wndAbsorbValue:SetText(Number2ShortString(nAbsorptionValue))
-        tBar.wndAbsorb:Show(true)
-      else
-        tBar.wndAbsorb:Show(false)
-      end
-      -- Process Armor bar
-      local nArmorValue = tUnit:GetInterruptArmorValue()
-      if nArmorValue and nArmorValue > 0 then
-        local left, top, right, bottom = tBar.wndBody:GetAnchorOffsets()
-        tBar.wndBody:SetAnchorOffsets(left, top, -32, bottom)
-        tBar.wndArmor:Show(true)
-        tBar.wndArmorValue:SetText(nArmorValue)
-      else
-        local left, top, right, bottom = tBar.wndBody:GetAnchorOffsets()
-        tBar.wndBody:SetAnchorOffsets(left, top, 0, bottom)
-        tBar.wndArmor:Show(false)
-      end
-    end
-  end
-end
-
 ----------------------------------------------------------------------------------------------------
 -- Template Class.
 ----------------------------------------------------------------------------------------------------
@@ -553,6 +445,114 @@ function UnitManager:AddBar(nId)
       }
     end
     TimerStart()
+  end
+end
+
+function UnitManager:UpdateUnitBar(tBar)
+  local tUnit = GetUnitById(tBar.nId)
+  if tUnit and tUnit:IsValid() then
+    local MaxHealth = tUnit:GetMaxHealth()
+    local Health = tUnit:GetHealth()
+    local sName = tUnit:GetName():gsub(NO_BREAK_SPACE, " ")
+    local bVunerable = tUnit:IsInCCState(VULNERABILITY)
+    if Health and MaxHealth then
+      local nPourcent = 100.0 * Health / MaxHealth
+      if tBar.wndUnitHPProgressBar then
+        -- Update progress bar.
+        tBar.wndUnitHPProgressBar:SetMax(MaxHealth)
+        tBar.wndUnitHPProgressBar:SetProgress(Health)
+        if bVunerable then
+          tBar.wndUnitHPProgressBar:SetBarColor("FF7E00FF")
+          tBar.wndUnit:SetBGColor("A0300062")
+        else
+          tBar.wndUnitHPProgressBar:SetBarColor("FF004000")
+          tBar.wndUnit:SetBGColor("A0131313")
+        end
+        -- Update the percent text.
+        local sPourcentFormat = "%.1f%%"
+        if self.tSettings.bPourcentWith2Digits then
+          sPourcentFormat = "%.2f%%"
+        end
+        tBar.wndUnitHPPercent:SetText(sPourcentFormat:format(nPourcent))
+        -- Update the short health text.
+        tBar.wndUnitHPValue:SetText(Number2ShortString(Health))
+      end
+    elseif tBar.wndUnitHPPercent then
+      tBar.wndUnitHPPercent:SetText("")
+      tBar.wndUnitHPValue:SetText("")
+    end
+    if tBar.wndUnitName then
+      -- Update the name.
+      tBar.wndUnitName:SetText(sName)
+      -- Update the marker indication.
+      if tBar.sMark then
+        tBar.wndMarkValue:SetText(tBar.sMark:sub(1, 4))
+        tBar.wndMark:Show(true)
+      else
+        tBar.wndMark:Show(false)
+      end
+
+      local bProcessMiddleBar = false
+      local nMidDuration, nMidElapsed, sMidName
+      if bVunerable then
+        bProcessMiddleBar = true
+        nMidDuration = tUnit:GetCCStateTotalTime(VULNERABILITY)
+        nMidElapsed = nMidDuration - tUnit:GetCCStateTimeRemaining(VULNERABILITY)
+        tBar.wndCastProgressBar:SetBarColor("xkcdVeryLightPurple")
+        sMidName = "Vunerable"
+      elseif tUnit:IsCasting() then
+        -- Process cast bar
+        nMidDuration = tUnit:GetCastDuration()
+        nMidElapsed = tUnit:GetCastElapsed()
+        sMidName = tUnit:GetCastName()
+        tBar.wndCastProgressBar:SetBarColor("darkgray")
+        if tUnit:IsCasting() and nMidElapsed < nMidDuration then
+          bProcessMiddleBar = true
+        end
+      end
+      if bProcessMiddleBar and self.tSettings.bDisplayCast then
+        tBar.wndCastProgressBar:SetProgress(nMidElapsed)
+        tBar.wndCastProgressBar:SetMax(nMidDuration)
+        tBar.wndCastText:SetText(sMidName)
+        tBar.wndCast:Show(true)
+      else
+        tBar.wndCast:Show(false)
+      end
+      -- Process shield bar
+      local nShieldCapacity = tUnit:GetShieldCapacity()
+      local nShieldCapacityMax = tUnit:GetShieldCapacityMax()
+      if Health ~= 0 and nShieldCapacity and nShieldCapacity ~= 0 and self.tSettings.bDisplayShield then
+        tBar.wndShieldProgressBar:SetProgress(nShieldCapacity)
+        tBar.wndShieldProgressBar:SetMax(nShieldCapacityMax)
+        tBar.wndShieldValue:SetText(Number2ShortString(nShieldCapacity))
+        tBar.wndShield:Show(true)
+      else
+        tBar.wndShield:Show(false)
+      end
+      -- Process absorb bar
+      local nAbsorptionValue = tUnit:GetAbsorptionValue()
+      local nAbsorptionMax = tUnit:GetAbsorptionMax()
+      if Health ~= 0 and nAbsorptionValue and nAbsorptionValue ~= 0 and self.tSettings.bDisplayAbsorb then
+        tBar.wndAbsorbProgressBar:SetProgress(nAbsorptionValue)
+        tBar.wndAbsorbProgressBar:SetMax(nAbsorptionMax)
+        tBar.wndAbsorbValue:SetText(Number2ShortString(nAbsorptionValue))
+        tBar.wndAbsorb:Show(true)
+      else
+        tBar.wndAbsorb:Show(false)
+      end
+      -- Process Armor bar
+      local nArmorValue = tUnit:GetInterruptArmorValue()
+      if nArmorValue and nArmorValue > 0 then
+        local left, top, right, bottom = tBar.wndBody:GetAnchorOffsets()
+        tBar.wndBody:SetAnchorOffsets(left, top, -32, bottom)
+        tBar.wndArmor:Show(true)
+        tBar.wndArmorValue:SetText(nArmorValue)
+      else
+        local left, top, right, bottom = tBar.wndBody:GetAnchorOffsets()
+        tBar.wndBody:SetAnchorOffsets(left, top, 0, bottom)
+        tBar.wndArmor:Show(false)
+      end
+    end
   end
 end
 
