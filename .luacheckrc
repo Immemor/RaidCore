@@ -95,5 +95,6 @@ globals = {
   "Unit",
   "Vector2",
   "Vector3",
-  "XmlDoc"
+  "XmlDoc",
+  "Print",
 }
