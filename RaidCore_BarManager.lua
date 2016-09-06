@@ -130,114 +130,6 @@ local function Number2ShortString(val)
   return r
 end
 
-local function UpdateUnitBar(tUnitManager, tBar)
-  local tUnit = GetUnitById(tBar.nId)
-  if tUnit and tUnit:IsValid() then
-    local MaxHealth = tUnit:GetMaxHealth()
-    local Health = tUnit:GetHealth()
-    local sName = tUnit:GetName():gsub(NO_BREAK_SPACE, " ")
-    local bVunerable = tUnit:IsInCCState(VULNERABILITY)
-    if Health and MaxHealth then
-      local nPourcent = 100.0 * Health / MaxHealth
-      if tBar.wndUnitHPProgressBar then
-        -- Update progress bar.
-        tBar.wndUnitHPProgressBar:SetMax(MaxHealth)
-        tBar.wndUnitHPProgressBar:SetProgress(Health)
-        if bVunerable then
-          tBar.wndUnitHPProgressBar:SetBarColor("FF7E00FF")
-          tBar.wndUnit:SetBGColor("A0300062")
-        else
-          tBar.wndUnitHPProgressBar:SetBarColor("FF004000")
-          tBar.wndUnit:SetBGColor("A0131313")
-        end
-        -- Update the percent text.
-        local sPourcentFormat = "%.1f%%"
-        if tUnitManager.tSettings.bPourcentWith2Digits then
-          sPourcentFormat = "%.2f%%"
-        end
-        tBar.wndUnitHPPercent:SetText(sPourcentFormat:format(nPourcent))
-        -- Update the short health text.
-        tBar.wndUnitHPValue:SetText(Number2ShortString(Health))
-      end
-    elseif tBar.wndUnitHPPercent then
-      tBar.wndUnitHPPercent:SetText("")
-      tBar.wndUnitHPValue:SetText("")
-    end
-    if tBar.wndUnitName then
-      -- Update the name.
-      tBar.wndUnitName:SetText(sName)
-      -- Update the marker indication.
-      if tBar.sMark then
-        tBar.wndMarkValue:SetText(tBar.sMark:sub(1, 4))
-        tBar.wndMark:Show(true)
-      else
-        tBar.wndMark:Show(false)
-      end
-
-      local bProcessMiddleBar = false
-      local nMidDuration, nMidElapsed, sMidName
-      if bVunerable then
-        bProcessMiddleBar = true
-        nMidDuration = tUnit:GetCCStateTotalTime(VULNERABILITY)
-        nMidElapsed = nMidDuration - tUnit:GetCCStateTimeRemaining(VULNERABILITY)
-        tBar.wndCastProgressBar:SetBarColor("xkcdVeryLightPurple")
-        sMidName = "Vunerable"
-      elseif tUnit:IsCasting() then
-        -- Process cast bar
-        nMidDuration = tUnit:GetCastDuration()
-        nMidElapsed = tUnit:GetCastElapsed()
-        sMidName = tUnit:GetCastName()
-        tBar.wndCastProgressBar:SetBarColor("darkgray")
-        if tUnit:IsCasting() and nMidElapsed < nMidDuration then
-          bProcessMiddleBar = true
-        end
-      end
-      if bProcessMiddleBar and tUnitManager.tSettings.bDisplayCast then
-        tBar.wndCastProgressBar:SetProgress(nMidElapsed)
-        tBar.wndCastProgressBar:SetMax(nMidDuration)
-        tBar.wndCastText:SetText(sMidName)
-        tBar.wndCast:Show(true)
-      else
-        tBar.wndCast:Show(false)
-      end
-      -- Process shield bar
-      local nShieldCapacity = tUnit:GetShieldCapacity()
-      local nShieldCapacityMax = tUnit:GetShieldCapacityMax()
-      if Health ~= 0 and nShieldCapacity and nShieldCapacity ~= 0 and tUnitManager.tSettings.bDisplayShield then
-        tBar.wndShieldProgressBar:SetProgress(nShieldCapacity)
-        tBar.wndShieldProgressBar:SetMax(nShieldCapacityMax)
-        tBar.wndShieldValue:SetText(Number2ShortString(nShieldCapacity))
-        tBar.wndShield:Show(true)
-      else
-        tBar.wndShield:Show(false)
-      end
-      -- Process absorb bar
-      local nAbsorptionValue = tUnit:GetAbsorptionValue()
-      local nAbsorptionMax = tUnit:GetAbsorptionMax()
-      if Health ~= 0 and nAbsorptionValue and nAbsorptionValue ~= 0 and tUnitManager.tSettings.bDisplayAbsorb then
-        tBar.wndAbsorbProgressBar:SetProgress(nAbsorptionValue)
-        tBar.wndAbsorbProgressBar:SetMax(nAbsorptionMax)
-        tBar.wndAbsorbValue:SetText(Number2ShortString(nAbsorptionValue))
-        tBar.wndAbsorb:Show(true)
-      else
-        tBar.wndAbsorb:Show(false)
-      end
-      -- Process Armor bar
-      local nArmorValue = tUnit:GetInterruptArmorValue()
-      if nArmorValue and nArmorValue > 0 then
-        local left, top, right, bottom = tBar.wndBody:GetAnchorOffsets()
-        tBar.wndBody:SetAnchorOffsets(left, top, -32, bottom)
-        tBar.wndArmor:Show(true)
-        tBar.wndArmorValue:SetText(nArmorValue)
-      else
-        local left, top, right, bottom = tBar.wndBody:GetAnchorOffsets()
-        tBar.wndBody:SetAnchorOffsets(left, top, 0, bottom)
-        tBar.wndArmor:Show(false)
-      end
-    end
-  end
-end
-
 ----------------------------------------------------------------------------------------------------
 -- Template Class.
 ----------------------------------------------------------------------------------------------------
@@ -350,42 +242,46 @@ function TimerManager:AddBar(sKey, sText, nDuration, tCallback, tOptions)
   end
 end
 
+function TimerManager:UpdateBar(sKey, tBar, nCurrentTime)
+  -- Is the timeout have been reached?
+  if nCurrentTime < tBar.nEndTime then
+    local nRemaining = tBar.nEndTime - nCurrentTime
+    tBar.wndProgressBar:SetProgress(nRemaining)
+    tBar.wndTimeLeft:SetText(("%.1fs"):format(nRemaining))
+    if tBar.EnableCountDown then
+      if nRemaining < 5 then
+        local nCountDown = math.floor(tBar.nPrevRemaining)
+        local nFloorRemain = math.floor(nRemaining)
+        if nCountDown ~= nFloorRemain then
+          local sCountDown = tostring(nCountDown)
+          if self.tSettings.bEnableCountDownMessage then
+            RaidCore:AddMsg("COUNTDOWN", sCountDown, 1, nil, "green")
+          end
+          if self.tSettings.bEnableCountDownSound then
+            RaidCore:PlaySound(sCountDown)
+          end
+        end
+      end
+    end
+    tBar.nPrevRemaining = nRemaining
+  else
+    if tBar.tCallback then
+      table.insert(self.tTimeout, tBar.tCallback)
+    end
+    self:RemoveBar(sKey)
+  end
+end
+
 function TimerManager:OnTimerUpdate()
-  local Timeout = {}
+  self.tTimeout = {}
   local nCurrentTime = GetGameTime()
 
   -- Update each bar timer.
   for sKey, tBar in next, self.tBars do
-    -- Is the timeout have been reached?
-    if nCurrentTime < tBar.nEndTime then
-      local nRemaining = tBar.nEndTime - nCurrentTime
-      tBar.wndProgressBar:SetProgress(nRemaining)
-      tBar.wndTimeLeft:SetText(("%.1fs"):format(nRemaining))
-      if tBar.EnableCountDown then
-        if nRemaining < 5 then
-          local nCountDown = math.floor(tBar.nPrevRemaining)
-          local nFloorRemain = math.floor(nRemaining)
-          if nCountDown ~= nFloorRemain then
-            local sCountDown = tostring(nCountDown)
-            if self.tSettings.bEnableCountDownMessage then
-              RaidCore:AddMsg("COUNTDOWN", sCountDown, 1, nil, "green")
-            end
-            if self.tSettings.bEnableCountDownSound then
-              RaidCore:PlaySound(sCountDown)
-            end
-          end
-        end
-      end
-      tBar.nPrevRemaining = nRemaining
-    else
-      if tBar.tCallback then
-        table.insert(Timeout, tBar.tCallback)
-      end
-      self:RemoveBar(sKey)
-    end
+    self:UpdateBar(sKey, tBar, nCurrentTime)
   end
   -- Process all callback of ended timer.
-  for _, tCallback in next, Timeout do
+  for _, tCallback in next, self.tTimeout do
     if tCallback.tClass then
       -- Call a function in a class.
       tCallback.fHandler(tCallback.tClass, tCallback.tData)
@@ -394,6 +290,7 @@ function TimerManager:OnTimerUpdate()
       tCallback.fHandler(tCallback.tData)
     end
   end
+  self.tTimeout = nil
 end
 
 ----------------------------------------------------------------------------------------------------
@@ -459,31 +356,35 @@ function ProgressManager:AddBar(sKey, sText, tUpdate, tOptions, tCallback)
   end
 end
 
+function ProgressManager:UpdateBar(sKey, tBar)
+  local nProgress
+  if tBar.tUpdate.tClass then
+    nProgress = tBar.tUpdate.fHandler(tBar.tUpdate.tClass, tBar.nPrevProgress)
+  else
+    nProgress = tBar.tUpdate.fHandler(tBar.nPrevProgress)
+  end
+  if nProgress < 100 then
+    tBar.wndMain:SetData(nProgress)
+    tBar.wndProgressBar:SetProgress(nProgress)
+    tBar.wndProgress:SetText(("%.1f%%"):format(nProgress))
+    tBar.nPrevProgress = nProgress
+  else
+    if tBar.tCallback then
+      table.insert(self.tTimeout, tBar.tCallback)
+    end
+    self:RemoveBar(sKey)
+  end
+end
+
 function ProgressManager:OnTimerUpdate()
-  local Timeout = {}
+  self.tTimeout = {}
 
   -- Update each bar progress
   for sKey, tBar in next, self.tBars do
-    local nProgress = 0
-    if tBar.tUpdate.tClass then
-      nProgress = tBar.tUpdate.fHandler(tBar.tUpdate.tClass, tBar.nPrevProgress)
-    else
-      nProgress = tBar.tUpdate.fHandler(tBar.nPrevProgress)
-    end
-    if nProgress < 100 then
-      tBar.wndMain:SetData(nProgress)
-      tBar.wndProgressBar:SetProgress(nProgress)
-      tBar.wndProgress:SetText(("%.1f%%"):format(nProgress))
-      tBar.nPrevProgress = nProgress
-    else
-      if tBar.tCallback then
-        table.insert(Timeout, tBar.tCallback)
-      end
-      self:RemoveBar(sKey)
-    end
+    self:UpdateBar(sKey, tBar)
   end
   -- Process all callback of ended timer.
-  for _, tCallback in next, Timeout do
+  for _, tCallback in next, self.tTimeout do
     if tCallback.tClass then
       -- Call a function in a class.
       tCallback.fHandler(tCallback.tClass, tCallback.tData)
@@ -492,6 +393,7 @@ function ProgressManager:OnTimerUpdate()
       tCallback.fHandler(tCallback.tData)
     end
   end
+  self.tTimeout = nil
 end
 
 ----------------------------------------------------------------------------------------------------
@@ -501,7 +403,7 @@ local UnitManager = NewManager("Health")
 
 function UnitManager:AddBar(nId)
   assert(GetUnitById(nId))
-  if not self.tBars[nId] then
+  if (self.tBars[nId] and self.tBars[nId].isSpacer) or not self.tBars[nId] then
     local sMark = RaidCore.mark[nId] and RaidCore.mark[nId].number
     if self.tSettings.bEnabled then
       local wndMain = Apollo.LoadForm(RaidCore.xmlDoc, "BarUnitTemplate", self.wndParent, self)
@@ -544,7 +446,7 @@ function UnitManager:AddBar(nId)
       }
       wndMain:SetData(GetGameTime())
       wndMain:SetAnchorOffsets(0, 0, 0, self.tSettings.nBarHeight)
-      UpdateUnitBar(self, self.tBars[nId])
+      self:UpdateBar(self.tBars[nId])
       ArrangeBar(self)
     else
       self.tBars[nId] = {
@@ -556,10 +458,142 @@ function UnitManager:AddBar(nId)
   end
 end
 
-function UnitManager:OnTimerUpdate()
-  for _, Bar in next, self.tBars do
-    UpdateUnitBar(self, Bar)
+function UnitManager:UpdateBar(tBar)
+  if tBar.isSpacer then return end
+  local tUnit = GetUnitById(tBar.nId)
+  if tUnit and tUnit:IsValid() then
+    local MaxHealth = tUnit:GetMaxHealth()
+    local Health = tUnit:GetHealth()
+    local sName = tUnit:GetName():gsub(NO_BREAK_SPACE, " ")
+    local bVunerable = tUnit:IsInCCState(VULNERABILITY)
+    if Health and MaxHealth then
+      local nPourcent = 100.0 * Health / MaxHealth
+      if tBar.wndUnitHPProgressBar then
+        -- Update progress bar.
+        tBar.wndUnitHPProgressBar:SetMax(MaxHealth)
+        tBar.wndUnitHPProgressBar:SetProgress(Health)
+        if bVunerable then
+          tBar.wndUnitHPProgressBar:SetBarColor("FF7E00FF")
+          tBar.wndUnit:SetBGColor("A0300062")
+        else
+          tBar.wndUnitHPProgressBar:SetBarColor("FF004000")
+          tBar.wndUnit:SetBGColor("A0131313")
+        end
+        -- Update the percent text.
+        local sPourcentFormat = "%.1f%%"
+        if self.tSettings.bPourcentWith2Digits then
+          sPourcentFormat = "%.2f%%"
+        end
+        tBar.wndUnitHPPercent:SetText(sPourcentFormat:format(nPourcent))
+        -- Update the short health text.
+        tBar.wndUnitHPValue:SetText(Number2ShortString(Health))
+      end
+    elseif tBar.wndUnitHPPercent then
+      tBar.wndUnitHPPercent:SetText("")
+      tBar.wndUnitHPValue:SetText("")
+    end
+    if tBar.wndUnitName then
+      -- Update the name.
+      tBar.wndUnitName:SetText(sName)
+      -- Update the marker indication.
+      if tBar.sMark then
+        tBar.wndMarkValue:SetText(tBar.sMark:sub(1, 4))
+        tBar.wndMark:Show(true)
+      else
+        tBar.wndMark:Show(false)
+      end
+
+      local bProcessMiddleBar = false
+      local nMidDuration, nMidElapsed, sMidName
+      if bVunerable then
+        bProcessMiddleBar = true
+        nMidDuration = tUnit:GetCCStateTotalTime(VULNERABILITY)
+        nMidElapsed = nMidDuration - tUnit:GetCCStateTimeRemaining(VULNERABILITY)
+        tBar.wndCastProgressBar:SetBarColor("xkcdVeryLightPurple")
+        sMidName = "Vunerable"
+      elseif tUnit:IsCasting() then
+        -- Process cast bar
+        nMidDuration = tUnit:GetCastDuration()
+        nMidElapsed = tUnit:GetCastElapsed()
+        sMidName = tUnit:GetCastName()
+        tBar.wndCastProgressBar:SetBarColor("darkgray")
+        if tUnit:IsCasting() and nMidElapsed < nMidDuration then
+          bProcessMiddleBar = true
+        end
+      end
+      if bProcessMiddleBar and self.tSettings.bDisplayCast then
+        tBar.wndCastProgressBar:SetProgress(nMidElapsed)
+        tBar.wndCastProgressBar:SetMax(nMidDuration)
+        tBar.wndCastText:SetText(sMidName)
+        tBar.wndCast:Show(true)
+      else
+        tBar.wndCast:Show(false)
+      end
+      -- Process shield bar
+      local nShieldCapacity = tUnit:GetShieldCapacity()
+      local nShieldCapacityMax = tUnit:GetShieldCapacityMax()
+      if Health ~= 0 and nShieldCapacity and nShieldCapacity ~= 0 and self.tSettings.bDisplayShield then
+        tBar.wndShieldProgressBar:SetProgress(nShieldCapacity)
+        tBar.wndShieldProgressBar:SetMax(nShieldCapacityMax)
+        tBar.wndShieldValue:SetText(Number2ShortString(nShieldCapacity))
+        tBar.wndShield:Show(true)
+      else
+        tBar.wndShield:Show(false)
+      end
+      -- Process absorb bar
+      local nAbsorptionValue = tUnit:GetAbsorptionValue()
+      local nAbsorptionMax = tUnit:GetAbsorptionMax()
+      if Health ~= 0 and nAbsorptionValue and nAbsorptionValue ~= 0 and self.tSettings.bDisplayAbsorb then
+        tBar.wndAbsorbProgressBar:SetProgress(nAbsorptionValue)
+        tBar.wndAbsorbProgressBar:SetMax(nAbsorptionMax)
+        tBar.wndAbsorbValue:SetText(Number2ShortString(nAbsorptionValue))
+        tBar.wndAbsorb:Show(true)
+      else
+        tBar.wndAbsorb:Show(false)
+      end
+      -- Process Armor bar
+      local nArmorValue = tUnit:GetInterruptArmorValue()
+      if nArmorValue and nArmorValue > 0 then
+        local left, top, right, bottom = tBar.wndBody:GetAnchorOffsets()
+        tBar.wndBody:SetAnchorOffsets(left, top, -32, bottom)
+        tBar.wndArmor:Show(true)
+        tBar.wndArmorValue:SetText(nArmorValue)
+      else
+        local left, top, right, bottom = tBar.wndBody:GetAnchorOffsets()
+        tBar.wndBody:SetAnchorOffsets(left, top, 0, bottom)
+        tBar.wndArmor:Show(false)
+      end
+    end
   end
+end
+
+function UnitManager:OnTimerUpdate()
+  for _, tBar in next, self.tBars do
+    self:UpdateBar(tBar)
+  end
+end
+
+function UnitManager:AddSpacer(key, nHeight)
+  assert(key)
+  if nHeight == nil then
+    nHeight = self.tSettings.nBarHeight
+  end
+
+  local wndMain
+  if self.tBars[key] and self.tBars[key].isSpacer then
+    -- Retrieve existing windows object.
+    wndMain = self.tBars[key].wndMain
+  else
+    -- Create a new bar.
+    wndMain = Apollo.LoadForm(RaidCore.xmlDoc, "BarSpacerTemplate", self.wndParent, self)
+  end
+  wndMain:SetData(GetGameTime())
+  wndMain:SetAnchorOffsets(0, 0, 0, nHeight)
+
+  self.tBars[key] = {
+    wndMain = wndMain,
+    isSpacer = true,
+  }
 end
 
 ----------------------------------------------------------------------------------------------------
@@ -626,17 +660,21 @@ function MessageManager:RemoveOrFade(sKey)
   end
 end
 
+function MessageManager:UpdateBar(sKey, tBar, nCurrentTime)
+  local bAutofade = self.tSettings.bAutofadeEnable and not tBar.bAutoFade
+  if nCurrentTime >= tBar.nEndTime then
+    self:RemoveBar(sKey)
+  elseif bAutofade and nCurrentTime + 0.5 >= tBar.nEndTime then
+    tBar.bAutoFade = true
+    -- Decrease opacity slowly (default is 2s, when second arg is 1).
+    tBar.wndMain:SetOpacity(0, 4)
+  end
+end
+
 function MessageManager:OnTimerUpdate()
   local nCurrentTime = GetGameTime()
-  for k, tBar in next, self.tBars do
-    local bAutofade = self.tSettings.bAutofadeEnable and not tBar.bAutoFade
-    if nCurrentTime >= tBar.nEndTime then
-      self:RemoveBar(k)
-    elseif bAutofade and nCurrentTime + 0.5 >= tBar.nEndTime then
-      tBar.bAutoFade = true
-      -- Decrease opacity slowly (default is 2s, when second arg is 1).
-      tBar.wndMain:SetOpacity(0, 4)
-    end
+  for sKey, tBar in next, self.tBars do
+    self:UpdateBar(sKey, tBar, nCurrentTime)
   end
 end
 
@@ -730,6 +768,10 @@ function RaidCore:AddUnit(tUnit)
   assert(type(tUnit) == "userdata")
   local nId = tUnit:GetId()
   UnitManager:AddBar(nId)
+end
+
+function RaidCore:AddUnitSpacer(key, nHeight)
+  UnitManager:AddSpacer(key, nHeight)
 end
 
 function RaidCore:RemoveUnit(nId)

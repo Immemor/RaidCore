@@ -171,6 +171,9 @@ function mod:AddUnits()
     core:WatchUnit(engineer.unit)
     core:AddUnit(engineer.unit)
   end
+  if mod:GetSetting("BarsCoreHealth") then
+    core:AddUnitSpacer("CORE_SPACER")
+  end
   for coreId, coreUnit in pairs(coreUnits) do
     core:WatchUnit(coreUnit.unit)
     if mod:GetSetting("BarsCoreHealth") then
@@ -183,8 +186,9 @@ function mod:RemoveUnits()
   for engineerId, engineer in pairs(engineerUnits) do
     core:RemoveUnit(engineer.unit)
   end
-  for coreId, coreUnit in pairs(coreUnits) do
-    if mod:GetSetting("BarsCoreHealth") then
+  if mod:GetSetting("BarsCoreHealth") then
+    core:RemoveUnit("CORE_SPACER")
+    for coreId, coreUnit in pairs(coreUnits) do
       core:RemoveUnit(coreUnit.unit)
     end
   end
