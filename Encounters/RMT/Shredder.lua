@@ -86,7 +86,7 @@ local lmt = {
   end
 }
 -- turns a table into a circular array
-function circular(t)
+local function circular(t)
   return setmetatable(t, lmt)
 end
 
