@@ -32,20 +32,20 @@ mod:RegisterEnglishLocale({
     ["The Robomination sinks down into the trash."] = "The Robomination sinks down into the trash.",
     ["The Robomination erupts back into the fight!"] = "The Robomination erupts back into the fight!",
     -- Messages.
-    ["SNAKE ON %s"] = "SNAKE ON %s",
-    ["SNAKE ON YOU"] = "SNAKE ON YOU",
-    ["SNAKE NEAR ON %s"] = "SNAKE NEAR ON %s",
-    ["Next snake in"] = "Next snake in",
-    ["Cannon arm spawned"] = "Cannon arm spawned",
-    ["Arms spawning in"] = "Arms spawning in",
-    ["LASER ON %s"] = "LASER ON %s",
-    ["LASER ON YOU"] = "LASER ON YOU",
-    ["RUN TO THE CENTER!"] = "RUN TO THE CENTER!",
-    ["MAZE SOON!"] = "MAZE SOON!",
-    ["INTERRUPT CANNON!"] = "INTERRUPT CANNON!",
-    ["Next incinerate in"] = "Next incinerate in",
-    ["Spew!"] = "Spew!",
-    ["Next spew in"] = "Next spew in",
+    ["snake.other"] = "SNAKE ON %s",
+    ["snake.you"] = "SNAKE ON YOU",
+    ["snake.near"] = "SNAKE NEAR ON %s",
+    ["snake.next"] = "Next snake in",
+    ["cannon_arm.spawned"] = "Cannon arm spawned",
+    ["arms.next"] = "Arms spawning in",
+    ["laser.other"] = "LASER ON %s",
+    ["laser.you"] = "LASER ON YOU",
+    ["laser.next"] = "Next incinerate in",
+    ["maze.coming"] = "MAZE SOON!",
+    ["maze.now"] = "RUN TO THE CENTER!",
+    ["cannon_arm.interrupt"] = "INTERRUPT CANNON!",
+    ["spew.now"] = "Spew!",
+    ["spew.next"] = "Next spew in",
   })
 ----------------------------------------------------------------------------------------------------
 -- Constants.
@@ -128,9 +128,9 @@ function mod:OnBossEnable()
   roboUnit = nil
   cannonArms = {}
   playerUnit = GameLib.GetPlayerUnit()
-  mod:AddTimerBar("NEXT_ARMS_TIMER", self.L["Arms spawning in"], ARMS_TIMER)
-  core:AddTimerBar("NEXT_SNAKE_TIMER", self.L["Next snake in"], FIRST_SNAKE_TIMER, nil, { sColor = "xkcdBrown" })
-  core:AddTimerBar("NEXT_SPEW_TIMER", self.L["Next spew in"], FIRST_SPEW_TIMER, nil, { sColor = "green" })
+  mod:AddTimerBar("NEXT_ARMS_TIMER", self.L["arms.next"], ARMS_TIMER)
+  core:AddTimerBar("NEXT_SNAKE_TIMER", self.L["snake.next"], FIRST_SNAKE_TIMER, nil, { sColor = "xkcdBrown" })
+  core:AddTimerBar("NEXT_SPEW_TIMER", self.L["spew.next"], FIRST_SPEW_TIMER, nil, { sColor = "green" })
   mod:DrawCompactorGrid()
 end
 
@@ -142,7 +142,7 @@ mod:RegisterDatachronEvent("Robomination tries to crush ([^%s]+%s[^!]+)!$", "MAT
     local snakeOnX
     if isOnMyself then
       sound = mod:GetSetting("SoundSnake") == true and "RunAway"
-      snakeOnX = self.L["SNAKE ON YOU"]
+      snakeOnX = self.L["snake.you"]
     elseif isSnakeNearYou then
       if mod:GetSetting("SoundSnakeNear") then
         if mod:GetSetting("SoundSnakeNearAlt") then
@@ -151,9 +151,9 @@ mod:RegisterDatachronEvent("Robomination tries to crush ([^%s]+%s[^!]+)!$", "MAT
           sound = "RunAway"
         end
       end
-      snakeOnX = self.L["SNAKE NEAR ON %s"]:format(snakeTarget:GetName())
+      snakeOnX = self.L["snake.near"]:format(snakeTarget:GetName())
     else
-      snakeOnX = self.L["SNAKE ON %s"]:format(snakeTarget:GetName())
+      snakeOnX = self.L["snake.other"]:format(snakeTarget:GetName())
     end
 
     if mod:GetSetting("CrosshairSnake") then
@@ -161,7 +161,7 @@ mod:RegisterDatachronEvent("Robomination tries to crush ([^%s]+%s[^!]+)!$", "MAT
     end
 
     mod:RemoveTimerBar("NEXT_SNAKE_TIMER")
-    core:AddTimerBar("NEXT_SNAKE_TIMER", self.L["Next snake in"], SNAKE_TIMER, nil, { sColor = "xkcdBrown" })
+    core:AddTimerBar("NEXT_SNAKE_TIMER", self.L["snake.next"], SNAKE_TIMER, nil, { sColor = "xkcdBrown" })
 
     mod:AddMsg("SNAKE_MSG", snakeOnX, 5, sound, "Blue")
   end
@@ -176,7 +176,7 @@ mod:RegisterDatachronEvent("The Robomination sinks down into the trash.", "EQUAL
     mod:RemoveTimerBar("NEXT_ARMS_TIMER")
     core:RemovePicture("SNAKE_CROSSHAIR")
 
-    mod:AddMsg("ROBO_MAZE", self.L["RUN TO THE CENTER!"], 5, mod:GetSetting("SoundSnakeNear") == true and "Info")
+    mod:AddMsg("ROBO_MAZE", self.L["maze.now"], 5, mod:GetSetting("SoundSnakeNear") == true and "Info")
     mod:RemoveCompactorGrid()
     mod:RemoveCannonArmLines()
   end
@@ -185,10 +185,10 @@ mod:RegisterDatachronEvent("The Robomination sinks down into the trash.", "EQUAL
 mod:RegisterDatachronEvent("The Robomination erupts back into the fight!", "EQUAL", function (self)
     phase = DPS_PHASE
     core:RemoveLineBetweenUnits("ROBO_MAZE_LINE")
-    core:AddTimerBar("NEXT_SNAKE_TIMER", self.L["Next snake in"], FIRST_SNAKE_TIMER, nil, { sColor = "xkcdBrown" })
-    core:AddTimerBar("NEXT_SPEW_TIMER", self.L["Next spew in"], MAZE_SPEW_TIMER, nil, { sColor = "green" })
-    core:AddTimerBar("NEXT_INCINERATE_TIMER", self.L["Next incinerate in"], FIRST_INCINERATE_TIMER, nil, { sColor = "red", bEmphasize = mod:GetSetting("SoundLaser") })
-    mod:AddTimerBar("NEXT_ARMS_TIMER", self.L["Arms spawning in"], ARMS_TIMER)
+    core:AddTimerBar("NEXT_SNAKE_TIMER", self.L["snake.next"], FIRST_SNAKE_TIMER, nil, { sColor = "xkcdBrown" })
+    core:AddTimerBar("NEXT_SPEW_TIMER", self.L["spew.next"], MAZE_SPEW_TIMER, nil, { sColor = "green" })
+    core:AddTimerBar("NEXT_INCINERATE_TIMER", self.L["laser.next"], FIRST_INCINERATE_TIMER, nil, { sColor = "red", bEmphasize = mod:GetSetting("SoundLaser") })
+    mod:AddTimerBar("NEXT_ARMS_TIMER", self.L["arms.next"], ARMS_TIMER)
     mod:DrawCompactorGrid()
   end
 )
@@ -199,9 +199,9 @@ mod:RegisterDatachronEvent("Robomination tries to incinerate ([^%s]+%s.+)$", "MA
     local sound = mod:GetSetting("SoundLaser") == true and "Burn"
     local laserOnX
     if isOnMyself then
-      laserOnX = self.L["LASER ON YOU"]
+      laserOnX = self.L["laser.you"]
     else
-      laserOnX = self.L["LASER ON %s"]:format(laserTarget:GetName())
+      laserOnX = self.L["laser.other"]:format(laserTarget:GetName())
     end
 
     if mod:GetSetting("CrosshairLaser") then
@@ -209,7 +209,7 @@ mod:RegisterDatachronEvent("Robomination tries to incinerate ([^%s]+%s.+)$", "MA
     end
 
     mod:RemoveTimerBar("NEXT_INCINERATE_TIMER")
-    core:AddTimerBar("NEXT_INCINERATE_TIMER", self.L["Next incinerate in"], INCINERATE_TIMER, nil, { sColor = "red", bEmphasize = mod:GetSetting("SoundLaser") })
+    core:AddTimerBar("NEXT_INCINERATE_TIMER", self.L["laser.next"], INCINERATE_TIMER, nil, { sColor = "red", bEmphasize = mod:GetSetting("SoundLaser") })
     mod:AddMsg("LASER_MSG", laserOnX, 5, sound, "Red")
   end
 )
@@ -310,14 +310,14 @@ mod:RegisterUnitEvents("Cannon Arm",{
         core:AddLineBetweenUnits(string.format("CANNON_ARM_LINE %d", id), playerUnit:GetId(), id, 5)
       end
       if phase == DPS_PHASE then
-        mod:AddTimerBar("NEXT_ARMS_TIMER", self.L["Arms spawning in"], ARMS_TIMER)
+        mod:AddTimerBar("NEXT_ARMS_TIMER", self.L["arms.next"], ARMS_TIMER)
       end
-      mod:AddMsg("ARMS_MSG", self.L["Cannon arm spawned"], 5, mod:GetSetting("SoundArmSpawn") == true and "Info", "Red")
+      mod:AddMsg("ARMS_MSG", self.L["cannon_arm.spawned"], 5, mod:GetSetting("SoundArmSpawn") == true and "Info", "Red")
     end,
     ["OnCastStart"] = function (self, id, castName)
       if self.L["Cannon Fire"] == castName then
         if mod:GetDistanceBetweenUnits(playerUnit, GetUnitById(id)) < 45 then
-          mod:AddMsg("ARMS_MSG", self.L["INTERRUPT CANNON!"], 2, mod:GetSetting("SoundCannonInterrupt") == true and "Inferno")
+          mod:AddMsg("ARMS_MSG", self.L["cannon_arm.interrupt"], 2, mod:GetSetting("SoundCannonInterrupt") == true and "Inferno")
         end
       end
     end,
@@ -335,14 +335,14 @@ mod:RegisterUnitEvents("Robomination",{
     end,
     ["OnHealthChanged"] = function (self, _, percent)
       if percent >= 75.5 and percent <= 76.5 then
-        mod:AddMsg("ROBO_MAZE", self.L["MAZE SOON!"], 5, mod:GetSetting("SoundPhaseChangeClose") and "Info")
+        mod:AddMsg("ROBO_MAZE", self.L["maze.coming"], 5, mod:GetSetting("SoundPhaseChangeClose") and "Info")
       end
     end,
     ["OnCastStart"] = function (self, _, castName)
       if self.L["Noxious Belch"] == castName then
         mod:RemoveTimerBar("NEXT_SPEW_TIMER")
-        core:AddTimerBar("NEXT_SPEW_TIMER", self.L["Next spew in"], SPEW_TIMER, nil, { sColor = "green" })
-        mod:AddMsg("SPEW_MSG", self.L["Spew!"], 4, mod:GetSetting("SoundSpew") == true and "Beware")
+        core:AddTimerBar("NEXT_SPEW_TIMER", self.L["spew.next"], SPEW_TIMER, nil, { sColor = "green" })
+        mod:AddMsg("SPEW_MSG", self.L["spew.now"], 4, mod:GetSetting("SoundSpew") == true and "Beware")
       end
     end,
     ["OnCastEnd"] = function (self, _, castName)

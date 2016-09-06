@@ -46,12 +46,22 @@ mod:RegisterEnglishLocale({
     ["Deathwail"] = "Deathwail",
     ["Necrotic Lash"] = "Necrotic Lash",
     -- Messages.
-    ["%d BILE STACKS!"] = "%d BILE STACKS!",
-    ["SAW IN MIDDLE"] = "SAW IN MIDDLE",
-    ["SAFE SPOT %s"] = "SAFE SPOT %s",
-    ["LEFT"] = "LEFT",
-    ["MIDDLE"] = "MIDDLE",
-    ["RIGHT"] = "RIGHT",
+    ["boss.knockback"] = "KNOCKBACK",
+    ["boss.walking"] = "Walking %s",
+    ["boss.walking.direction.north"] = "North",
+    ["boss.walking.direction.south"] = "South",
+    ["bile.stacks.amount"] = "%d BILE STACKS!",
+    ["saw.middle"] = "SAW IN MIDDLE",
+    ["saw.safe_spot"] = "SAFE SPOT %s",
+    ["saw.safe_spot.left"] = "LEFT",
+    ["saw.safe_spot.middle"] = "MIDDLE",
+    ["saw.safe_spot.right"] = "RIGHT",
+    ["adds.spawning"] = "ADDS SPAWNING",
+    ["adds.next"] = "Next wave of adds spawning ...",
+    ["nabber.spawned"] = "NOXIOUS NABBER SPAWNED",
+    ["nabber.interrupt"] = "INTERRUPT NECROTIC LASH!",
+    ["miniboss.spawned"] = "MINIBOSS SPAWNED",
+    ["miniboss.interrupt"] = "INTERRUPT MINIBOSS!",
   })
 ----------------------------------------------------------------------------------------------------
 -- Settings
@@ -111,9 +121,9 @@ local SAW_WEST = 1
 local SAW_MID = 2
 local SAW_EAST = 4
 local SAW_SAFESPOT = {
-  [SAW_WEST + SAW_MID] = "LEFT",
-  [SAW_WEST + SAW_EAST] = "MIDDLE",
-  [SAW_MID + SAW_EAST] = "RIGHT",
+  [SAW_WEST + SAW_MID] = "saw.safe_spot.left",
+  [SAW_WEST + SAW_EAST] = "saw.safe_spot.middle",
+  [SAW_MID + SAW_EAST] = "saw.safe_spot.right",
 }
 ----------------------------------------------------------------------------------------------------
 -- Functions.
@@ -145,7 +155,7 @@ end
 function mod:OnDebuffUpdate(id, spellId, stack)
   if DEBUFF_OOZING_BILE == spellId then
     if playerUnit:GetId() == id and stack >= 8 then
-      mod:AddMsg("OOZE_MSG", string.format(self.L["%d BILE STACKS!"], stack), 5, stack == 8 and mod:GetSetting("SoundOozeStacksWarning") and "Beware")
+      mod:AddMsg("OOZE_MSG", string.format(self.L["bile.stacks.amount"], stack), 5, stack == 8 and mod:GetSetting("SoundOozeStacksWarning") and "Beware")
     end
   end
 end
@@ -173,32 +183,35 @@ end
 
 function mod:NextAddWave()
   if ADD_PHASES[addPhase] ~= 0 then
-    mod:AddMsg("ADDS_MSG", "ADDS SPAWNING", 5, mod:GetSetting("SoundAdds") and "Info")
+    mod:AddMsg("ADDS_MSG", self.L["adds.spawning"], 5, mod:GetSetting("SoundAdds") and "Info")
   end
   previousAddPhase = ADD_PHASES[addPhase]
   addPhase = addPhase + 1
   if ADD_PHASES[addPhase] ~= 0 then
-    mod:AddProgressBar("ADDS_PROGRESS", "Next wave of adds spawning ...", mod.GetAddSpawnProgess, mod, mod.NextAddWave)
+    mod:AddProgressBar("ADDS_PROGRESS", self.L["adds.next"], mod.GetAddSpawnProgess, mod, mod.NextAddWave)
   end
 end
 
 function mod:PhaseChange()
-  local text = "Walking "
+  local text = self.L["boss.walking"]
+  local walkingDirection
   if phase == SHREDDER then
     phase = WALKING
-    text = text.." North"
+    walkingDirection = self.L["boss.walking.direction.north"]
     mod:NextAddWave()
   else
-    text = text.." South"
+    walkingDirection = self.L["boss.walking.direction.south"]
     phase = SHREDDER
     firstShredderSaw = nil
     secondShredderSaw = nil
   end
-  mod:AddProgressBar("WALKING_PROGRESS", text, mod.GetWalkingProgress, mod, mod.PhaseChange)
+  local messageText = text:format(walkingDirection)
+  mod:AddProgressBar("WALKING_PROGRESS", messageText, mod.GetWalkingProgress, mod, mod.PhaseChange)
 end
 
 function mod:StartProgressBar()
-  mod:AddProgressBar("WALKING_PROGRESS", "Walking North", mod.GetWalkingProgress, mod, mod.PhaseChange)
+  local messageText = self.L["boss.walking"]:format(self.L["boss.walking.direction.north"])
+  mod:AddProgressBar("WALKING_PROGRESS", messageText, mod.GetWalkingProgress, mod, mod.PhaseChange)
   mod:NextAddWave()
   startProgressBarTimer:Stop()
   startProgressBarTimer = nil
@@ -250,7 +263,7 @@ mod:RegisterUnitEvents("Swabbie Ski'Li",{
     end,
     ["OnCastStart"] = function (self, _, castName)
       if self.L["Risen Repellent"] == castName then
-        mod:AddMsg("KNOCKBACK", "KNOCKBACK", 2)
+        mod:AddMsg("KNOCKBACK", self.L["boss.knockback"], 2)
       end
     end,
     ["OnCastEnd"] = function (self, _, castName)
@@ -284,7 +297,7 @@ function mod:HandleShredderSaw(sawLocation)
   end
 
   local safeSpotLocation = SAW_SAFESPOT[firstShredderSaw + secondShredderSaw]
-  local message = string.format(self.L["SAFE SPOT %s"], self.L[safeSpotLocation])
+  local message = string.format(self.L["saw.safe_spot"], self.L[safeSpotLocation])
   local sound = mod:GetSetting("SoundSawSafeSpot") == true and "Info"
   mod:AddMsg("SAW_MSG", message, 5, sound)
 end
@@ -296,7 +309,7 @@ mod:RegisterUnitEvents("Sawblade",{
       end
       local sawLocation = mod:DetermineSawLocation(unit)
       if phase == WALKING and sawLocation == SAW_MID then
-        mod:AddMsg("SAW_MSG", self.L["SAW IN MIDDLE"], 5,
+        mod:AddMsg("SAW_MSG", self.L["saw.middle"], 5,
           mod:GetSetting("SoundMidSawWarning") == true and "Beware"
         )
       elseif phase == SHREDDER then
@@ -310,15 +323,15 @@ mod:RegisterUnitEvents("Sawblade",{
 )
 
 mod:RegisterUnitEvents("Noxious Nabber",{
-    ["OnUnitCreated"] = function ()
+    ["OnUnitCreated"] = function (self)
       core:RemoveMsg("ADDS_MSG")
-      mod:AddMsg("ADDS_MSG", "NOXIOUS NABBER SPAWNED", 5, mod:GetSetting("SoundAdds") and "Info")
+      mod:AddMsg("ADDS_MSG", self.L["nabber.spawned"], 5, mod:GetSetting("SoundAdds") and "Info")
     end,
     ["OnCastStart"] = function (self, id, castName)
       if self.L["Necrotic Lash"] == castName then
         local unit = GetUnitById(id)
         if mod:GetDistanceBetweenUnits(playerUnit, unit) < 45 then
-          mod:AddMsg("NABBER", "INTERRUPT NECROTIC LASH!", 5, mod:GetSetting("SoundNecroticLash") == true and "Inferno")
+          mod:AddMsg("NABBER", self.L["nabber.interrupt"], 5, mod:GetSetting("SoundNecroticLash") == true and "Inferno")
         end
       end
     end,
@@ -326,15 +339,15 @@ mod:RegisterUnitEvents("Noxious Nabber",{
 )
 
 mod:RegisterUnitEvents({"Regor the Rancid", "Braugh the Bloated"},{
-    ["OnUnitCreated"] = function ()
-      mod:AddMsg("MINIBOSS", "MINIBOSS SPAWNED", 5, mod:GetSetting("SoundMiniboss") and "Info")
+    ["OnUnitCreated"] = function (self)
+      mod:AddMsg("MINIBOSS", self.L["miniboss.spawned"], 5, mod:GetSetting("SoundMiniboss") and "Info")
     end,
     ["OnCastStart"] = function (self, _, castName)
       if self.L["Gravedigger"] == castName or
       self.L["Deathwail"] == castName or
       self.L["Crush"] == castName then
         core:RemoveMsg("MINIBOSS")
-        mod:AddMsg("MINIBOSS", "INTERRUPT MINIBOSS!", 5, mod:GetSetting("SoundMinibossCast") and "Inferno")
+        mod:AddMsg("MINIBOSS", self.L["miniboss.interrupt"], 5, mod:GetSetting("SoundMinibossCast") and "Inferno")
       end
     end,
   }
