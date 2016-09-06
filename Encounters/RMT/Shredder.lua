@@ -120,7 +120,6 @@ local SAW_SAFESPOT = {
 -- Functions.
 ----------------------------------------------------------------------------------------------------
 local GetUnitById = GameLib.GetUnitById
-local GetPlayerUnit = GameLib.GetPlayerUnit
 local GetGameTime = GameLib.GetGameTime
 ----------------------------------------------------------------------------------------------------
 -- Locals.
@@ -130,11 +129,13 @@ local addPhase
 local previousAddPhase
 local firstShredderSaw
 local secondShredderSaw
+local playerUnit
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 -----------------------------------------------------------------------------------------------------
 
 function mod:OnBossEnable()
+  playerUnit = GameLib.GetPlayerUnit()
   phase = WALKING
   addPhase = 4
   previousAddPhase = 0
@@ -144,7 +145,7 @@ end
 
 function mod:OnDebuffUpdate(id, spellId, stack, timeRemaining)
   if DEBUFF_OOZING_BILE == spellId then
-    if GameLib.GetPlayerUnit():GetId() == id and stack >= 8 then
+    if playerUnit:GetId() == id and stack >= 8 then
       mod:AddMsg("OOZE_MSG", string.format(self.L["%d BILE STACKS!"], stack), 5, stack == 8 and mod:GetSetting("SoundOozeStacksWarning") and "Beware")
     end
   end
