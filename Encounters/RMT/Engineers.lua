@@ -107,7 +107,6 @@ local ENGINEER_NICKNAMES = {
 -- Functions.
 ----------------------------------------------------------------------------------------------------
 local GetUnitById = GameLib.GetUnitById
-local GetGameTime = GameLib.GetGameTime
 ----------------------------------------------------------------------------------------------------
 -- Locals.
 ----------------------------------------------------------------------------------------------------
@@ -154,7 +153,7 @@ function mod:OnBossEnable()
     ENGINEER_NAMES[self.L[name]] = id
   end
 
-  for id, coreUnit in pairs(coreUnits) do
+  for _, coreUnit in pairs(coreUnits) do
     coreUnit.healthWarning = false
   end
 
@@ -167,14 +166,14 @@ function mod:OnBossDisable()
 end
 
 function mod:AddUnits()
-  for engineerId, engineer in pairs(engineerUnits) do
+  for _, engineer in pairs(engineerUnits) do
     core:WatchUnit(engineer.unit)
     core:AddUnit(engineer.unit)
   end
   if mod:GetSetting("BarsCoreHealth") then
     core:AddUnitSpacer("CORE_SPACER")
   end
-  for coreId, coreUnit in pairs(coreUnits) do
+  for _, coreUnit in pairs(coreUnits) do
     core:WatchUnit(coreUnit.unit)
     if mod:GetSetting("BarsCoreHealth") then
       core:AddUnit(coreUnit.unit)
@@ -183,12 +182,12 @@ function mod:AddUnits()
 end
 
 function mod:RemoveUnits()
-  for engineerId, engineer in pairs(engineerUnits) do
+  for _, engineer in pairs(engineerUnits) do
     core:RemoveUnit(engineer.unit)
   end
   if mod:GetSetting("BarsCoreHealth") then
     core:RemoveUnit("CORE_SPACER")
-    for coreId, coreUnit in pairs(coreUnits) do
+    for _, coreUnit in pairs(coreUnits) do
       core:RemoveUnit(coreUnit.unit)
     end
   end
@@ -211,7 +210,7 @@ end
 function mod:OnEngiChangeLocation(engineerId, oldCoreId, newCoreId)
 end
 
-function mod:OnBuffRemove(id, spellId)
+function mod:OnBuffRemove(_, spellId)
   if spellId == BUFF_INSULATION then
     for engineerId, engineer in pairs(engineerUnits) do
       local oldLocation = engineerUnits[engineerId].location
@@ -224,12 +223,12 @@ function mod:OnBuffRemove(id, spellId)
   end
 end
 
-function mod:OnDebuffAdd(id, spellId, stack, timeRemaining)
+function mod:OnDebuffAdd(id, spellId)
   if DEBUFF_ELECTROSHOCK_VULNERABILITY == spellId then
     local target = GetUnitById(id)
     local targetName = target:GetName()
     local isOnMyself = targetName == player.unit:GetName()
-    local electroshockOnX = ""
+    local electroshockOnX
     local messageId = string.format("ELECTROSHOCK_MSG_%s", targetName)
     local sound
     if isOnMyself then
@@ -263,7 +262,7 @@ mod:RegisterUnitEvents({
     "Spark Plug",
     "Lubricant Nozzle"
     },{
-    ["OnUnitCreated"] = function (self, id, unit, name)
+    ["OnUnitCreated"] = function (_, _, unit, name)
       if CORE_NAMES[name] ~= nil then
         coreUnits[CORE_NAMES[name]] = {
           unit = unit,
@@ -290,7 +289,7 @@ mod:RegisterUnitEvents({
     "Spark Plug",
     "Lubricant Nozzle"
     },{
-    ["OnHealthChanged"] = function (self, id, percent, name)
+    ["OnHealthChanged"] = function (self, _, percent, name)
       local coreId = CORE_NAMES[name]
       local coreUnit = coreUnits[coreId]
       if percent > 15 and percent < 85 then
@@ -308,14 +307,14 @@ mod:RegisterUnitEvents({
 
 -- Warrior
 mod:RegisterUnitEvents("Chief Engineer Wilbargh",{
-    ["OnCastStart"] = function (self, id, castName, castEndTime, name)
+    ["OnCastStart"] = function (self, _, castName)
       if self.L["Liquidate"] == castName then
         if mod:IsPlayerOnPlatform(engineerUnits[WARRIOR].location) then
           mod:AddMsg("LIQUIDATE_MSG", self.L["liquidate.stack"], 5, mod:GetSetting("SoundLiquidate") == true and "Info")
         end
       end
     end,
-    ["OnCastEnd"] = function (self, id, castName, castEndTime, name)
+    ["OnCastEnd"] = function (self, _, castName)
       if self.L["Rocket Jump"] == castName then
         mod:RemoveTimerBar("NEXT_LIQUIDATE_TIMER")
       end
@@ -341,7 +340,7 @@ end
 
 -- Engineer
 mod:RegisterUnitEvents("Head Engineer Orvulgh",{
-    ["OnCastStart"] = function (self, id, castName, castEndTime, name)
+    ["OnCastStart"] = function (self, _, castName)
       if self.L["Electroshock"] == castName then
         if mod:GetSetting("LineElectroshock") then
           core:AddPixie("ELECTROSHOCK_PIXIE", 2, engineerUnits[ENGINEER].unit, nil, "Red", 10, 80, 0)
@@ -351,7 +350,7 @@ mod:RegisterUnitEvents("Head Engineer Orvulgh",{
         end
       end
     end,
-    ["OnCastEnd"] = function (self, id, castName, castEndTime, name)
+    ["OnCastEnd"] = function (self, _, castName)
       if self.L["Rocket Jump"] == castName then
         mod:RemoveTimerBar("NEXT_ELEKTROSHOCK_TIMER")
         mod:AddTimerBar("NEXT_ELEKTROSHOCK_TIMER", self.L["electroshock.next"], JUMP_ELECTROSHOCK_TIMER)
@@ -374,7 +373,7 @@ function mod:PopFireOrb()
 end
 
 mod:RegisterUnitEvents("Discharged Plasma",{
-    ["OnUnitCreated"] = function (self, id, unit, name)
+    ["OnUnitCreated"] = function (self, id, unit)
       core:WatchUnit(unit)
       mod:RemoveTimerBar("NEXT_FIRE_ORB_TIMER")
       mod:AddTimerBar("NEXT_FIRE_ORB_TIMER", self.L["fire_orb.next"], NEXT_FIRE_ORB_TIMER)
@@ -387,7 +386,7 @@ mod:RegisterUnitEvents("Discharged Plasma",{
         timer = testTimer
       }
     end,
-    ["OnUnitDestroyed"] = function (self, id, unit, name)
+    ["OnUnitDestroyed"] = function (_, id)
       orbUnits[id] = nil
       mod:RemoveTimerBar(string.format("FIRE_ORB_SAFE_TIMER %d", id))
     end,
@@ -398,7 +397,7 @@ function mod:RegisterOrbTarget()
   if orbUnits == nil then
     return
   end
-  for orbId, orbUnit in pairs(orbUnits) do
+  for _, orbUnit in pairs(orbUnits) do
     if not orbUnit.checkedTarget then
       orbUnit.checkedTarget = true
       local target = orbUnit.unit:GetTarget()

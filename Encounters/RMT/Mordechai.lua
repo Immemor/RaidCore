@@ -20,43 +20,10 @@ mod:RegisterEnglishLocale({
     ["Mordechai Redmoon"] = "Mordechai Redmoon"
   })
 ----------------------------------------------------------------------------------------------------
--- Constants.
-----------------------------------------------------------------------------------------------------
-
-----------------------------------------------------------------------------------------------------
--- Locals.
-----------------------------------------------------------------------------------------------------
-
-local GetUnitById = GameLib.GetUnitById
-local GetPlayerUnit = GameLib.GetPlayerUnit
-local GetGameTime = GameLib.GetGameTime
-----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
-function mod:OnBossEnable()
-
-end
-
-function mod:OnBuffAdd(id, spellId, stack, timeRemaining)
-end
-
-function mod:OnCastStart(id, castName, castEndTime, name)
-end
-
-function mod:OnDebuffAdd(id, spellId, stack, timeRemaining)
-
-end
-
-function mod:OnUnitDestroyed(id, tUnit, name)
-
-end
-
-function mod:OnUnitCreated(id, unit, name)
-
-end
-
 mod:RegisterUnitEvents("Mordechai Redmoon",{
-    ["OnUnitCreated"] = function (self, id, unit, name)
+    ["OnUnitCreated"] = function (_, _, unit)
       core:AddUnit(unit)
       core:WatchUnit(unit)
     end,
