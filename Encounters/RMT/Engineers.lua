@@ -230,7 +230,7 @@ function mod:OnDebuffAdd(id, spellId, stack, timeRemaining)
     local sound
     if bIsOnMyself then
       electroshockOnX = self.L["electroshock.swap.you"]
-      sound = mod:GetSetting("SoundElectroshockSwapYou") == true and "RunAway"
+      sound = mod:GetSetting("SoundElectroshockSwapYou") == true and "Burn"
     else
       electroshockOnX = self.L["electroshock.swap.other"]:format(targetName)
       sound = mod:GetSetting("SoundElectroshockSwap") == true and "Info"
