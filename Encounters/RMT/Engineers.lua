@@ -55,10 +55,7 @@ mod:RegisterEnglishLocale({
 ----------------------------------------------------------------------------------------------------
 -- Constants.
 ----------------------------------------------------------------------------------------------------
-local DEBUFF_ION_CLASH = 84051
-local DEBUFF_UNSTABLE_VOLTAGE = 84045
 local DEBUFF_ELECTROSHOCK_VULNERABILITY = 83798
-local DEBUFF_DIMINISHING_FUSION_REACTION = 87214
 local BUFF_INSULATION = 83987
 
 -- Timers
