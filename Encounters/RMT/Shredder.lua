@@ -45,7 +45,6 @@ mod:RegisterEnglishLocale({
     ["Gravedigger"] = "Gravedigger",
     ["Deathwail"] = "Deathwail",
     ["Necrotic Lash"] = "Necrotic Lash",
-    ["Swabbie Swoop"] = "Swabbie Swoop",
     -- Messages.
     ["%d BILE STACKS!"] = "%d BILE STACKS!",
     ["SAW IN MIDDLE"] = "SAW IN MIDDLE",
