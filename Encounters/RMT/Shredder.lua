@@ -130,6 +130,7 @@ local previousAddPhase
 local firstShredderSaw
 local secondShredderSaw
 local playerUnit
+local startProgressBarTimer
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 -----------------------------------------------------------------------------------------------------
