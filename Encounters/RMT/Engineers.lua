@@ -291,15 +291,16 @@ mod:RegisterUnitEvents({
     "Lubricant Nozzle"
     },{
     ["OnHealthChanged"] = function (self, id, percent, name)
-      local coreUnit = coreUnits[CORE_NAMES[name]]
+      local coreId = CORE_NAMES[name]
+      local coreUnit = coreUnits[coreId]
       if percent > 15 and percent < 85 then
         coreUnit.healthWarning = false
       elseif percent >= 85 and not coreUnit.healthWarning then
         coreUnit.healthWarning = true
         mod:AddMsg("CORE_HEALTH_HIGH_WARN", self.L["core.health.high.warning"]:format(name), 5, mod:GetSetting("SoundCoreHealthWarning") and "Info")
-      elseif percent <= 15 and not coreUnit.healthWarning then
+      elseif percent <= 15 and not coreUnit.healthWarning and mod:IsPlayerOnPlatform(coreId) then
         coreUnit.healthWarning = true
-        mod:AddMsg("CORE_HEALTH_LOW_WARN", self.L["core.health.low.warning"]:format(name), 5, mod:GetSetting("SoundCoreHealthWarning") and "Info")
+        mod:AddMsg("CORE_HEALTH_LOW_WARN", self.L["core.health.low.warning"]:format(name), 5, mod:GetSetting("SoundCoreHealthWarning") and "Inferno")
       end
     end
   }
