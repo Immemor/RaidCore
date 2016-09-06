@@ -228,7 +228,7 @@ function mod:OnDebuffAdd(id, spellId, stack, timeRemaining)
     local electroshockOnX = ""
     local messageId = string.format("ELECTROSHOCK_MSG_%s", targetName)
     local sound
-    if bIsOnMyself then
+    if isOnMyself then
       electroshockOnX = self.L["electroshock.swap.you"]
       sound = mod:GetSetting("SoundElectroshockSwapYou") == true and "Burn"
     else
