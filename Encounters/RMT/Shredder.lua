@@ -319,7 +319,7 @@ mod:RegisterUnitEvents("Noxious Nabber",{
     ["OnCastStart"] = function (self, id, castName, castEndTime, name)
       if self.L["Necrotic Lash"] == castName then
         local unit = GetUnitById(id)
-        if mod:GetDistanceBetweenUnits(playerUnit, unit) < 45 and sSpellName == castName then
+        if mod:GetDistanceBetweenUnits(playerUnit, unit) < 45 then
           mod:AddMsg("NABBER", "INTERRUPT NECROTIC LASH!", 5, mod:GetSetting("SoundNecroticLash") == true and "Inferno")
         end
       end
