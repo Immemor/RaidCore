@@ -242,42 +242,46 @@ function TimerManager:AddBar(sKey, sText, nDuration, tCallback, tOptions)
   end
 end
 
+function TimerManager:UpdateBar(sKey, tBar, nCurrentTime)
+  -- Is the timeout have been reached?
+  if nCurrentTime < tBar.nEndTime then
+    local nRemaining = tBar.nEndTime - nCurrentTime
+    tBar.wndProgressBar:SetProgress(nRemaining)
+    tBar.wndTimeLeft:SetText(("%.1fs"):format(nRemaining))
+    if tBar.EnableCountDown then
+      if nRemaining < 5 then
+        local nCountDown = math.floor(tBar.nPrevRemaining)
+        local nFloorRemain = math.floor(nRemaining)
+        if nCountDown ~= nFloorRemain then
+          local sCountDown = tostring(nCountDown)
+          if self.tSettings.bEnableCountDownMessage then
+            RaidCore:AddMsg("COUNTDOWN", sCountDown, 1, nil, "green")
+          end
+          if self.tSettings.bEnableCountDownSound then
+            RaidCore:PlaySound(sCountDown)
+          end
+        end
+      end
+    end
+    tBar.nPrevRemaining = nRemaining
+  else
+    if tBar.tCallback then
+      table.insert(self.tTimeout, tBar.tCallback)
+    end
+    self:RemoveBar(sKey)
+  end
+end
+
 function TimerManager:OnTimerUpdate()
-  local Timeout = {}
+  self.tTimeout = {}
   local nCurrentTime = GetGameTime()
 
   -- Update each bar timer.
   for sKey, tBar in next, self.tBars do
-    -- Is the timeout have been reached?
-    if nCurrentTime < tBar.nEndTime then
-      local nRemaining = tBar.nEndTime - nCurrentTime
-      tBar.wndProgressBar:SetProgress(nRemaining)
-      tBar.wndTimeLeft:SetText(("%.1fs"):format(nRemaining))
-      if tBar.EnableCountDown then
-        if nRemaining < 5 then
-          local nCountDown = math.floor(tBar.nPrevRemaining)
-          local nFloorRemain = math.floor(nRemaining)
-          if nCountDown ~= nFloorRemain then
-            local sCountDown = tostring(nCountDown)
-            if self.tSettings.bEnableCountDownMessage then
-              RaidCore:AddMsg("COUNTDOWN", sCountDown, 1, nil, "green")
-            end
-            if self.tSettings.bEnableCountDownSound then
-              RaidCore:PlaySound(sCountDown)
-            end
-          end
-        end
-      end
-      tBar.nPrevRemaining = nRemaining
-    else
-      if tBar.tCallback then
-        table.insert(Timeout, tBar.tCallback)
-      end
-      self:RemoveBar(sKey)
-    end
+    self:UpdateBar(sKey, tBar, nCurrentTime)
   end
   -- Process all callback of ended timer.
-  for _, tCallback in next, Timeout do
+  for _, tCallback in next, self.tTimeout do
     if tCallback.tClass then
       -- Call a function in a class.
       tCallback.fHandler(tCallback.tClass, tCallback.tData)
@@ -286,6 +290,7 @@ function TimerManager:OnTimerUpdate()
       tCallback.fHandler(tCallback.tData)
     end
   end
+  self.tTimeout = nil
 end
 
 ----------------------------------------------------------------------------------------------------
@@ -351,31 +356,35 @@ function ProgressManager:AddBar(sKey, sText, tUpdate, tOptions, tCallback)
   end
 end
 
+function ProgressManager:UpdateBar(sKey, tBar)
+  local nProgress
+  if tBar.tUpdate.tClass then
+    nProgress = tBar.tUpdate.fHandler(tBar.tUpdate.tClass, tBar.nPrevProgress)
+  else
+    nProgress = tBar.tUpdate.fHandler(tBar.nPrevProgress)
+  end
+  if nProgress < 100 then
+    tBar.wndMain:SetData(nProgress)
+    tBar.wndProgressBar:SetProgress(nProgress)
+    tBar.wndProgress:SetText(("%.1f%%"):format(nProgress))
+    tBar.nPrevProgress = nProgress
+  else
+    if tBar.tCallback then
+      table.insert(self.tTimeout, tBar.tCallback)
+    end
+    self:RemoveBar(sKey)
+  end
+end
+
 function ProgressManager:OnTimerUpdate()
-  local Timeout = {}
+  self.tTimeout = {}
 
   -- Update each bar progress
   for sKey, tBar in next, self.tBars do
-    local nProgress = 0
-    if tBar.tUpdate.tClass then
-      nProgress = tBar.tUpdate.fHandler(tBar.tUpdate.tClass, tBar.nPrevProgress)
-    else
-      nProgress = tBar.tUpdate.fHandler(tBar.nPrevProgress)
-    end
-    if nProgress < 100 then
-      tBar.wndMain:SetData(nProgress)
-      tBar.wndProgressBar:SetProgress(nProgress)
-      tBar.wndProgress:SetText(("%.1f%%"):format(nProgress))
-      tBar.nPrevProgress = nProgress
-    else
-      if tBar.tCallback then
-        table.insert(Timeout, tBar.tCallback)
-      end
-      self:RemoveBar(sKey)
-    end
+    self:UpdateBar(sKey, tBar)
   end
   -- Process all callback of ended timer.
-  for _, tCallback in next, Timeout do
+  for _, tCallback in next, self.tTimeout do
     if tCallback.tClass then
       -- Call a function in a class.
       tCallback.fHandler(tCallback.tClass, tCallback.tData)
@@ -384,6 +393,7 @@ function ProgressManager:OnTimerUpdate()
       tCallback.fHandler(tCallback.tData)
     end
   end
+  self.tTimeout = nil
 end
 
 ----------------------------------------------------------------------------------------------------
@@ -436,7 +446,7 @@ function UnitManager:AddBar(nId)
       }
       wndMain:SetData(GetGameTime())
       wndMain:SetAnchorOffsets(0, 0, 0, self.tSettings.nBarHeight)
-      self:UpdateUnitBar(self.tBars[nId])
+      self:UpdateBar(self.tBars[nId])
       ArrangeBar(self)
     else
       self.tBars[nId] = {
@@ -448,7 +458,7 @@ function UnitManager:AddBar(nId)
   end
 end
 
-function UnitManager:UpdateUnitBar(tBar)
+function UnitManager:UpdateBar(tBar)
   local tUnit = GetUnitById(tBar.nId)
   if tUnit and tUnit:IsValid() then
     local MaxHealth = tUnit:GetMaxHealth()
@@ -557,8 +567,8 @@ function UnitManager:UpdateUnitBar(tBar)
 end
 
 function UnitManager:OnTimerUpdate()
-  for _, Bar in next, self.tBars do
-    self:UpdateUnitBar(Bar)
+  for _, tBar in next, self.tBars do
+    self:UpdateBar(tBar)
   end
 end
 
@@ -626,17 +636,21 @@ function MessageManager:RemoveOrFade(sKey)
   end
 end
 
+function MessageManager:UpdateBar(sKey, tBar, nCurrentTime)
+  local bAutofade = self.tSettings.bAutofadeEnable and not tBar.bAutoFade
+  if nCurrentTime >= tBar.nEndTime then
+    self:RemoveBar(sKey)
+  elseif bAutofade and nCurrentTime + 0.5 >= tBar.nEndTime then
+    tBar.bAutoFade = true
+    -- Decrease opacity slowly (default is 2s, when second arg is 1).
+    tBar.wndMain:SetOpacity(0, 4)
+  end
+end
+
 function MessageManager:OnTimerUpdate()
   local nCurrentTime = GetGameTime()
-  for k, tBar in next, self.tBars do
-    local bAutofade = self.tSettings.bAutofadeEnable and not tBar.bAutoFade
-    if nCurrentTime >= tBar.nEndTime then
-      self:RemoveBar(k)
-    elseif bAutofade and nCurrentTime + 0.5 >= tBar.nEndTime then
-      tBar.bAutoFade = true
-      -- Decrease opacity slowly (default is 2s, when second arg is 1).
-      tBar.wndMain:SetOpacity(0, 4)
-    end
+  for sKey, tBar in next, self.tBars do
+    self:UpdateBar(sKey, tBar, nCurrentTime)
   end
 end
 
