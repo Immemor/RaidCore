@@ -42,6 +42,7 @@ local playerUnit
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
   playerUnit = GameLib.GetPlayerUnit()
+  jumpStarts = {}
 end
 
 mod:RegisterUnitEvents("Chief Engine Scrubber Thrag",{

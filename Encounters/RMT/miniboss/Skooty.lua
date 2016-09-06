@@ -38,6 +38,7 @@ local playerUnit
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
   playerUnit = GameLib.GetPlayerUnit()
+  jumpStarts = {}
 end
 
 mod:RegisterUnitEvents("Assistant Technician Skooty",{
