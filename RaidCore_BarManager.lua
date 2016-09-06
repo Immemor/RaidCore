@@ -130,7 +130,7 @@ local function Number2ShortString(val)
   return r
 end
 
-local function UpdateUnitBar(tUnitManager, tBar)
+function UnitManager:UpdateUnitBar(tBar)
   local tUnit = GetUnitById(tBar.nId)
   if tUnit and tUnit:IsValid() then
     local MaxHealth = tUnit:GetMaxHealth()
@@ -152,7 +152,7 @@ local function UpdateUnitBar(tUnitManager, tBar)
         end
         -- Update the percent text.
         local sPourcentFormat = "%.1f%%"
-        if tUnitManager.tSettings.bPourcentWith2Digits then
+        if self.tSettings.bPourcentWith2Digits then
           sPourcentFormat = "%.2f%%"
         end
         tBar.wndUnitHPPercent:SetText(sPourcentFormat:format(nPourcent))
@@ -192,7 +192,7 @@ local function UpdateUnitBar(tUnitManager, tBar)
           bProcessMiddleBar = true
         end
       end
-      if bProcessMiddleBar and tUnitManager.tSettings.bDisplayCast then
+      if bProcessMiddleBar and self.tSettings.bDisplayCast then
         tBar.wndCastProgressBar:SetProgress(nMidElapsed)
         tBar.wndCastProgressBar:SetMax(nMidDuration)
         tBar.wndCastText:SetText(sMidName)
@@ -203,7 +203,7 @@ local function UpdateUnitBar(tUnitManager, tBar)
       -- Process shield bar
       local nShieldCapacity = tUnit:GetShieldCapacity()
       local nShieldCapacityMax = tUnit:GetShieldCapacityMax()
-      if Health ~= 0 and nShieldCapacity and nShieldCapacity ~= 0 and tUnitManager.tSettings.bDisplayShield then
+      if Health ~= 0 and nShieldCapacity and nShieldCapacity ~= 0 and self.tSettings.bDisplayShield then
         tBar.wndShieldProgressBar:SetProgress(nShieldCapacity)
         tBar.wndShieldProgressBar:SetMax(nShieldCapacityMax)
         tBar.wndShieldValue:SetText(Number2ShortString(nShieldCapacity))
@@ -214,7 +214,7 @@ local function UpdateUnitBar(tUnitManager, tBar)
       -- Process absorb bar
       local nAbsorptionValue = tUnit:GetAbsorptionValue()
       local nAbsorptionMax = tUnit:GetAbsorptionMax()
-      if Health ~= 0 and nAbsorptionValue and nAbsorptionValue ~= 0 and tUnitManager.tSettings.bDisplayAbsorb then
+      if Health ~= 0 and nAbsorptionValue and nAbsorptionValue ~= 0 and self.tSettings.bDisplayAbsorb then
         tBar.wndAbsorbProgressBar:SetProgress(nAbsorptionValue)
         tBar.wndAbsorbProgressBar:SetMax(nAbsorptionMax)
         tBar.wndAbsorbValue:SetText(Number2ShortString(nAbsorptionValue))
@@ -544,7 +544,7 @@ function UnitManager:AddBar(nId)
       }
       wndMain:SetData(GetGameTime())
       wndMain:SetAnchorOffsets(0, 0, 0, self.tSettings.nBarHeight)
-      UpdateUnitBar(self, self.tBars[nId])
+      self:UpdateUnitBar(self.tBars[nId])
       ArrangeBar(self)
     else
       self.tBars[nId] = {
@@ -558,7 +558,7 @@ end
 
 function UnitManager:OnTimerUpdate()
   for _, Bar in next, self.tBars do
-    UpdateUnitBar(self, Bar)
+    self:UpdateUnitBar(Bar)
   end
 end
 
