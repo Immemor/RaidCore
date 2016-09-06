@@ -403,7 +403,7 @@ local UnitManager = NewManager("Health")
 
 function UnitManager:AddBar(nId)
   assert(GetUnitById(nId))
-  if not self.tBars[nId] then
+  if (self.tBars[nId] and self.tBars[nId].isSpacer) or not self.tBars[nId] then
     local sMark = RaidCore.mark[nId] and RaidCore.mark[nId].number
     if self.tSettings.bEnabled then
       local wndMain = Apollo.LoadForm(RaidCore.xmlDoc, "BarUnitTemplate", self.wndParent, self)
@@ -459,6 +459,7 @@ function UnitManager:AddBar(nId)
 end
 
 function UnitManager:UpdateBar(tBar)
+  if tBar.isSpacer then return end
   local tUnit = GetUnitById(tBar.nId)
   if tUnit and tUnit:IsValid() then
     local MaxHealth = tUnit:GetMaxHealth()
@@ -570,6 +571,29 @@ function UnitManager:OnTimerUpdate()
   for _, tBar in next, self.tBars do
     self:UpdateBar(tBar)
   end
+end
+
+function UnitManager:AddSpacer(key, nHeight)
+  assert(key)
+  if nHeight == nil then
+    nHeight = self.tSettings.nBarHeight
+  end
+
+  local wndMain
+  if self.tBars[key] and self.tBars[key].isSpacer then
+    -- Retrieve existing windows object.
+    wndMain = self.tBars[key].wndMain
+  else
+    -- Create a new bar.
+    wndMain = Apollo.LoadForm(RaidCore.xmlDoc, "BarSpacerTemplate", self.wndParent, self)
+  end
+  wndMain:SetData(GetGameTime())
+  wndMain:SetAnchorOffsets(0, 0, 0, nHeight)
+
+  self.tBars[key] = {
+    wndMain = wndMain,
+    isSpacer = true,
+  }
 end
 
 ----------------------------------------------------------------------------------------------------
@@ -744,6 +768,10 @@ function RaidCore:AddUnit(tUnit)
   assert(type(tUnit) == "userdata")
   local nId = tUnit:GetId()
   UnitManager:AddBar(nId)
+end
+
+function RaidCore:AddUnitSpacer(key, nHeight)
+  UnitManager:AddSpacer(key, nHeight)
 end
 
 function RaidCore:RemoveUnit(nId)
