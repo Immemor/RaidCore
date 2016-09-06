@@ -383,7 +383,6 @@ mod:RegisterUnitEvents("Discharged Plasma",{
         unit = unit,
         checkedTarget = false,
         popMessageSent = false,
-        timer = testTimer
       }
     end,
     ["OnUnitDestroyed"] = function (_, id)
