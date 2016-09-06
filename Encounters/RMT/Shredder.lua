@@ -110,11 +110,11 @@ local MIDDLE_EAST_POSITION = -14
 local EAST_POSITION = 0
 local SAW_WEST = 1
 local SAW_MID = 2
-local SAW_WEST = 4
+local SAW_EAST = 4
 local SAW_SAFESPOT = {
-  [3] = "LEFT", --SAW_WEST + SAW_MID
-  [5] = "MIDDLE", --SAW_WEST + SAW_EAST
-  [6] = "RIGHT", --SAW_MID + SAW_EAST
+  [SAW_WEST + SAW_MID] = "LEFT",
+  [SAW_WEST + SAW_EAST] = "MIDDLE",
+  [SAW_MID + SAW_EAST] = "RIGHT",
 }
 ----------------------------------------------------------------------------------------------------
 -- Functions.
