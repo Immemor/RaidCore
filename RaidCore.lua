@@ -938,6 +938,7 @@ function RaidCore:LaunchBreak(tArgc)
   ----------------------------------------------------------------------------------------------------
   -- TEST features functions
   ----------------------------------------------------------------------------------------------------
+  local targetId = 0
   function RaidCore:OnStartTestScenario()
     local tPlayerUnit = GetPlayerUnit()
     local nPlayerId = tPlayerUnit:GetId()
@@ -955,6 +956,11 @@ function RaidCore:LaunchBreak(tArgc)
     self:AddProgressBar("PROGRESS", "Progress", { fHandler = GetProgress }, nil)
     self:AddProgressBar("PROGRESS2", "Progress2", { fHandler = GetProgress2 }, nil)
     self:AddUnit(GetPlayerUnit())
+    if GetPlayerUnit():GetTarget() then
+      self:AddUnitSpacer("UNIT_SPACER")
+      self:AddUnit(GetPlayerUnit():GetTarget())
+      targetId = GetPlayerUnit():GetTarget():GetId()
+    end
     self:AddMsg("TEST1", self.L["Start test scenario"], 5, "red")
     for i = 1, 36 do
       local nForce = 1 - i / 36.0
@@ -982,6 +988,11 @@ function RaidCore:LaunchBreak(tArgc)
         end
         self:RemoveMsg("TEST1")
         self:RemoveUnit(GetPlayerUnit():GetId())
+        if targetId ~= 0 then
+          self:RemoveUnit("UNIT_SPACER")
+          self:RemoveUnit(targetId)
+          targetId = nil
+        end
         self:RemoveTimerBar("TEST1")
         self:RemoveTimerBar("TEST2")
         self:RemoveTimerBar("TEST3")
