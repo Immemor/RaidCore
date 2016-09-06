@@ -31,11 +31,11 @@ mod:RegisterDefaultSetting("CrosshairTethers")
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 mod:RegisterUnitEvents("Chief Warden Lockjaw",{
-    ["OnUnitCreated"] = function (self, id, unit, name)
+    ["OnUnitCreated"] = function (_, _, unit)
       core:AddUnit(unit)
       core:WatchUnit(unit)
     end,
-    ["OnCastStart"] = function (self, id, castName, castEndTime, name)
+    ["OnCastStart"] = function (self, _, castName)
       if self.L["Blaze Shackles"] == castName then
         mod:AddMsg("CIRCLES", "DODGE CIRCLES", 5, "Info")
       end
@@ -44,12 +44,12 @@ mod:RegisterUnitEvents("Chief Warden Lockjaw",{
 )
 
 mod:RegisterUnitEvents("Blaze Shackle",{
-    ["OnUnitCreated"] = function (self, id, unit, name)
+    ["OnUnitCreated"] = function (_, id)
       if mod:GetSetting("CrosshairTethers") then
         core:AddPicture(id, id, "Crosshair", 25)
       end
     end,
-    ["OnUnitDestroyed"] = function (self, id, unit, name)
+    ["OnUnitDestroyed"] = function (_, id)
       core:RemovePicture(id)
     end,
   }

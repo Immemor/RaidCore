@@ -29,10 +29,6 @@ mod:RegisterEnglishLocale({
 mod:RegisterDefaultSetting("PulseCannon")
 mod:RegisterDefaultSetting("BombLines")
 ----------------------------------------------------------------------------------------------------
--- Constants.
-----------------------------------------------------------------------------------------------------
-
-----------------------------------------------------------------------------------------------------
 -- Locals.
 ----------------------------------------------------------------------------------------------------
 local jumpStarts
@@ -42,14 +38,15 @@ local playerUnit
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
   playerUnit = GameLib.GetPlayerUnit()
+  jumpStarts = {}
 end
 
 mod:RegisterUnitEvents("Assistant Technician Skooty",{
-    ["OnUnitCreated"] = function (self, id, unit, name)
+    ["OnUnitCreated"] = function (_, _, unit)
       core:AddUnit(unit)
       core:WatchUnit(unit)
     end,
-    ["OnCastStart"] = function (self, id, castName, castEndTime, name)
+    ["OnCastStart"] = function (self, _, castName)
       if self.L["Pulse Cannon"] == castName then
         mod:AddMsg("PULSECANNON", "GET OUT", 5, mod:GetSetting("PulseCannon") == true and "RunAway")
       end
@@ -58,14 +55,14 @@ mod:RegisterUnitEvents("Assistant Technician Skooty",{
 )
 
 mod:RegisterUnitEvents("Jumpstart Charge",{
-    ["OnUnitCreated"] = function (self, id, unit, name)
+    ["OnUnitCreated"] = function (_, id, unit)
       jumpStarts[id] = unit
       core:WatchUnit(unit)
       if mod:GetSetting("BombLines") then
         core:AddLineBetweenUnits(string.format("JUMP_START_LINE %d", id), playerUnit:GetId(), id, 5)
       end
     end,
-    ["OnUnitDestroyed"] = function (self, id, unit, name)
+    ["OnUnitDestroyed"] = function (_, id)
       jumpStarts[id] = nil
       if mod:GetSetting("BombLines") then
         core:RemoveLineBetweenUnits(string.format("JUMP_START_LINE %d", id))
