@@ -31,15 +31,15 @@ mod:RegisterEnglishLocale({
     ["unit.warrior"] = "Chief Engineer Wilbargh", -- Warrior
     ["unit.fire_orb"] = "Discharged Plasma", -- Fire Orb
     -- Cast names.
-    ["cast.liquidate"] = "Liquidate",
-    ["cast.electroshock"] = "Electroshock",
+    ["cast.warrior.liquidate"] = "Liquidate",
+    ["cast.engineer.electroshock"] = "Electroshock",
     ["cast.rocket_jump"] = "Rocket Jump",
     -- Messages.
-    ["msg.electroshock.next"] = "Next Electroshock in",
-    ["msg.liquidate.next"] = "Next Liquidate in",
-    ["msg.liquidate.stack"] = "Stack",
-    ["msg.electroshock.swap.other"] = "%s SWAP TO WARRIOR",
-    ["msg.electroshock.swap.you"] = "YOU SWAP TO WARRIOR",
+    ["msg.warrior.liquidate.next"] = "Next Liquidate in",
+    ["msg.warrior.liquidate.stack"] = "Stack",
+    ["msg.engineer.electroshock.next"] = "Next Electroshock in",
+    ["msg.engineer.electroshock.swap.other"] = "%s SWAP TO WARRIOR",
+    ["msg.engineer.electroshock.swap.you"] = "YOU SWAP TO WARRIOR",
     ["msg.fire_orb.next"] = "Next Fire Orb in",
     ["msg.fire_orb.you"] = "FIRE ORB ON YOU",
     ["msg.fire_orb.spawned"] = "Fire Orb spawned",
@@ -147,8 +147,8 @@ function mod:OnBossEnable()
     coreUnit.healthWarning = false
   end
 
-  mod:AddTimerBar("NEXT_ELEKTROSHOCK_TIMER", self.L["msg.electroshock.next"], FIRST_ELECTROSHOCK_TIMER)
-  mod:AddTimerBar("NEXT_LIQUIDATE_TIMER", self.L["msg.liquidate.next"], FIRST_LIQUIDATE_TIMER)
+  mod:AddTimerBar("NEXT_ELEKTROSHOCK_TIMER", self.L["msg.engineer.electroshock.next"], FIRST_ELECTROSHOCK_TIMER)
+  mod:AddTimerBar("NEXT_LIQUIDATE_TIMER", self.L["msg.warrior.liquidate.next"], FIRST_LIQUIDATE_TIMER)
 end
 
 function mod:OnBossDisable()
@@ -222,10 +222,10 @@ function mod:OnDebuffAdd(id, spellId)
     local messageId = string.format("ELECTROSHOCK_MSG_%s", targetName)
     local sound
     if isOnMyself then
-      electroshockOnX = self.L["msg.electroshock.swap.you"]
+      electroshockOnX = self.L["msg.engineer.electroshock.swap.you"]
       sound = mod:GetSetting("SoundElectroshockSwapYou") == true and "Burn"
     else
-      electroshockOnX = self.L["msg.electroshock.swap.other"]:format(targetName)
+      electroshockOnX = self.L["msg.engineer.electroshock.swap.other"]:format(targetName)
       sound = mod:GetSetting("SoundElectroshockSwap") == true and "Info"
     end
     if isOnMyself or mod:GetSetting("MessageElectroshockSwap") then
@@ -304,9 +304,9 @@ mod:RegisterUnitEvents({
 -- Warrior
 mod:RegisterUnitEvents("unit.warrior",{
     ["OnCastStart"] = function (self, _, castName)
-      if self.L["cast.liquidate"] == castName then
+      if self.L["cast.warrior.liquidate"] == castName then
         if mod:IsPlayerOnPlatform(engineerUnits[WARRIOR].location) then
-          mod:AddMsg("LIQUIDATE_MSG", self.L["msg.liquidate.stack"], 5, mod:GetSetting("SoundLiquidate") == true and "Info")
+          mod:AddMsg("LIQUIDATE_MSG", self.L["msg.warrior.liquidate.stack"], 5, mod:GetSetting("SoundLiquidate") == true and "Info")
         end
       end
     end,
@@ -314,9 +314,9 @@ mod:RegisterUnitEvents("unit.warrior",{
       if self.L["cast.rocket_jump"] == castName then
         mod:RemoveTimerBar("NEXT_LIQUIDATE_TIMER")
       end
-      if self.L["cast.liquidate"] == castName then
+      if self.L["cast.warrior.liquidate"] == castName then
         mod:RemoveTimerBar("NEXT_LIQUIDATE_TIMER")
-        mod:AddTimerBar("NEXT_LIQUIDATE_TIMER", self.L["msg.liquidate.next"], LIQUIDATE_TIMER)
+        mod:AddTimerBar("NEXT_LIQUIDATE_TIMER", self.L["msg.warrior.liquidate.next"], LIQUIDATE_TIMER)
       end
     end,
   }
@@ -337,26 +337,26 @@ end
 -- Engineer
 mod:RegisterUnitEvents("unit.engineer",{
     ["OnCastStart"] = function (self, _, castName)
-      if self.L["cast.electroshock"] == castName then
+      if self.L["cast.engineer.electroshock"] == castName then
         if mod:GetSetting("LineElectroshock") then
           core:AddPixie("ELECTROSHOCK_PIXIE", 2, engineerUnits[ENGINEER].unit, nil, "Red", 10, 80, 0)
         end
         if mod:IsPlayerOnPlatform(engineerUnits[ENGINEER].location) then
-          mod:AddMsg("ELECTROSHOCK_CAST_MSG", self.L["cast.electroshock"], 5, mod:GetSetting("SoundElectroshock") == true and "Beware")
+          mod:AddMsg("ELECTROSHOCK_CAST_MSG", self.L["cast.engineer.electroshock"], 5, mod:GetSetting("SoundElectroshock") == true and "Beware")
         end
       end
     end,
     ["OnCastEnd"] = function (self, _, castName)
       if self.L["cast.rocket_jump"] == castName then
         mod:RemoveTimerBar("NEXT_ELEKTROSHOCK_TIMER")
-        mod:AddTimerBar("NEXT_ELEKTROSHOCK_TIMER", self.L["msg.electroshock.next"], JUMP_ELECTROSHOCK_TIMER)
+        mod:AddTimerBar("NEXT_ELEKTROSHOCK_TIMER", self.L["msg.engineer.electroshock.next"], JUMP_ELECTROSHOCK_TIMER)
       end
-      if self.L["cast.electroshock"] == castName then
+      if self.L["cast.engineer.electroshock"] == castName then
         if mod:GetSetting("LineElectroshock") then
           core:DropPixie("ELECTROSHOCK_PIXIE")
         end
         mod:RemoveTimerBar("NEXT_ELEKTROSHOCK_TIMER")
-        mod:AddTimerBar("NEXT_ELEKTROSHOCK_TIMER", self.L["msg.electroshock.next"], ELECTROSHOCK_TIMER)
+        mod:AddTimerBar("NEXT_ELEKTROSHOCK_TIMER", self.L["msg.engineer.electroshock.next"], ELECTROSHOCK_TIMER)
       end
     end,
   }

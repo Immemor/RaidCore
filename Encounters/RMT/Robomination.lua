@@ -36,9 +36,9 @@ mod:RegisterEnglishLocale({
     ["msg.snake.you"] = "SNAKE ON YOU",
     ["msg.snake.near"] = "SNAKE NEAR ON %s",
     ["msg.snake.next"] = "Next snake in",
-    ["msg.laser.other"] = "LASER ON %s",
-    ["msg.laser.you"] = "LASER ON YOU",
-    ["msg.laser.next"] = "Next incinerate in",
+    ["msg.robo.laser.other"] = "LASER ON %s",
+    ["msg.robo.laser.you"] = "LASER ON YOU",
+    ["msg.robo.laser.next"] = "Next incinerate in",
     ["msg.maze.coming"] = "MAZE SOON!",
     ["msg.maze.now"] = "RUN TO THE CENTER!",
     ["msg.arms.next"] = "Arms spawning in",
@@ -187,7 +187,7 @@ mod:RegisterDatachronEvent("chron.robo.shows", "EQUAL", function (self)
     core:RemoveLineBetweenUnits("ROBO_MAZE_LINE")
     core:AddTimerBar("NEXT_SNAKE_TIMER", self.L["msg.snake.next"], FIRST_SNAKE_TIMER, nil, { sColor = "xkcdBrown" })
     core:AddTimerBar("NEXT_SPEW_TIMER", self.L["msg.spew.next"], MAZE_SPEW_TIMER, nil, { sColor = "green" })
-    core:AddTimerBar("NEXT_INCINERATE_TIMER", self.L["msg.laser.next"], FIRST_INCINERATE_TIMER, nil, { sColor = "red", bEmphasize = mod:GetSetting("SoundLaser") })
+    core:AddTimerBar("NEXT_INCINERATE_TIMER", self.L["msg.robo.laser.next"], FIRST_INCINERATE_TIMER, nil, { sColor = "red", bEmphasize = mod:GetSetting("SoundLaser") })
     mod:AddTimerBar("NEXT_ARMS_TIMER", self.L["msg.arms.next"], ARMS_TIMER)
     mod:DrawCompactorGrid()
   end
@@ -199,9 +199,9 @@ mod:RegisterDatachronEvent("chron.robo.laser", "MATCH", function (self, _, laser
     local sound = mod:GetSetting("SoundLaser") == true and "Burn"
     local laserOnX
     if isOnMyself then
-      laserOnX = self.L["msg.laser.you"]
+      laserOnX = self.L["msg.robo.laser.you"]
     else
-      laserOnX = self.L["msg.laser.other"]:format(laserTarget:GetName())
+      laserOnX = self.L["msg.robo.laser.other"]:format(laserTarget:GetName())
     end
 
     if mod:GetSetting("CrosshairLaser") then
@@ -209,7 +209,7 @@ mod:RegisterDatachronEvent("chron.robo.laser", "MATCH", function (self, _, laser
     end
 
     mod:RemoveTimerBar("NEXT_INCINERATE_TIMER")
-    core:AddTimerBar("NEXT_INCINERATE_TIMER", self.L["msg.laser.next"], INCINERATE_TIMER, nil, { sColor = "red", bEmphasize = mod:GetSetting("SoundLaser") })
+    core:AddTimerBar("NEXT_INCINERATE_TIMER", self.L["msg.robo.laser.next"], INCINERATE_TIMER, nil, { sColor = "red", bEmphasize = mod:GetSetting("SoundLaser") })
     mod:AddMsg("LASER_MSG", laserOnX, 5, sound, "Red")
   end
 )
