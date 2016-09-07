@@ -20,31 +20,31 @@ if not mod then return end
 ----------------------------------------------------------------------------------------------------
 -- Registering combat.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterTrigMob("ALL", { "Swabbie Ski'Li" })
+mod:RegisterTrigMob("ALL", { "unit.swabbie" })
 mod:RegisterEnglishLocale({
     -- Unit names.
-    ["Swabbie Ski'Li"] = "Swabbie Ski'Li",
-    ["Sawblade"] = "Sawblade", -- big saw
-    ["Saw"] = "Saw", -- little saw
-    ["Noxious Nabber"] = "Noxious Nabber",
-    ["Risen Redmoon Grunt"] = "Risen Redmoon Grunt",
-    ["Regor the Rancid"] = "Regor the Rancid",
-    ["Braugh the Bloated"] = "Braugh the Bloated",
-    ["Bilious Brute"] = "Bilious Brute",
-    ["Putrid Pouncer"] = "Putrid Pouncer",
-    ["Risen Redmoon Plunderer"] = "Risen Redmoon Plunderer",
-    ["Risen Redmoon Cadet"] = "Risen Redmoon Cadet",
-    ["Tether Anchor"] = "Tether Anchor",
-    ["Junk Trap"] = "Junk Trap",
+    ["unit.swabbie"] = "Swabbie Ski'Li",
+    ["unit.big_saw"] = "Sawblade", -- big saw
+    ["unit.small_saw"] = "Saw", -- little saw
+    ["unit.miniboss.regor"] = "Regor the Rancid",
+    ["unit.miniboss.braugh"] = "Braugh the Bloated",
+    ["unit.add.nabber"] = "Noxious Nabber",
+    ["unit.add.grunt"] = "Risen Redmoon Grunt",
+    ["unit.add.brute"] = "Bilious Brute",
+    ["unit.add.putrid_pouncer"] = "Putrid Pouncer",
+    ["unit.add.plunderer"] = "Risen Redmoon Plunderer",
+    ["unit.add.cadet"] = "Risen Redmoon Cadet",
+    ["unit.tether"] = "Tether Anchor",
+    ["unit.junk_trap"] = "Junk Trap",
     -- Datachron messages.
-    ["WARNING: THE SHREDDER IS STARTING!"] = "WARNING: THE SHREDDER IS STARTING!",
+    ["chron.shredder.starting"] = "WARNING: THE SHREDDER IS STARTING!",
     -- Cast names.
-    ["Swabbie Swoop"] = "Swabbie Swoop",
-    ["Risen Repellent"] = "Risen Repellent",
-    ["Crush"] = "Crush",
-    ["Gravedigger"] = "Gravedigger",
-    ["Deathwail"] = "Deathwail",
-    ["Necrotic Lash"] = "Necrotic Lash",
+    ["cast.swabbie_swoop"] = "Swabbie Swoop",
+    ["cast.swabbie.knockback"] = "Risen Repellent",
+    ["cast.miniboss.crush"] = "Crush",
+    ["cast.miniboss.gravedigger"] = "Gravedigger",
+    ["cast.miniboss.deathwail"] = "Deathwail",
+    ["cast.nabber.lash"] = "Necrotic Lash",
     -- Messages.
     ["boss.knockback"] = "KNOCKBACK",
     ["boss.walking"] = "Walking %s",
@@ -218,14 +218,14 @@ function mod:StartProgressBar()
 end
 
 mod:RegisterUnitEvents({
-    "Noxious Nabber",
-    "Risen Redmoon Grunt",
-    "Regor the Rancid",
-    "Braugh the Bloated",
-    "Bilious Brute",
-    "Putrid Pouncer",
-    "Risen Redmoon Plunderer",
-    "Risen Redmoon Cadet"
+    "unit.add.nabber",
+    "unit.add.grunt",
+    "unit.miniboss.regor",
+    "unit.miniboss.braugh",
+    "unit.add.brute",
+    "unit.add.putrid_pouncer",
+    "unit.add.plunderer",
+    "unit.add.cadet"
     },{
     ["OnUnitCreated"] = function (_, _, unit)
       core:WatchUnit(unit)
@@ -241,7 +241,7 @@ mod:RegisterUnitEvents({
   }
 )
 
-mod:RegisterUnitEvents({ "Bilious Brute", "Noxious Nabber" },{
+mod:RegisterUnitEvents({ "unit.add.brute", "unit.add.nabber" },{
     ["OnUnitCreated"] = function (_, id)
       if mod:GetSetting("CrosshairPriority") then
         core:AddPicture(id, id, "Crosshair", 30, 0, 0, nil, "red")
@@ -250,7 +250,7 @@ mod:RegisterUnitEvents({ "Bilious Brute", "Noxious Nabber" },{
   }
 )
 
-mod:RegisterUnitEvents("Swabbie Ski'Li",{
+mod:RegisterUnitEvents("unit.swabbie",{
     ["OnUnitCreated"] = function (self, _, unit)
       core:AddUnit(unit)
       core:WatchUnit(unit)
@@ -262,12 +262,12 @@ mod:RegisterUnitEvents("Swabbie Ski'Li",{
       self:RemoveProgressBar("ADDS_PROGRESS")
     end,
     ["OnCastStart"] = function (self, _, castName)
-      if self.L["Risen Repellent"] == castName then
+      if self.L["cast.swabbie.knockback"] == castName then
         mod:AddMsg("KNOCKBACK", self.L["boss.knockback"], 2)
       end
     end,
     ["OnCastEnd"] = function (self, _, castName)
-      if self.L["Swabbie Swoop"] == castName then
+      if self.L["cast.swabbie_swoop"] == castName then
         startProgressBarTimer = ApolloTimer.Create(1, true, "StartProgressBar", mod)
         startProgressBarTimer:Start()
       end
@@ -302,7 +302,7 @@ function mod:HandleShredderSaw(sawLocation)
   mod:AddMsg("SAW_MSG", message, 5, sound)
 end
 
-mod:RegisterUnitEvents("Sawblade",{
+mod:RegisterUnitEvents("unit.big_saw",{
     ["OnUnitCreated"] = function (self, id, unit)
       if mod:GetSetting("LineSawblade") then
         core:AddPixie(id, 2, unit, nil, "Red", 10, 60, 0)
@@ -322,13 +322,13 @@ mod:RegisterUnitEvents("Sawblade",{
   }
 )
 
-mod:RegisterUnitEvents("Noxious Nabber",{
+mod:RegisterUnitEvents("unit.add.nabber",{
     ["OnUnitCreated"] = function (self)
       core:RemoveMsg("ADDS_MSG")
       mod:AddMsg("ADDS_MSG", self.L["nabber.spawned"], 5, mod:GetSetting("SoundAdds") and "Info")
     end,
     ["OnCastStart"] = function (self, id, castName)
-      if self.L["Necrotic Lash"] == castName then
+      if self.L["cast.nabber.lash"] == castName then
         local unit = GetUnitById(id)
         if mod:GetDistanceBetweenUnits(playerUnit, unit) < 45 then
           mod:AddMsg("NABBER", self.L["nabber.interrupt"], 5, mod:GetSetting("SoundNecroticLash") == true and "Inferno")
@@ -338,14 +338,14 @@ mod:RegisterUnitEvents("Noxious Nabber",{
   }
 )
 
-mod:RegisterUnitEvents({"Regor the Rancid", "Braugh the Bloated"},{
+mod:RegisterUnitEvents({"unit.miniboss.regor", "unit.miniboss.braugh"},{
     ["OnUnitCreated"] = function (self)
       mod:AddMsg("MINIBOSS", self.L["miniboss.spawned"], 5, mod:GetSetting("SoundMiniboss") and "Info")
     end,
     ["OnCastStart"] = function (self, _, castName)
-      if self.L["Gravedigger"] == castName or
-      self.L["Deathwail"] == castName or
-      self.L["Crush"] == castName then
+      if self.L["cast.miniboss.gravedigger"] == castName or
+      self.L["cast.miniboss.deathwail"] == castName or
+      self.L["cast.miniboss.crush"] == castName then
         core:RemoveMsg("MINIBOSS")
         mod:AddMsg("MINIBOSS", self.L["miniboss.interrupt"], 5, mod:GetSetting("SoundMinibossCast") and "Inferno")
       end
@@ -353,7 +353,7 @@ mod:RegisterUnitEvents({"Regor the Rancid", "Braugh the Bloated"},{
   }
 )
 
-mod:RegisterUnitEvents("Tether Anchor",{
+mod:RegisterUnitEvents("unit.tether",{
     ["OnUnitCreated"] = function (_, id)
       if mod:GetSetting("CrosshairTether") then
         core:AddPicture(id, id, "Crosshair", 25, 0, 0, nil, "FFFFF569")
@@ -365,7 +365,7 @@ mod:RegisterUnitEvents("Tether Anchor",{
   }
 )
 
-mod:RegisterUnitEvents("Junk Trap",{
+mod:RegisterUnitEvents("unit.junk_trap",{
     ["OnUnitCreated"] = function (_, id)
       if mod:GetSetting("SquareTethers") then
         core:AddPolygon(id, id, 5, 45, 6, nil, 4)

@@ -14,23 +14,23 @@ if not mod then return end
 ----------------------------------------------------------------------------------------------------
 -- Registering combat.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterTrigMob("ANY", { "Robomination" })
+mod:RegisterTrigMob("ANY", { "unit.robo" })
 mod:RegisterEnglishLocale({
     -- Unit names.
-    ["Robomination"] = "Robomination",
-    ["Trash Compactor"] = "Trash Compactor",
-    ["Cannon Arm"] = "Cannon Arm",
-    ["Flailing Arm"] = "Flailing Arm",
-    ["Scanning Eye"] = "Scanning Eye",
+    ["unit.robo"] = "Robomination",
+    ["unit.trash_compactor"] = "Trash Compactor",
+    ["unit.arm.cannon"] = "Cannon Arm",
+    ["unit.flailing_arm"] = "Flailing Arm",
+    ["unit.scanning_eye"] = "Scanning Eye",
     -- Cast names.
-    ["Cannon Fire"] = "Cannon Fire",
-    ["Incineration Laser"] = "Incineration Laser",
-    ["Noxious Belch"] = "Noxious Belch",
+    ["cast.cannon_fire"] = "Cannon Fire",
+    ["cast.laser"] = "Incineration Laser",
+    ["cast.spew"] = "Noxious Belch",
     -- Datachron.
-    ["Robomination tries to crush ([^%s]+%s[^!]+)!$"] = "Robomination tries to crush ([^%s]+%s[^!]+)!$",
-    ["Robomination tries to incinerate ([^%s]+%s.+)$"] = "Robomination tries to incinerate ([^%s]+%s.+)$",
-    ["The Robomination sinks down into the trash."] = "The Robomination sinks down into the trash.",
-    ["The Robomination erupts back into the fight!"] = "The Robomination erupts back into the fight!",
+    ["chron.robo.snake"] = "Robomination tries to crush ([^%s]+%s[^!]+)!$",
+    ["chron.robo.laser"] = "Robomination tries to incinerate ([^%s]+%s.+)$",
+    ["chron.robo.hides"] = "The Robomination sinks down into the trash.",
+    ["chron.robo.shows"] = "The Robomination erupts back into the fight!",
     -- Messages.
     ["snake.other"] = "SNAKE ON %s",
     ["snake.you"] = "SNAKE ON YOU",
@@ -134,7 +134,7 @@ function mod:OnBossEnable()
   mod:DrawCompactorGrid()
 end
 
-mod:RegisterDatachronEvent("Robomination tries to crush ([^%s]+%s[^!]+)!$", "MATCH", function (self, _, snakeTargetName)
+mod:RegisterDatachronEvent("chron.robo.snake", "MATCH", function (self, _, snakeTargetName)
     local snakeTarget = GetPlayerUnitByName(snakeTargetName)
     local isOnMyself = snakeTarget == playerUnit
     local isSnakeNearYou = not isOnMyself and mod:GetDistanceBetweenUnits(playerUnit, snakeTarget) < 10
@@ -167,7 +167,7 @@ mod:RegisterDatachronEvent("Robomination tries to crush ([^%s]+%s[^!]+)!$", "MAT
   end
 )
 
-mod:RegisterDatachronEvent("The Robomination sinks down into the trash.", "EQUAL", function (self)
+mod:RegisterDatachronEvent("chron.robo.hides", "EQUAL", function (self)
     phase = MAZE_PHASE
     core:RemoveMsg("ROBO_MAZE")
     mod:RemoveTimerBar("NEXT_SNAKE_TIMER")
@@ -182,7 +182,7 @@ mod:RegisterDatachronEvent("The Robomination sinks down into the trash.", "EQUAL
   end
 )
 
-mod:RegisterDatachronEvent("The Robomination erupts back into the fight!", "EQUAL", function (self)
+mod:RegisterDatachronEvent("chron.robo.shows", "EQUAL", function (self)
     phase = DPS_PHASE
     core:RemoveLineBetweenUnits("ROBO_MAZE_LINE")
     core:AddTimerBar("NEXT_SNAKE_TIMER", self.L["snake.next"], FIRST_SNAKE_TIMER, nil, { sColor = "xkcdBrown" })
@@ -193,7 +193,7 @@ mod:RegisterDatachronEvent("The Robomination erupts back into the fight!", "EQUA
   end
 )
 
-mod:RegisterDatachronEvent("Robomination tries to incinerate ([^%s]+%s.+)$", "MATCH", function (self, _, laserTargetName)
+mod:RegisterDatachronEvent("chron.robo.laser", "MATCH", function (self, _, laserTargetName)
     local laserTarget = GetPlayerUnitByName(laserTargetName)
     local isOnMyself = laserTarget == playerUnit
     local sound = mod:GetSetting("SoundLaser") == true and "Burn"
@@ -248,10 +248,10 @@ function mod:OnDebuffRemove(_, spellId)
 end
 
 mod:RegisterUnitEvents({
-    "Cannon Arm",
-    "Flailing Arm",
-    "Robomination",
-    "Scanning Eye",
+    "unit.cannon_arm",
+    "unit.flailing_arm",
+    "unit.robo",
+    "unit.scanning_eye",
     },{
     ["OnUnitCreated"] = function (_, _, unit)
       core:AddUnit(unit)
@@ -259,14 +259,14 @@ mod:RegisterUnitEvents({
   }
 )
 
-mod:RegisterUnitEvents("Scanning Eye",{
+mod:RegisterUnitEvents("unit.scanning_eye",{
     ["OnUnitDestroyed"] = function ()
       phase = MID_MAZE_PHASE
     end,
   }
 )
 
-mod:RegisterUnitEvents({"Cannon Arm", "Flailing Arm"},{
+mod:RegisterUnitEvents({"unit.cannon_arm", "unit.flailing_arm"},{
     ["OnUnitCreated"] = function ()
       if phase == MID_MAZE_PHASE then
         mazeArmCount = mazeArmCount + 1
@@ -302,7 +302,7 @@ function mod:RemoveCannonArmLines()
   end
 end
 
-mod:RegisterUnitEvents("Cannon Arm",{
+mod:RegisterUnitEvents("unit.cannon_arm",{
     ["OnUnitCreated"] = function (self, id, unit)
       cannonArms[id] = unit
       core:WatchUnit(unit)
@@ -315,7 +315,7 @@ mod:RegisterUnitEvents("Cannon Arm",{
       mod:AddMsg("ARMS_MSG", self.L["cannon_arm.spawned"], 5, mod:GetSetting("SoundArmSpawn") == true and "Info", "Red")
     end,
     ["OnCastStart"] = function (self, id, castName)
-      if self.L["Cannon Fire"] == castName then
+      if self.L["cast.cannon_fire"] == castName then
         if mod:GetDistanceBetweenUnits(playerUnit, GetUnitById(id)) < 45 then
           mod:AddMsg("ARMS_MSG", self.L["cannon_arm.interrupt"], 2, mod:GetSetting("SoundCannonInterrupt") == true and "Inferno")
         end
@@ -328,7 +328,7 @@ mod:RegisterUnitEvents("Cannon Arm",{
   }
 )
 
-mod:RegisterUnitEvents("Robomination",{
+mod:RegisterUnitEvents("unit.robo",{
     ["OnUnitCreated"] = function (_, _, unit)
       core:WatchUnit(unit)
       roboUnit = unit
@@ -339,14 +339,14 @@ mod:RegisterUnitEvents("Robomination",{
       end
     end,
     ["OnCastStart"] = function (self, _, castName)
-      if self.L["Noxious Belch"] == castName then
+      if self.L["cast.spew"] == castName then
         mod:RemoveTimerBar("NEXT_SPEW_TIMER")
         core:AddTimerBar("NEXT_SPEW_TIMER", self.L["spew.next"], SPEW_TIMER, nil, { sColor = "green" })
         mod:AddMsg("SPEW_MSG", self.L["spew.now"], 4, mod:GetSetting("SoundSpew") == true and "Beware")
       end
     end,
     ["OnCastEnd"] = function (self, _, castName)
-      if self.L["Incineration Laser"] == castName then
+      if self.L["cast.laser"] == castName then
         core:RemovePicture("LASER_CROSSHAIR")
       end
     end,

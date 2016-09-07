@@ -15,29 +15,25 @@ if not mod then return end
 -- Registering combat.
 ----------------------------------------------------------------------------------------------------
 mod:RegisterTrigMob("ANY", {
-    "Chief Engineer Wilbargh", "Head Engineer Orvulgh",
-    "Fusion Core",
-    "Cooling Turbine",
-    "Spark Plug",
-    "Lubricant Nozzle"
+    "unit.warrior", "unit.engineer",
+    "unit.fusion_core",
+    "unit.cooling_turbine",
+    "unit.spark_plug",
+    "unit.lubricant_nozzle"
   })
 mod:RegisterEnglishLocale({
     -- Unit names.
-    ["Fusion Core"] = "Fusion Core",
-    ["Cooling Turbine"] = "Cooling Turbine",
-    ["Spark Plug"] = "Spark Plug",
-    ["Lubricant Nozzle"] = "Lubricant Nozzle",
-    ["Head Engineer Orvulgh"] = "Head Engineer Orvulgh", -- Engineer
-    ["Chief Engineer Wilbargh"] = "Chief Engineer Wilbargh", -- Warrior
-    ["Air Current"] = "Air Current",
-    ["Friendly Invisible Unit for Fields"] = "Friendly Invisible Unit for Fields",
-    ["Hostile Invisible Unit for Fields (0 hit radius)"] = "Hostile Invisible Unit for Fields (0 hit radius)",
-    ["Discharged Plasma"] = "Discharged Plasma", -- Fire Orb
+    ["unit.fusion_core"] = "Fusion Core",
+    ["unit.cooling_turbine"] = "Cooling Turbine",
+    ["unit.spark_plug"] = "Spark Plug",
+    ["unit.lubricant_nozzle"] = "Lubricant Nozzle",
+    ["unit.engineer"] = "Head Engineer Orvulgh", -- Engineer
+    ["unit.warrior"] = "Chief Engineer Wilbargh", -- Warrior
+    ["unit.fire_orb"] = "Discharged Plasma", -- Fire Orb
     -- Cast names.
-    ["Liquidate"] = "Liquidate",
-    ["Electroshock"] = "Electroshock",
-    -- Datachron.
-    ["([^%s]+%s[^%s]+) suffers from Electroshock"] = "([^%s]+%s[^%s]+) suffers from Electroshock",
+    ["cast.liquidate"] = "Liquidate",
+    ["cast.electroshock"] = "Electroshock",
+    ["cast.rocket_jump"] = "Rocket Jump",
     -- Messages.
     ["electroshock.next"] = "Next Electroshock in",
     ["liquidate.next"] = "Next Liquidate in",
@@ -73,17 +69,17 @@ local COOLING_TURBINE = 2
 local SPARK_PLUG = 3
 local LUBRICANT_NOZZLE = 4
 local CORE_NAMES = {
-  ["Fusion Core"] = FUSION_CORE,
-  ["Cooling Turbine"] = COOLING_TURBINE,
-  ["Spark Plug"] = SPARK_PLUG,
-  ["Lubricant Nozzle"] = LUBRICANT_NOZZLE
+  ["unit.fusion_core"] = FUSION_CORE,
+  ["unit.cooling_turbine"] = COOLING_TURBINE,
+  ["unit.spark_plug"] = SPARK_PLUG,
+  ["unit.lubricant_nozzle"] = LUBRICANT_NOZZLE
 }
 
 local WARRIOR = 1
 local ENGINEER = 2
 local ENGINEER_NAMES = {
-  ["Chief Engineer Wilbargh"] = WARRIOR,
-  ["Head Engineer Orvulgh"] = ENGINEER,
+  ["unit.warrior"] = WARRIOR,
+  ["unit.engineer"] = ENGINEER,
 }
 local ENGINEER_START_LOCATION = {
   [WARRIOR] = SPARK_PLUG,
@@ -251,11 +247,11 @@ function mod:OnUnitDestroyedRaw(unit)
 end
 
 mod:RegisterUnitEvents({
-    "Head Engineer Orvulgh", "Chief Engineer Wilbargh",
-    "Fusion Core",
-    "Cooling Turbine",
-    "Spark Plug",
-    "Lubricant Nozzle"
+    "unit.engineer", "unit.warrior",
+    "unit.fusion_core",
+    "unit.cooling_turbine",
+    "unit.spark_plug",
+    "unit.lubricant_nozzle"
     },{
     ["OnUnitCreated"] = function (_, _, unit, name)
       if CORE_NAMES[name] ~= nil then
@@ -284,10 +280,10 @@ mod:RegisterUnitEvents({
 
 -- Cores
 mod:RegisterUnitEvents({
-    "Fusion Core",
-    "Cooling Turbine",
-    "Spark Plug",
-    "Lubricant Nozzle"
+    "unit.fusion_core",
+    "unit.cooling_turbine",
+    "unit.spark_plug",
+    "unit.lubricant_nozzle"
     },{
     ["OnHealthChanged"] = function (self, _, percent, name)
       local coreId = CORE_NAMES[name]
@@ -306,19 +302,19 @@ mod:RegisterUnitEvents({
 )
 
 -- Warrior
-mod:RegisterUnitEvents("Chief Engineer Wilbargh",{
+mod:RegisterUnitEvents("unit.warrior",{
     ["OnCastStart"] = function (self, _, castName)
-      if self.L["Liquidate"] == castName then
+      if self.L["cast.liquidate"] == castName then
         if mod:IsPlayerOnPlatform(engineerUnits[WARRIOR].location) then
           mod:AddMsg("LIQUIDATE_MSG", self.L["liquidate.stack"], 5, mod:GetSetting("SoundLiquidate") == true and "Info")
         end
       end
     end,
     ["OnCastEnd"] = function (self, _, castName)
-      if self.L["Rocket Jump"] == castName then
+      if self.L["cast.rocket_jump"] == castName then
         mod:RemoveTimerBar("NEXT_LIQUIDATE_TIMER")
       end
-      if self.L["Liquidate"] == castName then
+      if self.L["cast.liquidate"] == castName then
         mod:RemoveTimerBar("NEXT_LIQUIDATE_TIMER")
         mod:AddTimerBar("NEXT_LIQUIDATE_TIMER", self.L["liquidate.next"], LIQUIDATE_TIMER)
       end
@@ -339,23 +335,23 @@ function mod:IsUnitFacingOtherUnit(unit, otherUnit)
 end
 
 -- Engineer
-mod:RegisterUnitEvents("Head Engineer Orvulgh",{
+mod:RegisterUnitEvents("unit.engineer",{
     ["OnCastStart"] = function (self, _, castName)
-      if self.L["Electroshock"] == castName then
+      if self.L["cast.electroshock"] == castName then
         if mod:GetSetting("LineElectroshock") then
           core:AddPixie("ELECTROSHOCK_PIXIE", 2, engineerUnits[ENGINEER].unit, nil, "Red", 10, 80, 0)
         end
         if mod:IsPlayerOnPlatform(engineerUnits[ENGINEER].location) then
-          mod:AddMsg("ELECTROSHOCK_CAST_MSG", self.L["Electroshock"], 5, mod:GetSetting("SoundElectroshock") == true and "Beware")
+          mod:AddMsg("ELECTROSHOCK_CAST_MSG", self.L["cast.electroshock"], 5, mod:GetSetting("SoundElectroshock") == true and "Beware")
         end
       end
     end,
     ["OnCastEnd"] = function (self, _, castName)
-      if self.L["Rocket Jump"] == castName then
+      if self.L["cast.rocket_jump"] == castName then
         mod:RemoveTimerBar("NEXT_ELEKTROSHOCK_TIMER")
         mod:AddTimerBar("NEXT_ELEKTROSHOCK_TIMER", self.L["electroshock.next"], JUMP_ELECTROSHOCK_TIMER)
       end
-      if self.L["Electroshock"] == castName then
+      if self.L["cast.electroshock"] == castName then
         if mod:GetSetting("LineElectroshock") then
           core:DropPixie("ELECTROSHOCK_PIXIE")
         end
@@ -372,7 +368,7 @@ function mod:PopFireOrb()
   end
 end
 
-mod:RegisterUnitEvents("Discharged Plasma",{
+mod:RegisterUnitEvents("unit.fire_orb",{
     ["OnUnitCreated"] = function (self, id, unit)
       core:WatchUnit(unit)
       mod:RemoveTimerBar("NEXT_FIRE_ORB_TIMER")
