@@ -24,8 +24,8 @@ mod:RegisterTrigMob("ALL", { "unit.swabbie" })
 mod:RegisterEnglishLocale({
     -- Unit names.
     ["unit.swabbie"] = "Swabbie Ski'Li",
-    ["unit.big_saw"] = "Sawblade", -- big saw
-    ["unit.small_saw"] = "Saw", -- little saw
+    ["unit.saw.big"] = "Sawblade", -- big saw
+    ["unit.saw.small"] = "Saw", -- little saw
     ["unit.miniboss.regor"] = "Regor the Rancid",
     ["unit.miniboss.braugh"] = "Braugh the Bloated",
     ["unit.add.nabber"] = "Noxious Nabber",
@@ -301,7 +301,7 @@ function mod:HandleShredderSaw(sawLocation)
   mod:AddMsg("SAW_MSG", message, 5, sound)
 end
 
-mod:RegisterUnitEvents("unit.big_saw",{
+mod:RegisterUnitEvents("unit.saw.big",{
     ["OnUnitCreated"] = function (self, id, unit)
       if mod:GetSetting("LineSawblade") then
         core:AddPixie(id, 2, unit, nil, "Red", 10, 60, 0)
