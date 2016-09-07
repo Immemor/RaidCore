@@ -69,6 +69,7 @@ end
 -- @param tEventsHandlers Table of Events/Handlers pairs
 function EncounterPrototype:RegisterUnitEvents(sUnitName, tEventsHandlers)
   assert(type(sUnitName) == "string" or type(sUnitName) == "table")
+  assert(type(tEventsHandlers) == "table")
 
   if type(sUnitName) == "string" then
     sUnitName = {sUnitName}
