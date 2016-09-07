@@ -405,7 +405,7 @@ function RaidCore:LaunchBreakRequest(tMessage, nSenderId)
 end
 
 function RaidCore:SyncSummonRequest(tMessage, nSenderId)
-  if not self.db.profile.bAcceptSummons or not self:isRaidManagement(strSender) then
+  if not self.db.profile.bAcceptSummons or not self:isRaidManagement(tMessage.sender) then
     return false
   end
   self:Print(tMessage.sender .. " requested that you accept a summon. Attempting to accept now.")
