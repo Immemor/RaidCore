@@ -205,8 +205,7 @@ function mod:PhaseChange()
     firstShredderSaw = nil
     secondShredderSaw = nil
   end
-  local messageText = text:format(walkingDirection)
-  mod:AddProgressBar("WALKING_PROGRESS", messageText, mod.GetWalkingProgress, mod, mod.PhaseChange)
+  mod:AddProgressBar("WALKING_PROGRESS", text:format(walkingDirection), mod.GetWalkingProgress, mod, mod.PhaseChange)
 end
 
 function mod:StartProgressBar()

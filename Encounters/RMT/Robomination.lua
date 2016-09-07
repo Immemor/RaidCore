@@ -19,7 +19,7 @@ mod:RegisterEnglishLocale({
     -- Unit names.
     ["unit.robo"] = "Robomination",
     ["unit.trash_compactor"] = "Trash Compactor",
-    ["unit.arm.cannon"] = "Cannon Arm",
+    ["unit.cannon_arm"] = "Cannon Arm",
     ["unit.flailing_arm"] = "Flailing Arm",
     ["unit.scanning_eye"] = "Scanning Eye",
     -- Cast names.
