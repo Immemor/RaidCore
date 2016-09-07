@@ -111,6 +111,7 @@ mod:RegisterDefaultSetting("LineElectroshock")
 mod:RegisterDefaultSetting("SoundLiquidate")
 mod:RegisterDefaultSetting("SoundElectroshock")
 mod:RegisterDefaultSetting("SoundElectroshockSwap")
+mod:RegisterDefaultSetting("MessageElectroshockSwap")
 mod:RegisterDefaultSetting("SoundElectroshockSwapYou")
 mod:RegisterDefaultSetting("SoundFireOrb")
 mod:RegisterDefaultSetting("SoundFireOrbAlt")
@@ -224,8 +225,9 @@ function mod:OnDebuffAdd(id, spellId)
       electroshockOnX = self.L["electroshock.swap.other"]:format(targetName)
       sound = mod:GetSetting("SoundElectroshockSwap") == true and "Info"
     end
-
-    mod:AddMsg(messageId, electroshockOnX, 5, sound, "Red")
+    if isOnMyself or mod:GetSetting("MessageElectroshockSwap") then
+      mod:AddMsg(messageId, electroshockOnX, 5, sound, "Red")
+    end
   end
 end
 
