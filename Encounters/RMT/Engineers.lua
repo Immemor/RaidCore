@@ -35,18 +35,18 @@ mod:RegisterEnglishLocale({
     ["cast.electroshock"] = "Electroshock",
     ["cast.rocket_jump"] = "Rocket Jump",
     -- Messages.
-    ["message.electroshock.next"] = "Next Electroshock in",
-    ["message.liquidate.next"] = "Next Liquidate in",
-    ["message.liquidate.stack"] = "Stack",
-    ["message.electroshock.swap.other"] = "%s SWAP TO WARRIOR",
-    ["message.electroshock.swap.you"] = "YOU SWAP TO WARRIOR",
-    ["message.fire_orb.next"] = "Next Fire Orb in",
-    ["message.fire_orb.you"] = "FIRE ORB ON YOU",
-    ["message.fire_orb.spawned"] = "Fire Orb spawned",
-    ["message.fire_orb.pop.timer"] = "Fire Orb is safe to pop in",
-    ["message.fire_orb.pop.msg"] = "Pop the Fire Orb!",
-    ["message.core.health.high.warning"] = "%s pillar at 85%%!",
-    ["message.core.health.low.warning"] = "%s pillar at 15%%!"
+    ["msg.electroshock.next"] = "Next Electroshock in",
+    ["msg.liquidate.next"] = "Next Liquidate in",
+    ["msg.liquidate.stack"] = "Stack",
+    ["msg.electroshock.swap.other"] = "%s SWAP TO WARRIOR",
+    ["msg.electroshock.swap.you"] = "YOU SWAP TO WARRIOR",
+    ["msg.fire_orb.next"] = "Next Fire Orb in",
+    ["msg.fire_orb.you"] = "FIRE ORB ON YOU",
+    ["msg.fire_orb.spawned"] = "Fire Orb spawned",
+    ["msg.fire_orb.pop.timer"] = "Fire Orb is safe to pop in",
+    ["msg.fire_orb.pop.msg"] = "Pop the Fire Orb!",
+    ["msg.core.health.high.warning"] = "%s pillar at 85%%!",
+    ["msg.core.health.low.warning"] = "%s pillar at 15%%!"
   })
 ----------------------------------------------------------------------------------------------------
 -- Constants.
@@ -147,8 +147,8 @@ function mod:OnBossEnable()
     coreUnit.healthWarning = false
   end
 
-  mod:AddTimerBar("NEXT_ELEKTROSHOCK_TIMER", self.L["message.electroshock.next"], FIRST_ELECTROSHOCK_TIMER)
-  mod:AddTimerBar("NEXT_LIQUIDATE_TIMER", self.L["message.liquidate.next"], FIRST_LIQUIDATE_TIMER)
+  mod:AddTimerBar("NEXT_ELEKTROSHOCK_TIMER", self.L["msg.electroshock.next"], FIRST_ELECTROSHOCK_TIMER)
+  mod:AddTimerBar("NEXT_LIQUIDATE_TIMER", self.L["msg.liquidate.next"], FIRST_LIQUIDATE_TIMER)
 end
 
 function mod:OnBossDisable()
@@ -222,10 +222,10 @@ function mod:OnDebuffAdd(id, spellId)
     local messageId = string.format("ELECTROSHOCK_MSG_%s", targetName)
     local sound
     if isOnMyself then
-      electroshockOnX = self.L["message.electroshock.swap.you"]
+      electroshockOnX = self.L["msg.electroshock.swap.you"]
       sound = mod:GetSetting("SoundElectroshockSwapYou") == true and "Burn"
     else
-      electroshockOnX = self.L["message.electroshock.swap.other"]:format(targetName)
+      electroshockOnX = self.L["msg.electroshock.swap.other"]:format(targetName)
       sound = mod:GetSetting("SoundElectroshockSwap") == true and "Info"
     end
     if isOnMyself or mod:GetSetting("MessageElectroshockSwap") then
@@ -292,10 +292,10 @@ mod:RegisterUnitEvents({
         coreUnit.healthWarning = false
       elseif percent >= 85 and not coreUnit.healthWarning then
         coreUnit.healthWarning = true
-        mod:AddMsg("CORE_HEALTH_HIGH_WARN", self.L["message.core.health.high.warning"]:format(name), 5, mod:GetSetting("SoundCoreHealthWarning") and "Info")
+        mod:AddMsg("CORE_HEALTH_HIGH_WARN", self.L["msg.core.health.high.warning"]:format(name), 5, mod:GetSetting("SoundCoreHealthWarning") and "Info")
       elseif percent <= 15 and not coreUnit.healthWarning and mod:IsPlayerOnPlatform(coreId) then
         coreUnit.healthWarning = true
-        mod:AddMsg("CORE_HEALTH_LOW_WARN", self.L["message.core.health.low.warning"]:format(name), 5, mod:GetSetting("SoundCoreHealthWarning") and "Inferno")
+        mod:AddMsg("CORE_HEALTH_LOW_WARN", self.L["msg.core.health.low.warning"]:format(name), 5, mod:GetSetting("SoundCoreHealthWarning") and "Inferno")
       end
     end
   }
@@ -306,7 +306,7 @@ mod:RegisterUnitEvents("unit.warrior",{
     ["OnCastStart"] = function (self, _, castName)
       if self.L["cast.liquidate"] == castName then
         if mod:IsPlayerOnPlatform(engineerUnits[WARRIOR].location) then
-          mod:AddMsg("LIQUIDATE_MSG", self.L["message.liquidate.stack"], 5, mod:GetSetting("SoundLiquidate") == true and "Info")
+          mod:AddMsg("LIQUIDATE_MSG", self.L["msg.liquidate.stack"], 5, mod:GetSetting("SoundLiquidate") == true and "Info")
         end
       end
     end,
@@ -316,7 +316,7 @@ mod:RegisterUnitEvents("unit.warrior",{
       end
       if self.L["cast.liquidate"] == castName then
         mod:RemoveTimerBar("NEXT_LIQUIDATE_TIMER")
-        mod:AddTimerBar("NEXT_LIQUIDATE_TIMER", self.L["message.liquidate.next"], LIQUIDATE_TIMER)
+        mod:AddTimerBar("NEXT_LIQUIDATE_TIMER", self.L["msg.liquidate.next"], LIQUIDATE_TIMER)
       end
     end,
   }
@@ -349,14 +349,14 @@ mod:RegisterUnitEvents("unit.engineer",{
     ["OnCastEnd"] = function (self, _, castName)
       if self.L["cast.rocket_jump"] == castName then
         mod:RemoveTimerBar("NEXT_ELEKTROSHOCK_TIMER")
-        mod:AddTimerBar("NEXT_ELEKTROSHOCK_TIMER", self.L["message.electroshock.next"], JUMP_ELECTROSHOCK_TIMER)
+        mod:AddTimerBar("NEXT_ELEKTROSHOCK_TIMER", self.L["msg.electroshock.next"], JUMP_ELECTROSHOCK_TIMER)
       end
       if self.L["cast.electroshock"] == castName then
         if mod:GetSetting("LineElectroshock") then
           core:DropPixie("ELECTROSHOCK_PIXIE")
         end
         mod:RemoveTimerBar("NEXT_ELEKTROSHOCK_TIMER")
-        mod:AddTimerBar("NEXT_ELEKTROSHOCK_TIMER", self.L["message.electroshock.next"], ELECTROSHOCK_TIMER)
+        mod:AddTimerBar("NEXT_ELEKTROSHOCK_TIMER", self.L["msg.electroshock.next"], ELECTROSHOCK_TIMER)
       end
     end,
   }
@@ -364,7 +364,7 @@ mod:RegisterUnitEvents("unit.engineer",{
 
 function mod:PopFireOrb()
   if mod:IsPlayerOnPlatform(FUSION_CORE) then
-    mod:AddMsg("FIRE_ORB_POP_MSG", self.L["message.fire_orb.pop.msg"], 5, mod:GetSetting("SoundFireOrbPop") == true and "Alarm")
+    mod:AddMsg("FIRE_ORB_POP_MSG", self.L["msg.fire_orb.pop.msg"], 5, mod:GetSetting("SoundFireOrbPop") == true and "Alarm")
   end
 end
 
@@ -372,8 +372,8 @@ mod:RegisterUnitEvents("unit.fire_orb",{
     ["OnUnitCreated"] = function (self, id, unit)
       core:WatchUnit(unit)
       mod:RemoveTimerBar("NEXT_FIRE_ORB_TIMER")
-      mod:AddTimerBar("NEXT_FIRE_ORB_TIMER", self.L["message.fire_orb.next"], NEXT_FIRE_ORB_TIMER)
-      mod:AddTimerBar(string.format("FIRE_ORB_SAFE_TIMER %d", id), self.L["message.fire_orb.pop.timer"], FIRE_ORB_SAFE_TIMER, false, "Red", mod.PopFireOrb, mod)
+      mod:AddTimerBar("NEXT_FIRE_ORB_TIMER", self.L["msg.fire_orb.next"], NEXT_FIRE_ORB_TIMER)
+      mod:AddTimerBar(string.format("FIRE_ORB_SAFE_TIMER %d", id), self.L["msg.fire_orb.pop.timer"], FIRE_ORB_SAFE_TIMER, false, "Red", mod.PopFireOrb, mod)
       fireOrbTargetTestTimer:Start()
       orbUnits[id] = {
         unit = unit,
@@ -398,9 +398,9 @@ function mod:RegisterOrbTarget()
       local target = orbUnit.unit:GetTarget()
       local isOnMyself = target == player.unit
       if isOnMyself then
-        mod:AddMsg("DISCHARGED_PLASMA_MSG", self.L["message.fire_orb.you"], 5, mod:GetSetting("SoundFireOrb") == true and "RunAway")
+        mod:AddMsg("DISCHARGED_PLASMA_MSG", self.L["msg.fire_orb.you"], 5, mod:GetSetting("SoundFireOrb") == true and "RunAway")
       elseif mod:IsPlayerOnPlatform(FUSION_CORE) then
-        mod:AddMsg("DISCHARGED_PLASMA_MSG", self.L["message.fire_orb.spawned"], 2, mod:GetSetting("SoundFireOrbAlt") == true and "Info")
+        mod:AddMsg("DISCHARGED_PLASMA_MSG", self.L["msg.fire_orb.spawned"], 2, mod:GetSetting("SoundFireOrbAlt") == true and "Info")
       end
     end
   end
