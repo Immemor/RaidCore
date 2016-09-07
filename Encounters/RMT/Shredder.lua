@@ -39,17 +39,17 @@ mod:RegisterEnglishLocale({
     -- Datachron messages.
     ["chron.shredder.starting"] = "WARNING: THE SHREDDER IS STARTING!",
     -- Cast names.
-    ["cast.swabbie_swoop"] = "Swabbie Swoop",
+    ["cast.swabbie.swoop"] = "Swabbie Swoop",
     ["cast.swabbie.knockback"] = "Risen Repellent",
     ["cast.miniboss.crush"] = "Crush",
     ["cast.miniboss.gravedigger"] = "Gravedigger",
     ["cast.miniboss.deathwail"] = "Deathwail",
     ["cast.nabber.lash"] = "Necrotic Lash",
     -- Messages.
-    ["msg.knockback"] = "KNOCKBACK",
-    ["msg.walking"] = "Walking %s",
-    ["msg.walking.direction.north"] = "North",
-    ["msg.walking.direction.south"] = "South",
+    ["msg.swabbie.knockback"] = "KNOCKBACK",
+    ["msg.swabbie.walking"] = "Walking %s",
+    ["msg.swabbie.walking.direction.north"] = "North",
+    ["msg.swabbie.walking.direction.south"] = "South",
     ["msg.bile.stacks"] = "%d BILE STACKS!",
     ["msg.saw.middle"] = "SAW IN MIDDLE",
     ["msg.saw.safe_spot"] = "SAFE SPOT %s",
@@ -193,14 +193,14 @@ function mod:NextAddWave()
 end
 
 function mod:PhaseChange()
-  local text = self.L["msg.walking"]
+  local text = self.L["msg.swabbie.walking"]
   local walkingDirection
   if phase == SHREDDER then
     phase = WALKING
-    walkingDirection = self.L["msg.walking.direction.north"]
+    walkingDirection = self.L["msg.swabbie.walking.direction.north"]
     mod:NextAddWave()
   else
-    walkingDirection = self.L["msg.walking.direction.south"]
+    walkingDirection = self.L["msg.swabbie.walking.direction.south"]
     phase = SHREDDER
     firstShredderSaw = nil
     secondShredderSaw = nil
@@ -209,7 +209,7 @@ function mod:PhaseChange()
 end
 
 function mod:StartProgressBar()
-  local messageText = self.L["msg.walking"]:format(self.L["msg.walking.direction.north"])
+  local messageText = self.L["msg.swabbie.walking"]:format(self.L["msg.swabbie.walking.direction.north"])
   mod:AddProgressBar("WALKING_PROGRESS", messageText, mod.GetWalkingProgress, mod, mod.PhaseChange)
   mod:NextAddWave()
   startProgressBarTimer:Stop()
@@ -262,11 +262,11 @@ mod:RegisterUnitEvents("unit.swabbie",{
     end,
     ["OnCastStart"] = function (self, _, castName)
       if self.L["cast.swabbie.knockback"] == castName then
-        mod:AddMsg("KNOCKBACK", self.L["msg.knockback"], 2)
+        mod:AddMsg("KNOCKBACK", self.L["msg.swabbie.knockback"], 2)
       end
     end,
     ["OnCastEnd"] = function (self, _, castName)
-      if self.L["cast.swabbie_swoop"] == castName then
+      if self.L["cast.swabbie.swoop"] == castName then
         startProgressBarTimer = ApolloTimer.Create(1, true, "StartProgressBar", mod)
         startProgressBarTimer:Start()
       end
