@@ -108,9 +108,10 @@ function EncounterPrototype:RegisterUnitEvent(sUnitName, sMethodName, fHandler)
   assert(type(sUnitName) == "string")
   assert(type(sMethodName) == "string")
   assert(type(fHandler) == "function")
+  sUnitName = self.L[sUnitName]
   self.tUnitEvents[sMethodName] = self.tUnitEvents[sMethodName] or {}
-  self.tUnitEvents[sMethodName][self.L[sUnitName]] = self.tUnitEvents[sMethodName][self.L[sUnitName]] or {}
-  table.insert(self.tUnitEvents[sMethodName][self.L[sUnitName]], fHandler)
+  self.tUnitEvents[sMethodName][sUnitName] = self.tUnitEvents[sMethodName][sUnitName] or {}
+  table.insert(self.tUnitEvents[sMethodName][sUnitName], fHandler)
 end
 
 -- Add a message to screen.
