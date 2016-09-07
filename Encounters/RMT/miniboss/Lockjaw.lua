@@ -27,6 +27,7 @@ mod:RegisterEnglishLocale({
 -- Settings.
 ----------------------------------------------------------------------------------------------------
 mod:RegisterDefaultSetting("CrosshairTethers")
+mod:RegisterDefaultSetting("SoundShackles")
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
@@ -37,7 +38,7 @@ mod:RegisterUnitEvents("Chief Warden Lockjaw",{
     end,
     ["OnCastStart"] = function (self, _, castName)
       if self.L["Blaze Shackles"] == castName then
-        mod:AddMsg("CIRCLES", "DODGE CIRCLES", 5, "Info")
+        mod:AddMsg("CIRCLES", "DODGE CIRCLES", 5, mod:GetSetting("SoundShackles") == true and "Info")
       end
     end,
   }
