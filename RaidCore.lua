@@ -115,7 +115,7 @@ local function OnEncounterDatachronEvents(sMethod, ...)
       local result = nil
 
       if sMatch == "EQUAL" then
-        result = sSearchMessage == sMessage
+        result = sSearchMessage == sMessage or nil
       elseif sMatch == "FIND" then
         result = sMessage:find(sSearchMessage)
       elseif sMatch == "MATCH" then
