@@ -71,15 +71,14 @@ end
 -- @param tEventsHandlers Table of Events/Handlers pairs
 function EncounterPrototype:RegisterUnitEvents(sUnitName, tEventsHandlers)
   assert(type(sUnitName) == "string" or type(sUnitName) == "table")
-  if type(sUnitName) == "table" then
-    for _, sName in pairs(sUnitName) do
-      for sMethodName, fHander in pairs(tEventsHandlers) do
-        self:RegisterUnitEvent(sName, sMethodName, fHander)
-      end
-    end
-  else
+
+  if type(sUnitName) == "string" then
+    sUnitName = {sUnitName}
+  end
+
+  for _, sName in pairs(sUnitName) do
     for sMethodName, fHander in pairs(tEventsHandlers) do
-      self:RegisterUnitEvent(sUnitName, sMethodName, fHander)
+      self:RegisterUnitEvent(sName, sMethodName, fHander)
     end
   end
 end
