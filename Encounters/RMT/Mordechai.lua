@@ -14,15 +14,15 @@ if not mod then return end
 ----------------------------------------------------------------------------------------------------
 -- Registering combat.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterTrigMob("ALL", { "Mordechai Redmoon" })
+mod:RegisterTrigMob("ALL", { "unit.mordechai" })
 mod:RegisterEnglishLocale({
     -- Unit names.
-    ["Mordechai Redmoon"] = "Mordechai Redmoon"
+    ["unit.mordechai"] = "Mordechai Redmoon"
   })
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterUnitEvents("Mordechai Redmoon",{
+mod:RegisterUnitEvents("unit.mordechai",{
     ["OnUnitCreated"] = function (_, _, unit)
       core:AddUnit(unit)
       core:WatchUnit(unit)

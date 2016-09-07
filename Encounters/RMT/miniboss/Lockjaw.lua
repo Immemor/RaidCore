@@ -14,14 +14,15 @@ if not mod then return end
 ----------------------------------------------------------------------------------------------------
 -- Registering combat.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterTrigMob("ALL", { "Chief Warden Lockjaw" })
+mod:RegisterTrigMob("ALL", { "unit.lockjaw" })
 mod:RegisterEnglishLocale({
     -- Unit names.
-    ["Chief Warden Lockjaw"] = "Chief Warden Lockjaw",
-    ["Hostile Invisible Unit for Fields (0 hit radius)"] = "Hostile Invisible Unit for Fields (0 hit radius)",
-    ["Blaze Shackle"] = "Blaze Shackle",
+    ["unit.lockjaw"] = "Chief Warden Lockjaw",
+    ["unit.shackle"] = "Blaze Shackle",
     -- Cast names.
-    ["Blaze Shackles"] = "Blaze Shackles",
+    ["cast.shackle"] = "Blaze Shackles",
+    -- Messages.
+    ["msg.shackle.dodge"] = "DODGE CIRCLES",
   })
 ----------------------------------------------------------------------------------------------------
 -- Settings.
@@ -31,20 +32,20 @@ mod:RegisterDefaultSetting("SoundShackles")
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterUnitEvents("Chief Warden Lockjaw",{
+mod:RegisterUnitEvents("unit.lockjaw",{
     ["OnUnitCreated"] = function (_, _, unit)
       core:AddUnit(unit)
       core:WatchUnit(unit)
     end,
     ["OnCastStart"] = function (self, _, castName)
-      if self.L["Blaze Shackles"] == castName then
-        mod:AddMsg("CIRCLES", "DODGE CIRCLES", 5, mod:GetSetting("SoundShackles") == true and "Info")
+      if self.L["cast.shackle"] == castName then
+        mod:AddMsg("CIRCLES", self.L["msg.shackle.dodge"], 5, mod:GetSetting("SoundShackles") == true and "Info")
       end
     end,
   }
 )
 
-mod:RegisterUnitEvents("Blaze Shackle",{
+mod:RegisterUnitEvents("unit.shackle",{
     ["OnUnitCreated"] = function (_, id)
       if mod:GetSetting("CrosshairTethers") then
         core:AddPicture(id, id, "Crosshair", 25)
