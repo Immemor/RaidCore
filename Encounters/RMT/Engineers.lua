@@ -93,6 +93,13 @@ local ENGINEER_START_LOCATION = {
 -- Functions.
 ----------------------------------------------------------------------------------------------------
 local GetUnitById = GameLib.GetUnitById
+local function TableLength(table)
+  local count = 0
+  for _, _ in pairs(table) do
+    count = count + 1
+  end
+  return count
+end
 ----------------------------------------------------------------------------------------------------
 -- Locals.
 ----------------------------------------------------------------------------------------------------
@@ -263,7 +270,7 @@ mod:RegisterUnitEvents({
           location = ENGINEER_START_LOCATION[engineerId],
         }
       end
-      if #coreUnits == 4 and #engineerUnits == 2 then
+      if TableLength(coreUnits) == 4 and TableLength(engineerUnits) == 2 then
         mod:AddUnits()
       end
     end,
