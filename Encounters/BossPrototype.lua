@@ -163,6 +163,10 @@ function EncounterPrototype:AddTimerBar(sKey, sEnglishText, nDuration, bEmphasiz
   RaidCore:AddTimerBar(sKey, sLocalText, nDuration, tCallback, tOptions)
 end
 
+function EncounterPrototype:ExtendTimerBar(sKey, nDurationToAdd)
+  RaidCore:ExtendTimerBar(sKey, nDurationToAdd)
+end
+
 -- Remove a timer bar if exist.
 -- @param sKey Index to remove.
 function EncounterPrototype:RemoveTimerBar(sKey)
