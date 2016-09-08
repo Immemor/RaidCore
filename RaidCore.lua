@@ -82,10 +82,22 @@ local empCD, empTimer = 5, nil
 ----------------------------------------------------------------------------------------------------
 -- Privates functions
 ----------------------------------------------------------------------------------------------------
+local function IsDeepNil (obj, ...)
+  if obj == nil then
+    return true
+  end
+  local n = select('#', ...)
+  for i = 1, n do
+    obj = obj[select(i, ...)]
+    if obj == nil then
+      return true
+    end
+  end
+  return false
+end
+
 local function OnEncounterUnitEvents(sMethod, ...)
-  if _tCurrentEncounter == nil or
-  _tCurrentEncounter.tUnitEvents == nil or
-  _tCurrentEncounter.tUnitEvents[sMethod] == nil or
+  if IsDeepNil(_tCurrentEncounter, "tUnitEvents", sMethod) or
   EVENT_UNIT_NAME_INDEX[sMethod] == nil then
     return
   end
@@ -99,8 +111,7 @@ local function OnEncounterUnitEvents(sMethod, ...)
 end
 
 local function OnEncounterDatachronEvents(sMethod, ...)
-  if sMethod ~= "OnDatachron" or _tCurrentEncounter == nil or
-  _tCurrentEncounter.tDatachronEvents == nil then
+  if sMethod ~= "OnDatachron" or IsDeepNil(_tCurrentEncounter, "tDatachronEvents") then
     return
   end
 
