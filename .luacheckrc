@@ -99,4 +99,5 @@ globals = {
   "Vector3",
   "XmlDoc",
   "Print",
+  "Event_FireGenericEvent",
 }
