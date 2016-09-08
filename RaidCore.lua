@@ -46,6 +46,15 @@ local MYCOLORS = {
 local MAIN_FSM__SEARCH = 1
 local MAIN_FSM__RUNNING = 2
 
+local EVENT_UNIT_NAME_INDEX = {
+  ["OnUnitCreated"] = 3,
+  ["OnUnitDestroyed"] = 3,
+  ["OnCastStart"] = 4,
+  ["OnCastEnd"] = 5,
+  ["OnHealthChanged"] = 3,
+  ["OnEnteredCombat"] = 3,
+}
+
 ----------------------------------------------------------------------------------------------------
 -- Privates variables.
 ----------------------------------------------------------------------------------------------------
@@ -74,23 +83,8 @@ local function OnEncounterUnitEvents(sMethod, ...)
   end
 
   local tEncounter = nil
-  if sMethod == "OnUnitCreated" then
-    local nId, tUnit, sName = ...
-    tEncounter = _tCurrentEncounter.tUnitEvents[sMethod][sName]
-  elseif sMethod == "OnUnitDestroyed" then
-    local nId, tUnit, sName = ...
-    tEncounter = _tCurrentEncounter.tUnitEvents[sMethod][sName]
-  elseif sMethod == "OnCastStart" then
-    local nId, sCastName, nCastEndTime, sName = ...
-    tEncounter = _tCurrentEncounter.tUnitEvents[sMethod][sName]
-  elseif sMethod == "OnCastEnd" then
-    local nId, sCastName, isInterrupted, nCastEndTime, sName = ...
-    tEncounter = _tCurrentEncounter.tUnitEvents[sMethod][sName]
-  elseif sMethod == "OnHealthChanged" then
-    local nId, nPourcent, sName = ...
-    tEncounter = _tCurrentEncounter.tUnitEvents[sMethod][sName]
-  elseif sMethod == "OnEnteredCombat" then
-    local nId, tUnit, sName, bInCombat = ...
+  if EVENT_UNIT_NAME_INDEX[sMethod] then
+    local sName = select(EVENT_UNIT_NAME_INDEX[sMethod], ...)
     tEncounter = _tCurrentEncounter.tUnitEvents[sMethod][sName]
   end
 
