@@ -243,13 +243,20 @@ function TimerManager:AddBar(sKey, sText, nDuration, tCallback, tOptions)
 end
 
 function TimerManager:ExtendBar(sKey, nDurationToAdd)
+  -- TODO Make it work on dead timers.
   assert(type(sKey) == "string")
   assert(type(nDurationToAdd) == "number")
   if nDurationToAdd > 0 then
     local tBar = self.tBars[sKey]
     if tBar ~= nil then
+      local nNewDuration = tBar.nDuration + nDurationToAdd
       local nNewEndTime = tBar.nEndTime + nDurationToAdd
       tBar.nEndTime = nNewEndTime
+      tBar.wndProgressBar:SetMax(nNewDuration)
+      tBar.wndMain:SetData(nNewEndTime)
+
+      local nCurrentTime = GetGameTime()
+      self:UpdateBar(sKey, tBar, nCurrentTime)
     end
   end
 end
