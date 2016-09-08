@@ -299,9 +299,7 @@ end
 
 function EncounterPrototype:IsSpell2Dispel(nId)
   if self.tDispelInfo[nId] then
-    for k,v in next, self.tDispelInfo[nId] do
-      return true
-    end
+    return next(self.tDispelInfo[nId]) ~= nil
   end
   return false
 end
