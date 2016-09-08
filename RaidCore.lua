@@ -88,15 +88,15 @@ local function OnEncounterUnitEvents(sMethod, ...)
     return
   end
 
-  local tEncounter = nil
+  local tHandlers = nil
   if EVENT_UNIT_NAME_INDEX[sMethod] then
     local sName = select(EVENT_UNIT_NAME_INDEX[sMethod], ...)
-    tEncounter = _tCurrentEncounter.tUnitEvents[sMethod][sName]
+    tHandlers = _tCurrentEncounter.tUnitEvents[sMethod][sName]
   end
 
-  if tEncounter then
-    for _, fEncounter in pairs(tEncounter) do
-      fEncounter(_tCurrentEncounter, ...)
+  if tHandlers then
+    for _, fHandler in pairs(tHandlers) do
+      fHandler(_tCurrentEncounter, ...)
     end
   end
 end
