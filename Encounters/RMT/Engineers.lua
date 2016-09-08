@@ -274,6 +274,11 @@ mod:RegisterUnitEvents({
         mod:AddUnits()
       end
     end,
+    ["OnUnitDestroyed"] = function (_, _, _, name)
+      if ENGINEER_NAMES[name] ~= nil then
+        engineerUnits[ENGINEER_NAMES[name]] = nil
+      end
+    end,
   }
 )
 
