@@ -244,12 +244,6 @@ function EncounterPrototype:OnDisable()
   self.tDispelInfo = nil
 end
 
-function EncounterPrototype:Reboot(isWipe)
-  -- Reboot covers everything including hard module reboots (clicking the minimap icon)
-  self:Disable()
-  self:Enable()
-end
-
 function EncounterPrototype:RegisterEnglishLocale(Locales)
   RegisterLocale(self, "enUS", Locales)
 end
