@@ -53,6 +53,12 @@ local EVENT_UNIT_NAME_INDEX = {
   ["OnCastEnd"] = 5,
   ["OnHealthChanged"] = 3,
   ["OnEnteredCombat"] = 3,
+  ["OnBuffAdd"] = 5,
+  ["OnBuffUpdate"] = 6,
+  ["OnBuffRemove"] = 3,
+  ["OnDebuffAdd"] = 5,
+  ["OnDebuffUpdate"] = 6,
+  ["OnDebuffRemove"] = 3,
 }
 
 ----------------------------------------------------------------------------------------------------
