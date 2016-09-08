@@ -83,21 +83,18 @@ local empCD, empTimer = 5, nil
 -- Privates functions
 ----------------------------------------------------------------------------------------------------
 local function OnEncounterUnitEvents(sMethod, ...)
-  if _tCurrentEncounter == nil or _tCurrentEncounter.tUnitEvents == nil or
-  _tCurrentEncounter.tUnitEvents[sMethod] == nil then
+  if _tCurrentEncounter == nil or
+  _tCurrentEncounter.tUnitEvents == nil or
+  _tCurrentEncounter.tUnitEvents[sMethod] == nil or
+  EVENT_UNIT_NAME_INDEX[sMethod] == nil then
     return
   end
 
-  local tHandlers = nil
-  if EVENT_UNIT_NAME_INDEX[sMethod] then
-    local sName = select(EVENT_UNIT_NAME_INDEX[sMethod], ...)
-    tHandlers = _tCurrentEncounter.tUnitEvents[sMethod][sName]
-  end
+  local sName = select(EVENT_UNIT_NAME_INDEX[sMethod], ...)
+  local tHandlers = _tCurrentEncounter.tUnitEvents[sMethod][sName] or {}
 
-  if tHandlers then
-    for _, fHandler in pairs(tHandlers) do
-      fHandler(_tCurrentEncounter, ...)
-    end
+  for _, fHandler in pairs(tHandlers) do
+    fHandler(_tCurrentEncounter, ...)
   end
 end
 
