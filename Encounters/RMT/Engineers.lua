@@ -135,11 +135,9 @@ function mod:OnBossEnable()
   orbUnits = {}
   --locales
   for name, id in pairs(CORE_NAMES) do
-    CORE_NAMES[name] = nil
     CORE_NAMES[self.L[name]] = id
   end
   for name, id in pairs(ENGINEER_NAMES) do
-    ENGINEER_NAMES[name] = nil
     ENGINEER_NAMES[self.L[name]] = id
   end
 
