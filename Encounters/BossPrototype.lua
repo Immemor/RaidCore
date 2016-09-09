@@ -67,17 +67,18 @@ end
 -- Register events to a single unit or a list of units
 -- @param sUnitName String or table of Strings of unit names.
 -- @param tEventsHandlers Table of Events/Handlers pairs
-function EncounterPrototype:RegisterUnitEvents(sUnitName, tEventsHandlers)
-  assert(type(sUnitName) == "string" or type(sUnitName) == "table")
+function EncounterPrototype:RegisterUnitEvents(tUnitNames, tEventsHandlers)
+  assert(type(tUnitNames) == "string" or type(tUnitNames) == "table")
   assert(type(tEventsHandlers) == "table")
 
-  if type(sUnitName) == "string" then
-    sUnitName = {sUnitName}
+  if type(tUnitNames) == "string" then
+    tUnitNames = {tUnitNames}
   end
-
-  for _, sName in pairs(sUnitName) do
-    for sMethodName, fHandler in pairs(tEventsHandlers) do
-      self:RegisterUnitEvent(sName, sMethodName, fHandler)
+  local nSize = #tUnitNames
+  for i = 1, nSize do
+    local sUnitName = tUnitNames[i]
+    for sMethodName, fHandler in next, tEventsHandlers do
+      self:RegisterUnitEvent(sUnitName, sMethodName, fHandler)
     end
   end
 end
