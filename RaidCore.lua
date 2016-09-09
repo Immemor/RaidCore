@@ -109,33 +109,17 @@ local empCD, empTimer = 5, nil
 ----------------------------------------------------------------------------------------------------
 -- Privates functions
 ----------------------------------------------------------------------------------------------------
-local function DeepGet (obj, ...)
-  if obj == nil then
-    return nil
-  end
-  local n = select('#', ...)
-  for i = 1, n do
-    local key = select(i, ...)
-    if key == nil then
-      return nil
-    end
-    obj = obj[key]
-    if obj == nil then
-      return nil
-    end
-  end
-  return obj
-end
-
 local function OnEncounterUnitEvents(sMethod, ...)
   if EVENT_UNIT_NAME_INDEX[sMethod] == nil then
     return
   end
   local sName = select(EVENT_UNIT_NAME_INDEX[sMethod], ...)
-  local tHandlers = DeepGet(_tCurrentEncounter, "tUnitEvents", sMethod, sName) or {}
-
-  for _, fHandler in pairs(tHandlers) do
-    fHandler(_tCurrentEncounter, ...)
+  local tHandlers = _tCurrentEncounter.tUnitEvents
+  tHandlers = tHandlers and tHandlers[sMethod]
+  tHandlers = tHandlers and tHandlers[sName] or {}
+  local nSize = #tHandlers
+  for i = 1, nSize do
+    tHandlers[i](_tCurrentEncounter, ...)
   end
 end
 
@@ -145,9 +129,14 @@ local function OnEncounterUnitSpellEvents(sMethod, ...)
   end
   local sName = select(EVENT_UNIT_NAME_INDEX[sMethod], ...)
   local spellId = select(EVENT_UNIT_SPELL_ID_INDEX[sMethod], ...)
-  local tHandlers = DeepGet(_tCurrentEncounter, "tUnitSpellEvents", sMethod, sName, spellId) or {}
-  for _, fHandler in pairs(tHandlers) do
-    fHandler(_tCurrentEncounter, ...)
+
+  local tHandlers = _tCurrentEncounter.tUnitEvents
+  tHandlers = tHandlers and tHandlers[sMethod]
+  tHandlers = tHandlers and tHandlers[sName]
+  tHandlers = tHandlers and tHandlers[spellId] or {}
+  local nSize = #tHandlers
+  for i = 1, nSize do
+    tHandlers[i](_tCurrentEncounter, ...)
   end
 end
 
@@ -155,10 +144,12 @@ local function OnEncounterDatachronEvents(sMethod, ...)
   if sMethod ~= RaidCore.E.DATACHRON then
     return
   end
-  local tDatachronEvents = DeepGet(_tCurrentEncounter, "tDatachronEvents") or {}
-  for sSearchMessage, tEvents in pairs(tDatachronEvents) do
-    for _, tEvent in pairs(tEvents) do
-      local sMessage = ...
+  local tDatachronEvents = _tCurrentEncounter.tDatachronEvents or {}
+  local sMessage = ...
+  for sSearchMessage, tEvents in next, tDatachronEvents do
+    local nSize = #tEvents
+    for i = 1, nSize do
+      local tEvent = tEvents[i]
       local sMatch = tEvent.sMatch
       local fHandler = tEvent.fHandler
       local result = nil

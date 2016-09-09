@@ -123,10 +123,11 @@ function EncounterPrototype:RegisterUnitSpellEvents(tUnitNames, primaryKey, tEve
   if type(tUnitNames) == "string" then
     tUnitNames = {tUnitNames}
   end
-
-  for _, sUnitName in pairs(tUnitNames) do
+  local nSize = #tUnitNames
+  for i = 1, nSize do
+    local sUnitName = tUnitNames[i]
     local isEventFirst = SPELL_EVENTS[primaryKey] == true
-    for secondaryKey, fHandler in pairs(tEventHandlers) do
+    for secondaryKey, fHandler in next, tEventHandlers do
       local sMethodName = secondaryKey
       local sCastName = primaryKey
       if isEventFirst then
