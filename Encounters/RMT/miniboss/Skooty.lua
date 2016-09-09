@@ -20,9 +20,9 @@ mod:RegisterEnglishLocale({
     ["unit.skooty"] = "Assistant Technician Skooty",
     ["unit.jumpstart"] = "unit.jumpstart",
     -- Cast names.
-    ["cast.cannon"] = "Pulse Cannon",
+    ["cast.skooty.cannon"] = "Pulse Cannon",
     -- Messages.
-    ["msg.cannon.get_out"] = "GET OUT",
+    ["msg.skooty.cannon.get_out"] = "GET OUT",
   })
 ----------------------------------------------------------------------------------------------------
 -- Settings.
@@ -48,8 +48,8 @@ mod:RegisterUnitEvents("unit.skooty",{
       core:WatchUnit(unit)
     end,
     ["OnCastStart"] = function (self, _, castName)
-      if self.L["cast.cannon"] == castName then
-        mod:AddMsg("PULSECANNON", self.L["msg.cannon.get_out"], 5, mod:GetSetting("PulseCannon") == true and "RunAway")
+      if self.L["cast.skooty.cannon"] == castName then
+        mod:AddMsg("PULSECANNON", self.L["msg.skooty.cannon.get_out"], 5, mod:GetSetting("PulseCannon") == true and "RunAway")
       end
     end,
   }

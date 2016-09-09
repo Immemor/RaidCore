@@ -20,9 +20,9 @@ mod:RegisterEnglishLocale({
     ["unit.lockjaw"] = "Chief Warden Lockjaw",
     ["unit.shackle"] = "Blaze Shackle",
     -- Cast names.
-    ["cast.shackle"] = "Blaze Shackles",
+    ["cast.lockjaw.shackle"] = "Blaze Shackles",
     -- Messages.
-    ["msg.shackle.dodge"] = "DODGE CIRCLES",
+    ["msg.lockjaw.shackle.dodge"] = "DODGE CIRCLES",
   })
 ----------------------------------------------------------------------------------------------------
 -- Settings.
@@ -38,8 +38,8 @@ mod:RegisterUnitEvents("unit.lockjaw",{
       core:WatchUnit(unit)
     end,
     ["OnCastStart"] = function (self, _, castName)
-      if self.L["cast.shackle"] == castName then
-        mod:AddMsg("CIRCLES", self.L["msg.shackle.dodge"], 5, mod:GetSetting("SoundShackles") == true and "Info")
+      if self.L["cast.lockjaw.shackle"] == castName then
+        mod:AddMsg("CIRCLES", self.L["msg.lockjaw.shackle.dodge"], 5, mod:GetSetting("SoundShackles") == true and "Info")
       end
     end,
   }

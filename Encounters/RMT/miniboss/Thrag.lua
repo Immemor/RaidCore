@@ -20,9 +20,9 @@ mod:RegisterEnglishLocale({
     ["unit.thrag"] = "Chief Engine Scrubber Thrag",
     ["unit.jumpstart"] = "Jumpstart Charge",
     -- Cast names.
-    ["cast.gigavolt"] = "Gigavolt",
+    ["cast.thrag.gigavolt"] = "Gigavolt",
     -- Messages.
-    ["msg.gigavolt.get_out"] = "GET OUT",
+    ["msg.thrag.gigavolt.get_out"] = "GET OUT",
   })
 ----------------------------------------------------------------------------------------------------
 -- Settings.
@@ -53,8 +53,8 @@ mod:RegisterUnitEvents("unit.thrag",{
     end,
     ["OnCastStart"] = function (_, _, _)
       -- TODO: Redo
-      -- if self.L["cast.gigavolt"] == castName then
-      --   mod:AddMsg("GIGAVOLT", self.L["msg.gigavolt.get_out"], 5, mod:GetSetting("Gigavolt") == true and "RunAway")
+      -- if self.L["cast.thrag.gigavolt"] == castName then
+      -- mod:AddMsg("GIGAVOLT", self.L["msg.thrag.gigavolt.get_out"], 5, mod:GetSetting("Gigavolt") == true and "RunAway")
       -- end
     end,
   }
