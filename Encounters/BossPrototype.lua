@@ -76,8 +76,8 @@ function EncounterPrototype:RegisterUnitEvents(sUnitName, tEventsHandlers)
   end
 
   for _, sName in pairs(sUnitName) do
-    for sMethodName, fHander in pairs(tEventsHandlers) do
-      self:RegisterUnitEvent(sName, sMethodName, fHander)
+    for sMethodName, fHandler in pairs(tEventsHandlers) do
+      self:RegisterUnitEvent(sName, sMethodName, fHandler)
     end
   end
 end
