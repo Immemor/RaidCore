@@ -168,7 +168,7 @@ function EncounterPrototype:RegisterDatachronEvent(sSearchMessage, sMatch, fHand
   assert(type(fHandler) == "function")
   assert(sMatch == "MATCH" or sMatch == "FIND" or sMatch == "EQUAL")
   sSearchMessage = self.L[sSearchMessage]
-  self.tDatachronEvents[sSearchMessage] = self.tDatachronEvents[sSearchMessage] or {}
+  self.tDatachronEvents = DeepInit(self.tDatachronEvents, sSearchMessage)
   table.insert(self.tDatachronEvents[sSearchMessage], {fHandler = fHandler, sMatch = sMatch })
 end
 
@@ -183,8 +183,7 @@ function EncounterPrototype:RegisterUnitEvent(sUnitName, sMethodName, fHandler)
   assert(type(sMethodName) == "string")
   assert(type(fHandler) == "function")
   sUnitName = self.L[sUnitName]
-  self.tUnitEvents[sMethodName] = self.tUnitEvents[sMethodName] or {}
-  self.tUnitEvents[sMethodName][sUnitName] = self.tUnitEvents[sMethodName][sUnitName] or {}
+  self.tUnitEvents = DeepInit(self.tUnitEvents, sMethodName, sUnitName)
   table.insert(self.tUnitEvents[sMethodName][sUnitName], fHandler)
 end
 
