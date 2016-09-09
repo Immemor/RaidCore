@@ -242,6 +242,25 @@ function TimerManager:AddBar(sKey, sText, nDuration, tCallback, tOptions)
   end
 end
 
+function TimerManager:ExtendBar(sKey, nDurationToAdd)
+  -- TODO Make it work on dead timers.
+  assert(type(sKey) == "string")
+  assert(type(nDurationToAdd) == "number")
+  if nDurationToAdd > 0 then
+    local tBar = self.tBars[sKey]
+    if tBar ~= nil then
+      local nNewDuration = tBar.nDuration + nDurationToAdd
+      local nNewEndTime = tBar.nEndTime + nDurationToAdd
+      tBar.nEndTime = nNewEndTime
+      tBar.wndProgressBar:SetMax(nNewDuration)
+      tBar.wndMain:SetData(nNewEndTime)
+
+      local nCurrentTime = GetGameTime()
+      self:UpdateBar(sKey, tBar, nCurrentTime)
+    end
+  end
+end
+
 function TimerManager:UpdateBar(sKey, tBar, nCurrentTime)
   -- Is the timeout have been reached?
   if nCurrentTime < tBar.nEndTime then
@@ -744,6 +763,10 @@ end
 -- @param tOptions structure with many graphical options.
 function RaidCore:AddTimerBar(sKey, sText, nDuration, tCallBack, tOptions)
   TimerManager:_AddBar(sKey, sText, nDuration, tCallBack, tOptions)
+end
+
+function RaidCore:ExtendTimerBar(sKey, nDurationToAdd)
+  TimerManager:ExtendBar(sKey, nDurationToAdd)
 end
 
 function RaidCore:RemoveTimerBar(sKey)
