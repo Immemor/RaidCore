@@ -46,7 +46,7 @@ local MYCOLORS = {
 local MAIN_FSM__SEARCH = 1
 local MAIN_FSM__RUNNING = 2
 
-local EVENTS = {
+RaidCore.E = {
   UNIT_CREATED = "OnUnitCreated",
   UNIT_DESTROYED = "OnUnitDestroyed",
   ENTERED_COMBAT = "OnEnteredCombat",
@@ -63,18 +63,18 @@ local EVENTS = {
 }
 
 local EVENT_UNIT_NAME_INDEX = {
-  [EVENTS.UNIT_CREATED] = 3,
-  [EVENTS.UNIT_DESTROYED] = 3,
-  [EVENTS.CAST_START] = 4,
-  [EVENTS.CAST_END] = 5,
-  [EVENTS.HEALTH_CHANGED] = 3,
-  [EVENTS.ENTERED_COMBAT] = 3,
-  [EVENTS.BUFF_ADD] = 5,
-  [EVENTS.BUFF_UPDATE] = 6,
-  [EVENTS.BUFF_REMOVE] = 3,
-  [EVENTS.DEBUFF_ADD] = 5,
-  [EVENTS.DEBUFF_UPDATE] = 6,
-  [EVENTS.DEBUFF_REMOVE] = 3,
+  [RaidCore.E.UNIT_CREATED] = 3,
+  [RaidCore.E.UNIT_DESTROYED] = 3,
+  [RaidCore.E.CAST_START] = 4,
+  [RaidCore.E.CAST_END] = 5,
+  [RaidCore.E.HEALTH_CHANGED] = 3,
+  [RaidCore.E.ENTERED_COMBAT] = 3,
+  [RaidCore.E.BUFF_ADD] = 5,
+  [RaidCore.E.BUFF_UPDATE] = 6,
+  [RaidCore.E.BUFF_REMOVE] = 3,
+  [RaidCore.E.DEBUFF_ADD] = 5,
+  [RaidCore.E.DEBUFF_UPDATE] = 6,
+  [RaidCore.E.DEBUFF_REMOVE] = 3,
 }
 
 ----------------------------------------------------------------------------------------------------
@@ -243,20 +243,19 @@ function RaidCore:Print(sMessage)
 end
 
 function RaidCore:OnInitialize()
-  self.E = EVENTS
   _tMainFSMHandlers = {
     [MAIN_FSM__SEARCH] = {
       ["OnChangeWorld"] = self.SEARCH_OnCheckMapZone,
       ["OnSubZoneChanged"] = self.SEARCH_OnCheckMapZone,
-      [self.E.UNIT_CREATED] = self.SEARCH_OnUnitCreated,
-      [self.E.ENTERED_COMBAT] = self.SEARCH_OnEnteredCombat,
-      [self.E.UNIT_DESTROYED] = self.SEARCH_OnUnitDestroyed,
+      [RaidCore.E.UNIT_CREATED] = self.SEARCH_OnUnitCreated,
+      [RaidCore.E.ENTERED_COMBAT] = self.SEARCH_OnEnteredCombat,
+      [RaidCore.E.UNIT_DESTROYED] = self.SEARCH_OnUnitDestroyed,
       ["OnReceivedMessage"] = self.SEARCH_OnReceivedMessage,
     },
     [MAIN_FSM__RUNNING] = {
-      [self.E.ENTERED_COMBAT] = self.RUNNING_OnEnteredCombat,
+      [RaidCore.E.ENTERED_COMBAT] = self.RUNNING_OnEnteredCombat,
       ["OnReceivedMessage"] = self.RUNNING_OnReceivedMessage,
-      [self.E.UNIT_DESTROYED] = self.RUNNING_OnUnitDestroyed,
+      [RaidCore.E.UNIT_DESTROYED] = self.RUNNING_OnUnitDestroyed,
     },
   }
   _eCurrentFSM = MAIN_FSM__SEARCH
