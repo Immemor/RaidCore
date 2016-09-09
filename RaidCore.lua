@@ -77,6 +77,17 @@ local EVENT_UNIT_NAME_INDEX = {
   [RaidCore.E.DEBUFF_REMOVE] = 3,
 }
 
+local EVENT_UNIT_SPELL_ID_INDEX = {
+  [RaidCore.E.CAST_START] = 2,
+  [RaidCore.E.CAST_END] = 2,
+  [RaidCore.E.BUFF_ADD] = 2,
+  [RaidCore.E.BUFF_UPDATE] = 2,
+  [RaidCore.E.BUFF_REMOVE] = 2,
+  [RaidCore.E.DEBUFF_ADD] = 2,
+  [RaidCore.E.DEBUFF_UPDATE] = 2,
+  [RaidCore.E.DEBUFF_REMOVE] = 2,
+}
+
 ----------------------------------------------------------------------------------------------------
 -- Privates variables.
 ----------------------------------------------------------------------------------------------------
@@ -112,6 +123,24 @@ local function IsDeepNil (obj, ...)
   return false
 end
 
+local function DeepGet (obj, ...)
+  if obj == nil then
+    return nil
+  end
+  local n = select('#', ...)
+  for i = 1, n do
+    local key = select(i, ...)
+    if key == nil then
+      return nil
+    end
+    obj = obj[key]
+    if obj == nil then
+      return nil
+    end
+  end
+  return obj
+end
+
 local function OnEncounterUnitEvents(sMethod, ...)
   if IsDeepNil(_tCurrentEncounter, "tUnitEvents", sMethod) or
   EVENT_UNIT_NAME_INDEX[sMethod] == nil then
@@ -121,6 +150,15 @@ local function OnEncounterUnitEvents(sMethod, ...)
   local sName = select(EVENT_UNIT_NAME_INDEX[sMethod], ...)
   local tHandlers = _tCurrentEncounter.tUnitEvents[sMethod][sName] or {}
 
+  for _, fHandler in pairs(tHandlers) do
+    fHandler(_tCurrentEncounter, ...)
+  end
+end
+
+local function OnEncounterUnitSpellEvents(sMethod, ...)
+  local sName = select(EVENT_UNIT_NAME_INDEX[sMethod], ...)
+  local spellId = select(EVENT_UNIT_SPELL_ID_INDEX[sMethod], ...)
+  local tHandlers = DeepGet(_tCurrentEncounter, "tUnitSpellEvents", sMethod, sName, spellId) or {}
   for _, fHandler in pairs(tHandlers) do
     fHandler(_tCurrentEncounter, ...)
   end
@@ -160,6 +198,7 @@ local function OnEncounterHookGeneric(sMethod, ...)
   end
 
   OnEncounterUnitEvents(sMethod, ...)
+  OnEncounterUnitSpellEvents(sMethod, ...)
   OnEncounterDatachronEvents(sMethod, ...)
 end
 
