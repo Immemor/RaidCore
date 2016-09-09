@@ -37,6 +37,21 @@ local function RegisterLocale(tBoss, sLanguage, Locales)
   end
 end
 
+local function DeepInit (obj, ...)
+  if obj == nil then
+    obj = {}
+  end
+  local root = obj
+  for i = 1, select('#', ...) do
+    local key = select(i, ...)
+    if obj[key] == nil then
+      obj[key] = {}
+    end
+    obj = obj[key]
+  end
+  return root
+end
+
 ------------------------------------------------------------------------------
 -- Encounter Prototype.
 ------------------------------------------------------------------------------
