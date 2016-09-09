@@ -63,18 +63,18 @@ local EVENTS = {
 }
 
 local EVENT_UNIT_NAME_INDEX = {
-  ["OnUnitCreated"] = 3,
-  ["OnUnitDestroyed"] = 3,
-  ["OnCastStart"] = 4,
-  ["OnCastEnd"] = 5,
-  ["OnHealthChanged"] = 3,
-  ["OnEnteredCombat"] = 3,
-  ["OnBuffAdd"] = 5,
-  ["OnBuffUpdate"] = 6,
-  ["OnBuffRemove"] = 3,
-  ["OnDebuffAdd"] = 5,
-  ["OnDebuffUpdate"] = 6,
-  ["OnDebuffRemove"] = 3,
+  [EVENTS.UNIT_CREATED] = 3,
+  [EVENTS.UNIT_DESTROYED] = 3,
+  [EVENTS.CAST_START] = 4,
+  [EVENTS.CAST_END] = 5,
+  [EVENTS.HEALTH_CHANGED] = 3,
+  [EVENTS.ENTERED_COMBAT] = 3,
+  [EVENTS.BUFF_ADD] = 5,
+  [EVENTS.BUFF_UPDATE] = 6,
+  [EVENTS.BUFF_REMOVE] = 3,
+  [EVENTS.DEBUFF_ADD] = 5,
+  [EVENTS.DEBUFF_UPDATE] = 6,
+  [EVENTS.DEBUFF_REMOVE] = 3,
 }
 
 ----------------------------------------------------------------------------------------------------
@@ -127,7 +127,7 @@ local function OnEncounterUnitEvents(sMethod, ...)
 end
 
 local function OnEncounterDatachronEvents(sMethod, ...)
-  if sMethod ~= "OnDatachron" or IsDeepNil(_tCurrentEncounter, "tDatachronEvents") then
+  if sMethod ~= RaidCore.E.DATACHRON or IsDeepNil(_tCurrentEncounter, "tDatachronEvents") then
     return
   end
 
@@ -213,7 +213,7 @@ local function ProcessDelayedUnit()
     for nDelayedId, bInCombat in next, tDelayedList do
       local tUnit = GetUnitById(nDelayedId)
       if tUnit then
-        local s, sErrMsg = pcall(OnEncounterHookGeneric, "OnUnitCreated", nDelayedId, tUnit, nDelayedName)
+        local s, sErrMsg = pcall(OnEncounterHookGeneric, RaidCore.E.UNIT_CREATED, nDelayedId, tUnit, nDelayedName)
         if not s then
           if RaidCore.db.profile.bLUAErrorMessage then
             RaidCore:Print(sErrMsg)
@@ -221,7 +221,7 @@ local function ProcessDelayedUnit()
           Log:Add("ERROR", sErrMsg)
         end
         if bInCombat then
-          s, sErrMsg = pcall(OnEncounterHookGeneric, "OnEnteredCombat", nDelayedId, tUnit, nDelayedName, bInCombat)
+          s, sErrMsg = pcall(OnEncounterHookGeneric, RaidCore.E.ENTERED_COMBAT, nDelayedId, tUnit, nDelayedName, bInCombat)
           if not s then
             if RaidCore.db.profile.bLUAErrorMessage then
               RaidCore:Print(sErrMsg)
@@ -243,20 +243,20 @@ function RaidCore:Print(sMessage)
 end
 
 function RaidCore:OnInitialize()
-  self.e = EVENTS
+  self.E = EVENTS
   _tMainFSMHandlers = {
     [MAIN_FSM__SEARCH] = {
       ["OnChangeWorld"] = self.SEARCH_OnCheckMapZone,
       ["OnSubZoneChanged"] = self.SEARCH_OnCheckMapZone,
-      ["OnUnitCreated"] = self.SEARCH_OnUnitCreated,
-      ["OnEnteredCombat"] = self.SEARCH_OnEnteredCombat,
-      ["OnUnitDestroyed"] = self.SEARCH_OnUnitDestroyed,
+      [self.E.UNIT_CREATED] = self.SEARCH_OnUnitCreated,
+      [self.E.ENTERED_COMBAT] = self.SEARCH_OnEnteredCombat,
+      [self.E.UNIT_DESTROYED] = self.SEARCH_OnUnitDestroyed,
       ["OnReceivedMessage"] = self.SEARCH_OnReceivedMessage,
     },
     [MAIN_FSM__RUNNING] = {
-      ["OnEnteredCombat"] = self.RUNNING_OnEnteredCombat,
+      [self.E.ENTERED_COMBAT] = self.RUNNING_OnEnteredCombat,
       ["OnReceivedMessage"] = self.RUNNING_OnReceivedMessage,
-      ["OnUnitDestroyed"] = self.RUNNING_OnUnitDestroyed,
+      [self.E.UNIT_DESTROYED] = self.RUNNING_OnUnitDestroyed,
     },
   }
   _eCurrentFSM = MAIN_FSM__SEARCH
