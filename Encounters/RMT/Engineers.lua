@@ -46,7 +46,8 @@ mod:RegisterEnglishLocale({
     ["msg.fire_orb.pop.timer"] = "Fire Orb is safe to pop in",
     ["msg.fire_orb.pop.msg"] = "Pop the Fire Orb!",
     ["msg.core.health.high.warning"] = "%s pillar at 85%%!",
-    ["msg.core.health.low.warning"] = "%s pillar at 15%%!"
+    ["msg.core.health.low.warning"] = "%s pillar at 15%%!",
+    ["msg.rocket_jump.moving"] = "%s IS MOVING"
   })
 ----------------------------------------------------------------------------------------------------
 -- Constants.
@@ -195,7 +196,11 @@ function mod:GetUnitPlatform(unit)
   return location
 end
 
-function mod:OnEngiChangeLocation()
+function mod:OnEngiChangeLocation(_, _, newLocation)
+  if newLocation == FUSION_CORE then
+    mod:RemoveTimerBar("NEXT_FIRE_ORB_TIMER")
+    mod:AddTimerBar("NEXT_FIRE_ORB_TIMER", self.L["msg.fire_orb.next"], NEXT_FIRE_ORB_TIMER)
+  end
 end
 
 function mod:OnBuffRemove(_, spellId)
@@ -299,6 +304,10 @@ mod:RegisterUnitEvents({
   }
 )
 
+function mod:EngineerIsMoving(engineerName)
+  mod:AddMsg("BOSS_MOVING_PLATFORM", self.L["msg.rocket_jump.moving"]:format(self.L[engineerName]), 5, "Alarm")
+end
+
 -- Warrior
 mod:RegisterUnitEvents("unit.warrior",{
     ["OnCastStart"] = function (self, _, castName)
@@ -307,11 +316,12 @@ mod:RegisterUnitEvents("unit.warrior",{
           mod:AddMsg("LIQUIDATE_MSG", self.L["msg.warrior.liquidate.stack"], 5, mod:GetSetting("SoundLiquidate") == true and "Info")
         end
       end
+      if self.L["cast.rocket_jump"] == castName then
+        mod:EngineerIsMoving("unit.warrior")
+        mod:ExtendTimerBar("NEXT_LIQUIDATE_TIMER", 4)
+      end
     end,
     ["OnCastEnd"] = function (self, _, castName)
-      if self.L["cast.rocket_jump"] == castName then
-        mod:RemoveTimerBar("NEXT_LIQUIDATE_TIMER")
-      end
       if self.L["cast.warrior.liquidate"] == castName then
         mod:RemoveTimerBar("NEXT_LIQUIDATE_TIMER")
         mod:AddTimerBar("NEXT_LIQUIDATE_TIMER", self.L["msg.warrior.liquidate.next"], LIQUIDATE_TIMER)
@@ -342,6 +352,9 @@ mod:RegisterUnitEvents("unit.engineer",{
         if mod:IsPlayerOnPlatform(engineerUnits[ENGINEER].location) then
           mod:AddMsg("ELECTROSHOCK_CAST_MSG", self.L["cast.engineer.electroshock"], 5, mod:GetSetting("SoundElectroshock") == true and "Beware")
         end
+      end
+      if self.L["cast.rocket_jump"] == castName then
+          mod:EngineerIsMoving("unit.engineer")
       end
     end,
     ["OnCastEnd"] = function (self, _, castName)
