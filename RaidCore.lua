@@ -46,6 +46,22 @@ local MYCOLORS = {
 local MAIN_FSM__SEARCH = 1
 local MAIN_FSM__RUNNING = 2
 
+local EVENTS = {
+  UNIT_CREATED = "OnUnitCreated",
+  UNIT_DESTROYED = "OnUnitDestroyed",
+  ENTERED_COMBAT = "OnEnteredCombat",
+  BUFF_ADD = "OnBuffAdd",
+  BUFF_UPDATE = "OnBuffUpdate",
+  BUFF_REMOVE = "OnBuffRemove",
+  DEBUFF_ADD = "OnDebuffAdd",
+  DEBUFF_UPDATE = "OnDebuffUpdate",
+  DEBUFF_REMOVE = "OnDebuffRemove",
+  CAST_START = "OnCastStart",
+  CAST_END = "OnCastEnd",
+  HEALTH_CHANGED = "OnHealthChanged",
+  DATACHRON = "OnDatachron",
+}
+
 local EVENT_UNIT_NAME_INDEX = {
   ["OnUnitCreated"] = 3,
   ["OnUnitDestroyed"] = 3,
@@ -227,6 +243,7 @@ function RaidCore:Print(sMessage)
 end
 
 function RaidCore:OnInitialize()
+  self.e = EVENTS
   _tMainFSMHandlers = {
     [MAIN_FSM__SEARCH] = {
       ["OnChangeWorld"] = self.SEARCH_OnCheckMapZone,
