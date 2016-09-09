@@ -14,14 +14,15 @@ if not mod then return end
 ----------------------------------------------------------------------------------------------------
 -- Registering combat.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterTrigMob("ALL", { "Assistant Technician Skooty" })
+mod:RegisterTrigMob("ALL", { "unit.skooty" })
 mod:RegisterEnglishLocale({
     -- Unit names.
-    ["Assistant Technician Skooty"] = "Assistant Technician Skooty",
-    ["Hostile Invisible Unit for Fields (0 hit radius)"] = "Hostile Invisible Unit for Fields (0 hit radius)",
-    ["Jumpstart Charge"] = "Jumpstart Charge",
+    ["unit.skooty"] = "Assistant Technician Skooty",
+    ["unit.jumpstart"] = "unit.jumpstart",
     -- Cast names.
-    ["Pulse Cannon"] = "Pulse Cannon",
+    ["cast.skooty.cannon"] = "Pulse Cannon",
+    -- Messages.
+    ["msg.skooty.cannon.get_out"] = "GET OUT",
   })
 ----------------------------------------------------------------------------------------------------
 -- Settings.
@@ -41,20 +42,20 @@ function mod:OnBossEnable()
   jumpStarts = {}
 end
 
-mod:RegisterUnitEvents("Assistant Technician Skooty",{
+mod:RegisterUnitEvents("unit.skooty",{
     ["OnUnitCreated"] = function (_, _, unit)
       core:AddUnit(unit)
       core:WatchUnit(unit)
     end,
     ["OnCastStart"] = function (self, _, castName)
-      if self.L["Pulse Cannon"] == castName then
-        mod:AddMsg("PULSECANNON", "GET OUT", 5, mod:GetSetting("PulseCannon") == true and "RunAway")
+      if self.L["cast.skooty.cannon"] == castName then
+        mod:AddMsg("PULSECANNON", self.L["msg.skooty.cannon.get_out"], 5, mod:GetSetting("PulseCannon") == true and "RunAway")
       end
     end,
   }
 )
 
-mod:RegisterUnitEvents("Jumpstart Charge",{
+mod:RegisterUnitEvents("unit.jumpstart",{
     ["OnUnitCreated"] = function (_, id, unit)
       jumpStarts[id] = unit
       core:WatchUnit(unit)

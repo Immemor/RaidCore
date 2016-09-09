@@ -14,14 +14,15 @@ if not mod then return end
 ----------------------------------------------------------------------------------------------------
 -- Registering combat.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterTrigMob("ALL", { "Chief Engine Scrubber Thrag" })
+mod:RegisterTrigMob("ALL", { "unit.thrag" })
 mod:RegisterEnglishLocale({
     -- Unit names.
-    ["Chief Engine Scrubber Thrag"] = "Chief Engine Scrubber Thrag",
-    ["Hostile Invisible Unit for Fields (0 hit radius)"] = "Hostile Invisible Unit for Fields (0 hit radius)",
-    ["Jumpstart Charge"] = "Jumpstart Charge",
+    ["unit.thrag"] = "Chief Engine Scrubber Thrag",
+    ["unit.jumpstart"] = "Jumpstart Charge",
     -- Cast names.
-    ["Gigavolt"] = "Gigavolt",
+    ["cast.thrag.gigavolt"] = "Gigavolt",
+    -- Messages.
+    ["msg.thrag.gigavolt.get_out"] = "GET OUT",
   })
 ----------------------------------------------------------------------------------------------------
 -- Settings.
@@ -45,21 +46,21 @@ function mod:OnBossEnable()
   jumpStarts = {}
 end
 
-mod:RegisterUnitEvents("Chief Engine Scrubber Thrag",{
+mod:RegisterUnitEvents("unit.thrag",{
     ["OnUnitCreated"] = function (_, _, unit)
       core:AddUnit(unit)
       core:WatchUnit(unit)
     end,
     ["OnCastStart"] = function (_, _, _)
       -- TODO: Redo
-      -- if self.L["Gigavolt"] == castName then
-      --   mod:AddMsg("GIGAVOLT", "GET OUT", 5, mod:GetSetting("Gigavolt") == true and "RunAway")
+      -- if self.L["cast.thrag.gigavolt"] == castName then
+      -- mod:AddMsg("GIGAVOLT", self.L["msg.thrag.gigavolt.get_out"], 5, mod:GetSetting("Gigavolt") == true and "RunAway")
       -- end
     end,
   }
 )
 
-mod:RegisterUnitEvents("Jumpstart Charge",{
+mod:RegisterUnitEvents("unit.jumpstart",{
     ["OnUnitCreated"] = function (_, id, unit)
       jumpStarts[id] = unit
       core:WatchUnit(unit)
