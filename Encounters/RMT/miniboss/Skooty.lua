@@ -27,7 +27,7 @@ mod:RegisterEnglishLocale({
 -- Settings.
 ----------------------------------------------------------------------------------------------------
 mod:RegisterDefaultSetting("PulseCannon")
-mod:RegisterDefaultSetting("BombLines")
+mod:RegisterDefaultSetting("BombLines", false)
 ----------------------------------------------------------------------------------------------------
 -- Locals.
 ----------------------------------------------------------------------------------------------------

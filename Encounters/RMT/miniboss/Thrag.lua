@@ -26,8 +26,8 @@ mod:RegisterEnglishLocale({
 ----------------------------------------------------------------------------------------------------
 -- Settings.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterDefaultSetting("Gigavolt")
-mod:RegisterDefaultSetting("BombLines")
+mod:RegisterDefaultSetting("Gigavolt", false)
+mod:RegisterDefaultSetting("BombLines", false)
 ----------------------------------------------------------------------------------------------------
 -- Constants.
 ----------------------------------------------------------------------------------------------------
@@ -50,10 +50,11 @@ mod:RegisterUnitEvents("Chief Engine Scrubber Thrag",{
       core:AddUnit(unit)
       core:WatchUnit(unit)
     end,
-    ["OnCastStart"] = function (self, _, castName)
-      if self.L["Gigavolt"] == castName then
-        mod:AddMsg("GIGAVOLT", "GET OUT", 5, mod:GetSetting("Gigavolt") == true and "RunAway")
-      end
+    ["OnCastStart"] = function (_, _, _)
+      -- TODO: Redo
+      -- if self.L["Gigavolt"] == castName then
+      --   mod:AddMsg("GIGAVOLT", "GET OUT", 5, mod:GetSetting("Gigavolt") == true and "RunAway")
+      -- end
     end,
   }
 )
