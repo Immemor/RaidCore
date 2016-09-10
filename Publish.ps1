@@ -45,7 +45,7 @@ $newversion = Read-Host "Please put in what version you want RaidCore to be at."
 
 $addon_date_version = $Date = Get-Date -format "yyMMddHH"
 
-$itemname = "$buildpath\RaidCoreCupcakes-$addon_date_version.zip"
+$itemname = "$buildpath\RaidCore-Cupcakes-$addon_date_version.zip"
 
 (Get-Content $file) -replace("^local RAIDCORE_CURRENT_VERSION = `".*?`"$", "local RAIDCORE_CURRENT_VERSION = `"$newversion`"") | Set-Content "$source\RaidCore.lua"
 (Get-Content $file) -replace("^local ADDON_DATE_VERSION = .*?$", "local ADDON_DATE_VERSION = $addon_date_version") | Set-Content "$source\RaidCore.lua"
