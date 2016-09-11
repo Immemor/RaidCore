@@ -121,6 +121,7 @@ mod:RegisterDefaultSetting("SoundFireOrb")
 mod:RegisterDefaultSetting("SoundFireOrbAlt")
 mod:RegisterDefaultSetting("SoundFireOrbPop")
 mod:RegisterDefaultSetting("SoundCoreHealthWarning")
+mod:RegisterDefaultSetting("MessageBossMove", false)
 ----------------------------------------------------------------------------------------------------
 -- Raw event handlers.
 ----------------------------------------------------------------------------------------------------
@@ -305,7 +306,9 @@ mod:RegisterUnitEvents({
 )
 
 function mod:EngineerIsMoving(engineerName)
-  mod:AddMsg("BOSS_MOVING_PLATFORM", self.L["msg.rocket_jump.moving"]:format(self.L[engineerName]), 5, "Alarm")
+  if mod:GetSetting("MessageBossMove") then
+    mod:AddMsg("BOSS_MOVING_PLATFORM", self.L["msg.rocket_jump.moving"]:format(self.L[engineerName]), 5, "Alarm")
+  end
 end
 
 -- Warrior
