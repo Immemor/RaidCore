@@ -26,8 +26,6 @@ local TRIG_STATES = {
 ------------------------------------------------------------------------------
 -- Locals
 ------------------------------------------------------------------------------
-local GetPlayerUnit = GameLib.GetPlayerUnit
-
 local function RegisterLocale(tBoss, sLanguage, Locales)
   local GeminiLocale = Apollo.GetPackage("Gemini:Locale-1.0").tPackage
   local sName = "RaidCore_" .. tBoss:GetName()
@@ -69,17 +67,18 @@ end
 -- Register events to a single unit or a list of units
 -- @param sUnitName String or table of Strings of unit names.
 -- @param tEventsHandlers Table of Events/Handlers pairs
-function EncounterPrototype:RegisterUnitEvents(sUnitName, tEventsHandlers)
-  assert(type(sUnitName) == "string" or type(sUnitName) == "table")
-  if type(sUnitName) == "table" then
-    for _, sName in pairs(sUnitName) do
-      for sMethodName, fHander in pairs(tEventsHandlers) do
-        self:RegisterUnitEvent(sName, sMethodName, fHander)
-      end
-    end
-  else
-    for sMethodName, fHander in pairs(tEventsHandlers) do
-      self:RegisterUnitEvent(sUnitName, sMethodName, fHander)
+function EncounterPrototype:RegisterUnitEvents(tUnitNames, tEventsHandlers)
+  assert(type(tUnitNames) == "string" or type(tUnitNames) == "table")
+  assert(type(tEventsHandlers) == "table")
+
+  if type(tUnitNames) == "string" then
+    tUnitNames = {tUnitNames}
+  end
+  local nSize = #tUnitNames
+  for i = 1, nSize do
+    local sUnitName = tUnitNames[i]
+    for sMethodName, fHandler in next, tEventsHandlers do
+      self:RegisterUnitEvent(sUnitName, sMethodName, fHandler)
     end
   end
 end
@@ -109,9 +108,10 @@ function EncounterPrototype:RegisterUnitEvent(sUnitName, sMethodName, fHandler)
   assert(type(sUnitName) == "string")
   assert(type(sMethodName) == "string")
   assert(type(fHandler) == "function")
+  sUnitName = self.L[sUnitName]
   self.tUnitEvents[sMethodName] = self.tUnitEvents[sMethodName] or {}
-  self.tUnitEvents[sMethodName][self.L[sUnitName]] = self.tUnitEvents[sMethodName][self.L[sUnitName]] or {}
-  table.insert(self.tUnitEvents[sMethodName][self.L[sUnitName]], fHandler)
+  self.tUnitEvents[sMethodName][sUnitName] = self.tUnitEvents[sMethodName][sUnitName] or {}
+  table.insert(self.tUnitEvents[sMethodName][sUnitName], fHandler)
 end
 
 -- Add a message to screen.
@@ -138,12 +138,10 @@ end
 --
 -- Note: If the English translation is not found, the current string will be used like that.
 function EncounterPrototype:AddTimerBar(sKey, sEnglishText, nDuration, bEmphasize, sColor, fHandler, tClass, tData)
-  local tOptions = nil
+  local tOptions = {}
   local sLocalText = self.L[sEnglishText]
   if self.tDefaultTimerBarsOptions[sKey] then
     tOptions = self.tDefaultTimerBarsOptions[sKey]
-  else
-    tOptions = {}
   end
   if bEmphasize ~= nil then
     tOptions["bEmphasize"] = bEmphasize and true
@@ -184,12 +182,10 @@ end
 --
 -- Note: If the English translation is not found, the current string will be used like that.
 function EncounterPrototype:AddProgressBar(sKey, sEnglishText, fHandler, tClass, fHandler2, tData)
-  local tOptions = nil
+  local tOptions = {}
   local sLocalText = self.L[sEnglishText]
   if self.tDefaultTimerBarsOptions[sKey] then
     tOptions = self.tDefaultTimerBarsOptions[sKey]
-  else
-    tOptions = {}
   end
   local tUpdate = nil
   if type(fHandler) == "function" then
@@ -249,12 +245,6 @@ function EncounterPrototype:OnDisable()
   self.tDispelInfo = nil
 end
 
-function EncounterPrototype:Reboot(isWipe)
-  -- Reboot covers everything including hard module reboots (clicking the minimap icon)
-  self:Disable()
-  self:Enable()
-end
-
 function EncounterPrototype:RegisterEnglishLocale(Locales)
   RegisterLocale(self, "enUS", Locales)
 end
@@ -304,9 +294,7 @@ end
 
 function EncounterPrototype:IsSpell2Dispel(nId)
   if self.tDispelInfo[nId] then
-    for k,v in next, self.tDispelInfo[nId] do
-      return true
-    end
+    return next(self.tDispelInfo[nId]) ~= nil
   end
   return false
 end
@@ -347,7 +335,7 @@ function EncounterPrototype:OnTrig(tNames)
   if self.nTrigType == TRIG__ANY then
     for _, sMobName in next, self.EnableMob do
       if tNames[sMobName] then
-        for nId, bInCombat in next, tNames[sMobName] do
+        for _, bInCombat in next, tNames[sMobName] do
           if bInCombat then
             return true
           end
@@ -361,7 +349,7 @@ function EncounterPrototype:OnTrig(tNames)
         return false
       else
         local bResult = false
-        for nId, bInCombat in next, tNames[sMobName] do
+        for _, bInCombat in next, tNames[sMobName] do
           if bInCombat then
             bResult = true
           end
