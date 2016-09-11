@@ -65,6 +65,11 @@ local FIRE_ORB_SAFE_TIMER = 18
 local FIRST_LIQUIDATE_TIMER = 12
 local LIQUIDATE_TIMER = 22
 
+local CORE_HEALTH_LOW_WARN_PERCENTAGE = 20
+local CORE_HEALTH_LOW_WARN_PERCENTAGE_REENABLE = 23
+local CORE_HEALTH_HIGH_WARN_PERCENTAGE = 85
+local CORE_HEALTH_HIGH_WARN_PERCENTAGE_REENABLE = 82
+
 local FUSION_CORE = 1
 local COOLING_TURBINE = 2
 local SPARK_PLUG = 3
@@ -300,12 +305,12 @@ mod:RegisterUnitEvents({
     ["OnHealthChanged"] = function (self, _, percent, name)
       local coreId = CORE_NAMES[name]
       local coreUnit = coreUnits[coreId]
-      if percent > 18 and percent < 82 then
+      if percent > CORE_HEALTH_LOW_WARN_PERCENTAGE_REENABLE and percent < CORE_HEALTH_HIGH_WARN_PERCENTAGE_REENABLE then
         coreUnit.healthWarning = false
-      elseif percent >= 85 and not coreUnit.healthWarning then
+      elseif percent >= CORE_HEALTH_HIGH_WARN_PERCENTAGE and not coreUnit.healthWarning then
         coreUnit.healthWarning = true
         mod:AddMsg("CORE_HEALTH_HIGH_WARN", self.L["msg.core.health.high.warning"]:format(name), 5, mod:GetSetting("SoundCoreHealthWarning") and "Info")
-      elseif percent <= 15 and not coreUnit.healthWarning and mod:IsPlayerOnPlatform(coreId) then
+      elseif percent <= CORE_HEALTH_LOW_WARN_PERCENTAGE and not coreUnit.healthWarning and mod:IsPlayerOnPlatform(coreId) then
         coreUnit.healthWarning = true
         mod:AddMsg("CORE_HEALTH_LOW_WARN", self.L["msg.core.health.low.warning"]:format(name), 5, mod:GetSetting("SoundCoreHealthWarning") and "Inferno")
       end
