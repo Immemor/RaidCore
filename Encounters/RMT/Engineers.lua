@@ -135,6 +135,7 @@ mod:RegisterDefaultSetting("SoundFireOrbPop")
 mod:RegisterDefaultSetting("SoundCoreHealthWarning")
 mod:RegisterDefaultSetting("MessageBossMove", false)
 mod:RegisterDefaultSetting("MessageElectroshockSwapReturn")
+mod:RegisterDefaultSetting("SoundElectroshockSwapReturn")
 ----------------------------------------------------------------------------------------------------
 -- Raw event handlers.
 ----------------------------------------------------------------------------------------------------
@@ -262,7 +263,7 @@ function mod:OnDebuffRemove(id, spellId)
     local targetName = target:GetName()
     local isOnMyself = targetName == player.unit:GetName()
     if isOnMyself and mod:GetSetting("MessageElectroshockSwapReturn") then
-      mod:AddMsg("ELECTROSHOCK_MSG_OVER", self.L["msg.engineer.electroshock.swap.return"], 5, "Burn")
+      mod:AddMsg("ELECTROSHOCK_MSG_OVER", self.L["msg.engineer.electroshock.swap.return"], 5, mod:GetSetting("SoundElectroshockSwapReturn") == true and "Burn")
     end
   end
 end
