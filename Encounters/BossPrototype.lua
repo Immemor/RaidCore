@@ -79,6 +79,59 @@ function EncounterPrototype:RegisterDefaultSetting(sKey, bDefaultSetting)
   self.tDefaultSettings[sKey] = bDefaultSetting == nil or bDefaultSetting
 end
 
+-- Bind a message and sound settings to a message id to internally check
+-- if they should be displayed or sound not played.
+-- @param sKey key of the message.
+-- @param sMatch Comparism type, "EQUAL", "MATCH", "FIND".
+-- @param sMsgSetting Message setting id.
+-- @param sSoundSetting Sound setting id.
+function EncounterPrototype:RegisterMessageSetting(sKey, sMatch, sMsgSetting, sSoundSetting)
+  assert(sKey)
+  assert(sMatch == "MATCH" or sMatch == "FIND" or sMatch == "EQUAL")
+  --Most of the matches will be EQUAL so use a faster hashtable to look up settings
+  if sMatch == "EQUAL" then
+    self.tSettingBindsEqual[sKey] = {
+      sMsgSetting = sMsgSetting,
+      sSoundSetting = sSoundSetting,
+    }
+  else
+    table.insert(self.tSettingBinds, {
+        sKey = sKey,
+        sMatch = sMatch,
+        sMsgSetting = sMsgSetting,
+        sSoundSetting = sSoundSetting,
+      }
+    )
+  end
+end
+
+function EncounterPrototype:GetSettingsForKey(sKey)
+  if self.tSettingBindsEqual[sKey] then
+    return self.tSettingBindsEqual[sKey]
+  end
+
+  local nCount = #self.tSettingBinds
+  for i = 1, nCount do
+    local tSettingBind = self.tSettingBinds[i]
+    local sMatch = tSettingBind.sMatch
+    local sMsgKey = tSettingBind.sKey
+    local result = nil
+
+    if sMatch == "EQUAL" then
+      result = sMsgKey == sKey or nil
+    elseif sMatch == "FIND" then
+      result = sKey:find(sMsgKey)
+    elseif sMatch == "MATCH" then
+      result = sKey:match(sMsgKey)
+    end
+    if result ~= nil then
+      return tSettingBind
+    end
+  end
+
+  return {}
+end
+
 -- Register events to a single unit or a list of units
 -- @param sUnitName String or table of Strings of unit names.
 -- @param tEventsHandlers Table of Events/Handlers pairs
@@ -196,19 +249,19 @@ end
 -- @param nDuration Timer duration.
 -- @param sSound The sound to be played back.
 -- @param sColor The color of the message.
--- @param sMsgSetting Setting to check if the message should be displayed.
--- @param sSoundSetting Setting to check if the sound should be played. Sound will still be played with msgSetting off.
 --
 -- Note: If the English translation is not found, the current string will be used like that.
-function EncounterPrototype:AddMsg(sKey, sEnglishText, nDuration, sSound, sColor, sMsgSetting, sSoundSetting)
+function EncounterPrototype:AddMsg(sKey, sEnglishText, nDuration, sSound, sColor)
   local bPlaySound = true
   local bShowMessage = true
-  if type(sSoundSetting) == "string" then
-    bPlaySound = self:GetSetting(sSoundSetting)
+  local tSettings = self:GetSettingsForKey(sKey)
+  if type(tSettings.sSoundSetting) == "string" then
+    bPlaySound = self:GetSetting(tSettings.sSoundSetting)
   end
-  if type(sMsgSetting) == "string" then
-    bShowMessage = self:GetSetting(bShowMessage)
+  if type(tSettings.sMsgSetting) == "string" then
+    bShowMessage = self:GetSetting(tSettings.sMsgSetting)
   end
+
   if bShowMessage then
     sSound = bPlaySound == true and sSound
     RaidCore:AddMsg(sKey, self.L[sEnglishText], nDuration, sSound, sColor)
@@ -518,5 +571,7 @@ function RaidCore:NewEncounter(name, continentId, parentMapId, mapId)
   new.tUnitEvents = {}
   new.tDatachronEvents = {}
   new.tUnitSpellEvents = {}
+  new.tSettingBinds = {}
+  new.tSettingBindsEqual = {}
   return new
 end
