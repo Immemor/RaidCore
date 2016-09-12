@@ -166,6 +166,7 @@ function mod:OnBossDisable()
 end
 
 function mod:AddUnits()
+  mod:RemoveUnits()
   for _, engineer in pairs(engineerUnits) do
     core:WatchUnit(engineer.unit)
     core:AddUnit(engineer.unit)
