@@ -40,6 +40,7 @@ mod:RegisterEnglishLocale({
     ["msg.engineer.electroshock.next"] = "Next Electroshock in",
     ["msg.engineer.electroshock.swap.other"] = "%s SWAP TO WARRIOR",
     ["msg.engineer.electroshock.swap.you"] = "YOU SWAP TO WARRIOR",
+    ["msg.engineer.electroshock.swap.return"] = "YOU SWAP BACK TO ENGINEER",
     ["msg.fire_orb.next"] = "Next Fire Orb in",
     ["msg.fire_orb.you"] = "FIRE ORB ON YOU",
     ["msg.fire_orb.spawned"] = "Fire Orb spawned",
@@ -133,6 +134,7 @@ mod:RegisterDefaultSetting("SoundFireOrbAlt")
 mod:RegisterDefaultSetting("SoundFireOrbPop")
 mod:RegisterDefaultSetting("SoundCoreHealthWarning")
 mod:RegisterDefaultSetting("MessageBossMove", false)
+mod:RegisterDefaultSetting("MessageElectroshockSwapReturn")
 ----------------------------------------------------------------------------------------------------
 -- Raw event handlers.
 ----------------------------------------------------------------------------------------------------
@@ -250,6 +252,17 @@ function mod:OnDebuffAdd(id, spellId)
     end
     if isOnMyself or mod:GetSetting("MessageElectroshockSwap") then
       mod:AddMsg(messageId, electroshockOnX, 5, sound, "Red")
+    end
+  end
+end
+
+function mod:OnDebuffRemove(id, spellId)
+  if DEBUFF_ELECTROSHOCK_VULNERABILITY == spellId then
+    local target = GetUnitById(id)
+    local targetName = target:GetName()
+    local isOnMyself = targetName == player.unit:GetName()
+    if isOnMyself and mod:GetSetting("MessageElectroshockSwapReturn") then
+      mod:AddMsg("ELECTROSHOCK_MSG_OVER", self.L["msg.engineer.electroshock.swap.return"], 5, "Burn")
     end
   end
 end
