@@ -196,10 +196,25 @@ end
 -- @param nDuration Timer duration.
 -- @param sSound The sound to be played back.
 -- @param sColor The color of the message.
+-- @param sMsgSetting Setting to check if the message should be displayed.
+-- @param sSoundSetting Setting to check if the sound should be played. Sound will still be played with msgSetting off.
 --
 -- Note: If the English translation is not found, the current string will be used like that.
-function EncounterPrototype:AddMsg(sKey, sEnglishText, nDuration, sSound, sColor)
-  RaidCore:AddMsg(sKey, self.L[sEnglishText], nDuration, sSound, sColor)
+function EncounterPrototype:AddMsg(sKey, sEnglishText, nDuration, sSound, sColor, sMsgSetting, sSoundSetting)
+  local bPlaySound = true
+  local bShowMessage = true
+  if type(sSoundSetting) == "string" then
+    bPlaySound = self:GetSetting(sSoundSetting)
+  end
+  if type(sMsgSetting) == "string" then
+    bShowMessage = self:GetSetting(bShowMessage)
+  end
+  if bShowMessage then
+    sSound = bPlaySound == true and sSound
+    RaidCore:AddMsg(sKey, self.L[sEnglishText], nDuration, sSound, sColor)
+  elseif bPlaySound then
+    RaidCore:PlaySound(sSound)
+  end
 end
 
 -- Create a timer bar.
