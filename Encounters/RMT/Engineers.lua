@@ -109,7 +109,6 @@ local ENGINEER_START_LOCATION = {
 ----------------------------------------------------------------------------------------------------
 -- Functions.
 ----------------------------------------------------------------------------------------------------
-local GetUnitById = GameLib.GetUnitById
 local next = next
 local function TableLength(table)
   local count = 0
@@ -146,6 +145,7 @@ mod:RegisterDefaultSetting("MessageBossMove", false)
 mod:RegisterDefaultSetting("MessageElectroshockSwapReturn")
 mod:RegisterDefaultSetting("SoundElectroshockSwapReturn")
 mod:RegisterDefaultSetting("VisualIonClashCircle")
+mod:RegisterMessageSetting("ELECTROSHOCK_MSG_OVER", "EQUAL", "MessageElectroshockSwapReturn", "SoundElectroshockSwapReturn")
 ----------------------------------------------------------------------------------------------------
 -- Raw event handlers.
 ----------------------------------------------------------------------------------------------------
@@ -256,9 +256,7 @@ end
 
 mod:RegisterUnitEvents(core.E.ALL_UNITS, {
     [DEBUFF_ELECTROSHOCK_VULNERABILITY] = {
-      [core.E.DEBUFF_ADD] = function(self, id)
-        local target = GetUnitById(id)
-        local targetName = target:GetName()
+      [core.E.DEBUFF_ADD] = function(self, id, spellId, stack, timeRemaining, targetName)
         local isOnMyself = targetName == player.unit:GetName()
         local electroshockOnX
         local messageId = string.format("ELECTROSHOCK_MSG_%s", targetName)
@@ -274,9 +272,7 @@ mod:RegisterUnitEvents(core.E.ALL_UNITS, {
           mod:AddMsg(messageId, electroshockOnX, 5, sound, "Red")
         end
       end,
-      [core.E.DEBUFF_REMOVE] = function(self, id)
-        local target = GetUnitById(id)
-        local targetName = target:GetName()
+      [core.E.DEBUFF_REMOVE] = function(self, id, spellId, targetName)
         local isOnMyself = targetName == player.unit:GetName()
         if isOnMyself and mod:GetSetting("MessageElectroshockSwapReturn") then
           mod:AddMsg("ELECTROSHOCK_MSG_OVER", self.L["msg.engineer.electroshock.swap.return"], 5, mod:GetSetting("SoundElectroshockSwapReturn") == true and "Burn")
@@ -294,9 +290,8 @@ mod:RegisterUnitEvents(core.E.ALL_UNITS, {
       end,
     },
     [core.E.DEBUFF_ADD] = {
-      [DEBUFF_ATOMIC_ATTRACTION] = function(self, id)
-        local target = GetUnitById(id)
-        local isOnMyself = target == player.unit
+      [DEBUFF_ATOMIC_ATTRACTION] = function(self, id, spellId, stack, timeRemaining, targetName)
+        local isOnMyself = targetName == player.unit:GetName()
         if isOnMyself then
           mod:AddMsg("DISCHARGED_PLASMA_MSG", self.L["msg.fire_orb.you"], 5, mod:GetSetting("SoundFireOrb") == true and "RunAway")
         elseif mod:IsPlayerOnPlatform(FUSION_CORE) then
@@ -377,13 +372,13 @@ mod:RegisterUnitEvents({
       end
     end,
     [BUFF_INSULATION] = {
-      [core.E.BUFF_ADD] = function(_, id)
-        local coreUnit = coreUnits[CORE_NAMES[GetUnitById(id):GetName()]]
+      [core.E.BUFF_ADD] = function(_, id, spellId, stack, timeRemaining, name)
+        local coreUnit = coreUnits[CORE_NAMES[name]]
         coreUnit.enabled = false
         mod:UpdateCoreHealthMark(coreUnit)
       end,
-      [core.E.BUFF_REMOVE] = function(_, id)
-        local coreUnit = coreUnits[CORE_NAMES[GetUnitById(id):GetName()]]
+      [core.E.BUFF_REMOVE] = function(_, id, spellId, name)
+        local coreUnit = coreUnits[CORE_NAMES[name]]
         coreUnit.enabled = true
         mod:UpdateCoreHealthMark(coreUnit)
         for engineerId, engineer in pairs(engineerUnits) do
