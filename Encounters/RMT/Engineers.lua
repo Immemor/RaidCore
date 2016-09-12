@@ -59,6 +59,7 @@ local BUFF_INSULATION = 83987
 local FIRST_ELECTROSHOCK_TIMER = 11
 local ELECTROSHOCK_TIMER = 18
 local JUMP_ELECTROSHOCK_TIMER = 12
+local FIRST_FIRE_ORB_TIMER = 21
 local NEXT_FIRE_ORB_TIMER = 24
 local FIRE_ORB_SAFE_TIMER = 18
 
@@ -213,7 +214,7 @@ function mod:OnEngiChangeLocation(engineerId, _, newLocation)
   end
   if newLocation == FUSION_CORE then
     mod:RemoveTimerBar("NEXT_FIRE_ORB_TIMER")
-    mod:AddTimerBar("NEXT_FIRE_ORB_TIMER", self.L["msg.fire_orb.next"], NEXT_FIRE_ORB_TIMER)
+    mod:AddTimerBar("NEXT_FIRE_ORB_TIMER", self.L["msg.fire_orb.next"], FIRST_FIRE_ORB_TIMER)
   end
 end
 
