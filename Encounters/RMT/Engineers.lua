@@ -100,9 +100,10 @@ local ENGINEER_START_LOCATION = {
 -- Functions.
 ----------------------------------------------------------------------------------------------------
 local GetUnitById = GameLib.GetUnitById
+local next = next
 local function TableLength(table)
   local count = 0
-  for _, _ in pairs(table) do
+  for _, _ in next, table do
     count = count + 1
   end
   return count
@@ -198,7 +199,7 @@ function mod:GetUnitPlatform(unit)
   local shortestDistance = 100000
   local currentDistance
   local location = 0
-  for coreId, coreUnit in pairs(coreUnits) do
+  for coreId, coreUnit in next, coreUnits do
     currentDistance = mod:GetDistanceBetweenUnits(unit, coreUnit.unit)
     if shortestDistance > currentDistance then
       shortestDistance = currentDistance
