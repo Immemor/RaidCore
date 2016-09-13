@@ -231,7 +231,7 @@ function mod:CheckDatachronResult()
     if registerMessage == datachronExpected.registerMessage then
       --Test against the expected result
       assert(self.L[datachronExpected.message] == message, "Messages are not the same: "..message.." == "..self.L[datachronExpected.message])
-      assert(result == datachronExpected.result, "Datachron is not equal: "..tostring(result).." == "..tostring(datachronExpected.result))
+      assert(result == datachronExpected.result, "Results are not the same: "..tostring(result).." == "..tostring(datachronExpected.result))
       expectedFound = true
     elseif testResult.oldEvent then
       --Test message passthrough of old datachron events.
