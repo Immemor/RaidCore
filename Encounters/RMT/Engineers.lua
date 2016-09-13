@@ -46,8 +46,8 @@ mod:RegisterEnglishLocale({
     ["msg.fire_orb.spawned"] = "Fire Orb spawned",
     ["msg.fire_orb.pop.timer"] = "Fire Orb is safe to pop in",
     ["msg.fire_orb.pop.msg"] = "Pop the Fire Orb!",
-    ["msg.core.health.high.warning"] = "%s pillar at 85%%!",
-    ["msg.core.health.low.warning"] = "%s pillar at 15%%!",
+    ["msg.core.health.high.warning"] = "%s pillar at HIGH HEALTH!",
+    ["msg.core.health.low.warning"] = "%s pillar at LOW HEALTH!",
     ["msg.rocket_jump.moved"] = "%s HAS MOVED"
   })
 ----------------------------------------------------------------------------------------------------
