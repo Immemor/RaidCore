@@ -98,6 +98,18 @@ mod:RegisterEnglishLocale({
     ["unit.titan.strike"] = "Trident Strike",
     ["unit.titan.buffer"] = "Aquatic Buffer",
     ["unit.pell.vortex"] = "Swirling Vortex",
+
+    -- Datachron.
+    ["chron.equal.first"] = "First simulated datachron.",
+    ["chron.equal.second"] = "Second simulated datachron.",
+    ["chron.find.first.partial"] = "find me first",
+    ["chron.find.second.partial"] = "find me second",
+    ["chron.find.first.full"] = "Do find me first.",
+    ["chron.find.second.full"] = "And then find me second.",
+    ["chron.match.first.partial"] = "First match this name: ([^%s]+%s[^%s]+) hopefully%.",
+    ["chron.match.second.partial"] = "Secondly match this name: ([^%s]+%s[^%s]+) please%.",
+    ["chron.match.first.full"] = "First match this name: Zod Bain hopefully.",
+    ["chron.match.second.full"] = "Secondly match this name: Zod Bain please.",
   })
 
 ----------------------------------------------------------------------------------------------------
@@ -107,15 +119,140 @@ local BUFF_KROGG_FOCUSED_ASSAULT = 72202
 --moodie and chompacabra debuff
 local DEBUFF_MELT = 50233
 local DEBUFF_CHOMPACABRA_BLEED = 43759
+local EXPECTED_DATACHRON_RESULTS = {
+  {
+    registerMessage = "chron.equal.first",
+    message = "chron.equal.first",
+    match = "EQUAL",
+    result = true,
+    },{
+    registerMessage = "chron.equal.second",
+    message = "chron.equal.second",
+    match = "EQUAL",
+    result = true,
+    },{
+    registerMessage = "chron.find.first.partial",
+    message = "chron.find.first.full",
+    match = "FIND",
+    result = 4,
+    },{
+    registerMessage = "chron.find.second.partial",
+    message = "chron.find.second.full",
+    match = "FIND",
+    result = 10,
+    },{
+    registerMessage = "chron.match.first.partial",
+    message = "chron.match.first.full",
+    match = "MATCH",
+    result = "Zod Bain",
+    },{
+    registerMessage = "chron.match.second.partial",
+    message = "chron.match.second.full",
+    match = "MATCH",
+    result = "Zod Bain",
+  },
+}
 ----------------------------------------------------------------------------------------------------
 -- Locals.
 ----------------------------------------------------------------------------------------------------
+local FakeDatachron = {}
+function FakeDatachron:GetType()
+  return ChatSystemLib.ChatChannel_Datachron
+end
+
+local datachronResult
+local datachronExpected
+local datachronTestNumber
+----------------------------------------------------------------------------------------------------
+-- Functions.
+----------------------------------------------------------------------------------------------------
+local next = next
+local function SimulateDatachron(message)
+  core:CI_OnChatMessage(FakeDatachron, {
+      strSender = "TestEncounter",
+      arMessageSegments = {{strText = message}},
+    }
+  )
+end
+
+local function RegisterDatachronTestResult(registerMessage, message, result, oldEvent)
+  --Add a event result that occured
+  table.insert(datachronResult, {
+      registerMessage = registerMessage,
+      message = message,
+      result = result,
+      oldEvent = oldEvent,
+    })
+end
+
+local function RegisterDatachronTestEvent(registerMessage, match)
+  --Bind datachron events based on the expected results
+  mod:RegisterDatachronEvent(registerMessage, match, function (_, message, result)
+      RegisterDatachronTestResult(registerMessage, message, result, false)
+    end
+  )
+end
 
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
-function mod:OnBossEnable()
+for _, result in next, EXPECTED_DATACHRON_RESULTS do
+  RegisterDatachronTestEvent(result.registerMessage, result.match)
+end
 
+function mod:OnBossEnable()
+  --Start datachron test cycles.
+  datachronTestNumber = 0
+  mod:AddTimerBar("DATACHRON", "Simulate datachron", 0.5, false, nil, mod.SimulateDatachron, mod)
+end
+
+function mod:SimulateDatachron()
+  --Cycle through datachron tests until we finished them all
+  datachronTestNumber = datachronTestNumber + 1
+  datachronResult = {}
+  datachronExpected = EXPECTED_DATACHRON_RESULTS[datachronTestNumber]
+  if datachronExpected then
+    SimulateDatachron(self.L[datachronExpected.message])
+    --Check results after a short timer to make sure all the events got caught
+    mod:AddTimerBar("DATACHRON", "Check datachron result", 0.5, false, nil, mod.CheckDatachronResult, mod)
+  end
+end
+
+function mod:CheckDatachronResult()
+  --Check the results from the last simulated datachron.
+  local expectedFound = false
+  local expectedOldFound = false
+  local nCount = #datachronResult
+  for i = 1, nCount do
+    local testResult = datachronResult[i]
+    local message = testResult.message
+    local result = testResult.result
+    local registerMessage = testResult.registerMessage
+    if registerMessage == datachronExpected.registerMessage then
+      --Test against the expected result
+      assert(self.L[datachronExpected.message] == message, "Messages are not the same: "..message.." == "..self.L[datachronExpected.message])
+      assert(result == datachronExpected.result, "Datachron is not equal: "..tostring(result).." == "..tostring(datachronExpected.result))
+      expectedFound = true
+    elseif testResult.oldEvent then
+      --Test message passthrough of old datachron events.
+      assert(self.L[datachronExpected.message] == message, "Messages are not the same: "..message.." == "..self.L[datachronExpected.message])
+      expectedOldFound = true
+    else
+      --This should never happen. Too many results have been found.
+      assert(registerMessage == nil, registerMessage.." should not be here, expected: "..datachronExpected.registerMessage)
+    end
+  end
+  --No results are found = bad
+  assert(expectedFound == true, "Expected result for "..datachronExpected.registerMessage.." has not been found.")
+  assert(expectedOldFound == true, "Expected old result for "..datachronExpected.registerMessage.." has not been found.")
+
+  --Start next cycle
+  mod:AddTimerBar("DATACHRON", "Simulate datachron", 0.5, false, nil, mod.SimulateDatachron, mod)
+end
+
+function mod:OnDatachron (message)
+  --Register old datachron events just to make sure they still get passed through too
+  RegisterDatachronTestResult(nil, message, nil, true)
 end
 
 mod:RegisterUnitEvents(ALL_MOBS,{
