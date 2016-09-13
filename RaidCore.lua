@@ -30,7 +30,7 @@ local next, pcall = next, pcall
 -- Constants.
 ----------------------------------------------------------------------------------------------------
 -- Should be 5.23 when replacement tokens will works (see #88 issue).
-local RAIDCORE_CURRENT_VERSION = "6.1.5"
+local RAIDCORE_CURRENT_VERSION = "6.1.6"
 -- Should be deleted.
 local ADDON_DATE_VERSION = 16091310
 -- Sometimes Carbine have inserted some no-break-space, for fun.
