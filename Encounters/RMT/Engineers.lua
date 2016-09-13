@@ -40,13 +40,15 @@ mod:RegisterEnglishLocale({
     ["msg.engineer.electroshock.next"] = "Next Electroshock in",
     ["msg.engineer.electroshock.swap.other"] = "%s SWAP TO WARRIOR",
     ["msg.engineer.electroshock.swap.you"] = "YOU SWAP TO WARRIOR",
+    ["msg.engineer.electroshock.swap.return"] = "YOU SWAP BACK TO ENGINEER",
     ["msg.fire_orb.next"] = "Next Fire Orb in",
     ["msg.fire_orb.you"] = "FIRE ORB ON YOU",
     ["msg.fire_orb.spawned"] = "Fire Orb spawned",
     ["msg.fire_orb.pop.timer"] = "Fire Orb is safe to pop in",
     ["msg.fire_orb.pop.msg"] = "Pop the Fire Orb!",
     ["msg.core.health.high.warning"] = "%s pillar at 85%%!",
-    ["msg.core.health.low.warning"] = "%s pillar at 15%%!"
+    ["msg.core.health.low.warning"] = "%s pillar at 15%%!",
+    ["msg.rocket_jump.moved"] = "%s HAS MOVED"
   })
 ----------------------------------------------------------------------------------------------------
 -- Constants.
@@ -58,11 +60,17 @@ local BUFF_INSULATION = 83987
 local FIRST_ELECTROSHOCK_TIMER = 11
 local ELECTROSHOCK_TIMER = 18
 local JUMP_ELECTROSHOCK_TIMER = 12
+local FIRST_FIRE_ORB_TIMER = 21
 local NEXT_FIRE_ORB_TIMER = 24
-local FIRE_ORB_SAFE_TIMER = 14
+local FIRE_ORB_SAFE_TIMER = 18
 
 local FIRST_LIQUIDATE_TIMER = 12
 local LIQUIDATE_TIMER = 22
+
+local CORE_HEALTH_LOW_WARN_PERCENTAGE = 20
+local CORE_HEALTH_LOW_WARN_PERCENTAGE_REENABLE = 23
+local CORE_HEALTH_HIGH_WARN_PERCENTAGE = 85
+local CORE_HEALTH_HIGH_WARN_PERCENTAGE_REENABLE = 82
 
 local FUSION_CORE = 1
 local COOLING_TURBINE = 2
@@ -77,6 +85,10 @@ local CORE_NAMES = {
 
 local WARRIOR = 1
 local ENGINEER = 2
+local ENGINEER_NICK_NAMES = {
+  [WARRIOR] = "unit.warrior",
+  [ENGINEER] = "unit.engineer"
+}
 local ENGINEER_NAMES = {
   ["unit.warrior"] = WARRIOR,
   ["unit.engineer"] = ENGINEER,
@@ -89,9 +101,10 @@ local ENGINEER_START_LOCATION = {
 -- Functions.
 ----------------------------------------------------------------------------------------------------
 local GetUnitById = GameLib.GetUnitById
+local next = next
 local function TableLength(table)
   local count = 0
-  for _, _ in pairs(table) do
+  for _, _ in next, table do
     count = count + 1
   end
   return count
@@ -120,6 +133,9 @@ mod:RegisterDefaultSetting("SoundFireOrb")
 mod:RegisterDefaultSetting("SoundFireOrbAlt")
 mod:RegisterDefaultSetting("SoundFireOrbPop")
 mod:RegisterDefaultSetting("SoundCoreHealthWarning")
+mod:RegisterDefaultSetting("MessageBossMove", false)
+mod:RegisterDefaultSetting("MessageElectroshockSwapReturn")
+mod:RegisterDefaultSetting("SoundElectroshockSwapReturn")
 ----------------------------------------------------------------------------------------------------
 -- Raw event handlers.
 ----------------------------------------------------------------------------------------------------
@@ -154,6 +170,7 @@ function mod:OnBossDisable()
 end
 
 function mod:AddUnits()
+  mod:RemoveUnits()
   for _, engineer in pairs(engineerUnits) do
     core:WatchUnit(engineer.unit)
     core:AddUnit(engineer.unit)
@@ -185,7 +202,7 @@ function mod:GetUnitPlatform(unit)
   local shortestDistance = 100000
   local currentDistance
   local location = 0
-  for coreId, coreUnit in pairs(coreUnits) do
+  for coreId, coreUnit in next, coreUnits do
     currentDistance = mod:GetDistanceBetweenUnits(unit, coreUnit.unit)
     if shortestDistance > currentDistance then
       shortestDistance = currentDistance
@@ -195,7 +212,15 @@ function mod:GetUnitPlatform(unit)
   return location
 end
 
-function mod:OnEngiChangeLocation()
+function mod:OnEngiChangeLocation(engineerId, _, newLocation)
+  if mod:GetSetting("MessageBossMove") and ENGINEER_NICK_NAMES[engineerId] ~= nil then
+    local engineerName = ENGINEER_NICK_NAMES[engineerId]
+    mod:AddMsg("BOSS_MOVED_PLATFORM", self.L["msg.rocket_jump.moved"]:format(self.L[engineerName]), 5, "Alarm")
+  end
+  if newLocation == FUSION_CORE then
+    mod:RemoveTimerBar("NEXT_FIRE_ORB_TIMER")
+    mod:AddTimerBar("NEXT_FIRE_ORB_TIMER", self.L["msg.fire_orb.next"], FIRST_FIRE_ORB_TIMER)
+  end
 end
 
 function mod:OnBuffRemove(_, spellId)
@@ -228,6 +253,17 @@ function mod:OnDebuffAdd(id, spellId)
     end
     if isOnMyself or mod:GetSetting("MessageElectroshockSwap") then
       mod:AddMsg(messageId, electroshockOnX, 5, sound, "Red")
+    end
+  end
+end
+
+function mod:OnDebuffRemove(id, spellId)
+  if DEBUFF_ELECTROSHOCK_VULNERABILITY == spellId then
+    local target = GetUnitById(id)
+    local targetName = target:GetName()
+    local isOnMyself = targetName == player.unit:GetName()
+    if isOnMyself and mod:GetSetting("MessageElectroshockSwapReturn") then
+      mod:AddMsg("ELECTROSHOCK_MSG_OVER", self.L["msg.engineer.electroshock.swap.return"], 5, mod:GetSetting("SoundElectroshockSwapReturn") == true and "Burn")
     end
   end
 end
@@ -286,12 +322,12 @@ mod:RegisterUnitEvents({
     ["OnHealthChanged"] = function (self, _, percent, name)
       local coreId = CORE_NAMES[name]
       local coreUnit = coreUnits[coreId]
-      if percent > 15 and percent < 85 then
+      if percent > CORE_HEALTH_LOW_WARN_PERCENTAGE_REENABLE and percent < CORE_HEALTH_HIGH_WARN_PERCENTAGE_REENABLE then
         coreUnit.healthWarning = false
-      elseif percent >= 85 and not coreUnit.healthWarning then
+      elseif percent >= CORE_HEALTH_HIGH_WARN_PERCENTAGE and not coreUnit.healthWarning then
         coreUnit.healthWarning = true
         mod:AddMsg("CORE_HEALTH_HIGH_WARN", self.L["msg.core.health.high.warning"]:format(name), 5, mod:GetSetting("SoundCoreHealthWarning") and "Info")
-      elseif percent <= 15 and not coreUnit.healthWarning and mod:IsPlayerOnPlatform(coreId) then
+      elseif percent <= CORE_HEALTH_LOW_WARN_PERCENTAGE and not coreUnit.healthWarning and mod:IsPlayerOnPlatform(coreId) then
         coreUnit.healthWarning = true
         mod:AddMsg("CORE_HEALTH_LOW_WARN", self.L["msg.core.health.low.warning"]:format(name), 5, mod:GetSetting("SoundCoreHealthWarning") and "Inferno")
       end
@@ -307,11 +343,11 @@ mod:RegisterUnitEvents("unit.warrior",{
           mod:AddMsg("LIQUIDATE_MSG", self.L["msg.warrior.liquidate.stack"], 5, mod:GetSetting("SoundLiquidate") == true and "Info")
         end
       end
+      if self.L["cast.rocket_jump"] == castName then
+        mod:ExtendTimerBar("NEXT_LIQUIDATE_TIMER", 4)
+      end
     end,
     ["OnCastEnd"] = function (self, _, castName)
-      if self.L["cast.rocket_jump"] == castName then
-        mod:RemoveTimerBar("NEXT_LIQUIDATE_TIMER")
-      end
       if self.L["cast.warrior.liquidate"] == castName then
         mod:RemoveTimerBar("NEXT_LIQUIDATE_TIMER")
         mod:AddTimerBar("NEXT_LIQUIDATE_TIMER", self.L["msg.warrior.liquidate.next"], LIQUIDATE_TIMER)
