@@ -5,9 +5,20 @@
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
 -- Description:
--- Fake boss, to test few basic feature in RaidCore.
+-- Using the Large Training Grounds fabkit it is possible to spawn enemies.
+-- There are 4 different modes: easy, normal, hard, elite. In each mode you get
+-- a random enemy out of 3 possibilities.
+-- These enemies have atleast one cast each and some of them have buffs and debuffs
+-- Easy:
+-- Chompacabra: Applies bleed debuff on the player
+-- Chompacabra: Applies melt debuff on the player
+-- Moodie: Applies melt debuff on the player
+-- Hard:
+-- Krogg: Applies a crit buff on himself
 --
--- This last should be declared only in alpha version or with git database.
+-- It's not possible to control what enemy you want to get so it's recommended
+-- to use the easy mode since there are 2 mobs there that will apply debuffs
+-- on the player.
 ----------------------------------------------------------------------------------------------------
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 --@alpha@
