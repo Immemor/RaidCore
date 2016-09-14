@@ -319,6 +319,8 @@ function mod:OnDatachron (message)
 end
 
 function mod:CompareEvents(eventName, args1, args2)
+  assert(args1 ~= nil, "Old args for "..eventName.." not found")
+  assert(args2 ~= nil, "Unit event args for "..eventName.." not found")
   --Compare the amount of arguments and the arguments themselves
   local count1 = #args1
   local count2 = #args2
