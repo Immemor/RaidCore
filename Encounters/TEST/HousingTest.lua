@@ -196,6 +196,7 @@ local datachronTestNumber
 local eventCounter
 local unitEventCounter
 local events
+local unitEventsInitialized = false
 ----------------------------------------------------------------------------------------------------
 -- Functions.
 ----------------------------------------------------------------------------------------------------
@@ -258,9 +259,12 @@ function mod:OnBossEnable()
   eventCounter = {}
   unitEventCounter = {}
   events = {}
-  table.insert(ALL_MOBS, GameLib.GetPlayerUnit():GetName())
-  for _, eventName in next, EVENTS_TO_TEST do
-    RegisterTestEvent(eventName)
+  if not unitEventsInitialized then
+    table.insert(ALL_MOBS, GameLib.GetPlayerUnit():GetName())
+    for _, eventName in next, EVENTS_TO_TEST do
+      RegisterTestEvent(eventName)
+    end
+    unitEventsInitialized = true
   end
   --Start datachron test cycles.
   datachronTestNumber = 0
