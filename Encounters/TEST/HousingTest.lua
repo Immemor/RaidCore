@@ -29,7 +29,7 @@ if not mod then return end
 ----------------------------------------------------------------------------------------------------
 -- Registering combat.
 ----------------------------------------------------------------------------------------------------
-local ALL_MOBS = {
+local TRIG_MOBS = {
   -- Easy.
   "unit.chompacabra",
   "unit.moodie",
@@ -48,7 +48,7 @@ local ALL_MOBS = {
   "unit.titan",
 }
 
-mod:RegisterTrigMob("ANY", ALL_MOBS)
+mod:RegisterTrigMob("ANY", TRIG_MOBS)
 mod:RegisterEnglishLocale({
     -- Unit names.
     -- Easy.
@@ -152,6 +152,36 @@ local EXPECTED_DATACHRON_RESULTS = {
     result = "Zod Bain",
   },
 }
+
+local ALL_MOBS = {
+  -- Easy.
+  "unit.chompacabra",
+  "unit.moodie",
+  "unit.aggressorbot",
+  -- Normal.
+  "unit.bandit",
+  "unit.girrok",
+  "unit.shootbot",
+  -- Hard.
+  "unit.pumera",
+  "unit.osun",
+  "unit.krogg",
+  -- Elite.
+  "unit.ravenok",
+  "unit.pell",
+  "unit.titan",
+  "unit.buffer",
+  "unit.invis.0",
+}
+
+local EVENTS_TO_TEST = {
+  "OnUnitCreated",
+  "OnUnitDestroyed",
+  "OnCastStart",
+  "OnCastEnd",
+  "OnHealthChanged",
+  "OnEnteredCombat",
+}
 ----------------------------------------------------------------------------------------------------
 -- Locals.
 ----------------------------------------------------------------------------------------------------
@@ -163,6 +193,9 @@ end
 local datachronResult
 local datachronExpected
 local datachronTestNumber
+local eventCounter
+local unitEventCounter
+local events
 ----------------------------------------------------------------------------------------------------
 -- Functions.
 ----------------------------------------------------------------------------------------------------
@@ -193,6 +226,27 @@ local function RegisterDatachronTestEvent(registerMessage, match)
   )
 end
 
+local function RegisterTestEvent(eventName)
+  --Register old events and unit events and keep count of how many events
+  --happened and remove them in the same order again.
+  mod[eventName] = function(...)
+    eventCounter[eventName] = eventCounter[eventName] or 0
+    local eventKey = eventName .. tostring(eventCounter[eventName])
+    events[eventKey] = {...}
+    eventCounter[eventName] = eventCounter[eventName] + 1
+  end
+  mod:RegisterUnitEvents(ALL_MOBS, {
+      [eventName] = function(...)
+        unitEventCounter[eventName] = unitEventCounter[eventName] or 0
+        local eventKey = eventName .. tostring(unitEventCounter[eventName])
+        mod:CompareEvents(eventName, events[eventKey], {...})
+        events[eventKey] = nil
+        unitEventCounter[eventName] = unitEventCounter[eventName] + 1
+      end
+    }
+  )
+end
+
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
@@ -201,9 +255,18 @@ for _, result in next, EXPECTED_DATACHRON_RESULTS do
 end
 
 function mod:OnBossEnable()
+  eventCounter = {}
+  unitEventCounter = {}
+  events = {}
+  table.insert(ALL_MOBS, GameLib.GetPlayerUnit():GetName())
+  for _, eventName in next, EVENTS_TO_TEST do
+    RegisterTestEvent(eventName)
+  end
   --Start datachron test cycles.
   datachronTestNumber = 0
   mod:AddTimerBar("DATACHRON", "Simulate datachron", 0.5, false, nil, mod.SimulateDatachron, mod)
+  --Start unit events cycle.
+  mod:AddTimerBar("UNIT_EVENTS", "Check if events have not been caught", 0.5, false, nil, mod.CheckEvents, mod)
 end
 
 function mod:SimulateDatachron()
@@ -255,7 +318,31 @@ function mod:OnDatachron (message)
   RegisterDatachronTestResult(nil, message, nil, true)
 end
 
-mod:RegisterUnitEvents(ALL_MOBS,{
+function mod:CompareEvents(eventName, args1, args2)
+  --Compare the amount of arguments and the arguments themselves
+  local count1 = #args1
+  local count2 = #args2
+  assert(count1 == count2, "Different amount of parameters in "..eventName.." "..tostring(count1).." == "..tostring(count2))
+
+  for i = 1, count1 do
+    local arg1 = args1[i]
+    local arg2 = args2[i]
+    assert(arg1 == arg2, "Arguments are not equal "..eventName.." "..tostring(arg1).." == "..tostring(arg2))
+  end
+end
+
+function mod:CheckEvents()
+  --Check if any events have not been caught by unit events.
+  --If this ever causes a race condition add a flag to the events and then
+  --do the assert on the second pass if they are still there
+  for eventName, _ in next, events do
+    assert(eventName == nil, eventName.." has not been detected by unit events")
+  end
+
+  mod:AddTimerBar("UNIT_EVENTS", "Check if events have not been caught", 1, false, nil, mod.CheckEvents, mod)
+end
+
+mod:RegisterUnitEvents(ALL_MOBS, {
     ["OnUnitCreated"] = function (_, _, unit)
       core:WatchUnit(unit)
       core:AddUnit(unit)
