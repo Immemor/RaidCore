@@ -82,6 +82,12 @@ local CORE_NAMES = {
   ["unit.spark_plug"] = SPARK_PLUG,
   ["unit.lubricant_nozzle"] = LUBRICANT_NOZZLE
 }
+local CORE_BAR_COLORS = {
+  [FUSION_CORE] = "xkcdDarkRed",
+  [COOLING_TURBINE] = "xkcdSkyBlue",
+  [SPARK_PLUG] = "xkcdLightYellow",
+  [LUBRICANT_NOZZLE] = "xkcdLightPurple",
+}
 
 local WARRIOR = 1
 local ENGINEER = 2
@@ -178,11 +184,11 @@ function mod:AddUnits()
   if mod:GetSetting("BarsCoreHealth") then
     core:AddUnitSpacer("CORE_SPACER")
   end
-  for _, coreUnit in pairs(coreUnits) do
+  for coreId, coreUnit in pairs(coreUnits) do
     core:WatchUnit(coreUnit.unit)
     core:MarkUnit(coreUnit.unit, 0, 30)
     if mod:GetSetting("BarsCoreHealth") then
-      core:AddUnit(coreUnit.unit)
+      core:AddUnit(coreUnit.unit, CORE_BAR_COLORS[coreId])
     end
   end
 end
