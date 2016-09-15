@@ -339,7 +339,7 @@ mod:RegisterUnitEvents({
     ["OnHealthChanged"] = function (self, _, percent, name)
       local coreId = CORE_NAMES[name]
       local coreUnit = coreUnits[coreId]
-      core:MarkUnit(coreUnit, 0, percent, mod:GetCoreMarkColorForHealth(percent))
+      core:MarkUnit(coreUnit.unit, 0, percent, mod:GetCoreMarkColorForHealth(percent))
       if percent > CORE_HEALTH_LOW_WARN_PERCENTAGE_REENABLE and percent < CORE_HEALTH_HIGH_WARN_PERCENTAGE_REENABLE then
         coreUnit.healthWarning = false
       elseif percent >= CORE_HEALTH_HIGH_WARN_PERCENTAGE and not coreUnit.healthWarning then
