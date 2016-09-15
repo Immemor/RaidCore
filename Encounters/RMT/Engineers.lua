@@ -67,6 +67,7 @@ local FIRE_ORB_SAFE_TIMER = 18
 local FIRST_LIQUIDATE_TIMER = 12
 local LIQUIDATE_TIMER = 22
 
+local CORE_HEALTH_LOW_PERCENTAGE = 15
 local CORE_HEALTH_LOW_WARN_PERCENTAGE = 20
 local CORE_HEALTH_LOW_WARN_PERCENTAGE_REENABLE = 23
 local CORE_HEALTH_HIGH_WARN_PERCENTAGE = 85
@@ -325,9 +326,9 @@ mod:RegisterUnitEvents({
 
 function mod:GetCoreMarkColorForHealth(health)
   local color = "White"
-  if health <= CORE_HEALTH_LOW_WARN_PERCENTAGE or health >= CORE_HEALTH_HIGH_WARN_PERCENTAGE then
+  if health <= CORE_HEALTH_LOW_PERCENTAGE or health >= CORE_HEALTH_HIGH_WARN_PERCENTAGE then
     color = "Red"
-  elseif health <= CORE_HEALTH_LOW_WARN_PERCENTAGE_REENABLE or health >= CORE_HEALTH_HIGH_WARN_PERCENTAGE_REENABLE then
+  elseif health <= CORE_HEALTH_LOW_WARN_PERCENTAGE or health >= CORE_HEALTH_HIGH_WARN_PERCENTAGE_REENABLE then
     color = "Yellow"
   end
   return color
