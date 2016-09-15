@@ -420,7 +420,7 @@ end
 ----------------------------------------------------------------------------------------------------
 local UnitManager = NewManager("Health")
 
-function UnitManager:AddBar(nId)
+function UnitManager:AddBar(nId, sColor)
   assert(GetUnitById(nId))
   if (self.tBars[nId] and self.tBars[nId].isSpacer) or not self.tBars[nId] then
     local sMark = RaidCore.mark[nId] and RaidCore.mark[nId].number
@@ -436,6 +436,7 @@ function UnitManager:AddBar(nId)
       self.tBars[nId] = {
         nId = nId,
         sMark = sMark,
+        sCustomBarColor = sColor,
         -- Windows objects.
         wndMain = wndMain,
         wndBody = wndBody,
@@ -495,7 +496,7 @@ function UnitManager:UpdateBar(tBar)
           tBar.wndUnitHPProgressBar:SetBarColor("FF7E00FF")
           tBar.wndUnit:SetBGColor("A0300062")
         else
-          tBar.wndUnitHPProgressBar:SetBarColor("FF004000")
+          tBar.wndUnitHPProgressBar:SetBarColor(tBar.sCustomBarColor or "FF004000")
           tBar.wndUnit:SetBGColor("A0131313")
         end
         -- Update the percent text.
@@ -787,10 +788,10 @@ function RaidCore:RemoveProgressBar(sKey)
   ProgressManager:RemoveBar(sKey)
 end
 
-function RaidCore:AddUnit(tUnit)
+function RaidCore:AddUnit(tUnit, sColor)
   assert(type(tUnit) == "userdata")
   local nId = tUnit:GetId()
-  UnitManager:AddBar(nId)
+  UnitManager:AddBar(nId, sColor)
 end
 
 function RaidCore:AddUnitSpacer(key, nHeight)
