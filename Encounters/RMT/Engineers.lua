@@ -129,6 +129,7 @@ local fireOrbTargetTestTimer = ApolloTimer.Create(1, false, "RegisterOrbTarget",
 -- Settings.
 ----------------------------------------------------------------------------------------------------
 mod:RegisterDefaultSetting("BarsCoreHealth", false)
+mod:RegisterDefaultSetting("MarkerCoreHealth")
 mod:RegisterDefaultSetting("LineElectroshock")
 mod:RegisterDefaultSetting("SoundLiquidate")
 mod:RegisterDefaultSetting("SoundElectroshock")
@@ -186,7 +187,10 @@ function mod:AddUnits()
   end
   for coreId, coreUnit in pairs(coreUnits) do
     core:WatchUnit(coreUnit.unit)
-    core:MarkUnit(coreUnit.unit, 0, 30)
+
+    if mod:GetSetting("MarkerCoreHealth") then
+      core:MarkUnit(coreUnit.unit, 0, 30)
+    end
     if mod:GetSetting("BarsCoreHealth") then
       core:AddUnit(coreUnit.unit, CORE_BAR_COLORS[coreId])
     end
@@ -339,7 +343,11 @@ mod:RegisterUnitEvents({
     ["OnHealthChanged"] = function (self, _, percent, name)
       local coreId = CORE_NAMES[name]
       local coreUnit = coreUnits[coreId]
-      core:MarkUnit(coreUnit.unit, 0, percent, mod:GetCoreMarkColorForHealth(percent))
+
+      if mod:GetSetting("MarkerCoreHealth") then
+        core:MarkUnit(coreUnit.unit, 0, percent, mod:GetCoreMarkColorForHealth(percent))
+      end
+
       if percent > CORE_HEALTH_LOW_WARN_PERCENTAGE_REENABLE and percent < CORE_HEALTH_HIGH_WARN_PERCENTAGE_REENABLE then
         coreUnit.healthWarning = false
       elseif percent >= CORE_HEALTH_HIGH_WARN_PERCENTAGE and not coreUnit.healthWarning then
