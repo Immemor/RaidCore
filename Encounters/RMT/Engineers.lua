@@ -180,6 +180,7 @@ function mod:AddUnits()
   end
   for _, coreUnit in pairs(coreUnits) do
     core:WatchUnit(coreUnit.unit)
+    core:MarkUnit(coreUnit.unit, 0, 30)
     if mod:GetSetting("BarsCoreHealth") then
       core:AddUnit(coreUnit.unit)
     end
@@ -312,6 +313,16 @@ mod:RegisterUnitEvents({
   }
 )
 
+function mod:GetCoreMarkColorForHealth(health)
+  local color = "White"
+  if health <= CORE_HEALTH_LOW_WARN_PERCENTAGE or health >= CORE_HEALTH_HIGH_WARN_PERCENTAGE then
+    color = "Red"
+  elseif health <= CORE_HEALTH_LOW_WARN_PERCENTAGE_REENABLE or health >= CORE_HEALTH_HIGH_WARN_PERCENTAGE_REENABLE then
+    color = "Yellow"
+  end
+  return color
+end
+
 -- Cores
 mod:RegisterUnitEvents({
     "unit.fusion_core",
@@ -322,6 +333,7 @@ mod:RegisterUnitEvents({
     ["OnHealthChanged"] = function (self, _, percent, name)
       local coreId = CORE_NAMES[name]
       local coreUnit = coreUnits[coreId]
+      core:MarkUnit(coreUnit, 0, percent, mod:GetCoreMarkColorForHealth(percent))
       if percent > CORE_HEALTH_LOW_WARN_PERCENTAGE_REENABLE and percent < CORE_HEALTH_HIGH_WARN_PERCENTAGE_REENABLE then
         coreUnit.healthWarning = false
       elseif percent >= CORE_HEALTH_HIGH_WARN_PERCENTAGE and not coreUnit.healthWarning then
