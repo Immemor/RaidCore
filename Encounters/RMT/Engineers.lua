@@ -67,6 +67,7 @@ local FIRE_ORB_SAFE_TIMER = 18
 local FIRST_LIQUIDATE_TIMER = 12
 local LIQUIDATE_TIMER = 22
 
+local CORE_HEALTH_LOW_PERCENTAGE = 15
 local CORE_HEALTH_LOW_WARN_PERCENTAGE = 20
 local CORE_HEALTH_LOW_WARN_PERCENTAGE_REENABLE = 23
 local CORE_HEALTH_HIGH_WARN_PERCENTAGE = 85
@@ -81,6 +82,12 @@ local CORE_NAMES = {
   ["unit.cooling_turbine"] = COOLING_TURBINE,
   ["unit.spark_plug"] = SPARK_PLUG,
   ["unit.lubricant_nozzle"] = LUBRICANT_NOZZLE
+}
+local CORE_BAR_COLORS = {
+  [FUSION_CORE] = "xkcdDarkRed",
+  [COOLING_TURBINE] = "xkcdSkyBlue",
+  [SPARK_PLUG] = "xkcdLightYellow",
+  [LUBRICANT_NOZZLE] = "xkcdLightPurple",
 }
 
 local WARRIOR = 1
@@ -123,6 +130,7 @@ local fireOrbTargetTestTimer = ApolloTimer.Create(1, false, "RegisterOrbTarget",
 -- Settings.
 ----------------------------------------------------------------------------------------------------
 mod:RegisterDefaultSetting("BarsCoreHealth", false)
+mod:RegisterDefaultSetting("MarkerCoreHealth")
 mod:RegisterDefaultSetting("LineElectroshock")
 mod:RegisterDefaultSetting("SoundLiquidate")
 mod:RegisterDefaultSetting("SoundElectroshock")
@@ -178,10 +186,14 @@ function mod:AddUnits()
   if mod:GetSetting("BarsCoreHealth") then
     core:AddUnitSpacer("CORE_SPACER")
   end
-  for _, coreUnit in pairs(coreUnits) do
+  for coreId, coreUnit in pairs(coreUnits) do
     core:WatchUnit(coreUnit.unit)
+
+    if mod:GetSetting("MarkerCoreHealth") then
+      core:MarkUnit(coreUnit.unit, 0, 30)
+    end
     if mod:GetSetting("BarsCoreHealth") then
-      core:AddUnit(coreUnit.unit)
+      core:AddUnit(coreUnit.unit, CORE_BAR_COLORS[coreId])
     end
   end
 end
@@ -312,6 +324,16 @@ mod:RegisterUnitEvents({
   }
 )
 
+function mod:GetCoreMarkColorForHealth(health)
+  local color = "White"
+  if health <= CORE_HEALTH_LOW_PERCENTAGE or health >= CORE_HEALTH_HIGH_WARN_PERCENTAGE then
+    color = "Red"
+  elseif health <= CORE_HEALTH_LOW_WARN_PERCENTAGE or health >= CORE_HEALTH_HIGH_WARN_PERCENTAGE_REENABLE then
+    color = "Yellow"
+  end
+  return color
+end
+
 -- Cores
 mod:RegisterUnitEvents({
     "unit.fusion_core",
@@ -322,6 +344,11 @@ mod:RegisterUnitEvents({
     ["OnHealthChanged"] = function (self, _, percent, name)
       local coreId = CORE_NAMES[name]
       local coreUnit = coreUnits[coreId]
+
+      if mod:GetSetting("MarkerCoreHealth") then
+        core:MarkUnit(coreUnit.unit, 0, percent, mod:GetCoreMarkColorForHealth(percent))
+      end
+
       if percent > CORE_HEALTH_LOW_WARN_PERCENTAGE_REENABLE and percent < CORE_HEALTH_HIGH_WARN_PERCENTAGE_REENABLE then
         coreUnit.healthWarning = false
       elseif percent >= CORE_HEALTH_HIGH_WARN_PERCENTAGE and not coreUnit.healthWarning then
