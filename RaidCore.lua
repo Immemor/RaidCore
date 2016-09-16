@@ -130,7 +130,7 @@ local function OnEncounterUnitSpellEvents(sMethod, ...)
   local sName = select(EVENT_UNIT_NAME_INDEX[sMethod], ...)
   local spellId = select(EVENT_UNIT_SPELL_ID_INDEX[sMethod], ...)
 
-  local tHandlers = _tCurrentEncounter.tUnitEvents
+  local tHandlers = _tCurrentEncounter.tUnitSpellEvents
   tHandlers = tHandlers and tHandlers[sMethod]
   tHandlers = tHandlers and tHandlers[sName]
   tHandlers = tHandlers and tHandlers[spellId] or {}
