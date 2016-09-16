@@ -23,7 +23,8 @@
     <Script Name="Encounters/BossPrototype.lua"/>
     <!-- Encounters: Testing purpose -->
     <!--@alpha@-->
-    <!--<Script Name="Encounters/TEST/GalerasTest.lua"/>-->
+    <Script Name="Encounters/TEST/GalerasTest.lua"/>-->
+    <Script Name="Encounters/TEST/HousingTest.lua"/>-->
     <!--@end-alpha@-->
     <!-- Encounters: Genetic Archive -->
     <Script Name="Encounters/GA/ExperimentX89.lua"/>

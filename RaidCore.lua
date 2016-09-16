@@ -260,6 +260,7 @@ function RaidCore:OnInitialize()
       bLUAErrorMessage = false,
       bReadyCheckOnBreakTimeout = true,
       sReadyCheckMessage = self.L["Raid Resume"],
+      bEnableTestEncounters = false,
     }
   }
   -- Final parsing about encounters.
@@ -974,39 +975,39 @@ function RaidCore:LaunchBreak(tArgc)
     self.tScenarioTestTimers = {}
     self.tScenarioTestTimers[1] = self:ScheduleTimer(function()
         self:AddPolygon("TEST1", GetPlayerUnit():GetPosition(), 8, 0, 3, "xkcdBrightPurple", 16)
-      end, 15)
-    self.tScenarioTestTimers[2] = self:ScheduleTimer(function()
-      self:AddPicture("TEST1", GetPlayerUnit():GetId(), "Crosshair", 55)
-    end, 30)
-    self:AddTimerBar("TEST6", "Extended timer", 25, nil, { bEmphasize = true })
-    self.tScenarioTestTimers[3] = self:ScheduleTimer(function()
-      self:ExtendTimerBar("TEST6", 20)
-    end, 10)
-  end
+        end, 15)
+      self.tScenarioTestTimers[2] = self:ScheduleTimer(function()
+          self:AddPicture("TEST1", GetPlayerUnit():GetId(), "Crosshair", 55)
+          end, 30)
+        self:AddTimerBar("TEST6", "Extended timer", 25, nil, { bEmphasize = true })
+        self.tScenarioTestTimers[3] = self:ScheduleTimer(function()
+            self:ExtendTimerBar("TEST6", 20)
+            end, 10)
+        end
 
-  function RaidCore:OnStopTestScenario()
-    for _, timer in next, self.tScenarioTestTimers do
-      self:CancelTimer(timer, true)
-    end
-    self:RemovePolygon("TEST1")
-    self:RemovePicture("TEST1")
-    for i = 1, 36 do
-      local nForce = i / 36.0
-      self:RemoveSimpleLine(("TEST%d"):format(i))
-    end
-    self:RemoveMsg("TEST1")
-    self:RemoveUnit(GetPlayerUnit():GetId())
-    if targetId ~= 0 then
-      self:RemoveUnit("UNIT_SPACER")
-      self:RemoveUnit(targetId)
-      targetId = nil
-    end
-    self:RemoveTimerBar("TEST1")
-    self:RemoveTimerBar("TEST2")
-    self:RemoveTimerBar("TEST3")
-    self:RemoveTimerBar("TEST4")
-    self:RemoveTimerBar("TEST6")
-    self:RemoveProgressBar("PROGRESS")
-    self:RemoveProgressBar("PROGRESS2")
+        function RaidCore:OnStopTestScenario()
+          for _, timer in next, self.tScenarioTestTimers do
+            self:CancelTimer(timer, true)
+          end
+          self:RemovePolygon("TEST1")
+          self:RemovePicture("TEST1")
+          for i = 1, 36 do
+            local nForce = i / 36.0
+            self:RemoveSimpleLine(("TEST%d"):format(i))
+          end
+          self:RemoveMsg("TEST1")
+          self:RemoveUnit(GetPlayerUnit():GetId())
+          if targetId ~= 0 then
+            self:RemoveUnit("UNIT_SPACER")
+            self:RemoveUnit(targetId)
+            targetId = nil
+          end
+          self:RemoveTimerBar("TEST1")
+          self:RemoveTimerBar("TEST2")
+          self:RemoveTimerBar("TEST3")
+          self:RemoveTimerBar("TEST4")
+          self:RemoveTimerBar("TEST6")
+          self:RemoveProgressBar("PROGRESS")
+          self:RemoveProgressBar("PROGRESS2")
 
-  end
+        end

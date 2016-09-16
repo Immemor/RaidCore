@@ -329,6 +329,10 @@ end
 -- @param tNames Names of units without break space.
 -- @return Any unit registered can start the encounter.
 function EncounterPrototype:OnTrig(tNames)
+  if not RaidCore.db.profile.bEnableTestEncounters and
+  (self.displayName == "HousingTest" or self.displayName == "GalerasTest") then
+    return false
+  end
   if next(self.EnableMob) == nil then
     return false
   end
