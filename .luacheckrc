@@ -1,4 +1,5 @@
 self = false
+exclude_files = {".luacheckrc"}
 globals = {
   "AaRect",
   "AbilityBook",
