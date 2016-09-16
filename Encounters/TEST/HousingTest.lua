@@ -87,6 +87,7 @@ mod:RegisterEnglishLocale({
     ["cast.pumera.swipe"] = "Leaping Swipe",
     ["cast.osun.firestorm"] = "Firestorm",
     ["cast.osun.fisure"] = "Erupting Fissure",
+    ["cast.osun.superheated"] = "Superheated",
     ["cast.krogg.rush"] = "Crushing Rush",
     ["cast.krogg.flurry"] = "Crushing Flurry",
     ["cast.krogg.assault"] = "Focused Assault",
@@ -117,6 +118,7 @@ mod:RegisterEnglishLocale({
 -- Constants.
 ----------------------------------------------------------------------------------------------------
 local BUFF_KROGG_FOCUSED_ASSAULT = 72202
+local BUFF_OSUN_SUPERHEAT = 71236
 --moodie and chompacabra debuff
 local DEBUFF_MELT = 50233
 local DEBUFF_CHOMPACABRA_BLEED = 43759
