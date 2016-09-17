@@ -44,6 +44,7 @@ local _bDrawManagerRunning = false
 local _nPreviousTime = 0
 local _wndOverlay = nil
 local _tDrawManagers = {}
+local _nDrawManagers
 local TemplateManager = {}
 local TemplateDraw = {}
 
@@ -106,6 +107,7 @@ local function NewManager(sText)
   new.sManagerName = sText
   new.tDraws = {}
   table.insert(_tDrawManagers, new)
+  _nDrawManagers = #_tDrawManagers
   return new
 end
 
@@ -702,7 +704,8 @@ end
 function RaidCore:DrawManagersInit(tSettings)
   _wndOverlay = Apollo.LoadForm(self.xmlDoc, "Overlay", "InWorldHudStratum", self)
   tSettings = tSettings or {}
-  for _, tDrawManager in next, _tDrawManagers do
+  for i = 1, _nDrawManagers do
+    local tDrawManager = _tDrawManagers[i]
     tDrawManager.tSettings = tSettings[tDrawManager.sManagerName] or {}
   end
 end
@@ -724,7 +727,8 @@ function RaidCore:OnDrawUpdate()
     end
 
     local bIsEmpty = true
-    for _, tDrawManager in next, _tDrawManagers do
+    for i = 1, _nDrawManagers do
+      local tDrawManager = _tDrawManagers[i]
       local fHandler
       if tDrawManager.tSettings.bEnabled then
         fHandler = tDrawManager.UpdateDraw
@@ -751,7 +755,8 @@ function RaidCore:OnDrawUpdate()
 end
 
 function RaidCore:ResetLines()
-  for _, tDrawManager in next, _tDrawManagers do
+  for i = 1, _nDrawManagers do
+    local tDrawManager = _tDrawManagers[i]
     for Key, _ in next, tDrawManager.tDraws do
       tDrawManager:RemoveDraw(Key)
     end
