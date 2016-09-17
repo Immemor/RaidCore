@@ -268,8 +268,7 @@ function mod:OnDebuffAdd(id, spellId)
     if isOnMyself or mod:GetSetting("MessageElectroshockSwap") then
       mod:AddMsg(messageId, electroshockOnX, 5, sound, "Red")
     end
-  end
-  if DEBUFF_ATOMIC_ATTRACTION == spellId then
+  elseif DEBUFF_ATOMIC_ATTRACTION == spellId then
     local target = GetUnitById(id)
     local isOnMyself = target == player.unit
     if isOnMyself then
@@ -277,8 +276,7 @@ function mod:OnDebuffAdd(id, spellId)
     elseif mod:IsPlayerOnPlatform(FUSION_CORE) then
       mod:AddMsg("DISCHARGED_PLASMA_MSG", self.L["msg.fire_orb.spawned"], 2, mod:GetSetting("SoundFireOrbAlt") == true and "Info")
     end
-  end
-  if DEBUFF_ION_CLASH == spellId then
+  elseif DEBUFF_ION_CLASH == spellId then
     core:AddPolygon("ION_CLASH", id, 9, 0, 10, "xkcdBlue", 64)
   end
 end
@@ -291,8 +289,7 @@ function mod:OnDebuffRemove(id, spellId)
     if isOnMyself and mod:GetSetting("MessageElectroshockSwapReturn") then
       mod:AddMsg("ELECTROSHOCK_MSG_OVER", self.L["msg.engineer.electroshock.swap.return"], 5, mod:GetSetting("SoundElectroshockSwapReturn") == true and "Burn")
     end
-  end
-  if DEBUFF_ION_CLASH == spellId then
+  elseif DEBUFF_ION_CLASH == spellId then
     core:RemovePolygon("ION_CLASH")
   end
 end
