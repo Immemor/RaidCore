@@ -281,14 +281,14 @@ local LineBetween = NewManager("LineBetween")
 function LineBetween:UpdateDraw(tDraw)
   local tVectorFrom, tVectorTo = nil, nil
   if tDraw.tUnitFrom then
-    if tDraw.tUnitFrom and tDraw.tUnitFrom:IsValid() then
+    if tDraw.tUnitFrom:IsValid() then
       tVectorFrom = NewVector3(tDraw.tUnitFrom:GetPosition())
     end
   else
     tVectorFrom = tDraw.tVectorFrom
   end
   if tDraw.tUnitTo then
-    if tDraw.tUnitTo and tDraw.tUnitTo:IsValid() then
+    if tDraw.tUnitTo:IsValid() then
       tVectorTo = NewVector3(tDraw.tUnitTo:GetPosition())
     end
   else
@@ -357,9 +357,9 @@ local SimpleLine = NewManager("SimpleLine")
 
 function SimpleLine:UpdateDraw(tDraw)
   local tVectorTo, tVectorFrom = nil, nil
-  if tDraw.nOriginUnit then
-    local tOriginUnit = tDraw.nOriginUnit
-    if tOriginUnit and tOriginUnit:IsValid() then
+  local tOriginUnit = tDraw.tOriginUnit
+  if tOriginUnit then
+    if tOriginUnit:IsValid() then
       local tOriginVector = NewVector3(tOriginUnit:GetPosition())
       local tFacingVector = NewVector3(tOriginUnit:GetFacing())
       local tVectorA = tFacingVector * (tDraw.nOffset)
@@ -410,7 +410,7 @@ function SimpleLine:AddDraw(Key, Origin, nOffset, nLength, nRotation, nWidth, sC
   }
   if OriginType == "number" then
     -- Origin is the Id of an unit.
-    tDraw.nOriginUnit = GetUnitById(Origin)
+    tDraw.tOriginUnit = GetUnitById(Origin)
     tDraw.tFromVector = nil
     tDraw.tToVector = nil
   else
@@ -421,7 +421,7 @@ function SimpleLine:AddDraw(Key, Origin, nOffset, nLength, nRotation, nWidth, sC
     local tVectorB = tFacingVector * (tDraw.nLength + tDraw.nOffset)
     tVectorA = Rotation(tVectorA, tDraw.RotationMatrix)
     tVectorB = Rotation(tVectorB, tDraw.RotationMatrix)
-    tDraw.nOriginUnit = nil
+    tDraw.tOriginUnit = nil
     tDraw.tFromVector = tOriginVector + tVectorA
     tDraw.tToVector = tOriginVector + tVectorB
   end
@@ -447,9 +447,9 @@ local Polygon = NewManager("Polygon")
 
 function Polygon:UpdateDraw(tDraw)
   local tVectors = nil
-  if tDraw.nOriginUnit then
-    local tOriginUnit = tDraw.nOriginUnit
-    if tOriginUnit and tOriginUnit:IsValid() then
+  local tOriginUnit = tDraw.tOriginUnit
+  if tOriginUnit then
+    if tOriginUnit:IsValid() then
       local tOriginVector = NewVector3(tOriginUnit:GetPosition())
       local tFacingVector = NewVector3(tOriginUnit:GetFacing())
       local tRefVector = tFacingVector * tDraw.nRadius
@@ -542,10 +542,10 @@ function Polygon:AddDraw(Key, Origin, nRadius, nRotation, nWidth, sColor, nSide)
 
   if OriginType == "number" then
     -- Origin is the Id of an unit.
-    tDraw.nOriginUnit = GetUnitById(Origin)
+    tDraw.tOriginUnit = GetUnitById(Origin)
   else
     -- Origin is the result of a GetPosition()
-    tDraw.nOriginUnit = nil
+    tDraw.tOriginUnit = nil
     -- Precomputing coordonate of the polygon with constant origin.
     local tOriginVector = NewVector3(Origin)
     local tFacingVector = NewVector3(DEFAULT_NORTH_FACING)
@@ -589,9 +589,9 @@ local Picture = NewManager("Picture")
 
 function Picture:UpdateDraw(tDraw)
   local tVector = nil
-  if tDraw.nOriginUnit then
-    local tOriginUnit = tDraw.nOriginUnit
-    if tOriginUnit and tOriginUnit:IsValid() then
+  local tOriginUnit = tDraw.tOriginUnit
+  if tOriginUnit then
+    if tOriginUnit:IsValid() then
       local tOriginVector = NewVector3(tOriginUnit:GetPosition())
       local tFacingVector = NewVector3(tOriginUnit:GetFacing())
       local tRefVector = tFacingVector * tDraw.nDistance
@@ -663,14 +663,14 @@ function Picture:AddDraw(Key, Origin, sSprite, nSpriteSize, nRotation, nDistance
   if OriginType == "number" then
     -- Origin is the Id of an unit.
     local tUnit = GetUnitById(Origin)
-    tDraw.nOriginUnit = tUnit
+    tDraw.tOriginUnit = tUnit
     local nRaceId = tUnit and tUnit:GetRaceId()
     if nRaceId and HEIGHT_PER_RACEID[nRaceId] then
       tDraw.nHeight = HEIGHT_PER_RACEID[nRaceId]
     end
   else
     -- Origin is the result of a GetPosition()
-    tDraw.nOriginUnit = nil
+    tDraw.tOriginUnit = nil
     -- Precomputing coordonate of the polygon with constant origin.
     local tOriginVector = NewVector3(Origin)
     local tFacingVector = NewVector3(DEFAULT_NORTH_FACING)
