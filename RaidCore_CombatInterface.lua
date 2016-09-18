@@ -730,7 +730,7 @@ function RaidCore:CI_ShowShortcutBarDelayed()
     if strIcon == nil or strIcon == "" then
       break
     end
-    table.insert(tIconFloatingSpellBar, strIcon)
+    tinsert(tIconFloatingSpellBar, strIcon)
   end
   ManagerCall("OnShowShortcutBar", tIconFloatingSpellBar)
 end
