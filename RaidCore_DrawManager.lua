@@ -92,11 +92,12 @@ end
 
 local function BuildPublicDraw(t)
   -- Create an empty metatable, with a write protection.
+  local function readonly()
+    error("Attempt to update a read-only graphical object", 2)
+  end
   local mt = {
     __index = t,
-    __newindex = function(_, _, _)
-      error("Attempt to update a read-only graphical object", 2)
-    end
+    __newindex = readonly
   }
   -- Create a proxy table, which will be the public interface.
   return setmetatable({}, mt)
