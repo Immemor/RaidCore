@@ -370,7 +370,7 @@ local function FullActivate(bEnable)
 end
 
 local function RemoveAllExtraActivation()
-  for sEvent, v in next, _CI_Extra do
+  for sEvent, _ in next, _CI_Extra do
     RemoveEventHandler(sEvent, RaidCore)
     _CI_Extra[sEvent] = nil
   end
