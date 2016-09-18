@@ -209,9 +209,9 @@ local function GetAllBuffs(tUnit)
   return r
 end
 
-local function TrackThisUnit(nId)
-  local tUnit = GetUnitById(nId)
-  if not _tTrackedUnits[nId] and tUnit and not tUnit:IsInYourGroup() then
+local function TrackThisUnit(tUnit)
+  local nId = tUnit:GetId()
+  if not _tTrackedUnits[nId] and not tUnit:IsInYourGroup() then
     Log:Add("TrackThisUnit", nId)
     local tAllBuffs = GetAllBuffs(tUnit)
     local MaxHealth = tUnit:GetMaxHealth()
@@ -491,13 +491,16 @@ function RaidCore:CombatInterface_ExtraActivate(sEvent, bNewState)
   end
 end
 
-function RaidCore:CombatInterface_Untrack(nId)
-  UnTrackThisUnit(nId)
+-- Track buff and cast of this unit.
+-- @param unit userdata object related to an unit in game.
+function RaidCore:WatchUnit(unit)
+  TrackThisUnit(unit)
 end
 
-function RaidCore:CombatInterface_Track(nId)
-  TrackThisUnit(nId)
-  return _tTrackedUnits[nId]
+-- Untrack buff and cast of this unit.
+-- @param unit userdata object related to an unit in game.
+function RaidCore:UnwatchUnit(unit)
+  UnTrackThisUnit(unit:GetId())
 end
 
 function RaidCore:CombatInterface_GetTrackedById(nId)
