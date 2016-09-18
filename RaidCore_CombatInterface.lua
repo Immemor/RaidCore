@@ -650,7 +650,7 @@ function RaidCore:CI_OnScanUpdate()
         if not data.tCast.bSuccess then
           -- Let's compare with the nCastEndTime
           local nThreshold = GetGameTime() + SCAN_PERIOD
-          local bIsFailed
+          local bIsInterrupted
           if nThreshold < data.tCast.nCastEndTime then
             bIsInterrupted = true
           else
