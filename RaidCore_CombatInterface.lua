@@ -192,7 +192,9 @@ local function GetAllBuffs(tUnit)
     if tAllBuffs then
       for sType, tBuffs in next, tAllBuffs do
         r[sType] = {}
-        for _,obj in next, tBuffs do
+        local nBuffs = #tBuffs
+        for i = 1, nBuffs do
+          local obj = tBuffs[i]
           local nSpellId = obj.splEffect:GetId()
           if nSpellId and not SPELLID_BLACKLISTED[nSpellId] then
             r[sType][obj.idBuff] = {
