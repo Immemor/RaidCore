@@ -187,23 +187,27 @@ Log:SetExtra2String(ExtraLog2Text)
 ----------------------------------------------------------------------------------------------------
 local function GetAllBuffs(tUnit)
   local r = {}
-  if tUnit then
-    local tAllBuffs = tUnit:GetBuffs()
-    if tAllBuffs then
-      for sType, tBuffs in next, tAllBuffs do
-        r[sType] = {}
-        local nBuffs = #tBuffs
-        for i = 1, nBuffs do
-          local obj = tBuffs[i]
-          local nSpellId = obj.splEffect:GetId()
-          if nSpellId and not SPELLID_BLACKLISTED[nSpellId] then
-            r[sType][obj.idBuff] = {
-              nCount = obj.nCount,
-              nSpellId = nSpellId,
-              fTimeRemaining = obj.fTimeRemaining,
-            }
-          end
-        end
+  if not tUnit then
+    return r
+  end
+
+  local tAllBuffs = tUnit:GetBuffs()
+  if not tAllBuffs then
+    return r
+  end
+
+  for sType, tBuffs in next, tAllBuffs do
+    r[sType] = {}
+    local nBuffs = #tBuffs
+    for i = 1, nBuffs do
+      local obj = tBuffs[i]
+      local nSpellId = obj.splEffect:GetId()
+      if nSpellId and not SPELLID_BLACKLISTED[nSpellId] then
+        r[sType][obj.idBuff] = {
+          nCount = obj.nCount,
+          nSpellId = nSpellId,
+          fTimeRemaining = obj.fTimeRemaining,
+        }
       end
     end
   end
