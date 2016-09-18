@@ -254,10 +254,10 @@ local function ProcessAllBuffs(tMyUnit)
   local bProcessBuffs = not bProcessDebuffs
   local nId = tMyUnit.nId
 
-  local tNewDebuffs = tAllBuffs["arHarmful"]
+  local tNewDebuffs = tAllBuffs.arHarmful
   local tDebuffs = tMyUnit.tDebuffs
   if bProcessDebuffs and tNewDebuffs then
-    for nIdBuff,current in next, tDebuffs do
+    for nIdBuff, current in next, tDebuffs do
       if tNewDebuffs[nIdBuff] then
         local tNew = tNewDebuffs[nIdBuff]
         if tNew.nCount ~= current.nCount then
@@ -273,16 +273,16 @@ local function ProcessAllBuffs(tMyUnit)
         ManagerCall("OnDebuffRemove", nId, current.nSpellId)
       end
     end
-    for nIdBuff,tNew in next, tNewDebuffs do
+    for nIdBuff, tNew in next, tNewDebuffs do
       tDebuffs[nIdBuff] = tNew
       ManagerCall("OnDebuffAdd", nId, tNew.nSpellId, tNew.nCount, tNew.fTimeRemaining)
     end
   end
 
-  local tNewBuffs = tAllBuffs["arBeneficial"]
+  local tNewBuffs = tAllBuffs.arBeneficial
   local tBuffs = tMyUnit.tBuffs
   if bProcessBuffs and tNewBuffs then
-    for nIdBuff,current in next, tBuffs do
+    for nIdBuff, current in next, tBuffs do
       if tNewBuffs[nIdBuff] then
         local tNew = tNewBuffs[nIdBuff]
         if tNew.nCount ~= current.nCount then
