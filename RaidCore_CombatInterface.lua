@@ -699,8 +699,8 @@ function RaidCore:CI_OnChatMessage(tChannelCurrent, tMessage)
 end
 
 function RaidCore:CI_OnReceivedMessage(sChannel, sMessage, sSender)
-  local tSender = sSender and GetPlayerUnitByName(sSender)
-  local nSenderId = tSender and tSender:GetId()
+  local tMember = _tMembers[sSender] or {}
+  local nSenderId = tMember.nId
   ManagerCall("OnReceivedMessage", sMessage, nSenderId)
 end
 
