@@ -52,10 +52,7 @@ local CHANNEL_HANDLERS = {
   [ChatSystemLib.ChatChannel_Datachron] = "OnDatachron",
 }
 local SPELLID_BLACKLISTED = {
-  [60883] = "Irradiate", -- On war class.
-  [79671] = "Empower", -- On war class.
-  [72651] = "Surge Focus Drain", -- On arcanero class.
-  [72652] = "Surge Focus Drain", -- On arcanero class.
+  [79757] = "Kinetic Rage: Augmented Blade", -- On war class.
 }
 -- State Machine.
 local INTERFACE__DISABLE = 1
