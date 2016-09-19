@@ -96,15 +96,6 @@ function mod:OnBossEnable()
   mod:AddTimerBar("AVATUS_INCOMING", "Avatus incoming", 425)
 end
 
-function mod:OnBuffAdded(nId, nSpellId, nStack, fTimeRemaining)
-end
-
-function mod:OnBuffUpdate(nId, nSpellId, nOldStack, nStack, fTimeRemaining)
-end
-
-function mod:OnBuffRemove(nId, nSpellId)
-end
-
 function mod:OnDatachron(sMessage)
   if sMessage == self.L["The lava begins to rise through the floor!"] then
     mod:AddTimerBar("LAVA_FLOOR", "End of lava floor phase", 28)

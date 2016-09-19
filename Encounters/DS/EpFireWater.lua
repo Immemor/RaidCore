@@ -222,7 +222,7 @@ function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
   end
 end
 
-function mod:OnDebuffUpdate(nId, nSpellId, nOldStack, nStack, fTimeRemaining)
+function mod:OnDebuffUpdate(nId, nSpellId, nStack, fTimeRemaining)
   local tUnit = GetUnitById(nId)
 
   if nSpellId == DEBUFFID_DRENCHED or nSpellId == DEBUFFID_ENGULFED then

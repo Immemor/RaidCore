@@ -110,7 +110,7 @@ function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
   mod:OnDebuffAddedOrUpdated(nId, nSpellId, nStack, fTimeRemaining)
 end
 
-function mod:OnDebuffUpdate(nId, nSpellId, nOldStack, nStack, fTimeRemaining)
+function mod:OnDebuffUpdate(nId, nSpellId, nStack, fTimeRemaining)
   mod:OnDebuffAddedOrUpdated(nId, nSpellId, nStack, fTimeRemaining)
 end
 
