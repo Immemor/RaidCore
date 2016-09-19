@@ -29,7 +29,6 @@ local Log = Apollo.GetPackage("Log-1.0").tPackage
 local RegisterEventHandler = Apollo.RegisterEventHandler
 local RemoveEventHandler = Apollo.RemoveEventHandler
 local GetGameTime = GameLib.GetGameTime
-local GetPlayerUnit = GameLib.GetPlayerUnit
 local GetUnitById = GameLib.GetUnitById
 local GetSpell = GameLib.GetSpell
 local next, string, pcall = next, string, pcall
@@ -491,12 +490,11 @@ end
 ----------------------------------------------------------------------------------------------------
 function RaidCore:CI_OnEnteredCombat(tUnit, bInCombat)
   local tOwner = tUnit.GetUnitOwner and tUnit:GetUnitOwner()
-  local tPlayerUnit = GetPlayerUnit()
-  local bIsPetPlayer = tOwner and (tOwner:IsInYourGroup() or tOwner == tPlayerUnit)
+  local bIsPetPlayer = tOwner and (tOwner:IsInYourGroup() or tOwner:IsThePlayer())
   if not bIsPetPlayer then
     local nId = tUnit:GetId()
     local sName = string.gsub(tUnit:GetName(), NO_BREAK_SPACE, " ")
-    if not tUnit:IsInYourGroup() and tUnit ~= tPlayerUnit then
+    if not tUnit:IsInYourGroup() and not tUnit:IsThePlayer() then
       if not _tAllUnits[nId] then
         ManagerCall("OnUnitCreated", nId, tUnit, sName)
       end
@@ -508,11 +506,10 @@ end
 
 function RaidCore:CI_OnUnitCreated(tUnit)
   local nId = tUnit:GetId()
-  local tPlayerUnit = GetPlayerUnit()
-  if not tUnit:IsInYourGroup() and tUnit ~= tPlayerUnit then
+  if not tUnit:IsInYourGroup() and not tUnit:IsThePlayer() then
     local sName = tUnit:GetName():gsub(NO_BREAK_SPACE, " ")
     local tOwner = tUnit.GetUnitOwner and tUnit:GetUnitOwner()
-    local bIsPetPlayer = tOwner and (tOwner:IsInYourGroup() or tOwner == tPlayerUnit)
+    local bIsPetPlayer = tOwner and (tOwner:IsInYourGroup() or tOwner:IsThePlayer())
     if not bIsPetPlayer and not _tAllUnits[nId] then
       _tAllUnits[nId] = true
       ManagerCall("OnUnitCreated", nId, tUnit, sName)
