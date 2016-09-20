@@ -226,13 +226,13 @@ mod:RegisterUnitEvents({
     "unit.add.plunderer",
     "unit.add.cadet"
     },{
-    [core.e.UNIT_CREATED] = function (_, _, unit)
+    [core.E.UNIT_CREATED] = function (_, _, unit)
       core:WatchUnit(unit)
     end,
-    [core.e.UNIT_DESTROYED] = function (_, id)
+    [core.E.UNIT_DESTROYED] = function (_, id)
       core:RemovePicture(id)
     end,
-    [core.e.HEALTH_CHANGED] = function (_, id, percent)
+    [core.E.HEALTH_CHANGED] = function (_, id, percent)
       if percent <= 1 and mod:GetSetting("CrosshairAdds") then
         core:AddPicture(id, id, "Crosshair", 20)
       end
@@ -241,7 +241,7 @@ mod:RegisterUnitEvents({
 )
 
 mod:RegisterUnitEvents({ "unit.add.brute", "unit.add.nabber" },{
-    [core.e.UNIT_CREATED] = function (_, id)
+    [core.E.UNIT_CREATED] = function (_, id)
       if mod:GetSetting("CrosshairPriority") then
         core:AddPicture(id, id, "Crosshair", 30, 0, 0, nil, "red")
       end
@@ -250,22 +250,22 @@ mod:RegisterUnitEvents({ "unit.add.brute", "unit.add.nabber" },{
 )
 
 mod:RegisterUnitEvents("unit.swabbie",{
-    [core.e.UNIT_CREATED] = function (self, _, unit)
+    [core.E.UNIT_CREATED] = function (self, _, unit)
       core:AddUnit(unit)
       core:WatchUnit(unit)
       self.swabbieUnit = unit
     end,
-    [core.e.UNIT_DESTROYED] = function (self, _, unit)
+    [core.E.UNIT_DESTROYED] = function (self, _, unit)
       core:RemoveUnit(unit)
       self:RemoveProgressBar("WALKING_PROGRESS")
       self:RemoveProgressBar("ADDS_PROGRESS")
     end,
-    [core.e.CAST_START] = {
+    [core.E.CAST_START] = {
       ["cast.swabbie.knockback"] = function(self, _)
         mod:AddMsg("KNOCKBACK", self.L["msg.swabbie.knockback"], 2)
       end
     },
-    [core.e.CAST_END] = {
+    [core.E.CAST_END] = {
       ["cast.swabbie.swoop"] = function(_, _)
         startProgressBarTimer = ApolloTimer.Create(1, true, "StartProgressBar", mod)
         startProgressBarTimer:Start()
@@ -302,7 +302,7 @@ function mod:HandleShredderSaw(sawLocation)
 end
 
 mod:RegisterUnitEvents("unit.saw.big",{
-    [core.e.UNIT_CREATED] = function (self, id, unit)
+    [core.E.UNIT_CREATED] = function (self, id, unit)
       if mod:GetSetting("LineSawblade") then
         core:AddPixie(id, 2, unit, nil, "Red", 10, 60, 0)
       end
@@ -315,18 +315,18 @@ mod:RegisterUnitEvents("unit.saw.big",{
         mod:HandleShredderSaw(sawLocation)
       end
     end,
-    [core.e.UNIT_DESTROYED] = function (_, id)
+    [core.E.UNIT_DESTROYED] = function (_, id)
       core:DropPixie(id)
     end,
   }
 )
 
 mod:RegisterUnitEvents("unit.add.nabber",{
-    [core.e.UNIT_CREATED] = function (self)
+    [core.E.UNIT_CREATED] = function (self)
       core:RemoveMsg("ADDS_MSG")
       mod:AddMsg("ADDS_MSG", self.L["msg.nabber.spawned"], 5, mod:GetSetting("SoundAdds") and "Info")
     end,
-    [core.e.CAST_START] = {
+    [core.E.CAST_START] = {
       ["cast.nabber.lash"] = function(self, id)
         local unit = GetUnitById(id)
         if mod:GetDistanceBetweenUnits(playerUnit, unit) < 45 then
@@ -338,10 +338,10 @@ mod:RegisterUnitEvents("unit.add.nabber",{
 )
 
 mod:RegisterUnitEvents({"unit.miniboss.regor", "unit.miniboss.braugh"},{
-    [core.e.UNIT_CREATED] = function (self)
+    [core.E.UNIT_CREATED] = function (self)
       mod:AddMsg("MINIBOSS", self.L["msg.miniboss.spawned"], 5, mod:GetSetting("SoundMiniboss") and "Info")
     end,
-    [core.e.CAST_START] = function (self, _, castName)
+    [core.E.CAST_START] = function (self, _, castName)
       if self.L["cast.miniboss.gravedigger"] == castName or
       self.L["cast.miniboss.deathwail"] == castName or
       self.L["cast.miniboss.crush"] == castName then
@@ -353,24 +353,24 @@ mod:RegisterUnitEvents({"unit.miniboss.regor", "unit.miniboss.braugh"},{
 )
 
 mod:RegisterUnitEvents("unit.tether",{
-    [core.e.UNIT_CREATED] = function (_, id)
+    [core.E.UNIT_CREATED] = function (_, id)
       if mod:GetSetting("CrosshairTether") then
         core:AddPicture(id, id, "Crosshair", 25, 0, 0, nil, "FFFFF569")
       end
     end,
-    [core.e.UNIT_DESTROYED] = function (_, id)
+    [core.E.UNIT_DESTROYED] = function (_, id)
       core:RemovePicture(id)
     end,
   }
 )
 
 mod:RegisterUnitEvents("unit.junk_trap",{
-    [core.e.UNIT_CREATED] = function (_, id)
+    [core.E.UNIT_CREATED] = function (_, id)
       if mod:GetSetting("SquareTethers") then
         core:AddPolygon(id, id, 5, 45, 6, nil, 4)
       end
     end,
-    [core.e.UNIT_DESTROYED] = function (_, id)
+    [core.E.UNIT_DESTROYED] = function (_, id)
       core:RemovePolygon(id)
     end,
   }
