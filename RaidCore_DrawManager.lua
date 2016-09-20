@@ -40,9 +40,11 @@ local math = math
 ----------------------------------------------------------------------------------------------------
 -- local data.
 ----------------------------------------------------------------------------------------------------
+local _bDrawManagerRunning = false
 local _nPreviousTime = 0
 local _wndOverlay = nil
 local _tDrawManagers = {}
+local _nDrawManagers
 local TemplateManager = {}
 local TemplateDraw = {}
 
@@ -90,11 +92,12 @@ end
 
 local function BuildPublicDraw(t)
   -- Create an empty metatable, with a write protection.
+  local function readonly()
+    error("Attempt to update a read-only graphical object", 2)
+  end
   local mt = {
     __index = t,
-    __newindex = function(t, k, v)
-      error("Attempt to update a read-only graphical object", 2)
-    end
+    __newindex = readonly
   }
   -- Create a proxy table, which will be the public interface.
   return setmetatable({}, mt)
@@ -105,6 +108,7 @@ local function NewManager(sText)
   new.sManagerName = sText
   new.tDraws = {}
   table.insert(_tDrawManagers, new)
+  _nDrawManagers = #_tDrawManagers
   return new
 end
 
@@ -279,18 +283,16 @@ local LineBetween = NewManager("LineBetween")
 
 function LineBetween:UpdateDraw(tDraw)
   local tVectorFrom, tVectorTo = nil, nil
-  if tDraw.nIdFrom then
-    local tUnitFrom = GetUnitById(tDraw.nIdFrom)
-    if tUnitFrom and tUnitFrom:IsValid() then
-      tVectorFrom = NewVector3(tUnitFrom:GetPosition())
+  if tDraw.tUnitFrom then
+    if tDraw.tUnitFrom:IsValid() then
+      tVectorFrom = NewVector3(tDraw.tUnitFrom:GetPosition())
     end
   else
     tVectorFrom = tDraw.tVectorFrom
   end
-  if tDraw.nIdTo then
-    local tUnitTo = GetUnitById(tDraw.nIdTo)
-    if tUnitTo and tUnitTo:IsValid() then
-      tVectorTo = NewVector3(tUnitTo:GetPosition())
+  if tDraw.tUnitTo then
+    if tDraw.tUnitTo:IsValid() then
+      tVectorTo = NewVector3(tDraw.tUnitTo:GetPosition())
     end
   else
     tVectorTo = tDraw.tVectorTo
@@ -319,21 +321,21 @@ function LineBetween:AddDraw(Key, FromOrigin, ToOrigin, nWidth, sColor, nNumberO
   -- Preprocessing of the 'From'.
   if type(FromOrigin) == "number" then
     -- FromOrigin is the Id of an unit.
-    tDraw.nIdFrom = FromOrigin
+    tDraw.tUnitFrom = GetUnitById(FromOrigin)
     tDraw.tVectorFrom = nil
   else
     -- FromOrigin is the result of a GetPosition()
-    tDraw.nIdFrom = nil
+    tDraw.tUnitFrom = nil
     tDraw.tVectorFrom = NewVector3(FromOrigin)
   end
   -- Preprocessing of the 'To'.
   if type(ToOrigin) == "number" then
     -- ToOrigin is the Id of an unit.
-    tDraw.nIdTo = ToOrigin
+    tDraw.tUnitTo = GetUnitById(ToOrigin)
     tDraw.tVectorTo = nil
   else
     -- ToOrigin is the result of a GetPosition()
-    tDraw.nIdTo = nil
+    tDraw.tUnitTo = nil
     tDraw.tVectorTo = NewVector3(ToOrigin)
   end
   -- Save this object (new or not).
@@ -358,9 +360,9 @@ local SimpleLine = NewManager("SimpleLine")
 
 function SimpleLine:UpdateDraw(tDraw)
   local tVectorTo, tVectorFrom = nil, nil
-  if tDraw.nOriginId then
-    local tOriginUnit = GetUnitById(tDraw.nOriginId)
-    if tOriginUnit and tOriginUnit:IsValid() then
+  local tOriginUnit = tDraw.tOriginUnit
+  if tOriginUnit then
+    if tOriginUnit:IsValid() then
       local tOriginVector = NewVector3(tOriginUnit:GetPosition())
       local tFacingVector = NewVector3(tOriginUnit:GetFacing())
       local tVectorA = tFacingVector * (tDraw.nOffset)
@@ -411,7 +413,7 @@ function SimpleLine:AddDraw(Key, Origin, nOffset, nLength, nRotation, nWidth, sC
   }
   if OriginType == "number" then
     -- Origin is the Id of an unit.
-    tDraw.nOriginId = Origin
+    tDraw.tOriginUnit = GetUnitById(Origin)
     tDraw.tFromVector = nil
     tDraw.tToVector = nil
   else
@@ -422,7 +424,7 @@ function SimpleLine:AddDraw(Key, Origin, nOffset, nLength, nRotation, nWidth, sC
     local tVectorB = tFacingVector * (tDraw.nLength + tDraw.nOffset)
     tVectorA = Rotation(tVectorA, tDraw.RotationMatrix)
     tVectorB = Rotation(tVectorB, tDraw.RotationMatrix)
-    tDraw.nOriginId = nil
+    tDraw.tOriginUnit = nil
     tDraw.tFromVector = tOriginVector + tVectorA
     tDraw.tToVector = tOriginVector + tVectorB
   end
@@ -448,9 +450,9 @@ local Polygon = NewManager("Polygon")
 
 function Polygon:UpdateDraw(tDraw)
   local tVectors = nil
-  if tDraw.nOriginId then
-    local tOriginUnit = GetUnitById(tDraw.nOriginId)
-    if tOriginUnit and tOriginUnit:IsValid() then
+  local tOriginUnit = tDraw.tOriginUnit
+  if tOriginUnit then
+    if tOriginUnit:IsValid() then
       local tOriginVector = NewVector3(tOriginUnit:GetPosition())
       local tFacingVector = NewVector3(tOriginUnit:GetFacing())
       local tRefVector = tFacingVector * tDraw.nRadius
@@ -543,10 +545,10 @@ function Polygon:AddDraw(Key, Origin, nRadius, nRotation, nWidth, sColor, nSide)
 
   if OriginType == "number" then
     -- Origin is the Id of an unit.
-    tDraw.nOriginId = Origin
+    tDraw.tOriginUnit = GetUnitById(Origin)
   else
     -- Origin is the result of a GetPosition()
-    tDraw.nOriginId = nil
+    tDraw.tOriginUnit = nil
     -- Precomputing coordonate of the polygon with constant origin.
     local tOriginVector = NewVector3(Origin)
     local tFacingVector = NewVector3(DEFAULT_NORTH_FACING)
@@ -590,9 +592,9 @@ local Picture = NewManager("Picture")
 
 function Picture:UpdateDraw(tDraw)
   local tVector = nil
-  if tDraw.nOriginId then
-    local tOriginUnit = GetUnitById(tDraw.nOriginId)
-    if tOriginUnit and tOriginUnit:IsValid() then
+  local tOriginUnit = tDraw.tOriginUnit
+  if tOriginUnit then
+    if tOriginUnit:IsValid() then
       local tOriginVector = NewVector3(tOriginUnit:GetPosition())
       local tFacingVector = NewVector3(tOriginUnit:GetFacing())
       local tRefVector = tFacingVector * tDraw.nDistance
@@ -641,7 +643,7 @@ end
 
 function Picture:AddDraw(Key, Origin, sSprite, nSpriteSize, nRotation, nDistance, nHeight, sColor)
   local OriginType = type(Origin)
-  assert(OriginType == "number" or OriginType == "table" or OriginType == "userdata")
+  assert(OriginType == "number" or OriginType == "table")
 
   -- Register a new object to manage.
   local tDraw = self.tDraws[Key] or NewDraw()
@@ -663,15 +665,15 @@ function Picture:AddDraw(Key, Origin, sSprite, nSpriteSize, nRotation, nDistance
 
   if OriginType == "number" then
     -- Origin is the Id of an unit.
-    tDraw.nOriginId = Origin
     local tUnit = GetUnitById(Origin)
+    tDraw.tOriginUnit = tUnit
     local nRaceId = tUnit and tUnit:GetRaceId()
     if nRaceId and HEIGHT_PER_RACEID[nRaceId] then
       tDraw.nHeight = HEIGHT_PER_RACEID[nRaceId]
     end
   else
     -- Origin is the result of a GetPosition()
-    tDraw.nOriginId = nil
+    tDraw.tOriginUnit = nil
     -- Precomputing coordonate of the polygon with constant origin.
     local tOriginVector = NewVector3(Origin)
     local tFacingVector = NewVector3(DEFAULT_NORTH_FACING)
@@ -701,9 +703,10 @@ end
 -- Relations between RaidCore and Draw Manager.
 ----------------------------------------------------------------------------------------------------
 function RaidCore:DrawManagersInit(tSettings)
-  _wndOverlay = Apollo.LoadForm(self.xmlDoc, "Overlay", "InWorldHudStratum", tClass)
+  _wndOverlay = Apollo.LoadForm(self.xmlDoc, "Overlay", "InWorldHudStratum", self)
   tSettings = tSettings or {}
-  for _, tDrawManager in next, _tDrawManagers do
+  for i = 1, _nDrawManagers do
+    local tDrawManager = _tDrawManagers[i]
     tDrawManager.tSettings = tSettings[tDrawManager.sManagerName] or {}
   end
 end
@@ -725,7 +728,8 @@ function RaidCore:OnDrawUpdate()
     end
 
     local bIsEmpty = true
-    for _, tDrawManager in next, _tDrawManagers do
+    for i = 1, _nDrawManagers do
+      local tDrawManager = _tDrawManagers[i]
       local fHandler
       if tDrawManager.tSettings.bEnabled then
         fHandler = tDrawManager.UpdateDraw
@@ -752,8 +756,9 @@ function RaidCore:OnDrawUpdate()
 end
 
 function RaidCore:ResetLines()
-  for _, tDrawManager in next, _tDrawManagers do
-    for Key, tDraw in next, tDrawManager.tDraws do
+  for i = 1, _nDrawManagers do
+    local tDrawManager = _tDrawManagers[i]
+    for Key, _ in next, tDrawManager.tDraws do
       tDrawManager:RemoveDraw(Key)
     end
   end
