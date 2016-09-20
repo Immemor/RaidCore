@@ -71,6 +71,12 @@ local MAZE_SPEW_TIMER = 10
 
 local ARMS_TIMER = 45
 
+-- Health trackers
+local FIRST_MAZE_PHASE_UPPER_HEALTH = 76.5
+local FIRST_MAZE_PHASE_LOWER_HEALTH = 75.5
+local SECOND_MAZE_PHASE_UPPER_HEALTH = 51.5
+local SECOND_MAZE_PHASE_LOWER_HEALTH = 50.5
+
 -- Compactors.
 local COMPACTORS_EDGE = {
   { y = -203.4208984375, x = 0.71257400512695, z = -1349.8697509766 },
@@ -334,7 +340,7 @@ mod:RegisterUnitEvents("unit.robo",{
       roboUnit = unit
     end,
     ["OnHealthChanged"] = function (self, _, percent)
-      if percent >= 75.5 and percent <= 76.5 then
+      if (percent >= FIRST_MAZE_PHASE_LOWER_HEALTH and percent <= FIRST_MAZE_PHASE_UPPER_HEALTH) or (percent >= SECOND_MAZE_PHASE_LOWER_HEALTH and percent <= SECOND_MAZE_PHASE_UPPER_HEALTH) then
         mod:AddMsg("ROBO_MAZE", self.L["msg.maze.coming"], 5, mod:GetSetting("SoundPhaseChangeClose") and "Info")
       end
     end,
