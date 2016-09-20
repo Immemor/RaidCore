@@ -312,7 +312,7 @@ function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
     end
   end
 
-  function mod:OnBuffUpdate(nId, nSpellId, nNewStack, fTimeRemaining)
+  function mod:OnBuffUpdate(nId, nSpellId, nOldStack, nNewStack, fTimeRemaining)
     if BUFF_NANOSTRAIN_INFUSION == nSpellId then
       local nRemain = NANOSTRAIN_2_CORRUPTION_THRESHOLD - nNewStack
       if nRemain == 2 or nRemain == 1 then
