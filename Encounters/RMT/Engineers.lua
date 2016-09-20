@@ -170,6 +170,7 @@ function mod:OnBossEnable()
 
   for _, coreUnit in pairs(coreUnits) do
     coreUnit.healthWarning = false
+    coreUnit.enabled = false
   end
 
   mod:AddTimerBar("NEXT_ELEKTROSHOCK_TIMER", self.L["msg.engineer.electroshock.next"], FIRST_ELECTROSHOCK_TIMER)
@@ -192,9 +193,7 @@ function mod:AddUnits()
   for coreId, coreUnit in pairs(coreUnits) do
     core:WatchUnit(coreUnit.unit)
 
-    if mod:GetSetting("MarkerCoreHealth") then
-      core:MarkUnit(coreUnit.unit, 0, 30)
-    end
+    mod:UpdateCoreHealthMark(coreUnit, 30)
     if mod:GetSetting("BarsCoreHealth") then
       core:AddUnit(coreUnit.unit, CORE_BAR_COLORS[coreId])
     end
@@ -238,8 +237,38 @@ function mod:OnEngiChangeLocation(engineerId, _, newLocation)
   end
 end
 
-function mod:OnBuffRemove(_, spellId)
+function mod:UpdateCoreHealthMark(coreUnit, percent)
+  if mod:GetSetting("MarkerCoreHealth") then
+    return
+  end
+
+  local color = "White"
+  if percent <= CORE_HEALTH_LOW_PERCENTAGE or percent >= CORE_HEALTH_HIGH_WARN_PERCENTAGE then
+    color = "Red"
+  elseif percent <= CORE_HEALTH_LOW_WARN_PERCENTAGE or percent >= CORE_HEALTH_HIGH_WARN_PERCENTAGE_REENABLE then
+    color = "Yellow"
+  end
+  if not coreUnit.enabled then
+    color = "DarkGray"
+  end
+
+  core:MarkUnit(coreUnit.unit, 0, percent, color)
+end
+
+function mod:OnBuffAdd(id, spellId)
   if spellId == BUFF_INSULATION then
+    local coreUnit = coreUnits[CORE_NAMES[GetUnitById(id):GetName()]]
+    coreUnit.enabled = false
+    mod:UpdateCoreHealthMark(coreUnit)
+  end
+end
+
+function mod:OnBuffRemove(id, spellId)
+  if spellId == BUFF_INSULATION then
+    local coreUnit = coreUnits[CORE_NAMES[GetUnitById(id):GetName()]]
+    coreUnit.enabled = true
+    mod:UpdateCoreHealthMark(coreUnit)
+
     for engineerId, engineer in pairs(engineerUnits) do
       local oldLocation = engineerUnits[engineerId].location
       local newLocation = mod:GetUnitPlatform(engineer.unit)
@@ -339,16 +368,6 @@ mod:RegisterUnitEvents({
   }
 )
 
-function mod:GetCoreMarkColorForHealth(health)
-  local color = "White"
-  if health <= CORE_HEALTH_LOW_PERCENTAGE or health >= CORE_HEALTH_HIGH_WARN_PERCENTAGE then
-    color = "Red"
-  elseif health <= CORE_HEALTH_LOW_WARN_PERCENTAGE or health >= CORE_HEALTH_HIGH_WARN_PERCENTAGE_REENABLE then
-    color = "Yellow"
-  end
-  return color
-end
-
 -- Cores
 mod:RegisterUnitEvents({
     "unit.fusion_core",
@@ -360,9 +379,7 @@ mod:RegisterUnitEvents({
       local coreId = CORE_NAMES[name]
       local coreUnit = coreUnits[coreId]
 
-      if mod:GetSetting("MarkerCoreHealth") then
-        core:MarkUnit(coreUnit.unit, 0, percent, mod:GetCoreMarkColorForHealth(percent))
-      end
+      mod:UpdateCoreHealthMark(coreUnit, percent)
 
       if percent > CORE_HEALTH_LOW_WARN_PERCENTAGE_REENABLE and percent < CORE_HEALTH_HIGH_WARN_PERCENTAGE_REENABLE then
         coreUnit.healthWarning = false
