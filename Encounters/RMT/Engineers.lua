@@ -146,6 +146,7 @@ mod:RegisterDefaultSetting("SoundCoreHealthWarning")
 mod:RegisterDefaultSetting("MessageBossMove", false)
 mod:RegisterDefaultSetting("MessageElectroshockSwapReturn")
 mod:RegisterDefaultSetting("SoundElectroshockSwapReturn")
+mod:RegisterDefaultSetting("VisualIonClashCircle")
 ----------------------------------------------------------------------------------------------------
 -- Raw event handlers.
 ----------------------------------------------------------------------------------------------------
@@ -276,7 +277,7 @@ function mod:OnDebuffAdd(id, spellId)
     elseif mod:IsPlayerOnPlatform(FUSION_CORE) then
       mod:AddMsg("DISCHARGED_PLASMA_MSG", self.L["msg.fire_orb.spawned"], 2, mod:GetSetting("SoundFireOrbAlt") == true and "Info")
     end
-  elseif DEBUFF_ION_CLASH == spellId then
+  elseif DEBUFF_ION_CLASH == spellId and mod:GetSetting("VisualIonClashCircle") then
     core:AddPolygon("ION_CLASH", id, 9, 0, 10, "xkcdBlue", 64)
   end
 end
@@ -289,7 +290,7 @@ function mod:OnDebuffRemove(id, spellId)
     if isOnMyself and mod:GetSetting("MessageElectroshockSwapReturn") then
       mod:AddMsg("ELECTROSHOCK_MSG_OVER", self.L["msg.engineer.electroshock.swap.return"], 5, mod:GetSetting("SoundElectroshockSwapReturn") == true and "Burn")
     end
-  elseif DEBUFF_ION_CLASH == spellId then
+  elseif DEBUFF_ION_CLASH == spellId and mod:GetSetting("VisualIonClashCircle") then
     core:RemovePolygon("ION_CLASH")
   end
 end
