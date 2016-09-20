@@ -365,6 +365,9 @@ function SimpleLine:UpdateDraw(tDraw)
     if tOriginUnit:IsValid() then
       local tOriginVector = NewVector3(tOriginUnit:GetPosition())
       local tFacingVector = NewVector3(tOriginUnit:GetFacing())
+      if tDraw.nOffsetOrigin then
+        tOriginVector = tOriginVector + Rotation(tFacingVector, tDraw.RotationMatrix90) * tDraw.nOffsetOrigin
+      end
       local tVectorA = tFacingVector * (tDraw.nOffset)
       local tVectorB = tFacingVector * (tDraw.nLength + tDraw.nOffset)
       tVectorA = Rotation(tVectorA, tDraw.RotationMatrix)
@@ -380,7 +383,7 @@ function SimpleLine:UpdateDraw(tDraw)
   UpdateLine(tDraw, tVectorFrom, tVectorTo)
 end
 
-function SimpleLine:AddDraw(Key, Origin, nOffset, nLength, nRotation, nWidth, sColor, nNumberOfDot)
+function SimpleLine:AddDraw(Key, Origin, nOffset, nLength, nRotation, nWidth, sColor, nNumberOfDot, nOffsetOrigin)
   local OriginType = type(Origin)
   assert(OriginType == "number" or OriginType == "table" or OriginType == "userdata")
 
@@ -402,11 +405,21 @@ function SimpleLine:AddDraw(Key, Origin, nOffset, nLength, nRotation, nWidth, sC
   tDraw.sColor = sColor or tDraw.sColor
   tDraw.nNumberOfDot = nNumberOfDot or DOT_IS_A_LINE
   tDraw.nPixieIdDot = tDraw.nPixieIdDot or {}
+  tDraw.nOffsetOrigin = nOffsetOrigin or nil
   -- Preprocessing.
   local nRad = math.rad(nRotation or 0)
   local nCos = math.cos(nRad)
   local nSin = math.sin(nRad)
   tDraw.RotationMatrix = {
+    x = NewVector3({ nCos, 0, -nSin }),
+    y = NewVector3({ 0, 1, 0 }),
+    z = NewVector3({ nSin, 0, nCos }),
+  }
+
+  nRad = math.rad(90)
+  nCos = math.cos(nRad)
+  nSin = math.sin(nRad)
+  tDraw.RotationMatrix90 = {
     x = NewVector3({ nCos, 0, -nSin }),
     y = NewVector3({ 0, 1, 0 }),
     z = NewVector3({ nSin, 0, nCos }),
