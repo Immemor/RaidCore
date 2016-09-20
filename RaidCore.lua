@@ -633,12 +633,13 @@ end
 
 function RaidCore:SetWorldMarker(key, sText, tPosition)
   assert(key)
+  local sLocalizedTest = self.L[sText]
   local tWorldMarker = self.worldmarker[key]
   if not tWorldMarker and sText and tPosition then
-    self:CreateWorldMarker(key, sText, tPosition)
+    self:CreateWorldMarker(key, sLocalizedTest, tPosition)
   elseif tWorldMarker and (sText or tPosition) then
-    self:UpdateWorldMarker(key, sText, tPosition)
-  elseif tWorldMarker and not sText and not tPosition then
+    self:UpdateWorldMarker(key, sLocalizedTest, tPosition)
+  elseif tWorldMarker and not sLocalizedTest and not tPosition then
     self:DropWorldMarker(key)
   end
 end
@@ -1071,6 +1072,7 @@ function RaidCore:OnStartTestScenario()
     end,
     10
   )
+  self:SetWorldMarker("TEST80", "1", GetPlayerUnit():GetPosition())
 end
 
 function RaidCore:OnStopTestScenario()
@@ -1097,4 +1099,5 @@ function RaidCore:OnStopTestScenario()
   self:RemoveTimerBar("TEST6")
   self:RemoveProgressBar("PROGRESS")
   self:RemoveProgressBar("PROGRESS2")
+  self:DropWorldMarker("TEST80")
 end
