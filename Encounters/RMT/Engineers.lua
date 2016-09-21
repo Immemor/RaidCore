@@ -171,6 +171,7 @@ function mod:OnBossEnable()
   for _, coreUnit in pairs(coreUnits) do
     coreUnit.healthWarning = false
     coreUnit.enabled = false
+    coreUnit.percent = 30
   end
 
   mod:AddTimerBar("NEXT_ELEKTROSHOCK_TIMER", self.L["msg.engineer.electroshock.next"], FIRST_ELECTROSHOCK_TIMER)
@@ -193,7 +194,7 @@ function mod:AddUnits()
   for coreId, coreUnit in pairs(coreUnits) do
     core:WatchUnit(coreUnit.unit)
 
-    mod:UpdateCoreHealthMark(coreUnit, 30)
+    mod:UpdateCoreHealthMark(coreUnit)
     if mod:GetSetting("BarsCoreHealth") then
       core:AddUnit(coreUnit.unit, CORE_BAR_COLORS[coreId])
     end
@@ -237,11 +238,11 @@ function mod:OnEngiChangeLocation(engineerId, _, newLocation)
   end
 end
 
-function mod:UpdateCoreHealthMark(coreUnit, percent)
+function mod:UpdateCoreHealthMark(coreUnit)
   if not mod:GetSetting("MarkerCoreHealth") then
     return
   end
-
+  local percent = coreUnit.percent
   local color = "White"
   if percent <= CORE_HEALTH_LOW_PERCENTAGE or percent >= CORE_HEALTH_HIGH_WARN_PERCENTAGE then
     color = "Red"
@@ -348,6 +349,8 @@ mod:RegisterUnitEvents({
         coreUnits[CORE_NAMES[name]] = {
           unit = unit,
           healthWarning = false,
+          enabled = false,
+          percent = 30,
         }
       elseif ENGINEER_NAMES[name] ~= nil then
         local engineerId = ENGINEER_NAMES[name]
@@ -378,8 +381,8 @@ mod:RegisterUnitEvents({
     ["OnHealthChanged"] = function (self, _, percent, name)
       local coreId = CORE_NAMES[name]
       local coreUnit = coreUnits[coreId]
-
-      mod:UpdateCoreHealthMark(coreUnit, percent)
+      coreUnit.percent = percent
+      mod:UpdateCoreHealthMark(coreUnit)
 
       if percent > CORE_HEALTH_LOW_WARN_PERCENTAGE_REENABLE and percent < CORE_HEALTH_HIGH_WARN_PERCENTAGE_REENABLE then
         coreUnit.healthWarning = false
