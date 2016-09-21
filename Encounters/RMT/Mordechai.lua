@@ -28,7 +28,7 @@ mod:RegisterEnglishLocale({
     ["mark.anchor_4"] = "4",
 
     -- Messages
-    ["msg.orb.spawned"] = "ORB SPAWNED"
+    ["msg.orb.spawned"] = "ORB SPAWNED",
     ["msg.orb.kinetic_link"] = "DPS THE ORB!"
   })
 ----------------------------------------------------------------------------------------------------
