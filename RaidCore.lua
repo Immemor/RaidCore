@@ -474,7 +474,6 @@ end
 function RaidCore:MarkUnit(unit, location, mark, color)
   if unit and not unit:IsDead() then
     local nId = unit:GetId()
-    color = color or "White"
     if not self.mark[nId] then
       self.mark[nId] = {}
       self.mark[nId]["unit"] = unit
@@ -488,15 +487,21 @@ function RaidCore:MarkUnit(unit, location, mark, color)
       local markFrame = Apollo.LoadForm(self.xmlDoc, "MarkFrame", "InWorldHudStratum", self)
       markFrame:SetUnit(unit, location)
       markFrame:FindChild("Name"):SetText(self.mark[nId].number)
-      markFrame:FindChild("Name"):SetTextColor(color)
+      if color then
+        markFrame:FindChild("Name"):SetTextColor(color)
+      end
 
       self:MarkerVisibilityHandler(markFrame)
 
       self.mark[nId].frame = markFrame
-    elseif mark then
-      self.mark[nId].number = tostring(mark)
-      self.mark[nId].frame:FindChild("Name"):SetText(self.mark[nId].number)
-      self.mark[nId].frame:FindChild("Name"):SetTextColor(color)
+    elseif mark or color then
+      if mark then
+        self.mark[nId].number = tostring(mark)
+        self.mark[nId].frame:FindChild("Name"):SetText(self.mark[nId].number)
+      end
+      if color then
+        self.mark[nId].frame:FindChild("Name"):SetTextColor(color)
+      end
     end
     self:SetMark2UnitBar(nId, self.mark[nId].number)
   end
