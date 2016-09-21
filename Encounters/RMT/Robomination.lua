@@ -111,20 +111,42 @@ local playerUnit
 -- Settings.
 ----------------------------------------------------------------------------------------------------
 mod:RegisterDefaultSetting("CrosshairSnake")
+mod:RegisterDefaultSetting("CompactorGridCorner")
+mod:RegisterDefaultSetting("CompactorGridEdge", false)
+mod:RegisterDefaultSetting("LineCannonArm")
+mod:RegisterDefaultSetting("CrosshairLaser")
+mod:RegisterDefaultSetting("LineRoboMaze")
+
 mod:RegisterDefaultSetting("SoundSnake")
 mod:RegisterDefaultSetting("SoundSnakeNear")
 mod:RegisterDefaultSetting("SoundSnakeNearAlt", false)
 mod:RegisterDefaultSetting("SoundPhaseChange")
 mod:RegisterDefaultSetting("SoundPhaseChangeClose")
-mod:RegisterDefaultSetting("CompactorGridCorner")
-mod:RegisterDefaultSetting("CompactorGridEdge", false)
 mod:RegisterDefaultSetting("SoundArmSpawn")
 mod:RegisterDefaultSetting("SoundCannonInterrupt")
-mod:RegisterDefaultSetting("LineCannonArm")
 mod:RegisterDefaultSetting("SoundLaser")
-mod:RegisterDefaultSetting("CrosshairLaser")
 mod:RegisterDefaultSetting("SoundSpew")
-mod:RegisterDefaultSetting("LineRoboMaze")
+
+mod:RegisterDefaultSetting("MessageSnake")
+mod:RegisterDefaultSetting("MessageSnakeNear")
+mod:RegisterDefaultSetting("MessageSnakeOther")
+mod:RegisterDefaultSetting("MessagePhaseChange")
+mod:RegisterDefaultSetting("MessagePhaseChangeClose")
+mod:RegisterDefaultSetting("MessageArmSpawn")
+mod:RegisterDefaultSetting("MessageCannonInterrupt")
+mod:RegisterDefaultSetting("MessageLaser")
+mod:RegisterDefaultSetting("MessageSpew")
+-- Binds.
+mod:RegisterMessageSetting("SNAKE_MSG", "EQUAL", "MessageSnake", "SoundSnake")
+mod:RegisterMessageSetting("SNAKE_MSG_NEAR", "EQUAL", "MessageSnakeNear", "SoundSnakeNear")
+mod:RegisterMessageSetting("SNAKE_MSG_OTHER", "EQUAL", "MessageSnakeOther")
+mod:RegisterMessageSetting("ROBO_MAZE_CLOSE", "EQUAL", "MessagePhaseChangeClose", "SoundPhaseChangeClose")
+mod:RegisterMessageSetting("ROBO_MAZE_NOW", "EQUAL", "MessagePhaseChange", "SoundPhaseChange")
+mod:RegisterMessageSetting("ARMS_MSG_SPAWN", "EQUAL", "MessageArmSpawn", "SoundArmSpawn")
+mod:RegisterMessageSetting("ARMS_MSG_CAST", "EQUAL", "MessageCannonInterrupt", "SoundCannonInterrupt")
+mod:RegisterMessageSetting("LASER_MSG", "EQUAL", "MessageLaser", "SoundLaser")
+mod:RegisterMessageSetting("SPEW_MSG", "EQUAL", "MessageSpew", "SoundSpew")
+
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
@@ -144,22 +166,18 @@ mod:RegisterDatachronEvent("chron.robo.snake", "MATCH", function(self, _, snakeT
     local snakeTarget = GetPlayerUnitByName(snakeTargetName)
     local isOnMyself = snakeTarget == playerUnit
     local isSnakeNearYou = not isOnMyself and mod:GetDistanceBetweenUnits(playerUnit, snakeTarget) < 10
-    local sound = nil
-    local snakeOnX
     if isOnMyself then
-      sound = mod:GetSetting("SoundSnake") == true and "RunAway"
-      snakeOnX = self.L["msg.snake.you"]
+      mod:AddMsg("SNAKE_MSG", self.L["msg.snake.you"], 5, "RunAway", "Blue")
     elseif isSnakeNearYou then
-      if mod:GetSetting("SoundSnakeNear") then
-        if mod:GetSetting("SoundSnakeNearAlt") then
-          sound = "Destruction"
-        else
-          sound = "RunAway"
-        end
+      local sound = "RunAway"
+      local msg = self.L["msg.snake.near"]:format(snakeTarget:GetName())
+      if mod:GetSetting("SoundSnakeNearAlt") then
+        sound = "Destruction"
       end
-      snakeOnX = self.L["msg.snake.near"]:format(snakeTarget:GetName())
+      mod:AddMsg("SNAKE_MSG_NEAR", msg, 5, sound, "Blue")
     else
-      snakeOnX = self.L["msg.snake.other"]:format(snakeTarget:GetName())
+      local msg = self.L["msg.snake.other"]:format(snakeTarget:GetName())
+      mod:AddMsg("SNAKE_MSG_OTHER", msg, 5, nil, "Blue")
     end
 
     if mod:GetSetting("CrosshairSnake") then
@@ -168,21 +186,19 @@ mod:RegisterDatachronEvent("chron.robo.snake", "MATCH", function(self, _, snakeT
 
     mod:RemoveTimerBar("NEXT_SNAKE_TIMER")
     core:AddTimerBar("NEXT_SNAKE_TIMER", self.L["msg.snake.next"], SNAKE_TIMER, nil, { sColor = "xkcdBrown" })
-
-    mod:AddMsg("SNAKE_MSG", snakeOnX, 5, sound, "Blue")
   end
 )
 
 mod:RegisterDatachronEvent("chron.robo.hides", "EQUAL", function(self)
     phase = MAZE_PHASE
-    core:RemoveMsg("ROBO_MAZE")
     mod:RemoveTimerBar("NEXT_SNAKE_TIMER")
     mod:RemoveTimerBar("NEXT_INCINERATE_TIMER")
     mod:RemoveTimerBar("NEXT_SPEW_TIMER")
     mod:RemoveTimerBar("NEXT_ARMS_TIMER")
     core:RemovePicture("SNAKE_CROSSHAIR")
 
-    mod:AddMsg("ROBO_MAZE", self.L["msg.maze.now"], 5, mod:GetSetting("SoundSnakeNear") == true and "Info")
+    core:RemoveMsg("ROBO_MAZE_CLOSE")
+    mod:AddMsg("ROBO_MAZE_NOW", self.L["msg.maze.now"], 5, "Info")
     mod:RemoveCompactorGrid()
     mod:RemoveCannonArmLines()
   end
@@ -202,7 +218,6 @@ mod:RegisterDatachronEvent("chron.robo.shows", "EQUAL", function(self)
 mod:RegisterDatachronEvent("chron.robo.laser", "MATCH", function(self, _, laserTargetName)
     local laserTarget = GetPlayerUnitByName(laserTargetName)
     local isOnMyself = laserTarget == playerUnit
-    local sound = mod:GetSetting("SoundLaser") == true and "Burn"
     local laserOnX
     if isOnMyself then
       laserOnX = self.L["msg.robo.laser.you"]
@@ -216,7 +231,7 @@ mod:RegisterDatachronEvent("chron.robo.laser", "MATCH", function(self, _, laserT
 
     mod:RemoveTimerBar("NEXT_INCINERATE_TIMER")
     core:AddTimerBar("NEXT_INCINERATE_TIMER", self.L["msg.robo.laser.next"], INCINERATE_TIMER, nil, { sColor = "red", bEmphasize = mod:GetSetting("SoundLaser") })
-    mod:AddMsg("LASER_MSG", laserOnX, 5, sound, "Red")
+    mod:AddMsg("LASER_MSG", laserOnX, 5, "Burn", "Red")
   end
 )
 
@@ -320,12 +335,12 @@ mod:RegisterUnitEvents("unit.cannon_arm",{
       if phase == DPS_PHASE then
         mod:AddTimerBar("NEXT_ARMS_TIMER", self.L["msg.arms.next"], ARMS_TIMER)
       end
-      mod:AddMsg("ARMS_MSG", self.L["msg.cannon_arm.spawned"], 5, mod:GetSetting("SoundArmSpawn") == true and "Info", "Red")
+      mod:AddMsg("ARMS_MSG_SPAWN", self.L["msg.cannon_arm.spawned"], 5, "Info", "Red")
     end,
     [core.E.CAST_START] = {
       ["cast.cannon_fire"] = function(self, id)
         if mod:GetDistanceBetweenUnits(playerUnit, GetUnitById(id)) < 45 then
-          mod:AddMsg("ARMS_MSG", self.L["msg.cannon_arm.interrupt"], 2, mod:GetSetting("SoundCannonInterrupt") == true and "Inferno")
+          mod:AddMsg("ARMS_MSG_CAST", self.L["msg.cannon_arm.interrupt"], 2, "Inferno")
         end
       end
     },
@@ -343,14 +358,14 @@ mod:RegisterUnitEvents("unit.robo",{
     end,
     [core.E.HEALTH_CHANGED] = function(self, _, percent)
       if (percent >= FIRST_MAZE_PHASE_LOWER_HEALTH and percent <= FIRST_MAZE_PHASE_UPPER_HEALTH) or (percent >= SECOND_MAZE_PHASE_LOWER_HEALTH and percent <= SECOND_MAZE_PHASE_UPPER_HEALTH) then
-        mod:AddMsg("ROBO_MAZE", self.L["msg.maze.coming"], 5, mod:GetSetting("SoundPhaseChangeClose") and "Info")
+        mod:AddMsg("ROBO_MAZE_CLOSE", self.L["msg.maze.coming"], 5, "Info")
       end
     end,
     [core.E.CAST_START] = {
       ["cast.spew"] = function(self, _)
         mod:RemoveTimerBar("NEXT_SPEW_TIMER")
         core:AddTimerBar("NEXT_SPEW_TIMER", self.L["msg.spew.next"], SPEW_TIMER, nil, { sColor = "green" })
-        mod:AddMsg("SPEW_MSG", self.L["msg.spew.now"], 4, mod:GetSetting("SoundSpew") == true and "Beware")
+        mod:AddMsg("SPEW_MSG", self.L["msg.spew.now"], 4, "Beware")
       end
     },
     [core.E.CAST_END] = {
