@@ -113,7 +113,37 @@ mod:RegisterEnglishLocale({
     ["chron.match.first.full"] = "First match this name: Zod Bain hopefully.",
     ["chron.match.second.full"] = "Secondly match this name: Zod Bain please.",
   })
+----------------------------------------------------------------------------------------------------
+-- Settings.
+----------------------------------------------------------------------------------------------------
+mod:RegisterDefaultSetting("TestEnabledSettingOne")
+mod:RegisterDefaultSetting("TestDisabledSettingOne", false)
+mod:RegisterDefaultSetting("TestEnabledSettingTwo")
+mod:RegisterDefaultSetting("TestDisabledSettingTwo", false)
+mod:RegisterDefaultSetting("TestEnabledSettingThree")
+mod:RegisterDefaultSetting("TestDisabledSettingThree", false)
 
+mod:RegisterMessageSetting("MSG_1", "EQUAL", "TestEnabledSettingOne", "TestEnabledSettingTwo")
+mod:RegisterMessageSetting("MSG_2", "EQUAL", "TestEnabledSettingOne", "TestDisabledSettingTwo")
+mod:RegisterMessageSetting("MSG_3", "EQUAL", "TestDisabledSettingOne", "TestEnabledSettingTwo")
+mod:RegisterMessageSetting("MSG_4", "EQUAL", "TestDisabledSettingOne", "TestDisabledSettingTwo")
+mod:RegisterMessageSetting("MSG_5", "EQUAL", nil, "TestEnabledSettingThree")
+mod:RegisterMessageSetting("MSG_6", "EQUAL", "TestEnabledSettingThree", nil)
+mod:RegisterMessageSetting("MSG_7", "EQUAL", nil, "TestDisabledSettingThree")
+mod:RegisterMessageSetting("MSG_8", "EQUAL", "TestDisabledSettingThree", nil)
+
+mod:RegisterDefaultSetting("TestEqualOne")
+mod:RegisterDefaultSetting("TestEqualTwo")
+
+mod:RegisterDefaultSetting("TestFindOne")
+mod:RegisterDefaultSetting("TestFindTwo")
+
+mod:RegisterDefaultSetting("TestMatchOne")
+mod:RegisterDefaultSetting("TestMatchTwo")
+
+mod:RegisterMessageSetting("MSG_TEST_ONE", "EQUAL", "TestEqualOne", "TestEqualTwo")
+mod:RegisterMessageSetting("MSG_FIND_ME", "FIND", "TestFindOne", "TestFindTwo")
+mod:RegisterMessageSetting("MSG_MATCH_%d_ME", "MATCH", "TestMatchOne", "TestMatchTwo")
 ----------------------------------------------------------------------------------------------------
 -- Constants.
 ----------------------------------------------------------------------------------------------------
@@ -256,6 +286,20 @@ local SPELL_EVENTS = {
   [core.E.DEBUFF_UPDATE] = true,
   [core.E.DEBUFF_REMOVE] = true,
 }
+
+local MESSAGE_SETTINGS_TESTS = {
+  {key = "MSG_1", msg = true, sound = true},
+  {key = "MSG_2", msg = true, sound = false},
+  {key = "MSG_3", msg = false, sound = true},
+  {key = "MSG_4", msg = false, sound = false},
+  {key = "MSG_5", msg = true, sound = true},
+  {key = "MSG_6", msg = true, sound = true},
+  {key = "MSG_7", msg = true, sound = false},
+  {key = "MSG_8", msg = false, sound = true},
+  {key = "MSG_TEST_ONE", msg = true, sound = true},
+  {key = "MSG_FIND_ME_SOMEWHERE", msg = true, sound = true},
+  {key = "MSG_MATCH_123_ME", msg = true, sound = true},
+}
 ----------------------------------------------------------------------------------------------------
 -- Locals.
 ----------------------------------------------------------------------------------------------------
@@ -271,6 +315,7 @@ local eventCounter
 local unitEventCounter
 local events
 local unitEventsInitialized = false
+local messageTestCounter
 ----------------------------------------------------------------------------------------------------
 -- Functions.
 ----------------------------------------------------------------------------------------------------
@@ -399,6 +444,23 @@ function mod:OnBossEnable()
   mod:AddTimerBar("DATACHRON", "Simulate datachron", 0.5, false, nil, mod.SimulateDatachron, mod)
   --Start unit events cycle.
   mod:AddTimerBar("UNIT_EVENTS", "Check if events have not been caught", 0.5, false, nil, mod.CheckEvents, mod)
+
+  messageTestCounter = 1
+  mod:AddTimerBar("MSG_SETTINGS", "Start message tests", 0.5, false, nil, mod.MessageTest, mod)
+end
+
+function mod:MessageTest()
+  local msgTest = MESSAGE_SETTINGS_TESTS[messageTestCounter]
+  messageTestCounter = messageTestCounter + 1
+  if not msgTest then
+    return
+  end
+  local key = msgTest.key
+  local msg = msgTest.msg and key or "You should not see this "..key
+  local sound = msgTest.sound and "Info" or "Inferno"
+  mod:AddMsg(key, msg, 1, sound)
+
+  mod:AddTimerBar("MSG_SETTINGS", "Next message tests", 1, false, nil, mod.MessageTest, mod)
 end
 
 function mod:SimulateDatachron()
