@@ -19,16 +19,24 @@ mod:RegisterEnglishLocale({
     -- Unit names.
     ["unit.mordechai"] = "Mordechai Redmoon",
     ["unit.anchor"] = "Airlock Anchor",
+    ["unit.orb"] = "Kinetic Orb",
 
     -- Markers
     ["mark.anchor_1"] = "1",
     ["mark.anchor_2"] = "2",
     ["mark.anchor_3"] = "3",
     ["mark.anchor_4"] = "4",
+
+    -- Messages
+    ["msg.orb.spawned"] = "ORB SPAWNED"
+    ["msg.orb.kinetic_link"] = "DPS THE ORB!"
   })
 ----------------------------------------------------------------------------------------------------
 -- Constants.
 ----------------------------------------------------------------------------------------------------
+local DEBUFF_KINETIC_LINK = 86797
+local DEBUFF_NULLIFIED = 85614
+
 local ANCHOR_POSITIONS = {
   [1] = { x = 93.849998474121, y = 353.87435913086, z = 209.71000671387 },
   [2] = { x = 93.849998474121, y = 353.87435913086, z = 179.71000671387 },
@@ -59,9 +67,14 @@ mod:RegisterUnitEvents("unit.mordechai",{
   end,
 })
 
-mod:RegisterUnitEvents("unit.anchor",{
-  [core.E.UNIT_CREATED] = function(_, _, unit)
-    local position = unit:GetPosition()
-    Print("x: "..position.x..", y: "..position.y..", z: "..position.z)
+mod:RegisterUnitEvents("unit.orb",{
+  [core.E.UNIT_CREATED] = function(_, id, unit)
+    mod:AddMsg("ORB_SPAWNED", "msg.orb.spawned", 5)
   end
 })
+
+function mod:OnDebuffAdd(id, spellId)
+  if DEBUFF_KINETIC_LINK == spellId then
+    mod:AddMsg("KINETIC_LINK_MSG", "msg.orb.kinetic_link", 5, "Burn")
+  end
+end
