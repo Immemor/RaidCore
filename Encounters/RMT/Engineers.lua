@@ -238,7 +238,7 @@ function mod:OnEngiChangeLocation(engineerId, _, newLocation)
 end
 
 function mod:UpdateCoreHealthMark(coreUnit, percent)
-  if mod:GetSetting("MarkerCoreHealth") then
+  if not mod:GetSetting("MarkerCoreHealth") then
     return
   end
 
