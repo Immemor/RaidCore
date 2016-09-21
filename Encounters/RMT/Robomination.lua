@@ -110,13 +110,14 @@ local playerUnit
 ----------------------------------------------------------------------------------------------------
 -- Settings.
 ----------------------------------------------------------------------------------------------------
+-- Visuals.
 mod:RegisterDefaultSetting("CrosshairSnake")
 mod:RegisterDefaultSetting("CompactorGridCorner")
 mod:RegisterDefaultSetting("CompactorGridEdge", false)
 mod:RegisterDefaultSetting("LineCannonArm")
 mod:RegisterDefaultSetting("CrosshairLaser")
 mod:RegisterDefaultSetting("LineRoboMaze")
-
+-- Sounds.
 mod:RegisterDefaultSetting("SoundSnake")
 mod:RegisterDefaultSetting("SoundSnakeNear")
 mod:RegisterDefaultSetting("SoundSnakeNearAlt", false)
@@ -126,7 +127,7 @@ mod:RegisterDefaultSetting("SoundArmSpawn")
 mod:RegisterDefaultSetting("SoundCannonInterrupt")
 mod:RegisterDefaultSetting("SoundLaser")
 mod:RegisterDefaultSetting("SoundSpew")
-
+-- Messsages.
 mod:RegisterDefaultSetting("MessageSnake")
 mod:RegisterDefaultSetting("MessageSnakeNear")
 mod:RegisterDefaultSetting("MessageSnakeOther")

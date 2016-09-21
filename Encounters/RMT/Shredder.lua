@@ -66,7 +66,7 @@ mod:RegisterEnglishLocale({
 ----------------------------------------------------------------------------------------------------
 -- Settings
 ----------------------------------------------------------------------------------------------------
--- Visual.
+-- Visuals.
 mod:RegisterDefaultSetting("LineSawblade")
 mod:RegisterDefaultSetting("SquareTethers")
 mod:RegisterDefaultSetting("CrosshairAdds")
