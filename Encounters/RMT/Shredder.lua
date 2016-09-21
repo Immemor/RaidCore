@@ -185,7 +185,7 @@ function mod:GetAddSpawnProgess()
 end
 
 function mod:NextAddWave()
-  if ADD_PHASES[addPhase] ~= 0 then
+  if ADD_PHASES[addPhase] ~= 0 and not core:IsMessageActive("ADDS_MSG") then
     mod:AddMsg("ADDS_MSG", self.L["msg.adds.spawning"], 5, mod:GetSetting("SoundAdds") and "Info")
   end
   previousAddPhase = ADD_PHASES[addPhase]
