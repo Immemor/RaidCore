@@ -66,11 +66,13 @@ mod:RegisterEnglishLocale({
 ----------------------------------------------------------------------------------------------------
 -- Settings
 ----------------------------------------------------------------------------------------------------
+-- Visual.
 mod:RegisterDefaultSetting("LineSawblade")
 mod:RegisterDefaultSetting("SquareTethers")
 mod:RegisterDefaultSetting("CrosshairAdds")
 mod:RegisterDefaultSetting("CrosshairPriority")
 mod:RegisterDefaultSetting("CrosshairTether")
+-- Sound.
 mod:RegisterDefaultSetting("SoundAdds")
 mod:RegisterDefaultSetting("SoundMiniboss")
 mod:RegisterDefaultSetting("SoundNecroticLash")
@@ -78,6 +80,22 @@ mod:RegisterDefaultSetting("SoundMinibossCast")
 mod:RegisterDefaultSetting("SoundOozeStacksWarning")
 mod:RegisterDefaultSetting("SoundMidSawWarning")
 mod:RegisterDefaultSetting("SoundSawSafeSpot")
+-- Messages.
+mod:RegisterDefaultSetting("MessageAdds")
+mod:RegisterDefaultSetting("MessageMiniboss")
+mod:RegisterDefaultSetting("MessageNecroticLash")
+mod:RegisterDefaultSetting("MessageMinibossCast")
+mod:RegisterDefaultSetting("MessageOozeStacksWarning")
+mod:RegisterDefaultSetting("MessageMidSawWarning")
+mod:RegisterDefaultSetting("MessageSawSafeSpot")
+-- Binds.
+mod:RegisterMessageSetting("ADDS_MSG", "EQUAL", "MessageAdds", "SoundAdds")
+mod:RegisterMessageSetting("MINIBOSS_SPAWN", "EQUAL", "MessageMiniboss", "SoundMiniboss")
+mod:RegisterMessageSetting("MINIBOSS_CAST", "EQUAL", "MessageMinibossCast", "SoundMinibossCast")
+mod:RegisterMessageSetting("NABBER", "EQUAL", "MessageNecroticLash", "SoundNecroticLash")
+mod:RegisterMessageSetting("OOZE_MSG", "EQUAL", "MessageOozeStacksWarning", "SoundOozeStacksWarning")
+mod:RegisterMessageSetting("SAW_MSG_MID", "EQUAL", "MessageMidSawWarning", "SoundMidSawWarning")
+mod:RegisterMessageSetting("SAW_MSG_MID", "EQUAL", "MessageSawSafeSpot", "SoundSawSafeSpot")
 ----------------------------------------------------------------------------------------------------
 -- Constants.
 ----------------------------------------------------------------------------------------------------
@@ -155,8 +173,8 @@ end
 mod:RegisterUnitEvents(core.E.ALL_UNITS, {
     [DEBUFF_OOZING_BILE] = {
       [core.E.DEBUFF_UPDATE] = function(self, id, _, stack)
-        if playerUnit:GetId() == id and stack >= 8 then
-          mod:AddMsg("OOZE_MSG", string.format(self.L["msg.bile.stacks"], stack), 5, stack == 8 and mod:GetSetting("SoundOozeStacksWarning") and "Beware")
+        if playerUnit:GetId() == id and stack == 8 then
+          mod:AddMsg("OOZE_MSG", string.format(self.L["msg.bile.stacks"], stack), 5, "Beware")
         end
       end
     },
@@ -186,7 +204,7 @@ end
 
 function mod:NextAddWave()
   if ADD_PHASES[addPhase] ~= 0 and not core:IsMessageActive("ADDS_MSG") then
-    mod:AddMsg("ADDS_MSG", self.L["msg.adds.spawning"], 5, mod:GetSetting("SoundAdds") and "Info")
+    mod:AddMsg("ADDS_MSG", self.L["msg.adds.spawning"], 5, "Info")
   end
   previousAddPhase = ADD_PHASES[addPhase]
   addPhase = addPhase + 1
@@ -319,10 +337,9 @@ function mod:HandleShredderSaw(sawLocation)
     return
   end
 
-  local safeSpotLocation = SAW_SAFESPOT[firstShredderSaw + secondShredderSaw]
-  local message = string.format(self.L["msg.saw.safe_spot"], self.L[safeSpotLocation])
-  local sound = mod:GetSetting("SoundSawSafeSpot") == true and "Info"
-  mod:AddMsg("SAW_MSG", message, 5, sound)
+  local safeSpot = SAW_SAFESPOT[firstShredderSaw + secondShredderSaw]
+  local msg = string.format(self.L["msg.saw.safe_spot"], self.L[safeSpot])
+  mod:AddMsg("SAW_MSG_SAFE", msg, 5, "Info")
 end
 
 mod:RegisterUnitEvents("unit.saw.big",{
@@ -332,9 +349,7 @@ mod:RegisterUnitEvents("unit.saw.big",{
       end
       local sawLocation = mod:DetermineSawLocation(unit)
       if phase == WALKING and sawLocation == SAW_MID then
-        mod:AddMsg("SAW_MSG", self.L["msg.saw.middle"], 5,
-          mod:GetSetting("SoundMidSawWarning") == true and "Beware"
-        )
+        mod:AddMsg("SAW_MSG_MID", self.L["msg.saw.middle"], 5, "Beware")
       elseif phase == SHREDDER then
         mod:HandleShredderSaw(sawLocation)
       end
@@ -348,13 +363,13 @@ mod:RegisterUnitEvents("unit.saw.big",{
 mod:RegisterUnitEvents("unit.add.nabber",{
     [core.E.UNIT_CREATED] = function(self)
       core:RemoveMsg("ADDS_MSG")
-      mod:AddMsg("ADDS_MSG", self.L["msg.nabber.spawned"], 5, mod:GetSetting("SoundAdds") and "Info")
+      mod:AddMsg("ADDS_MSG", self.L["msg.nabber.spawned"], 5, "Info")
     end,
     [core.E.CAST_START] = {
       ["cast.nabber.lash"] = function(self, id)
         local unit = GetUnitById(id)
         if mod:GetDistanceBetweenUnits(playerUnit, unit) < 45 then
-          mod:AddMsg("NABBER", self.L["msg.nabber.interrupt"], 5, mod:GetSetting("SoundNecroticLash") == true and "Inferno")
+          mod:AddMsg("NABBER", self.L["msg.nabber.interrupt"], 5, "Inferno")
         end
       end
     },
@@ -363,14 +378,14 @@ mod:RegisterUnitEvents("unit.add.nabber",{
 
 mod:RegisterUnitEvents({"unit.miniboss.regor", "unit.miniboss.braugh"},{
     [core.E.UNIT_CREATED] = function(self)
-      mod:AddMsg("MINIBOSS", self.L["msg.miniboss.spawned"], 5, mod:GetSetting("SoundMiniboss") and "Info")
+      mod:AddMsg("MINIBOSS", self.L["msg.miniboss.spawned"], 5, "Info")
     end,
     [core.E.CAST_START] = function(self, _, castName)
       if self.L["cast.miniboss.gravedigger"] == castName or
       self.L["cast.miniboss.deathwail"] == castName or
       self.L["cast.miniboss.crush"] == castName then
-        core:RemoveMsg("MINIBOSS")
-        mod:AddMsg("MINIBOSS", self.L["msg.miniboss.interrupt"], 5, mod:GetSetting("SoundMinibossCast") and "Inferno")
+        core:RemoveMsg("MINIBOSS_SPAWN")
+        mod:AddMsg("MINIBOSS_CAST", self.L["msg.miniboss.interrupt"], 5, "Inferno")
       end
     end,
   }
