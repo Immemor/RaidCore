@@ -83,7 +83,7 @@ mod:RegisterUnitEvents("unit.orb",{
 )
 
 function mod:OnDebuffAdd(id, spellId)
-  if DEBUFF_KINETIC_LINK == spellId then
+  if DEBUFF_KINETIC_LINK == spellId and id == GameLib.GetPlayerUnit():GetId() then
     mod:AddMsg("KINETIC_LINK_MSG", "msg.orb.kinetic_link", 5, "Burn")
   end
 end
