@@ -38,6 +38,7 @@ mod:RegisterEnglishLocale({
     ["mark.anchor_4"] = "4",
 
     -- Messages.
+    ["msg.mordechai.shuriken.next"] = "Next Shuriken",
     ["msg.orb.spawned"] = "ORB SPAWNED",
     ["msg.orb.kinetic_link"] = "DPS THE ORB!"
   })
@@ -46,6 +47,12 @@ mod:RegisterEnglishLocale({
 ----------------------------------------------------------------------------------------------------
 local DEBUFF_NULLIFIED = 85614 -- Green
 local DEBUFF_KINETIC_LINK = 86797 -- Purple
+local DEBUFF_SHOCKING_ATTRACTION = 86861
+
+local FIRST_SUCKY_PHASE_UPPER_HEALTH = 86.5
+local FIRST_SUCKY_PHASE_LOWER_HEALTH = 85.5
+local FIRST_SHURIKEN_TIMER = 11
+local SHURIKEN_TIMER = 22
 
 local ANCHOR_POSITIONS = {
   [1] = { x = 93.849998474121, y = 353.87435913086, z = 209.71000671387 },
@@ -85,6 +92,16 @@ mod:RegisterUnitEvents("unit.mordechai",{
       core:WatchUnit(unit)
       mod:AddCleaveLines()
     end,
+    [core.E.HEALTH_CHANGED] = function(_, _, percent)
+      if percent >= FIRST_SUCKY_PHASE_LOWER_HEALTH and percent <= FIRST_SUCKY_PHASE_UPPER_HEALTH then
+        mod:AddMsg("SUCKY PHASE", "SUCKY PHASE STARTING", 5)
+      end
+    end,
+    [core.E.CAST_START] = {
+      ["cast.mordechai.shatter"] = function(_, _)
+        mod:AddTimerBar("NEXT_SHURIKEN_TIMER", "msg.mordechai.shuriken.next", SHURIKEN_TIMER)
+      end
+    }
   }
 )
 
@@ -104,12 +121,16 @@ mod:RegisterUnitEvents("unit.orb",{
 
 mod:RegisterDatachronEvent("chron.airlock.closed", "EQUAL", function (_)
     mod:AddCleaveLines()
+    mod:AddTimerBar("NEXT_SHURIKEN_TIMER", "msg.mordechai.shuriken.next", FIRST_SHURIKEN_TIMER)
   end
 )
 
-function mod:OnDebuffAdd(id, spellId)
+function mod:OnDebuffAdd(id, spellId, sName)
   if DEBUFF_KINETIC_LINK == spellId and id == GameLib.GetPlayerUnit():GetId() then
     mod:AddMsg("KINETIC_LINK_MSG", "msg.orb.kinetic_link", 5, "Burn")
+  end
+  if DEBUFF_SHOCKING_ATTRACTION == spellId then
+    mod:AddMsg("SHOCKING ATTRACTION", "BLA ON "..sName, 5)
   end
 end
 
