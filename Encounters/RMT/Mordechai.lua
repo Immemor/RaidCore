@@ -29,7 +29,8 @@ mod:RegisterEnglishLocale({
     ["cast.mordechai.shatter"] = "Shatter Shock",
     ["cast.turret.discharge"] = "Kinetic Discharge",
     -- Datachrons.
-    ["chron.airlock.open"] = "The airlock has been opened!",
+    ["chron.airlock.opened"] = "The airlock has been opened!",
+    ["chron.airlock.closed"] = "The airlock has been closed!",
     -- Markers.
     ["mark.anchor_1"] = "1",
     ["mark.anchor_2"] = "2",
@@ -53,6 +54,10 @@ local ANCHOR_POSITIONS = {
   [4] = { x = 123.849998474121, y = 353.87435913086, z = 179.71000671387 },
 }
 ----------------------------------------------------------------------------------------------------
+-- Locals.
+----------------------------------------------------------------------------------------------------
+local mordechai
+----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
@@ -66,7 +71,7 @@ function mod:OnBossDisable()
 end
 
 mod:RegisterUnitEvents("unit.turret",{
-    [core.E.UNIT_CREATED] = function(_, id, unit)
+    [core.E.UNIT_CREATED] = function(_, _, unit)
       core:AddUnit(unit)
       core:WatchUnit(unit)
     end,
@@ -74,26 +79,51 @@ mod:RegisterUnitEvents("unit.turret",{
 )
 
 mod:RegisterUnitEvents("unit.mordechai",{
-    [core.E.UNIT_CREATED] = function(_, id, unit)
+    [core.E.UNIT_CREATED] = function(_, _, unit)
+      mordechai = unit
       core:AddUnit(unit)
       core:WatchUnit(unit)
-      core:AddSimpleLine("CLEAVE_FRONT_RIGHT", id, 3.5, 40, 24.5, 5, "white", nil, 3)
-      core:AddSimpleLine("CLEAVE_BACK_RIGHT", id, 3.5, 40, 180-24.5, 5, "white", nil, 3)
-      core:AddSimpleLine("CLEAVE_FRONT_LEFT", id, 3.5, 40, -24.5, 5, "white", nil, -3)
-      core:AddSimpleLine("CLEAVE_BACK_LEFT", id, 3.5, 40, -(180-24.5), 5, "white", nil, -3)
+      mod:AddCleaveLines()
+    end,
+  }
+)
+
+mod:RegisterUnitEvents("unit.anchor",{
+    [core.E.UNIT_CREATED] = function(_, id, unit)
+      mod:RemoveCleaveLines()
     end,
   }
 )
 
 mod:RegisterUnitEvents("unit.orb",{
-    [core.E.UNIT_CREATED] = function(_, id, unit)
+    [core.E.UNIT_CREATED] = function(_, _, _)
       mod:AddMsg("ORB_SPAWNED", "msg.orb.spawned", 5)
     end
   }
+)
+
+mod:RegisterDatachronEvent("chron.airlock.closed", "EQUAL", function (_)
+    mod:AddCleaveLines()
+  end
 )
 
 function mod:OnDebuffAdd(id, spellId)
   if DEBUFF_KINETIC_LINK == spellId and id == GameLib.GetPlayerUnit():GetId() then
     mod:AddMsg("KINETIC_LINK_MSG", "msg.orb.kinetic_link", 5, "Burn")
   end
+end
+
+function mod:AddCleaveLines()
+  local id = mordechai:GetId()
+  core:AddSimpleLine("CLEAVE_FRONT_RIGHT", id, 3.5, 40, 24.5, 5, "white", nil, 3)
+  core:AddSimpleLine("CLEAVE_BACK_RIGHT", id, 3.5, 40, 180-24.5, 5, "white", nil, 3)
+  core:AddSimpleLine("CLEAVE_FRONT_LEFT", id, 3.5, 40, -24.5, 5, "white", nil, -3)
+  core:AddSimpleLine("CLEAVE_BACK_LEFT", id, 3.5, 40, -(180-24.5), 5, "white", nil, -3)
+end
+
+function mod:RemoveCleaveLines()
+  core:RemoveSimpleLine("CLEAVE_FRONT_RIGHT")
+  core:RemoveSimpleLine("CLEAVE_BACK_RIGHT")
+  core:RemoveSimpleLine("CLEAVE_FRONT_LEFT")
+  core:RemoveSimpleLine("CLEAVE_BACK_LEFT")
 end
