@@ -20,22 +20,29 @@ mod:RegisterEnglishLocale({
     ["unit.mordechai"] = "Mordechai Redmoon",
     ["unit.anchor"] = "Airlock Anchor",
     ["unit.orb"] = "Kinetic Orb",
-
-    -- Markers
+    ["unit.junk"] = "Airlock Junk",
+    ["unit.invis.0"] = "Hostile Invisible Unit for Fields (0 hit radius)", -- ??
+    ["unit.shuriken"] = "Ignores Collision Big Base Invisible Unit for Spells (1 hit radius)",
+    -- Cast names.
+    ["cast.mordechai.cross"] = "Cross Shot",
+    ["cast.mordechai.shatter"] = "Shatter Shock",
+    -- Datachrons.
+    ["chron.airlock.open"] = "The airlock has been opened!",
+    -- Markers.
     ["mark.anchor_1"] = "1",
     ["mark.anchor_2"] = "2",
     ["mark.anchor_3"] = "3",
     ["mark.anchor_4"] = "4",
 
-    -- Messages
+    -- Messages.
     ["msg.orb.spawned"] = "ORB SPAWNED",
     ["msg.orb.kinetic_link"] = "DPS THE ORB!"
   })
 ----------------------------------------------------------------------------------------------------
 -- Constants.
 ----------------------------------------------------------------------------------------------------
-local DEBUFF_KINETIC_LINK = 86797
-local DEBUFF_NULLIFIED = 85614
+local DEBUFF_NULLIFIED = 85614 -- Green
+local DEBUFF_KINETIC_LINK = 86797 -- Purple
 
 local ANCHOR_POSITIONS = {
   [1] = { x = 93.849998474121, y = 353.87435913086, z = 209.71000671387 },
