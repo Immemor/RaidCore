@@ -127,13 +127,22 @@ mod:RegisterDatachronEvent("chron.airlock.closed", "EQUAL", function (_)
   end
 )
 
-function mod:OnDebuffAdd(id, spellId, _, _, sName)
+function mod:OnDebuffAdd(id, spellId)
   local isOnMyself = id == GameLib.GetPlayerUnit():GetId()
   if DEBUFF_KINETIC_LINK == spellId and isOnMyself then
     mod:AddMsg("KINETIC_LINK_MSG", "msg.orb.kinetic_link", 5, "Burn")
   end
-  if DEBUFF_SHOCKING_ATTRACTION == spellId and isOnMyself then
-    mod:AddMsg("SHOCKING ATTRACTION", "msg.mordechai.shuriken.you", 5, "RunAway")
+  if DEBUFF_SHOCKING_ATTRACTION == spellId then
+    core:AddPicture("SHOCKING_ATTRACTION_TARGET_"..id, id, "Crosshair", 30, 0, 0, nil, "white")
+    if isOnMyself then
+      mod:AddMsg("SHOCKING_ATTRACTION", "msg.mordechai.shuriken.you", 5, "RunAway")
+    end
+  end
+end
+
+function mod:OnDebuffRemove(id, spellId)
+  if DEBUFF_SHOCKING_ATTRACTION == spellId then
+    core:RemovePicture("SHOCKING_ATTRACTION_TARGET_"..id)
   end
 end
 
