@@ -57,21 +57,23 @@ function mod:OnBossDisable()
 end
 
 mod:RegisterUnitEvents("unit.mordechai",{
-  [core.E.UNIT_CREATED] = function(_, id, unit)
-    core:AddUnit(unit)
-    core:WatchUnit(unit)
-    core:AddSimpleLine("CLEAVE_FRONT_RIGHT", id, 3.5, 40, 24.5, 5, "white", nil, 3)
-    core:AddSimpleLine("CLEAVE_BACK_RIGHT", id, 3.5, 40, 180-24.5, 5, "white", nil, 3)
-    core:AddSimpleLine("CLEAVE_FRONT_LEFT", id, 3.5, 40, -24.5, 5, "white", nil, -3)
-    core:AddSimpleLine("CLEAVE_BACK_LEFT", id, 3.5, 40, -(180-24.5), 5, "white", nil, -3)
-  end,
-})
+    [core.E.UNIT_CREATED] = function(_, id, unit)
+      core:AddUnit(unit)
+      core:WatchUnit(unit)
+      core:AddSimpleLine("CLEAVE_FRONT_RIGHT", id, 3.5, 40, 24.5, 5, "white", nil, 3)
+      core:AddSimpleLine("CLEAVE_BACK_RIGHT", id, 3.5, 40, 180-24.5, 5, "white", nil, 3)
+      core:AddSimpleLine("CLEAVE_FRONT_LEFT", id, 3.5, 40, -24.5, 5, "white", nil, -3)
+      core:AddSimpleLine("CLEAVE_BACK_LEFT", id, 3.5, 40, -(180-24.5), 5, "white", nil, -3)
+    end,
+  }
+)
 
 mod:RegisterUnitEvents("unit.orb",{
-  [core.E.UNIT_CREATED] = function(_, id, unit)
-    mod:AddMsg("ORB_SPAWNED", "msg.orb.spawned", 5)
-  end
-})
+    [core.E.UNIT_CREATED] = function(_, id, unit)
+      mod:AddMsg("ORB_SPAWNED", "msg.orb.spawned", 5)
+    end
+  }
+)
 
 function mod:OnDebuffAdd(id, spellId)
   if DEBUFF_KINETIC_LINK == spellId then
