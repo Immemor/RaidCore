@@ -252,13 +252,13 @@ end
 --
 -- Note: If the English translation is not found, the current string will be used like that.
 function EncounterPrototype:AddMsg(sKey, sEnglishText, nDuration, sSound, sColor)
-  local bPlaySound = true
-  local bShowMessage = true
+  local bPlaySound = sSound and true
+  local bShowMessage = sEnglishText and true
   local tSettings = self:GetSettingsForKey(sKey)
-  if type(tSettings.sSoundSetting) == "string" then
+  if bPlaySound and type(tSettings.sSoundSetting) == "string" then
     bPlaySound = self:GetSetting(tSettings.sSoundSetting)
   end
-  if type(tSettings.sMsgSetting) == "string" then
+  if bShowMessage and type(tSettings.sMsgSetting) == "string" then
     bShowMessage = self:GetSetting(tSettings.sMsgSetting)
   end
 
