@@ -23,9 +23,11 @@ mod:RegisterEnglishLocale({
     ["unit.junk"] = "Airlock Junk",
     ["unit.invis.0"] = "Hostile Invisible Unit for Fields (0 hit radius)", -- ??
     ["unit.shuriken"] = "Ignores Collision Big Base Invisible Unit for Spells (1 hit radius)",
+    ["unit.turret"] = "Redmoon Turret",
     -- Cast names.
     ["cast.mordechai.cross"] = "Cross Shot",
     ["cast.mordechai.shatter"] = "Shatter Shock",
+    ["cast.turret.discharge"] = "Kinetic Discharge",
     -- Datachrons.
     ["chron.airlock.open"] = "The airlock has been opened!",
     -- Markers.
@@ -62,6 +64,14 @@ end
 
 function mod:OnBossDisable()
 end
+
+mod:RegisterUnitEvents("unit.turret",{
+    [core.E.UNIT_CREATED] = function(_, id, unit)
+      core:AddUnit(unit)
+      core:WatchUnit(unit)
+    end,
+  }
+)
 
 mod:RegisterUnitEvents("unit.mordechai",{
     [core.E.UNIT_CREATED] = function(_, id, unit)
