@@ -157,9 +157,9 @@ function mod:OnBossEnable()
   roboUnit = nil
   cannonArms = {}
   playerUnit = GameLib.GetPlayerUnit()
-  mod:AddTimerBar("NEXT_ARMS_TIMER", self.L["msg.arms.next"], ARMS_TIMER)
-  core:AddTimerBar("NEXT_SNAKE_TIMER", self.L["msg.snake.next"], FIRST_SNAKE_TIMER, nil, { sColor = "xkcdBrown" })
-  core:AddTimerBar("NEXT_SPEW_TIMER", self.L["msg.spew.next"], FIRST_SPEW_TIMER, nil, { sColor = "green" })
+  mod:AddTimerBar("NEXT_ARMS_TIMER", "msg.arms.next", ARMS_TIMER)
+  core:AddTimerBar("NEXT_SNAKE_TIMER", "msg.snake.next", FIRST_SNAKE_TIMER, nil, { sColor = "xkcdBrown" })
+  core:AddTimerBar("NEXT_SPEW_TIMER", "msg.spew.next", FIRST_SPEW_TIMER, nil, { sColor = "green" })
   mod:DrawCompactorGrid()
 end
 
@@ -168,7 +168,7 @@ mod:RegisterDatachronEvent("chron.robo.snake", "MATCH", function(self, _, snakeT
     local isOnMyself = snakeTarget == playerUnit
     local isSnakeNearYou = not isOnMyself and mod:GetDistanceBetweenUnits(playerUnit, snakeTarget) < 10
     if isOnMyself then
-      mod:AddMsg("SNAKE_MSG", self.L["msg.snake.you"], 5, "RunAway", "Blue")
+      mod:AddMsg("SNAKE_MSG", "msg.snake.you", 5, "RunAway", "Blue")
     elseif isSnakeNearYou then
       local sound = "RunAway"
       local msg = self.L["msg.snake.near"]:format(snakeTarget:GetName())
@@ -186,11 +186,11 @@ mod:RegisterDatachronEvent("chron.robo.snake", "MATCH", function(self, _, snakeT
     end
 
     mod:RemoveTimerBar("NEXT_SNAKE_TIMER")
-    core:AddTimerBar("NEXT_SNAKE_TIMER", self.L["msg.snake.next"], SNAKE_TIMER, nil, { sColor = "xkcdBrown" })
+    core:AddTimerBar("NEXT_SNAKE_TIMER", "msg.snake.next", SNAKE_TIMER, nil, { sColor = "xkcdBrown" })
   end
 )
 
-mod:RegisterDatachronEvent("chron.robo.hides", "EQUAL", function(self)
+mod:RegisterDatachronEvent("chron.robo.hides", "EQUAL", function ()
     phase = MAZE_PHASE
     mod:RemoveTimerBar("NEXT_SNAKE_TIMER")
     mod:RemoveTimerBar("NEXT_INCINERATE_TIMER")
@@ -199,19 +199,19 @@ mod:RegisterDatachronEvent("chron.robo.hides", "EQUAL", function(self)
     core:RemovePicture("SNAKE_CROSSHAIR")
 
     core:RemoveMsg("ROBO_MAZE_CLOSE")
-    mod:AddMsg("ROBO_MAZE_NOW", self.L["msg.maze.now"], 5, "Info")
+    mod:AddMsg("ROBO_MAZE_NOW", "msg.maze.now", 5, "Info")
     mod:RemoveCompactorGrid()
     mod:RemoveCannonArmLines()
   end
 )
 
-mod:RegisterDatachronEvent("chron.robo.shows", "EQUAL", function(self)
+mod:RegisterDatachronEvent("chron.robo.shows", "EQUAL", function ()
     phase = DPS_PHASE
     core:RemoveLineBetweenUnits("ROBO_MAZE_LINE")
-    core:AddTimerBar("NEXT_SNAKE_TIMER", self.L["msg.snake.next"], FIRST_SNAKE_TIMER, nil, { sColor = "xkcdBrown" })
-    core:AddTimerBar("NEXT_SPEW_TIMER", self.L["msg.spew.next"], MAZE_SPEW_TIMER, nil, { sColor = "green" })
-    core:AddTimerBar("NEXT_INCINERATE_TIMER", self.L["msg.robo.laser.next"], FIRST_INCINERATE_TIMER, nil, { sColor = "red", bEmphasize = mod:GetSetting("SoundLaser") })
-    mod:AddTimerBar("NEXT_ARMS_TIMER", self.L["msg.arms.next"], ARMS_TIMER)
+    core:AddTimerBar("NEXT_SNAKE_TIMER", "msg.snake.next", FIRST_SNAKE_TIMER, nil, { sColor = "xkcdBrown" })
+    core:AddTimerBar("NEXT_SPEW_TIMER", "msg.spew.next", MAZE_SPEW_TIMER, nil, { sColor = "green" })
+    core:AddTimerBar("NEXT_INCINERATE_TIMER", "msg.robo.laser.next", FIRST_INCINERATE_TIMER, nil, { sColor = "red", bEmphasize = mod:GetSetting("SoundLaser") })
+    mod:AddTimerBar("NEXT_ARMS_TIMER", "msg.arms.next", ARMS_TIMER)
     mod:DrawCompactorGrid()
   end
 )
@@ -221,7 +221,7 @@ mod:RegisterDatachronEvent("chron.robo.laser", "MATCH", function(self, _, laserT
     local isOnMyself = laserTarget == playerUnit
     local laserOnX
     if isOnMyself then
-      laserOnX = self.L["msg.robo.laser.you"]
+      laserOnX = "msg.robo.laser.you"
     else
       laserOnX = self.L["msg.robo.laser.other"]:format(laserTarget:GetName())
     end
@@ -231,7 +231,7 @@ mod:RegisterDatachronEvent("chron.robo.laser", "MATCH", function(self, _, laserT
     end
 
     mod:RemoveTimerBar("NEXT_INCINERATE_TIMER")
-    core:AddTimerBar("NEXT_INCINERATE_TIMER", self.L["msg.robo.laser.next"], INCINERATE_TIMER, nil, { sColor = "red", bEmphasize = mod:GetSetting("SoundLaser") })
+    core:AddTimerBar("NEXT_INCINERATE_TIMER", "msg.robo.laser.next", INCINERATE_TIMER, nil, { sColor = "red", bEmphasize = mod:GetSetting("SoundLaser") })
     mod:AddMsg("LASER_MSG", laserOnX, 5, "Burn", "Red")
   end
 )
@@ -327,21 +327,21 @@ function mod:RemoveCannonArmLines()
 end
 
 mod:RegisterUnitEvents("unit.cannon_arm",{
-    [core.E.UNIT_CREATED] = function(self, id, unit)
+    ["OnUnitCreated"] = function (_, id, unit)
       cannonArms[id] = unit
       core:WatchUnit(unit, core.E.TRACK_CASTS)
       if mod:GetSetting("LineCannonArm") then
         core:AddLineBetweenUnits(string.format("CANNON_ARM_LINE %d", id), playerUnit:GetId(), id, 5)
       end
       if phase == DPS_PHASE then
-        mod:AddTimerBar("NEXT_ARMS_TIMER", self.L["msg.arms.next"], ARMS_TIMER)
+        mod:AddTimerBar("NEXT_ARMS_TIMER", "msg.arms.next", ARMS_TIMER)
       end
-      mod:AddMsg("ARMS_MSG_SPAWN", self.L["msg.cannon_arm.spawned"], 5, "Info", "Red")
+      mod:AddMsg("ARMS_MSG_SPAWN", "msg.cannon_arm.spawned", 5, "Info", "Red")
     end,
     [core.E.CAST_START] = {
       ["cast.cannon_fire"] = function(self, id)
         if mod:GetDistanceBetweenUnits(playerUnit, GetUnitById(id)) < 45 then
-          mod:AddMsg("ARMS_MSG_CAST", self.L["msg.cannon_arm.interrupt"], 2, "Inferno")
+          mod:AddMsg("ARMS_MSG_CAST", "msg.cannon_arm.interrupt", 2, "Inferno")
         end
       end
     },
@@ -357,16 +357,16 @@ mod:RegisterUnitEvents("unit.robo",{
       core:WatchUnit(unit, core.E.TRACK_CASTS + core.E.TRACK_HEALTH)
       roboUnit = unit
     end,
-    [core.E.HEALTH_CHANGED] = function(self, _, percent)
+    [core.E.HEALTH_CHANGED] = function(_, _, percent)
       if (percent >= FIRST_MAZE_PHASE_LOWER_HEALTH and percent <= FIRST_MAZE_PHASE_UPPER_HEALTH) or (percent >= SECOND_MAZE_PHASE_LOWER_HEALTH and percent <= SECOND_MAZE_PHASE_UPPER_HEALTH) then
-        mod:AddMsg("ROBO_MAZE_CLOSE", self.L["msg.maze.coming"], 5, "Info")
+        mod:AddMsg("ROBO_MAZE_CLOSE", "msg.maze.coming", 5, "Info")
       end
     end,
     [core.E.CAST_START] = {
       ["cast.spew"] = function(self, _)
         mod:RemoveTimerBar("NEXT_SPEW_TIMER")
-        core:AddTimerBar("NEXT_SPEW_TIMER", self.L["msg.spew.next"], SPEW_TIMER, nil, { sColor = "green" })
-        mod:AddMsg("SPEW_MSG", self.L["msg.spew.now"], 4, "Beware")
+        core:AddTimerBar("NEXT_SPEW_TIMER", "msg.spew.next", SPEW_TIMER, nil, { sColor = "green" })
+        mod:AddMsg("SPEW_MSG", "msg.spew.now", 4, "Beware")
       end
     },
     [core.E.CAST_END] = {

@@ -193,8 +193,8 @@ function mod:OnBossEnable()
     coreUnit.percent = 30
   end
 
-  mod:AddTimerBar("NEXT_ELEKTROSHOCK_TIMER", self.L["msg.engineer.electroshock.next"], FIRST_ELECTROSHOCK_TIMER)
-  mod:AddTimerBar("NEXT_LIQUIDATE_TIMER", self.L["msg.warrior.liquidate.next"], FIRST_LIQUIDATE_TIMER)
+  mod:AddTimerBar("NEXT_ELEKTROSHOCK_TIMER", "msg.engineer.electroshock.next", FIRST_ELECTROSHOCK_TIMER)
+  mod:AddTimerBar("NEXT_LIQUIDATE_TIMER", "msg.warrior.liquidate.next", FIRST_LIQUIDATE_TIMER)
 end
 
 function mod:OnBossDisable()
@@ -253,7 +253,7 @@ function mod:OnEngiChangeLocation(engineerId, _, newLocation)
   end
   if newLocation == FUSION_CORE then
     mod:RemoveTimerBar("NEXT_FIRE_ORB_TIMER")
-    mod:AddTimerBar("NEXT_FIRE_ORB_TIMER", self.L["msg.fire_orb.next"], FIRST_FIRE_ORB_TIMER)
+    mod:AddTimerBar("NEXT_FIRE_ORB_TIMER", "msg.fire_orb.next", FIRST_FIRE_ORB_TIMER)
   end
 end
 
@@ -279,7 +279,7 @@ mod:RegisterUnitEvents(core.E.ALL_UNITS, {
     [DEBUFF_ELECTROSHOCK_VULNERABILITY] = {
       [core.E.DEBUFF_ADD] = function(self, id, spellId, stack, timeRemaining, targetName)
         if id == player.unit:GetId() then
-          mod:AddMsg("ELECTROSHOCK_MSG_YOU", self.L["msg.engineer.electroshock.swap.you"], 5, "Burn", "Red")
+          mod:AddMsg("ELECTROSHOCK_MSG_YOU", "msg.engineer.electroshock.swap.you", 5, "Burn", "Red")
         else
           local messageId = string.format("ELECTROSHOCK_MSG_OTHER_%s", targetName)
           local electroshockOnX = self.L["msg.engineer.electroshock.swap.other"]:format(targetName)
@@ -288,7 +288,7 @@ mod:RegisterUnitEvents(core.E.ALL_UNITS, {
       end,
       [core.E.DEBUFF_REMOVE] = function(self, id, spellId, targetName)
         if id == player.unit:GetId() then
-          mod:AddMsg("ELECTROSHOCK_MSG_OVER", self.L["msg.engineer.electroshock.swap.return"], 5, "Burn")
+          mod:AddMsg("ELECTROSHOCK_MSG_OVER", "msg.engineer.electroshock.swap.return", 5, "Burn")
         end
       end,
     },
@@ -305,9 +305,9 @@ mod:RegisterUnitEvents(core.E.ALL_UNITS, {
     [core.E.DEBUFF_ADD] = {
       [DEBUFF_ATOMIC_ATTRACTION] = function(self, id, spellId, stack, timeRemaining, targetName)
         if id == player.unit:GetId() then
-          mod:AddMsg("DISCHARGED_PLASMA_MSG", self.L["msg.fire_orb.you"], 5, "RunAway")
+          mod:AddMsg("DISCHARGED_PLASMA_MSG", "msg.fire_orb.you", 5, "RunAway")
         elseif mod:IsPlayerOnPlatform(FUSION_CORE) then
-          mod:AddMsg("DISCHARGED_PLASMA_MSG_SPAWN", self.L["msg.fire_orb.spawned"], 2, "Info")
+          mod:AddMsg("DISCHARGED_PLASMA_MSG_SPAWN", "msg.fire_orb.spawned", 2, "Info")
         end
       end,
     },
@@ -411,7 +411,7 @@ mod:RegisterUnitEvents("unit.warrior",{
     [core.E.CAST_START] = {
       ["cast.warrior.liquidate"] = function(self)
         if mod:IsPlayerOnPlatform(engineerUnits[WARRIOR].location) then
-          mod:AddMsg("LIQUIDATE_MSG", self.L["msg.warrior.liquidate.stack"], 5, "Info")
+          mod:AddMsg("LIQUIDATE_MSG", "msg.warrior.liquidate.stack", 5, "Info")
         end
       end,
       ["cast.rocket_jump"] = function()
@@ -421,7 +421,7 @@ mod:RegisterUnitEvents("unit.warrior",{
     [core.E.CAST_END] = {
       ["cast.warrior.liquidate"] = function(self)
         mod:RemoveTimerBar("NEXT_LIQUIDATE_TIMER")
-        mod:AddTimerBar("NEXT_LIQUIDATE_TIMER", self.L["msg.warrior.liquidate.next"], LIQUIDATE_TIMER)
+        mod:AddTimerBar("NEXT_LIQUIDATE_TIMER", "msg.warrior.liquidate.next", LIQUIDATE_TIMER)
       end
     },
   }
@@ -435,21 +435,21 @@ mod:RegisterUnitEvents("unit.engineer",{
           core:AddPixie("ELECTROSHOCK_PIXIE", 2, engineerUnits[ENGINEER].unit, nil, "Red", 10, 80, 0)
         end
         if mod:IsPlayerOnPlatform(engineerUnits[ENGINEER].location) then
-          mod:AddMsg("ELECTROSHOCK_CAST_MSG", self.L["cast.engineer.electroshock"], 5, "Beware")
+          mod:AddMsg("ELECTROSHOCK_CAST_MSG", "cast.engineer.electroshock", 5, "Beware")
         end
       end
     },
     [core.E.CAST_END] = {
       ["cast.rocket_jump"] = function(self)
         mod:RemoveTimerBar("NEXT_ELEKTROSHOCK_TIMER")
-        mod:AddTimerBar("NEXT_ELEKTROSHOCK_TIMER", self.L["msg.engineer.electroshock.next"], JUMP_ELECTROSHOCK_TIMER)
+        mod:AddTimerBar("NEXT_ELEKTROSHOCK_TIMER", "msg.engineer.electroshock.next", JUMP_ELECTROSHOCK_TIMER)
       end,
-      ["cast.engineer.electroshock"] = function(self)
+      ["cast.engineer.electroshock"] = function()
         if mod:GetSetting("LineElectroshock") then
           core:DropPixie("ELECTROSHOCK_PIXIE")
         end
         mod:RemoveTimerBar("NEXT_ELEKTROSHOCK_TIMER")
-        mod:AddTimerBar("NEXT_ELEKTROSHOCK_TIMER", self.L["msg.engineer.electroshock.next"], ELECTROSHOCK_TIMER)
+        mod:AddTimerBar("NEXT_ELEKTROSHOCK_TIMER", "msg.engineer.electroshock.next", ELECTROSHOCK_TIMER)
       end
     },
   }
@@ -457,15 +457,15 @@ mod:RegisterUnitEvents("unit.engineer",{
 
 function mod:PopFireOrb()
   if mod:IsPlayerOnPlatform(FUSION_CORE) then
-    mod:AddMsg("FIRE_ORB_POP_MSG", self.L["msg.fire_orb.pop.msg"], 5, "Alarm")
+    mod:AddMsg("FIRE_ORB_POP_MSG", "msg.fire_orb.pop.msg", 5, "Alarm")
   end
 end
 
 mod:RegisterUnitEvents("unit.fire_orb",{
     [core.E.UNIT_CREATED] = function(self, id, unit)
       mod:RemoveTimerBar("NEXT_FIRE_ORB_TIMER")
-      mod:AddTimerBar("NEXT_FIRE_ORB_TIMER", self.L["msg.fire_orb.next"], NEXT_FIRE_ORB_TIMER)
-      mod:AddTimerBar(string.format("FIRE_ORB_SAFE_TIMER %d", id), self.L["msg.fire_orb.pop.timer"], FIRE_ORB_SAFE_TIMER, false, "Red", mod.PopFireOrb, mod)
+      mod:AddTimerBar("NEXT_FIRE_ORB_TIMER", "msg.fire_orb.next", NEXT_FIRE_ORB_TIMER)
+      mod:AddTimerBar(string.format("FIRE_ORB_SAFE_TIMER %d", id), "msg.fire_orb.pop.timer", FIRE_ORB_SAFE_TIMER, false, "Red", mod.PopFireOrb, mod)
       fireOrbTargetTestTimer:Start()
     end,
     [core.E.UNIT_DESTROYED] = function(_, id)
