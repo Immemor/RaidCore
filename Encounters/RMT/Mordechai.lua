@@ -39,8 +39,10 @@ mod:RegisterEnglishLocale({
 
     -- Messages.
     ["msg.mordechai.shuriken.next"] = "Next Shuriken",
-    ["msg.orb.spawned"] = "ORB SPAWNED",
-    ["msg.orb.kinetic_link"] = "DPS THE ORB!"
+    ["msg.phase.start"] = "SUCKY SUCKY PHASE STARTING",
+    ["msg.orb.spawned"] = "Orb Spawned",
+    ["msg.orb.kinetic_link"] = "DPS THE ORB!",
+    ["msg.mordechai.shuriken.you"] = "SHURIKEN ON YOU"
   })
 ----------------------------------------------------------------------------------------------------
 -- Constants.
@@ -94,19 +96,19 @@ mod:RegisterUnitEvents("unit.mordechai",{
     end,
     [core.E.HEALTH_CHANGED] = function(_, _, percent)
       if percent >= FIRST_SUCKY_PHASE_LOWER_HEALTH and percent <= FIRST_SUCKY_PHASE_UPPER_HEALTH then
-        mod:AddMsg("SUCKY PHASE", "SUCKY PHASE STARTING", 5)
+        mod:AddMsg("SUCKY PHASE", "msg.phase.start", 5)
       end
     end,
     [core.E.CAST_START] = {
       ["cast.mordechai.shatter"] = function(_, _)
-        mod:AddTimerBar("NEXT_SHURIKEN_TIMER", "msg.mordechai.shuriken.next", SHURIKEN_TIMER)
+        mod:AddTimerBar("NEXT_SHURIKEN_TIMER", "msg.mordechai.shuriken.next", SHURIKEN_TIMER, true)
       end
     }
   }
 )
 
 mod:RegisterUnitEvents("unit.anchor",{
-    [core.E.UNIT_CREATED] = function(_, id, unit)
+    [core.E.UNIT_CREATED] = function(_, _, _)
       mod:RemoveCleaveLines()
     end,
   }
@@ -121,16 +123,17 @@ mod:RegisterUnitEvents("unit.orb",{
 
 mod:RegisterDatachronEvent("chron.airlock.closed", "EQUAL", function (_)
     mod:AddCleaveLines()
-    mod:AddTimerBar("NEXT_SHURIKEN_TIMER", "msg.mordechai.shuriken.next", FIRST_SHURIKEN_TIMER)
+    mod:AddTimerBar("NEXT_SHURIKEN_TIMER", "msg.mordechai.shuriken.next", FIRST_SHURIKEN_TIMER, true)
   end
 )
 
-function mod:OnDebuffAdd(id, spellId, sName)
-  if DEBUFF_KINETIC_LINK == spellId and id == GameLib.GetPlayerUnit():GetId() then
+function mod:OnDebuffAdd(id, spellId, _, _, sName)
+  local isOnMyself = id == GameLib.GetPlayerUnit():GetId()
+  if DEBUFF_KINETIC_LINK == spellId and isOnMyself then
     mod:AddMsg("KINETIC_LINK_MSG", "msg.orb.kinetic_link", 5, "Burn")
   end
-  if DEBUFF_SHOCKING_ATTRACTION == spellId then
-    mod:AddMsg("SHOCKING ATTRACTION", "BLA ON "..sName, 5)
+  if DEBUFF_SHOCKING_ATTRACTION == spellId and isOnMyself then
+    mod:AddMsg("SHOCKING ATTRACTION", "msg.mordechai.shuriken.you", 5, "RunAway")
   end
 end
 
