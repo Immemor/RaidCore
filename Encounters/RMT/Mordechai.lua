@@ -39,7 +39,7 @@ mod:RegisterEnglishLocale({
 
     -- Messages.
     ["msg.mordechai.shuriken.next"] = "Next Shuriken",
-    ["msg.phase.start"] = "SUCKY SUCKY PHASE STARTING",
+    ["msg.phase.start"] = "SUCKY SUCKY PHASE SOON",
     ["msg.orb.spawned"] = "Orb Spawned",
     ["msg.orb.kinetic_link"] = "DPS THE ORB!",
     ["msg.mordechai.shuriken.you"] = "SHURIKEN ON YOU"
