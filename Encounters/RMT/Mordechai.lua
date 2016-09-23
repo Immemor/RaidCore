@@ -81,7 +81,6 @@ end
 
 mod:RegisterUnitEvents("unit.turret",{
     [core.E.UNIT_CREATED] = function(_, _, unit)
-      core:AddUnit(unit)
       core:WatchUnit(unit)
     end,
   }
