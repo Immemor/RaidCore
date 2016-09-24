@@ -181,12 +181,39 @@ Log:SetExtra2String(ExtraLog2Text)
 ----------------------------------------------------------------------------------------------------
 -- Privates functions: unit processing
 ----------------------------------------------------------------------------------------------------
+local function GetBuffs(tUnit)
+  local r = {}
+  if not tUnit then
+    return r
+  end
+
+  local tBuffs = tUnit:GetBuffs()
+  if not tBuffs then
+    return r
+  end
+  tBuffs = tBuffs.arBeneficial
+  local nBuffs = #tBuffs
+  for i = 1, nBuffs do
+    local obj = tBuffs[i]
+    local nSpellId = obj.splEffect:GetId()
+    if nSpellId and not SPELLID_BLACKLISTED[nSpellId] then
+      r[obj.idBuff] = {
+        nCount = obj.nCount,
+        nSpellId = nSpellId,
+        fTimeRemaining = obj.fTimeRemaining,
+      }
+    end
+  end
+  return r
+end
+
 local function TrackThisUnit(tUnit)
   local nId = tUnit:GetId()
   if not _tTrackedUnits[nId] and not tUnit:IsInYourGroup() then
     Log:Add("TrackThisUnit", nId)
     local MaxHealth = tUnit:GetMaxHealth()
     local Health = tUnit:GetHealth()
+    local tAllBuffs = GetBuffs(tUnit)
     local nPercent = Health and MaxHealth and math.floor(100 * Health / MaxHealth)
     _tAllUnits[nId] = true
     _tTrackedUnits[nId] = {
@@ -197,6 +224,8 @@ local function TrackThisUnit(tUnit)
       tCast = {
         bCasting = false,
         sCastName = "",
+        tBuffs = tAllBuffs or {},
+        tDebuffs = {},
         nCastEndTime = 0,
         bSuccess = false,
       },
@@ -212,6 +241,36 @@ local function UnTrackThisUnit(nId)
   end
 end
 
+local function PollUnitBuffs(tMyUnit)
+  local nId = tMyUnit.nId
+  local tNewBuffs = GetBuffs(tMyUnit.tUnit)
+  local tBuffs = tMyUnit.tBuffs
+  if not tNewBuffs then
+    return
+  end
+
+  for nIdBuff,current in next, tBuffs do
+    if tNewBuffs[nIdBuff] then
+      local tNew = tNewBuffs[nIdBuff]
+      if tNew.nCount ~= current.nCount then
+        tBuffs[nIdBuff].nCount = tNew.nCount
+        tBuffs[nIdBuff].fTimeRemaining = tNew.fTimeRemaining
+        ManagerCall("OnBuffUpdate", nId, current.nSpellId, tNew.nCount, tNew.fTimeRemaining)
+      end
+      -- Remove this entry for second loop.
+      tNewBuffs[nIdBuff] = nil
+    else
+      tBuffs[nIdBuff] = nil
+      ManagerCall("OnBuffRemove", nId, current.nSpellId)
+    end
+  end
+
+  for nIdBuff, tNew in next, tNewBuffs do
+    tBuffs[nIdBuff] = tNew
+    ManagerCall("OnBuffAdd", nId, tNew.nSpellId, tNew.nCount, tNew.fTimeRemaining)
+  end
+end
+
 function RaidCore:CI_OnBuff(tUnit, tBuff, sMsgBuff, sMsgDebuff)
   local bBeneficial = tBuff.splEffect:IsBeneficial()
   local nSpellId = tBuff.splEffect:GetId()
@@ -224,8 +283,9 @@ function RaidCore:CI_OnBuff(tUnit, tBuff, sMsgBuff, sMsgDebuff)
     if not SPELLID_BLACKLISTED[nSpellId] then
       tTrackedUnit = _tMembers[tUnit:GetName()]
     end
-  elseif not bProcessDebuffs and bBeneficial then
-    tTrackedUnit = _tTrackedUnits[tUnit:GetId()]
+    --NOTE: Tracking other units with these events is currently buggy
+    --elseif not bProcessDebuffs and bBeneficial then
+    --tTrackedUnit = _tTrackedUnits[tUnit:GetId()]
   end
   return sEvent, tTrackedUnit, nSpellId
 end
@@ -532,6 +592,12 @@ function RaidCore:CI_OnScanUpdate()
 
   for nId, data in next, _tTrackedUnits do
     if data.tUnit:IsValid() then
+      -- Process buff tracking.
+      local f, err = pcall(PollUnitBuffs, data)
+      if not f then
+        Print(err)
+      end
+
       -- Process name update.
       data.sName = data.tUnit:GetName():gsub(NO_BREAK_SPACE, " ")
 
