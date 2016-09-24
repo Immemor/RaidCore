@@ -115,6 +115,9 @@ local SPELL_EVENTS = {
   [RaidCore.E.DEBUFF_ADD] = true,
   [RaidCore.E.DEBUFF_UPDATE] = true,
   [RaidCore.E.DEBUFF_REMOVE] = true,
+  [RaidCore.E.NPC_SAY] = true, -- Not really spells but the format is the same:
+  [RaidCore.E.NPC_YELL] = true, -- Bind by name and a second string
+  [RaidCore.E.NPC_WHISPER] = true,
 }
 function EncounterPrototype:RegisterUnitSpellEvents(tUnitNames, primaryKey, tEventHandlers)
   assert(type(tUnitNames) == "string" or type(tUnitNames) == "table")

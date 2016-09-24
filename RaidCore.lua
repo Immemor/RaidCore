@@ -60,6 +60,9 @@ RaidCore.E = {
   CAST_END = "OnCastEnd",
   HEALTH_CHANGED = "OnHealthChanged",
   DATACHRON = "OnDatachron",
+  NPC_SAY = "OnNPCSay",
+  NPC_YELL = "OnNPCYell",
+  NPC_WHISPER = "OnNPCWhisper",
 }
 
 local EVENT_UNIT_NAME_INDEX = {
@@ -75,6 +78,9 @@ local EVENT_UNIT_NAME_INDEX = {
   [RaidCore.E.DEBUFF_ADD] = 5,
   [RaidCore.E.DEBUFF_UPDATE] = 6,
   [RaidCore.E.DEBUFF_REMOVE] = 3,
+  [RaidCore.E.NPC_SAY] = 2,
+  [RaidCore.E.NPC_YELL] = 2,
+  [RaidCore.E.NPC_WHISPER] = 2,
 }
 
 local EVENT_UNIT_SPELL_ID_INDEX = {
@@ -86,6 +92,9 @@ local EVENT_UNIT_SPELL_ID_INDEX = {
   [RaidCore.E.DEBUFF_ADD] = 2,
   [RaidCore.E.DEBUFF_UPDATE] = 2,
   [RaidCore.E.DEBUFF_REMOVE] = 2,
+  [RaidCore.E.NPC_SAY] = 1,
+  [RaidCore.E.NPC_YELL] = 1,
+  [RaidCore.E.NPC_WHISPER] = 1,
 }
 
 ----------------------------------------------------------------------------------------------------
