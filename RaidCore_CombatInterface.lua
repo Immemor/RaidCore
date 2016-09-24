@@ -51,7 +51,15 @@ local CHANNEL_HANDLERS = {
   [ChatSystemLib.ChatChannel_Datachron] = "OnDatachron",
 }
 local SPELLID_BLACKLISTED = {
-  [79757] = "Kinetic Rage: Augmented Blade", -- On war class.
+  [79757] = "Kinetic Rage: Augmented Blade", -- Warrior
+  [70161] = "Atomic Spear", -- Warrior T4
+  [70162] = "Atomic Spear", --T5
+  [70163] = "Atomic Spear", --T6
+  [70164] = "Atomic Spear", --T7
+  [70165] = "Atomic Spear", --T8
+  [41137] = "To the Pain", -- Warrior cheat death
+  [84397] = "Unbreakable", -- Engineer cheat death
+  [82748] = "Unbreakable", -- Engineer cheat death cooldown
 }
 -- State Machine.
 local INTERFACE__DISABLE = 1
@@ -195,7 +203,7 @@ local function GetBuffs(tUnit)
   for i = 1, nBuffs do
     local obj = tBuffs[i]
     local nSpellId = obj.splEffect:GetId()
-    if nSpellId and not SPELLID_BLACKLISTED[nSpellId] then
+    if nSpellId then
       r[obj.idBuff] = {
         nCount = obj.nCount,
         nSpellId = nSpellId,
