@@ -162,6 +162,11 @@ function mod:AddCleaveLines()
   core:AddSimpleLine("CLEAVE_BACK_RIGHT", id, 3.5, 40, 180-24.5, 5, "white", nil, 3)
   core:AddSimpleLine("CLEAVE_FRONT_LEFT", id, 3.5, 40, -24.5, 5, "white", nil, -3)
   core:AddSimpleLine("CLEAVE_BACK_LEFT", id, 3.5, 40, -(180-24.5), 5, "white", nil, -3)
+
+  core:AddSimpleLine("CLEAVE_FRONT_RIGHT2", id, 0, 3.5, 17.5, 5, "white", nil, -5.5)
+  core:AddSimpleLine("CLEAVE_BACK_RIGHT2", id, 0, 3.5, 180-17.5, 5, "white", nil, -5.5)
+  core:AddSimpleLine("CLEAVE_FRONT_LEFT2", id, 0, 3.5, -17.5, 5, "white", nil, 5.5)
+  core:AddSimpleLine("CLEAVE_BACK_LEFT2", id, 0, 3.5, -(180-17.5), 5, "white", nil, 5.5)
 end
 
 function mod:RemoveCleaveLines()
@@ -169,4 +174,8 @@ function mod:RemoveCleaveLines()
   core:RemoveSimpleLine("CLEAVE_BACK_RIGHT")
   core:RemoveSimpleLine("CLEAVE_FRONT_LEFT")
   core:RemoveSimpleLine("CLEAVE_BACK_LEFT")
+  core:RemoveSimpleLine("CLEAVE_FRONT_RIGHT2")
+  core:RemoveSimpleLine("CLEAVE_BACK_RIGHT2")
+  core:RemoveSimpleLine("CLEAVE_FRONT_LEFT2")
+  core:RemoveSimpleLine("CLEAVE_BACK_LEFT2")
 end
