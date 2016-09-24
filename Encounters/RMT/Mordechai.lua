@@ -42,6 +42,7 @@ mod:RegisterEnglishLocale({
     ["msg.phase.start"] = "SUCKY SUCKY PHASE SOON",
     ["msg.orb.spawned"] = "Orb Spawned",
     ["msg.orb.kinetic_link"] = "DPS THE ORB!",
+    ["msg.orb.next"] = "Next Orb",
     ["msg.mordechai.shuriken.you"] = "SHURIKEN ON YOU"
   })
 ----------------------------------------------------------------------------------------------------
@@ -55,6 +56,11 @@ local FIRST_SUCKY_PHASE_UPPER_HEALTH = 86.5
 local FIRST_SUCKY_PHASE_LOWER_HEALTH = 85.5
 local FIRST_SHURIKEN_TIMER = 11
 local SHURIKEN_TIMER = 22
+
+--TODO: I made the timers based on the only log I had
+-- Need to get more logs again with casts from turret etc.
+local FIRST_ORB_TIMER = 18.5
+local ORB_TIMER = 26
 
 local ANCHOR_POSITIONS = {
   [1] = { x = 93.849998474121, y = 353.87435913086, z = 209.71000671387 },
@@ -74,6 +80,8 @@ function mod:OnBossEnable()
   mod:SetWorldMarker("ANCHOR_2", "mark.anchor_2", ANCHOR_POSITIONS[2])
   mod:SetWorldMarker("ANCHOR_3", "mark.anchor_3", ANCHOR_POSITIONS[3])
   mod:SetWorldMarker("ANCHOR_4", "mark.anchor_4", ANCHOR_POSITIONS[4])
+
+  mod:AddTimerBar("NEXT_ORB_TIMER", "msg.orb.next", ORB_TIMER)
 end
 
 function mod:OnBossDisable()
@@ -108,6 +116,7 @@ mod:RegisterUnitEvents("unit.mordechai",{
 
 mod:RegisterUnitEvents("unit.anchor",{
     [core.E.UNIT_CREATED] = function(_, _, _)
+      mod:RemoveTimerBar("NEXT_ORB_TIMER")
       mod:RemoveCleaveLines()
     end,
   }
@@ -116,6 +125,7 @@ mod:RegisterUnitEvents("unit.anchor",{
 mod:RegisterUnitEvents("unit.orb",{
     [core.E.UNIT_CREATED] = function(_, _, _)
       mod:AddMsg("ORB_SPAWNED", "msg.orb.spawned", 5)
+      mod:AddTimerBar("NEXT_ORB_TIMER", "msg.orb.next", ORB_TIMER)
     end
   }
 )
@@ -123,6 +133,7 @@ mod:RegisterUnitEvents("unit.orb",{
 mod:RegisterDatachronEvent("chron.airlock.closed", "EQUAL", function (_)
     mod:AddCleaveLines()
     mod:AddTimerBar("NEXT_SHURIKEN_TIMER", "msg.mordechai.shuriken.next", FIRST_SHURIKEN_TIMER, true)
+    mod:AddTimerBar("NEXT_ORB_TIMER", "msg.orb.next", FIRST_ORB_TIMER)
   end
 )
 
