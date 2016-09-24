@@ -286,7 +286,7 @@ function RaidCore:CI_OnBuff(tUnit, tBuff, sMsgBuff, sMsgDebuff)
 
   -- Track debuffs for players and buffs for enemies
   if bProcessDebuffs and not bBeneficial then
-    if not SPELLID_BLACKLISTED[nSpellId] then
+    if not SPELLID_BLACKLISTED[nSpellId] and self:IsUnitInGroup(tUnit) then
       nUnitId = tUnit:GetId()
     end
     --NOTE: Tracking other units with these events is currently buggy
@@ -317,6 +317,9 @@ function RaidCore:CI_OnBuffRemoved(tUnit, tBuff)
   end
 end
 
+function RaidCore:IsUnitInGroup(tUnit)
+  return tUnit:IsInYourGroup() or tUnit:IsThePlayer()
+end
 ----------------------------------------------------------------------------------------------------
 -- Privates functions: State Machine
 ----------------------------------------------------------------------------------------------------
@@ -530,11 +533,11 @@ end
 ----------------------------------------------------------------------------------------------------
 function RaidCore:CI_OnEnteredCombat(tUnit, bInCombat)
   local tOwner = tUnit.GetUnitOwner and tUnit:GetUnitOwner()
-  local bIsPetPlayer = tOwner and (tOwner:IsInYourGroup() or tOwner:IsThePlayer())
+  local bIsPetPlayer = tOwner and self:IsUnitInGroup(tOwner)
   if not bIsPetPlayer then
     local nId = tUnit:GetId()
     local sName = string.gsub(tUnit:GetName(), NO_BREAK_SPACE, " ")
-    if not tUnit:IsInYourGroup() and not tUnit:IsThePlayer() then
+    if not self:IsUnitInGroup(tUnit) then
       if not _tAllUnits[nId] then
         ManagerCall("OnUnitCreated", nId, tUnit, sName)
       end
@@ -546,10 +549,10 @@ end
 
 function RaidCore:CI_OnUnitCreated(tUnit)
   local nId = tUnit:GetId()
-  if not tUnit:IsInYourGroup() and not tUnit:IsThePlayer() then
+  if not self:IsUnitInGroup(tUnit) then
     local sName = tUnit:GetName():gsub(NO_BREAK_SPACE, " ")
     local tOwner = tUnit.GetUnitOwner and tUnit:GetUnitOwner()
-    local bIsPetPlayer = tOwner and (tOwner:IsInYourGroup() or tOwner:IsThePlayer())
+    local bIsPetPlayer = tOwner and self:IsUnitInGroup(tOwner)
     if not bIsPetPlayer and not _tAllUnits[nId] then
       _tAllUnits[nId] = true
       ManagerCall("OnUnitCreated", nId, tUnit, sName)
