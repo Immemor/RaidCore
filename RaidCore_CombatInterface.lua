@@ -31,9 +31,9 @@ local RemoveEventHandler = Apollo.RemoveEventHandler
 local GetGameTime = GameLib.GetGameTime
 local GetUnitById = GameLib.GetUnitById
 local GetSpell = GameLib.GetSpell
+local GetPlayerUnitByName = GameLib.GetPlayerUnitByName
 local next, string, pcall = next, string, pcall
 local tinsert = table.insert
-
 ----------------------------------------------------------------------------------------------------
 -- Constants.
 ----------------------------------------------------------------------------------------------------
@@ -82,7 +82,6 @@ local _DelayShowShortcutBar = nil
 local _nCommChannelRetry = 5
 local _tAllUnits = {}
 local _tTrackedUnits = {}
-local _tMembers = {}
 local _RaidCoreChannelComm = nil
 local _nNumShortcuts
 local _CI_State
@@ -276,62 +275,38 @@ function RaidCore:CI_OnBuff(tUnit, tBuff, sMsgBuff, sMsgDebuff)
   local nSpellId = tBuff.splEffect:GetId()
   local sEvent = bBeneficial and sMsgBuff or sMsgDebuff
   local bProcessDebuffs = tUnit:IsACharacter()
-  local tTrackedUnit
+  local nUnitId
 
   -- Track debuffs for players and buffs for enemies
   if bProcessDebuffs and not bBeneficial then
     if not SPELLID_BLACKLISTED[nSpellId] then
-      tTrackedUnit = _tMembers[tUnit:GetName()]
+      nUnitId = tUnit:GetId()
     end
     --NOTE: Tracking other units with these events is currently buggy
     --elseif not bProcessDebuffs and bBeneficial then
-    --tTrackedUnit = _tTrackedUnits[tUnit:GetId()]
+    --nUnitId = _tTrackedUnits[tUnit:GetId()]
   end
-  return sEvent, tTrackedUnit, nSpellId
+  return sEvent, nUnitId, nSpellId
 end
 
 function RaidCore:CI_OnBuffAdded(tUnit, tBuff)
-  local sEvent, tTrackedUnit, nSpellId = self:CI_OnBuff(tUnit, tBuff, "OnBuffAdd", "OnDebuffAdd")
-  if tTrackedUnit then
-    ManagerCall(sEvent, tTrackedUnit.nId, nSpellId, tBuff.nCount, tBuff.fTimeRemaining)
+  local sEvent, nUnitId, nSpellId = self:CI_OnBuff(tUnit, tBuff, "OnBuffAdd", "OnDebuffAdd")
+  if nUnitId then
+    ManagerCall(sEvent, nUnitId, nSpellId, tBuff.nCount, tBuff.fTimeRemaining)
   end
 end
 
 function RaidCore:CI_OnBuffUpdated(tUnit, tBuff)
-  local sEvent, tTrackedUnit, nSpellId = self:CI_OnBuff(tUnit, tBuff, "OnBuffUpdate", "OnDebuffUpdate")
-  if tTrackedUnit then
-    ManagerCall(sEvent, tTrackedUnit.nId, nSpellId, tBuff.nCount, tBuff.fTimeRemaining)
+  local sEvent, nUnitId, nSpellId = self:CI_OnBuff(tUnit, tBuff, "OnBuffUpdate", "OnDebuffUpdate")
+  if nUnitId then
+    ManagerCall(sEvent, nUnitId, nSpellId, tBuff.nCount, tBuff.fTimeRemaining)
   end
 end
 
 function RaidCore:CI_OnBuffRemoved(tUnit, tBuff)
-  local sEvent, tTrackedUnit, nSpellId = self:CI_OnBuff(tUnit, tBuff, "OnBuffRemove", "OnDebuffRemove")
-  if tTrackedUnit then
-    ManagerCall(sEvent, tTrackedUnit.nId, nSpellId)
-  end
-end
-
-local function UpdateMemberList()
-  for i = 1, GroupLib.GetMemberCount() do
-    local tUnit = GroupLib.GetUnitForGroupMember(i)
-    -- A Friend out of range have a tUnit object equal to nil.
-    -- And if you have the tUnit object, the IsValid flag can change.
-    if tUnit then
-      local sName = tUnit:GetName():gsub(NO_BREAK_SPACE, " ")
-      if not _tMembers[sName] then
-        _tMembers[sName] = {
-          tUnit = tUnit,
-          nId = tUnit:GetId(),
-          bIsACharacter = true,
-        }
-      elseif _tMembers[sName].tUnit ~= tUnit then
-        local nOldId = _tMembers[sName].nId
-        local nNewId = tUnit:GetId()
-        Log:Add("WARNING tUnit reference changed", nOldId, nNewId)
-        _tMembers[sName].tUnit = tUnit
-        _tMembers[sName].nId = nNewId
-      end
-    end
+  local sEvent, nUnitId, nSpellId = self:CI_OnBuff(tUnit, tBuff, "OnBuffRemove", "OnDebuffRemove")
+  if nUnitId then
+    ManagerCall(sEvent, nUnitId, nSpellId)
   end
 end
 
@@ -378,7 +353,6 @@ local function FullActivate(bEnable)
     -- Clear private data.
     _tTrackedUnits = {}
     _tAllUnits = {}
-    _tMembers = {}
   end
   _bRunning = bEnable
 end
@@ -467,7 +441,6 @@ end
 function RaidCore:CombatInterface_Init()
   _tAllUnits = {}
   _tTrackedUnits = {}
-  _tMembers = {}
   _tScanTimer = ApolloTimer.Create(SCAN_PERIOD, true, "CI_OnScanUpdate", self)
   _tScanTimer:Stop()
 
@@ -588,8 +561,6 @@ function RaidCore:CI_OnUnitDestroyed(tUnit)
 end
 
 function RaidCore:CI_OnScanUpdate()
-  UpdateMemberList()
-
   for nId, data in next, _tTrackedUnits do
     if data.tUnit:IsValid() then
       -- Process buff tracking.
@@ -703,8 +674,8 @@ function RaidCore:CI_OnChatMessage(tChannelCurrent, tMessage)
 end
 
 function RaidCore:CI_OnReceivedMessage(sChannel, sMessage, sSender)
-  local tMember = _tMembers[sSender] or {}
-  local nSenderId = tMember.nId
+  local tSender = sSender and GetPlayerUnitByName(sSender)
+  local nSenderId = tSender and tSender:GetId()
   ManagerCall("OnReceivedMessage", sMessage, nSenderId)
 end
 
