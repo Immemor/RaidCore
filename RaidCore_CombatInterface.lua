@@ -220,7 +220,7 @@ local function TrackThisUnit(tUnit)
     Log:Add("TrackThisUnit", nId)
     local MaxHealth = tUnit:GetMaxHealth()
     local Health = tUnit:GetHealth()
-    local tAllBuffs = GetBuffs(tUnit)
+    local tBuffs = GetBuffs(tUnit)
     local nPercent = Health and MaxHealth and math.floor(100 * Health / MaxHealth)
     _tAllUnits[nId] = true
     _tTrackedUnits[nId] = {
@@ -228,11 +228,10 @@ local function TrackThisUnit(tUnit)
       sName = tUnit:GetName():gsub(NO_BREAK_SPACE, " "),
       nId = nId,
       bIsACharacter = false,
+      tBuffs = tBuffs,
       tCast = {
         bCasting = false,
         sCastName = "",
-        tBuffs = tAllBuffs or {},
-        tDebuffs = {},
         nCastEndTime = 0,
         bSuccess = false,
       },
