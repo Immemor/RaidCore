@@ -86,7 +86,6 @@ local _bUnitInCombatEnable = false
 local _bRunning = false
 local _tScanTimer = nil
 local _CommChannelTimer = nil
-local _DelayShowShortcutBar = nil
 local _nCommChannelRetry = 5
 local _tAllUnits = {}
 local _tTrackedUnits = {}
@@ -704,7 +703,7 @@ function RaidCore:CI_ShowShortcutBar(eWhichBar, bIsVisible, nNumShortcuts)
   if eWhichBar == ActionSetLib.CodeEnumShortcutSet.FloatingSpellBar then
     -- The GetContent function is not ready... A delay must be added.
     _nNumShortcuts = nNumShortcuts
-    _DelayShowShortcutBar = ApolloTimer.Create(1, false, "CI_ShowShortcutBarDelayed", RaidCore)
+    ApolloTimer.Create(1, false, "CI_ShowShortcutBarDelayed", RaidCore)
   end
 end
 
