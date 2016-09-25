@@ -52,6 +52,7 @@ mod:RegisterEnglishLocale({
 mod:RegisterDefaultSetting("LinesCleave")
 mod:RegisterDefaultSetting("WorldMarkerAnchor")
 mod:RegisterDefaultSetting("MarkerAnchorHP")
+mod:RegisterDefaultSetting("CrosshairShockingAttraction")
 -- Sounds.
 mod:RegisterDefaultSetting("SoundOrbSpawn")
 mod:RegisterDefaultSetting("SoundOrbLink")
@@ -190,7 +191,9 @@ function mod:OnDebuffAdd(id, spellId)
     end
   end
   if DEBUFF_SHOCKING_ATTRACTION == spellId then
-    core:AddPicture("SHOCKING_ATTRACTION_TARGET_"..id, id, "Crosshair", 30, 0, 0, nil, "white")
+    if mod:GetSetting("CrosshairShockingAttraction") then
+      core:AddPicture("SHOCKING_ATTRACTION_TARGET_"..id, id, "Crosshair", 30, 0, 0, nil, "blue")
+    end
     if isOnMyself then
       if mod:GetSetting("MessageShockingAttraction") then
         mod:AddMsg("SHOCKING_ATTRACTION", "msg.mordechai.shuriken.you", 5, mod:GetSetting("SoundShurikenCountdown") == true and "RunAway")
