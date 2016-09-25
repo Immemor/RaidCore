@@ -63,6 +63,7 @@ RaidCore.E = {
   NPC_SAY = "OnNPCSay",
   NPC_YELL = "OnNPCYell",
   NPC_WHISPER = "OnNPCWhisper",
+  ALL_UNITS = "**",
 }
 
 local EVENT_UNIT_NAME_INDEX = {
@@ -123,12 +124,25 @@ local function OnEncounterUnitEvents(sMethod, ...)
     return
   end
   local sName = select(EVENT_UNIT_NAME_INDEX[sMethod], ...)
-  local tHandlers = _tCurrentEncounter.tUnitEvents
-  tHandlers = tHandlers and tHandlers[sMethod]
-  tHandlers = tHandlers and tHandlers[sName] or {}
+
+  -- Check if any events are bound
+  local tUnitEvents = _tCurrentEncounter.tUnitEvents
+  tUnitEvents = tUnitEvents and tUnitEvents[sMethod]
+
+  if not tUnitEvents then return end
+
+  -- Check for events bound by name
+  local tHandlers = tUnitEvents[sName] or {}
   local nSize = #tHandlers
   for i = 1, nSize do
     tHandlers[i](_tCurrentEncounter, ...)
+  end
+
+  -- Check for events bound for all units
+  local tAnyHandlers = tUnitEvents[RaidCore.E.ALL_UNITS] or {}
+  nSize = #tAnyHandlers
+  for i = 1, nSize do
+    tAnyHandlers[i](_tCurrentEncounter, ...)
   end
 end
 
@@ -139,13 +153,26 @@ local function OnEncounterUnitSpellEvents(sMethod, ...)
   local sName = select(EVENT_UNIT_NAME_INDEX[sMethod], ...)
   local spellId = select(EVENT_UNIT_SPELL_ID_INDEX[sMethod], ...)
 
-  local tHandlers = _tCurrentEncounter.tUnitSpellEvents
-  tHandlers = tHandlers and tHandlers[sMethod]
-  tHandlers = tHandlers and tHandlers[sName]
-  tHandlers = tHandlers and tHandlers[spellId] or {}
-  local nSize = #tHandlers
+  -- Check if any events are bound
+  local tUnitSpellEvents = _tCurrentEncounter.tUnitSpellEvents
+  tUnitSpellEvents = tUnitSpellEvents and tUnitSpellEvents[sMethod]
+
+  if not tUnitSpellEvents then return end
+
+  -- Check for events bound by name
+  local tUnitHandlers = tUnitSpellEvents[sName]
+  tUnitHandlers = tUnitHandlers and tUnitHandlers[spellId] or {}
+  local nSize = #tUnitHandlers
   for i = 1, nSize do
-    tHandlers[i](_tCurrentEncounter, ...)
+    tUnitHandlers[i](_tCurrentEncounter, ...)
+  end
+
+  -- Check for events bound for all units
+  local tAnyHandlers = tUnitSpellEvents[RaidCore.E.ALL_UNITS]
+  tAnyHandlers = tAnyHandlers and tUnitHandlers[spellId] or {}
+  nSize = #tAnyHandlers
+  for i = 1, nSize do
+    tAnyHandlers[i](_tCurrentEncounter, ...)
   end
 end
 
