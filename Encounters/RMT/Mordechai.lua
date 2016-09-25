@@ -91,11 +91,13 @@ local ANCHOR_POSITIONS = {
 ----------------------------------------------------------------------------------------------------
 local mordechai
 local anchors
+local anchorCount
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
   anchors = {}
+  anchorCount = 0
   mod:AddAnchorWorldMarkers()
   mod:AddTimerBar("NEXT_ORB_TIMER", "msg.orb.next", ORB_TIMER)
 end
@@ -141,10 +143,13 @@ mod:RegisterUnitEvents("unit.anchor",{
         core:MarkUnit(unit, 0, 100)
       end
 
-      --TODO: execute this only once
-      mod:RemoveAnchorWorldMarkers()
-      mod:RemoveCleaveLines()
-      mod:RemoveTimerBar("NEXT_ORB_TIMER")
+      anchorCount = anchorCount + 1
+      if anchorCount == 4 then
+        mod:RemoveAnchorWorldMarkers()
+        mod:RemoveCleaveLines()
+        mod:RemoveTimerBar("NEXT_ORB_TIMER")
+        anchorCount = 0
+      end
     end,
     [core.E.UNIT_DESTROYED] = function (_, id)
       anchors[id] = nil
