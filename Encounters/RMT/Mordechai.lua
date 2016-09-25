@@ -140,10 +140,10 @@ mod:RegisterUnitEvents("unit.mordechai",{
       end
     end,
     [core.E.CAST_START] = {
-      ["cast.mordechai.shatter"] = function(_, _)
+      ["cast.mordechai.shatter"] = function()
         mod:AddTimerBar("NEXT_SHURIKEN_TIMER", "msg.mordechai.shuriken.next", SHURIKEN_TIMER, mod:GetSetting("SoundShurikenCountdown"))
       end,
-      ["cast.mordechai.barrage"] = function(_, _)
+      ["cast.mordechai.barrage"] = function()
         mod:AddTimerBar("NEXT_BARRAGE_TIMER", "msg.mordechai.barrage.next", BARRAGE_TIMER)
       end
     }
@@ -168,10 +168,10 @@ mod:RegisterUnitEvents("unit.anchor",{
         anchorCount = 0
       end
     end,
-    [core.E.UNIT_DESTROYED] = function (_, id)
+    [core.E.UNIT_DESTROYED] = function(_, id)
       anchors[id] = nil
     end,
-    [core.E.HEALTH_CHANGED] = function (_, id, percent)
+    [core.E.HEALTH_CHANGED] = function(_, id, percent)
       if mod:GetSetting("MarkerAnchorHP") then
         core:MarkUnit(anchors[id], 0, percent)
       end
@@ -180,7 +180,7 @@ mod:RegisterUnitEvents("unit.anchor",{
 )
 
 mod:RegisterUnitEvents("unit.orb",{
-    [core.E.UNIT_CREATED] = function(_, _, _)
+    [core.E.UNIT_CREATED] = function()
       if mod:GetSetting("MessageOrbSpawn") then
         mod:AddMsg("ORB_SPAWNED", "msg.orb.spawned", 5, mod:GetSetting("SoundOrbSpawn") == true and "Info")
       end
@@ -189,7 +189,7 @@ mod:RegisterUnitEvents("unit.orb",{
   }
 )
 
-mod:RegisterDatachronEvent("chron.airlock.closed", "EQUAL", function (_)
+mod:RegisterDatachronEvent("chron.airlock.closed", "EQUAL", function()
     mod:AddCleaveLines()
     mod:AddTimerBar("NEXT_SHURIKEN_TIMER", "msg.mordechai.shuriken.next", FIRST_SHURIKEN_TIMER, mod:GetSetting("SoundShurikenCountdown"))
     mod:AddTimerBar("NEXT_ORB_TIMER", "msg.orb.next", FIRST_ORB_TIMER)
