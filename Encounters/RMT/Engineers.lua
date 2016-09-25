@@ -420,18 +420,6 @@ mod:RegisterUnitEvents("unit.warrior",{
   }
 )
 
-function mod:IsUnitFacingOtherUnit(unit, otherUnit)
-  local unitVector = Vector3.New(unit:GetPosition())
-  local otherUnitVector = Vector3.New(otherUnit:GetPosition())
-  local difference = otherUnitVector - unitVector
-  local normalized = difference:Normal()
-  normalized.y = 0
-  local facing = Vector3.New(unit:GetFacing())
-  local facingDifference = normalized - facing
-
-  return math.abs(facingDifference.x) < 0.01 and math.abs(facingDifference.z) < 0.01
-end
-
 -- Engineer
 mod:RegisterUnitEvents("unit.engineer",{
     [core.E.CAST_START] = {
