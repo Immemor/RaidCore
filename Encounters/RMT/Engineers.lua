@@ -125,7 +125,6 @@ end
 local coreUnits = {}
 local engineerUnits
 local player
-local orbUnits
 
 local fireOrbTargetTestTimer = ApolloTimer.Create(1, false, "RegisterOrbTarget", mod)
 ----------------------------------------------------------------------------------------------------
@@ -159,7 +158,6 @@ function mod:OnBossEnable()
   player.unit = GameLib.GetPlayerUnit()
   player.location = 0
   engineerUnits = {}
-  orbUnits = {}
   --locales
   for name, id in pairs(CORE_NAMES) do
     CORE_NAMES[self.L[name]] = id
@@ -475,14 +473,8 @@ mod:RegisterUnitEvents("unit.fire_orb",{
       mod:AddTimerBar("NEXT_FIRE_ORB_TIMER", self.L["msg.fire_orb.next"], NEXT_FIRE_ORB_TIMER)
       mod:AddTimerBar(string.format("FIRE_ORB_SAFE_TIMER %d", id), self.L["msg.fire_orb.pop.timer"], FIRE_ORB_SAFE_TIMER, false, "Red", mod.PopFireOrb, mod)
       fireOrbTargetTestTimer:Start()
-      orbUnits[id] = {
-        unit = unit,
-        checkedTarget = false,
-        popMessageSent = false,
-      }
     end,
     [core.E.UNIT_DESTROYED] = function(_, id)
-      orbUnits[id] = nil
       mod:RemoveTimerBar(string.format("FIRE_ORB_SAFE_TIMER %d", id))
     end,
   }
