@@ -51,6 +51,7 @@ mod:RegisterEnglishLocale({
 -- Visuals.
 mod:RegisterDefaultSetting("LinesCleave")
 mod:RegisterDefaultSetting("WorldMarkerAnchor")
+mod:RegisterDefaultSetting("MarkerAnchorHP")
 -- Sounds.
 mod:RegisterDefaultSetting("SoundOrbSpawn")
 mod:RegisterDefaultSetting("SoundOrbLink")
@@ -89,17 +90,13 @@ local ANCHOR_POSITIONS = {
 -- Locals.
 ----------------------------------------------------------------------------------------------------
 local mordechai
+local anchors
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-  if mod:GetSetting("WorldMarkerAnchor") then
-    mod:SetWorldMarker("ANCHOR_1", "mark.anchor_1", ANCHOR_POSITIONS[1])
-    mod:SetWorldMarker("ANCHOR_2", "mark.anchor_2", ANCHOR_POSITIONS[2])
-    mod:SetWorldMarker("ANCHOR_3", "mark.anchor_3", ANCHOR_POSITIONS[3])
-    mod:SetWorldMarker("ANCHOR_4", "mark.anchor_4", ANCHOR_POSITIONS[4])
-  end
-
+  anchors = {}
+  mod:AddAnchorWorldMarkers()
   mod:AddTimerBar("NEXT_ORB_TIMER", "msg.orb.next", ORB_TIMER)
 end
 
@@ -136,9 +133,26 @@ mod:RegisterUnitEvents("unit.mordechai",{
 )
 
 mod:RegisterUnitEvents("unit.anchor",{
-    [core.E.UNIT_CREATED] = function(_, _, _)
-      mod:RemoveTimerBar("NEXT_ORB_TIMER")
+    [core.E.UNIT_CREATED] = function(_, id, unit)
+      anchors[id] = unit
+      core:AddUnit(unit)
+      core:WatchUnit(unit)
+      if mod:GetSetting("MarkerAnchorHP") then
+        core:MarkUnit(unit, 0, 100)
+      end
+
+      --TODO: execute this only once
+      mod:RemoveAnchorWorldMarkers()
       mod:RemoveCleaveLines()
+      mod:RemoveTimerBar("NEXT_ORB_TIMER")
+    end,
+    [core.E.UNIT_DESTROYED] = function (_, id)
+      anchors[id] = nil
+    end,
+    [core.E.HEALTH_CHANGED] = function (_, id, percent)
+      if mod:GetSetting("MarkerAnchorHP") then
+        core:MarkUnit(anchors[id], 0, percent)
+      end
     end,
   }
 )
@@ -157,6 +171,7 @@ mod:RegisterDatachronEvent("chron.airlock.closed", "EQUAL", function (_)
     mod:AddCleaveLines()
     mod:AddTimerBar("NEXT_SHURIKEN_TIMER", "msg.mordechai.shuriken.next", FIRST_SHURIKEN_TIMER, true)
     mod:AddTimerBar("NEXT_ORB_TIMER", "msg.orb.next", FIRST_ORB_TIMER)
+    mod:AddAnchorWorldMarkers()
   end
 )
 
@@ -181,6 +196,26 @@ function mod:OnDebuffRemove(id, spellId)
   if DEBUFF_SHOCKING_ATTRACTION == spellId then
     core:RemovePicture("SHOCKING_ATTRACTION_TARGET_"..id)
   end
+end
+
+function mod:AddAnchorWorldMarkers()
+  if not mod:GetSetting("WorldMarkerAnchor") then
+    return
+  end
+  mod:SetWorldMarker("ANCHOR_1", "mark.anchor_1", ANCHOR_POSITIONS[1])
+  mod:SetWorldMarker("ANCHOR_2", "mark.anchor_2", ANCHOR_POSITIONS[2])
+  mod:SetWorldMarker("ANCHOR_3", "mark.anchor_3", ANCHOR_POSITIONS[3])
+  mod:SetWorldMarker("ANCHOR_4", "mark.anchor_4", ANCHOR_POSITIONS[4])
+end
+
+function mod:RemoveAnchorWorldMarkers()
+  if not mod:GetSetting("WorldMarkerAnchor") then
+    return
+  end
+  mod:DropWorldMarker("ANCHOR_1")
+  mod:DropWorldMarker("ANCHOR_2")
+  mod:DropWorldMarker("ANCHOR_3")
+  mod:DropWorldMarker("ANCHOR_4")
 end
 
 function mod:AddCleaveLines()
