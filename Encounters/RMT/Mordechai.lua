@@ -92,10 +92,12 @@ local ANCHOR_POSITIONS = {
 local mordechai
 local anchors
 local anchorCount
+local playerUnit
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
+  playerUnit = GameLib.GetPlayerUnit()
   anchors = {}
   anchorCount = 0
   mod:AddAnchorWorldMarkers()
@@ -181,7 +183,7 @@ mod:RegisterDatachronEvent("chron.airlock.closed", "EQUAL", function (_)
 )
 
 function mod:OnDebuffAdd(id, spellId)
-  local isOnMyself = id == GameLib.GetPlayerUnit():GetId()
+  local isOnMyself = id == playerUnit:GetId()
   if DEBUFF_KINETIC_LINK == spellId and isOnMyself then
     if mod:GetSetting("MessageOrbLink") then
       mod:AddMsg("KINETIC_LINK_MSG", "msg.orb.kinetic_link", 5, mod:GetSetting("SoundOrbLink") == true and "Burn")
