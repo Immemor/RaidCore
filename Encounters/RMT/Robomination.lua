@@ -140,7 +140,7 @@ function mod:OnBossEnable()
   mod:DrawCompactorGrid()
 end
 
-mod:RegisterDatachronEvent("chron.robo.snake", "MATCH", function (self, _, snakeTargetName)
+mod:RegisterDatachronEvent("chron.robo.snake", "MATCH", function(self, _, snakeTargetName)
     local snakeTarget = GetPlayerUnitByName(snakeTargetName)
     local isOnMyself = snakeTarget == playerUnit
     local isSnakeNearYou = not isOnMyself and mod:GetDistanceBetweenUnits(playerUnit, snakeTarget) < 10
@@ -173,7 +173,7 @@ mod:RegisterDatachronEvent("chron.robo.snake", "MATCH", function (self, _, snake
   end
 )
 
-mod:RegisterDatachronEvent("chron.robo.hides", "EQUAL", function (self)
+mod:RegisterDatachronEvent("chron.robo.hides", "EQUAL", function(self)
     phase = MAZE_PHASE
     core:RemoveMsg("ROBO_MAZE")
     mod:RemoveTimerBar("NEXT_SNAKE_TIMER")
@@ -188,7 +188,7 @@ mod:RegisterDatachronEvent("chron.robo.hides", "EQUAL", function (self)
   end
 )
 
-mod:RegisterDatachronEvent("chron.robo.shows", "EQUAL", function (self)
+mod:RegisterDatachronEvent("chron.robo.shows", "EQUAL", function(self)
     phase = DPS_PHASE
     core:RemoveLineBetweenUnits("ROBO_MAZE_LINE")
     core:AddTimerBar("NEXT_SNAKE_TIMER", self.L["msg.snake.next"], FIRST_SNAKE_TIMER, nil, { sColor = "xkcdBrown" })
@@ -199,7 +199,7 @@ mod:RegisterDatachronEvent("chron.robo.shows", "EQUAL", function (self)
   end
 )
 
-mod:RegisterDatachronEvent("chron.robo.laser", "MATCH", function (self, _, laserTargetName)
+mod:RegisterDatachronEvent("chron.robo.laser", "MATCH", function(self, _, laserTargetName)
     local laserTarget = GetPlayerUnitByName(laserTargetName)
     local isOnMyself = laserTarget == playerUnit
     local sound = mod:GetSetting("SoundLaser") == true and "Burn"
@@ -259,26 +259,26 @@ mod:RegisterUnitEvents({
     "unit.robo",
     "unit.scanning_eye",
     },{
-    [core.E.UNIT_CREATED] = function (_, _, unit)
+    [core.E.UNIT_CREATED] = function(_, _, unit)
       core:AddUnit(unit)
     end,
   }
 )
 
 mod:RegisterUnitEvents("unit.scanning_eye",{
-    [core.E.UNIT_DESTROYED] = function ()
+    [core.E.UNIT_DESTROYED] = function()
       phase = MID_MAZE_PHASE
     end,
   }
 )
 
 mod:RegisterUnitEvents({"unit.cannon_arm", "unit.flailing_arm"},{
-    [core.E.UNIT_CREATED] = function ()
+    [core.E.UNIT_CREATED] = function()
       if phase == MID_MAZE_PHASE then
         mazeArmCount = mazeArmCount + 1
       end
     end,
-    [core.E.UNIT_DESTROYED] = function ()
+    [core.E.UNIT_DESTROYED] = function()
       if phase == MID_MAZE_PHASE then
         mazeArmCount = mazeArmCount - 1
         if mazeArmCount == 0 then
@@ -309,7 +309,7 @@ function mod:RemoveCannonArmLines()
 end
 
 mod:RegisterUnitEvents("unit.cannon_arm",{
-    [core.E.UNIT_CREATED] = function (self, id, unit)
+    [core.E.UNIT_CREATED] = function(self, id, unit)
       cannonArms[id] = unit
       core:WatchUnit(unit)
       if mod:GetSetting("LineCannonArm") then
@@ -327,7 +327,7 @@ mod:RegisterUnitEvents("unit.cannon_arm",{
         end
       end
     },
-    [core.E.UNIT_DESTROYED] = function (_, id)
+    [core.E.UNIT_DESTROYED] = function(_, id)
       cannonArms[id] = nil
       core:RemoveLineBetweenUnits(string.format("CANNON_ARM_LINE %d", id))
     end,
@@ -335,11 +335,11 @@ mod:RegisterUnitEvents("unit.cannon_arm",{
 )
 
 mod:RegisterUnitEvents("unit.robo",{
-    [core.E.UNIT_CREATED] = function (_, _, unit)
+    [core.E.UNIT_CREATED] = function(_, _, unit)
       core:WatchUnit(unit)
       roboUnit = unit
     end,
-    [core.E.HEALTH_CHANGED] = function (self, _, percent)
+    [core.E.HEALTH_CHANGED] = function(self, _, percent)
       if (percent >= FIRST_MAZE_PHASE_LOWER_HEALTH and percent <= FIRST_MAZE_PHASE_UPPER_HEALTH) or (percent >= SECOND_MAZE_PHASE_LOWER_HEALTH and percent <= SECOND_MAZE_PHASE_UPPER_HEALTH) then
         mod:AddMsg("ROBO_MAZE", self.L["msg.maze.coming"], 5, mod:GetSetting("SoundPhaseChangeClose") and "Info")
       end

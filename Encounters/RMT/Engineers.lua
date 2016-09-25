@@ -319,7 +319,7 @@ mod:RegisterUnitEvents({
     "unit.spark_plug",
     "unit.lubricant_nozzle"
     },{
-    [core.E.UNIT_CREATED] = function (_, _, unit, name)
+    [core.E.UNIT_CREATED] = function(_, _, unit, name)
       if CORE_NAMES[name] ~= nil then
         coreUnits[CORE_NAMES[name]] = {
           unit = unit,
@@ -338,7 +338,7 @@ mod:RegisterUnitEvents({
         mod:AddUnits()
       end
     end,
-    [core.E.UNIT_DESTROYED] = function (_, _, _, name)
+    [core.E.UNIT_DESTROYED] = function(_, _, _, name)
       if ENGINEER_NAMES[name] ~= nil then
         engineerUnits[ENGINEER_NAMES[name]] = nil
       end
@@ -353,7 +353,7 @@ mod:RegisterUnitEvents({
     "unit.spark_plug",
     "unit.lubricant_nozzle"
     },{
-    [core.E.HEALTH_CHANGED] = function (self, _, percent, name)
+    [core.E.HEALTH_CHANGED] = function(self, _, percent, name)
       local coreId = CORE_NAMES[name]
       local coreUnit = coreUnits[coreId]
       coreUnit.percent = percent
@@ -395,17 +395,17 @@ mod:RegisterUnitEvents({
 -- Warrior
 mod:RegisterUnitEvents("unit.warrior",{
     [core.E.CAST_START] = {
-      ["cast.warrior.liquidate"] = function(self, _)
+      ["cast.warrior.liquidate"] = function(self)
         if mod:IsPlayerOnPlatform(engineerUnits[WARRIOR].location) then
           mod:AddMsg("LIQUIDATE_MSG", self.L["msg.warrior.liquidate.stack"], 5, mod:GetSetting("SoundLiquidate") == true and "Info")
         end
       end,
-      ["cast.rocket_jump"] = function(_, _)
+      ["cast.rocket_jump"] = function()
         mod:ExtendTimerBar("NEXT_LIQUIDATE_TIMER", 4)
       end
     },
     [core.E.CAST_END] = {
-      ["cast.warrior.liquidate"] = function(self, _)
+      ["cast.warrior.liquidate"] = function(self)
         mod:RemoveTimerBar("NEXT_LIQUIDATE_TIMER")
         mod:AddTimerBar("NEXT_LIQUIDATE_TIMER", self.L["msg.warrior.liquidate.next"], LIQUIDATE_TIMER)
       end
@@ -428,7 +428,7 @@ end
 -- Engineer
 mod:RegisterUnitEvents("unit.engineer",{
     [core.E.CAST_START] = {
-      ["cast.engineer.electroshock"] = function(self, _)
+      ["cast.engineer.electroshock"] = function(self)
         if mod:GetSetting("LineElectroshock") then
           core:AddPixie("ELECTROSHOCK_PIXIE", 2, engineerUnits[ENGINEER].unit, nil, "Red", 10, 80, 0)
         end
@@ -438,11 +438,11 @@ mod:RegisterUnitEvents("unit.engineer",{
       end
     },
     [core.E.CAST_END] = {
-      ["cast.rocket_jump"] = function(self, _)
+      ["cast.rocket_jump"] = function(self)
         mod:RemoveTimerBar("NEXT_ELEKTROSHOCK_TIMER")
         mod:AddTimerBar("NEXT_ELEKTROSHOCK_TIMER", self.L["msg.engineer.electroshock.next"], JUMP_ELECTROSHOCK_TIMER)
       end,
-      ["cast.engineer.electroshock"] = function(self, _)
+      ["cast.engineer.electroshock"] = function(self)
         if mod:GetSetting("LineElectroshock") then
           core:DropPixie("ELECTROSHOCK_PIXIE")
         end
@@ -460,7 +460,7 @@ function mod:PopFireOrb()
 end
 
 mod:RegisterUnitEvents("unit.fire_orb",{
-    [core.E.UNIT_CREATED] = function (self, id, unit)
+    [core.E.UNIT_CREATED] = function(self, id, unit)
       core:WatchUnit(unit)
       mod:RemoveTimerBar("NEXT_FIRE_ORB_TIMER")
       mod:AddTimerBar("NEXT_FIRE_ORB_TIMER", self.L["msg.fire_orb.next"], NEXT_FIRE_ORB_TIMER)
@@ -472,7 +472,7 @@ mod:RegisterUnitEvents("unit.fire_orb",{
         popMessageSent = false,
       }
     end,
-    [core.E.UNIT_DESTROYED] = function (_, id)
+    [core.E.UNIT_DESTROYED] = function(_, id)
       orbUnits[id] = nil
       mod:RemoveTimerBar(string.format("FIRE_ORB_SAFE_TIMER %d", id))
     end,
