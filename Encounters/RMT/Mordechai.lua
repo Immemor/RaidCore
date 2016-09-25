@@ -81,10 +81,10 @@ local FIRST_ORB_TIMER = 18.5
 local ORB_TIMER = 26
 
 local ANCHOR_POSITIONS = {
-  [1] = { x = 93.849998474121, y = 353.87435913086, z = 209.71000671387 },
-  [2] = { x = 93.849998474121, y = 353.87435913086, z = 179.71000671387 },
-  [3] = { x = 123.849998474121, y = 353.87435913086, z = 209.71000671387 },
-  [4] = { x = 123.849998474121, y = 353.87435913086, z = 179.71000671387 },
+  { x = 93.849998474121, y = 353.87435913086, z = 209.71000671387 },
+  { x = 93.849998474121, y = 353.87435913086, z = 179.71000671387 },
+  { x = 123.849998474121, y = 353.87435913086, z = 209.71000671387 },
+  { x = 123.849998474121, y = 353.87435913086, z = 179.71000671387 },
 }
 ----------------------------------------------------------------------------------------------------
 -- Locals.
@@ -202,20 +202,18 @@ function mod:AddAnchorWorldMarkers()
   if not mod:GetSetting("WorldMarkerAnchor") then
     return
   end
-  mod:SetWorldMarker("ANCHOR_1", "mark.anchor_1", ANCHOR_POSITIONS[1])
-  mod:SetWorldMarker("ANCHOR_2", "mark.anchor_2", ANCHOR_POSITIONS[2])
-  mod:SetWorldMarker("ANCHOR_3", "mark.anchor_3", ANCHOR_POSITIONS[3])
-  mod:SetWorldMarker("ANCHOR_4", "mark.anchor_4", ANCHOR_POSITIONS[4])
+  for i = 1, #ANCHOR_POSITIONS do
+    mod:SetWorldMarker("ANCHOR_"..i, "mark.anchor_"..i, ANCHOR_POSITIONS[i])
+  end
 end
 
 function mod:RemoveAnchorWorldMarkers()
   if not mod:GetSetting("WorldMarkerAnchor") then
     return
   end
-  mod:DropWorldMarker("ANCHOR_1")
-  mod:DropWorldMarker("ANCHOR_2")
-  mod:DropWorldMarker("ANCHOR_3")
-  mod:DropWorldMarker("ANCHOR_4")
+  for i = 1, #ANCHOR_POSITIONS do
+    mod:DropWorldMarker("ANCHOR_"..i)
+  end
 end
 
 function mod:AddCleaveLines()
