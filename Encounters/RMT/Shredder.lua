@@ -152,13 +152,16 @@ function mod:OnBossEnable()
   secondShredderSaw = nil
 end
 
-function mod:OnDebuffUpdate(id, spellId, stack)
-  if DEBUFF_OOZING_BILE == spellId then
-    if playerUnit:GetId() == id and stack >= 8 then
-      mod:AddMsg("OOZE_MSG", string.format(self.L["msg.bile.stacks"], stack), 5, stack == 8 and mod:GetSetting("SoundOozeStacksWarning") and "Beware")
-    end
-  end
-end
+mod:RegisterUnitEvent(core.E.ALL_UNITS, {
+    [DEBUFF_OOZING_BILE] = {
+      [core.E.DEBUFF_UPDATE] = function(self, id, _, stack)
+        if playerUnit:GetId() == id and stack >= 8 then
+          mod:AddMsg("OOZE_MSG", string.format(self.L["msg.bile.stacks"], stack), 5, stack == 8 and mod:GetSetting("SoundOozeStacksWarning") and "Beware")
+        end
+      end
+    },
+  }
+)
 
 function mod:GetWalkingProgress()
   local pos1

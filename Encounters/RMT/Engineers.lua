@@ -256,49 +256,58 @@ function mod:UpdateCoreHealthMark(coreUnit)
   core:MarkUnit(coreUnit.unit, 0, percent, color)
 end
 
-function mod:OnDebuffAdd(id, spellId)
-  if DEBUFF_ELECTROSHOCK_VULNERABILITY == spellId then
-    local target = GetUnitById(id)
-    local targetName = target:GetName()
-    local isOnMyself = targetName == player.unit:GetName()
-    local electroshockOnX
-    local messageId = string.format("ELECTROSHOCK_MSG_%s", targetName)
-    local sound
-    if isOnMyself then
-      electroshockOnX = self.L["msg.engineer.electroshock.swap.you"]
-      sound = mod:GetSetting("SoundElectroshockSwapYou") == true and "Burn"
-    else
-      electroshockOnX = self.L["msg.engineer.electroshock.swap.other"]:format(targetName)
-      sound = mod:GetSetting("SoundElectroshockSwap") == true and "Info"
-    end
-    if isOnMyself or mod:GetSetting("MessageElectroshockSwap") then
-      mod:AddMsg(messageId, electroshockOnX, 5, sound, "Red")
-    end
-  elseif DEBUFF_ATOMIC_ATTRACTION == spellId then
-    local target = GetUnitById(id)
-    local isOnMyself = target == player.unit
-    if isOnMyself then
-      mod:AddMsg("DISCHARGED_PLASMA_MSG", self.L["msg.fire_orb.you"], 5, mod:GetSetting("SoundFireOrb") == true and "RunAway")
-    elseif mod:IsPlayerOnPlatform(FUSION_CORE) then
-      mod:AddMsg("DISCHARGED_PLASMA_MSG", self.L["msg.fire_orb.spawned"], 2, mod:GetSetting("SoundFireOrbAlt") == true and "Info")
-    end
-  elseif DEBUFF_ION_CLASH == spellId and mod:GetSetting("VisualIonClashCircle") then
-    core:AddPolygon("ION_CLASH", id, 9, 0, 10, "xkcdBlue", 64)
-  end
-end
-
-function mod:OnDebuffRemove(id, spellId)
-  if DEBUFF_ELECTROSHOCK_VULNERABILITY == spellId then
-    local target = GetUnitById(id)
-    local targetName = target:GetName()
-    local isOnMyself = targetName == player.unit:GetName()
-    if isOnMyself and mod:GetSetting("MessageElectroshockSwapReturn") then
-      mod:AddMsg("ELECTROSHOCK_MSG_OVER", self.L["msg.engineer.electroshock.swap.return"], 5, mod:GetSetting("SoundElectroshockSwapReturn") == true and "Burn")
-    end
-  elseif DEBUFF_ION_CLASH == spellId and mod:GetSetting("VisualIonClashCircle") then
-    core:RemovePolygon("ION_CLASH")
-  end
-end
+mod:RegisterUnitEvent(core.E.ALL_UNITS, {
+    [DEBUFF_ELECTROSHOCK_VULNERABILITY] = {
+      [core.E.DEBUFF_ADD] = function(self, id)
+        local target = GetUnitById(id)
+        local targetName = target:GetName()
+        local isOnMyself = targetName == player.unit:GetName()
+        local electroshockOnX
+        local messageId = string.format("ELECTROSHOCK_MSG_%s", targetName)
+        local sound
+        if isOnMyself then
+          electroshockOnX = self.L["msg.engineer.electroshock.swap.you"]
+          sound = mod:GetSetting("SoundElectroshockSwapYou") == true and "Burn"
+        else
+          electroshockOnX = self.L["msg.engineer.electroshock.swap.other"]:format(targetName)
+          sound = mod:GetSetting("SoundElectroshockSwap") == true and "Info"
+        end
+        if isOnMyself or mod:GetSetting("MessageElectroshockSwap") then
+          mod:AddMsg(messageId, electroshockOnX, 5, sound, "Red")
+        end
+      end,
+      [core.E.DEBUFF_REMOVE] = function(self, id)
+        local target = GetUnitById(id)
+        local targetName = target:GetName()
+        local isOnMyself = targetName == player.unit:GetName()
+        if isOnMyself and mod:GetSetting("MessageElectroshockSwapReturn") then
+          mod:AddMsg("ELECTROSHOCK_MSG_OVER", self.L["msg.engineer.electroshock.swap.return"], 5, mod:GetSetting("SoundElectroshockSwapReturn") == true and "Burn")
+        end
+      end,
+    },
+    [DEBUFF_ION_CLASH] = {
+      [core.E.DEBUFF_ADD] = function(_, id)
+        if mod:GetSetting("VisualIonClashCircle") then
+          core:AddPolygon("ION_CLASH", id, 9, 0, 10, "xkcdBlue", 64)
+        end
+      end,
+      [core.E.DEBUFF_REMOVE] = function()
+        core:RemovePolygon("ION_CLASH")
+      end,
+    },
+    [core.E.DEBUFF_ADD] = {
+      [DEBUFF_ATOMIC_ATTRACTION] = function(self, id)
+        local target = GetUnitById(id)
+        local isOnMyself = target == player.unit
+        if isOnMyself then
+          mod:AddMsg("DISCHARGED_PLASMA_MSG", self.L["msg.fire_orb.you"], 5, mod:GetSetting("SoundFireOrb") == true and "RunAway")
+        elseif mod:IsPlayerOnPlatform(FUSION_CORE) then
+          mod:AddMsg("DISCHARGED_PLASMA_MSG", self.L["msg.fire_orb.spawned"], 2, mod:GetSetting("SoundFireOrbAlt") == true and "Info")
+        end
+      end
+    },
+  }
+)
 
 function mod:IsPlayerOnPlatform(coreId)
   player.location = mod:GetUnitPlatform(player.unit)

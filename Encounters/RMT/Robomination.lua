@@ -247,12 +247,14 @@ function mod:HelperCompactorGrid(compactors, isCorner, isAdding)
   end
 end
 
-function mod:OnDebuffRemove(_, spellId)
-  if spellId == DEBUFF_SNAKE then
-    core:RemovePicture("SNAKE_CROSSHAIR")
-  end
-end
-
+mod:RegisterUnitEvent(core.E.ALL_UNITS, {
+    [DEBUFF_SNAKE] = {
+      [core.E.DEBUFF_REMOVE] = function()
+        core:RemovePicture("SNAKE_CROSSHAIR")
+      end
+    },
+  }
+)
 mod:RegisterUnitEvents({
     "unit.cannon_arm",
     "unit.flailing_arm",
