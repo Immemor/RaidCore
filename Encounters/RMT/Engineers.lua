@@ -370,12 +370,12 @@ mod:RegisterUnitEvents({
       end
     end,
     [BUFF_INSULATION] = {
-      [core.E.BUFF_ADD] = function(_, _, _)
+      [core.E.BUFF_ADD] = function(_, id)
         local coreUnit = coreUnits[CORE_NAMES[GetUnitById(id):GetName()]]
         coreUnit.enabled = false
         mod:UpdateCoreHealthMark(coreUnit)
       end,
-      [core.E.BUFF_REMOVE] = function(_, _, _)
+      [core.E.BUFF_REMOVE] = function(_, id)
         local coreUnit = coreUnits[CORE_NAMES[GetUnitById(id):GetName()]]
         coreUnit.enabled = true
         mod:UpdateCoreHealthMark(coreUnit)
