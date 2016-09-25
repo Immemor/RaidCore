@@ -326,7 +326,7 @@ local function RegisterTestEvent(eventName)
       eventCounter[secondaryEventName] = eventCounter[secondaryEventName] + 1
     end
   end
-  mod:RegisterUnitEvents(ALL_MOBS, {
+  mod:RegisterUnitEvents(core.E.ALL_UNITS, {
       [eventName] = function(...)
         unitEventCounter[eventName] = unitEventCounter[eventName] or 0
         local eventKey = eventName .. tostring(unitEventCounter[eventName])
