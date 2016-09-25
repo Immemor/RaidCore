@@ -27,6 +27,7 @@ mod:RegisterEnglishLocale({
     -- Cast names.
     ["cast.mordechai.cross"] = "Cross Shot",
     ["cast.mordechai.shatter"] = "Shatter Shock",
+    ["cast.mordechai.barrage"] = "Vicious Barrage",
     ["cast.turret.discharge"] = "Kinetic Discharge",
     -- Datachrons.
     ["chron.airlock.opened"] = "The airlock has been opened!",
@@ -39,6 +40,7 @@ mod:RegisterEnglishLocale({
 
     -- Messages.
     ["msg.mordechai.shuriken.next"] = "Next Shuriken",
+    ["msg.mordechai.barrage.next"] = "Next Vicious Barrage",
     ["msg.phase.start"] = "SUCKY SUCKY PHASE SOON",
     ["msg.orb.spawned"] = "Orb Spawned",
     ["msg.orb.kinetic_link"] = "DPS THE ORB!",
@@ -75,6 +77,8 @@ local FIRST_SUCKY_PHASE_UPPER_HEALTH = 86.5
 local FIRST_SUCKY_PHASE_LOWER_HEALTH = 85.5
 local FIRST_SHURIKEN_TIMER = 11
 local SHURIKEN_TIMER = 22
+local FIRST_BARRAGE_TIMER = 19.5
+local BARRAGE_TIMER = 44
 
 --TODO: I made the timers based on the only log I had
 -- Need to get more logs again with casts from turret etc.
@@ -94,6 +98,7 @@ local mordechai
 local anchors
 local anchorCount
 local playerUnit
+local numberOfAirPhases
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
@@ -101,6 +106,7 @@ function mod:OnBossEnable()
   playerUnit = GameLib.GetPlayerUnit()
   anchors = {}
   anchorCount = 0
+  numberOfAirPhases = 0
   mod:AddAnchorWorldMarkers()
   mod:AddTimerBar("NEXT_ORB_TIMER", "msg.orb.next", ORB_TIMER)
 end
@@ -132,6 +138,9 @@ mod:RegisterUnitEvents("unit.mordechai",{
     [core.E.CAST_START] = {
       ["cast.mordechai.shatter"] = function(_, _)
         mod:AddTimerBar("NEXT_SHURIKEN_TIMER", "msg.mordechai.shuriken.next", SHURIKEN_TIMER, mod:GetSetting("SoundShurikenCountdown"))
+      end,
+      ["cast.mordechai.barrage"] = function(_, _)
+        mod:AddTimerBar("NEXT_BARRAGE_TIMER", "msg.mordechai.barrage.next", BARRAGE_TIMER)
       end
     }
   }
@@ -148,6 +157,7 @@ mod:RegisterUnitEvents("unit.anchor",{
 
       anchorCount = anchorCount + 1
       if anchorCount == 4 then
+        numberOfAirPhases = numberOfAirPhases + 1
         mod:RemoveAnchorWorldMarkers()
         mod:RemoveCleaveLines()
         mod:RemoveTimerBar("NEXT_ORB_TIMER")
@@ -177,8 +187,11 @@ mod:RegisterUnitEvents("unit.orb",{
 
 mod:RegisterDatachronEvent("chron.airlock.closed", "EQUAL", function (_)
     mod:AddCleaveLines()
-    mod:AddTimerBar("NEXT_SHURIKEN_TIMER", "msg.mordechai.shuriken.next", FIRST_SHURIKEN_TIMER, true)
+    mod:AddTimerBar("NEXT_SHURIKEN_TIMER", "msg.mordechai.shuriken.next", FIRST_SHURIKEN_TIMER, mod:GetSetting("SoundShurikenCountdown"))
     mod:AddTimerBar("NEXT_ORB_TIMER", "msg.orb.next", FIRST_ORB_TIMER)
+    if numberOfAirPhases > 2 then
+      mod:AddTimerBar("NEXT_BARRAGE_TIMER", "msg.mordechai.barrage.next", FIRST_BARRAGE_TIMER)
+    end
     mod:AddAnchorWorldMarkers()
   end
 )
