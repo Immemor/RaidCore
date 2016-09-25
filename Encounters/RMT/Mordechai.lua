@@ -77,7 +77,7 @@ local FIRST_SUCKY_PHASE_UPPER_HEALTH = 86.5
 local FIRST_SUCKY_PHASE_LOWER_HEALTH = 85.5
 local FIRST_SHURIKEN_TIMER = 11
 local SHURIKEN_TIMER = 22
-local FIRST_BARRAGE_TIMER = 19.5
+local FIRST_BARRAGE_TIMER = 19
 local BARRAGE_TIMER = 44
 
 --TODO: I made the timers based on the only log I had
