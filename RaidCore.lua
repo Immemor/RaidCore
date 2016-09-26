@@ -464,13 +464,6 @@ function RaidCore:PlaySound(sFilename)
   end
 end
 
--- Track buff and cast of this unit.
--- @param unit userdata object related to an unit in game.
-function RaidCore:WatchUnit(unit)
-  local id = unit:GetId()
-  self:CombatInterface_Track(id)
-end
-
 function RaidCore:MarkUnit(unit, location, mark, color)
   if unit and not unit:IsDead() then
     local nId = unit:GetId()

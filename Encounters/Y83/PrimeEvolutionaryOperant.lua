@@ -312,9 +312,9 @@ function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
     end
   end
 
-  function mod:OnBuffUpdate(nId, nSpellId, nOldStack, nNewStack, fTimeRemaining)
+  function mod:OnBuffUpdate(nId, nSpellId, nStack, fTimeRemaining)
     if BUFF_NANOSTRAIN_INFUSION == nSpellId then
-      local nRemain = NANOSTRAIN_2_CORRUPTION_THRESHOLD - nNewStack
+      local nRemain = NANOSTRAIN_2_CORRUPTION_THRESHOLD - nStack
       if nRemain == 2 or nRemain == 1 then
         local sColor = nRemain == 2 and "blue" or "red"
         core:AddMsg("WARNING", self.L["%u STACKS BEFORE CORRUPTION"]:format(nRemain), 4, nil, sColor)

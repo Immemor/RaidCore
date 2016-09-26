@@ -28,14 +28,12 @@ local Log = Apollo.GetPackage("Log-1.0").tPackage
 ----------------------------------------------------------------------------------------------------
 local RegisterEventHandler = Apollo.RegisterEventHandler
 local RemoveEventHandler = Apollo.RemoveEventHandler
-local GetPlayerUnitByName = GameLib.GetPlayerUnitByName
 local GetGameTime = GameLib.GetGameTime
-local GetPlayerUnit = GameLib.GetPlayerUnit
 local GetUnitById = GameLib.GetUnitById
 local GetSpell = GameLib.GetSpell
+local GetPlayerUnitByName = GameLib.GetPlayerUnitByName
 local next, string, pcall = next, string, pcall
 local tinsert = table.insert
-
 ----------------------------------------------------------------------------------------------------
 -- Constants.
 ----------------------------------------------------------------------------------------------------
@@ -53,10 +51,15 @@ local CHANNEL_HANDLERS = {
   [ChatSystemLib.ChatChannel_Datachron] = "OnDatachron",
 }
 local SPELLID_BLACKLISTED = {
-  [60883] = "Irradiate", -- On war class.
-  [79671] = "Empower", -- On war class.
-  [72651] = "Surge Focus Drain", -- On arcanero class.
-  [72652] = "Surge Focus Drain", -- On arcanero class.
+  [79757] = "Kinetic Rage: Augmented Blade", -- Warrior
+  [70161] = "Atomic Spear", -- Warrior T4
+  [70162] = "Atomic Spear", --T5
+  [70163] = "Atomic Spear", --T6
+  [70164] = "Atomic Spear", --T7
+  [70165] = "Atomic Spear", --T8
+  [41137] = "To the Pain", -- Warrior cheat death
+  [84397] = "Unbreakable", -- Engineer cheat death
+  [82748] = "Unbreakable", -- Engineer cheat death cooldown
 }
 -- State Machine.
 local INTERFACE__DISABLE = 1
@@ -83,11 +86,9 @@ local _bUnitInCombatEnable = false
 local _bRunning = false
 local _tScanTimer = nil
 local _CommChannelTimer = nil
-local _DelayShowShortcutBar = nil
 local _nCommChannelRetry = 5
 local _tAllUnits = {}
 local _tTrackedUnits = {}
-local _tMembers = {}
 local _RaidCoreChannelComm = nil
 local _nNumShortcuts
 local _CI_State
@@ -123,8 +124,8 @@ local function ExtraLog2Text(k, nRefTime, tParam)
     sResult = sFormat:format(tParam[1], sSpellName, tParam[2])
   elseif k == "OnDebuffUpdate" or k == "OnBuffUpdate" then
     local sSpellName = GetSpell(tParam[2]):GetName():gsub(NO_BREAK_SPACE, " ")
-    local sFormat = "Id=%u SpellName='%s' SpellId=%u OldStack=%d NewStack=%d fTimeRemaining=%.2f"
-    sResult = sFormat:format(tParam[1], sSpellName, tParam[2], tParam[3], tParam[4], tParam[5])
+    local sFormat = "Id=%u SpellName='%s' SpellId=%u Stack=%d fTimeRemaining=%.2f"
+    sResult = sFormat:format(tParam[1], sSpellName, tParam[2], tParam[3], tParam[4])
   elseif k == "OnCastStart" then
     local nCastEndTime = tParam[3] - nRefTime
     local sFormat = "Id=%u CastName='%s' CastEndTime=%.3f sName=\"%s\""
@@ -170,7 +171,7 @@ local function ExtraLog2Text(k, nRefTime, tParam)
     local sFormat = "CasterId=%s TargetId=%s sCasterName=\"%s\" sTargetName=\"%s\" nHealAmount=%u nOverHeal=%u nSpellId=%u"
     sResult = sFormat:format(tostring(tParam[1]), tostring(tParam[2]), tParam[3], tParam[4], tParam[5], tParam[6], tParam[7])
   elseif k == "OnHealthChanged" then
-    local sFormat = "Id=%u nPourcent=%.2f sName=\"%s\""
+    local sFormat = "Id=%u nPercent=%.2f sName=\"%s\""
     sResult = sFormat:format(tParam[1], tParam[2], tParam[3])
   elseif k == "OnSubZoneChanged" then
     local sFormat = "ZoneId=%u ZoneName=\"%s\""
@@ -186,52 +187,54 @@ Log:SetExtra2String(ExtraLog2Text)
 ----------------------------------------------------------------------------------------------------
 -- Privates functions: unit processing
 ----------------------------------------------------------------------------------------------------
-local function GetAllBuffs(tUnit)
+local function GetBuffs(tUnit)
   local r = {}
-  if tUnit then
-    local tAllBuffs = tUnit:GetBuffs()
-    if tAllBuffs then
-      for sType, tBuffs in next, tAllBuffs do
-        r[sType] = {}
-        for _,obj in next, tBuffs do
-          local nSpellId = obj.splEffect:GetId()
-          if nSpellId and not SPELLID_BLACKLISTED[nSpellId] then
-            r[sType][obj.idBuff] = {
-              nCount = obj.nCount,
-              nSpellId = nSpellId,
-              fTimeRemaining = obj.fTimeRemaining,
-            }
-          end
-        end
-      end
+  if not tUnit then
+    return r
+  end
+
+  local tBuffs = tUnit:GetBuffs()
+  if not tBuffs then
+    return r
+  end
+  tBuffs = tBuffs.arBeneficial
+  local nBuffs = #tBuffs
+  for i = 1, nBuffs do
+    local obj = tBuffs[i]
+    local nSpellId = obj.splEffect:GetId()
+    if nSpellId then
+      r[obj.idBuff] = {
+        nCount = obj.nCount,
+        nSpellId = nSpellId,
+        fTimeRemaining = obj.fTimeRemaining,
+      }
     end
   end
   return r
 end
 
-local function TrackThisUnit(nId)
-  local tUnit = GetUnitById(nId)
-  if not _tTrackedUnits[nId] and tUnit and not tUnit:IsInYourGroup() then
+local function TrackThisUnit(tUnit)
+  local nId = tUnit:GetId()
+  if not _tTrackedUnits[nId] and not tUnit:IsInYourGroup() then
     Log:Add("TrackThisUnit", nId)
-    local tAllBuffs = GetAllBuffs(tUnit)
     local MaxHealth = tUnit:GetMaxHealth()
     local Health = tUnit:GetHealth()
-    local nPourcent = Health and MaxHealth and math.floor(100 * Health / MaxHealth)
+    local tBuffs = GetBuffs(tUnit)
+    local nPercent = Health and MaxHealth and math.floor(100 * Health / MaxHealth)
     _tAllUnits[nId] = true
     _tTrackedUnits[nId] = {
       tUnit = tUnit,
       sName = tUnit:GetName():gsub(NO_BREAK_SPACE, " "),
       nId = nId,
-      tBuffs = tAllBuffs["arBeneficial"] or {},
-      tDebuffs = {},
       bIsACharacter = false,
+      tBuffs = tBuffs,
       tCast = {
         bCasting = false,
         sCastName = "",
         nCastEndTime = 0,
         bSuccess = false,
       },
-      nPreviousHealthPourcent = nPourcent,
+      nPreviousHealthPercent = nPercent,
     }
   end
 end
@@ -243,90 +246,79 @@ local function UnTrackThisUnit(nId)
   end
 end
 
-local function ProcessAllBuffs(tMyUnit)
-  local tAllBuffs = GetAllBuffs(tMyUnit.tUnit)
-  local bProcessDebuffs = tMyUnit.bIsACharacter
-  local bProcessBuffs = not bProcessDebuffs
+local function PollUnitBuffs(tMyUnit)
   local nId = tMyUnit.nId
-
-  local tNewDebuffs = tAllBuffs["arHarmful"]
-  local tDebuffs = tMyUnit.tDebuffs
-  if bProcessDebuffs and tNewDebuffs then
-    for nIdBuff,current in next, tDebuffs do
-      if tNewDebuffs[nIdBuff] then
-        local tNew = tNewDebuffs[nIdBuff]
-        if tNew.nCount ~= current.nCount then
-          local nOld = current.nCount
-          tDebuffs[nIdBuff].nCount = tNew.nCount
-          tDebuffs[nIdBuff].fTimeRemaining = tNew.fTimeRemaining
-          ManagerCall("OnDebuffUpdate", nId, current.nSpellId, nOld, tNew.nCount, tNew.fTimeRemaining)
-        end
-        -- Remove this entry for second loop.
-        tNewDebuffs[nIdBuff] = nil
-      else
-        tDebuffs[nIdBuff] = nil
-        ManagerCall("OnDebuffRemove", nId, current.nSpellId)
-      end
-    end
-    for nIdBuff,tNew in next, tNewDebuffs do
-      tDebuffs[nIdBuff] = tNew
-      ManagerCall("OnDebuffAdd", nId, tNew.nSpellId, tNew.nCount, tNew.fTimeRemaining)
-    end
-  end
-
-  local tNewBuffs = tAllBuffs["arBeneficial"]
+  local tNewBuffs = GetBuffs(tMyUnit.tUnit)
   local tBuffs = tMyUnit.tBuffs
-  if bProcessBuffs and tNewBuffs then
-    for nIdBuff,current in next, tBuffs do
-      if tNewBuffs[nIdBuff] then
-        local tNew = tNewBuffs[nIdBuff]
-        if tNew.nCount ~= current.nCount then
-          local nOld = current.nCount
-          tBuffs[nIdBuff].nCount = tNew.nCount
-          tBuffs[nIdBuff].fTimeRemaining = tNew.fTimeRemaining
-          ManagerCall("OnBuffUpdate", nId, current.nSpellId, nOld, tNew.nCount, tNew.fTimeRemaining)
-        end
-        -- Remove this entry for second loop.
-        tNewBuffs[nIdBuff] = nil
-      else
-        tBuffs[nIdBuff] = nil
-        ManagerCall("OnBuffRemove", nId, current.nSpellId)
+  if not tNewBuffs then
+    return
+  end
+
+  for nIdBuff,current in next, tBuffs do
+    if tNewBuffs[nIdBuff] then
+      local tNew = tNewBuffs[nIdBuff]
+      if tNew.nCount ~= current.nCount then
+        tBuffs[nIdBuff].nCount = tNew.nCount
+        tBuffs[nIdBuff].fTimeRemaining = tNew.fTimeRemaining
+        ManagerCall("OnBuffUpdate", nId, current.nSpellId, tNew.nCount, tNew.fTimeRemaining)
       end
+      -- Remove this entry for second loop.
+      tNewBuffs[nIdBuff] = nil
+    else
+      tBuffs[nIdBuff] = nil
+      ManagerCall("OnBuffRemove", nId, current.nSpellId)
     end
-    for nIdBuff, tNew in next, tNewBuffs do
-      tBuffs[nIdBuff] = tNew
-      ManagerCall("OnBuffAdd", nId, tNew.nSpellId, tNew.nCount, tNew.fTimeRemaining)
-    end
+  end
+
+  for nIdBuff, tNew in next, tNewBuffs do
+    tBuffs[nIdBuff] = tNew
+    ManagerCall("OnBuffAdd", nId, tNew.nSpellId, tNew.nCount, tNew.fTimeRemaining)
   end
 end
 
-local function UpdateMemberList()
-  for i = 1, GroupLib.GetMemberCount() do
-    local tUnit = GroupLib.GetUnitForGroupMember(i)
-    -- A Friend out of range have a tUnit object equal to nil.
-    -- And if you have the tUnit object, the IsValid flag can change.
-    if tUnit then
-      local sName = tUnit:GetName():gsub(NO_BREAK_SPACE, " ")
-      if not _tMembers[sName] then
-        local tAllBuffs = GetAllBuffs(tUnit)
-        _tMembers[sName] = {
-          tUnit = tUnit,
-          nId = tUnit:GetId(),
-          tDebuffs = tAllBuffs["arHarmful"] or {},
-          tBuffs = {},
-          bIsACharacter = true,
-        }
-      elseif _tMembers[sName].tUnit ~= tUnit then
-        local nOldId = _tMembers[sName].nId
-        local nNewId = tUnit:GetId()
-        Log:Add("WARNING tUnit reference changed", nOldId, nNewId)
-        _tMembers[sName].tUnit = tUnit
-        _tMembers[sName].nId = nNewId
-      end
+function RaidCore:CI_OnBuff(tUnit, tBuff, sMsgBuff, sMsgDebuff)
+  local bBeneficial = tBuff.splEffect:IsBeneficial()
+  local nSpellId = tBuff.splEffect:GetId()
+  local sEvent = bBeneficial and sMsgBuff or sMsgDebuff
+  local bProcessDebuffs = tUnit:IsACharacter()
+  local nUnitId
+
+  -- Track debuffs for players and buffs for enemies
+  if bProcessDebuffs and not bBeneficial then
+    if not SPELLID_BLACKLISTED[nSpellId] and self:IsUnitInGroup(tUnit) then
+      nUnitId = tUnit:GetId()
     end
+    --NOTE: Tracking other units with these events is currently buggy
+    --elseif not bProcessDebuffs and bBeneficial then
+    --nUnitId = _tTrackedUnits[tUnit:GetId()]
+  end
+  return sEvent, nUnitId, nSpellId
+end
+
+function RaidCore:CI_OnBuffAdded(tUnit, tBuff)
+  local sEvent, nUnitId, nSpellId = self:CI_OnBuff(tUnit, tBuff, "OnBuffAdd", "OnDebuffAdd")
+  if nUnitId then
+    ManagerCall(sEvent, nUnitId, nSpellId, tBuff.nCount, tBuff.fTimeRemaining)
   end
 end
 
+function RaidCore:CI_OnBuffUpdated(tUnit, tBuff)
+  local sEvent, nUnitId, nSpellId = self:CI_OnBuff(tUnit, tBuff, "OnBuffUpdate", "OnDebuffUpdate")
+  if nUnitId then
+    ManagerCall(sEvent, nUnitId, nSpellId, tBuff.nCount, tBuff.fTimeRemaining)
+  end
+end
+
+function RaidCore:CI_OnBuffRemoved(tUnit, tBuff)
+  local sEvent, nUnitId, nSpellId = self:CI_OnBuff(tUnit, tBuff, "OnBuffRemove", "OnDebuffRemove")
+  if nUnitId then
+    ManagerCall(sEvent, nUnitId, nSpellId)
+  end
+end
+
+function RaidCore:IsUnitInGroup(tUnit)
+  return tUnit:IsInYourGroup() or tUnit:IsThePlayer()
+end
 ----------------------------------------------------------------------------------------------------
 -- Privates functions: State Machine
 ----------------------------------------------------------------------------------------------------
@@ -355,22 +347,27 @@ local function FullActivate(bEnable)
     Log:SetRefTime(GetGameTime())
     RegisterEventHandler("ChatMessage", "CI_OnChatMessage", RaidCore)
     RegisterEventHandler("ShowActionBarShortcut", "CI_ShowShortcutBar", RaidCore)
+    RegisterEventHandler("BuffAdded", "CI_OnBuffAdded", RaidCore)
+    RegisterEventHandler("BuffUpdated", "CI_OnBuffUpdated", RaidCore)
+    RegisterEventHandler("BuffRemoved", "CI_OnBuffRemoved", RaidCore)
     _tScanTimer:Start()
   elseif _bRunning == true and bEnable == false then
     _tScanTimer:Stop()
     RemoveEventHandler("ChatMessage", RaidCore)
     RemoveEventHandler("ShowActionBarShortcut", RaidCore)
+    RemoveEventHandler("BuffAdded", RaidCore)
+    RemoveEventHandler("BuffUpdated", RaidCore)
+    RemoveEventHandler("BuffRemoved", RaidCore)
     Log:NextBuffer()
     -- Clear private data.
     _tTrackedUnits = {}
     _tAllUnits = {}
-    _tMembers = {}
   end
   _bRunning = bEnable
 end
 
 local function RemoveAllExtraActivation()
-  for sEvent, v in next, _CI_Extra do
+  for sEvent, _ in next, _CI_Extra do
     RemoveEventHandler(sEvent, RaidCore)
     _CI_Extra[sEvent] = nil
   end
@@ -453,7 +450,6 @@ end
 function RaidCore:CombatInterface_Init()
   _tAllUnits = {}
   _tTrackedUnits = {}
-  _tMembers = {}
   _tScanTimer = ApolloTimer.Create(SCAN_PERIOD, true, "CI_OnScanUpdate", self)
   _tScanTimer:Stop()
 
@@ -491,13 +487,16 @@ function RaidCore:CombatInterface_ExtraActivate(sEvent, bNewState)
   end
 end
 
-function RaidCore:CombatInterface_Untrack(nId)
-  UnTrackThisUnit(nId)
+-- Track buff and cast of this unit.
+-- @param unit userdata object related to an unit in game.
+function RaidCore:WatchUnit(unit)
+  TrackThisUnit(unit)
 end
 
-function RaidCore:CombatInterface_Track(nId)
-  TrackThisUnit(nId)
-  return _tTrackedUnits[nId]
+-- Untrack buff and cast of this unit.
+-- @param unit userdata object related to an unit in game.
+function RaidCore:UnwatchUnit(unit)
+  UnTrackThisUnit(unit:GetId())
 end
 
 function RaidCore:CombatInterface_GetTrackedById(nId)
@@ -533,12 +532,11 @@ end
 ----------------------------------------------------------------------------------------------------
 function RaidCore:CI_OnEnteredCombat(tUnit, bInCombat)
   local tOwner = tUnit.GetUnitOwner and tUnit:GetUnitOwner()
-  local tPlayerUnit = GetPlayerUnit()
-  local bIsPetPlayer = tOwner and (tOwner:IsInYourGroup() or tOwner == tPlayerUnit)
+  local bIsPetPlayer = tOwner and self:IsUnitInGroup(tOwner)
   if not bIsPetPlayer then
     local nId = tUnit:GetId()
     local sName = string.gsub(tUnit:GetName(), NO_BREAK_SPACE, " ")
-    if not tUnit:IsInYourGroup() and tUnit ~= tPlayerUnit then
+    if not self:IsUnitInGroup(tUnit) then
       if not _tAllUnits[nId] then
         ManagerCall("OnUnitCreated", nId, tUnit, sName)
       end
@@ -550,11 +548,10 @@ end
 
 function RaidCore:CI_OnUnitCreated(tUnit)
   local nId = tUnit:GetId()
-  local tPlayerUnit = GetPlayerUnit()
-  if not tUnit:IsInYourGroup() and tUnit ~= tPlayerUnit then
+  if not self:IsUnitInGroup(tUnit) then
     local sName = tUnit:GetName():gsub(NO_BREAK_SPACE, " ")
     local tOwner = tUnit.GetUnitOwner and tUnit:GetUnitOwner()
-    local bIsPetPlayer = tOwner and (tOwner:IsInYourGroup() or tOwner == tPlayerUnit)
+    local bIsPetPlayer = tOwner and self:IsUnitInGroup(tOwner)
     if not bIsPetPlayer and not _tAllUnits[nId] then
       _tAllUnits[nId] = true
       ManagerCall("OnUnitCreated", nId, tUnit, sName)
@@ -573,20 +570,10 @@ function RaidCore:CI_OnUnitDestroyed(tUnit)
 end
 
 function RaidCore:CI_OnScanUpdate()
-  UpdateMemberList()
-  for sName,tMember in next, _tMembers do
-    if tMember.tUnit:IsValid() then
-      local f, err = pcall(ProcessAllBuffs, tMember)
-      if not f then
-        Print(err)
-      end
-    end
-  end
-
   for nId, data in next, _tTrackedUnits do
     if data.tUnit:IsValid() then
       -- Process buff tracking.
-      local f, err = pcall(ProcessAllBuffs, data)
+      local f, err = pcall(PollUnitBuffs, data)
       if not f then
         Print(err)
       end
@@ -650,7 +637,7 @@ function RaidCore:CI_OnScanUpdate()
         if not data.tCast.bSuccess then
           -- Let's compare with the nCastEndTime
           local nThreshold = GetGameTime() + SCAN_PERIOD
-          local bIsFailed
+          local bIsInterrupted
           if nThreshold < data.tCast.nCastEndTime then
             bIsInterrupted = true
           else
@@ -670,10 +657,10 @@ function RaidCore:CI_OnScanUpdate()
       local MaxHealth = data.tUnit:GetMaxHealth()
       local Health = data.tUnit:GetHealth()
       if Health and MaxHealth then
-        local nPourcent = math.floor(100 * Health / MaxHealth)
-        if data.nPreviousHealthPourcent ~= nPourcent then
-          data.nPreviousHealthPourcent = nPourcent
-          ManagerCall("OnHealthChanged", nId, nPourcent, data.sName)
+        local nPercent = math.floor(100 * Health / MaxHealth)
+        if data.nPreviousHealthPercent ~= nPercent then
+          data.nPreviousHealthPercent = nPercent
+          ManagerCall("OnHealthChanged", nId, nPercent, data.sName)
         end
       end
 
@@ -716,7 +703,7 @@ function RaidCore:CI_ShowShortcutBar(eWhichBar, bIsVisible, nNumShortcuts)
   if eWhichBar == ActionSetLib.CodeEnumShortcutSet.FloatingSpellBar then
     -- The GetContent function is not ready... A delay must be added.
     _nNumShortcuts = nNumShortcuts
-    _DelayShowShortcutBar = ApolloTimer.Create(1, false, "CI_ShowShortcutBarDelayed", RaidCore)
+    ApolloTimer.Create(1, false, "CI_ShowShortcutBarDelayed", RaidCore)
   end
 end
 
@@ -730,7 +717,7 @@ function RaidCore:CI_ShowShortcutBarDelayed()
     if strIcon == nil or strIcon == "" then
       break
     end
-    table.insert(tIconFloatingSpellBar, strIcon)
+    tinsert(tIconFloatingSpellBar, strIcon)
   end
   ManagerCall("OnShowShortcutBar", tIconFloatingSpellBar)
 end

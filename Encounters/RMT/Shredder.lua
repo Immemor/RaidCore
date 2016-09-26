@@ -152,7 +152,7 @@ function mod:OnBossEnable()
   secondShredderSaw = nil
 end
 
-function mod:OnDebuffUpdate(id, spellId, _, stack)
+function mod:OnDebuffUpdate(id, spellId, stack)
   if DEBUFF_OOZING_BILE == spellId then
     if playerUnit:GetId() == id and stack >= 8 then
       mod:AddMsg("OOZE_MSG", string.format(self.L["msg.bile.stacks"], stack), 5, stack == 8 and mod:GetSetting("SoundOozeStacksWarning") and "Beware")
