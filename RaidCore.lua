@@ -46,6 +46,58 @@ local MYCOLORS = {
 local MAIN_FSM__SEARCH = 1
 local MAIN_FSM__RUNNING = 2
 
+RaidCore.E = {
+  UNIT_CREATED = "OnUnitCreated",
+  UNIT_DESTROYED = "OnUnitDestroyed",
+  ENTERED_COMBAT = "OnEnteredCombat",
+  BUFF_ADD = "OnBuffAdd",
+  BUFF_UPDATE = "OnBuffUpdate",
+  BUFF_REMOVE = "OnBuffRemove",
+  DEBUFF_ADD = "OnDebuffAdd",
+  DEBUFF_UPDATE = "OnDebuffUpdate",
+  DEBUFF_REMOVE = "OnDebuffRemove",
+  CAST_START = "OnCastStart",
+  CAST_END = "OnCastEnd",
+  HEALTH_CHANGED = "OnHealthChanged",
+  DATACHRON = "OnDatachron",
+  NPC_SAY = "OnNPCSay",
+  NPC_YELL = "OnNPCYell",
+  NPC_WHISPER = "OnNPCWhisper",
+  ALL_UNITS = "**",
+}
+
+local EVENT_UNIT_NAME_INDEX = {
+  [RaidCore.E.UNIT_CREATED] = 3,
+  [RaidCore.E.UNIT_DESTROYED] = 3,
+  [RaidCore.E.CAST_START] = 4,
+  [RaidCore.E.CAST_END] = 5,
+  [RaidCore.E.HEALTH_CHANGED] = 3,
+  [RaidCore.E.ENTERED_COMBAT] = 3,
+  [RaidCore.E.BUFF_ADD] = 5,
+  [RaidCore.E.BUFF_UPDATE] = 5,
+  [RaidCore.E.BUFF_REMOVE] = 3,
+  [RaidCore.E.DEBUFF_ADD] = 5,
+  [RaidCore.E.DEBUFF_UPDATE] = 5,
+  [RaidCore.E.DEBUFF_REMOVE] = 3,
+  [RaidCore.E.NPC_SAY] = 2,
+  [RaidCore.E.NPC_YELL] = 2,
+  [RaidCore.E.NPC_WHISPER] = 2,
+}
+
+local EVENT_UNIT_SPELL_ID_INDEX = {
+  [RaidCore.E.CAST_START] = 2,
+  [RaidCore.E.CAST_END] = 2,
+  [RaidCore.E.BUFF_ADD] = 2,
+  [RaidCore.E.BUFF_UPDATE] = 2,
+  [RaidCore.E.BUFF_REMOVE] = 2,
+  [RaidCore.E.DEBUFF_ADD] = 2,
+  [RaidCore.E.DEBUFF_UPDATE] = 2,
+  [RaidCore.E.DEBUFF_REMOVE] = 2,
+  [RaidCore.E.NPC_SAY] = 1,
+  [RaidCore.E.NPC_YELL] = 1,
+  [RaidCore.E.NPC_WHISPER] = 1,
+}
+
 ----------------------------------------------------------------------------------------------------
 -- Privates variables.
 ----------------------------------------------------------------------------------------------------
@@ -68,48 +120,72 @@ local empCD, empTimer = 5, nil
 -- Privates functions
 ----------------------------------------------------------------------------------------------------
 local function OnEncounterUnitEvents(sMethod, ...)
-  if _tCurrentEncounter == nil or _tCurrentEncounter.tUnitEvents == nil or
-  _tCurrentEncounter.tUnitEvents[sMethod] == nil then
+  if EVENT_UNIT_NAME_INDEX[sMethod] == nil then
     return
   end
+  local sName = select(EVENT_UNIT_NAME_INDEX[sMethod], ...)
 
-  local tEncounter = nil
-  if sMethod == "OnUnitCreated" then
-    local nId, tUnit, sName = ...
-    tEncounter = _tCurrentEncounter.tUnitEvents[sMethod][sName]
-  elseif sMethod == "OnUnitDestroyed" then
-    local nId, tUnit, sName = ...
-    tEncounter = _tCurrentEncounter.tUnitEvents[sMethod][sName]
-  elseif sMethod == "OnCastStart" then
-    local nId, sCastName, nCastEndTime, sName = ...
-    tEncounter = _tCurrentEncounter.tUnitEvents[sMethod][sName]
-  elseif sMethod == "OnCastEnd" then
-    local nId, sCastName, isInterrupted, nCastEndTime, sName = ...
-    tEncounter = _tCurrentEncounter.tUnitEvents[sMethod][sName]
-  elseif sMethod == "OnHealthChanged" then
-    local nId, nPourcent, sName = ...
-    tEncounter = _tCurrentEncounter.tUnitEvents[sMethod][sName]
-  elseif sMethod == "OnEnteredCombat" then
-    local nId, tUnit, sName, bInCombat = ...
-    tEncounter = _tCurrentEncounter.tUnitEvents[sMethod][sName]
+  -- Check if any events are bound
+  local tUnitEvents = _tCurrentEncounter.tUnitEvents
+  tUnitEvents = tUnitEvents and tUnitEvents[sMethod]
+
+  if not tUnitEvents then return end
+
+  -- Check for events bound by name
+  local tHandlers = tUnitEvents[sName] or {}
+  local nSize = #tHandlers
+  for i = 1, nSize do
+    tHandlers[i](_tCurrentEncounter, ...)
   end
 
-  if tEncounter then
-    for _, fEncounter in pairs(tEncounter) do
-      fEncounter(_tCurrentEncounter, ...)
-    end
+  -- Check for events bound for all units
+  local tAnyHandlers = tUnitEvents[RaidCore.E.ALL_UNITS] or {}
+  nSize = #tAnyHandlers
+  for i = 1, nSize do
+    tAnyHandlers[i](_tCurrentEncounter, ...)
+  end
+end
+
+local function OnEncounterUnitSpellEvents(sMethod, ...)
+  if EVENT_UNIT_NAME_INDEX[sMethod] == nil or EVENT_UNIT_SPELL_ID_INDEX[sMethod] == nil then
+    return
+  end
+  local sName = select(EVENT_UNIT_NAME_INDEX[sMethod], ...)
+  local spellId = select(EVENT_UNIT_SPELL_ID_INDEX[sMethod], ...)
+
+  -- Check if any events are bound
+  local tUnitSpellEvents = _tCurrentEncounter.tUnitSpellEvents
+  tUnitSpellEvents = tUnitSpellEvents and tUnitSpellEvents[sMethod]
+
+  if not tUnitSpellEvents then return end
+
+  -- Check for events bound by name
+  local tUnitHandlers = tUnitSpellEvents[sName]
+  tUnitHandlers = tUnitHandlers and tUnitHandlers[spellId] or {}
+  local nSize = #tUnitHandlers
+  for i = 1, nSize do
+    tUnitHandlers[i](_tCurrentEncounter, ...)
+  end
+
+  -- Check for events bound for all units
+  local tAnyHandlers = tUnitSpellEvents[RaidCore.E.ALL_UNITS]
+  tAnyHandlers = tAnyHandlers and tUnitHandlers[spellId] or {}
+  nSize = #tAnyHandlers
+  for i = 1, nSize do
+    tAnyHandlers[i](_tCurrentEncounter, ...)
   end
 end
 
 local function OnEncounterDatachronEvents(sMethod, ...)
-  if sMethod ~= "OnDatachron" or _tCurrentEncounter == nil or
-  _tCurrentEncounter.tDatachronEvents == nil then
+  if sMethod ~= RaidCore.E.DATACHRON then
     return
   end
-
-  for sSearchMessage, tEvents in pairs(_tCurrentEncounter.tDatachronEvents) do
-    for _, tEvent in pairs(tEvents) do
-      local sMessage = ...
+  local tDatachronEvents = _tCurrentEncounter.tDatachronEvents or {}
+  local sMessage = ...
+  for sSearchMessage, tEvents in next, tDatachronEvents do
+    local nSize = #tEvents
+    for i = 1, nSize do
+      local tEvent = tEvents[i]
       local sMatch = tEvent.sMatch
       local fHandler = tEvent.fHandler
       local result = nil
@@ -136,6 +212,7 @@ local function OnEncounterHookGeneric(sMethod, ...)
   end
 
   OnEncounterUnitEvents(sMethod, ...)
+  OnEncounterUnitSpellEvents(sMethod, ...)
   OnEncounterDatachronEvents(sMethod, ...)
 end
 
@@ -156,8 +233,11 @@ local function AddDelayedUnit(nId, sName, bInCombat)
     local id1 = tMap.continentId
     local id2 = tMap.parentZoneId
     local id3 = tMap.id
-    local tTrig = _tTrigPerZone[id1] and _tTrigPerZone[id1][id2] and _tTrigPerZone[id1][id2][id3]
-    if tTrig and tTrig[sName] then
+    local tTrig = _tTrigPerZone[id1]
+    tTrig = tTrig and tTrig[id2]
+    tTrig = tTrig and tTrig[id3]
+    tTrig = tTrig and tTrig[sName]
+    if tTrig then
       if not _tDelayedUnits[sName] then
         _tDelayedUnits[sName] = {}
       end
@@ -172,13 +252,15 @@ local function SearchEncounter()
     local id1 = tMap.continentId
     local id2 = tMap.parentZoneId
     local id3 = tMap.id
-    local tEncounters = _tEncountersPerZone[id1] and _tEncountersPerZone[id1][id2] and _tEncountersPerZone[id1][id2][id3]
-    if tEncounters then
-      for _, tEncounter in next, tEncounters do
-        if tEncounter:OnTrig(_tDelayedUnits) then
-          _tCurrentEncounter = tEncounter
-          break
-        end
+    local tEncounters = _tEncountersPerZone[id1]
+    tEncounters = tEncounters and tEncounters[id2]
+    tEncounters = tEncounters and tEncounters[id3] or {}
+    local nSize = #tEncounters
+    for i = 1, nSize do
+      local tEncounter = tEncounters[i]
+      if tEncounter:OnTrig(_tDelayedUnits) then
+        _tCurrentEncounter = tEncounter
+        break
       end
     end
   end
@@ -189,7 +271,7 @@ local function ProcessDelayedUnit()
     for nDelayedId, bInCombat in next, tDelayedList do
       local tUnit = GetUnitById(nDelayedId)
       if tUnit then
-        local s, sErrMsg = pcall(OnEncounterHookGeneric, "OnUnitCreated", nDelayedId, tUnit, nDelayedName)
+        local s, sErrMsg = pcall(OnEncounterHookGeneric, RaidCore.E.UNIT_CREATED, nDelayedId, tUnit, nDelayedName)
         if not s then
           if RaidCore.db.profile.bLUAErrorMessage then
             RaidCore:Print(sErrMsg)
@@ -197,7 +279,7 @@ local function ProcessDelayedUnit()
           Log:Add("ERROR", sErrMsg)
         end
         if bInCombat then
-          s, sErrMsg = pcall(OnEncounterHookGeneric, "OnEnteredCombat", nDelayedId, tUnit, nDelayedName, bInCombat)
+          s, sErrMsg = pcall(OnEncounterHookGeneric, RaidCore.E.ENTERED_COMBAT, nDelayedId, tUnit, nDelayedName, bInCombat)
           if not s then
             if RaidCore.db.profile.bLUAErrorMessage then
               RaidCore:Print(sErrMsg)
@@ -223,15 +305,15 @@ function RaidCore:OnInitialize()
     [MAIN_FSM__SEARCH] = {
       ["OnChangeWorld"] = self.SEARCH_OnCheckMapZone,
       ["OnSubZoneChanged"] = self.SEARCH_OnCheckMapZone,
-      ["OnUnitCreated"] = self.SEARCH_OnUnitCreated,
-      ["OnEnteredCombat"] = self.SEARCH_OnEnteredCombat,
-      ["OnUnitDestroyed"] = self.SEARCH_OnUnitDestroyed,
+      [RaidCore.E.UNIT_CREATED] = self.SEARCH_OnUnitCreated,
+      [RaidCore.E.ENTERED_COMBAT] = self.SEARCH_OnEnteredCombat,
+      [RaidCore.E.UNIT_DESTROYED] = self.SEARCH_OnUnitDestroyed,
       ["OnReceivedMessage"] = self.SEARCH_OnReceivedMessage,
     },
     [MAIN_FSM__RUNNING] = {
-      ["OnEnteredCombat"] = self.RUNNING_OnEnteredCombat,
+      [RaidCore.E.ENTERED_COMBAT] = self.RUNNING_OnEnteredCombat,
       ["OnReceivedMessage"] = self.RUNNING_OnReceivedMessage,
-      ["OnUnitDestroyed"] = self.RUNNING_OnUnitDestroyed,
+      [RaidCore.E.UNIT_DESTROYED] = self.RUNNING_OnUnitDestroyed,
     },
   }
   _eCurrentFSM = MAIN_FSM__SEARCH
@@ -782,230 +864,237 @@ function RaidCore:LaunchBreak(tArgc)
       self.LaunchBreakTimerId = self:ScheduleTimer(function()
           self.LaunchBreakTimerId = nil
           GroupLib.ReadyCheck(self.db.profile.sReadyCheckMessage or "")
-          end, nTime)
+        end,
+        nTime
+      )
+    end
+  end
+end
+
+function RaidCore:SyncSummon()
+  local myName = GetPlayerUnit():GetName()
+  if not self:isRaidManagement(myName) then
+    self:Print("You must be a raid leader or assistant to use this command!")
+    return false
+  end
+  local msg = {
+    action = "SyncSummon",
+  }
+  self:SendMessage(msg)
+end
+
+----------------------------------------------------------------------------------------------------
+-- Relation between: CombatInterface <-> RaidCore <-> Encounter
+----------------------------------------------------------------------------------------------------
+function RaidCore:GlobalEventHandler(sMethod, ...)
+  -- Call the encounter handler if we were in RUNNING.
+  if _eCurrentFSM == MAIN_FSM__RUNNING then
+    local s, sErrMsg = pcall(OnEncounterHookGeneric, sMethod, ...)
+    if not s then
+      if self.db.profile.bLUAErrorMessage then
+        self:Print(sErrMsg)
       end
+      Log:Add("ERROR", sErrMsg)
     end
   end
-
-  function RaidCore:SyncSummon()
-    local myName = GetPlayerUnit():GetName()
-    if not self:isRaidManagement(myName) then
-      self:Print("You must be a raid leader or assistant to use this command!")
-      return false
-    end
-    local msg = {
-      action = "SyncSummon",
-    }
-    self:SendMessage(msg)
+  -- Call the FSM handler, if needed.
+  local fFSMHandler = _tMainFSMHandlers[_eCurrentFSM][sMethod]
+  if fFSMHandler then
+    fFSMHandler(self, ...)
   end
+end
 
-  ----------------------------------------------------------------------------------------------------
-  -- Relation between: CombatInterface <-> RaidCore <-> Encounter
-  ----------------------------------------------------------------------------------------------------
-  function RaidCore:GlobalEventHandler(sMethod, ...)
-    -- Call the encounter handler if we were in RUNNING.
-    if _eCurrentFSM == MAIN_FSM__RUNNING then
-      local s, sErrMsg = pcall(OnEncounterHookGeneric, sMethod, ...)
-      if not s then
-        if self.db.profile.bLUAErrorMessage then
-          self:Print(sErrMsg)
-        end
-        Log:Add("ERROR", sErrMsg)
-      end
-    end
-    -- Call the FSM handler, if needed.
-    local fFSMHandler = _tMainFSMHandlers[_eCurrentFSM][sMethod]
-    if fFSMHandler then
-      fFSMHandler(self, ...)
-    end
-  end
-
-  function RaidCore:SEARCH_OnCheckMapZone()
-    if not _bIsEncounterInProgress then
-      local tMap = GetCurrentZoneMap()
-      if tMap then
-        Log:Add("CurrentZoneMap", tMap.continentId, tMap.parentZoneId, tMap.id)
-        local tTrigInZone = _tTrigPerZone[tMap.continentId]
-        local bSearching = false
+function RaidCore:SEARCH_OnCheckMapZone()
+  if not _bIsEncounterInProgress then
+    local tMap = GetCurrentZoneMap()
+    if tMap then
+      Log:Add("CurrentZoneMap", tMap.continentId, tMap.parentZoneId, tMap.id)
+      local tTrigInZone = _tTrigPerZone[tMap.continentId]
+      local bSearching = false
+      if tTrigInZone then
+        tTrigInZone = tTrigInZone[tMap.parentZoneId]
         if tTrigInZone then
-          tTrigInZone = tTrigInZone[tMap.parentZoneId]
+          tTrigInZone = tTrigInZone[tMap.id]
           if tTrigInZone then
-            tTrigInZone = tTrigInZone[tMap.id]
-            if tTrigInZone then
-              bSearching = true
-            end
+            bSearching = true
           end
         end
-        if bSearching then
-          self:CombatInterface_Activate("DetectAll")
-        else
-          self:CombatInterface_Activate("Disable")
-        end
-      else
-        self:ScheduleTimer("SEARCH_OnCheckMapZone", 5)
       end
+      if bSearching then
+        self:CombatInterface_Activate("DetectAll")
+      else
+        self:CombatInterface_Activate("Disable")
+      end
+    else
+      self:ScheduleTimer("SEARCH_OnCheckMapZone", 5)
     end
   end
+end
 
-  function RaidCore:SEARCH_OnUnitCreated(nId, tUnit, sName)
-    local bInCombat = tUnit:IsInCombat()
-    AddDelayedUnit(nId, sName, bInCombat)
-  end
+function RaidCore:SEARCH_OnUnitCreated(nId, tUnit, sName)
+  local bInCombat = tUnit:IsInCombat()
+  AddDelayedUnit(nId, sName, bInCombat)
+end
 
-  function RaidCore:SEARCH_OnEnteredCombat(nId, tUnit, sName, bInCombat)
-    -- Manage the lower layer.
-    if tUnit == GetPlayerUnit() then
-      if bInCombat then
-        -- Player entering in combat.
-        _bIsEncounterInProgress = true
-        -- Enable CombatInterface now to be able to log a combat
-        -- not registered.
-        self:CombatInterface_Activate("FullEnable")
+function RaidCore:SEARCH_OnEnteredCombat(nId, tUnit, sName, bInCombat)
+  -- Manage the lower layer.
+  if tUnit == GetPlayerUnit() then
+    if bInCombat then
+      -- Player entering in combat.
+      _bIsEncounterInProgress = true
+      -- Enable CombatInterface now to be able to log a combat
+      -- not registered.
+      self:CombatInterface_Activate("FullEnable")
+      SearchEncounter()
+      if _tCurrentEncounter and not _tCurrentEncounter:IsEnabled() then
+        _eCurrentFSM = MAIN_FSM__RUNNING
+        _tCurrentEncounter:Enable()
+        ProcessDelayedUnit()
+      end
+    else
+      -- Player is dead or left the combat.
+      _tWipeTimer:Start()
+    end
+  elseif not tUnit:IsInYourGroup() then
+    if not _tCurrentEncounter then
+      AddDelayedUnit(nId, sName, bInCombat)
+      if _bIsEncounterInProgress then
         SearchEncounter()
         if _tCurrentEncounter and not _tCurrentEncounter:IsEnabled() then
           _eCurrentFSM = MAIN_FSM__RUNNING
           _tCurrentEncounter:Enable()
           ProcessDelayedUnit()
         end
-      else
-        -- Player is dead or left the combat.
-        _tWipeTimer:Start()
-      end
-    elseif not tUnit:IsInYourGroup() then
-      if not _tCurrentEncounter then
-        AddDelayedUnit(nId, sName, bInCombat)
-        if _bIsEncounterInProgress then
-          SearchEncounter()
-          if _tCurrentEncounter and not _tCurrentEncounter:IsEnabled() then
-            _eCurrentFSM = MAIN_FSM__RUNNING
-            _tCurrentEncounter:Enable()
-            ProcessDelayedUnit()
-          end
-        end
       end
     end
   end
+end
 
-  function RaidCore:SEARCH_OnUnitDestroyed(nId, tUnit, sName)
-    RemoveDelayedUnit(nId, tUnit)
-    self:AutoCleanUnitDestroyed(nId, tUnit, sName)
-  end
+function RaidCore:SEARCH_OnUnitDestroyed(nId, tUnit, sName)
+  RemoveDelayedUnit(nId, tUnit)
+  self:AutoCleanUnitDestroyed(nId, tUnit, sName)
+end
 
-  function RaidCore:SEARCH_OnReceivedMessage(sMessage, nSenderId)
-    local tMessage = JSON.decode(sMessage)
-    self:ProcessMessage(tMessage, nSenderId)
-  end
+function RaidCore:SEARCH_OnReceivedMessage(sMessage, nSenderId)
+  local tMessage = JSON.decode(sMessage)
+  self:ProcessMessage(tMessage, nSenderId)
+end
 
-  function RaidCore:RUNNING_OnReceivedMessage(sMessage, nSenderId)
-    local tMessage = JSON.decode(sMessage)
-    self:ProcessMessage(tMessage, nSenderId)
-  end
+function RaidCore:RUNNING_OnReceivedMessage(sMessage, nSenderId)
+  local tMessage = JSON.decode(sMessage)
+  self:ProcessMessage(tMessage, nSenderId)
+end
 
-  function RaidCore:RUNNING_OnEnteredCombat(nId, tUnit, sName, bInCombat)
-    if tUnit == GetPlayerUnit() then
-      if bInCombat == false then
-        -- Player is dead or left the combat.
-        _tWipeTimer:Start()
-      end
+function RaidCore:RUNNING_OnEnteredCombat(nId, tUnit, sName, bInCombat)
+  if tUnit == GetPlayerUnit() then
+    if bInCombat == false then
+      -- Player is dead or left the combat.
+      _tWipeTimer:Start()
     end
   end
+end
 
-  function RaidCore:RUNNING_OnUnitDestroyed(nId, tUnit, sName)
-    self:AutoCleanUnitDestroyed(nId, tUnit, sName)
+function RaidCore:RUNNING_OnUnitDestroyed(nId, tUnit, sName)
+  self:AutoCleanUnitDestroyed(nId, tUnit, sName)
+end
+
+function RaidCore:RUNNING_WipeCheck()
+  local tPlayerDeathState = GameLib.GetPlayerDeathState()
+
+  if tPlayerDeathState and not tPlayerDeathState.bAcceptCasterRez then
+    return
   end
-
-  function RaidCore:RUNNING_WipeCheck()
-    local tPlayerDeathState = GameLib.GetPlayerDeathState()
-
-    if tPlayerDeathState and not tPlayerDeathState.bAcceptCasterRez then
+  for i = 1, GroupLib.GetMemberCount() do
+    local tUnit = GroupLib.GetUnitForGroupMember(i)
+    if tUnit and tUnit:IsInCombat() then
       return
     end
-    for i = 1, GroupLib.GetMemberCount() do
-      local tUnit = GroupLib.GetUnitForGroupMember(i)
-      if tUnit and tUnit:IsInCombat() then
-        return
-      end
-    end
-    self:CombatInterface_Activate("DetectAll")
-    _bIsEncounterInProgress = false
-    if _tCurrentEncounter then
-      _tCurrentEncounter:Disable()
-      _tCurrentEncounter = nil
-    end
-    self:ResetAll()
-    -- Set the FSM in SEARCH mode.
-    _eCurrentFSM = MAIN_FSM__SEARCH
-    self:SEARCH_OnCheckMapZone()
   end
+  self:CombatInterface_Activate("DetectAll")
+  _bIsEncounterInProgress = false
+  if _tCurrentEncounter then
+    _tCurrentEncounter:Disable()
+    _tCurrentEncounter = nil
+  end
+  self:ResetAll()
+  -- Set the FSM in SEARCH mode.
+  _eCurrentFSM = MAIN_FSM__SEARCH
+  self:SEARCH_OnCheckMapZone()
+end
 
-  ----------------------------------------------------------------------------------------------------
-  -- TEST features functions
-  ----------------------------------------------------------------------------------------------------
-  local targetId = 0
-  function RaidCore:OnStartTestScenario()
-    local tPlayerUnit = GetPlayerUnit()
-    local nPlayerId = tPlayerUnit:GetId()
-    local nRandomGreen = math.random()
-    local function GetProgress(nProgress)
-      return nProgress + 1.3
-    end
-    local function GetProgress2(nProgress)
-      return nProgress + 0.5
-    end
-    self:AddTimerBar("TEST1", "End of test scenario", 60, nil, { sColor = "red" })
-    self:AddTimerBar("TEST2", "Timer with count down", 8, nil, { sColor = "blue", bEmphasize = true })
-    self:AddTimerBar("TEST3", "Timer for a static circle", 15, nil, { sColor = "xkcdBarneyPurple" })
-    self:AddTimerBar("TEST4", "Timer for the crosshair on you", 30, nil, { sColor = "xkcdBrown" })
-    self:AddProgressBar("PROGRESS", "Progress", { fHandler = GetProgress }, nil)
-    self:AddProgressBar("PROGRESS2", "Progress2", { fHandler = GetProgress2 }, nil)
-    self:AddUnit(GetPlayerUnit())
-    if GetPlayerUnit():GetTarget() then
-      self:AddUnitSpacer("UNIT_SPACER")
-      self:AddUnit(GetPlayerUnit():GetTarget())
-      targetId = GetPlayerUnit():GetTarget():GetId()
-    end
-    self:AddMsg("TEST1", self.L["Start test scenario"], 5, "red")
-    for i = 1, 36 do
-      local nForce = 1 - i / 36.0
-      local tColor = { a = 1.0, r = 1 - nForce, g = nRandomGreen, b = nForce }
-      self:AddSimpleLine(("TEST%d"):format(i), nPlayerId, i / 6, i / 8 + 2, nForce * 360, i / 4 + 1, tColor)
-    end
-    self.tScenarioTestTimers = {}
-    self.tScenarioTestTimers[1] = self:ScheduleTimer(function()
-        self:AddPolygon("TEST1", GetPlayerUnit():GetPosition(), 8, 0, 3, "xkcdBrightPurple", 16)
-        end, 15)
-      self.tScenarioTestTimers[2] = self:ScheduleTimer(function()
-          self:AddPicture("TEST1", GetPlayerUnit():GetId(), "Crosshair", 55)
-          end, 30)
-        self:AddTimerBar("TEST6", "Extended timer", 25, nil, { bEmphasize = true })
-        self.tScenarioTestTimers[3] = self:ScheduleTimer(function()
-            self:ExtendTimerBar("TEST6", 20)
-            end, 10)
-        end
+----------------------------------------------------------------------------------------------------
+-- TEST features functions
+----------------------------------------------------------------------------------------------------
+local targetId = 0
+function RaidCore:OnStartTestScenario()
+  local tPlayerUnit = GetPlayerUnit()
+  local nPlayerId = tPlayerUnit:GetId()
+  local nRandomGreen = math.random()
+  local function GetProgress(nProgress)
+    return nProgress + 1.3
+  end
+  local function GetProgress2(nProgress)
+    return nProgress + 0.5
+  end
+  self:AddTimerBar("TEST1", "End of test scenario", 60, nil, { sColor = "red" })
+  self:AddTimerBar("TEST2", "Timer with count down", 8, nil, { sColor = "blue", bEmphasize = true })
+  self:AddTimerBar("TEST3", "Timer for a static circle", 15, nil, { sColor = "xkcdBarneyPurple" })
+  self:AddTimerBar("TEST4", "Timer for the crosshair on you", 30, nil, { sColor = "xkcdBrown" })
+  self:AddProgressBar("PROGRESS", "Progress", { fHandler = GetProgress }, nil)
+  self:AddProgressBar("PROGRESS2", "Progress2", { fHandler = GetProgress2 }, nil)
+  self:AddUnit(GetPlayerUnit())
+  if GetPlayerUnit():GetTarget() then
+    self:AddUnitSpacer("UNIT_SPACER")
+    self:AddUnit(GetPlayerUnit():GetTarget())
+    targetId = GetPlayerUnit():GetTarget():GetId()
+  end
+  self:AddMsg("TEST1", self.L["Start test scenario"], 5, "red")
+  for i = 1, 36 do
+    local nForce = 1 - i / 36.0
+    local tColor = { a = 1.0, r = 1 - nForce, g = nRandomGreen, b = nForce }
+    self:AddSimpleLine(("TEST%d"):format(i), nPlayerId, i / 6, i / 8 + 2, nForce * 360, i / 4 + 1, tColor)
+  end
+  self.tScenarioTestTimers = {}
+  self.tScenarioTestTimers[1] = self:ScheduleTimer(function()
+      self:AddPolygon("TEST1", GetPlayerUnit():GetPosition(), 8, 0, 3, "xkcdBrightPurple", 16)
+    end,
+    15
+  )
+  self.tScenarioTestTimers[2] = self:ScheduleTimer(function()
+      self:AddPicture("TEST1", GetPlayerUnit():GetId(), "Crosshair", 55)
+    end,
+    30
+  )
+  self:AddTimerBar("TEST6", "Extended timer", 25, nil, { bEmphasize = true })
+  self.tScenarioTestTimers[3] = self:ScheduleTimer(function()
+      self:ExtendTimerBar("TEST6", 20)
+    end,
+    10
+  )
+end
 
-        function RaidCore:OnStopTestScenario()
-          for _, timer in next, self.tScenarioTestTimers do
-            self:CancelTimer(timer, true)
-          end
-          self:RemovePolygon("TEST1")
-          self:RemovePicture("TEST1")
-          for i = 1, 36 do
-            local nForce = i / 36.0
-            self:RemoveSimpleLine(("TEST%d"):format(i))
-          end
-          self:RemoveMsg("TEST1")
-          self:RemoveUnit(GetPlayerUnit():GetId())
-          if targetId ~= 0 then
-            self:RemoveUnit("UNIT_SPACER")
-            self:RemoveUnit(targetId)
-            targetId = nil
-          end
-          self:RemoveTimerBar("TEST1")
-          self:RemoveTimerBar("TEST2")
-          self:RemoveTimerBar("TEST3")
-          self:RemoveTimerBar("TEST4")
-          self:RemoveTimerBar("TEST6")
-          self:RemoveProgressBar("PROGRESS")
-          self:RemoveProgressBar("PROGRESS2")
-
-        end
+function RaidCore:OnStopTestScenario()
+  for _, timer in next, self.tScenarioTestTimers do
+    self:CancelTimer(timer, true)
+  end
+  self:RemovePolygon("TEST1")
+  self:RemovePicture("TEST1")
+  for i = 1, 36 do
+    local nForce = i / 36.0
+    self:RemoveSimpleLine(("TEST%d"):format(i))
+  end
+  self:RemoveMsg("TEST1")
+  self:RemoveUnit(GetPlayerUnit():GetId())
+  if targetId ~= 0 then
+    self:RemoveUnit("UNIT_SPACER")
+    self:RemoveUnit(targetId)
+    targetId = nil
+  end
+  self:RemoveTimerBar("TEST1")
+  self:RemoveTimerBar("TEST2")
+  self:RemoveTimerBar("TEST3")
+  self:RemoveTimerBar("TEST4")
+  self:RemoveTimerBar("TEST6")
+  self:RemoveProgressBar("PROGRESS")
+  self:RemoveProgressBar("PROGRESS2")
+end

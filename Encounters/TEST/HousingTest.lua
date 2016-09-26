@@ -78,26 +78,28 @@ mod:RegisterEnglishLocale({
     ["cast.shootbot.dash"] = "Slasher Dash",
     ["cast.shootbot.jump"] = "Jump Shot",
 
-    ["unit.bandit.blast"] = "Blast Shot",
-    ["unit.girrok.roar"] = "Roar",
-    ["unit.aggressorbot.spin"] = "Mauling Spin",
+    ["cast.bandit.blast"] = "Blast Shot",
+    ["cast.girrok.roar"] = "Roar",
+    ["cast.aggressorbot.spin"] = "Mauling Spin",
 
-    ["unit.pumera.pounce"] = "Pride Pounce",
-    ["unit.pumera.frenzy"] = "Frenzy of the Feline",
-    ["unit.osun.firestorm"] = "Firestorm",
-    ["unit.osun.fisure"] = "Erupting Fissure",
-    ["unit.krogg.rush"] = "Crushing Rush",
-    ["unit.krogg.flurry"] = "Crushing Flurry",
-    ["unit.krogg.assault"] = "Focused Assault",
+    ["cast.pumera.pounce"] = "Pride Pounce",
+    ["cast.pumera.frenzy"] = "Frenzy of the Feline",
+    ["cast.pumera.swipe"] = "Leaping Swipe",
+    ["cast.osun.firestorm"] = "Firestorm",
+    ["cast.osun.fisure"] = "Erupting Fissure",
+    ["cast.osun.superheated"] = "Superheated",
+    ["cast.krogg.rush"] = "Crushing Rush",
+    ["cast.krogg.flurry"] = "Crushing Flurry",
+    ["cast.krogg.assault"] = "Focused Assault",
 
-    ["unit.ravenok.head_shoulders"] = "Head and Shoulders",
-    ["unit.ravenok.tooth_nail"] = "Tooth and Nail",
-    ["unit.ravenok.winds"] = "Tail Winds",
-    ["unit.ravenok.rush"] = "Ravenok Rush",
-    ["unit.titan.slash"] = "Shellark Slash",
-    ["unit.titan.strike"] = "Trident Strike",
-    ["unit.titan.buffer"] = "Aquatic Buffer",
-    ["unit.pell.vortex"] = "Swirling Vortex",
+    ["cast.ravenok.head_shoulders"] = "Head and Shoulders",
+    ["cast.ravenok.tooth_nail"] = "Tooth and Nail",
+    ["cast.ravenok.winds"] = "Tail Winds",
+    ["cast.ravenok.rush"] = "Ravenok Rush",
+    ["cast.titan.slash"] = "Shellark Slash",
+    ["cast.titan.strike"] = "Trident Strike",
+    ["cast.titan.buffer"] = "Aquatic Buffer",
+    ["cast.pell.vortex"] = "Swirling Vortex",
 
     -- Datachron.
     ["chron.equal.first"] = "First simulated datachron.",
@@ -116,6 +118,7 @@ mod:RegisterEnglishLocale({
 -- Constants.
 ----------------------------------------------------------------------------------------------------
 local BUFF_KROGG_FOCUSED_ASSAULT = 72202
+local BUFF_OSUN_SUPERHEAT = 71236
 --moodie and chompacabra debuff
 local DEBUFF_MELT = 50233
 local DEBUFF_CHOMPACABRA_BLEED = 43759
@@ -174,13 +177,84 @@ local ALL_MOBS = {
   "unit.invis.0",
 }
 
+local ALL_SPELLS = {
+  ["unit.chompacabra"] = {
+    "cast.chompacabra.frenzy",
+    "cast.chompacabra.trap",
+  },
+  ["unit.moodie"] = {
+    "cast.moodie.firestorm",
+    "cast.moodie.fissure",
+  },
+  ["unit.shootbot"] = {
+    "cast.shootbot.dash",
+    "cast.shootbot.jump",
+  },
+  ["unit.bandit"] = {
+    "cast.bandit.blast",
+  },
+  ["unit.girrok"] = {
+    "cast.girrok.roar",
+  },
+  ["unit.aggressorbot"] = {
+    "cast.aggressorbot.spin",
+  },
+  ["unit.pumera"] = {
+    "cast.pumera.pounce",
+    "cast.pumera.frenzy",
+    "cast.pumera.swipe",
+  },
+  ["unit.osun"] = {
+    "cast.osun.firestorm",
+    "cast.osun.fisure",
+    "cast.osun.superheated",
+    BUFF_OSUN_SUPERHEAT,
+  },
+  ["unit.krogg"] = {
+    "cast.krogg.rush",
+    "cast.krogg.flurry",
+    "cast.krogg.assault",
+    BUFF_KROGG_FOCUSED_ASSAULT,
+  },
+  ["unit.ravenok"] = {
+    "cast.ravenok.head_shoulders",
+    "cast.ravenok.tooth_nail",
+    "cast.ravenok.rush",
+    "cast.ravenok.winds",
+  },
+  ["unit.titan"] = {
+    "cast.titan.slash",
+    "cast.titan.strike",
+    "cast.titan.buffer",
+  },
+  ["unit.pell"] = {
+    "cast.pell.vortex",
+  },
+}
+
 local EVENTS_TO_TEST = {
-  "OnUnitCreated",
-  "OnUnitDestroyed",
-  "OnCastStart",
-  "OnCastEnd",
-  "OnHealthChanged",
-  "OnEnteredCombat",
+  core.E.UNIT_CREATED,
+  core.E.UNIT_DESTROYED,
+  core.E.HEALTH_CHANGED,
+  core.E.ENTERED_COMBAT,
+  core.E.CAST_START,
+  core.E.CAST_END,
+  core.E.DEBUFF_ADD,
+  core.E.DEBUFF_UPDATE,
+  core.E.DEBUFF_REMOVE,
+  core.E.BUFF_ADD,
+  core.E.BUFF_UPDATE,
+  core.E.BUFF_REMOVE,
+}
+local SPELL_EVENTS = {
+  [core.E.CAST_START] = true,
+  [core.E.CAST_END] = true,
+  [core.E.BUFF_ADD] = true,
+  [core.E.BUFF_UPDATE] = true,
+  [core.E.BUFF_REMOVE] = true,
+  [core.E.DEBUFF_ADD] = true,
+  [core.E.DEBUFF_UPDATE] = true,
+  [core.E.DEBUFF_REMOVE] = true,
 }
 ----------------------------------------------------------------------------------------------------
 -- Locals.
@@ -231,12 +305,28 @@ local function RegisterTestEvent(eventName)
   --Register old events and unit events and keep count of how many events
   --happened and remove them in the same order again.
   mod[eventName] = function(...)
+    --Handle normal events
     eventCounter[eventName] = eventCounter[eventName] or 0
     local eventKey = eventName .. tostring(eventCounter[eventName])
     events[eventKey] = {...}
     eventCounter[eventName] = eventCounter[eventName] + 1
+
+    --Handle buff and cast events
+    if SPELL_EVENTS[eventName] then
+      local primaryEventName = eventName .. "_Primary"
+      eventCounter[primaryEventName] = eventCounter[primaryEventName] or 0
+      eventKey = primaryEventName .. tostring(eventCounter[primaryEventName])
+      events[eventKey] = {...}
+      eventCounter[primaryEventName] = eventCounter[primaryEventName] + 1
+
+      local secondaryEventName = eventName .. "_Secondary"
+      eventCounter[secondaryEventName] = eventCounter[secondaryEventName] or 0
+      eventKey = secondaryEventName .. tostring(eventCounter[secondaryEventName])
+      events[eventKey] = {...}
+      eventCounter[secondaryEventName] = eventCounter[secondaryEventName] + 1
+    end
   end
-  mod:RegisterUnitEvents(ALL_MOBS, {
+  mod:RegisterUnitEvents(core.E.ALL_UNITS, {
       [eventName] = function(...)
         unitEventCounter[eventName] = unitEventCounter[eventName] or 0
         local eventKey = eventName .. tostring(unitEventCounter[eventName])
@@ -246,6 +336,39 @@ local function RegisterTestEvent(eventName)
       end
     }
   )
+  if not SPELL_EVENTS[eventName] then
+    return
+  end
+
+  for mob, spellIds in next, ALL_SPELLS do
+    local size = #spellIds
+    for i = 1, size do
+      local spellId = spellIds[i]
+      mod:RegisterUnitEvents(mob, {
+          [eventName] = {
+            [spellId] = function(...)
+              local primaryEventName = eventName .. "_Primary"
+              unitEventCounter[primaryEventName] = unitEventCounter[primaryEventName] or 0
+              local eventKey = primaryEventName .. tostring(unitEventCounter[primaryEventName])
+              mod:CompareEvents(primaryEventName, events[eventKey], {...})
+              events[eventKey] = nil
+              unitEventCounter[primaryEventName] = unitEventCounter[primaryEventName] + 1
+            end
+          },
+          [spellId] = {
+            [eventName] = function(...)
+              local secondaryEventName = eventName .. "_Secondary"
+              unitEventCounter[secondaryEventName] = unitEventCounter[secondaryEventName] or 0
+              local eventKey = secondaryEventName .. tostring(unitEventCounter[secondaryEventName])
+              mod:CompareEvents(secondaryEventName, events[eventKey], {...})
+              events[eventKey] = nil
+              unitEventCounter[secondaryEventName] = unitEventCounter[secondaryEventName] + 1
+            end
+          },
+        }
+      )
+    end
+  end
 end
 
 ----------------------------------------------------------------------------------------------------
@@ -260,7 +383,12 @@ function mod:OnBossEnable()
   unitEventCounter = {}
   events = {}
   if not unitEventsInitialized then
-    table.insert(ALL_MOBS, GameLib.GetPlayerUnit():GetName())
+    local playerName = GameLib.GetPlayerUnit():GetName()
+    ALL_SPELLS[playerName] = {
+      DEBUFF_MELT,
+      DEBUFF_CHOMPACABRA_BLEED,
+    }
+    table.insert(ALL_MOBS, playerName)
     for _, eventName in next, EVENTS_TO_TEST do
       RegisterTestEvent(eventName)
     end

@@ -37,6 +37,21 @@ local function RegisterLocale(tBoss, sLanguage, Locales)
   end
 end
 
+local function DeepInit (obj, ...)
+  if obj == nil then
+    obj = {}
+  end
+  local root = obj
+  for i = 1, select('#', ...) do
+    local key = select(i, ...)
+    if obj[key] == nil then
+      obj[key] = {}
+    end
+    obj = obj[key]
+  end
+  return root
+end
+
 ------------------------------------------------------------------------------
 -- Encounter Prototype.
 ------------------------------------------------------------------------------
@@ -70,17 +85,79 @@ end
 function EncounterPrototype:RegisterUnitEvents(tUnitNames, tEventsHandlers)
   assert(type(tUnitNames) == "string" or type(tUnitNames) == "table")
   assert(type(tEventsHandlers) == "table")
+  if type(tUnitNames) == "string" then
+    tUnitNames = {tUnitNames}
+  end
 
+  local nSize = #tUnitNames
+  for i = 1, nSize do
+    local sUnitName = tUnitNames[i]
+    for sMethodName, fHandler in next, tEventsHandlers do
+      if type(fHandler) == "table" then
+        self:RegisterUnitSpellEvents(sUnitName, sMethodName, fHandler)
+      else
+        self:RegisterUnitEvent(sUnitName, sMethodName, fHandler)
+      end
+    end
+  end
+end
+
+-- Register cast events to a single unit or a list of units
+-- @param tUnitNames String or table of Strings of unit names.
+-- @param primaryKey Parent key of the table OnCastStart or castName/buffId
+-- @param tEventsHandlers Table of Events/Handlers pairs
+local SPELL_EVENTS = {
+  [RaidCore.E.CAST_START] = true,
+  [RaidCore.E.CAST_END] = true,
+  [RaidCore.E.BUFF_ADD] = true,
+  [RaidCore.E.BUFF_UPDATE] = true,
+  [RaidCore.E.BUFF_REMOVE] = true,
+  [RaidCore.E.DEBUFF_ADD] = true,
+  [RaidCore.E.DEBUFF_UPDATE] = true,
+  [RaidCore.E.DEBUFF_REMOVE] = true,
+  [RaidCore.E.NPC_SAY] = true, -- Not really spells but the format is the same:
+  [RaidCore.E.NPC_YELL] = true, -- Bind by name and a second string
+  [RaidCore.E.NPC_WHISPER] = true,
+}
+function EncounterPrototype:RegisterUnitSpellEvents(tUnitNames, primaryKey, tEventHandlers)
+  assert(type(tUnitNames) == "string" or type(tUnitNames) == "table")
+  assert(type(primaryKey) == "string" or type(primaryKey) == "number")
+  assert(type(tEventHandlers) == "table")
   if type(tUnitNames) == "string" then
     tUnitNames = {tUnitNames}
   end
   local nSize = #tUnitNames
   for i = 1, nSize do
     local sUnitName = tUnitNames[i]
-    for sMethodName, fHandler in next, tEventsHandlers do
-      self:RegisterUnitEvent(sUnitName, sMethodName, fHandler)
+    local isEventFirst = SPELL_EVENTS[primaryKey] == true
+    for secondaryKey, fHandler in next, tEventHandlers do
+      local sMethodName = secondaryKey
+      local sCastName = primaryKey
+      if isEventFirst then
+        sMethodName = primaryKey
+        sCastName = secondaryKey
+      end
+      self:RegisterUnitSpellEvent(sUnitName, sMethodName, sCastName, fHandler)
     end
   end
+end
+
+-- Register cast events to a single unit or a list of units
+-- @param sUnitName String or table of Strings of unit names.
+-- @param sMethodName OnCastStart or OnCastEnd
+-- @param sCastName Name of the cast or id of the buff
+-- @param fHandler Function to handle the event
+function EncounterPrototype:RegisterUnitSpellEvent(sUnitName, sMethodName, spellId, fHandler)
+  assert(type(sUnitName) == "string")
+  assert(type(sMethodName) == "string")
+  assert(type(spellId) == "string" or type(spellId) == "number")
+  assert(type(fHandler) == "function")
+  sUnitName = self.L[sUnitName]
+  if type(spellId) == "string" then
+    spellId = self.L[spellId]
+  end
+  self.tUnitSpellEvents = DeepInit(self.tUnitSpellEvents, sMethodName, sUnitName, spellId)
+  table.insert(self.tUnitSpellEvents[sMethodName][sUnitName][spellId], fHandler)
 end
 
 -- Register events to a datachron message
@@ -94,7 +171,7 @@ function EncounterPrototype:RegisterDatachronEvent(sSearchMessage, sMatch, fHand
   assert(type(fHandler) == "function")
   assert(sMatch == "MATCH" or sMatch == "FIND" or sMatch == "EQUAL")
   sSearchMessage = self.L[sSearchMessage]
-  self.tDatachronEvents[sSearchMessage] = self.tDatachronEvents[sSearchMessage] or {}
+  self.tDatachronEvents = DeepInit(self.tDatachronEvents, sSearchMessage)
   table.insert(self.tDatachronEvents[sSearchMessage], {fHandler = fHandler, sMatch = sMatch })
 end
 
@@ -109,8 +186,7 @@ function EncounterPrototype:RegisterUnitEvent(sUnitName, sMethodName, fHandler)
   assert(type(sMethodName) == "string")
   assert(type(fHandler) == "function")
   sUnitName = self.L[sUnitName]
-  self.tUnitEvents[sMethodName] = self.tUnitEvents[sMethodName] or {}
-  self.tUnitEvents[sMethodName][sUnitName] = self.tUnitEvents[sMethodName][sUnitName] or {}
+  self.tUnitEvents = DeepInit(self.tUnitEvents, sMethodName, sUnitName)
   table.insert(self.tUnitEvents[sMethodName][sUnitName], fHandler)
 end
 
@@ -408,5 +484,6 @@ function RaidCore:NewEncounter(name, continentId, parentMapId, mapId)
   new.tDefaultSettings = {}
   new.tUnitEvents = {}
   new.tDatachronEvents = {}
+  new.tUnitSpellEvents = {}
   return new
 end

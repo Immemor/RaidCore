@@ -269,7 +269,7 @@ function RaidCore:GUI_init(sVersion)
     Shredder = Apollo.LoadForm(self.xmlDoc, "ConfigForm_Shredder", self.wndEncounterTarget, self),
     MinibossesRedmoon = Apollo.LoadForm(self.xmlDoc, "ConfigForm_MinibossesRedmoon", self.wndEncounterTarget, self),
     Robomination = Apollo.LoadForm(self.xmlDoc, "ConfigForm_Robomination", self.wndEncounterTarget, self),
-	Engineers = Apollo.LoadForm(self.xmlDoc, "ConfigForm_Engineers", self.wndEncounterTarget, self),
+    Engineers = Apollo.LoadForm(self.xmlDoc, "ConfigForm_Engineers", self.wndEncounterTarget, self),
   }
   -- Initialize Left Menu in Main RaidCore window.
   local wndGeneralButton = self.wndMain:FindChild("Static"):FindChild("General")
@@ -415,95 +415,97 @@ function RaidCore:OnTestScenarioButton(wndHandler, wndControl, eMouseButton)
         wndControl:SetCheck(false)
         wndControl:SetText(self.L["Start test scenario"])
         self:OnStopTestScenario()
-        end, 60, wndControl)
-    else
-      self:CancelTimer(_TestTimer, true)
+      end,
+      60, wndControl
+    )
+  else
+    self:CancelTimer(_TestTimer, true)
 
-      wndControl:SetText(self.L["Start test scenario"])
-      self:OnStopTestScenario()
+    wndControl:SetText(self.L["Start test scenario"])
+    self:OnStopTestScenario()
+  end
+end
+
+-- When the Reset button is clicked.
+function RaidCore:OnResetBarsButton(wndHandler, wndControl, eMouseButton)
+  self:BarsResetAnchors()
+end
+
+-- When the Move button is pushed.
+function RaidCore:OnMoveBarsButton(wndHandler, wndControl, eMouseButton)
+  local bIsChecked = wndControl:IsChecked()
+  if bIsChecked then
+    wndControl:SetText(self.L["Lock Bars"])
+    self:BarsAnchorUnlock(true)
+  else
+    wndControl:SetText(self.L["Move Bars"])
+    self:BarsAnchorUnlock(false)
+  end
+end
+
+function RaidCore:OnWindowLoad(wndHandler, wndControl)
+  local a, b, c = unpack(Split(wndControl:GetName(), '_'))
+  local val = nil
+  if c then
+    val = self.db.profile[a][b][c]
+  elseif b then
+    val = self.db.profile[a][b]
+  elseif a then
+    val = self.db.profile[a]
+  end
+  if val == nil then
+    error((("Value not found in DB for keys: [%s][%s][%s]"):format(tostring(a), tostring(b), tostring(c))))
+  end
+  if wndControl.SetCheck then
+    wndControl:SetCheck(val)
+  end
+  if type(val) == "boolean" or a == "Encounters" then
+    wndControl:SetCheck(val)
+  elseif type(val) == "number" or type(val) == "string" then
+    wndControl:SetText(val)
+    if wndControl.SetValue and type(val) == "number" then
+      wndControl:SetValue(val)
     end
   end
+end
 
-  -- When the Reset button is clicked.
-  function RaidCore:OnResetBarsButton(wndHandler, wndControl, eMouseButton)
-    self:BarsResetAnchors()
+function RaidCore:OnButtonCheckBoxSwitched(wndHandler, wndControl, eMouseButton)
+  local a, b, c = unpack(Split(wndControl:GetName(), '_'))
+  if c then
+    self.db.profile[a][b][c] = wndControl:IsChecked()
+  elseif b then
+    self.db.profile[a][b] = wndControl:IsChecked()
+  else
+    self.db.profile[a] = wndControl:IsChecked()
   end
+end
 
-  -- When the Move button is pushed.
-  function RaidCore:OnMoveBarsButton(wndHandler, wndControl, eMouseButton)
-    local bIsChecked = wndControl:IsChecked()
-    if bIsChecked then
-      wndControl:SetText(self.L["Lock Bars"])
-      self:BarsAnchorUnlock(true)
-    else
-      wndControl:SetText(self.L["Move Bars"])
-      self:BarsAnchorUnlock(false)
-    end
+function RaidCore:OnEditBoxChanged(wndHandler, wndControl, eMouseButton)
+  local a, b, c = unpack(Split(wndControl:GetName(), '_'))
+  if c then
+    self.db.profile[a][b][c] = wndControl:GetText()
+  elseif b then
+    self.db.profile[a][b] = wndControl:GetText()
+  else
+    self.db.profile[a] = wndControl:GetText()
   end
+end
 
-  function RaidCore:OnWindowLoad(wndHandler, wndControl)
-    local a, b, c = unpack(Split(wndControl:GetName(), '_'))
-    local val = nil
-    if c then
-      val = self.db.profile[a][b][c]
-    elseif b then
-      val = self.db.profile[a][b]
-    elseif a then
-      val = self.db.profile[a]
-    end
-    if val == nil then
-      error((("Value not found in DB for keys: [%s][%s][%s]"):format(tostring(a), tostring(b), tostring(c))))
-    end
-    if wndControl.SetCheck then
-      wndControl:SetCheck(val)
-    end
-    if type(val) == "boolean" or a == "Encounters" then
-      wndControl:SetCheck(val)
-    elseif type(val) == "number" or type(val) == "string" then
-      wndControl:SetText(val)
-      if wndControl.SetValue and type(val) == "number" then
-        wndControl:SetValue(val)
-      end
+function RaidCore:OnGeneralSettingsSliderBarChanged(wndHandler, wndControl, nNewValue, fOldValue)
+  local sName = wndControl:GetName()
+  local a, b, c = unpack(Split(sName, '_'))
+  nNewValue = math.floor(nNewValue)
+  for _, wnd in next, wndControl:GetParent():GetParent():GetChildren() do
+    if wnd:GetName() == sName then
+      wnd:SetText(nNewValue)
+      break
     end
   end
-
-  function RaidCore:OnButtonCheckBoxSwitched(wndHandler, wndControl, eMouseButton)
-    local a, b, c = unpack(Split(wndControl:GetName(), '_'))
-    if c then
-      self.db.profile[a][b][c] = wndControl:IsChecked()
-    elseif b then
-      self.db.profile[a][b] = wndControl:IsChecked()
-    else
-      self.db.profile[a] = wndControl:IsChecked()
-    end
+  if c then
+    self.db.profile[a][b][c] = nNewValue
+  elseif b then
+    self.db.profile[a][b] = nNewValue
+  else
+    self.db.profile[a] = nNewValue
   end
-
-  function RaidCore:OnEditBoxChanged(wndHandler, wndControl, eMouseButton)
-    local a, b, c = unpack(Split(wndControl:GetName(), '_'))
-    if c then
-      self.db.profile[a][b][c] = wndControl:GetText()
-    elseif b then
-      self.db.profile[a][b] = wndControl:GetText()
-    else
-      self.db.profile[a] = wndControl:GetText()
-    end
-  end
-
-  function RaidCore:OnGeneralSettingsSliderBarChanged(wndHandler, wndControl, nNewValue, fOldValue)
-    local sName = wndControl:GetName()
-    local a, b, c = unpack(Split(sName, '_'))
-    nNewValue = math.floor(nNewValue)
-    for _, wnd in next, wndControl:GetParent():GetParent():GetChildren() do
-      if wnd:GetName() == sName then
-        wnd:SetText(nNewValue)
-        break
-      end
-    end
-    if c then
-      self.db.profile[a][b][c] = nNewValue
-    elseif b then
-      self.db.profile[a][b] = nNewValue
-    else
-      self.db.profile[a] = nNewValue
-    end
-  end
+end
