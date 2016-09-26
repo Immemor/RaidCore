@@ -254,7 +254,7 @@ function mod:UpdateCoreHealthMark(coreUnit)
   core:MarkUnit(coreUnit.unit, 0, percent, color)
 end
 
-mod:RegisterUnitEvent(core.E.ALL_UNITS, {
+mod:RegisterUnitEvents(core.E.ALL_UNITS, {
     [DEBUFF_ELECTROSHOCK_VULNERABILITY] = {
       [core.E.DEBUFF_ADD] = function(self, id)
         local target = GetUnitById(id)

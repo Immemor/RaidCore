@@ -152,7 +152,7 @@ function mod:OnBossEnable()
   secondShredderSaw = nil
 end
 
-mod:RegisterUnitEvent(core.E.ALL_UNITS, {
+mod:RegisterUnitEvents(core.E.ALL_UNITS, {
     [DEBUFF_OOZING_BILE] = {
       [core.E.DEBUFF_UPDATE] = function(self, id, _, stack)
         if playerUnit:GetId() == id and stack >= 8 then

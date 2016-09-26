@@ -247,7 +247,7 @@ function mod:HelperCompactorGrid(compactors, isCorner, isAdding)
   end
 end
 
-mod:RegisterUnitEvent(core.E.ALL_UNITS, {
+mod:RegisterUnitEvents(core.E.ALL_UNITS, {
     [DEBUFF_SNAKE] = {
       [core.E.DEBUFF_REMOVE] = function()
         core:RemovePicture("SNAKE_CROSSHAIR")
