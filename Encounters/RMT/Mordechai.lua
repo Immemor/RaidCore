@@ -81,8 +81,12 @@ local DEBUFF_NULLIFIED = 85614 -- Green
 local DEBUFF_KINETIC_LINK = 86797 -- Purple
 local DEBUFF_SHOCKING_ATTRACTION = 86861
 
-local FIRST_SUCKY_PHASE_UPPER_HEALTH = 86.5
-local FIRST_SUCKY_PHASE_LOWER_HEALTH = 85.5
+local PHASES_CLOSE = {
+  {UPPER = 86.5, LOWER = 85.5},
+  {UPPER = 61.5, LOWER = 60.5},
+  {UPPER = 36.5, LOWER = 35.5},
+  {UPPER = 11.5, LOWER = 10.5},
+}
 local FIRST_SHURIKEN_TIMER = 11
 local SHURIKEN_TIMER = 22
 local FIRST_BARRAGE_TIMER = 19
@@ -142,9 +146,12 @@ mod:RegisterUnitEvents("unit.mordechai",{
       mod:AddCleaveLines()
     end,
     [core.E.HEALTH_CHANGED] = function(_, _, percent)
-      if percent >= FIRST_SUCKY_PHASE_LOWER_HEALTH and percent <= FIRST_SUCKY_PHASE_UPPER_HEALTH then
-        if mod:GetSetting("MessageAirlockPhaseSoon") then
-          mod:AddMsg("SUCKY PHASE", "msg.phase.start", 5, mod:GetSetting("SoundAirlockPhaseSoon") == true and "Info")
+      for i = 1, #PHASES_CLOSE do
+        if percent >= PHASES_CLOSE[i].LOWER and percent <= PHASES_CLOSE[i].UPPER then
+          if mod:GetSetting("MessageAirlockPhaseSoon") then
+            mod:AddMsg("SUCKY PHASE", "msg.phase.start", 5, mod:GetSetting("SoundAirlockPhaseSoon") == true and "Info")
+          end
+          break
         end
       end
     end,
