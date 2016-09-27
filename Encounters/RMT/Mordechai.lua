@@ -66,6 +66,14 @@ mod:RegisterDefaultSetting("MessageOrbSpawn")
 mod:RegisterDefaultSetting("MessageOrbLink")
 mod:RegisterDefaultSetting("MessageAirlockPhaseSoon")
 mod:RegisterDefaultSetting("MessageShockingAttraction")
+-- Timer default configs.
+mod:RegisterDefaultTimerBarConfigs({
+    ["NEXT_ORB_TIMER"] = { sColor = "xkcdLightLightblue" },
+    ["NEXT_BARRAGE_TIMER"] = { sColor = "xkcdRed" },
+    ["NEXT_SHURIKEN_TIMER"] = { sColor = "xkcdBlue" },
+  }
+)
+
 ----------------------------------------------------------------------------------------------------
 -- Constants.
 ----------------------------------------------------------------------------------------------------
