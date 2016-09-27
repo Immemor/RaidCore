@@ -444,6 +444,24 @@ function EncounterPrototype:OnTrig(tNames)
   return false
 end
 
+-- Create a world marker.
+-- @param sKey Index which will be used to match on SetMarker.
+-- @param sText Text key to search in language dictionnary.
+-- @param tPosition Position of the marker
+--
+-- Note: If the Text key is not found, the current string will be used like that.
+function EncounterPrototype:SetWorldMarker(sKey, sText, tPosition)
+  RaidCore:SetWorldMarker(sKey, self.L[sText], tPosition)
+end
+
+function EncounterPrototype:DropWorldMarker(sKey)
+  RaidCore:DropWorldMarker(sKey)
+end
+
+function EncounterPrototype:ResetWorldMarkers()
+  RaidCore:ResetWorldMarkers()
+end
+
 ------------------------------------------------------------------------------
 -- RaidCore interaction
 ------------------------------------------------------------------------------
