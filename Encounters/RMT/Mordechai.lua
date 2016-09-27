@@ -80,10 +80,9 @@ local SHURIKEN_TIMER = 22
 local FIRST_BARRAGE_TIMER = 19
 local BARRAGE_TIMER = 44
 
---TODO: I made the timers based on the only log I had
--- Need to get more logs again with casts from turret etc.
-local FIRST_ORB_TIMER = 18.5
-local ORB_TIMER = 26
+local FIRST_ORB_TIMER = 22
+local FIRST_ORB_MIDPHASE_TIMER = 15
+local ORB_TIMER = 27
 
 local ANCHOR_POSITIONS = {
   { x = 93.849998474121, y = 353.87435913086, z = 209.71000671387 },
@@ -112,7 +111,7 @@ function mod:OnBossEnable()
   anchorCount = 0
   numberOfAirPhases = 0
   mod:AddAnchorWorldMarkers()
-  mod:AddTimerBar("NEXT_ORB_TIMER", "msg.orb.next", ORB_TIMER)
+  mod:AddTimerBar("NEXT_ORB_TIMER", "msg.orb.next", FIRST_ORB_TIMER)
 end
 
 function mod:OnBossDisable()
@@ -192,7 +191,7 @@ mod:RegisterUnitEvents("unit.orb",{
 mod:RegisterDatachronEvent("chron.airlock.closed", "EQUAL", function()
     mod:AddCleaveLines()
     mod:AddTimerBar("NEXT_SHURIKEN_TIMER", "msg.mordechai.shuriken.next", FIRST_SHURIKEN_TIMER, mod:GetSetting("SoundShurikenCountdown"))
-    mod:AddTimerBar("NEXT_ORB_TIMER", "msg.orb.next", FIRST_ORB_TIMER)
+    mod:AddTimerBar("NEXT_ORB_TIMER", "msg.orb.next", FIRST_ORB_MIDPHASE_TIMER)
     if numberOfAirPhases > 2 then
       mod:AddTimerBar("NEXT_BARRAGE_TIMER", "msg.mordechai.barrage.next", FIRST_BARRAGE_TIMER)
     end
