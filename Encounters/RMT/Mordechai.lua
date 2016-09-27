@@ -110,6 +110,7 @@ local anchors
 local anchorCount
 local playerUnit
 local numberOfAirPhases
+local isAirPhase
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
@@ -118,6 +119,7 @@ function mod:OnBossEnable()
   anchors = {}
   anchorCount = 0
   numberOfAirPhases = 0
+  isAirPhase = false
   mod:AddAnchorWorldMarkers()
   mod:AddTimerBar("NEXT_ORB_TIMER", "msg.orb.next", FIRST_ORB_TIMER)
 end
@@ -149,10 +151,16 @@ mod:RegisterUnitEvents("unit.mordechai",{
     [core.E.CAST_START] = {
       ["cast.mordechai.shatter"] = function()
         mod:AddTimerBar("NEXT_SHURIKEN_TIMER", "msg.mordechai.shuriken.next", SHURIKEN_TIMER, mod:GetSetting("SoundShurikenCountdown"))
-      end,
-      ["cast.mordechai.barrage"] = function()
-        mod:AddTimerBar("NEXT_BARRAGE_TIMER", "msg.mordechai.barrage.next", BARRAGE_TIMER)
       end
+    },
+    ["cast.mordechai.barrage"] = {
+      [core.E.CAST_START] = function()
+        mod:AddTimerBar("NEXT_BARRAGE_TIMER", "msg.mordechai.barrage.next", BARRAGE_TIMER)
+        mod:RemoveCleaveLines()
+      end,
+      [core.E.CAST_END] = function()
+        mod:AddCleaveLines()
+      end,
     }
   }
 )
@@ -168,6 +176,7 @@ mod:RegisterUnitEvents("unit.anchor",{
 
       anchorCount = anchorCount + 1
       if anchorCount == 4 then
+        isAirPhase = true
         numberOfAirPhases = numberOfAirPhases + 1
         mod:RemoveAnchorWorldMarkers()
         mod:RemoveCleaveLines()
@@ -197,6 +206,7 @@ mod:RegisterUnitEvents("unit.orb",{
 )
 
 mod:RegisterDatachronEvent("chron.airlock.closed", "EQUAL", function()
+    isAirPhase = false
     mod:AddCleaveLines()
     mod:AddTimerBar("NEXT_SHURIKEN_TIMER", "msg.mordechai.shuriken.next", FIRST_SHURIKEN_TIMER, mod:GetSetting("SoundShurikenCountdown"))
     mod:AddTimerBar("NEXT_ORB_TIMER", "msg.orb.next", FIRST_ORB_MIDPHASE_TIMER)
@@ -251,7 +261,7 @@ function mod:RemoveAnchorWorldMarkers()
 end
 
 function mod:AddCleaveLines()
-  if not mod:GetSetting("LinesCleave") then
+  if not mod:GetSetting("LinesCleave") or isAirPhase then
     return
   end
   local id = mordechai:GetId()
