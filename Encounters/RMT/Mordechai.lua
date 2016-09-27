@@ -155,10 +155,14 @@ mod:RegisterUnitEvents("unit.mordechai",{
         end
       end
     end,
-    [core.E.CAST_START] = {
-      ["cast.mordechai.shatter"] = function()
+    ["cast.mordechai.shatter"] = {
+      [core.E.CAST_START] = function()
         mod:AddTimerBar("NEXT_SHURIKEN_TIMER", "msg.mordechai.shuriken.next", SHURIKEN_TIMER, mod:GetSetting("SoundShurikenCountdown"))
-      end
+        mod:RemoveCleaveLines()
+      end,
+      [core.E.CAST_END] = function()
+        mod:AddCleaveLines()
+      end,
     },
     ["cast.mordechai.barrage"] = {
       [core.E.CAST_START] = function()
@@ -168,7 +172,7 @@ mod:RegisterUnitEvents("unit.mordechai",{
       [core.E.CAST_END] = function()
         mod:AddCleaveLines()
       end,
-    }
+    },
   }
 )
 
