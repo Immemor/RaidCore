@@ -313,7 +313,7 @@ end
 mod:RegisterUnitEvents("unit.cannon_arm",{
     [core.E.UNIT_CREATED] = function(self, id, unit)
       cannonArms[id] = unit
-      core:WatchUnit(unit)
+      core:WatchUnit(unit, core.E.TRACK_CASTS)
       if mod:GetSetting("LineCannonArm") then
         core:AddLineBetweenUnits(string.format("CANNON_ARM_LINE %d", id), playerUnit:GetId(), id, 5)
       end
@@ -338,7 +338,7 @@ mod:RegisterUnitEvents("unit.cannon_arm",{
 
 mod:RegisterUnitEvents("unit.robo",{
     [core.E.UNIT_CREATED] = function(_, _, unit)
-      core:WatchUnit(unit)
+      core:WatchUnit(unit, core.E.TRACK_CASTS_HEALTH)
       roboUnit = unit
     end,
     [core.E.HEALTH_CHANGED] = function(self, _, percent)
