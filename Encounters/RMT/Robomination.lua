@@ -147,7 +147,13 @@ mod:RegisterMessageSetting("ARMS_MSG_SPAWN", "EQUAL", "MessageArmSpawn", "SoundA
 mod:RegisterMessageSetting("ARMS_MSG_CAST", "EQUAL", "MessageCannonInterrupt", "SoundCannonInterrupt")
 mod:RegisterMessageSetting("LASER_MSG", "EQUAL", "MessageLaser", "SoundLaser")
 mod:RegisterMessageSetting("SPEW_MSG", "EQUAL", "MessageSpew", "SoundSpew")
-
+-- Timer default configs.
+mod:RegisterDefaultTimerBarConfigs({
+    ["NEXT_SNAKE_TIMER"] = { sColor = "xkcdBrown" },
+    ["NEXT_SPEW_TIMER"] = { sColor = "green" },
+    ["NEXT_INCINERATE_TIMER"] = { sColor = "red", bEmphasize = mod:GetSetting("SoundLaser") },
+  }
+)
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
@@ -158,8 +164,8 @@ function mod:OnBossEnable()
   cannonArms = {}
   playerUnit = GameLib.GetPlayerUnit()
   mod:AddTimerBar("NEXT_ARMS_TIMER", "msg.arms.next", ARMS_TIMER)
-  core:AddTimerBar("NEXT_SNAKE_TIMER", "msg.snake.next", FIRST_SNAKE_TIMER, nil, { sColor = "xkcdBrown" })
-  core:AddTimerBar("NEXT_SPEW_TIMER", "msg.spew.next", FIRST_SPEW_TIMER, nil, { sColor = "green" })
+  mod:AddTimerBar("NEXT_SNAKE_TIMER", "msg.snake.next", FIRST_SNAKE_TIMER)
+  mod:AddTimerBar("NEXT_SPEW_TIMER", "msg.spew.next", FIRST_SPEW_TIMER)
   mod:DrawCompactorGrid()
 end
 
@@ -186,7 +192,7 @@ mod:RegisterDatachronEvent("chron.robo.snake", "MATCH", function(self, _, snakeT
     end
 
     mod:RemoveTimerBar("NEXT_SNAKE_TIMER")
-    core:AddTimerBar("NEXT_SNAKE_TIMER", "msg.snake.next", SNAKE_TIMER, nil, { sColor = "xkcdBrown" })
+    mod:AddTimerBar("NEXT_SNAKE_TIMER", "msg.snake.next", SNAKE_TIMER)
   end
 )
 
@@ -208,9 +214,9 @@ mod:RegisterDatachronEvent("chron.robo.hides", "EQUAL", function ()
 mod:RegisterDatachronEvent("chron.robo.shows", "EQUAL", function ()
     phase = DPS_PHASE
     core:RemoveLineBetweenUnits("ROBO_MAZE_LINE")
-    core:AddTimerBar("NEXT_SNAKE_TIMER", "msg.snake.next", FIRST_SNAKE_TIMER, nil, { sColor = "xkcdBrown" })
-    core:AddTimerBar("NEXT_SPEW_TIMER", "msg.spew.next", MAZE_SPEW_TIMER, nil, { sColor = "green" })
-    core:AddTimerBar("NEXT_INCINERATE_TIMER", "msg.robo.laser.next", FIRST_INCINERATE_TIMER, nil, { sColor = "red", bEmphasize = mod:GetSetting("SoundLaser") })
+    mod:AddTimerBar("NEXT_SNAKE_TIMER", "msg.snake.next", FIRST_SNAKE_TIMER)
+    mod:AddTimerBar("NEXT_SPEW_TIMER", "msg.spew.next", MAZE_SPEW_TIMER)
+    mod:AddTimerBar("NEXT_INCINERATE_TIMER", "msg.robo.laser.next", FIRST_INCINERATE_TIMER)
     mod:AddTimerBar("NEXT_ARMS_TIMER", "msg.arms.next", ARMS_TIMER)
     mod:DrawCompactorGrid()
   end
@@ -231,7 +237,7 @@ mod:RegisterDatachronEvent("chron.robo.laser", "MATCH", function(self, _, laserT
     end
 
     mod:RemoveTimerBar("NEXT_INCINERATE_TIMER")
-    core:AddTimerBar("NEXT_INCINERATE_TIMER", "msg.robo.laser.next", INCINERATE_TIMER, nil, { sColor = "red", bEmphasize = mod:GetSetting("SoundLaser") })
+    mod:AddTimerBar("NEXT_INCINERATE_TIMER", "msg.robo.laser.next", INCINERATE_TIMER)
     mod:AddMsg("LASER_MSG", laserOnX, 5, "Burn", "Red")
   end
 )
@@ -365,7 +371,7 @@ mod:RegisterUnitEvents("unit.robo",{
     [core.E.CAST_START] = {
       ["cast.spew"] = function(self, _)
         mod:RemoveTimerBar("NEXT_SPEW_TIMER")
-        core:AddTimerBar("NEXT_SPEW_TIMER", "msg.spew.next", SPEW_TIMER, nil, { sColor = "green" })
+        mod:AddTimerBar("NEXT_SPEW_TIMER", "msg.spew.next", SPEW_TIMER)
         mod:AddMsg("SPEW_MSG", "msg.spew.now", 4, "Beware")
       end
     },
