@@ -135,6 +135,11 @@ mod:RegisterUnitEvents("unit.turret",{
     [core.E.UNIT_CREATED] = function(_, _, unit)
       core:WatchUnit(unit)
     end,
+    ["cast.turret.discharge"] = {
+      [core.E.CAST_START] = function()
+        mod:AddTimerBar("NEXT_ORB_TIMER", "msg.orb.next", ORB_TIMER)
+      end
+    }
   }
 )
 
@@ -211,7 +216,6 @@ mod:RegisterUnitEvents("unit.orb",{
       if mod:GetSetting("MessageOrbSpawn") then
         mod:AddMsg("ORB_SPAWNED", "msg.orb.spawned", 5, mod:GetSetting("SoundOrbSpawn") == true and "Info")
       end
-      mod:AddTimerBar("NEXT_ORB_TIMER", "msg.orb.next", ORB_TIMER)
     end
   }
 )
