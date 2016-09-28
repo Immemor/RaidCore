@@ -49,7 +49,7 @@ end
 mod:RegisterUnitEvents("unit.thrag",{
     ["OnUnitCreated"] = function (_, _, unit)
       core:AddUnit(unit)
-      core:WatchUnit(unit)
+      core:WatchUnit(unit, core.E.TRACK_CASTS)
     end,
     ["OnCastStart"] = function (_, _, _)
       -- TODO: Redo
@@ -63,7 +63,6 @@ mod:RegisterUnitEvents("unit.thrag",{
 mod:RegisterUnitEvents("unit.jumpstart",{
     ["OnUnitCreated"] = function (_, id, unit)
       jumpStarts[id] = unit
-      core:WatchUnit(unit)
       if mod:GetSetting("BombLines") then
         core:AddLineBetweenUnits(string.format("JUMP_START_LINE %d", id), playerUnit:GetId(), id, 5)
       end

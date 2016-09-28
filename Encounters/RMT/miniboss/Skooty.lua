@@ -45,7 +45,7 @@ end
 mod:RegisterUnitEvents("unit.skooty",{
     ["OnUnitCreated"] = function (_, _, unit)
       core:AddUnit(unit)
-      core:WatchUnit(unit)
+      core:WatchUnit(unit, core.E.TRACK_CASTS)
     end,
     ["OnCastStart"] = function (self, _, castName)
       if self.L["cast.skooty.cannon"] == castName then
@@ -58,7 +58,6 @@ mod:RegisterUnitEvents("unit.skooty",{
 mod:RegisterUnitEvents("unit.jumpstart",{
     ["OnUnitCreated"] = function (_, id, unit)
       jumpStarts[id] = unit
-      core:WatchUnit(unit)
       if mod:GetSetting("BombLines") then
         core:AddLineBetweenUnits(string.format("JUMP_START_LINE %d", id), playerUnit:GetId(), id, 5)
       end
