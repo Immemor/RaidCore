@@ -133,7 +133,7 @@ end
 
 mod:RegisterUnitEvents("unit.turret",{
     [core.E.UNIT_CREATED] = function(_, _, unit)
-      core:WatchUnit(unit)
+      core:WatchUnit(unit, core.E.TRACK_CASTS)
     end,
     ["cast.turret.discharge"] = {
       [core.E.CAST_START] = function()
@@ -147,7 +147,7 @@ mod:RegisterUnitEvents("unit.mordechai",{
     [core.E.UNIT_CREATED] = function(_, _, unit)
       mordechai = unit
       core:AddUnit(unit)
-      core:WatchUnit(unit)
+      core:WatchUnit(unit, core.E.TRACK_CASTS_HEALTH)
       mod:AddCleaveLines()
     end,
     [core.E.HEALTH_CHANGED] = function(_, _, percent)
@@ -185,7 +185,7 @@ mod:RegisterUnitEvents("unit.anchor",{
     [core.E.UNIT_CREATED] = function(_, id, unit)
       anchors[id] = unit
       core:AddUnit(unit)
-      core:WatchUnit(unit)
+      core:WatchUnit(unit, core.E.TRACK_HEALTH)
       if mod:GetSetting("MarkerAnchorHP") then
         core:MarkUnit(unit, 0, 100)
       end
