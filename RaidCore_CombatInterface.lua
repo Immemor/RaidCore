@@ -34,6 +34,7 @@ local GetSpell = GameLib.GetSpell
 local GetPlayerUnitByName = GameLib.GetPlayerUnitByName
 local next, string, pcall = next, string, pcall
 local tinsert = table.insert
+local binaryAnd = bit32.band
 ----------------------------------------------------------------------------------------------------
 -- Constants.
 ----------------------------------------------------------------------------------------------------
@@ -213,8 +214,9 @@ local function GetBuffs(tUnit)
   return r
 end
 
-local function TrackThisUnit(tUnit)
+local function TrackThisUnit(tUnit, nTrackingType)
   local nId = tUnit:GetId()
+  nTrackingType = nTrackingType or RaidCore.E.TRACK_ALL
   if not _tTrackedUnits[nId] and not tUnit:IsInYourGroup() then
     Log:Add("TrackThisUnit", nId)
     local MaxHealth = tUnit:GetMaxHealth()
@@ -235,6 +237,9 @@ local function TrackThisUnit(tUnit)
         bSuccess = false,
       },
       nPreviousHealthPercent = nPercent,
+      bTrackBuffs = binaryAnd(nTrackingType, RaidCore.E.TRACK_BUFFS) ~= 0,
+      bTrackCasts = binaryAnd(nTrackingType, RaidCore.E.TRACK_CASTS) ~= 0,
+      bTrackHealth = binaryAnd(nTrackingType, RaidCore.E.TRACK_HEALTH) ~= 0,
     }
   end
 end
@@ -493,8 +498,8 @@ end
 
 -- Track buff and cast of this unit.
 -- @param unit userdata object related to an unit in game.
-function RaidCore:WatchUnit(unit)
-  TrackThisUnit(unit)
+function RaidCore:WatchUnit(unit, nTrackingType)
+  TrackThisUnit(unit, nTrackingType)
 end
 
 -- Untrack buff and cast of this unit.
@@ -674,9 +679,15 @@ function RaidCore:CI_OnScanUpdate()
       -- Process name update.
       data.sName = data.tUnit:GetName():gsub(NO_BREAK_SPACE, " ")
 
-      self:CI_UpdateBuffs(data, nId)
-      self:CI_UpdateCasts(data, nId)
-      self:CI_UpdateHealth(data, nId)
+      if data.bTrackBuffs then
+        self:CI_UpdateBuffs(data, nId)
+      end
+      if data.bTrackCasts then
+        self:CI_UpdateCasts(data, nId)
+      end
+      if data.bTrackHealth then
+        self:CI_UpdateHealth(data, nId)
+      end
     end
   end
 end
