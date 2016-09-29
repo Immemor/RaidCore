@@ -55,6 +55,7 @@ mod:RegisterDefaultSetting("LinesCleave")
 mod:RegisterDefaultSetting("WorldMarkerAnchor")
 mod:RegisterDefaultSetting("MarkerAnchorHP")
 mod:RegisterDefaultSetting("CrosshairShockingAttraction")
+mod:RegisterDefaultSetting("MarkerPurple")
 -- Sounds.
 mod:RegisterDefaultSetting("SoundOrbSpawn")
 mod:RegisterDefaultSetting("SoundOrbLink")
@@ -73,7 +74,10 @@ mod:RegisterDefaultTimerBarConfigs({
     ["NEXT_SHURIKEN_TIMER"] = { sColor = "xkcdBlue" },
   }
 )
-
+----------------------------------------------------------------------------------------------------
+-- Functions.
+----------------------------------------------------------------------------------------------------
+local GetUnitById = GameLib.GetUnitById
 ----------------------------------------------------------------------------------------------------
 -- Constants.
 ----------------------------------------------------------------------------------------------------
@@ -238,6 +242,12 @@ mod:RegisterUnitEvents(core.E.ALL_UNITS, {
         if id == playerUnit:GetId() and mod:GetSetting("MessageOrbLink") then
           mod:AddMsg("KINETIC_LINK_MSG", "msg.orb.kinetic_link", 5, mod:GetSetting("SoundOrbLink") == true and "Burn")
         end
+        if mod:GetSetting("MarkerPurple") then
+          core:MarkUnit(GetUnitById(id), core.E.LOCATION_STATIC_CHEST, "P", "xkcdPurplePink")
+        end
+      end,
+      [core.E.DEBUFF_REMOVE] = function (self, id)
+        core:DropMark(id)
       end,
     },
     [DEBUFF_SHOCKING_ATTRACTION] = {
