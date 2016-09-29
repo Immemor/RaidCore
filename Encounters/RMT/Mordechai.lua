@@ -232,30 +232,29 @@ mod:RegisterDatachronEvent("chron.airlock.closed", "EQUAL", function()
   end
 )
 
-function mod:OnDebuffAdd(id, spellId)
-  local isOnMyself = id == playerUnit:GetId()
-  if DEBUFF_KINETIC_LINK == spellId and isOnMyself then
-    if mod:GetSetting("MessageOrbLink") then
-      mod:AddMsg("KINETIC_LINK_MSG", "msg.orb.kinetic_link", 5, mod:GetSetting("SoundOrbLink") == true and "Burn")
-    end
-  end
-  if DEBUFF_SHOCKING_ATTRACTION == spellId then
-    if mod:GetSetting("CrosshairShockingAttraction") then
-      core:AddPicture("SHOCKING_ATTRACTION_TARGET_"..id, id, "Crosshair", 30, 0, 0, nil, "blue")
-    end
-    if isOnMyself then
-      if mod:GetSetting("MessageShockingAttraction") then
-        mod:AddMsg("SHOCKING_ATTRACTION", "msg.mordechai.shuriken.you", 5, mod:GetSetting("SoundShurikenCountdown") == true and "RunAway")
-      end
-    end
-  end
-end
-
-function mod:OnDebuffRemove(id, spellId)
-  if DEBUFF_SHOCKING_ATTRACTION == spellId then
-    core:RemovePicture("SHOCKING_ATTRACTION_TARGET_"..id)
-  end
-end
+mod:RegisterUnitEvents(core.E.ALL_UNITS, {
+    [DEBUFF_KINETIC_LINK] = {
+      [core.E.DEBUFF_ADD] = function (self, id)
+        if id == playerUnit:GetId() and mod:GetSetting("MessageOrbLink") then
+          mod:AddMsg("KINETIC_LINK_MSG", "msg.orb.kinetic_link", 5, mod:GetSetting("SoundOrbLink") == true and "Burn")
+        end
+      end,
+    },
+    [DEBUFF_SHOCKING_ATTRACTION] = {
+      [core.E.DEBUFF_ADD] = function (self, id)
+        if mod:GetSetting("CrosshairShockingAttraction") then
+          core:AddPicture("SHOCKING_ATTRACTION_TARGET_"..id, id, "Crosshair", 30, 0, 0, nil, "blue")
+        end
+        if id == playerUnit:GetId() and mod:GetSetting("MessageShockingAttraction") then
+          mod:AddMsg("SHOCKING_ATTRACTION", "msg.mordechai.shuriken.you", 5, mod:GetSetting("SoundShurikenCountdown") == true and "RunAway")
+        end
+      end,
+      [core.E.DEBUFF_REMOVE] = function (self, id)
+        core:RemovePicture("SHOCKING_ATTRACTION_TARGET_"..id)
+      end,
+    },
+  }
+)
 
 function mod:AddAnchorWorldMarkers()
   if not mod:GetSetting("WorldMarkerAnchor") then
