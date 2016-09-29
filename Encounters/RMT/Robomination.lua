@@ -338,7 +338,7 @@ mod:RegisterUnitEvents("unit.cannon_arm",{
 
 mod:RegisterUnitEvents("unit.robo",{
     [core.E.UNIT_CREATED] = function(_, _, unit)
-      core:WatchUnit(unit, core.E.TRACK_CASTS_HEALTH)
+      core:WatchUnit(unit, core.E.TRACK_CASTS + core.E.TRACK_HEALTH)
       roboUnit = unit
     end,
     [core.E.HEALTH_CHANGED] = function(self, _, percent)

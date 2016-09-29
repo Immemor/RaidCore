@@ -190,7 +190,7 @@ function mod:AddUnits()
     core:AddUnitSpacer("CORE_SPACER")
   end
   for coreId, coreUnit in pairs(coreUnits) do
-    core:WatchUnit(coreUnit.unit, core.E.TRACK_BUFFS_HEALTH)
+    core:WatchUnit(coreUnit.unit, core.E.TRACK_BUFFS + core.E.TRACK_HEALTH)
 
     mod:UpdateCoreHealthMark(coreUnit)
     if mod:GetSetting("BarsCoreHealth") then

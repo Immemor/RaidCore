@@ -147,7 +147,7 @@ mod:RegisterUnitEvents("unit.mordechai",{
     [core.E.UNIT_CREATED] = function(_, _, unit)
       mordechai = unit
       core:AddUnit(unit)
-      core:WatchUnit(unit, core.E.TRACK_CASTS_HEALTH)
+      core:WatchUnit(unit, core.E.TRACK_CASTS + core.E.TRACK_HEALTH)
       mod:AddCleaveLines()
     end,
     [core.E.HEALTH_CHANGED] = function(_, _, percent)
