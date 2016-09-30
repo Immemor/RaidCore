@@ -777,7 +777,7 @@ function RaidCore:CI_OnChangeWorld()
 end
 
 function RaidCore:CI_OnCharacterCreated()
-  ManagerCall("OnCharacterCreated")
+  ManagerCall(RaidCore.E.CHARACTER_CREATED)
 end
 
 function RaidCore:CI_OnSubZoneChanged(nZoneId, sZoneName)

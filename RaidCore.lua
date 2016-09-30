@@ -73,6 +73,11 @@ RaidCore.E = {
   LOCATION_LEFT_ASS = 34,
   LOCATION_RIGHT_ASS = 35,
   LOCATION_STATIC_CHEST = 40,
+  -- Core Events.
+  CHANGE_WORLD = "OnChangeWorld",
+  SUB_ZONE_CHANGE = "OnSubZoneChanged",
+  RECEIVED_MESSAGE = "OnReceivedMessage",
+  CHARACTER_CREATED = "OnCharacterCreated",
 }
 
 local EVENT_UNIT_NAME_INDEX = {
@@ -318,17 +323,17 @@ end
 function RaidCore:OnInitialize()
   _tMainFSMHandlers = {
     [MAIN_FSM__SEARCH] = {
-      ["OnChangeWorld"] = self.SEARCH_OnCheckMapZone,
-      ["OnSubZoneChanged"] = self.SEARCH_OnCheckMapZone,
-      ["OnCharacterCreated"] = self.SEARCH_OnCheckMapZone,
+      [RaidCore.E.CHANGE_WORLD] = self.SEARCH_OnCheckMapZone,
+      [RaidCore.E.SUB_ZONE_CHANGE] = self.SEARCH_OnCheckMapZone,
+      [RaidCore.E.CHARACTER_CREATED] = self.SEARCH_OnCheckMapZone,
       [RaidCore.E.UNIT_CREATED] = self.SEARCH_OnUnitCreated,
       [RaidCore.E.ENTERED_COMBAT] = self.SEARCH_OnEnteredCombat,
       [RaidCore.E.UNIT_DESTROYED] = self.SEARCH_OnUnitDestroyed,
-      ["OnReceivedMessage"] = self.SEARCH_OnReceivedMessage,
+      [RaidCore.E.RECEIVED_MESSAGE] = self.SEARCH_OnReceivedMessage,
     },
     [MAIN_FSM__RUNNING] = {
       [RaidCore.E.ENTERED_COMBAT] = self.RUNNING_OnEnteredCombat,
-      ["OnReceivedMessage"] = self.RUNNING_OnReceivedMessage,
+      [RaidCore.E.RECEIVED_MESSAGE] = self.RUNNING_OnReceivedMessage,
       [RaidCore.E.UNIT_DESTROYED] = self.RUNNING_OnUnitDestroyed,
     },
   }
