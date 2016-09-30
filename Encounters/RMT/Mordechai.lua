@@ -56,6 +56,7 @@ mod:RegisterDefaultSetting("WorldMarkerAnchor")
 mod:RegisterDefaultSetting("MarkerAnchorHP")
 mod:RegisterDefaultSetting("CrosshairShockingAttraction")
 mod:RegisterDefaultSetting("MarkerPurple")
+mod:RegisterDefaultSetting("LinePurple")
 -- Sounds.
 mod:RegisterDefaultSetting("SoundOrbSpawn")
 mod:RegisterDefaultSetting("SoundOrbLink")
@@ -238,16 +239,27 @@ mod:RegisterDatachronEvent("chron.airlock.closed", "EQUAL", function()
 
 mod:RegisterUnitEvents(core.E.ALL_UNITS, {
     [DEBUFF_KINETIC_LINK] = {
-      [core.E.DEBUFF_ADD] = function (self, id)
-        if id == playerUnit:GetId() and mod:GetSetting("MessageOrbLink") then
-          mod:AddMsg("KINETIC_LINK_MSG", "msg.orb.kinetic_link", 5, mod:GetSetting("SoundOrbLink") == true and "Burn")
-        end
+      [core.E.DEBUFF_ADD] = function (self, id, spellId, stack, timeRemaining, name, unitCaster)
         if mod:GetSetting("MarkerPurple") then
           core:MarkUnit(GetUnitById(id), core.E.LOCATION_STATIC_CHEST, "P", "xkcdPurplePink")
         end
+
+        if id ~= playerUnit:GetId() then -- not on myself
+          return
+        end
+
+        if mod:GetSetting("MessageOrbLink") then
+          mod:AddMsg("KINETIC_LINK_MSG", "msg.orb.kinetic_link", 5, mod:GetSetting("SoundOrbLink") == true and "Burn")
+        end
+
+        if mod:GetSetting("LinePurple") then
+          local casterId = unitCaster:GetId()
+          core:AddLineBetweenUnits("PURPLE_LINE_"..casterId, id, casterId, 7, "xkcdLightMagenta")
+        end
       end,
-      [core.E.DEBUFF_REMOVE] = function (self, id)
+      [core.E.DEBUFF_REMOVE] = function (self, id, spellId, name, unitCaster)
         core:DropMark(id)
+        core:RemoveLineBetweenUnits("PURPLE_LINE_"..unitCaster:GetId())
       end,
     },
     [DEBUFF_SHOCKING_ATTRACTION] = {
