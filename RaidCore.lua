@@ -115,6 +115,15 @@ RaidCore.E = {
   EVENT_NEXT_FRAME = "NextFrame",
   EVENT_WINDOWS_MANAGEMENT_READY = "WindowManagementReady",
   EVENT_CHARACTER_CREATED = "CharacterCreated",
+  -- Comm events. Using numbers for these instead to save bandwidth would break
+  -- compatibility with older versions of raidcore.
+  COMM_VERSION_CHECK_REQUEST = "VersionCheckRequest",
+  COMM_VERSION_CHECK_REPLY = "VersionCheckReply",
+  COMM_NEWEST_VERSION = "NewestVersion",
+  COMM_LAUNCH_PULL = "LaunchPull",
+  COMM_LAUNCH_BREAK = "LaunchBreak",
+  COMM_SYNC_SUMMON = "SyncSummon",
+  COMM_ENCOUNTER_IND = "Encounter_IND",
 }
 
 local EVENT_UNIT_NAME_INDEX = {
@@ -491,13 +500,13 @@ function RaidCore:ProcessMessage(tMessage, nSenderId)
   end
 
   local tAction2function = {
-    ["VersionCheckRequest"] = self.VersionCheckRequest,
-    ["VersionCheckReply"] = self.VersionCheckReply,
-    ["NewestVersion"] = self.NewestVersionRequest,
-    ["LaunchPull"] = self.LaunchPullRequest,
-    ["LaunchBreak"] = self.LaunchBreakRequest,
-    ["SyncSummon"] = self.SyncSummonRequest,
-    ["Encounter_IND"] = self.EncounterInd,
+    [RaidCore.E.COMM_VERSION_CHECK_REQUEST] = self.VersionCheckRequest,
+    [RaidCore.E.COMM_VERSION_CHECK_REPLY] = self.VersionCheckReply,
+    [RaidCore.E.COMM_NEWEST_VERSION] = self.NewestVersionRequest,
+    [RaidCore.E.COMM_LAUNCH_PULL] = self.LaunchPullRequest,
+    [RaidCore.E.COMM_LAUNCH_BREAK] = self.LaunchBreakRequest,
+    [RaidCore.E.COMM_SYNC_SUMMON] = self.SyncSummonRequest,
+    [RaidCore.E.COMM_ENCOUNTER_IND] = self.EncounterInd,
   }
   local func = tAction2function[tMessage.action]
   if func then
@@ -507,7 +516,7 @@ end
 
 function RaidCore:VersionCheckRequest(tMessage, nSenderId)
   local msg = {
-    action = "VersionCheckReply",
+    action = RaidCore.E.COMM_VERSION_CHECK_REPLY,
     version = ADDON_DATE_VERSION,
     tag = RAIDCORE_CURRENT_VERSION,
   }
@@ -832,7 +841,7 @@ function RaidCore:VersionCheck()
     self:Print(self.L["Checking version on group member."])
     VCReply[GetPlayerUnit():GetName()] = ADDON_DATE_VERSION
     local msg = {
-      action = "VersionCheckRequest",
+      action = RaidCore.E.COMM_VERSION_CHECK_REQUEST,
     }
     VCtimer = ApolloTimer.Create(5, false, "VersionCheckResults", self)
     self:SendMessage(msg)
@@ -879,7 +888,7 @@ function RaidCore:VersionCheckResults()
   end
   self:Print(self.L["%d members are up to date."]:format(nMemberWithLasted))
   -- Send Msg to oudated players.
-  local msg = {action = "NewestVersion", version = nMaxVersion}
+  local msg = {action = RaidCore.E.COMM_NEWEST_VERSION, version = nMaxVersion}
   self:SendMessage(msg)
   self:ProcessMessage(msg)
   VCtimer = nil
@@ -889,7 +898,7 @@ function RaidCore:LaunchPull(tArgc)
   local nTime = #tArgc >= 1 and tonumber(tArgc[1])
   nTime = nTime and nTime > 2 and nTime or 10
   local msg = {
-    action = "LaunchPull",
+    action = RaidCore.E.COMM_LAUNCH_PULL,
     cooldown = nTime,
   }
   self:SendMessage(msg)
@@ -904,7 +913,7 @@ function RaidCore:LaunchBreak(tArgc)
     local nTime = #tArgc >= 1 and tonumber(tArgc[1])
     nTime = nTime and nTime > 2 and nTime or 600
     local msg = {
-      action = "LaunchBreak",
+      action = RaidCore.E.COMM_LAUNCH_BREAK,
       cooldown = nTime
     }
     self:SendMessage(msg)
@@ -932,7 +941,7 @@ function RaidCore:SyncSummon()
     return false
   end
   local msg = {
-    action = "SyncSummon",
+    action = RaidCore.E.COMM_SYNC_SUMMON,
   }
   self:SendMessage(msg)
 end

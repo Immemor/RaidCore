@@ -468,7 +468,7 @@ end
 
 function EncounterPrototype:SendIndMessage(sReason, tData)
   local msg = {
-    action = "Encounter_IND",
+    action = RaidCore.E.COMM_ENCOUNTER_IND,
     reason = sReason,
     data = tData,
   }
