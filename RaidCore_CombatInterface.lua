@@ -503,6 +503,13 @@ end
 
 -- Track buff and cast of this unit.
 -- @param unit userdata object related to an unit in game.
+-- @param nTrackingType describes what kind of events should be tracked for this unit
+-- and different tracking types can be added together to enable multiple ones.
+-- After discovering what kind of events are needed for a unit it is advised to
+-- disable the other events to skip unneeded and performance intensive code.
+-- Currently supports TRACK_ALL, TRACK_BUFFS, TRACK_CASTS and TRACK_HEALTH
+-- :WatchUnit(unit, core.E.TRACK_ALL)
+-- :WatchUnit(unit, core.E.TRACK_CASTS + core.E.TRACK_BUFFS)
 function RaidCore:WatchUnit(unit, nTrackingType)
   TrackThisUnit(unit, nTrackingType)
 end
