@@ -122,7 +122,7 @@ end
 function mod:OnUnitCreated(nId, unit, sName)
   if sName == self.L["Maelstrom Authority"] then
     core:AddUnit(unit)
-    core:WatchUnit(unit)
+    core:WatchUnit(unit, core.E.TRACK_CASTS)
     if mod:GetSetting("LineCleaveBoss") then
       core:AddPixie(nId, 2, unit, nil, "Red", 10, 15, 0)
     end
