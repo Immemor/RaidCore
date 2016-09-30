@@ -93,7 +93,7 @@ local function FillLogGrid(tDumpLog)
     _wndLogGrid:SetCellText(idx, 2, tLog[2])
     _wndLogGrid:SetCellText(idx, 3, tLog[3])
     -- Increase error counter on error logged.
-    if tLog[2] == "ERROR" then
+    if tLog[2] == RaidCore.E.ERROR then
       nErrorCount = nErrorCount + 1
     end
   end

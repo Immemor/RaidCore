@@ -88,6 +88,8 @@ RaidCore.E = {
   COMPARE_EQUAL = 1,
   COMPARE_FIND = 2,
   COMPARE_MATCH = 3,
+  -- Log.
+  ERROR = "ERROR",
 }
 
 local EVENT_UNIT_NAME_INDEX = {
@@ -306,7 +308,7 @@ local function ProcessDelayedUnit()
           if RaidCore.db.profile.bLUAErrorMessage then
             RaidCore:Print(sErrMsg)
           end
-          Log:Add("ERROR", sErrMsg)
+          Log:Add(RaidCore.E.ERROR, sErrMsg)
         end
         if bInCombat then
           s, sErrMsg = pcall(OnEncounterHookGeneric, RaidCore.E.ENTERED_COMBAT, nDelayedId, tUnit, nDelayedName, bInCombat)
@@ -314,7 +316,7 @@ local function ProcessDelayedUnit()
             if RaidCore.db.profile.bLUAErrorMessage then
               RaidCore:Print(sErrMsg)
             end
-            Log:Add("ERROR", sErrMsg)
+            Log:Add(RaidCore.E.ERROR, sErrMsg)
           end
         end
       end
@@ -921,7 +923,7 @@ function RaidCore:GlobalEventHandler(sMethod, ...)
       if self.db.profile.bLUAErrorMessage then
         self:Print(sErrMsg)
       end
-      Log:Add("ERROR", sErrMsg)
+      Log:Add(RaidCore.E.ERROR, sErrMsg)
     end
   end
   -- Call the FSM handler, if needed.

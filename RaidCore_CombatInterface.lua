@@ -96,13 +96,13 @@ local function ManagerCall(sMethod, ...)
     --@alpha@
     Print(sMethod .. ": " .. sErrMsg)
     --@end-alpha@
-    Log:Add("ERROR", sErrMsg)
+    Log:Add(RaidCore.E.ERROR, sErrMsg)
   end
 end
 
 local function ExtraLog2Text(k, nRefTime, tParam)
   local sResult = ""
-  if k == "ERROR" then
+  if k == RaidCore.E.ERROR then
     sResult = tParam[1]
   elseif k == "OnDebuffAdd" or k == "OnBuffAdd" then
     local sSpellName = GetSpell(tParam[2]):GetName():gsub(NO_BREAK_SPACE, " ")
@@ -483,7 +483,7 @@ function RaidCore:CombatInterface_ExtraActivate(sEvent, bNewState)
         _CI_Extra[sEvent] = nil
       end
     else
-      Log:Add("ERROR", ("Extra event '%s' is not supported"):format(sEvent))
+      Log:Add(RaidCore.E.ERROR, ("Extra event '%s' is not supported"):format(sEvent))
     end
 
   end
