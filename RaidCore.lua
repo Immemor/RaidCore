@@ -118,7 +118,6 @@ local _bIsEncounterInProgress = false
 local _tCurrentEncounter = nil
 local _eCurrentFSM
 local _tMainFSMHandlers
-local trackMaster = Apollo.GetAddon("TrackMaster")
 local markCount = 0
 local VCReply, VCtimer = {}, nil
 
@@ -659,12 +658,6 @@ function RaidCore:SetWorldMarker(key, sText, tPosition)
     self:UpdateWorldMarker(key, sLocalizedTest, tPosition)
   elseif tWorldMarker and not sLocalizedTest and not tPosition then
     self:DropWorldMarker(key)
-  end
-end
-
-function RaidCore:SetTarget(position)
-  if trackMaster ~= nil then
-    trackMaster:SetTarget(position)
   end
 end
 
