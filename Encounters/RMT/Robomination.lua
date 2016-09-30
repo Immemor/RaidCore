@@ -191,7 +191,7 @@ function mod:OnBossEnable()
   mod:DrawCompactorGrid()
 end
 
-mod:RegisterDatachronEvent("chron.robo.snake", "MATCH", function(self, _, snakeTargetName)
+mod:RegisterDatachronEvent("chron.robo.snake", core.E.COMPARE_MATCH, function(self, _, snakeTargetName)
     local snakeTarget = GetPlayerUnitByName(snakeTargetName)
     local isOnMyself = snakeTarget == playerUnit
     local isSnakeNearYou = not isOnMyself and mod:GetDistanceBetweenUnits(playerUnit, snakeTarget) < 10
@@ -218,7 +218,7 @@ mod:RegisterDatachronEvent("chron.robo.snake", "MATCH", function(self, _, snakeT
   end
 )
 
-mod:RegisterDatachronEvent("chron.robo.hides", "EQUAL", function ()
+mod:RegisterDatachronEvent("chron.robo.hides", core.E.COMPARE_EQUAL, function()
     phase = MAZE_PHASE
     mod:RemoveTimerBar("NEXT_SNAKE_TIMER")
     mod:RemoveTimerBar("NEXT_INCINERATE_TIMER")
@@ -234,7 +234,7 @@ mod:RegisterDatachronEvent("chron.robo.hides", "EQUAL", function ()
   end
 )
 
-mod:RegisterDatachronEvent("chron.robo.shows", "EQUAL", function ()
+mod:RegisterDatachronEvent("chron.robo.shows", core.E.COMPARE_EQUAL, function()
     phase = DPS_PHASE
     core:RemoveLineBetweenUnits("ROBO_MAZE_LINE")
     mod:AddTimerBar("NEXT_SNAKE_TIMER", "msg.snake.next", FIRST_SNAKE_TIMER)
@@ -245,7 +245,7 @@ mod:RegisterDatachronEvent("chron.robo.shows", "EQUAL", function ()
   end
 )
 
-mod:RegisterDatachronEvent("chron.robo.laser", "MATCH", function(self, _, laserTargetName)
+mod:RegisterDatachronEvent("chron.robo.laser", core.E.COMPARE_MATCH, function(self, _, laserTargetName)
     local laserTarget = GetPlayerUnitByName(laserTargetName)
     local isOnMyself = laserTarget == playerUnit
     local laserOnX

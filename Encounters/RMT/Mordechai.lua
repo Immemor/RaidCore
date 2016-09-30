@@ -271,7 +271,7 @@ mod:RegisterUnitEvents("unit.orb",{
   }
 )
 
-mod:RegisterDatachronEvent("chron.airlock.closed", "EQUAL", function()
+mod:RegisterDatachronEvent("chron.airlock.closed", core.E.COMPARE_EQUAL, function()
     isAirPhase = false
     mod:AddCleaveLines()
     mod:AddTimerBar("NEXT_SHURIKEN_TIMER", "msg.mordechai.shuriken.next", FIRST_SHURIKEN_TIMER, mod:GetSetting("SoundShurikenCountdown"))

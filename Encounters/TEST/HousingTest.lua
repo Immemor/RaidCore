@@ -162,32 +162,32 @@ local EXPECTED_DATACHRON_RESULTS = {
   {
     registerMessage = "chron.equal.first",
     message = "chron.equal.first",
-    match = "EQUAL",
+    match = core.E.COMPARE_EQUAL,
     result = true,
     },{
     registerMessage = "chron.equal.second",
     message = "chron.equal.second",
-    match = "EQUAL",
+    match = core.E.COMPARE_EQUAL,
     result = true,
     },{
     registerMessage = "chron.find.first.partial",
     message = "chron.find.first.full",
-    match = "FIND",
+    match = core.E.COMPARE_FIND,
     result = 4,
     },{
     registerMessage = "chron.find.second.partial",
     message = "chron.find.second.full",
-    match = "FIND",
+    match = core.E.COMPARE_FIND,
     result = 10,
     },{
     registerMessage = "chron.match.first.partial",
     message = "chron.match.first.full",
-    match = "MATCH",
+    match = core.E.COMPARE_MATCH,
     result = "Zod Bain",
     },{
     registerMessage = "chron.match.second.partial",
     message = "chron.match.second.full",
-    match = "MATCH",
+    match = core.E.COMPARE_MATCH,
     result = "Zod Bain",
   },
 }

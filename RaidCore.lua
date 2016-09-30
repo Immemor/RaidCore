@@ -84,6 +84,10 @@ RaidCore.E = {
   INTERFACE_DETECTALL = 3,
   INTERFACE_LIGHTENABLE = 4,
   INTERFACE_FULLENABLE = 5,
+  -- Comparism types.
+  COMPARE_EQUAL = 1,
+  COMPARE_FIND = 2,
+  COMPARE_MATCH = 3,
 }
 
 local EVENT_UNIT_NAME_INDEX = {
@@ -202,15 +206,15 @@ local function OnEncounterDatachronEvents(sMethod, ...)
     local nSize = #tEvents
     for i = 1, nSize do
       local tEvent = tEvents[i]
-      local sMatch = tEvent.sMatch
+      local compareType = tEvent.compareType
       local fHandler = tEvent.fHandler
       local result = nil
 
-      if sMatch == "EQUAL" then
+      if compareType == RaidCore.E.COMPARE_EQUAL then
         result = sSearchMessage == sMessage or nil
-      elseif sMatch == "FIND" then
+      elseif compareType == RaidCore.E.COMPARE_FIND then
         result = sMessage:find(sSearchMessage)
-      elseif sMatch == "MATCH" then
+      elseif compareType == RaidCore.E.COMPARE_MATCH then
         result = sMessage:match(sSearchMessage)
       end
 

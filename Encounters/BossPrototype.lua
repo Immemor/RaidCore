@@ -215,17 +215,21 @@ end
 
 -- Register events to a datachron message
 -- @param sSearchMessage The message or parts of it
--- @param sMatch "MATCH" or "FIND" for comparing the sSearchMessage
+-- @param compareType COMPARE_EQUAL, COMPARE_FIND or COMPARE_MATCH for comparing the sSearchMessage
 -- @param fHandler Function to handle the event
 --
 -- Note: If the English translation is not found, the current string will be used like that.
-function EncounterPrototype:RegisterDatachronEvent(sSearchMessage, sMatch, fHandler)
+function EncounterPrototype:RegisterDatachronEvent(sSearchMessage, compareType, fHandler)
   assert(type(sSearchMessage) == "string")
   assert(type(fHandler) == "function")
-  assert(sMatch == "MATCH" or sMatch == "FIND" or sMatch == "EQUAL")
+  assert(
+    compareType == RaidCore.E.COMPARE_MATCH or
+    compareType == RaidCore.E.COMPARE_FIND or
+    compareType == RaidCore.E.COMPARE_EQUAL
+  )
   sSearchMessage = self.L[sSearchMessage]
   self.tDatachronEvents = DeepInit(self.tDatachronEvents, sSearchMessage)
-  table.insert(self.tDatachronEvents[sSearchMessage], {fHandler = fHandler, sMatch = sMatch })
+  table.insert(self.tDatachronEvents[sSearchMessage], {fHandler = fHandler, compareType = compareType })
 end
 
 -- Register events to a single unit
