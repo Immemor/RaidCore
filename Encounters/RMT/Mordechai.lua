@@ -230,7 +230,7 @@ mod:RegisterDatachronEvent("chron.airlock.closed", "EQUAL", function()
     mod:AddCleaveLines()
     mod:AddTimerBar("NEXT_SHURIKEN_TIMER", "msg.mordechai.shuriken.next", FIRST_SHURIKEN_TIMER, mod:GetSetting("SoundShurikenCountdown"))
     mod:AddTimerBar("NEXT_ORB_TIMER", "msg.orb.next", FIRST_ORB_MIDPHASE_TIMER)
-    if numberOfAirPhases > 2 then
+    if numberOfAirPhases >= 2 then
       mod:AddTimerBar("NEXT_BARRAGE_TIMER", "msg.mordechai.barrage.next", FIRST_BARRAGE_TIMER)
     end
     mod:AddAnchorWorldMarkers()
