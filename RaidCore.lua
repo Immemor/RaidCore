@@ -78,6 +78,12 @@ RaidCore.E = {
   SUB_ZONE_CHANGE = "OnSubZoneChanged",
   RECEIVED_MESSAGE = "OnReceivedMessage",
   CHARACTER_CREATED = "OnCharacterCreated",
+  -- Combat Interface States.
+  INTERFACE_DISABLE = 1,
+  INTERFACE_DETECTCOMBAT = 2,
+  INTERFACE_DETECTALL = 3,
+  INTERFACE_LIGHTENABLE = 4,
+  INTERFACE_FULLENABLE = 5,
 }
 
 local EVENT_UNIT_NAME_INDEX = {
@@ -942,9 +948,9 @@ function RaidCore:SEARCH_OnCheckMapZone()
         end
       end
       if bSearching then
-        self:CombatInterface_Activate("DetectAll")
+        self:CombatInterface_Activate(RaidCore.E.INTERFACE_DETECTALL)
       else
-        self:CombatInterface_Activate("Disable")
+        self:CombatInterface_Activate(RaidCore.E.INTERFACE_DISABLE)
       end
     else
       self:ScheduleTimer("SEARCH_OnCheckMapZone", 5)
@@ -960,7 +966,7 @@ function RaidCore:SEARCH_OnEnteredCombat(nId, tUnit, sName, bInCombat)
       _bIsEncounterInProgress = true
       -- Enable CombatInterface now to be able to log a combat
       -- not registered.
-      self:CombatInterface_Activate("FullEnable")
+      self:CombatInterface_Activate(RaidCore.E.INTERFACE_FULLENABLE)
       SearchEncounter()
       if _tCurrentEncounter and not _tCurrentEncounter:IsEnabled() then
         _eCurrentFSM = MAIN_FSM__RUNNING
@@ -1026,7 +1032,7 @@ function RaidCore:RUNNING_WipeCheck()
       return
     end
   end
-  self:CombatInterface_Activate("DetectAll")
+  self:CombatInterface_Activate(RaidCore.E.INTERFACE_DETECTALL)
   _bIsEncounterInProgress = false
   if _tCurrentEncounter then
     _tCurrentEncounter:Disable()

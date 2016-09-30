@@ -63,19 +63,7 @@ local SPELLID_BLACKLISTED = {
   [84397] = "Unbreakable", -- Engineer cheat death
   [82748] = "Unbreakable", -- Engineer cheat death cooldown
 }
--- State Machine.
-local INTERFACE__DISABLE = 1
-local INTERFACE__DETECTCOMBAT = 2
-local INTERFACE__DETECTALL = 3
-local INTERFACE__LIGHTENABLE = 4
-local INTERFACE__FULLENABLE = 5
-local INTERFACE_STATES = {
-  ["Disable"] = INTERFACE__DISABLE,
-  ["DetectCombat"] = INTERFACE__DETECTCOMBAT,
-  ["DetectAll"] = INTERFACE__DETECTALL,
-  ["LightEnable"] = INTERFACE__LIGHTENABLE,
-  ["FullEnable"] = INTERFACE__FULLENABLE,
-}
+
 local EXTRA_HANDLER_ALLOWED = {
   ["CombatLogHeal"] = "CI_OnCombatLogHeal",
 }
@@ -391,23 +379,23 @@ end
 
 local function InterfaceSwitch(to)
   RemoveAllExtraActivation()
-  if to == INTERFACE__DISABLE then
+  if to == RaidCore.E.INTERFACE_DISABLE then
     UnitInCombatActivate(false)
     UnitScanActivate(false)
     FullActivate(false)
-  elseif to == INTERFACE__DETECTCOMBAT then
+  elseif to == RaidCore.E.INTERFACE_DETECTCOMBAT then
     UnitInCombatActivate(true)
     UnitScanActivate(false)
     FullActivate(false)
-  elseif to == INTERFACE__DETECTALL then
+  elseif to == RaidCore.E.INTERFACE_DETECTALL then
     UnitInCombatActivate(true)
     UnitScanActivate(true)
     FullActivate(false)
-  elseif to == INTERFACE__LIGHTENABLE then
+  elseif to == RaidCore.E.INTERFACE_LIGHTENABLE then
     UnitInCombatActivate(true)
     UnitScanActivate(false)
     FullActivate(true)
-  elseif to == INTERFACE__FULLENABLE then
+  elseif to == RaidCore.E.INTERFACE_FULLENABLE then
     UnitInCombatActivate(true)
     UnitScanActivate(true)
     FullActivate(true)
@@ -474,21 +462,18 @@ function RaidCore:CombatInterface_Init()
   RegisterEventHandler("CharacterCreated", "CI_OnCharacterCreated", self)
   RegisterEventHandler("SubZoneChanged", "CI_OnSubZoneChanged", self)
 
-  InterfaceSwitch(INTERFACE__DISABLE)
+  InterfaceSwitch(RaidCore.E.INTERFACE_DISABLE)
   self.wndBarItem = Apollo.LoadForm(self.xmlDoc, "ActionBarShortcutItem", "FixedHudStratum", self)
   self.ActionBarShortcutBtn = self.wndBarItem:FindChild("ActionBarShortcutBtn")
 end
 
-function RaidCore:CombatInterface_Activate(sState)
-  local nState = INTERFACE_STATES[sState]
-  if nState then
-    InterfaceSwitch(nState)
-  end
+function RaidCore:CombatInterface_Activate(nState)
+  InterfaceSwitch(nState)
 end
 
 function RaidCore:CombatInterface_ExtraActivate(sEvent, bNewState)
   assert(type(sEvent) == "string")
-  if _CI_State == INTERFACE__LIGHTENABLE or _CI_State == INTERFACE__FULLENABLE then
+  if _CI_State == RaidCore.E.INTERFACE_LIGHTENABLE or _CI_State == RaidCore.E.INTERFACE_FULLENABLE then
     if EXTRA_HANDLER_ALLOWED[sEvent] then
       if not _CI_Extra[sEvent] and bNewState then
         _CI_Extra[sEvent] = true
