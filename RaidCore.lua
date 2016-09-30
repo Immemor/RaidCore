@@ -20,7 +20,6 @@ local Log = Apollo.GetPackage("Log-1.0").tPackage
 -- Copy of few objects to reduce the cpu load.
 -- Because all local objects are faster.
 --------------------------------------------------------------------B--------------------------------
-local GetPlayerUnitByName = GameLib.GetPlayerUnitByName
 local GetPlayerUnit = GameLib.GetPlayerUnit
 local GetUnitById = GameLib.GetUnitById
 local GetCurrentZoneMap = GameLib.GetCurrentZoneMap
@@ -33,9 +32,6 @@ local next, pcall = next, pcall
 local RAIDCORE_CURRENT_VERSION = "6.2.8"
 -- Should be deleted.
 local ADDON_DATE_VERSION = 16102618
--- Sometimes Carbine have inserted some no-break-space, for fun.
--- Behavior seen with French language. This problem is not present in English.
-local NO_BREAK_SPACE = string.char(194, 160)
 
 local MYCOLORS = {
   ["Blue"] = "FF0066FF",
@@ -114,7 +110,6 @@ local EVENT_UNIT_SPELL_ID_INDEX = {
 ----------------------------------------------------------------------------------------------------
 -- Privates variables.
 ----------------------------------------------------------------------------------------------------
-local _wndrclog = nil
 local _tWipeTimer
 local _tTrigPerZone = {}
 local _tEncountersPerZone = {}
@@ -122,12 +117,10 @@ local _tDelayedUnits = {}
 local _bIsEncounterInProgress = false
 local _tCurrentEncounter = nil
 local _eCurrentFSM
-local _tEncounterHookHandlers
 local _tMainFSMHandlers
 local trackMaster = Apollo.GetAddon("TrackMaster")
 local markCount = 0
 local VCReply, VCtimer = {}, nil
-local empCD, empTimer = 5, nil
 
 ----------------------------------------------------------------------------------------------------
 -- Privates functions
@@ -1107,7 +1100,6 @@ function RaidCore:OnStopTestScenario()
   self:RemovePolygon("TEST1")
   self:RemovePicture("TEST1")
   for i = 1, 36 do
-    local nForce = i / 36.0
     self:RemoveSimpleLine(("TEST%d"):format(i))
   end
   self:RemoveMsg("TEST1")
