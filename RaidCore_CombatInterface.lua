@@ -46,10 +46,10 @@ local SCAN_PERIOD = 0.1 -- in seconds.
 local CHANNEL_HANDLERS = {
   [ChatSystemLib.ChatChannel_Say] = nil,
   [ChatSystemLib.ChatChannel_Party] = nil,
-  [ChatSystemLib.ChatChannel_NPCSay] = "OnNPCSay",
-  [ChatSystemLib.ChatChannel_NPCYell] = "OnNPCYell",
-  [ChatSystemLib.ChatChannel_NPCWhisper] = "OnNPCWhisper",
-  [ChatSystemLib.ChatChannel_Datachron] = "OnDatachron",
+  [ChatSystemLib.ChatChannel_NPCSay] = RaidCore.E.NPC_SAY,
+  [ChatSystemLib.ChatChannel_NPCYell] = RaidCore.E.NPC_YELL,
+  [ChatSystemLib.ChatChannel_NPCWhisper] = RaidCore.E.NPC_WHISPER,
+  [ChatSystemLib.ChatChannel_Datachron] = RaidCore.E.DATACHRON,
 }
 local SPELLID_BLACKLISTED = {
   [79757] = "Kinetic Rage: Augmented Blade", -- Warrior
@@ -104,69 +104,67 @@ local function ExtraLog2Text(k, nRefTime, tParam)
   local sResult = ""
   if k == RaidCore.E.ERROR then
     sResult = tParam[1]
-  elseif k == "OnDebuffAdd" or k == "OnBuffAdd" then
+  elseif k == RaidCore.E.DEBUFF_ADD or k == RaidCore.E.BUFF_ADD then
     local sSpellName = GetSpell(tParam[2]):GetName():gsub(NO_BREAK_SPACE, " ")
     local sFormat = "Id=%u SpellName='%s' SpellId=%u Stack=%d fTimeRemaining=%.2f sName=\"%s\""
     sResult = sFormat:format(tParam[1], sSpellName, tParam[2], tParam[3], tParam[4], tParam[5])
-  elseif k == "OnDebuffRemove" or k == "OnBuffRemove" then
+  elseif k == RaidCore.E.DEBUFF_REMOVE or k == RaidCore.E.BUFF_REMOVE then
     local sSpellName = GetSpell(tParam[2]):GetName():gsub(NO_BREAK_SPACE, " ")
     local sFormat = "Id=%u SpellName='%s' SpellId=%u sName=\"%s\""
     sResult = sFormat:format(tParam[1], sSpellName, tParam[2], tParam[3])
-  elseif k == "OnDebuffUpdate" or k == "OnBuffUpdate" then
+  elseif k == RaidCore.E.DEBUFF_UPDATE or k == RaidCore.E.BUFF_UPDATE then
     local sSpellName = GetSpell(tParam[2]):GetName():gsub(NO_BREAK_SPACE, " ")
     local sFormat = "Id=%u SpellName='%s' SpellId=%u Stack=%d fTimeRemaining=%.2f sName=\"%s\""
     sResult = sFormat:format(tParam[1], sSpellName, tParam[2], tParam[3], tParam[4], tParam[5])
-  elseif k == "OnCastStart" then
+  elseif k == RaidCore.E.CAST_START then
     local nCastEndTime = tParam[3] - nRefTime
     local sFormat = "Id=%u CastName='%s' CastEndTime=%.3f sName=\"%s\""
     sResult = sFormat:format(tParam[1], tParam[2], nCastEndTime, tParam[4])
-  elseif k == "OnCastEnd" then
+  elseif k == RaidCore.E.CAST_END then
     local nCastEndTime = tParam[4] - nRefTime
     local sFormat = "Id=%u CastName='%s' IsInterrupted=%s CastEndTime=%.3f sName=\"%s\""
     sResult = sFormat:format(tParam[1], tParam[2], tostring(tParam[3]), nCastEndTime, tParam[5])
-  elseif k == "OnUnitCreated" then
+  elseif k == RaidCore.E.UNIT_CREATED then
     local sFormat = "Id=%u Unit='%s'"
     sResult = sFormat:format(tParam[1], tParam[3])
-  elseif k == "OnUnitDestroyed" then
+  elseif k == RaidCore.E.UNIT_DESTROYED then
     local sFormat = "Id=%u Unit='%s'"
     sResult = sFormat:format(tParam[1], tParam[3])
-  elseif k == "OnEnteredCombat" then
+  elseif k == RaidCore.E.ENTERED_COMBAT then
     local sFormat = "Id=%u Unit='%s' InCombat=%s"
     sResult = sFormat:format(tParam[1], tParam[3], tostring(tParam[4]))
-  elseif k == "OnNPCSay" or k == "OnNPCYell" or k == "OnNPCWhisper" or k == "OnDatachron" then
+  elseif k == RaidCore.E.NPC_SAY or k == RaidCore.E.NPC_YELL or k == RaidCore.E.NPC_WHISPER or k == RaidCore.E.DATACHRON then
     local sFormat = "sMessage='%s' sSender='%s'"
     sResult = sFormat:format(tParam[1], tParam[2])
-  elseif k == "TrackThisUnit" or k == "UnTrackThisUnit" then
+  elseif k == RaidCore.E.TRACK_UNIT or k == RaidCore.E.UNTRACK_UNIT then
     sResult = ("Id='%s'"):format(tParam[1])
-  elseif k == "WARNING tUnit reference changed" then
-    sResult = ("OldId=%u NewId=%u"):format(tParam[1], tParam[2])
-  elseif k == "OnShowShortcutBar" then
+  elseif k == RaidCore.E.SHOW_SHORTCUT_BAR then
     sResult = "sIcon=" .. table.concat(tParam[1], ", ")
-  elseif k == "SendMessage" then
+  elseif k == RaidCore.E.SEND_MESSAGE then
     local sFormat = "sMsg=\"%s\" to=\"%s\""
     sResult = sFormat:format(tParam[1], tostring(tParam[2]))
-  elseif k == "OnReceivedMessage" then
+  elseif k == RaidCore.E.RECEIVED_MESSAGE then
     local sFormat = "sMsg=\"%s\" SenderId=%s"
     sResult = sFormat:format(tParam[1], tostring(tParam[2]))
-  elseif k == "ChannelCommStatus" then
+  elseif k == RaidCore.E.CHANNEL_COMM_STATUS then
     sResult = tParam[1]
-  elseif k == "SendMessageResult" then
+  elseif k == RaidCore.E.SEND_MESSAGE_RESULT then
     sResult = ("sResult=\"%s\" MsgId=%d"):format(tParam[1], tParam[2])
-  elseif k == "JoinChannelTry" then
+  elseif k == RaidCore.E.JOIN_CHANNEL_TRY then
     sResult = ("ChannelName=\"%s\" ChannelType=\"%s\""):format(tParam[1], tParam[2])
-  elseif k == "JoinChannelStatus" then
+  elseif k == RaidCore.E.JOIN_CHANNEL_STATUS then
     local sFormat = "Result=\"%s\""
     sResult = sFormat:format(tParam[1])
-  elseif k == "OnCombatLogHeal" then
+  elseif k == RaidCore.E.COMBAT_LOG_HEAL then
     local sFormat = "CasterId=%s TargetId=%s sCasterName=\"%s\" sTargetName=\"%s\" nHealAmount=%u nOverHeal=%u nSpellId=%u"
     sResult = sFormat:format(tostring(tParam[1]), tostring(tParam[2]), tParam[3], tParam[4], tParam[5], tParam[6], tParam[7])
-  elseif k == "OnHealthChanged" then
+  elseif k == RaidCore.E.HEALTH_CHANGED then
     local sFormat = "Id=%u nPercent=%.2f sName=\"%s\""
     sResult = sFormat:format(tParam[1], tParam[2], tParam[3])
-  elseif k == "OnSubZoneChanged" then
+  elseif k == RaidCore.E.SUB_ZONE_CHANGE then
     local sFormat = "ZoneId=%u ZoneName=\"%s\""
     sResult = sFormat:format(tParam[1], tParam[2])
-  elseif k == "CurrentZoneMap" then
+  elseif k == RaidCore.E.CURRENT_ZONE_MAP then
     local sFormat = "ContinentId=%u ZoneId=%u Id=%u"
     sResult = sFormat:format(tParam[1], tParam[2], tParam[3])
   end
@@ -213,7 +211,7 @@ local function TrackThisUnit(tUnit, nTrackingType)
   end
 
   if not _tTrackedUnits[nId] and not tUnit:IsInYourGroup() then
-    Log:Add("TrackThisUnit", nId)
+    Log:Add(RaidCore.E.TRACK_UNIT, nId)
     local MaxHealth = tUnit:GetMaxHealth()
     local Health = tUnit:GetHealth()
     local tBuffs = GetBuffs(tUnit)
@@ -241,7 +239,7 @@ end
 
 local function UnTrackThisUnit(nId)
   if _tTrackedUnits[nId] then
-    Log:Add("UnTrackThisUnit", nId)
+    Log:Add(RaidCore.E.UNTRACK_UNIT, nId)
     _tTrackedUnits[nId] = nil
   end
 end
@@ -261,19 +259,19 @@ local function PollUnitBuffs(tMyUnit)
       if tNew.nCount ~= current.nCount then
         tBuffs[nIdBuff].nCount = tNew.nCount
         tBuffs[nIdBuff].fTimeRemaining = tNew.fTimeRemaining
-        ManagerCall("OnBuffUpdate", nId, current.nSpellId, tNew.nCount, tNew.fTimeRemaining, sName, current.unitCaster)
+        ManagerCall(RaidCore.E.BUFF_UPDATE, nId, current.nSpellId, tNew.nCount, tNew.fTimeRemaining, sName, current.unitCaster)
       end
       -- Remove this entry for second loop.
       tNewBuffs[nIdBuff] = nil
     else
       tBuffs[nIdBuff] = nil
-      ManagerCall("OnBuffRemove", nId, current.nSpellId, sName, current.unitCaster)
+      ManagerCall(RaidCore.E.BUFF_REMOVE, nId, current.nSpellId, sName, current.unitCaster)
     end
   end
 
   for nIdBuff, tNew in next, tNewBuffs do
     tBuffs[nIdBuff] = tNew
-    ManagerCall("OnBuffAdd", nId, tNew.nSpellId, tNew.nCount, tNew.fTimeRemaining, sName, tNew.unitCaster)
+    ManagerCall(RaidCore.E.BUFF_ADD, nId, tNew.nSpellId, tNew.nCount, tNew.fTimeRemaining, sName, tNew.unitCaster)
   end
 end
 
@@ -300,21 +298,21 @@ function RaidCore:CI_OnBuff(tUnit, tBuff, sMsgBuff, sMsgDebuff)
 end
 
 function RaidCore:CI_OnBuffAdded(tUnit, tBuff)
-  local sEvent, nUnitId, nSpellId, sName = self:CI_OnBuff(tUnit, tBuff, "OnBuffAdd", "OnDebuffAdd")
+  local sEvent, nUnitId, nSpellId, sName = self:CI_OnBuff(tUnit, tBuff, RaidCore.E.BUFF_ADD, RaidCore.E.DEBUFF_ADD)
   if nUnitId then
     ManagerCall(sEvent, nUnitId, nSpellId, tBuff.nCount, tBuff.fTimeRemaining, sName, tBuff.unitCaster)
   end
 end
 
 function RaidCore:CI_OnBuffUpdated(tUnit, tBuff)
-  local sEvent, nUnitId, nSpellId, sName = self:CI_OnBuff(tUnit, tBuff, "OnBuffUpdate", "OnDebuffUpdate")
+  local sEvent, nUnitId, nSpellId, sName = self:CI_OnBuff(tUnit, tBuff, RaidCore.E.BUFF_UPDATE, RaidCore.E.DEBUFF_UPDATE)
   if nUnitId then
     ManagerCall(sEvent, nUnitId, nSpellId, tBuff.nCount, tBuff.fTimeRemaining, sName, tBuff.unitCaster)
   end
 end
 
 function RaidCore:CI_OnBuffRemoved(tUnit, tBuff)
-  local sEvent, nUnitId, nSpellId, sName = self:CI_OnBuff(tUnit, tBuff, "OnBuffRemove", "OnDebuffRemove")
+  local sEvent, nUnitId, nSpellId, sName = self:CI_OnBuff(tUnit, tBuff, RaidCore.E.BUFF_REMOVE, RaidCore.E.DEBUFF_REMOVE)
   if nUnitId then
     ManagerCall(sEvent, nUnitId, nSpellId, sName, tBuff.unitCaster)
   end
@@ -407,7 +405,7 @@ end
 -- ICCom functions.
 ----------------------------------------------------------------------------------------------------
 local function JoinSuccess()
-  Log:Add("JoinChannelStatus", "Join Success")
+  Log:Add(RaidCore.E.JOIN_CHANNEL_STATUS, "Join Success")
   _CommChannelTimer:Stop()
   _RaidCoreChannelComm:SetReceivedMessageFunction("CI_OnReceivedMessage", RaidCore)
   _RaidCoreChannelComm:SetSendMessageResultFunction("CI_OnSendMessageResult", RaidCore)
@@ -418,7 +416,7 @@ function RaidCore:CI_JoinChannelTry()
   local sChannelName = "RaidCore"
 
   -- Log this try.
-  Log:Add("JoinChannelTry", sChannelName, "Group")
+  Log:Add(RaidCore.E.JOIN_CHANNEL_TRY, sChannelName, "Group")
   -- Request to join the channel.
   _RaidCoreChannelComm = ICCommLib.JoinChannel(sChannelName, eChannelType)
   -- Start a timer to retry to join.
@@ -429,7 +427,7 @@ function RaidCore:CI_JoinChannelTry()
     if _RaidCoreChannelComm:IsReady() then
       JoinSuccess()
     else
-      Log:Add("JoinChannelStatus", "In Progress")
+      Log:Add(RaidCore.E.JOIN_CHANNEL_STATUS, "In Progress")
       _RaidCoreChannelComm:SetJoinResultFunction("CI_OnJoinResultFunction", RaidCore)
     end
   end
@@ -441,7 +439,7 @@ function RaidCore:CI_OnJoinResultFunction(tChannel, eResult)
   else
     for sJoinResult, ResultId in next, ICCommLib.CodeEnumICCommJoinResult do
       if ResultId == eResult then
-        Log:Add("JoinChannelStatus", sJoinResult)
+        Log:Add(RaidCore.E.JOIN_CHANNEL_STATUS, sJoinResult)
         break
       end
     end
@@ -517,21 +515,21 @@ function RaidCore:CombatInterface_SendMessage(sMessage, tDPlayerId)
   assert(type(tDPlayerId) == "number" or tDPlayerId == nil)
 
   if not _RaidCoreChannelComm then
-    Log:Add("ChannelCommStatus", "Channel not found")
+    Log:Add(RaidCore.E.CHANNEL_COMM_STATUS, "Channel not found")
   elseif tDPlayerId == nil then
     -- Broadcast the message on RaidCore Channel (type: Group).
     _RaidCoreChannelComm:SendMessage(sMessage)
-    Log:Add("SendMessage", sMessage, tDPlayerId)
+    Log:Add(RaidCore.E.SEND_MESSAGE, sMessage, tDPlayerId)
   else
     -- Send the message to this player.
     local tPlayerUnit = GetUnitById(tDPlayerId)
     if not tPlayerUnit then
-      Log:Add("ChannelCommStatus", "Send aborded by Unknown ID")
+      Log:Add(RaidCore.E.CHANNEL_COMM_STATUS, "Send aborded by Unknown ID")
     elseif not tPlayerUnit:IsInYourGroup() then
-      Log:Add("ChannelCommStatus", "Send aborded by invalid PlayerUnit")
+      Log:Add(RaidCore.E.CHANNEL_COMM_STATUS, "Send aborded by invalid PlayerUnit")
     else
       _RaidCoreChannelComm:SendPrivateMessage(tPlayerUnit:GetName(), sMessage)
-      Log:Add("SendMessage", sMessage, tDPlayerId)
+      Log:Add(RaidCore.E.SEND_MESSAGE, sMessage, tDPlayerId)
     end
   end
 end
@@ -547,11 +545,11 @@ function RaidCore:CI_OnEnteredCombat(tUnit, bInCombat)
     local sName = string.gsub(tUnit:GetName(), NO_BREAK_SPACE, " ")
     if not self:IsUnitInGroup(tUnit) then
       if not _tAllUnits[nId] then
-        ManagerCall("OnUnitCreated", nId, tUnit, sName)
+        ManagerCall(RaidCore.E.UNIT_CREATED, nId, tUnit, sName)
       end
       _tAllUnits[nId] = true
     end
-    ManagerCall("OnEnteredCombat", nId, tUnit, sName, bInCombat)
+    ManagerCall(RaidCore.E.ENTERED_COMBAT, nId, tUnit, sName, bInCombat)
   end
 end
 
@@ -563,7 +561,7 @@ function RaidCore:CI_OnUnitCreated(tUnit)
     local bIsPetPlayer = tOwner and self:IsUnitInGroup(tOwner)
     if not bIsPetPlayer and not _tAllUnits[nId] then
       _tAllUnits[nId] = true
-      ManagerCall("OnUnitCreated", nId, tUnit, sName)
+      ManagerCall(RaidCore.E.UNIT_CREATED, nId, tUnit, sName)
     end
   end
 end
@@ -574,7 +572,7 @@ function RaidCore:CI_OnUnitDestroyed(tUnit)
     _tAllUnits[nId] = nil
     UnTrackThisUnit(nId)
     local sName = tUnit:GetName():gsub(NO_BREAK_SPACE, " ")
-    ManagerCall("OnUnitDestroyed", nId, tUnit, sName)
+    ManagerCall(RaidCore.E.UNIT_DESTROYED, nId, tUnit, sName)
   end
 end
 
@@ -614,12 +612,12 @@ function RaidCore:CI_UpdateCasts(myUnit, nId)
         nCastEndTime = nCastEndTime,
         bSuccess = false,
       }
-      ManagerCall("OnCastStart", nId, sCastName, nCastEndTime, myUnit.sName)
+      ManagerCall(RaidCore.E.CAST_START, nId, sCastName, nCastEndTime, myUnit.sName)
     elseif myUnit.tCast.bCasting then
       if sCastName ~= myUnit.tCast.sCastName then
         -- New cast just after a previous one.
         if myUnit.tCast.bSuccess == false then
-          ManagerCall("OnCastEnd", nId, myUnit.tCast.sCastName, false, myUnit.tCast.nCastEndTime, myUnit.sName)
+          ManagerCall(RaidCore.E.CAST_END, nId, myUnit.tCast.sCastName, false, myUnit.tCast.nCastEndTime, myUnit.sName)
         end
         myUnit.tCast = {
           bCasting = true,
@@ -627,10 +625,10 @@ function RaidCore:CI_UpdateCasts(myUnit, nId)
           nCastEndTime = nCastEndTime,
           bSuccess = false,
         }
-        ManagerCall("OnCastStart", nId, sCastName, nCastEndTime, myUnit.sName)
+        ManagerCall(RaidCore.E.CAST_START, nId, sCastName, nCastEndTime, myUnit.sName)
       elseif not myUnit.tCast.bSuccess and nCastElapsed >= nCastDuration then
         -- The have reached the end.
-        ManagerCall("OnCastEnd", nId, myUnit.tCast.sCastName, false, myUnit.tCast.nCastEndTime, myUnit.sName)
+        ManagerCall(RaidCore.E.CAST_END, nId, myUnit.tCast.sCastName, false, myUnit.tCast.nCastEndTime, myUnit.sName)
         myUnit.tCast = {
           bCasting = true,
           sCastName = sCastName,
@@ -649,7 +647,7 @@ function RaidCore:CI_UpdateCasts(myUnit, nId)
       else
         bIsInterrupted = false
       end
-      ManagerCall("OnCastEnd", nId, myUnit.tCast.sCastName, bIsInterrupted, myUnit.tCast.nCastEndTime, myUnit.sName)
+      ManagerCall(RaidCore.E.CAST_END, nId, myUnit.tCast.sCastName, bIsInterrupted, myUnit.tCast.nCastEndTime, myUnit.sName)
     end
     myUnit.tCast = {
       bCasting = false,
@@ -668,7 +666,7 @@ function RaidCore:CI_UpdateHealth(myUnit, nId)
     local nPercent = math.floor(100 * Health / MaxHealth)
     if myUnit.nPreviousHealthPercent ~= nPercent then
       myUnit.nPreviousHealthPercent = nPercent
-      ManagerCall("OnHealthChanged", nId, nPercent, myUnit.sName)
+      ManagerCall(RaidCore.E.HEALTH_CHANGED, nId, nPercent, myUnit.sName)
     end
   end
 end
@@ -709,7 +707,7 @@ end
 function RaidCore:CI_OnReceivedMessage(sChannel, sMessage, sSender)
   local tSender = sSender and GetPlayerUnitByName(sSender)
   local nSenderId = tSender and tSender:GetId()
-  ManagerCall("OnReceivedMessage", sMessage, nSenderId)
+  ManagerCall(RaidCore.E.RECEIVED_MESSAGE, sMessage, nSenderId)
 end
 
 function RaidCore:CI_OnSendMessageResult(iccomm, eResult, nMessageId)
@@ -720,7 +718,7 @@ function RaidCore:CI_OnSendMessageResult(iccomm, eResult, nMessageId)
       break
     end
   end
-  Log:Add("SendMessageResult", sResult, nMessageId)
+  Log:Add(RaidCore.E.SEND_MESSAGE_RESULT, sResult, nMessageId)
 end
 
 function RaidCore:CI_ShowShortcutBar(eWhichBar, bIsVisible, nNumShortcuts)
@@ -743,7 +741,7 @@ function RaidCore:CI_ShowShortcutBarDelayed()
     end
     tinsert(tIconFloatingSpellBar, strIcon)
   end
-  ManagerCall("OnShowShortcutBar", tIconFloatingSpellBar)
+  ManagerCall(RaidCore.E.SHOW_SHORTCUT_BAR, tIconFloatingSpellBar)
 end
 
 function RaidCore:CI_OnCombatLogHeal(tArgs)
@@ -754,11 +752,11 @@ function RaidCore:CI_OnCombatLogHeal(tArgs)
   local nHealAmount = tArgs.nHealAmount or 0
   local nOverHeal = tArgs.nOverHeal or 0
   local nSpellId = tArgs.splCallingSpell and tArgs.splCallingSpell:GetId()
-  ManagerCall("OnCombatLogHeal", nCasterId, nTargetId, sCasterName, sTargetName, nHealAmount, nOverHeal, nSpellId)
+  ManagerCall(RaidCore.E.COMBAT_LOG_HEAL, nCasterId, nTargetId, sCasterName, sTargetName, nHealAmount, nOverHeal, nSpellId)
 end
 
 function RaidCore:CI_OnChangeWorld()
-  ManagerCall("OnChangeWorld")
+  ManagerCall(RaidCore.E.CHANGE_WORLD)
 end
 
 function RaidCore:CI_OnCharacterCreated()
@@ -766,5 +764,5 @@ function RaidCore:CI_OnCharacterCreated()
 end
 
 function RaidCore:CI_OnSubZoneChanged(nZoneId, sZoneName)
-  ManagerCall("OnSubZoneChanged", nZoneId, sZoneName)
+  ManagerCall(RaidCore.E.SUB_ZONE_CHANGE, nZoneId, sZoneName)
 end

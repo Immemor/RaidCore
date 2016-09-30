@@ -60,6 +60,8 @@ RaidCore.E = {
   NPC_SAY = "OnNPCSay",
   NPC_YELL = "OnNPCYell",
   NPC_WHISPER = "OnNPCWhisper",
+  COMBAT_LOG_HEAL = "OnCombatLogHeal",
+  SHOW_SHORTCUT_BAR = "OnShowShortcutBar",
   -- Special Keywords.
   ALL_UNITS = "**",
   -- Tracking.
@@ -90,6 +92,14 @@ RaidCore.E = {
   COMPARE_MATCH = 3,
   -- Log.
   ERROR = "ERROR",
+  CURRENT_ZONE_MAP = "CurrentZoneMap",
+  TRACK_UNIT = "TrackThisUnit",
+  UNTRACK_UNIT = "UnTrackThisUnit",
+  JOIN_CHANNEL_TRY = "JoinChannelTry",
+  JOIN_CHANNEL_STATUS = "JoinChannelStatus",
+  CHANNEL_COMM_STATUS = "ChannelCommStatus",
+  SEND_MESSAGE = "SendMessage",
+  SEND_MESSAGE_RESULT = "SendMessageResult",
 }
 
 local EVENT_UNIT_NAME_INDEX = {
@@ -941,7 +951,7 @@ function RaidCore:SEARCH_OnCheckMapZone()
   if not _bIsEncounterInProgress then
     local tMap = GetCurrentZoneMap()
     if tMap then
-      Log:Add("CurrentZoneMap", tMap.continentId, tMap.parentZoneId, tMap.id)
+      Log:Add(RaidCore.E.CURRENT_ZONE_MAP, tMap.continentId, tMap.parentZoneId, tMap.id)
       local tTrigInZone = _tTrigPerZone[tMap.continentId]
       local bSearching = false
       if tTrigInZone then
