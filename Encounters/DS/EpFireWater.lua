@@ -149,14 +149,12 @@ end
 function mod:OnUnitCreated(nId, unit, sName)
   if sName == self.L["Hydroflux"] then
     core:AddUnit(unit)
-    core:WatchUnit(unit)
     if mod:GetSetting("LineCleaveHydroflux") then
       core:AddPixie(nId .. "_1", 2, unit, nil, "Yellow", 3, 7, 0)
       core:AddPixie(nId .. "_2", 2, unit, nil, "Yellow", 3, 7, 180)
     end
   elseif sName == self.L["Pyrobane"] then
     core:AddUnit(unit)
-    core:WatchUnit(unit)
   elseif sName == self.L["Ice Tomb"] then
     local nCurrentTime = GetGameTime()
     if nCurrentTime - nLastIceTombTime > 13 then

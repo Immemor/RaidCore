@@ -199,7 +199,7 @@ function mod:OnUnitCreated(nId, tUnit, sName)
   if sName == self.L["Visceralus"] then
     if nHealth then
       core:AddUnit(tUnit)
-      core:WatchUnit(tUnit)
+      core:WatchUnit(tUnit, core.E.TRACK_CASTS)
       if mod:GetSetting("LineCleaveVisceralus") then
         core:AddSimpleLine("Visc1", nId, 0, 25, 0, 4, "blue", 10)
         core:AddSimpleLine("Visc2", nId, 0, 25, 72, 4, "green", 20)
@@ -210,7 +210,7 @@ function mod:OnUnitCreated(nId, tUnit, sName)
     end
   elseif sName == self.L["Mnemesis"] then
     if nHealth then
-      core:WatchUnit(tUnit)
+      core:WatchUnit(tUnit, core.E.TRACK_CASTS)
       core:AddUnit(tUnit)
     end
   elseif sName == self.L["Essence of Life"] then

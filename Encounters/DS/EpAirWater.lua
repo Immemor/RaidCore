@@ -99,9 +99,12 @@ function mod:OnBossEnable()
 end
 
 function mod:OnUnitCreated(nId, tUnit, sName)
-  if sName == self.L["Hydroflux"] or sName == self.L["Aileron"] then
+  if sName == self.L["Hydroflux"] then
     core:AddUnit(tUnit)
-    core:WatchUnit(tUnit)
+    core:WatchUnit(tUnit, core.E.TRACK_CASTS + core.E.TRACK_BUFFS)
+  elseif sName == self.L["Aileron"] then
+    core:AddUnit(tUnit)
+    core:WatchUnit(tUnit, core.E.TRACK_BUFFS)
   end
 end
 

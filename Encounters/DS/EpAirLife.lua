@@ -221,7 +221,7 @@ function mod:OnUnitCreated(nId, tUnit, sName)
     end
   elseif sName == self.L["Visceralus"] then
     core:AddUnit(tUnit)
-    core:WatchUnit(tUnit)
+    core:WatchUnit(tUnit, core.E.TRACK_CASTS)
     if mod:GetSetting("LineVisceralus") then
       core:AddSimpleLine("Visc1", nId, 0, 25, 0, 4, "blue", 10)
       core:AddSimpleLine("Visc2", nId, 0, 25, 72, 4, "green", 20)

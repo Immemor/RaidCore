@@ -115,14 +115,14 @@ end
 function mod:OnUnitCreated(nId, unit, sName)
   if sName == self.L["Megalith"] then
     core:AddUnit(unit)
-    core:WatchUnit(unit)
+    core:WatchUnit(unit, core.E.TRACK_CASTS)
     core:MarkUnit(unit, nil, self.L["EARTH"])
   elseif sName == self.L["Aileron"] then
     if mod:GetSetting("LineCleaveAileron") then
       core:AddPixie(unit:GetId(), 2, unit, nil, "Green", 10, 15, 0)
     end
     core:AddUnit(unit)
-    core:WatchUnit(unit)
+    core:WatchUnit(unit, core.E.TRACK_CASTS)
   elseif sName == self.L["Air Column"] then
     if mod:GetSetting("LineTornado") then
       core:AddLine(unit:GetId(), 2, unit, nil, 3, 30, 0, 10)

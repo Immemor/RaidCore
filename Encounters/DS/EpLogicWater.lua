@@ -210,14 +210,14 @@ function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
       end
     elseif sName == self.L["Hydroflux"] then
       core:AddUnit(unit)
-      core:WatchUnit(unit)
+      core:WatchUnit(unit, core.E.TRACK_CASTS)
       if mod:GetSetting("LineCleaveHydroflux") then
         core:AddSimpleLine("HydroCleave", unit:GetId(), -7, 14, 0, 3, "xkcdOrangeYellow")
       end
     elseif sName == self.L["Mnemesis"] then
       if nHealth and nHealth > 0 then
         core:AddUnit(unit)
-        core:WatchUnit(unit)
+        core:WatchUnit(unit, core.E.TRACK_CASTS)
       end
     end
   end
