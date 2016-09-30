@@ -174,10 +174,10 @@ end
 
 function mod:OnUnitCreated(nId, tUnit, sName)
   if sName == self.L["Corrupted Ravager"] or sName == self.L["Empowered Ravager"] then
-    core:WatchUnit(tUnit)
+    core:WatchUnit(tUnit, core.E.TRACK_CASTS)
   elseif sName == self.L["Gloomclaw"] then
     core:AddUnit(tUnit)
-    core:WatchUnit(tUnit)
+    core:WatchUnit(tUnit, core.E.TRACK_CASTS)
   end
 end
 
