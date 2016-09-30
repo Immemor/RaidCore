@@ -216,7 +216,12 @@ end
 
 local function TrackThisUnit(tUnit, nTrackingType)
   local nId = tUnit:GetId()
-  nTrackingType = nTrackingType or RaidCore.E.TRACK_ALL
+  if RaidCore.db.profile.bDisableSelectiveTracking then
+    nTrackingType = RaidCore.E.TRACK_ALL
+  else
+    nTrackingType = nTrackingType or RaidCore.E.TRACK_ALL
+  end
+
   if not _tTrackedUnits[nId] and not tUnit:IsInYourGroup() then
     Log:Add("TrackThisUnit", nId)
     local MaxHealth = tUnit:GetMaxHealth()

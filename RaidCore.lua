@@ -350,6 +350,7 @@ function RaidCore:OnInitialize()
       bReadyCheckOnBreakTimeout = true,
       sReadyCheckMessage = self.L["Raid Resume"],
       bEnableTestEncounters = false,
+      bDisableSelectiveTracking = false,
     }
   }
   -- Final parsing about encounters.
