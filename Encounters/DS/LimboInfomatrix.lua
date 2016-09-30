@@ -90,7 +90,7 @@ end
 function mod:OnUnitCreated(nId, tUnit, sName)
   if sName == self.L["Keeper of Sands"] then
     core:AddUnit(tUnit)
-    core:WatchUnit(tUnit)
+    core:WatchUnit(tUnit, core.E.TRACK_CASTS)
     tKoS_Position = tUnit:GetPosition()
     mod:SendIndMessage("KeeperOfSands_Position", tKoS_Position)
     ManagerKeeperOfSandsLine()
