@@ -202,14 +202,14 @@ function ShowHideClass:OnShowHideUpdate()
 
   if nEncounterDelta == 0 and nLogDelta == 0 and nSettingsDelta == 0 then
     _bShowHidePanelActive = false
-    Apollo.RemoveEventHandler("NextFrame", self)
+    Apollo.RemoveEventHandler(RaidCore.E.EVENT_NEXT_FRAME, self)
   end
 end
 
 function ShowHideClass:StartUpdate()
   if not _bShowHidePanelActive then
     _bShowHidePanelActive = true
-    Apollo.RegisterEventHandler("NextFrame", "OnShowHideUpdate", self)
+    Apollo.RegisterEventHandler(RaidCore.E.EVENT_NEXT_FRAME, "OnShowHideUpdate", self)
   end
 end
 
@@ -295,7 +295,7 @@ function RaidCore:GUI_init(sVersion)
   _wndLogSize = self.wndLogTarget:FindChild("LogSize")
 
   -- Registering to Windows Manager.
-  Apollo.RegisterEventHandler("WindowManagementReady", "OnWindowManagementReady", self)
+  Apollo.RegisterEventHandler(RaidCore.E.EVENT_WINDOWS_MANAGEMENT_READY, "OnWindowManagementReady", self)
   self:OnWindowManagementReady() --Already is ready
 end
 

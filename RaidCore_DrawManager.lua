@@ -123,14 +123,14 @@ end
 local function StartDrawing()
   if _bDrawManagerRunning ~= true then
     _bDrawManagerRunning = true
-    Apollo.RegisterEventHandler("NextFrame", "OnDrawUpdate", RaidCore)
+    Apollo.RegisterEventHandler(RaidCore.E.EVENT_NEXT_FRAME, "OnDrawUpdate", RaidCore)
   end
 end
 
 local function StopDrawing()
   if _bDrawManagerRunning == true then
     _bDrawManagerRunning = false
-    Apollo.RemoveEventHandler("NextFrame", RaidCore)
+    Apollo.RemoveEventHandler(RaidCore.E.EVENT_NEXT_FRAME, RaidCore)
   end
 end
 

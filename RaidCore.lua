@@ -100,6 +100,21 @@ RaidCore.E = {
   CHANNEL_COMM_STATUS = "ChannelCommStatus",
   SEND_MESSAGE = "SendMessage",
   SEND_MESSAGE_RESULT = "SendMessageResult",
+  -- Carbine Events.
+  EVENT_COMBAT_LOG_HEAL = "CombatLogHeal",
+  EVENT_UNIT_ENTERED_COMBAT = "UnitEnteredCombat",
+  EVENT_UNIT_CREATED = "UnitCreated",
+  EVENT_UNIT_DESTROYED = "UnitDestroyed",
+  EVENT_CHAT_MESSAGE = "ChatMessage",
+  EVENT_SHOW_ACTION_BAR_SHORTCUT = "ShowActionBarShortcut",
+  EVENT_BUFF_ADDED = "BuffAdded",
+  EVENT_BUFF_UPDATED = "BuffUpdated",
+  EVENT_BUFF_REMOVED = "BuffRemoved",
+  EVENT_CHANGE_WORLD = "ChangeWorld",
+  EVENT_SUB_ZONE_CHANGED = "SubZoneChanged",
+  EVENT_NEXT_FRAME = "NextFrame",
+  EVENT_WINDOWS_MANAGEMENT_READY = "WindowManagementReady",
+  EVENT_CHARACTER_CREATED = "CharacterCreated",
 }
 
 local EVENT_UNIT_NAME_INDEX = {

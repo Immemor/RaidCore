@@ -65,7 +65,7 @@ local SPELLID_BLACKLISTED = {
 }
 
 local EXTRA_HANDLER_ALLOWED = {
-  ["CombatLogHeal"] = "CI_OnCombatLogHeal",
+  [RaidCore.E.EVENT_COMBAT_LOG_HEAL] = "CI_OnCombatLogHeal",
 }
 
 ----------------------------------------------------------------------------------------------------
@@ -326,20 +326,20 @@ end
 ----------------------------------------------------------------------------------------------------
 local function UnitInCombatActivate(bEnable)
   if _bUnitInCombatEnable == false and bEnable == true then
-    RegisterEventHandler("UnitEnteredCombat", "CI_OnEnteredCombat", RaidCore)
+    RegisterEventHandler(RaidCore.E.EVENT_UNIT_ENTERED_COMBAT, "CI_OnEnteredCombat", RaidCore)
   elseif _bUnitInCombatEnable == true and bEnable == false then
-    RemoveEventHandler("UnitEnteredCombat", RaidCore)
+    RemoveEventHandler(RaidCore.E.EVENT_UNIT_ENTERED_COMBAT, RaidCore)
   end
   _bUnitInCombatEnable = bEnable
 end
 
 local function UnitScanActivate(bEnable)
   if _bDetectAllEnable == false and bEnable == true then
-    RegisterEventHandler("UnitCreated", "CI_OnUnitCreated", RaidCore)
-    RegisterEventHandler("UnitDestroyed", "CI_OnUnitDestroyed", RaidCore)
+    RegisterEventHandler(RaidCore.E.EVENT_UNIT_CREATED, "CI_OnUnitCreated", RaidCore)
+    RegisterEventHandler(RaidCore.E.EVENT_UNIT_DESTROYED, "CI_OnUnitDestroyed", RaidCore)
   elseif _bDetectAllEnable == true and bEnable == false then
-    RemoveEventHandler("UnitCreated", RaidCore)
-    RemoveEventHandler("UnitDestroyed", RaidCore)
+    RemoveEventHandler(RaidCore.E.EVENT_UNIT_CREATED, RaidCore)
+    RemoveEventHandler(RaidCore.E.EVENT_UNIT_DESTROYED, RaidCore)
   end
   _bDetectAllEnable = bEnable
 end
@@ -347,19 +347,19 @@ end
 local function FullActivate(bEnable)
   if _bRunning == false and bEnable == true then
     Log:SetRefTime(GetGameTime())
-    RegisterEventHandler("ChatMessage", "CI_OnChatMessage", RaidCore)
-    RegisterEventHandler("ShowActionBarShortcut", "CI_ShowShortcutBar", RaidCore)
-    RegisterEventHandler("BuffAdded", "CI_OnBuffAdded", RaidCore)
-    RegisterEventHandler("BuffUpdated", "CI_OnBuffUpdated", RaidCore)
-    RegisterEventHandler("BuffRemoved", "CI_OnBuffRemoved", RaidCore)
+    RegisterEventHandler(RaidCore.E.EVENT_CHAT_MESSAGE, "CI_OnChatMessage", RaidCore)
+    RegisterEventHandler(RaidCore.E.EVENT_SHOW_ACTION_BAR_SHORTCUT, "CI_ShowShortcutBar", RaidCore)
+    RegisterEventHandler(RaidCore.E.EVENT_BUFF_ADDED, "CI_OnBuffAdded", RaidCore)
+    RegisterEventHandler(RaidCore.E.EVENT_BUFF_UPDATED, "CI_OnBuffUpdated", RaidCore)
+    RegisterEventHandler(RaidCore.E.EVENT_BUFF_REMOVED, "CI_OnBuffRemoved", RaidCore)
     _tScanTimer:Start()
   elseif _bRunning == true and bEnable == false then
     _tScanTimer:Stop()
-    RemoveEventHandler("ChatMessage", RaidCore)
-    RemoveEventHandler("ShowActionBarShortcut", RaidCore)
-    RemoveEventHandler("BuffAdded", RaidCore)
-    RemoveEventHandler("BuffUpdated", RaidCore)
-    RemoveEventHandler("BuffRemoved", RaidCore)
+    RemoveEventHandler(RaidCore.E.EVENT_CHAT_MESSAGE, RaidCore)
+    RemoveEventHandler(RaidCore.E.EVENT_SHOW_ACTION_BAR_SHORTCUT, RaidCore)
+    RemoveEventHandler(RaidCore.E.EVENT_BUFF_ADDED, RaidCore)
+    RemoveEventHandler(RaidCore.E.EVENT_BUFF_UPDATED, RaidCore)
+    RemoveEventHandler(RaidCore.E.EVENT_BUFF_REMOVED, RaidCore)
     Log:NextBuffer()
     -- Clear private data.
     _tTrackedUnits = {}
@@ -456,9 +456,9 @@ function RaidCore:CombatInterface_Init()
   _tScanTimer:Stop()
 
   -- Permanent registering.
-  RegisterEventHandler("ChangeWorld", "CI_OnChangeWorld", self)
-  RegisterEventHandler("CharacterCreated", "CI_OnCharacterCreated", self)
-  RegisterEventHandler("SubZoneChanged", "CI_OnSubZoneChanged", self)
+  RegisterEventHandler(RaidCore.E.EVENT_CHANGE_WORLD, "CI_OnChangeWorld", self)
+  RegisterEventHandler(RaidCore.E.EVENT_CHARACTER_CREATED, "CI_OnCharacterCreated", self)
+  RegisterEventHandler(RaidCore.E.EVENT_SUB_ZONE_CHANGED, "CI_OnSubZoneChanged", self)
 
   InterfaceSwitch(RaidCore.E.INTERFACE_DISABLE)
   self.wndBarItem = Apollo.LoadForm(self.xmlDoc, "ActionBarShortcutItem", "FixedHudStratum", self)
