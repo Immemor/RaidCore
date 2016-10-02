@@ -7,3 +7,6 @@
 local GeminiLocale = Apollo.GetPackage("Gemini:Locale-1.0").tPackage
 local L = GeminiLocale:NewLocale("RaidCore", "deDE", false, true)
 if not L then return end
+
+L["csi.summon"] = "Zu deinem Gruppenmitglied teleportieren?"
+L["message.summon.request"] = "%s versucht dich herbeizurufen. Versuche jetzt anzunehmen."

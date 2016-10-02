@@ -554,10 +554,10 @@ function RaidCore:SyncSummonRequest(tMessage, nSenderId)
     return false
   end
   local CSImsg = CSIsLib.GetActiveCSI()
-  if not CSImsg or not CSImsg["strContext"] then return end
+  if not CSImsg or not CSImsg.strContext then return end
 
-  if CSImsg["strContext"] == "Teleport to your group member?" then
-    self:Print(tMessage.sender .. " requested that you accept a summon. Attempting to accept now.")
+  if CSImsg.strContext == self.L["message.summon.csi"] then
+    self:Print(self.L["message.summon.request"]:format(tMessage.sender))
     if CSIsLib.IsCSIRunning() then
       CSIsLib.CSIProcessInteraction(true)
     end
