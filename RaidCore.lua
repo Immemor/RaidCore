@@ -169,7 +169,7 @@ local function OnEncounterUnitSpellEvents(sMethod, ...)
 
   -- Check for events bound for all units
   local tAnyHandlers = tUnitSpellEvents[RaidCore.E.ALL_UNITS]
-  tAnyHandlers = tAnyHandlers and tUnitHandlers[spellId] or {}
+  tAnyHandlers = tAnyHandlers and tAnyHandlers[spellId] or {}
   nSize = #tAnyHandlers
   for i = 1, nSize do
     tAnyHandlers[i](_tCurrentEncounter, ...)
