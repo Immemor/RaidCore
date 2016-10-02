@@ -33,11 +33,6 @@ local RAIDCORE_CURRENT_VERSION = "6.2.8"
 -- Should be deleted.
 local ADDON_DATE_VERSION = 16102618
 
-local MYCOLORS = {
-  ["Blue"] = "FF0066FF",
-  ["Green"] = "FF00CC00",
-}
-
 -- State Machine.
 local MAIN_FSM__SEARCH = 1
 local MAIN_FSM__RUNNING = 2
@@ -539,7 +534,7 @@ function RaidCore:LaunchPullRequest(tMessage, nSenderId)
   if tMessage.cooldown then
     local tOptions = { bEmphasize = true }
     self:AddTimerBar("PULL", "PULL", tMessage.cooldown, nil, tOptions)
-    self:AddMsg("PULL", ("PULL in %s"):format(tMessage.cooldown), 2, MYCOLORS["Green"])
+    self:AddMsg("PULL", ("PULL in %s"):format(tMessage.cooldown), 2, nil, "Green")
   end
 end
 
@@ -547,7 +542,7 @@ function RaidCore:LaunchBreakRequest(tMessage, nSenderId)
   if tMessage.cooldown and tMessage.cooldown > 0 then
     local tOptions = { bEmphasize = true }
     self:AddTimerBar("BREAK", "BREAK", tMessage.cooldown, nil, tOptions)
-    self:AddMsg("BREAK", ("BREAK for %ss"):format(tMessage.cooldown), 5, MYCOLORS["Green"])
+    self:AddMsg("BREAK", ("BREAK for %ss"):format(tMessage.cooldown), 5, nil, "Green")
     self:PlaySound("Long")
   else
     self:RemoveTimerBar("BREAK")
@@ -1111,7 +1106,7 @@ function RaidCore:OnStartTestScenario()
     self:AddUnit(GetPlayerUnit():GetTarget())
     targetId = GetPlayerUnit():GetTarget():GetId()
   end
-  self:AddMsg("TEST1", self.L["Start test scenario"], 5, "red")
+  self:AddMsg("TEST1", self.L["Start test scenario"], 5, nil, "red")
   for i = 1, 36 do
     local nForce = 1 - i / 36.0
     local tColor = { a = 1.0, r = 1 - nForce, g = nRandomGreen, b = nForce }
