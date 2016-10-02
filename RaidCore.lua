@@ -542,8 +542,7 @@ function RaidCore:LaunchBreakRequest(tMessage, nSenderId)
   if tMessage.cooldown and tMessage.cooldown > 0 then
     local tOptions = { bEmphasize = true }
     self:AddTimerBar("BREAK", "BREAK", tMessage.cooldown, nil, tOptions)
-    self:AddMsg("BREAK", ("BREAK for %ss"):format(tMessage.cooldown), 5, nil, "Green")
-    self:PlaySound("Long")
+    self:AddMsg("BREAK", ("BREAK for %ss"):format(tMessage.cooldown), 5, "Long", "Green")
   else
     self:RemoveTimerBar("BREAK")
     self:RemoveMsg("BREAK")
