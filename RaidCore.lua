@@ -970,17 +970,9 @@ function RaidCore:SEARCH_OnCheckMapZone()
     if tMap then
       Log:Add(RaidCore.E.CURRENT_ZONE_MAP, tMap.continentId, tMap.parentZoneId, tMap.id)
       local tTrigInZone = _tTrigPerZone[tMap.continentId]
-      local bSearching = false
+      tTrigInZone = tTrigInZone and tTrigInZone[tMap.parentZoneId]
+      tTrigInZone = tTrigInZone and tTrigInZone[tMap.id]
       if tTrigInZone then
-        tTrigInZone = tTrigInZone[tMap.parentZoneId]
-        if tTrigInZone then
-          tTrigInZone = tTrigInZone[tMap.id]
-          if tTrigInZone then
-            bSearching = true
-          end
-        end
-      end
-      if bSearching then
         self:CombatInterface_Activate(RaidCore.E.INTERFACE_DETECTALL)
       else
         self:CombatInterface_Activate(RaidCore.E.INTERFACE_DISABLE)
