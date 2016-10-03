@@ -453,7 +453,6 @@ function RaidCore:OnInitialize()
   self.worldmarker = {}
   _tWipeTimer = ApolloTimer.Create(0.5, true, "RUNNING_WipeCheck", self)
   _tWipeTimer:Stop()
-  self.lines = {}
   -- Initialize the Zone Detection.
   self:SEARCH_OnCheckMapZone()
 end
