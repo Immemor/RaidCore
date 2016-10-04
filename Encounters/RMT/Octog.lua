@@ -8,13 +8,13 @@
 -- TODO
 ----------------------------------------------------------------------------------------------------
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
-local mod = core:NewEncounter("unit.octog", 104, 0, 548)
+local mod = core:NewEncounter("Octog", 104, 0, 548)
 if not mod then return end
 
 ----------------------------------------------------------------------------------------------------
 -- Registering combat.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterTrigMob("ALL", { "unit.thrag" })
+mod:RegisterTrigMob("ALL", { "unit.octog" })
 mod:RegisterEnglishLocale({
     -- Unit names.
     ["unit.octog"] = "Star-Eater the Voracious",
