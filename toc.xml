@@ -69,7 +69,8 @@
     <Script Name="Encounters/RMT/Robomination.lua"/>
     <Script Name="Encounters/RMT/Engineers.lua"/>
     <Script Name="Encounters/RMT/Mordechai.lua"/>
+    <Script Name="Encounters/RMT/Octog.lua"/>
     <Script Name="Encounters/RMT/miniboss/Lockjaw.lua"/>
-	<Script Name="Encounters/RMT/miniboss/Skooty.lua"/>
-	<Script Name="Encounters/RMT/miniboss/Thrag.lua"/>
+    <Script Name="Encounters/RMT/miniboss/Skooty.lua"/>
+    <Script Name="Encounters/RMT/miniboss/Thrag.lua"/>
 </Addon>
