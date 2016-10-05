@@ -240,6 +240,10 @@ mod:RegisterDatachronEvent("chron.airlock.closed", "EQUAL", function()
 )
 
 mod:RegisterUnitEvents(core.E.ALL_UNITS, {
+    [core.E.UNIT_DESTROYED] = function (self, id, unit, name)
+      --Drop mark in case the player dies with the debuff
+      core:DropMark(id)
+    end,
     [DEBUFF_KINETIC_LINK] = {
       [core.E.DEBUFF_ADD] = function (self, id, spellId, stack, timeRemaining, name, unitCaster)
         if mod:GetSetting("MarkerPurple") then
