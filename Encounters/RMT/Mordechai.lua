@@ -202,6 +202,8 @@ mod:RegisterUnitEvents("unit.anchor",{
         mod:RemoveAnchorWorldMarkers()
         mod:RemoveCleaveLines()
         mod:RemoveTimerBar("NEXT_ORB_TIMER")
+        mod:RemoveTimerBar("NEXT_BARRAGE_TIMER")
+        mod:RemoveTimerBar("NEXT_SHURIKEN_TIMER")
         anchorCount = 0
       end
     end,
