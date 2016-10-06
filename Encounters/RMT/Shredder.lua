@@ -36,6 +36,7 @@ mod:RegisterEnglishLocale({
     ["unit.add.cadet"] = "Risen Redmoon Cadet",
     ["unit.tether"] = "Tether Anchor",
     ["unit.junk_trap"] = "Junk Trap",
+    ["unit.bubble"] = "Hostile Invisible Unit for Fields (1.2 hit radius)",
     -- Datachron messages.
     ["chron.shredder.starting"] = "WARNING: THE SHREDDER IS STARTING!",
     -- Cast names.
@@ -72,6 +73,7 @@ mod:RegisterDefaultSetting("SquareTethers")
 mod:RegisterDefaultSetting("CrosshairAdds")
 mod:RegisterDefaultSetting("CrosshairPriority")
 mod:RegisterDefaultSetting("CrosshairTether")
+mod:RegisterDefaultSetting("CircleBubble")
 -- Sound.
 mod:RegisterDefaultSetting("SoundAdds")
 mod:RegisterDefaultSetting("SoundMiniboss")
@@ -387,6 +389,18 @@ mod:RegisterUnitEvents({"unit.miniboss.regor", "unit.miniboss.braugh"},{
         core:RemoveMsg("MINIBOSS_SPAWN")
         mod:AddMsg("MINIBOSS_CAST", "msg.miniboss.interrupt", 5, "Inferno", "xkcdOrange")
       end
+    end,
+  }
+)
+
+mod:RegisterUnitEvents("unit.bubble",{
+    [core.E.UNIT_CREATED] = function(_, id)
+      if mod:GetSetting("CircleBubble") then
+        core:AddPolygon(id, id, 6.75, nil, 6, "xkcdBrightPurple", 20)
+      end
+    end,
+    [core.E.UNIT_DESTROYED] = function(_, id)
+      core:RemovePolygon(id)
     end,
   }
 )
