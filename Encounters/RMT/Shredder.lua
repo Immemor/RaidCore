@@ -396,7 +396,7 @@ mod:RegisterUnitEvents({"unit.miniboss.regor", "unit.miniboss.braugh"},{
 mod:RegisterUnitEvents("unit.bubble",{
     [core.E.UNIT_CREATED] = function(_, id)
       if mod:GetSetting("CircleBubble") then
-        core:AddPolygon(id, id, 6.75, nil, 6, "xkcdBrightPurple", 20)
+        core:AddPolygon(id, id, 6.5, nil, 5, "white", 20)
       end
     end,
     [core.E.UNIT_DESTROYED] = function(_, id)
