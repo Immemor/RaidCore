@@ -20,7 +20,7 @@ local RaidCore = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCo
 -- Copy of few objects to reduce the cpu load.
 -- Because all local objects are faster.
 ----------------------------------------------------------------------------------------------------
-local next, pcall, assert, error, ipairs = next, pcall, assert, error, ipairs
+local next, assert, error, ipairs = next, assert, error, ipairs
 local GetGameTime = GameLib.GetGameTime
 
 ----------------------------------------------------------------------------------------------------
