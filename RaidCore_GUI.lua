@@ -29,6 +29,10 @@ local GetGameTime = GameLib.GetGameTime
 local ShowHideClass = {}
 local _wndUploadAction
 local _wndLogGrid
+local _wndLogSize
+local _wndLogErrorCount
+local _wndLogEventsCount
+local _bShowHidePanelActive
 local _TestTimer = nil
 
 ----------------------------------------------------------------------------------------------------
