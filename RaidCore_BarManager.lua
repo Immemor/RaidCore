@@ -193,7 +193,7 @@ function TimerManager:AddBar(sKey, sText, nDuration, tCallback, tOptions)
 
   if nDuration > 0 then
     -- Manage windows objects.
-    local wndMain = nil
+    local wndMain
     if self.tBars[sKey] then
       -- Retrieve existing windows object.
       wndMain = self.tBars[sKey].wndMain
@@ -581,12 +581,12 @@ function UnitManager:UpdateBar(tBar)
       -- Process Armor bar
       local nArmorValue = tUnit:GetInterruptArmorValue()
       if nArmorValue and nArmorValue > 0 then
-        local left, top, right, bottom = tBar.wndBody:GetAnchorOffsets()
+        local left, top, _, bottom = tBar.wndBody:GetAnchorOffsets()
         tBar.wndBody:SetAnchorOffsets(left, top, -32, bottom)
         tBar.wndArmor:Show(true)
         tBar.wndArmorValue:SetText(nArmorValue)
       else
-        local left, top, right, bottom = tBar.wndBody:GetAnchorOffsets()
+        local left, top, _, bottom = tBar.wndBody:GetAnchorOffsets()
         tBar.wndBody:SetAnchorOffsets(left, top, 0, bottom)
         tBar.wndArmor:Show(false)
       end
@@ -635,7 +635,7 @@ function MessageManager:AddBar(sKey, sText, nDuration, tOptions)
 
   if nDuration > 0 then
     -- Manage windows objects.
-    local wndMain = nil
+    local wndMain
     if self.tBars[sKey] then
       -- Retrieve existing windows object.
       wndMain = self.tBars[sKey].wndMain
