@@ -68,6 +68,11 @@ mod:RegisterDefaultSetting("MessageOrbSpawn")
 mod:RegisterDefaultSetting("MessageOrbLink")
 mod:RegisterDefaultSetting("MessageAirlockPhaseSoon")
 mod:RegisterDefaultSetting("MessageShockingAttraction")
+-- Binds.
+mod:RegisterMessageSetting("ORB_SPAWNED", "EQUAL", "MessageOrbSpawn", "SoundOrbSpawn")
+mod:RegisterMessageSetting("KINETIC_LINK_MSG", "EQUAL", "MessageOrbLink", "SoundOrbLink")
+mod:RegisterMessageSetting("SUCKY_PHASE", "EQUAL", "MessageAirlockPhaseSoon", "SoundAirlockPhaseSoon")
+mod:RegisterMessageSetting("SHOCKING_ATTRACTION", "EQUAL", "MessageShockingAttraction", "SoundShockingAttraction")
 -- Timer default configs.
 mod:RegisterDefaultTimerBarConfigs({
     ["NEXT_ORB_TIMER"] = { sColor = "xkcdLightLightblue" },
@@ -158,9 +163,7 @@ mod:RegisterUnitEvents("unit.mordechai",{
     [core.E.HEALTH_CHANGED] = function(_, _, percent)
       for i = 1, #PHASES_CLOSE do
         if percent >= PHASES_CLOSE[i].LOWER and percent <= PHASES_CLOSE[i].UPPER then
-          if mod:GetSetting("MessageAirlockPhaseSoon") then
-            mod:AddMsg("SUCKY PHASE", "msg.phase.start", 5, mod:GetSetting("SoundAirlockPhaseSoon") == true and "Info")
-          end
+          mod:AddMsg("SUCKY_PHASE", "msg.phase.start", 5, "Info")
           break
         end
       end
@@ -220,9 +223,7 @@ mod:RegisterUnitEvents("unit.anchor",{
 
 mod:RegisterUnitEvents("unit.orb",{
     [core.E.UNIT_CREATED] = function()
-      if mod:GetSetting("MessageOrbSpawn") then
-        mod:AddMsg("ORB_SPAWNED", "msg.orb.spawned", 5, mod:GetSetting("SoundOrbSpawn") == true and "Info")
-      end
+      mod:AddMsg("ORB_SPAWNED", "msg.orb.spawned", 5, "Info")
     end
   }
 )
@@ -254,9 +255,7 @@ mod:RegisterUnitEvents(core.E.ALL_UNITS, {
           return
         end
 
-        if mod:GetSetting("MessageOrbLink") then
-          mod:AddMsg("KINETIC_LINK_MSG", "msg.orb.kinetic_link", 5, mod:GetSetting("SoundOrbLink") == true and "Burn")
-        end
+        mod:AddMsg("KINETIC_LINK_MSG", "msg.orb.kinetic_link", 5, "Burn")
 
         if mod:GetSetting("LinePurple") then
           local casterId = unitCaster:GetId()
@@ -273,8 +272,8 @@ mod:RegisterUnitEvents(core.E.ALL_UNITS, {
         if mod:GetSetting("CrosshairShockingAttraction") then
           core:AddPicture("SHOCKING_ATTRACTION_TARGET_"..id, id, "Crosshair", 30, 0, 0, nil, "blue")
         end
-        if id == playerUnit:GetId() and mod:GetSetting("MessageShockingAttraction") then
-          mod:AddMsg("SHOCKING_ATTRACTION", "msg.mordechai.shuriken.you", 5, mod:GetSetting("SoundShurikenCountdown") == true and "RunAway")
+        if id == playerUnit:GetId() then
+          mod:AddMsg("SHOCKING_ATTRACTION", "msg.mordechai.shuriken.you", 5, "RunAway")
         end
       end,
       [core.E.DEBUFF_REMOVE] = function (self, id)

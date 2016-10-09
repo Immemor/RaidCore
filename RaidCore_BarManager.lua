@@ -157,6 +157,11 @@ function TemplateManager:_AddBar(...)
   end
 end
 
+function TemplateManager:HasBar(key)
+  assert(key)
+  return self.tBars[key] ~= nil
+end
+
 function TemplateManager:RemoveBar(key)
   assert(key)
   local tBar = self.tBars[key]
@@ -752,8 +757,24 @@ function RaidCore:AddMsg(sKey, sText, nDuration, sSound, sColor)
   end
 end
 
-function RaidCore:RemoveMsg(sKey)
-  MessageManager:RemoveOrFade(sKey)
+function RaidCore:IsUnitActive(key)
+  return UnitManager:HasBar(key)
+end
+
+function RaidCore:IsProgessActive(key)
+  return ProgressManager:HasBar(key)
+end
+
+function RaidCore:IsTimerActive(key)
+  return TimerManager:HasBar(key)
+end
+
+function RaidCore:IsMessageActive(key)
+  return MessageManager:HasBar(key)
+end
+
+function RaidCore:RemoveMsg(key)
+  MessageManager:RemoveOrFade(key)
 end
 
 -- Add a timer bar on screen.

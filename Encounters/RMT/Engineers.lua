@@ -109,7 +109,6 @@ local ENGINEER_START_LOCATION = {
 ----------------------------------------------------------------------------------------------------
 -- Functions.
 ----------------------------------------------------------------------------------------------------
-local GetUnitById = GameLib.GetUnitById
 local next = next
 local function TableLength(table)
   local count = 0
@@ -130,22 +129,44 @@ local fireOrbTargetTestTimer = ApolloTimer.Create(1, false, "RegisterOrbTarget",
 ----------------------------------------------------------------------------------------------------
 -- Settings.
 ----------------------------------------------------------------------------------------------------
+-- Visuals.
 mod:RegisterDefaultSetting("BarsCoreHealth", false)
 mod:RegisterDefaultSetting("MarkerCoreHealth")
 mod:RegisterDefaultSetting("LineElectroshock")
+mod:RegisterDefaultSetting("VisualIonClashCircle")
+-- Sounds.
+mod:RegisterDefaultSetting("SoundBossMove", false)
 mod:RegisterDefaultSetting("SoundLiquidate")
 mod:RegisterDefaultSetting("SoundElectroshock")
 mod:RegisterDefaultSetting("SoundElectroshockSwap")
-mod:RegisterDefaultSetting("MessageElectroshockSwap")
 mod:RegisterDefaultSetting("SoundElectroshockSwapYou")
+mod:RegisterDefaultSetting("SoundElectroshockSwapReturn")
 mod:RegisterDefaultSetting("SoundFireOrb")
 mod:RegisterDefaultSetting("SoundFireOrbAlt")
 mod:RegisterDefaultSetting("SoundFireOrbPop")
 mod:RegisterDefaultSetting("SoundCoreHealthWarning")
+-- Messages.
 mod:RegisterDefaultSetting("MessageBossMove", false)
+mod:RegisterDefaultSetting("MessageElectroshockSwap")
+mod:RegisterDefaultSetting("MessageElectroshockSwapYou")
 mod:RegisterDefaultSetting("MessageElectroshockSwapReturn")
-mod:RegisterDefaultSetting("SoundElectroshockSwapReturn")
-mod:RegisterDefaultSetting("VisualIonClashCircle")
+mod:RegisterDefaultSetting("MessageLiquidate")
+mod:RegisterDefaultSetting("MessageElectroshock")
+mod:RegisterDefaultSetting("MessageFireOrb")
+mod:RegisterDefaultSetting("MessageFireOrbAlt")
+mod:RegisterDefaultSetting("MessageFireOrbPop")
+mod:RegisterDefaultSetting("MessageCoreHealthWarning")
+-- Binds.
+mod:RegisterMessageSetting("BOSS_MOVED_PLATFORM", "EQUAL", "MessageBossMove", "SoundBossMove")
+mod:RegisterMessageSetting("ELECTROSHOCK_MSG_OVER", "EQUAL", "MessageElectroshockSwapReturn", "SoundElectroshockSwapReturn")
+mod:RegisterMessageSetting("ELECTROSHOCK_MSG_YOU", "EQUAL", "MessageElectroshockSwapYou", "SoundElectroshockSwapYou")
+mod:RegisterMessageSetting("ELECTROSHOCK_MSG_OTHER", "FIND", "MessageElectroshockSwap", "SoundElectroshockSwap")
+mod:RegisterMessageSetting("ELECTROSHOCK_CAST_MSG", "EQUAL", "MessageElectroshock", "SoundElectroshock")
+mod:RegisterMessageSetting("LIQUIDATE_MSG", "EQUAL", "MessageLiquidate", "SoundLiquidate")
+mod:RegisterMessageSetting("DISCHARGED_PLASMA_MSG", "EQUAL", "MessageFireOrb", "SoundFireOrb")
+mod:RegisterMessageSetting("DISCHARGED_PLASMA_MSG_SPAWN", "EQUAL", "MessageFireOrbAlt", "SoundFireOrbAlt")
+mod:RegisterMessageSetting("FIRE_ORB_POP_MSG", "EQUAL", "MessageFireOrbPop", "SoundFireOrbPop")
+mod:RegisterMessageSetting("CORE_HEALTH_%s+_WARN", "MATCH", "MessageCoreHealthWarning", "SoundCoreHealthWarning")
 ----------------------------------------------------------------------------------------------------
 -- Raw event handlers.
 ----------------------------------------------------------------------------------------------------
@@ -172,8 +193,8 @@ function mod:OnBossEnable()
     coreUnit.percent = 30
   end
 
-  mod:AddTimerBar("NEXT_ELEKTROSHOCK_TIMER", self.L["msg.engineer.electroshock.next"], FIRST_ELECTROSHOCK_TIMER)
-  mod:AddTimerBar("NEXT_LIQUIDATE_TIMER", self.L["msg.warrior.liquidate.next"], FIRST_LIQUIDATE_TIMER)
+  mod:AddTimerBar("NEXT_ELEKTROSHOCK_TIMER", "msg.engineer.electroshock.next", FIRST_ELECTROSHOCK_TIMER)
+  mod:AddTimerBar("NEXT_LIQUIDATE_TIMER", "msg.warrior.liquidate.next", FIRST_LIQUIDATE_TIMER)
 end
 
 function mod:OnBossDisable()
@@ -226,13 +247,13 @@ function mod:GetUnitPlatform(unit)
 end
 
 function mod:OnEngiChangeLocation(engineerId, _, newLocation)
-  if mod:GetSetting("MessageBossMove") and ENGINEER_NICK_NAMES[engineerId] ~= nil then
-    local engineerName = ENGINEER_NICK_NAMES[engineerId]
-    mod:AddMsg("BOSS_MOVED_PLATFORM", self.L["msg.rocket_jump.moved"]:format(self.L[engineerName]), 5, "Alarm")
+  if ENGINEER_NICK_NAMES[engineerId] ~= nil then
+    local msg = self.L["msg.rocket_jump.moved"]:format(self.L[ENGINEER_NICK_NAMES[engineerId]])
+    mod:AddMsg("BOSS_MOVED_PLATFORM", msg, 5, "Alarm")
   end
   if newLocation == FUSION_CORE then
     mod:RemoveTimerBar("NEXT_FIRE_ORB_TIMER")
-    mod:AddTimerBar("NEXT_FIRE_ORB_TIMER", self.L["msg.fire_orb.next"], FIRST_FIRE_ORB_TIMER)
+    mod:AddTimerBar("NEXT_FIRE_ORB_TIMER", "msg.fire_orb.next", FIRST_FIRE_ORB_TIMER)
   end
 end
 
@@ -256,30 +277,18 @@ end
 
 mod:RegisterUnitEvents(core.E.ALL_UNITS, {
     [DEBUFF_ELECTROSHOCK_VULNERABILITY] = {
-      [core.E.DEBUFF_ADD] = function(self, id)
-        local target = GetUnitById(id)
-        local targetName = target:GetName()
-        local isOnMyself = targetName == player.unit:GetName()
-        local electroshockOnX
-        local messageId = string.format("ELECTROSHOCK_MSG_%s", targetName)
-        local sound
-        if isOnMyself then
-          electroshockOnX = self.L["msg.engineer.electroshock.swap.you"]
-          sound = mod:GetSetting("SoundElectroshockSwapYou") == true and "Burn"
+      [core.E.DEBUFF_ADD] = function(self, id, spellId, stack, timeRemaining, targetName)
+        if id == player.unit:GetId() then
+          mod:AddMsg("ELECTROSHOCK_MSG_YOU", "msg.engineer.electroshock.swap.you", 5, "Burn", "Red")
         else
-          electroshockOnX = self.L["msg.engineer.electroshock.swap.other"]:format(targetName)
-          sound = mod:GetSetting("SoundElectroshockSwap") == true and "Info"
-        end
-        if isOnMyself or mod:GetSetting("MessageElectroshockSwap") then
-          mod:AddMsg(messageId, electroshockOnX, 5, sound, "Red")
+          local messageId = string.format("ELECTROSHOCK_MSG_OTHER_%s", targetName)
+          local electroshockOnX = self.L["msg.engineer.electroshock.swap.other"]:format(targetName)
+          mod:AddMsg(messageId, electroshockOnX, 5, "Info", "Red")
         end
       end,
-      [core.E.DEBUFF_REMOVE] = function(self, id)
-        local target = GetUnitById(id)
-        local targetName = target:GetName()
-        local isOnMyself = targetName == player.unit:GetName()
-        if isOnMyself and mod:GetSetting("MessageElectroshockSwapReturn") then
-          mod:AddMsg("ELECTROSHOCK_MSG_OVER", self.L["msg.engineer.electroshock.swap.return"], 5, mod:GetSetting("SoundElectroshockSwapReturn") == true and "Burn")
+      [core.E.DEBUFF_REMOVE] = function(self, id, spellId, targetName)
+        if id == player.unit:GetId() then
+          mod:AddMsg("ELECTROSHOCK_MSG_OVER", "msg.engineer.electroshock.swap.return", 5, "Burn")
         end
       end,
     },
@@ -294,15 +303,13 @@ mod:RegisterUnitEvents(core.E.ALL_UNITS, {
       end,
     },
     [core.E.DEBUFF_ADD] = {
-      [DEBUFF_ATOMIC_ATTRACTION] = function(self, id)
-        local target = GetUnitById(id)
-        local isOnMyself = target == player.unit
-        if isOnMyself then
-          mod:AddMsg("DISCHARGED_PLASMA_MSG", self.L["msg.fire_orb.you"], 5, mod:GetSetting("SoundFireOrb") == true and "RunAway")
+      [DEBUFF_ATOMIC_ATTRACTION] = function(self, id, spellId, stack, timeRemaining, targetName)
+        if id == player.unit:GetId() then
+          mod:AddMsg("DISCHARGED_PLASMA_MSG", "msg.fire_orb.you", 5, "RunAway")
         elseif mod:IsPlayerOnPlatform(FUSION_CORE) then
-          mod:AddMsg("DISCHARGED_PLASMA_MSG", self.L["msg.fire_orb.spawned"], 2, mod:GetSetting("SoundFireOrbAlt") == true and "Info")
+          mod:AddMsg("DISCHARGED_PLASMA_MSG_SPAWN", "msg.fire_orb.spawned", 2, "Info")
         end
-      end
+      end,
     },
   }
 )
@@ -370,20 +377,20 @@ mod:RegisterUnitEvents({
         coreUnit.healthWarning = false
       elseif percent >= CORE_HEALTH_HIGH_WARN_PERCENTAGE and not coreUnit.healthWarning then
         coreUnit.healthWarning = true
-        mod:AddMsg("CORE_HEALTH_HIGH_WARN", self.L["msg.core.health.high.warning"]:format(name), 5, mod:GetSetting("SoundCoreHealthWarning") and "Info")
+        mod:AddMsg("CORE_HEALTH_HIGH_WARN", self.L["msg.core.health.high.warning"]:format(name), 5, "Info")
       elseif percent <= CORE_HEALTH_LOW_WARN_PERCENTAGE and not coreUnit.healthWarning and mod:IsPlayerOnPlatform(coreId) then
         coreUnit.healthWarning = true
-        mod:AddMsg("CORE_HEALTH_LOW_WARN", self.L["msg.core.health.low.warning"]:format(name), 5, mod:GetSetting("SoundCoreHealthWarning") and "Inferno")
+        mod:AddMsg("CORE_HEALTH_LOW_WARN", self.L["msg.core.health.low.warning"]:format(name), 5, "Inferno")
       end
     end,
     [BUFF_INSULATION] = {
-      [core.E.BUFF_ADD] = function(_, id)
-        local coreUnit = coreUnits[CORE_NAMES[GetUnitById(id):GetName()]]
+      [core.E.BUFF_ADD] = function(_, id, spellId, stack, timeRemaining, name)
+        local coreUnit = coreUnits[CORE_NAMES[name]]
         coreUnit.enabled = false
         mod:UpdateCoreHealthMark(coreUnit)
       end,
-      [core.E.BUFF_REMOVE] = function(_, id)
-        local coreUnit = coreUnits[CORE_NAMES[GetUnitById(id):GetName()]]
+      [core.E.BUFF_REMOVE] = function(_, id, spellId, name)
+        local coreUnit = coreUnits[CORE_NAMES[name]]
         coreUnit.enabled = true
         mod:UpdateCoreHealthMark(coreUnit)
         for engineerId, engineer in pairs(engineerUnits) do
@@ -404,7 +411,7 @@ mod:RegisterUnitEvents("unit.warrior",{
     [core.E.CAST_START] = {
       ["cast.warrior.liquidate"] = function(self)
         if mod:IsPlayerOnPlatform(engineerUnits[WARRIOR].location) then
-          mod:AddMsg("LIQUIDATE_MSG", self.L["msg.warrior.liquidate.stack"], 5, mod:GetSetting("SoundLiquidate") == true and "Info")
+          mod:AddMsg("LIQUIDATE_MSG", "msg.warrior.liquidate.stack", 5, "Info")
         end
       end,
       ["cast.rocket_jump"] = function()
@@ -414,7 +421,7 @@ mod:RegisterUnitEvents("unit.warrior",{
     [core.E.CAST_END] = {
       ["cast.warrior.liquidate"] = function(self)
         mod:RemoveTimerBar("NEXT_LIQUIDATE_TIMER")
-        mod:AddTimerBar("NEXT_LIQUIDATE_TIMER", self.L["msg.warrior.liquidate.next"], LIQUIDATE_TIMER)
+        mod:AddTimerBar("NEXT_LIQUIDATE_TIMER", "msg.warrior.liquidate.next", LIQUIDATE_TIMER)
       end
     },
   }
@@ -428,21 +435,21 @@ mod:RegisterUnitEvents("unit.engineer",{
           core:AddPixie("ELECTROSHOCK_PIXIE", 2, engineerUnits[ENGINEER].unit, nil, "Red", 10, 80, 0)
         end
         if mod:IsPlayerOnPlatform(engineerUnits[ENGINEER].location) then
-          mod:AddMsg("ELECTROSHOCK_CAST_MSG", self.L["cast.engineer.electroshock"], 5, mod:GetSetting("SoundElectroshock") == true and "Beware")
+          mod:AddMsg("ELECTROSHOCK_CAST_MSG", "cast.engineer.electroshock", 5, "Beware")
         end
       end
     },
     [core.E.CAST_END] = {
       ["cast.rocket_jump"] = function(self)
         mod:RemoveTimerBar("NEXT_ELEKTROSHOCK_TIMER")
-        mod:AddTimerBar("NEXT_ELEKTROSHOCK_TIMER", self.L["msg.engineer.electroshock.next"], JUMP_ELECTROSHOCK_TIMER)
+        mod:AddTimerBar("NEXT_ELEKTROSHOCK_TIMER", "msg.engineer.electroshock.next", JUMP_ELECTROSHOCK_TIMER)
       end,
-      ["cast.engineer.electroshock"] = function(self)
+      ["cast.engineer.electroshock"] = function()
         if mod:GetSetting("LineElectroshock") then
           core:DropPixie("ELECTROSHOCK_PIXIE")
         end
         mod:RemoveTimerBar("NEXT_ELEKTROSHOCK_TIMER")
-        mod:AddTimerBar("NEXT_ELEKTROSHOCK_TIMER", self.L["msg.engineer.electroshock.next"], ELECTROSHOCK_TIMER)
+        mod:AddTimerBar("NEXT_ELEKTROSHOCK_TIMER", "msg.engineer.electroshock.next", ELECTROSHOCK_TIMER)
       end
     },
   }
@@ -450,15 +457,15 @@ mod:RegisterUnitEvents("unit.engineer",{
 
 function mod:PopFireOrb()
   if mod:IsPlayerOnPlatform(FUSION_CORE) then
-    mod:AddMsg("FIRE_ORB_POP_MSG", self.L["msg.fire_orb.pop.msg"], 5, mod:GetSetting("SoundFireOrbPop") == true and "Alarm")
+    mod:AddMsg("FIRE_ORB_POP_MSG", "msg.fire_orb.pop.msg", 5, "Alarm")
   end
 end
 
 mod:RegisterUnitEvents("unit.fire_orb",{
     [core.E.UNIT_CREATED] = function(self, id, unit)
       mod:RemoveTimerBar("NEXT_FIRE_ORB_TIMER")
-      mod:AddTimerBar("NEXT_FIRE_ORB_TIMER", self.L["msg.fire_orb.next"], NEXT_FIRE_ORB_TIMER)
-      mod:AddTimerBar(string.format("FIRE_ORB_SAFE_TIMER %d", id), self.L["msg.fire_orb.pop.timer"], FIRE_ORB_SAFE_TIMER, false, "Red", mod.PopFireOrb, mod)
+      mod:AddTimerBar("NEXT_FIRE_ORB_TIMER", "msg.fire_orb.next", NEXT_FIRE_ORB_TIMER)
+      mod:AddTimerBar(string.format("FIRE_ORB_SAFE_TIMER %d", id), "msg.fire_orb.pop.timer", FIRE_ORB_SAFE_TIMER, false, "Red", mod.PopFireOrb, mod)
       fireOrbTargetTestTimer:Start()
     end,
     [core.E.UNIT_DESTROYED] = function(_, id)
