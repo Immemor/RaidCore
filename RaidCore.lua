@@ -47,6 +47,7 @@ local MAIN_FSM__SEARCH = 1
 local MAIN_FSM__RUNNING = 2
 
 RaidCore.E = {
+  -- Events.
   UNIT_CREATED = "OnUnitCreated",
   UNIT_DESTROYED = "OnUnitDestroyed",
   ENTERED_COMBAT = "OnEnteredCombat",
@@ -63,7 +64,13 @@ RaidCore.E = {
   NPC_SAY = "OnNPCSay",
   NPC_YELL = "OnNPCYell",
   NPC_WHISPER = "OnNPCWhisper",
+  -- Special Keywords.
   ALL_UNITS = "**",
+  -- Tracking.
+  TRACK_ALL = 0xFF,
+  TRACK_BUFFS = 0x01,
+  TRACK_CASTS = 0x02,
+  TRACK_HEALTH = 0x04,
 }
 
 local EVENT_UNIT_NAME_INDEX = {
@@ -343,6 +350,7 @@ function RaidCore:OnInitialize()
       bReadyCheckOnBreakTimeout = true,
       sReadyCheckMessage = self.L["Raid Resume"],
       bEnableTestEncounters = false,
+      bDisableSelectiveTracking = false,
     }
   }
   -- Final parsing about encounters.

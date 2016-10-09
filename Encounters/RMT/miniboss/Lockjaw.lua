@@ -35,7 +35,7 @@ mod:RegisterDefaultSetting("SoundShackles")
 mod:RegisterUnitEvents("unit.lockjaw",{
     ["OnUnitCreated"] = function (_, _, unit)
       core:AddUnit(unit)
-      core:WatchUnit(unit)
+      core:WatchUnit(unit, core.E.TRACK_CASTS)
     end,
     ["OnCastStart"] = function (self, _, castName)
       if self.L["cast.lockjaw.shackle"] == castName then

@@ -109,7 +109,6 @@ end
 function mod:OnUnitCreated(nId, unit, sName)
   if sName == self.L["Pyrobane"] or sName == self.L["Megalith"] then
     core:AddUnit(unit)
-    core:WatchUnit(unit)
   elseif sName == self.L["Flame Wave"] then
     if mod:GetSetting("LineFlameWaves") then
       core:AddPixie(nId, 2, unit, nil, "Green", 10, 20, 0)

@@ -183,14 +183,14 @@ end
 function mod:AddUnits()
   mod:RemoveUnits()
   for _, engineer in pairs(engineerUnits) do
-    core:WatchUnit(engineer.unit)
+    core:WatchUnit(engineer.unit, core.E.TRACK_CASTS)
     core:AddUnit(engineer.unit)
   end
   if mod:GetSetting("BarsCoreHealth") then
     core:AddUnitSpacer("CORE_SPACER")
   end
   for coreId, coreUnit in pairs(coreUnits) do
-    core:WatchUnit(coreUnit.unit)
+    core:WatchUnit(coreUnit.unit, core.E.TRACK_BUFFS + core.E.TRACK_HEALTH)
 
     mod:UpdateCoreHealthMark(coreUnit)
     if mod:GetSetting("BarsCoreHealth") then
@@ -456,7 +456,6 @@ end
 
 mod:RegisterUnitEvents("unit.fire_orb",{
     [core.E.UNIT_CREATED] = function(self, id, unit)
-      core:WatchUnit(unit)
       mod:RemoveTimerBar("NEXT_FIRE_ORB_TIMER")
       mod:AddTimerBar("NEXT_FIRE_ORB_TIMER", self.L["msg.fire_orb.next"], NEXT_FIRE_ORB_TIMER)
       mod:AddTimerBar(string.format("FIRE_ORB_SAFE_TIMER %d", id), self.L["msg.fire_orb.pop.timer"], FIRE_ORB_SAFE_TIMER, false, "Red", mod.PopFireOrb, mod)

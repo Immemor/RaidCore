@@ -98,7 +98,7 @@ function mod:OnUnitCreated(nId, tUnit, sName)
   if sName == self.L["Visceralus"] then
     if nHealth and nHealth > 0 then
       core:AddUnit(tUnit)
-      core:WatchUnit(tUnit)
+      core:WatchUnit(tUnit, core.E.TRACK_CASTS)
       if mod:GetSetting("LineBlindVisceralus") then
         core:AddSimpleLine("Visc1", nId, 0, 25, 0, 4, "blue", 10)
         core:AddSimpleLine("Visc2", nId, 0, 25, 72, 4, "green", 20)
@@ -110,7 +110,6 @@ function mod:OnUnitCreated(nId, tUnit, sName)
   elseif sName == self.L["Pyrobane"] then
     if nHealth and nHealth > 0 then
       core:AddUnit(tUnit)
-      core:WatchUnit(tUnit)
     else
       -- Other units called Pyrobane are in fact the wall of fire un phase 2.
       -- The positions retrieve of these wall of fire, are always the middle.

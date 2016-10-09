@@ -156,7 +156,7 @@ function mod:OnUnitCreated(nId, tUnit, sName)
   if self.L["Megalith"] == sName or self.L["Mnemesis"] == sName then
     if nHealth then
       core:AddUnit(tUnit)
-      core:WatchUnit(tUnit)
+      core:WatchUnit(tUnit, core.E.TRACK_CASTS)
     end
   elseif sName == self.L["Obsidian Outcropping"] then
     table.insert(tObsidianList, nId)

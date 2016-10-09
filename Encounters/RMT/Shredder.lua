@@ -221,6 +221,30 @@ end
 
 mod:RegisterUnitEvents({
     "unit.add.nabber",
+    "unit.miniboss.regor",
+    "unit.miniboss.braugh",
+    },{
+    [core.E.UNIT_CREATED] = function(_, _, unit)
+      core:WatchUnit(unit, core.E.TRACK_CASTS + core.E.TRACK_HEALTH)
+    end,
+  }
+)
+
+mod:RegisterUnitEvents({
+    "unit.add.grunt",
+    "unit.add.brute",
+    "unit.add.pouncer",
+    "unit.add.plunderer",
+    "unit.add.cadet"
+    },{
+    [core.E.UNIT_CREATED] = function(_, _, unit)
+      core:WatchUnit(unit, core.E.TRACK_HEALTH)
+    end,
+  }
+)
+
+mod:RegisterUnitEvents({
+    "unit.add.nabber",
     "unit.add.grunt",
     "unit.miniboss.regor",
     "unit.miniboss.braugh",
@@ -229,9 +253,6 @@ mod:RegisterUnitEvents({
     "unit.add.plunderer",
     "unit.add.cadet"
     },{
-    [core.E.UNIT_CREATED] = function(_, _, unit)
-      core:WatchUnit(unit)
-    end,
     [core.E.UNIT_DESTROYED] = function(_, id)
       core:RemovePicture(id)
     end,
@@ -255,7 +276,7 @@ mod:RegisterUnitEvents({ "unit.add.brute", "unit.add.nabber" },{
 mod:RegisterUnitEvents("unit.swabbie",{
     [core.E.UNIT_CREATED] = function(self, _, unit)
       core:AddUnit(unit)
-      core:WatchUnit(unit)
+      core:WatchUnit(unit, core.E.TRACK_CASTS)
       self.swabbieUnit = unit
     end,
     [core.E.UNIT_DESTROYED] = function(self, _, unit)

@@ -34,6 +34,7 @@ local GetSpell = GameLib.GetSpell
 local GetPlayerUnitByName = GameLib.GetPlayerUnitByName
 local next, string, pcall = next, string, pcall
 local tinsert = table.insert
+local binaryAnd = bit32.band
 ----------------------------------------------------------------------------------------------------
 -- Constants.
 ----------------------------------------------------------------------------------------------------
@@ -213,8 +214,14 @@ local function GetBuffs(tUnit)
   return r
 end
 
-local function TrackThisUnit(tUnit)
+local function TrackThisUnit(tUnit, nTrackingType)
   local nId = tUnit:GetId()
+  if RaidCore.db.profile.bDisableSelectiveTracking then
+    nTrackingType = RaidCore.E.TRACK_ALL
+  else
+    nTrackingType = nTrackingType or RaidCore.E.TRACK_ALL
+  end
+
   if not _tTrackedUnits[nId] and not tUnit:IsInYourGroup() then
     Log:Add("TrackThisUnit", nId)
     local MaxHealth = tUnit:GetMaxHealth()
@@ -235,6 +242,9 @@ local function TrackThisUnit(tUnit)
         bSuccess = false,
       },
       nPreviousHealthPercent = nPercent,
+      bTrackBuffs = binaryAnd(nTrackingType, RaidCore.E.TRACK_BUFFS) ~= 0,
+      bTrackCasts = binaryAnd(nTrackingType, RaidCore.E.TRACK_CASTS) ~= 0,
+      bTrackHealth = binaryAnd(nTrackingType, RaidCore.E.TRACK_HEALTH) ~= 0,
     }
   end
 end
@@ -493,8 +503,15 @@ end
 
 -- Track buff and cast of this unit.
 -- @param unit userdata object related to an unit in game.
-function RaidCore:WatchUnit(unit)
-  TrackThisUnit(unit)
+-- @param nTrackingType describes what kind of events should be tracked for this unit
+-- and different tracking types can be added together to enable multiple ones.
+-- After discovering what kind of events are needed for a unit it is advised to
+-- disable the other events to skip unneeded and performance intensive code.
+-- Currently supports TRACK_ALL, TRACK_BUFFS, TRACK_CASTS and TRACK_HEALTH
+-- :WatchUnit(unit, core.E.TRACK_ALL)
+-- :WatchUnit(unit, core.E.TRACK_CASTS + core.E.TRACK_BUFFS)
+function RaidCore:WatchUnit(unit, nTrackingType)
+  TrackThisUnit(unit, nTrackingType)
 end
 
 -- Untrack buff and cast of this unit.
@@ -573,101 +590,116 @@ function RaidCore:CI_OnUnitDestroyed(tUnit)
   end
 end
 
+function RaidCore:CI_UpdateBuffs(myUnit)
+  -- Process buff tracking.
+  local f, err = pcall(PollUnitBuffs, myUnit)
+  if not f then
+    Print(err)
+  end
+end
+
+function RaidCore:CI_UpdateCasts(myUnit, nId)
+  -- Process cast tracking.
+  local bCasting = myUnit.tUnit:IsCasting()
+  local nCurrentTime
+  local sCastName
+  local nCastDuration
+  local nCastElapsed
+  local nCastEndTime
+  if bCasting then
+    nCurrentTime = GetGameTime()
+    sCastName = myUnit.tUnit:GetCastName()
+    nCastDuration = myUnit.tUnit:GetCastDuration()
+    nCastElapsed = myUnit.tUnit:GetCastElapsed()
+    nCastEndTime = nCurrentTime + (nCastDuration - nCastElapsed) / 1000
+    -- Refresh needed if the function is called at the end of cast.
+    -- Like that, previous myUnit retrieved are valid.
+    bCasting = myUnit.tUnit:IsCasting()
+  end
+  if bCasting then
+    sCastName = string.gsub(sCastName, NO_BREAK_SPACE, " ")
+    if not myUnit.tCast.bCasting then
+      -- New cast
+      myUnit.tCast = {
+        bCasting = true,
+        sCastName = sCastName,
+        nCastEndTime = nCastEndTime,
+        bSuccess = false,
+      }
+      ManagerCall("OnCastStart", nId, sCastName, nCastEndTime, myUnit.sName)
+    elseif myUnit.tCast.bCasting then
+      if sCastName ~= myUnit.tCast.sCastName then
+        -- New cast just after a previous one.
+        if myUnit.tCast.bSuccess == false then
+          ManagerCall("OnCastEnd", nId, myUnit.tCast.sCastName, false, myUnit.tCast.nCastEndTime, myUnit.sName)
+        end
+        myUnit.tCast = {
+          bCasting = true,
+          sCastName = sCastName,
+          nCastEndTime = nCastEndTime,
+          bSuccess = false,
+        }
+        ManagerCall("OnCastStart", nId, sCastName, nCastEndTime, myUnit.sName)
+      elseif not myUnit.tCast.bSuccess and nCastElapsed >= nCastDuration then
+        -- The have reached the end.
+        ManagerCall("OnCastEnd", nId, myUnit.tCast.sCastName, false, myUnit.tCast.nCastEndTime, myUnit.sName)
+        myUnit.tCast = {
+          bCasting = true,
+          sCastName = sCastName,
+          nCastEndTime = 0,
+          bSuccess = true,
+        }
+      end
+    end
+  elseif myUnit.tCast.bCasting then
+    if not myUnit.tCast.bSuccess then
+      -- Let's compare with the nCastEndTime
+      local nThreshold = GetGameTime() + SCAN_PERIOD
+      local bIsInterrupted
+      if nThreshold < myUnit.tCast.nCastEndTime then
+        bIsInterrupted = true
+      else
+        bIsInterrupted = false
+      end
+      ManagerCall("OnCastEnd", nId, myUnit.tCast.sCastName, bIsInterrupted, myUnit.tCast.nCastEndTime, myUnit.sName)
+    end
+    myUnit.tCast = {
+      bCasting = false,
+      sCastName = "",
+      nCastEndTime = 0,
+      bSuccess = false,
+    }
+  end
+end
+
+function RaidCore:CI_UpdateHealth(myUnit, nId)
+  -- Process Health tracking.
+  local MaxHealth = myUnit.tUnit:GetMaxHealth()
+  local Health = myUnit.tUnit:GetHealth()
+  if Health and MaxHealth then
+    local nPercent = math.floor(100 * Health / MaxHealth)
+    if myUnit.nPreviousHealthPercent ~= nPercent then
+      myUnit.nPreviousHealthPercent = nPercent
+      ManagerCall("OnHealthChanged", nId, nPercent, myUnit.sName)
+    end
+  end
+end
+
 function RaidCore:CI_OnScanUpdate()
   for nId, data in next, _tTrackedUnits do
     if data.tUnit:IsValid() then
       -- Process name update.
       data.sName = data.tUnit:GetName():gsub(NO_BREAK_SPACE, " ")
 
-      -- Process buff tracking.
-      local f, err = pcall(PollUnitBuffs, data)
-      if not f then
-        Print(err)
+      if data.bTrackBuffs then
+        self:CI_UpdateBuffs(data, nId)
       end
-
-      -- Process cast tracking.
-      local bCasting = data.tUnit:IsCasting()
-      local nCurrentTime
-      local sCastName
-      local nCastDuration
-      local nCastElapsed
-      local nCastEndTime
-      if bCasting then
-        nCurrentTime = GetGameTime()
-        sCastName = data.tUnit:GetCastName()
-        nCastDuration = data.tUnit:GetCastDuration()
-        nCastElapsed = data.tUnit:GetCastElapsed()
-        nCastEndTime = nCurrentTime + (nCastDuration - nCastElapsed) / 1000
-        -- Refresh needed if the function is called at the end of cast.
-        -- Like that, previous data retrieved are valid.
-        bCasting = data.tUnit:IsCasting()
+      if data.bTrackCasts then
+        self:CI_UpdateCasts(data, nId)
       end
-      if bCasting then
-        sCastName = string.gsub(sCastName, NO_BREAK_SPACE, " ")
-        if not data.tCast.bCasting then
-          -- New cast
-          data.tCast = {
-            bCasting = true,
-            sCastName = sCastName,
-            nCastEndTime = nCastEndTime,
-            bSuccess = false,
-          }
-          ManagerCall("OnCastStart", nId, sCastName, nCastEndTime, data.sName)
-        elseif data.tCast.bCasting then
-          if sCastName ~= data.tCast.sCastName then
-            -- New cast just after a previous one.
-            if data.tCast.bSuccess == false then
-              ManagerCall("OnCastEnd", nId, data.tCast.sCastName, false, data.tCast.nCastEndTime, data.sName)
-            end
-            data.tCast = {
-              bCasting = true,
-              sCastName = sCastName,
-              nCastEndTime = nCastEndTime,
-              bSuccess = false,
-            }
-            ManagerCall("OnCastStart", nId, sCastName, nCastEndTime, data.sName)
-          elseif not data.tCast.bSuccess and nCastElapsed >= nCastDuration then
-            -- The have reached the end.
-            ManagerCall("OnCastEnd", nId, data.tCast.sCastName, false, data.tCast.nCastEndTime, data.sName)
-            data.tCast = {
-              bCasting = true,
-              sCastName = sCastName,
-              nCastEndTime = 0,
-              bSuccess = true,
-            }
-          end
-        end
-      elseif data.tCast.bCasting then
-        if not data.tCast.bSuccess then
-          -- Let's compare with the nCastEndTime
-          local nThreshold = GetGameTime() + SCAN_PERIOD
-          local bIsInterrupted
-          if nThreshold < data.tCast.nCastEndTime then
-            bIsInterrupted = true
-          else
-            bIsInterrupted = false
-          end
-          ManagerCall("OnCastEnd", nId, data.tCast.sCastName, bIsInterrupted, data.tCast.nCastEndTime, data.sName)
-        end
-        data.tCast = {
-          bCasting = false,
-          sCastName = "",
-          nCastEndTime = 0,
-          bSuccess = false,
-        }
+      if data.bTrackHealth then
+        self:CI_UpdateHealth(data, nId)
       end
-
-      -- Process Health tracking.
-      local MaxHealth = data.tUnit:GetMaxHealth()
-      local Health = data.tUnit:GetHealth()
-      if Health and MaxHealth then
-        local nPercent = math.floor(100 * Health / MaxHealth)
-        if data.nPreviousHealthPercent ~= nPercent then
-          data.nPreviousHealthPercent = nPercent
-          ManagerCall("OnHealthChanged", nId, nPercent, data.sName)
-        end
-      end
-
     end
   end
 end
