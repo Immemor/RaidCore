@@ -208,6 +208,7 @@ local function GetBuffs(tUnit)
         nCount = obj.nCount,
         nSpellId = nSpellId,
         fTimeRemaining = obj.fTimeRemaining,
+        unitCaster = obj.unitCaster,
       }
     end
   end
@@ -271,19 +272,19 @@ local function PollUnitBuffs(tMyUnit)
       if tNew.nCount ~= current.nCount then
         tBuffs[nIdBuff].nCount = tNew.nCount
         tBuffs[nIdBuff].fTimeRemaining = tNew.fTimeRemaining
-        ManagerCall("OnBuffUpdate", nId, current.nSpellId, tNew.nCount, tNew.fTimeRemaining, sName)
+        ManagerCall("OnBuffUpdate", nId, current.nSpellId, tNew.nCount, tNew.fTimeRemaining, sName, current.unitCaster)
       end
       -- Remove this entry for second loop.
       tNewBuffs[nIdBuff] = nil
     else
       tBuffs[nIdBuff] = nil
-      ManagerCall("OnBuffRemove", nId, current.nSpellId, sName)
+      ManagerCall("OnBuffRemove", nId, current.nSpellId, sName, current.unitCaster)
     end
   end
 
   for nIdBuff, tNew in next, tNewBuffs do
     tBuffs[nIdBuff] = tNew
-    ManagerCall("OnBuffAdd", nId, tNew.nSpellId, tNew.nCount, tNew.fTimeRemaining, sName)
+    ManagerCall("OnBuffAdd", nId, tNew.nSpellId, tNew.nCount, tNew.fTimeRemaining, sName, tNew.unitCaster)
   end
 end
 
@@ -312,21 +313,21 @@ end
 function RaidCore:CI_OnBuffAdded(tUnit, tBuff)
   local sEvent, nUnitId, nSpellId, sName = self:CI_OnBuff(tUnit, tBuff, "OnBuffAdd", "OnDebuffAdd")
   if nUnitId then
-    ManagerCall(sEvent, nUnitId, nSpellId, tBuff.nCount, tBuff.fTimeRemaining, sName)
+    ManagerCall(sEvent, nUnitId, nSpellId, tBuff.nCount, tBuff.fTimeRemaining, sName, tBuff.unitCaster)
   end
 end
 
 function RaidCore:CI_OnBuffUpdated(tUnit, tBuff)
   local sEvent, nUnitId, nSpellId, sName = self:CI_OnBuff(tUnit, tBuff, "OnBuffUpdate", "OnDebuffUpdate")
   if nUnitId then
-    ManagerCall(sEvent, nUnitId, nSpellId, tBuff.nCount, tBuff.fTimeRemaining, sName)
+    ManagerCall(sEvent, nUnitId, nSpellId, tBuff.nCount, tBuff.fTimeRemaining, sName, tBuff.unitCaster)
   end
 end
 
 function RaidCore:CI_OnBuffRemoved(tUnit, tBuff)
   local sEvent, nUnitId, nSpellId, sName = self:CI_OnBuff(tUnit, tBuff, "OnBuffRemove", "OnDebuffRemove")
   if nUnitId then
-    ManagerCall(sEvent, nUnitId, nSpellId, sName)
+    ManagerCall(sEvent, nUnitId, nSpellId, sName, tBuff.unitCaster)
   end
 end
 

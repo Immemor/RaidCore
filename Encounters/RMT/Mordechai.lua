@@ -55,6 +55,8 @@ mod:RegisterDefaultSetting("LinesCleave")
 mod:RegisterDefaultSetting("WorldMarkerAnchor")
 mod:RegisterDefaultSetting("MarkerAnchorHP")
 mod:RegisterDefaultSetting("CrosshairShockingAttraction")
+mod:RegisterDefaultSetting("MarkerPurple")
+mod:RegisterDefaultSetting("LinePurple")
 -- Sounds.
 mod:RegisterDefaultSetting("SoundOrbSpawn")
 mod:RegisterDefaultSetting("SoundOrbLink")
@@ -73,7 +75,10 @@ mod:RegisterDefaultTimerBarConfigs({
     ["NEXT_SHURIKEN_TIMER"] = { sColor = "xkcdBlue" },
   }
 )
-
+----------------------------------------------------------------------------------------------------
+-- Functions.
+----------------------------------------------------------------------------------------------------
+local GetUnitById = GameLib.GetUnitById
 ----------------------------------------------------------------------------------------------------
 -- Constants.
 ----------------------------------------------------------------------------------------------------
@@ -197,6 +202,8 @@ mod:RegisterUnitEvents("unit.anchor",{
         mod:RemoveAnchorWorldMarkers()
         mod:RemoveCleaveLines()
         mod:RemoveTimerBar("NEXT_ORB_TIMER")
+        mod:RemoveTimerBar("NEXT_BARRAGE_TIMER")
+        mod:RemoveTimerBar("NEXT_SHURIKEN_TIMER")
         anchorCount = 0
       end
     end,
@@ -225,37 +232,57 @@ mod:RegisterDatachronEvent("chron.airlock.closed", "EQUAL", function()
     mod:AddCleaveLines()
     mod:AddTimerBar("NEXT_SHURIKEN_TIMER", "msg.mordechai.shuriken.next", FIRST_SHURIKEN_TIMER, mod:GetSetting("SoundShurikenCountdown"))
     mod:AddTimerBar("NEXT_ORB_TIMER", "msg.orb.next", FIRST_ORB_MIDPHASE_TIMER)
-    if numberOfAirPhases > 2 then
+    if numberOfAirPhases >= 2 then
       mod:AddTimerBar("NEXT_BARRAGE_TIMER", "msg.mordechai.barrage.next", FIRST_BARRAGE_TIMER)
     end
     mod:AddAnchorWorldMarkers()
   end
 )
 
-function mod:OnDebuffAdd(id, spellId)
-  local isOnMyself = id == playerUnit:GetId()
-  if DEBUFF_KINETIC_LINK == spellId and isOnMyself then
-    if mod:GetSetting("MessageOrbLink") then
-      mod:AddMsg("KINETIC_LINK_MSG", "msg.orb.kinetic_link", 5, mod:GetSetting("SoundOrbLink") == true and "Burn")
-    end
-  end
-  if DEBUFF_SHOCKING_ATTRACTION == spellId then
-    if mod:GetSetting("CrosshairShockingAttraction") then
-      core:AddPicture("SHOCKING_ATTRACTION_TARGET_"..id, id, "Crosshair", 30, 0, 0, nil, "blue")
-    end
-    if isOnMyself then
-      if mod:GetSetting("MessageShockingAttraction") then
-        mod:AddMsg("SHOCKING_ATTRACTION", "msg.mordechai.shuriken.you", 5, mod:GetSetting("SoundShurikenCountdown") == true and "RunAway")
-      end
-    end
-  end
-end
+mod:RegisterUnitEvents(core.E.ALL_UNITS, {
+    [core.E.UNIT_DESTROYED] = function (self, id, unit, name)
+      --Drop mark in case the player dies with the debuff
+      core:DropMark(id)
+    end,
+    [DEBUFF_KINETIC_LINK] = {
+      [core.E.DEBUFF_ADD] = function (self, id, spellId, stack, timeRemaining, name, unitCaster)
+        if mod:GetSetting("MarkerPurple") then
+          core:MarkUnit(GetUnitById(id), core.E.LOCATION_STATIC_CHEST, "P", "xkcdPurplePink")
+        end
 
-function mod:OnDebuffRemove(id, spellId)
-  if DEBUFF_SHOCKING_ATTRACTION == spellId then
-    core:RemovePicture("SHOCKING_ATTRACTION_TARGET_"..id)
-  end
-end
+        if id ~= playerUnit:GetId() then -- not on myself
+          return
+        end
+
+        if mod:GetSetting("MessageOrbLink") then
+          mod:AddMsg("KINETIC_LINK_MSG", "msg.orb.kinetic_link", 5, mod:GetSetting("SoundOrbLink") == true and "Burn")
+        end
+
+        if mod:GetSetting("LinePurple") then
+          local casterId = unitCaster:GetId()
+          core:AddLineBetweenUnits("PURPLE_LINE_"..casterId, id, casterId, 7, "xkcdLightMagenta")
+        end
+      end,
+      [core.E.DEBUFF_REMOVE] = function (self, id, spellId, name, unitCaster)
+        core:DropMark(id)
+        core:RemoveLineBetweenUnits("PURPLE_LINE_"..unitCaster:GetId())
+      end,
+    },
+    [DEBUFF_SHOCKING_ATTRACTION] = {
+      [core.E.DEBUFF_ADD] = function (self, id)
+        if mod:GetSetting("CrosshairShockingAttraction") then
+          core:AddPicture("SHOCKING_ATTRACTION_TARGET_"..id, id, "Crosshair", 30, 0, 0, nil, "blue")
+        end
+        if id == playerUnit:GetId() and mod:GetSetting("MessageShockingAttraction") then
+          mod:AddMsg("SHOCKING_ATTRACTION", "msg.mordechai.shuriken.you", 5, mod:GetSetting("SoundShurikenCountdown") == true and "RunAway")
+        end
+      end,
+      [core.E.DEBUFF_REMOVE] = function (self, id)
+        core:RemovePicture("SHOCKING_ATTRACTION_TARGET_"..id)
+      end,
+    },
+  }
+)
 
 function mod:AddAnchorWorldMarkers()
   if not mod:GetSetting("WorldMarkerAnchor") then
