@@ -296,11 +296,13 @@ function RaidCore:GUI_init(sVersion)
 
   -- Registering to Windows Manager.
   Apollo.RegisterEventHandler("WindowManagementReady", "OnWindowManagementReady", self)
+  self:OnWindowManagementReady() --Already is ready
 end
 
 function RaidCore:OnWindowManagementReady()
   local param = { wnd = self.wndMain, strName = "RaidCore" }
-  Event_FireGenericEvent('WindowManagementAdd', param)
+  Event_FireGenericEvent("WindowManagementRegister", param)
+  Event_FireGenericEvent("WindowManagementAdd", param)
 end
 
 ----------------------------------------------------------------------------------------------------
