@@ -109,8 +109,8 @@ local function Split(str, sep)
   assert(str)
   sep = sep or "%s"
   local r = {}
-  for str in string.gmatch(str, "([^"..sep.."]+)") do
-    table.insert(r, str)
+  for match in string.gmatch(str, "([^"..sep.."]+)") do
+    table.insert(r, match)
   end
   return r
 end
@@ -119,7 +119,7 @@ end
 -- ShowHide Class manager.
 ----------------------------------------------------------------------------------------------------
 function ShowHideClass:OnShowHideUpdate()
-  local left, top, right, bottom
+  local left, right
   local nCurrentTime = GetGameTime()
   local nEncounterDelta = RaidCore.nShowHideEncounterPanelTime - nCurrentTime
   local nLogDelta = RaidCore.nShowHideLogPanelTime - nCurrentTime
@@ -418,9 +418,9 @@ function RaidCore:OnTestScenarioButton(wndHandler, wndControl, eMouseButton)
   if bIsChecked then
     wndControl:SetText(self.L["Stop test scenario"])
     self:OnStartTestScenario()
-    _TestTimer = self:ScheduleTimer(function(wndControl)
-        wndControl:SetCheck(false)
-        wndControl:SetText(self.L["Start test scenario"])
+    _TestTimer = self:ScheduleTimer(function(wndControlInner)
+        wndControlInner:SetCheck(false)
+        wndControlInner:SetText(self.L["Start test scenario"])
         self:OnStopTestScenario()
       end,
       60, wndControl
