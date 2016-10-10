@@ -657,9 +657,8 @@ end
 
 -- Removes all the world markers
 function RaidCore:ResetWorldMarkers()
-  for k, over in next, self.worldmarker do
-    over:Destroy()
-    self.worldmarker[k] = nil
+  for nId, _ in next, self.worldmarker do
+    self:DropWorldMarker(nId)
   end
 end
 
@@ -688,7 +687,6 @@ function RaidCore:DropWorldMarker(key)
   if self.worldmarker[key] then
     self.worldmarker[key]:Destroy()
     self.worldmarker[key] = nil
-    return true
   end
 end
 
