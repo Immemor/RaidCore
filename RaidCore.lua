@@ -344,6 +344,22 @@ local function ProcessDelayedUnit()
 
   CleanDelayedUnits()
 end
+
+local function InitModuleZones(module, id1, id2, id3)
+  _tTrigPerZone[id1] = _tTrigPerZone[id1] or {}
+  _tTrigPerZone[id1][id2] = _tTrigPerZone[id1][id2] or {}
+  _tTrigPerZone[id1][id2][id3] = _tTrigPerZone[id1][id2][id3] or {}
+  _tEncountersPerZone[id1] = _tEncountersPerZone[id1] or {}
+  _tEncountersPerZone[id1][id2] = _tEncountersPerZone[id1][id2] or {}
+  _tEncountersPerZone[id1][id2][id3] = _tEncountersPerZone[id1][id2][id3] or {}
+
+  table.insert(_tEncountersPerZone[id1][id2][id3], module)
+  if module.EnableMob then
+    for _, Mob in next, module.EnableMob do
+      _tTrigPerZone[id1][id2][id3][Mob] = true
+    end
+  end
+end
 ----------------------------------------------------------------------------------------------------
 -- RaidCore Initialization
 ----------------------------------------------------------------------------------------------------
@@ -402,27 +418,15 @@ function RaidCore:OnInitialize()
   for name, module in self:IterateModules() do
     local s, e = pcall(module.PrepareEncounter, module)
     if self:HandlePcallResult(s, e) then
-      for _, id1 in next, module.continentIdList do
-        if _tTrigPerZone[id1] == nil then
-          _tTrigPerZone[id1] = {}
-          _tEncountersPerZone[id1] = {}
-        end
-        for _, id2 in next, module.parentMapIdList do
-          if _tTrigPerZone[id1][id2] == nil then
-            _tTrigPerZone[id1][id2] = {}
-            _tEncountersPerZone[id1][id2] = {}
-          end
-          for _, id3 in next, module.mapIdList do
-            if _tTrigPerZone[id1][id2][id3] == nil then
-              _tTrigPerZone[id1][id2][id3] = {}
-              _tEncountersPerZone[id1][id2][id3] = {}
-            end
-            table.insert(_tEncountersPerZone[id1][id2][id3], module)
-            if module.EnableMob then
-              for _, Mob in next, module.EnableMob do
-                _tTrigPerZone[id1][id2][id3][Mob] = true
-              end
-            end
+      for i = 1, #module.continentIdList do
+        for ii = 1, #module.parentMapIdList do
+          for iii = 1, #module.mapIdList do
+            InitModuleZones(
+              module,
+              module.continentIdList[i],
+              module.parentMapIdList[ii],
+              module.mapIdList[iii]
+            )
           end
         end
       end
