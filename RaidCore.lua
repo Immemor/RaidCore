@@ -332,21 +332,11 @@ local function ProcessDelayedUnit()
     for nDelayedId, tUnit in next, tDelayedList do
       if tUnit:IsValid() then
         local bInCombat = tUnit:IsInCombat()
-        local s, sErrMsg = pcall(OnEncounterHookGeneric, RaidCore.E.UNIT_CREATED, nDelayedId, tUnit, nDelayedName)
-        if not s then
-          if RaidCore.db.profile.bLUAErrorMessage then
-            RaidCore:Print(sErrMsg)
-          end
-          Log:Add(RaidCore.E.ERROR, sErrMsg)
-        end
+        local s, e = pcall(OnEncounterHookGeneric, RaidCore.E.UNIT_CREATED, nDelayedId, tUnit, nDelayedName)
+        RaidCore:HandlePcallResult(s, e)
         if bInCombat then
-          s, sErrMsg = pcall(OnEncounterHookGeneric, RaidCore.E.ENTERED_COMBAT, nDelayedId, tUnit, nDelayedName, bInCombat)
-          if not s then
-            if RaidCore.db.profile.bLUAErrorMessage then
-              RaidCore:Print(sErrMsg)
-            end
-            Log:Add(RaidCore.E.ERROR, sErrMsg)
-          end
+          s, e = pcall(OnEncounterHookGeneric, RaidCore.E.ENTERED_COMBAT, nDelayedId, tUnit, nDelayedName, bInCombat)
+          RaidCore:HandlePcallResult(s, e)
         end
       end
     end
@@ -410,10 +400,8 @@ function RaidCore:OnInitialize()
   }
   -- Final parsing about encounters.
   for name, module in self:IterateModules() do
-    local r, e = pcall(module.PrepareEncounter, module)
-    if not r then
-      self:Print(e)
-    else
+    local s, e = pcall(module.PrepareEncounter, module)
+    if self:HandlePcallResult(s, e) then
       for _, id1 in next, module.continentIdList do
         if _tTrigPerZone[id1] == nil then
           _tTrigPerZone[id1] = {}
@@ -455,6 +443,16 @@ function RaidCore:OnInitialize()
   _tWipeTimer:Stop()
   -- Initialize the Zone Detection.
   self:SEARCH_OnCheckMapZone()
+end
+
+function RaidCore:HandlePcallResult(success, error)
+  if not success then
+    if self.db.profile.bLUAErrorMessage then
+      self:Print(error)
+    end
+    Log:Add(RaidCore.E.ERROR, error)
+  end
+  return success
 end
 
 ----------------------------------------------------------------------------------------------------
@@ -913,13 +911,8 @@ end
 function RaidCore:GlobalEventHandler(sMethod, ...)
   -- Call the encounter handler if we were in RUNNING.
   if _eCurrentFSM == MAIN_FSM__RUNNING then
-    local s, sErrMsg = pcall(OnEncounterHookGeneric, sMethod, ...)
-    if not s then
-      if self.db.profile.bLUAErrorMessage then
-        self:Print(sErrMsg)
-      end
-      Log:Add(RaidCore.E.ERROR, sErrMsg)
-    end
+    local s, e = pcall(OnEncounterHookGeneric, sMethod, ...)
+    self:HandlePcallResult(s, e)
   end
   -- Call the FSM handler, if needed.
   local fFSMHandler = _tMainFSMHandlers[_eCurrentFSM][sMethod]

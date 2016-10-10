@@ -91,13 +91,8 @@ local function ManagerCall(sMethod, ...)
   -- Trace all call to upper layer for debugging purpose.
   Log:Add(sMethod, ...)
   -- Protected call.
-  local s, sErrMsg = pcall(RaidCore.GlobalEventHandler, RaidCore, sMethod, ...)
-  if not s then
-    --@alpha@
-    Print(sMethod .. ": " .. sErrMsg)
-    --@end-alpha@
-    Log:Add(RaidCore.E.ERROR, sErrMsg)
-  end
+  local s, e = pcall(RaidCore.GlobalEventHandler, RaidCore, sMethod, ...)
+  RaidCore:HandlePcallResult(s, e)
 end
 
 local function ExtraLog2Text(k, nRefTime, tParam)
@@ -578,10 +573,8 @@ end
 
 function RaidCore:CI_UpdateBuffs(myUnit)
   -- Process buff tracking.
-  local f, err = pcall(PollUnitBuffs, myUnit)
-  if not f then
-    Print(err)
-  end
+  local s, e = pcall(PollUnitBuffs, myUnit)
+  self:HandlePcallResult(s, e)
 end
 
 function RaidCore:CI_UpdateCasts(myUnit, nId)

@@ -724,12 +724,8 @@ end
 
 function RaidCore:OnBarsUpdate()
   for _, tManager in next, _tManagers do
-    local r, sErr = pcall(tManager.OnTimerUpdate, tManager)
-    if not r then
-      --@alpha@
-      Print(sErr)
-      --@end-alpha@
-    end
+    local s, e = pcall(tManager.OnTimerUpdate, tManager)
+    self:HandlePcallResult(s, e)
   end
   -- Is there at least 1 bar remaining somewhere?
   local bIsEmpty = true
