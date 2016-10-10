@@ -424,6 +424,10 @@ function RaidCore:OnInitialize()
     ["summon"] = self.SyncSummon,
   }
 
+  for sCommand, fHandler in next, self.tCMD2function do
+    self.tCMD2function[self.L[sCommand]] = fHandler
+  end
+
   self.tAction2function = {
     [RaidCore.E.COMM_VERSION_CHECK_REQUEST] = self.VersionCheckRequest,
     [RaidCore.E.COMM_VERSION_CHECK_REPLY] = self.VersionCheckReply,
