@@ -756,12 +756,7 @@ end
 
 function RaidCore:AutoCleanUnitDestroyed(nId, tUnit, sName)
   self:RemoveUnit(nId)
-  if self.mark[nId] then
-    local markFrame = self.mark[nId].frame
-    markFrame:SetUnit(nil)
-    markFrame:Destroy()
-    self.mark[nId] = nil
-  end
+  self:DropMark(nId)
 end
 
 ----------------------------------------------------------------------------------------------------
