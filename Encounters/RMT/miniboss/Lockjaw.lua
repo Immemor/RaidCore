@@ -40,7 +40,7 @@ mod:RegisterUnitEvents("unit.lockjaw",{
       core:AddUnit(unit)
       core:WatchUnit(unit, core.E.TRACK_CASTS)
     end,
-    [core.E.CAST_START] = {
+    [core.E.CAST_END] = {
       ["cast.lockjaw.shackle"] = function(self)
         mod:AddMsg("CIRCLES", "msg.lockjaw.shackle.dodge", 5, "Inferno")
       end
