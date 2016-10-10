@@ -280,10 +280,11 @@ local function SearchEncounter()
 end
 
 local function ProcessDelayedUnit()
+  local tRemove = {}
   for nDelayedName, tDelayedList in next, _tDelayedUnits do
     for nDelayedId, bInCombat in next, tDelayedList do
       local tUnit = GetUnitById(nDelayedId)
-      if tUnit then
+      if tUnit and tUnit:IsValid() then
         local s, sErrMsg = pcall(OnEncounterHookGeneric, RaidCore.E.UNIT_CREATED, nDelayedId, tUnit, nDelayedName)
         if not s then
           if RaidCore.db.profile.bLUAErrorMessage then
@@ -300,10 +301,16 @@ local function ProcessDelayedUnit()
             Log:Add("ERROR", sErrMsg)
           end
         end
+      else
+        table.insert(tRemove, {nId = nDelayedId, sName = nDelayedName})
       end
     end
   end
-  _tDelayedUnits = {}
+
+  local nCount = #tRemove
+  for i = 1, nCount do
+    RemoveDelayedUnit(tRemove[i].nId, tRemove[i].sName)
+  end
 end
 
 ----------------------------------------------------------------------------------------------------
@@ -987,7 +994,7 @@ function RaidCore:SEARCH_OnEnteredCombat(nId, tUnit, sName, bInCombat)
 end
 
 function RaidCore:SEARCH_OnUnitDestroyed(nId, tUnit, sName)
-  RemoveDelayedUnit(nId, tUnit)
+  RemoveDelayedUnit(nId, sName)
   self:AutoCleanUnitDestroyed(nId, tUnit, sName)
 end
 

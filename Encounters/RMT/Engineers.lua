@@ -120,8 +120,7 @@ end
 ----------------------------------------------------------------------------------------------------
 -- Locals.
 ----------------------------------------------------------------------------------------------------
---Do not reset coreUnits since they don't get destroyed after each pull
-local coreUnits = {}
+local coreUnits
 local engineerUnits
 local player
 
@@ -176,10 +175,6 @@ mod:RegisterDefaultTimerBarConfigs({
   }
 )
 ----------------------------------------------------------------------------------------------------
--- Raw event handlers.
-----------------------------------------------------------------------------------------------------
-Apollo.RegisterEventHandler("UnitDestroyed", "OnUnitDestroyedRaw", mod)
-----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
@@ -187,18 +182,13 @@ function mod:OnBossEnable()
   player.unit = GameLib.GetPlayerUnit()
   player.location = 0
   engineerUnits = {}
+  coreUnits = {}
   --locales
   for name, id in pairs(CORE_NAMES) do
     CORE_NAMES[self.L[name]] = id
   end
   for name, id in pairs(ENGINEER_NAMES) do
     ENGINEER_NAMES[self.L[name]] = id
-  end
-
-  for _, coreUnit in pairs(coreUnits) do
-    coreUnit.healthWarning = false
-    coreUnit.enabled = false
-    coreUnit.percent = 30
   end
 
   mod:AddTimerBar("NEXT_ELEKTROSHOCK_TIMER", "msg.engineer.electroshock.next", FIRST_ELECTROSHOCK_TIMER)
@@ -335,13 +325,6 @@ mod:RegisterUnitEvents(core.E.ALL_UNITS, {
 function mod:IsPlayerOnPlatform(coreId)
   player.location = mod:GetUnitPlatform(player.unit)
   return player.location == coreId
-end
-
-function mod:OnUnitDestroyedRaw(unit)
-  local name = unit:GetName()
-  if CORE_NAMES[name] ~= nil then
-    coreUnits[CORE_NAMES[name]] = nil
-  end
 end
 
 mod:RegisterUnitEvents({
