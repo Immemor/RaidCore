@@ -22,36 +22,39 @@ mod:RegisterEnglishLocale({
     -- Cast names.
     ["cast.lockjaw.shackle"] = "Blaze Shackles",
     -- Messages.
-    ["msg.lockjaw.shackle.dodge"] = "DODGE CIRCLES",
+    ["msg.lockjaw.shackle.dodge"] = "INTERRUPT",
   })
 ----------------------------------------------------------------------------------------------------
 -- Settings.
 ----------------------------------------------------------------------------------------------------
 mod:RegisterDefaultSetting("CrosshairTethers")
+mod:RegisterDefaultSetting("MessageShackles")
 mod:RegisterDefaultSetting("SoundShackles")
+
+mod:RegisterMessageSetting("CIRCLES", "EQUAL", "MessageShackles", "SoundShackles")
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 mod:RegisterUnitEvents("unit.lockjaw",{
-    ["OnUnitCreated"] = function (_, _, unit)
+    [core.E.UNIT_CREATED] = function (_, _, unit)
       core:AddUnit(unit)
       core:WatchUnit(unit, core.E.TRACK_CASTS)
     end,
-    ["OnCastStart"] = function (self, _, castName)
-      if self.L["cast.lockjaw.shackle"] == castName then
-        mod:AddMsg("CIRCLES", self.L["msg.lockjaw.shackle.dodge"], 5, mod:GetSetting("SoundShackles") == true and "Info")
+    [core.E.CAST_END] = {
+      ["cast.lockjaw.shackle"] = function(self)
+        mod:AddMsg("CIRCLES", "msg.lockjaw.shackle.dodge", 5, "Inferno")
       end
-    end,
+    },
   }
 )
 
 mod:RegisterUnitEvents("unit.shackle",{
-    ["OnUnitCreated"] = function (_, id)
+    [core.E.UNIT_CREATED] = function (_, id)
       if mod:GetSetting("CrosshairTethers") then
         core:AddPicture(id, id, "Crosshair", 25)
       end
     end,
-    ["OnUnitDestroyed"] = function (_, id)
+    [core.E.UNIT_DESTROYED] = function (_, id)
       core:RemovePicture(id)
     end,
   }
