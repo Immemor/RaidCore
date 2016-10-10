@@ -414,6 +414,26 @@ function RaidCore:OnInitialize()
       bDisableSelectiveTracking = false,
     }
   }
+
+  self.tCMD2function = {
+    ["config"] = self.DisplayMainWindow,
+    ["reset"] = self.ResetAll,
+    ["versioncheck"] = self.VersionCheck,
+    ["pull"] = self.LaunchPull,
+    ["break"] = self.LaunchBreak,
+    ["summon"] = self.SyncSummon,
+  }
+
+  self.tAction2function = {
+    [RaidCore.E.COMM_VERSION_CHECK_REQUEST] = self.VersionCheckRequest,
+    [RaidCore.E.COMM_VERSION_CHECK_REPLY] = self.VersionCheckReply,
+    [RaidCore.E.COMM_NEWEST_VERSION] = self.NewestVersionRequest,
+    [RaidCore.E.COMM_LAUNCH_PULL] = self.LaunchPullRequest,
+    [RaidCore.E.COMM_LAUNCH_BREAK] = self.LaunchBreakRequest,
+    [RaidCore.E.COMM_SYNC_SUMMON] = self.SyncSummonRequest,
+    [RaidCore.E.COMM_ENCOUNTER_IND] = self.EncounterInd,
+  }
+
   -- Final parsing about encounters.
   for name, module in self:IterateModules() do
     local s, e = pcall(module.PrepareEncounter, module)
@@ -495,16 +515,7 @@ function RaidCore:ProcessMessage(tMessage, nSenderId)
     return
   end
 
-  local tAction2function = {
-    [RaidCore.E.COMM_VERSION_CHECK_REQUEST] = self.VersionCheckRequest,
-    [RaidCore.E.COMM_VERSION_CHECK_REPLY] = self.VersionCheckReply,
-    [RaidCore.E.COMM_NEWEST_VERSION] = self.NewestVersionRequest,
-    [RaidCore.E.COMM_LAUNCH_PULL] = self.LaunchPullRequest,
-    [RaidCore.E.COMM_LAUNCH_BREAK] = self.LaunchBreakRequest,
-    [RaidCore.E.COMM_SYNC_SUMMON] = self.SyncSummonRequest,
-    [RaidCore.E.COMM_ENCOUNTER_IND] = self.EncounterInd,
-  }
-  local func = tAction2function[tMessage.action]
+  local func = self.tAction2function[tMessage.action]
   if func then
     func(self, tMessage, nSenderId)
   end
@@ -772,22 +783,13 @@ function RaidCore:OnRaidCoreOn(cmd, args)
     table.remove(tArgc, 1)
   end
 
-  local tCMD2function = {
-    ["config"] = self.DisplayMainWindow,
-    ["reset"] = self.ResetAll,
-    ["versioncheck"] = self.VersionCheck,
-    ["pull"] = self.LaunchPull,
-    ["break"] = self.LaunchBreak,
-    ["summon"] = self.SyncSummon,
-  }
-
-  local func = tCMD2function[command]
+  local func = self.tCMD2function[command]
   if func then
     func(self, tArgc)
   else
     self:Print(("Unknown command: %s"):format(command))
     local tAllCommands = {}
-    for k, v in next, tCMD2function do
+    for k, v in next, self.tCMD2function do
       table.insert(tAllCommands, k)
     end
     local sAllCommands = table.concat(tAllCommands, ", ")
