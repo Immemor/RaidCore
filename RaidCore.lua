@@ -281,12 +281,9 @@ end
 local function AddDelayedUnit(nId, tUnit, sName)
   local tMap = GetCurrentZoneMap()
   if tMap then
-    local id1 = tMap.continentId
-    local id2 = tMap.parentZoneId
-    local id3 = tMap.id
-    local tTrig = _tTrigPerZone[id1]
-    tTrig = tTrig and tTrig[id2]
-    tTrig = tTrig and tTrig[id3]
+    local tTrig = _tTrigPerZone[tMap.continentId]
+    tTrig = tTrig and tTrig[tMap.parentZoneId]
+    tTrig = tTrig and tTrig[tMap.id]
     tTrig = tTrig and tTrig[sName]
     if tTrig then
       if not _tDelayedUnits[sName] then
@@ -300,12 +297,9 @@ end
 local function SearchEncounter()
   local tMap = GetCurrentZoneMap()
   if tMap then
-    local id1 = tMap.continentId
-    local id2 = tMap.parentZoneId
-    local id3 = tMap.id
-    local tEncounters = _tEncountersPerZone[id1]
-    tEncounters = tEncounters and tEncounters[id2]
-    tEncounters = tEncounters and tEncounters[id3] or {}
+    local tEncounters = _tEncountersPerZone[tMap.continentId]
+    tEncounters = tEncounters and tEncounters[tMap.parentZoneId]
+    tEncounters = tEncounters and tEncounters[tMap.id] or {}
     local nSize = #tEncounters
     for i = 1, nSize do
       local tEncounter = tEncounters[i]
