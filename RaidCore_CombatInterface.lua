@@ -38,9 +38,6 @@ local binaryAnd = bit32.band
 ----------------------------------------------------------------------------------------------------
 -- Constants.
 ----------------------------------------------------------------------------------------------------
--- Sometimes Carbine have inserted some no-break-space, for fun.
--- Behavior seen with French language.
-local NO_BREAK_SPACE = string.char(194, 160)
 local SCAN_PERIOD = 0.1 -- in seconds.
 -- Array with chat permission.
 local CHANNEL_HANDLERS = {
@@ -100,15 +97,15 @@ local function ExtraLog2Text(k, nRefTime, tParam)
   if k == RaidCore.E.ERROR then
     sResult = tParam[1]
   elseif k == RaidCore.E.DEBUFF_ADD or k == RaidCore.E.BUFF_ADD then
-    local sSpellName = GetSpell(tParam[2]):GetName():gsub(NO_BREAK_SPACE, " ")
+    local sSpellName = GetSpell(tParam[2]):GetName():gsub(RaidCore.E.NO_BREAK_SPACE, " ")
     local sFormat = "Id=%u SpellName='%s' SpellId=%u Stack=%d fTimeRemaining=%.2f sName=\"%s\""
     sResult = sFormat:format(tParam[1], sSpellName, tParam[2], tParam[3], tParam[4], tParam[5])
   elseif k == RaidCore.E.DEBUFF_REMOVE or k == RaidCore.E.BUFF_REMOVE then
-    local sSpellName = GetSpell(tParam[2]):GetName():gsub(NO_BREAK_SPACE, " ")
+    local sSpellName = GetSpell(tParam[2]):GetName():gsub(RaidCore.E.NO_BREAK_SPACE, " ")
     local sFormat = "Id=%u SpellName='%s' SpellId=%u sName=\"%s\""
     sResult = sFormat:format(tParam[1], sSpellName, tParam[2], tParam[3])
   elseif k == RaidCore.E.DEBUFF_UPDATE or k == RaidCore.E.BUFF_UPDATE then
-    local sSpellName = GetSpell(tParam[2]):GetName():gsub(NO_BREAK_SPACE, " ")
+    local sSpellName = GetSpell(tParam[2]):GetName():gsub(RaidCore.E.NO_BREAK_SPACE, " ")
     local sFormat = "Id=%u SpellName='%s' SpellId=%u Stack=%d fTimeRemaining=%.2f sName=\"%s\""
     sResult = sFormat:format(tParam[1], sSpellName, tParam[2], tParam[3], tParam[4], tParam[5])
   elseif k == RaidCore.E.CAST_START then
@@ -214,7 +211,7 @@ local function TrackThisUnit(tUnit, nTrackingType)
     _tAllUnits[nId] = true
     _tTrackedUnits[nId] = {
       tUnit = tUnit,
-      sName = tUnit:GetName():gsub(NO_BREAK_SPACE, " "),
+      sName = tUnit:GetName():gsub(RaidCore.E.NO_BREAK_SPACE, " "),
       nId = nId,
       bIsACharacter = false,
       tBuffs = tBuffs,
@@ -537,7 +534,7 @@ function RaidCore:CI_OnEnteredCombat(tUnit, bInCombat)
   local bIsPetPlayer = tOwner and self:IsUnitInGroup(tOwner)
   if not bIsPetPlayer then
     local nId = tUnit:GetId()
-    local sName = string.gsub(tUnit:GetName(), NO_BREAK_SPACE, " ")
+    local sName = string.gsub(tUnit:GetName(), RaidCore.E.NO_BREAK_SPACE, " ")
     if not self:IsUnitInGroup(tUnit) then
       if not _tAllUnits[nId] then
         ManagerCall(RaidCore.E.UNIT_CREATED, nId, tUnit, sName)
@@ -551,7 +548,7 @@ end
 function RaidCore:CI_OnUnitCreated(tUnit)
   local nId = tUnit:GetId()
   if not self:IsUnitInGroup(tUnit) then
-    local sName = tUnit:GetName():gsub(NO_BREAK_SPACE, " ")
+    local sName = tUnit:GetName():gsub(RaidCore.E.NO_BREAK_SPACE, " ")
     local tOwner = tUnit.GetUnitOwner and tUnit:GetUnitOwner()
     local bIsPetPlayer = tOwner and self:IsUnitInGroup(tOwner)
     if not bIsPetPlayer and not _tAllUnits[nId] then
@@ -566,7 +563,7 @@ function RaidCore:CI_OnUnitDestroyed(tUnit)
   if _tAllUnits[nId] then
     _tAllUnits[nId] = nil
     UnTrackThisUnit(nId)
-    local sName = tUnit:GetName():gsub(NO_BREAK_SPACE, " ")
+    local sName = tUnit:GetName():gsub(RaidCore.E.NO_BREAK_SPACE, " ")
     ManagerCall(RaidCore.E.UNIT_DESTROYED, nId, tUnit, sName)
   end
 end
@@ -596,7 +593,7 @@ function RaidCore:CI_UpdateCasts(myUnit, nId)
     bCasting = myUnit.tUnit:IsCasting()
   end
   if bCasting then
-    sCastName = string.gsub(sCastName, NO_BREAK_SPACE, " ")
+    sCastName = string.gsub(sCastName, RaidCore.E.NO_BREAK_SPACE, " ")
     if not myUnit.tCast.bCasting then
       -- New cast
       myUnit.tCast = {
@@ -668,7 +665,7 @@ function RaidCore:CI_OnScanUpdate()
   for nId, data in next, _tTrackedUnits do
     if data.tUnit:IsValid() then
       -- Process name update.
-      data.sName = data.tUnit:GetName():gsub(NO_BREAK_SPACE, " ")
+      data.sName = data.tUnit:GetName():gsub(RaidCore.E.NO_BREAK_SPACE, " ")
 
       if data.bTrackBuffs then
         self:CI_UpdateBuffs(data, nId)
@@ -688,10 +685,10 @@ function RaidCore:CI_OnChatMessage(tChannelCurrent, tMessage)
   local sHandler = CHANNEL_HANDLERS[nChannelType]
   if sHandler then
     local sSender = tMessage.strSender or ""
-    sSender:gsub(NO_BREAK_SPACE, " ")
+    sSender:gsub(RaidCore.E.NO_BREAK_SPACE, " ")
     local sMessage = ""
     for _, tSegment in next, tMessage.arMessageSegments do
-      sMessage = sMessage .. tSegment.strText:gsub(NO_BREAK_SPACE, " ")
+      sMessage = sMessage .. tSegment.strText:gsub(RaidCore.E.NO_BREAK_SPACE, " ")
     end
     ManagerCall(sHandler, sMessage, sSender)
   end
@@ -740,8 +737,8 @@ end
 function RaidCore:CI_OnCombatLogHeal(tArgs)
   local nCasterId = tArgs.unitCaster and tArgs.unitCaster:GetId()
   local nTargetId = tArgs.unitTarget and tArgs.unitTarget:GetId()
-  local sCasterName = tArgs.unitCaster and tArgs.unitCaster:GetName():gsub(NO_BREAK_SPACE, " ") or ""
-  local sTargetName = tArgs.unitTarget and tArgs.unitTarget:GetName():gsub(NO_BREAK_SPACE, " ") or ""
+  local sCasterName = tArgs.unitCaster and tArgs.unitCaster:GetName():gsub(RaidCore.E.NO_BREAK_SPACE, " ") or ""
+  local sTargetName = tArgs.unitTarget and tArgs.unitTarget:GetName():gsub(RaidCore.E.NO_BREAK_SPACE, " ") or ""
   local nHealAmount = tArgs.nHealAmount or 0
   local nOverHeal = tArgs.nOverHeal or 0
   local nSpellId = tArgs.splCallingSpell and tArgs.splCallingSpell:GetId()

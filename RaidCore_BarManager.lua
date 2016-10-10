@@ -40,7 +40,6 @@ local TemplateManager = {}
 local TEMPLATE_MANAGER_META = { __index = TemplateManager }
 local VULNERABILITY = Unit.CodeEnumCCState.Vulnerability
 local BAR_UPDATE_PERIOD = 0.1
-local NO_BREAK_SPACE = string.char(194, 160)
 local DEFAULT_SETTINGS = {
   ['**'] = {
     bEnabled = true,
@@ -491,7 +490,7 @@ function UnitManager:UpdateBar(tBar)
   if tUnit and tUnit:IsValid() then
     local MaxHealth = tUnit:GetMaxHealth()
     local Health = tUnit:GetHealth()
-    local sName = tUnit:GetName():gsub(NO_BREAK_SPACE, " ")
+    local sName = tUnit:GetName():gsub(RaidCore.E.NO_BREAK_SPACE, " ")
     local bVunerable = tUnit:IsInCCState(VULNERABILITY)
     if Health and MaxHealth then
       local nPourcent = 100.0 * Health / MaxHealth

@@ -59,6 +59,7 @@ RaidCore.E = {
   SHOW_SHORTCUT_BAR = "OnShowShortcutBar",
   -- Special Keywords.
   ALL_UNITS = "**",
+  NO_BREAK_SPACE = string.char(194, 160),
   -- Tracking.
   TRACK_ALL = 0xFF,
   TRACK_BUFFS = 0x01,

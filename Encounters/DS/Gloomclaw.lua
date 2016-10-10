@@ -258,8 +258,7 @@ function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
 
   function mod:OnCombatLogHeal(tArgs)
     if tArgs.unitTarget then
-      local NO_BREAK_SPACE = string.char(194, 160)
-      local targetName = tArgs.unitTarget:GetName():gsub(NO_BREAK_SPACE, " ")
+      local targetName = tArgs.unitTarget:GetName():gsub(core.E.NO_BREAK_SPACE, " ")
       local targetId = tArgs.unitTarget:GetId()
       if targetName == self.L["Essence of Logic"] then
         if not essenceUp[targetId] then
