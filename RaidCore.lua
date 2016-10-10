@@ -318,6 +318,7 @@ function RaidCore:OnInitialize()
     [MAIN_FSM__SEARCH] = {
       ["OnChangeWorld"] = self.SEARCH_OnCheckMapZone,
       ["OnSubZoneChanged"] = self.SEARCH_OnCheckMapZone,
+      ["OnCharacterCreated"] = self.SEARCH_OnCheckMapZone,
       [RaidCore.E.UNIT_CREATED] = self.SEARCH_OnUnitCreated,
       [RaidCore.E.ENTERED_COMBAT] = self.SEARCH_OnEnteredCombat,
       [RaidCore.E.UNIT_DESTROYED] = self.SEARCH_OnUnitDestroyed,
