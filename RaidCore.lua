@@ -578,10 +578,10 @@ function RaidCore:isPublicEventObjectiveActive(objectiveString)
     return false
   end
 
-  for eventId, event in pairs(activeEvents) do
+  for eventId, event in next, activeEvents do
     local objectives = event:GetObjectives()
     if objectives ~= nil then
-      for id, objective in pairs(objectives) do
+      for id, objective in next, objectives do
         if objective:GetShortDescription() == objectiveString then
           return objective:GetStatus() == 1
         end
@@ -592,7 +592,7 @@ function RaidCore:isPublicEventObjectiveActive(objectiveString)
 end
 
 function RaidCore:hasActiveEvent(tblEvents)
-  for key, value in pairs(tblEvents) do
+  for key, value in next, tblEvents do
     if self:isPublicEventObjectiveActive(key) then
       return true
     end
@@ -657,7 +657,7 @@ end
 
 -- Removes all the world markers
 function RaidCore:ResetWorldMarkers()
-  for k, over in pairs(self.worldmarker) do
+  for k, over in next, self.worldmarker do
     over:Destroy()
     self.worldmarker[k] = nil
   end
@@ -706,7 +706,7 @@ function RaidCore:SetWorldMarker(key, sText, tPosition)
 end
 
 function RaidCore:OnMarkUpdate()
-  for k, v in pairs(self.mark) do
+  for k, v in next, self.mark do
     if v.unit:GetPosition() then
       v.frame:SetWorldLocation(v.unit:GetPosition())
     end
@@ -788,7 +788,7 @@ function RaidCore:OnRaidCoreOn(cmd, args)
   else
     self:Print(("Unknown command: %s"):format(command))
     local tAllCommands = {}
-    for k, v in pairs(tCMD2function) do
+    for k, v in next, tCMD2function do
       table.insert(tAllCommands, k)
     end
     local sAllCommands = table.concat(tAllCommands, ", ")
@@ -846,7 +846,7 @@ function RaidCore:VersionCheckResults()
   end
   if next(tOutdated) then
     self:Print("Outdated RaidCore Version:")
-    for sPlayerVersion, tList in pairs(tOutdated) do
+    for sPlayerVersion, tList in next, tOutdated do
       self:Print((" - '%s': %s"):format(sPlayerVersion, table.concat(tList, ", ")))
     end
   end
