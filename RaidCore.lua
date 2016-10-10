@@ -731,28 +731,6 @@ function RaidCore:ResetMarks()
   markCount = 0
 end
 
--- Obsolete way to test. PublicEventObjectif will be reworked later.
-function RaidCore:TestPE()
-  local tActiveEvents = PublicEvent.GetActiveEvents()
-  local i = RaidCore:isPublicEventObjectiveActive("Talk to Captain Tero")
-  self:Print("result ".. tostring(i))
-  i = RaidCore:isPublicEventObjectiveActive("Talk to Captain Teroxx")
-  self:Print("result ".. tostring(i))
-  for idx, peEvent in pairs(tActiveEvents) do
-    local test = peEvent:GetName()
-    local truc
-    self:Print(test)
-    for idObjective, peObjective in pairs(peEvent:GetObjectives()) do
-      test = peObjective:GetShortDescription()
-      if test == "North Power Core Energy" then
-        truc = peObjective:GetCount()
-        self:Print(test)
-        self:Print(truc)
-      end
-    end
-  end
-end
-
 function RaidCore:ResetAll()
   _tWipeTimer:Stop()
   self:BarsRemoveAll()
