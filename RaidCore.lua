@@ -723,10 +723,8 @@ function RaidCore:DropMark(key)
 end
 
 function RaidCore:ResetMarks()
-  for k, over in pairs(self.mark) do
-    over.frame:SetUnit(nil)
-    over.frame:Destroy()
-    self.mark[k] = nil
+  for nId, _ in next, self.mark do
+    self:DropMark(nId)
   end
   markCount = 0
 end
