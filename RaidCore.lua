@@ -612,7 +612,6 @@ function RaidCore:MarkUnit(unit, location, mark, color)
     local nId = unit:GetId()
     if not self.mark[nId] then
       self.mark[nId] = {}
-      self.mark[nId]["unit"] = unit
       if not mark then
         markCount = markCount + 1
         self.mark[nId].number = tostring(markCount)
@@ -739,8 +738,8 @@ function RaidCore:isRaidManagement(strName)
   if not GroupLib.InGroup() then return false end
   for nIdx=0, GroupLib.GetMemberCount() do
     local tGroupMember = GroupLib.GetGroupMember(nIdx)
-    if tGroupMember and tGroupMember["strCharacterName"] == strName then
-      if tGroupMember["bIsLeader"] or tGroupMember["bRaidAssistant"] then
+    if tGroupMember and tGroupMember.strCharacterName == strName then
+      if tGroupMember.bIsLeader or tGroupMember.bRaidAssistant then
         return true
       else
         return false
