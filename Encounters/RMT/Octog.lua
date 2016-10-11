@@ -18,6 +18,7 @@ mod:RegisterTrigMob("ALL", { "unit.octog" })
 mod:RegisterEnglishLocale({
     -- Unit names.
     ["unit.octog"] = "Star-Eater the Voracious",
+    ["unit.squirgling"] = "Squirgling",
     -- Cast names.
     -- Messages.
   })
@@ -35,7 +36,10 @@ mod:RegisterEnglishLocale({
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterUnitEvents("unit.octog",{
+mod:RegisterUnitEvents({
+    "unit.octog",
+    "unit.squirgling"
+    },{
     [core.E.UNIT_CREATED] = function (_, _, unit)
       core:AddUnit(unit)
       core:WatchUnit(unit)
