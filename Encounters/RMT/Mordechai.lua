@@ -42,7 +42,7 @@ mod:RegisterEnglishLocale({
     ["msg.mordechai.shuriken.next"] = "Next Shuriken",
     ["msg.mordechai.barrage.next"] = "Next Vicious Barrage",
     ["msg.phase.start"] = "SUCKY SUCKY PHASE SOON",
-    ["msg.orb.spawned"] = "Orb Spawned",
+    ["msg.orb.spawned"] = "ORB",
     ["msg.orb.kinetic_link"] = "DPS THE ORB!",
     ["msg.orb.next"] = "Next Orb",
     ["msg.mordechai.shuriken.you"] = "SHURIKEN ON YOU"
