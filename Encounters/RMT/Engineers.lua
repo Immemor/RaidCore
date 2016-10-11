@@ -168,6 +168,13 @@ mod:RegisterMessageSetting("DISCHARGED_PLASMA_MSG", "EQUAL", "MessageFireOrb", "
 mod:RegisterMessageSetting("DISCHARGED_PLASMA_MSG_SPAWN", "EQUAL", "MessageFireOrbAlt", "SoundFireOrbAlt")
 mod:RegisterMessageSetting("FIRE_ORB_POP_MSG", "EQUAL", "MessageFireOrbPop", "SoundFireOrbPop")
 mod:RegisterMessageSetting("CORE_HEALTH_%s+_WARN", "MATCH", "MessageCoreHealthWarning", "SoundCoreHealthWarning")
+-- Timer default configs.
+mod:RegisterDefaultTimerBarConfigs({
+    ["NEXT_ELEKTROSHOCK_TIMER"] = { sColor = "xkcdGreen" },
+    ["NEXT_LIQUIDATE_TIMER"] = { sColor = "xkcdOrange" },
+    ["NEXT_FIRE_ORB_TIMER"] = { sColor = "xkcdLightRed" },
+  }
+)
 ----------------------------------------------------------------------------------------------------
 -- Raw event handlers.
 ----------------------------------------------------------------------------------------------------
