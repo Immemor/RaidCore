@@ -163,7 +163,7 @@ mod:RegisterUnitEvents("unit.mordechai",{
     [core.E.HEALTH_CHANGED] = function(_, _, percent)
       for i = 1, #PHASES_CLOSE do
         if percent >= PHASES_CLOSE[i].LOWER and percent <= PHASES_CLOSE[i].UPPER then
-          mod:AddMsg("SUCKY_PHASE", "msg.phase.start", 5, "Info")
+          mod:AddMsg("SUCKY_PHASE", "msg.phase.start", 5, "Info", "xkcdWhite")
           break
         end
       end
@@ -223,7 +223,7 @@ mod:RegisterUnitEvents("unit.anchor",{
 
 mod:RegisterUnitEvents("unit.orb",{
     [core.E.UNIT_CREATED] = function()
-      mod:AddMsg("ORB_SPAWNED", "msg.orb.spawned", 5, "Info")
+      mod:AddMsg("ORB_SPAWNED", "msg.orb.spawned", 5, "Info", "xkcdWhite")
     end
   }
 )
@@ -255,7 +255,7 @@ mod:RegisterUnitEvents(core.E.ALL_UNITS, {
           return
         end
 
-        mod:AddMsg("KINETIC_LINK_MSG", "msg.orb.kinetic_link", 5, "Burn")
+        mod:AddMsg("KINETIC_LINK_MSG", "msg.orb.kinetic_link", 5, "Burn", "xkcdPurplePink")
 
         if mod:GetSetting("LinePurple") then
           local casterId = unitCaster:GetId()
@@ -273,7 +273,7 @@ mod:RegisterUnitEvents(core.E.ALL_UNITS, {
           core:AddPicture("SHOCKING_ATTRACTION_TARGET_"..id, id, "Crosshair", 30, 0, 0, nil, "blue")
         end
         if id == playerUnit:GetId() then
-          mod:AddMsg("SHOCKING_ATTRACTION", "msg.mordechai.shuriken.you", 5, "RunAway")
+          mod:AddMsg("SHOCKING_ATTRACTION", "msg.mordechai.shuriken.you", 5, "RunAway", "xkcdBlue")
         end
       end,
       [core.E.DEBUFF_REMOVE] = function (self, id)
