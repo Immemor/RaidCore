@@ -38,6 +38,22 @@ mod:RegisterEnglishLocale({
 ----------------------------------------------------------------------------------------------------
 -- Constants.
 ----------------------------------------------------------------------------------------------------
+-- Debuffs and Buffs.
+local DEBUFFS = {
+  REND = 85443, --Reduces Mitigation by 2.5% per stack.
+  NOXIOUS_INK = 85533, --Taking X damage every 0s.
+  SQUIRGLING_SMASHER = 86804, --Increases Damage Dealt by 5% and Outgoing healing by 5% per stack.
+  SPACE_FIRE = 87159, --Taking X technology damage every 3s.
+  CHAOS_ORB = 85578, --Protected by Chaos Orbs.
+  CHAOS_ORB_STACK = 85582, --Damage taken increased by 10% per stack.
+  CHAOS_TETHER = 85583, --Chaos orb deals lethal damage to those who try to scape its grasp.
+}
+local BUFFS = {
+  CHAOS_AMPLIFIER = 86876, --Increases the potency of Chaos Orbs.
+  CHAOS_ORBS = 86885, --Channeling Chaos Orbs.
+  ASTRAL_SHIELD = 85679, --Immune to damage.
+  ASTRAL_SHIELD_STACKS = 85643, --Immune to damage.
+}
 
 -- Timers.
 local FIRST_HOOKSHOT_TIMER = 10
