@@ -20,6 +20,7 @@ mod:RegisterEnglishLocale({
     ["unit.octog"] = "Star-Eater the Voracious",
     ["unit.squirgling"] = "Squirgling",
     ["unit.orb"] = "Chaos Orb",
+    ["unit.pool"] = "Noxious Ink Pool",
     -- Cast names.
     -- Messages.
   })
@@ -50,6 +51,7 @@ mod:RegisterUnitEvents({
 
 mod:RegisterUnitEvents({
     "unit.squirgling",
+    "unit.pool",
     },{
     [core.E.UNIT_CREATED] = function (_, _, unit)
       core:WatchUnit(unit)
