@@ -79,7 +79,6 @@ local PHASES_CLOSE = {
 function mod:OnBossEnable()
   mod:AddTimerBar("NEXT_HOOKSHOT_TIMER", "msg.hookshot.next", FIRST_HOOKSHOT_TIMER)
   mod:AddTimerBar("NEXT_FLAMETHROWER_TIMER", "msg.flamethrower.next", FLAMETHROWER_TIMER)
-  mod:DrawCompactorGrid()
 end
 
 mod:RegisterUnitEvents({
