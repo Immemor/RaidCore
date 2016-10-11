@@ -50,7 +50,7 @@ mod:RegisterEnglishLocale({
     ["msg.swabbie.walking"] = "Walking %s",
     ["msg.swabbie.walking.direction.north"] = "North",
     ["msg.swabbie.walking.direction.south"] = "South",
-    ["msg.bile.stacks"] = "%d STACKS!",
+    ["msg.bile.stacks"] = "%d STACKS",
     ["msg.saw.middle"] = "SAW MIDDLE",
     ["msg.saw.safe_spot"] = "GAP %s",
     ["msg.saw.safe_spot.left"] = "LEFT",

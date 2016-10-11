@@ -39,12 +39,12 @@ mod:RegisterEnglishLocale({
     ["msg.robo.laser.other"] = "LASER ON %s",
     ["msg.robo.laser.you"] = "LASER ON YOU",
     ["msg.robo.laser.next"] = "Next incinerate in",
-    ["msg.maze.coming"] = "MAZE SOON!",
+    ["msg.maze.coming"] = "MAZE SOON",
     ["msg.maze.now"] = "CENTER",
     ["msg.arms.next"] = "Arms spawning in",
-    ["msg.cannon_arm.spawned"] = "Cannon arm",
-    ["msg.cannon_arm.interrupt"] = "INTERRUPT CANNON!",
-    ["msg.spew.now"] = "Spew!",
+    ["msg.cannon_arm.spawned"] = "CANNON",
+    ["msg.cannon_arm.interrupt"] = "INTERRUPT CANNON",
+    ["msg.spew.now"] = "Spew",
     ["msg.spew.next"] = "Next spew in",
   })
 ----------------------------------------------------------------------------------------------------

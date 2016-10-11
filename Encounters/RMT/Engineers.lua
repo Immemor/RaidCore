@@ -43,12 +43,12 @@ mod:RegisterEnglishLocale({
     ["msg.engineer.electroshock.swap.return"] = "SWAP TO ENGINEER",
     ["msg.fire_orb.next"] = "Next Fire Orb in",
     ["msg.fire_orb.you"] = "FIRE ORB ON YOU",
-    ["msg.fire_orb.spawned"] = "Fire Orb spawned",
+    ["msg.fire_orb.spawned"] = "Fire Orb",
     ["msg.fire_orb.pop.timer"] = "Fire Orb is safe to pop in",
-    ["msg.fire_orb.pop.msg"] = "Pop the Fire Orb!",
+    ["msg.fire_orb.pop.msg"] = "Pop the Orb",
     ["msg.core.health.high.warning"] = "%s HIGH HEALTH!",
     ["msg.core.health.low.warning"] = "%s LOW HEALTH!",
-    ["msg.rocket_jump.moved"] = "%s MOVED"
+    ["msg.rocket_jump.moved"] = "%s MOVED",
   })
 ----------------------------------------------------------------------------------------------------
 -- Constants.
