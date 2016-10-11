@@ -61,15 +61,14 @@ local HOOKSHOT_TIMER = 45
 local FLAMETHROWER_TIMER = 40
 
 -- Health trackers
-local FIRST_CHAOS_ORB_UPPER_HEALTH = 86.5
-local FIRST_CHAOS_ORB_LOWER_HEALTH = 85.5
+local ORBS_CLOSE = {
+  {UPPER = 86.5, LOWER = 85.5}, -- 85
+  {UPPER = 71.5, LOWER = 70.5}, -- 70
+}
 
-local SECOND_CHAOS_ORB_UPPER_HEALTH = 71.5
-local SECOND_CHAOS_ORB_LOWER_HEALTH = 70.5
-
-local MIDPHASE_UPPER_HEALTH = 66.5
-local MIDPHASE_LOWER_HEALTH = 65.5
-
+local PHASES_CLOSE = {
+  {UPPER = 66.5, LOWER = 65.5}, -- 65
+}
 ----------------------------------------------------------------------------------------------------
 -- Locals.
 ----------------------------------------------------------------------------------------------------
@@ -93,6 +92,15 @@ mod:RegisterUnitEvents({
   }
 )
 
+function mod:IsPhaseClose(phase, percent)
+  for i = 1, #phase do
+    if percent >= phase[i].LOWER and percent <= phase[i].UPPER then
+      return true
+    end
+  end
+  return false
+end
+
 mod:RegisterUnitEvents({
     "unit.octog",
     [core.E.UNIT_CREATED] = function (_, _, unit)
@@ -100,10 +108,10 @@ mod:RegisterUnitEvents({
       core:WatchUnit(unit)
     end,
     [core.E.HEALTH_CHANGED] = function(_, _, percent)
-      if (percent >= FIRST_CHAOS_ORB_LOWER_HEALTH and percent <= FIRST_CHAOS_ORB_UPPER_HEALTH) or (percent >= SECOND_CHAOS_ORB_LOWER_HEALTH and percent <= SECOND_CHAOS_ORB_UPPER_HEALTH) then
+      if mod:IsPhaseClose(ORBS_CLOSE, percent) then
         mod:AddMsg("CHAOS_ORB_SOON", "msg.chaos.orbs.coming", 5, "Info", "xkcdWhite")
       end
-      if (percent >= MIDPHASE_LOWER_HEALTH and percent <= MIDPHASE_UPPER_HEALTH) then
+      if mod:IsPhaseClose(PHASES_CLOSE, percent) then
         mod:AddMsg("MIDPHASE_SOON", "msg.midphase.coming", 5, "Info", "xkcdWhite")
       end
     end,
