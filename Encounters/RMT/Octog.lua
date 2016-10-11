@@ -101,8 +101,7 @@ function mod:IsPhaseClose(phase, percent)
   return false
 end
 
-mod:RegisterUnitEvents({
-    "unit.octog",
+mod:RegisterUnitEvents("unit.octog",{
     [core.E.UNIT_CREATED] = function (_, _, unit)
       core:AddUnit(unit)
       core:WatchUnit(unit)
