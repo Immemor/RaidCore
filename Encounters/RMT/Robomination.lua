@@ -39,12 +39,12 @@ mod:RegisterEnglishLocale({
     ["msg.robo.laser.other"] = "LASER ON %s",
     ["msg.robo.laser.you"] = "LASER ON YOU",
     ["msg.robo.laser.next"] = "Next incinerate in",
-    ["msg.maze.coming"] = "MAZE SOON!",
-    ["msg.maze.now"] = "RUN TO THE CENTER!",
+    ["msg.maze.coming"] = "MAZE SOON",
+    ["msg.maze.now"] = "CENTER",
     ["msg.arms.next"] = "Arms spawning in",
-    ["msg.cannon_arm.spawned"] = "Cannon arm spawned",
-    ["msg.cannon_arm.interrupt"] = "INTERRUPT CANNON!",
-    ["msg.spew.now"] = "Spew!",
+    ["msg.cannon_arm.spawned"] = "CANNON",
+    ["msg.cannon_arm.interrupt"] = "INTERRUPT CANNON",
+    ["msg.spew.now"] = "Spew",
     ["msg.spew.next"] = "Next spew in",
   })
 ----------------------------------------------------------------------------------------------------
@@ -175,17 +175,17 @@ mod:RegisterDatachronEvent("chron.robo.snake", "MATCH", function(self, _, snakeT
     local isOnMyself = snakeTarget == playerUnit
     local isSnakeNearYou = not isOnMyself and mod:GetDistanceBetweenUnits(playerUnit, snakeTarget) < 10
     if isOnMyself then
-      mod:AddMsg("SNAKE_MSG", "msg.snake.you", 5, "RunAway", "Blue")
+      mod:AddMsg("SNAKE_MSG", "msg.snake.you", 5, "RunAway", "xkcdBlue")
     elseif isSnakeNearYou then
       local sound = "RunAway"
       local msg = self.L["msg.snake.near"]:format(snakeTarget:GetName())
       if mod:GetSetting("SoundSnakeNearAlt") then
         sound = "Destruction"
       end
-      mod:AddMsg("SNAKE_MSG_NEAR", msg, 5, sound, "Blue")
+      mod:AddMsg("SNAKE_MSG_NEAR", msg, 5, sound, "xkcdBlue")
     else
       local msg = self.L["msg.snake.other"]:format(snakeTarget:GetName())
-      mod:AddMsg("SNAKE_MSG_OTHER", msg, 5, nil, "Blue")
+      mod:AddMsg("SNAKE_MSG_OTHER", msg, 5, nil, "xkcdBlue")
     end
 
     if mod:GetSetting("CrosshairSnake") then
@@ -207,7 +207,7 @@ mod:RegisterDatachronEvent("chron.robo.hides", "EQUAL", function ()
     core:RemovePicture("LASER_CROSSHAIR")
 
     core:RemoveMsg("ROBO_MAZE_CLOSE")
-    mod:AddMsg("ROBO_MAZE_NOW", "msg.maze.now", 5, "Info")
+    mod:AddMsg("ROBO_MAZE_NOW", "msg.maze.now", 5, "Info", "xkcdWhite")
     mod:RemoveCompactorGrid()
     mod:RemoveCannonArmLines()
   end
@@ -240,7 +240,7 @@ mod:RegisterDatachronEvent("chron.robo.laser", "MATCH", function(self, _, laserT
 
     mod:RemoveTimerBar("NEXT_INCINERATE_TIMER")
     mod:AddTimerBar("NEXT_INCINERATE_TIMER", "msg.robo.laser.next", INCINERATE_TIMER)
-    mod:AddMsg("LASER_MSG", laserOnX, 5, "Burn", "Red")
+    mod:AddMsg("LASER_MSG", laserOnX, 5, "Burn", "xkcdRed")
   end
 )
 
@@ -347,12 +347,12 @@ mod:RegisterUnitEvents("unit.cannon_arm",{
       if phase == DPS_PHASE then
         mod:AddTimerBar("NEXT_ARMS_TIMER", "msg.arms.next", ARMS_TIMER)
       end
-      mod:AddMsg("ARMS_MSG_SPAWN", "msg.cannon_arm.spawned", 5, "Info", "Red")
+      mod:AddMsg("ARMS_MSG_SPAWN", "msg.cannon_arm.spawned", 5, "Info", "xkcdWhite")
     end,
     [core.E.CAST_START] = {
       ["cast.cannon_fire"] = function(self, id)
         if mod:GetDistanceBetweenUnits(playerUnit, GetUnitById(id)) < 45 then
-          mod:AddMsg("ARMS_MSG_CAST", "msg.cannon_arm.interrupt", 2, "Inferno")
+          mod:AddMsg("ARMS_MSG_CAST", "msg.cannon_arm.interrupt", 2, "Inferno", "xkcdOrange")
         end
       end
     },
@@ -370,14 +370,14 @@ mod:RegisterUnitEvents("unit.robo",{
     end,
     [core.E.HEALTH_CHANGED] = function(_, _, percent)
       if (percent >= FIRST_MAZE_PHASE_LOWER_HEALTH and percent <= FIRST_MAZE_PHASE_UPPER_HEALTH) or (percent >= SECOND_MAZE_PHASE_LOWER_HEALTH and percent <= SECOND_MAZE_PHASE_UPPER_HEALTH) then
-        mod:AddMsg("ROBO_MAZE_CLOSE", "msg.maze.coming", 5, "Info")
+        mod:AddMsg("ROBO_MAZE_CLOSE", "msg.maze.coming", 5, "Info", "xkcdWhite")
       end
     end,
     [core.E.CAST_START] = {
       ["cast.spew"] = function(self, _)
         mod:RemoveTimerBar("NEXT_SPEW_TIMER")
         mod:AddTimerBar("NEXT_SPEW_TIMER", "msg.spew.next", SPEW_TIMER, mod:GetSetting("SoundLaser"))
-        mod:AddMsg("SPEW_MSG", "msg.spew.now", 4, "Beware")
+        mod:AddMsg("SPEW_MSG", "msg.spew.now", 4, "Beware", "xkcdDarkGreen")
       end
     },
   }

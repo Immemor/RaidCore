@@ -40,15 +40,15 @@ mod:RegisterEnglishLocale({
     ["msg.engineer.electroshock.next"] = "Next Electroshock in",
     ["msg.engineer.electroshock.swap.other"] = "%s SWAP TO WARRIOR",
     ["msg.engineer.electroshock.swap.you"] = "YOU SWAP TO WARRIOR",
-    ["msg.engineer.electroshock.swap.return"] = "YOU SWAP BACK TO ENGINEER",
+    ["msg.engineer.electroshock.swap.return"] = "SWAP TO ENGINEER",
     ["msg.fire_orb.next"] = "Next Fire Orb in",
     ["msg.fire_orb.you"] = "FIRE ORB ON YOU",
-    ["msg.fire_orb.spawned"] = "Fire Orb spawned",
+    ["msg.fire_orb.spawned"] = "Fire Orb",
     ["msg.fire_orb.pop.timer"] = "Fire Orb is safe to pop in",
-    ["msg.fire_orb.pop.msg"] = "Pop the Fire Orb!",
-    ["msg.core.health.high.warning"] = "%s pillar at HIGH HEALTH!",
-    ["msg.core.health.low.warning"] = "%s pillar at LOW HEALTH!",
-    ["msg.rocket_jump.moved"] = "%s HAS MOVED"
+    ["msg.fire_orb.pop.msg"] = "Pop the Orb",
+    ["msg.core.health.high.warning"] = "%s HIGH HEALTH!",
+    ["msg.core.health.low.warning"] = "%s LOW HEALTH!",
+    ["msg.rocket_jump.moved"] = "%s MOVED",
   })
 ----------------------------------------------------------------------------------------------------
 -- Constants.
@@ -168,6 +168,13 @@ mod:RegisterMessageSetting("DISCHARGED_PLASMA_MSG", "EQUAL", "MessageFireOrb", "
 mod:RegisterMessageSetting("DISCHARGED_PLASMA_MSG_SPAWN", "EQUAL", "MessageFireOrbAlt", "SoundFireOrbAlt")
 mod:RegisterMessageSetting("FIRE_ORB_POP_MSG", "EQUAL", "MessageFireOrbPop", "SoundFireOrbPop")
 mod:RegisterMessageSetting("CORE_HEALTH_%s+_WARN", "MATCH", "MessageCoreHealthWarning", "SoundCoreHealthWarning")
+-- Timer default configs.
+mod:RegisterDefaultTimerBarConfigs({
+    ["NEXT_ELEKTROSHOCK_TIMER"] = { sColor = "xkcdGreen" },
+    ["NEXT_LIQUIDATE_TIMER"] = { sColor = "xkcdOrange" },
+    ["NEXT_FIRE_ORB_TIMER"] = { sColor = "xkcdLightRed" },
+  }
+)
 ----------------------------------------------------------------------------------------------------
 -- Raw event handlers.
 ----------------------------------------------------------------------------------------------------
@@ -250,7 +257,7 @@ end
 function mod:OnEngiChangeLocation(engineerId, _, newLocation)
   if ENGINEER_NICK_NAMES[engineerId] ~= nil then
     local msg = self.L["msg.rocket_jump.moved"]:format(self.L[ENGINEER_NICK_NAMES[engineerId]])
-    mod:AddMsg("BOSS_MOVED_PLATFORM", msg, 5, "Alarm")
+    mod:AddMsg("BOSS_MOVED_PLATFORM", msg, 5, "Alarm", "xkcdWhite")
   end
   if newLocation == FUSION_CORE then
     mod:RemoveTimerBar("NEXT_FIRE_ORB_TIMER")
@@ -287,7 +294,7 @@ mod:RegisterUnitEvents(core.E.ALL_UNITS, {
         else
           local messageId = string.format("ELECTROSHOCK_MSG_OTHER_%s", targetName)
           local electroshockOnX = self.L["msg.engineer.electroshock.swap.other"]:format(targetName)
-          mod:AddMsg(messageId, electroshockOnX, 5, "Info", "Red")
+          mod:AddMsg(messageId, electroshockOnX, 5, "Info", "xkcdBlue")
         end
         if mod:GetSetting("MarkerDebuff") then
           core:MarkUnit(target, core.E.LOCATION_STATIC_CHEST, "E", "xkcdOrange")
@@ -295,7 +302,7 @@ mod:RegisterUnitEvents(core.E.ALL_UNITS, {
       end,
       [core.E.DEBUFF_REMOVE] = function(self, id, spellId, targetName)
         if id == player.unit:GetId() then
-          mod:AddMsg("ELECTROSHOCK_MSG_OVER", "msg.engineer.electroshock.swap.return", 5, "Burn")
+          mod:AddMsg("ELECTROSHOCK_MSG_OVER", "msg.engineer.electroshock.swap.return", 5, "Burn", "xkcdGreen")
         end
         core:DropMark(id)
       end,
@@ -313,9 +320,9 @@ mod:RegisterUnitEvents(core.E.ALL_UNITS, {
     [core.E.DEBUFF_ADD] = {
       [DEBUFF_ATOMIC_ATTRACTION] = function(self, id, spellId, stack, timeRemaining, targetName)
         if id == player.unit:GetId() then
-          mod:AddMsg("DISCHARGED_PLASMA_MSG", "msg.fire_orb.you", 5, "RunAway")
+          mod:AddMsg("DISCHARGED_PLASMA_MSG", "msg.fire_orb.you", 5, "RunAway", "xkcdLightRed")
         elseif mod:IsPlayerOnPlatform(FUSION_CORE) then
-          mod:AddMsg("DISCHARGED_PLASMA_MSG_SPAWN", "msg.fire_orb.spawned", 2, "Info")
+          mod:AddMsg("DISCHARGED_PLASMA_MSG_SPAWN", "msg.fire_orb.spawned", 2, "Info", "xkcdWhite")
         end
       end,
     },
@@ -385,10 +392,10 @@ mod:RegisterUnitEvents({
         coreUnit.healthWarning = false
       elseif percent >= CORE_HEALTH_HIGH_WARN_PERCENTAGE and not coreUnit.healthWarning then
         coreUnit.healthWarning = true
-        mod:AddMsg("CORE_HEALTH_HIGH_WARN", self.L["msg.core.health.high.warning"]:format(name), 5, "Info")
+        mod:AddMsg("CORE_HEALTH_HIGH_WARN", self.L["msg.core.health.high.warning"]:format(name), 5, "Info", "xkcdRed")
       elseif percent <= CORE_HEALTH_LOW_WARN_PERCENTAGE and not coreUnit.healthWarning and mod:IsPlayerOnPlatform(coreId) then
         coreUnit.healthWarning = true
-        mod:AddMsg("CORE_HEALTH_LOW_WARN", self.L["msg.core.health.low.warning"]:format(name), 5, "Inferno")
+        mod:AddMsg("CORE_HEALTH_LOW_WARN", self.L["msg.core.health.low.warning"]:format(name), 5, "Inferno", "xkcdRed")
       end
     end,
     [BUFF_INSULATION] = {
@@ -419,7 +426,7 @@ mod:RegisterUnitEvents("unit.warrior",{
     [core.E.CAST_START] = {
       ["cast.warrior.liquidate"] = function(self)
         if mod:IsPlayerOnPlatform(engineerUnits[WARRIOR].location) then
-          mod:AddMsg("LIQUIDATE_MSG", "msg.warrior.liquidate.stack", 5, "Info")
+          mod:AddMsg("LIQUIDATE_MSG", "msg.warrior.liquidate.stack", 5, "Info", "xkcdOrange")
         end
       end,
       ["cast.rocket_jump"] = function()
@@ -443,7 +450,7 @@ mod:RegisterUnitEvents("unit.engineer",{
           core:AddPixie("ELECTROSHOCK_PIXIE", 2, engineerUnits[ENGINEER].unit, nil, "Red", 10, 80, 0)
         end
         if mod:IsPlayerOnPlatform(engineerUnits[ENGINEER].location) then
-          mod:AddMsg("ELECTROSHOCK_CAST_MSG", "cast.engineer.electroshock", 5, "Beware")
+          mod:AddMsg("ELECTROSHOCK_CAST_MSG", "cast.engineer.electroshock", 5, "Beware", "xkcdOrange")
         end
       end
     },
@@ -465,7 +472,7 @@ mod:RegisterUnitEvents("unit.engineer",{
 
 function mod:PopFireOrb()
   if mod:IsPlayerOnPlatform(FUSION_CORE) then
-    mod:AddMsg("FIRE_ORB_POP_MSG", "msg.fire_orb.pop.msg", 5, "Alarm")
+    mod:AddMsg("FIRE_ORB_POP_MSG", "msg.fire_orb.pop.msg", 5, "Alarm", "xkcdGreen")
   end
 end
 
