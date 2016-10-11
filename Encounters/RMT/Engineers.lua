@@ -132,6 +132,7 @@ local fireOrbTargetTestTimer = ApolloTimer.Create(1, false, "RegisterOrbTarget",
 -- Visuals.
 mod:RegisterDefaultSetting("BarsCoreHealth", false)
 mod:RegisterDefaultSetting("MarkerCoreHealth")
+mod:RegisterDefaultSetting("MarkerDebuff")
 mod:RegisterDefaultSetting("LineElectroshock")
 mod:RegisterDefaultSetting("VisualIonClashCircle")
 -- Sounds.
@@ -276,6 +277,9 @@ function mod:UpdateCoreHealthMark(coreUnit)
 end
 
 mod:RegisterUnitEvents(core.E.ALL_UNITS, {
+    [core.E.UNIT_DESTROYED] = function (self, id)
+      core:DropMark(id)
+    end,
     [DEBUFF_ELECTROSHOCK_VULNERABILITY] = {
       [core.E.DEBUFF_ADD] = function(self, id, spellId, stack, timeRemaining, targetName)
         if id == player.unit:GetId() then
@@ -285,11 +289,15 @@ mod:RegisterUnitEvents(core.E.ALL_UNITS, {
           local electroshockOnX = self.L["msg.engineer.electroshock.swap.other"]:format(targetName)
           mod:AddMsg(messageId, electroshockOnX, 5, "Info", "Red")
         end
+        if mod:GetSetting("MarkerDebuff") then
+          core:MarkUnit(target, core.E.LOCATION_STATIC_CHEST, "E", "xkcdOrange")
+        end
       end,
       [core.E.DEBUFF_REMOVE] = function(self, id, spellId, targetName)
         if id == player.unit:GetId() then
           mod:AddMsg("ELECTROSHOCK_MSG_OVER", "msg.engineer.electroshock.swap.return", 5, "Burn")
         end
+        core:DropMark(id)
       end,
     },
     [DEBUFF_ION_CLASH] = {
