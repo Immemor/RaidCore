@@ -339,7 +339,7 @@ function mod:HandleShredderSaw(sawLocation)
 
   local safeSpot = SAW_SAFESPOT[firstShredderSaw + secondShredderSaw]
   local msg = string.format(self.L["msg.saw.safe_spot"], self.L[safeSpot])
-  mod:AddMsg("SAW_MSG_SAFE", msg, 5, "Info", nil, "xkcdGreen")
+  mod:AddMsg("SAW_MSG_SAFE", msg, 5, "Info", "xkcdGreen")
 end
 
 mod:RegisterUnitEvents("unit.saw.big",{
