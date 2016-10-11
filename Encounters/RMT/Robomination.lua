@@ -52,6 +52,7 @@ mod:RegisterEnglishLocale({
 ----------------------------------------------------------------------------------------------------
 -- Spell ids.
 local DEBUFF_SNAKE = 75126
+local DEBUFF_LASER = 75626
 
 -- Phases.
 local DPS_PHASE = 1
@@ -203,6 +204,7 @@ mod:RegisterDatachronEvent("chron.robo.hides", "EQUAL", function ()
     mod:RemoveTimerBar("NEXT_SPEW_TIMER")
     mod:RemoveTimerBar("NEXT_ARMS_TIMER")
     core:RemovePicture("SNAKE_CROSSHAIR")
+    core:RemovePicture("LASER_CROSSHAIR")
 
     core:RemoveMsg("ROBO_MAZE_CLOSE")
     mod:AddMsg("ROBO_MAZE_NOW", "msg.maze.now", 5, "Info")
@@ -270,10 +272,13 @@ function mod:HelperCompactorGrid(compactors, isCorner, isAdding)
 end
 
 mod:RegisterUnitEvents(core.E.ALL_UNITS, {
-    [DEBUFF_SNAKE] = {
-      [core.E.DEBUFF_REMOVE] = function()
+    [core.E.DEBUFF_REMOVE] = {
+      [DEBUFF_SNAKE] = function()
         core:RemovePicture("SNAKE_CROSSHAIR")
-      end
+      end,
+      [DEBUFF_LASER] = function()
+        core:RemovePicture("LASER_CROSSHAIR")
+      end,
     },
   }
 )
@@ -373,11 +378,6 @@ mod:RegisterUnitEvents("unit.robo",{
         mod:RemoveTimerBar("NEXT_SPEW_TIMER")
         mod:AddTimerBar("NEXT_SPEW_TIMER", "msg.spew.next", SPEW_TIMER, mod:GetSetting("SoundLaser"))
         mod:AddMsg("SPEW_MSG", "msg.spew.now", 4, "Beware")
-      end
-    },
-    [core.E.CAST_END] = {
-      ["cast.laser"] = function(_, _)
-        core:RemovePicture("LASER_CROSSHAIR")
       end
     },
   }
