@@ -166,7 +166,7 @@ function mod:OnBossEnable()
   playerUnit = GameLib.GetPlayerUnit()
   mod:AddTimerBar("NEXT_ARMS_TIMER", "msg.arms.next", ARMS_TIMER)
   mod:AddTimerBar("NEXT_SNAKE_TIMER", "msg.snake.next", FIRST_SNAKE_TIMER)
-  mod:AddTimerBar("NEXT_SPEW_TIMER", "msg.spew.next", FIRST_SPEW_TIMER, mod:GetSetting("SoundLaser"))
+  mod:AddTimerBar("NEXT_SPEW_TIMER", "msg.spew.next", FIRST_SPEW_TIMER)
   mod:DrawCompactorGrid()
 end
 
@@ -217,8 +217,8 @@ mod:RegisterDatachronEvent("chron.robo.shows", "EQUAL", function ()
     phase = DPS_PHASE
     core:RemoveLineBetweenUnits("ROBO_MAZE_LINE")
     mod:AddTimerBar("NEXT_SNAKE_TIMER", "msg.snake.next", FIRST_SNAKE_TIMER)
-    mod:AddTimerBar("NEXT_SPEW_TIMER", "msg.spew.next", MAZE_SPEW_TIMER, mod:GetSetting("SoundLaser"))
-    mod:AddTimerBar("NEXT_INCINERATE_TIMER", "msg.robo.laser.next", FIRST_INCINERATE_TIMER)
+    mod:AddTimerBar("NEXT_SPEW_TIMER", "msg.spew.next", MAZE_SPEW_TIMER)
+    mod:AddTimerBar("NEXT_INCINERATE_TIMER", "msg.robo.laser.next", FIRST_INCINERATE_TIMER, mod:GetSetting("SoundLaser"))
     mod:AddTimerBar("NEXT_ARMS_TIMER", "msg.arms.next", ARMS_TIMER)
     mod:DrawCompactorGrid()
   end
@@ -239,7 +239,7 @@ mod:RegisterDatachronEvent("chron.robo.laser", "MATCH", function(self, _, laserT
     end
 
     mod:RemoveTimerBar("NEXT_INCINERATE_TIMER")
-    mod:AddTimerBar("NEXT_INCINERATE_TIMER", "msg.robo.laser.next", INCINERATE_TIMER)
+    mod:AddTimerBar("NEXT_INCINERATE_TIMER", "msg.robo.laser.next", INCINERATE_TIMER, mod:GetSetting("SoundLaser"))
     mod:AddMsg("LASER_MSG", laserOnX, 5, "Burn", "xkcdRed")
   end
 )
@@ -376,7 +376,7 @@ mod:RegisterUnitEvents("unit.robo",{
     [core.E.CAST_START] = {
       ["cast.spew"] = function(self, _)
         mod:RemoveTimerBar("NEXT_SPEW_TIMER")
-        mod:AddTimerBar("NEXT_SPEW_TIMER", "msg.spew.next", SPEW_TIMER, mod:GetSetting("SoundLaser"))
+        mod:AddTimerBar("NEXT_SPEW_TIMER", "msg.spew.next", SPEW_TIMER)
         mod:AddMsg("SPEW_MSG", "msg.spew.now", 4, "Beware", "xkcdDarkGreen")
       end
     },
