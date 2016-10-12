@@ -31,6 +31,7 @@ mod:RegisterEnglishLocale({
     ["msg.chaos.orbs.coming"] = "Chaos orb(s) coming soon",
     ["msg.midphase.coming"] = "Midphase coming soon",
     ["msg.midphase.started"] = "MIDPHASE",
+    ["msg.flamethrower.interrupt"] = "INTERRUPT OCTOG",
   })
 ----------------------------------------------------------------------------------------------------
 -- Settings.
@@ -119,6 +120,9 @@ mod:RegisterUnitEvents("unit.octog",{
         mod:RemoveTimerBar("NEXT_HOOKSHOT_TIMER")
         mod:RemoveTimerBar("NEXT_FLAMETHROWER_TIMER")
       end,
+      ["cast.flamethrower"] = function(self)
+        mod:AddMsg("FLAMETHROWER_MSG_CAST", "msg.flamethrower.interrupt", 2, "Inferno", "xkcdOrange")
+      end
     },
     [core.E.CAST_END] = {
       ["cast.hookshot"] = function(self)
