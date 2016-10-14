@@ -174,7 +174,7 @@ mod:RegisterUnitEvents(core.E.ALL_UNITS, {
     [DEBUFF_OOZING_BILE] = {
       [core.E.DEBUFF_UPDATE] = function(self, id, _, stack)
         if playerUnit:GetId() == id and stack == 8 then
-          mod:AddMsg("OOZE_MSG", string.format(self.L["msg.bile.stacks"], stack), 5, "Beware", "xkcdDarkGreen")
+          mod:AddMsg("OOZE_MSG", string.format(self.L["msg.bile.stacks"], stack), 5, "Beware", "xkcdAcidGreen")
         end
       end
     },

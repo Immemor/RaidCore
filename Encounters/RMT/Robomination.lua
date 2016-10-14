@@ -377,7 +377,7 @@ mod:RegisterUnitEvents("unit.robo",{
       ["cast.spew"] = function(self, _)
         mod:RemoveTimerBar("NEXT_SPEW_TIMER")
         mod:AddTimerBar("NEXT_SPEW_TIMER", "msg.spew.next", SPEW_TIMER)
-        mod:AddMsg("SPEW_MSG", "msg.spew.now", 4, "Beware", "xkcdDarkGreen")
+        mod:AddMsg("SPEW_MSG", "msg.spew.now", 4, "Beware", "xkcdAcidGreen")
       end
     },
   }
