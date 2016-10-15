@@ -125,12 +125,14 @@ local anchorCount
 local playerUnit
 local numberOfAirPhases
 local isAirPhase
+local orbs
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
   playerUnit = GameLib.GetPlayerUnit()
   anchors = {}
+  orbs = {}
   anchorCount = 0
   numberOfAirPhases = 0
   isAirPhase = false
@@ -259,12 +261,25 @@ mod:RegisterUnitEvents(core.E.ALL_UNITS, {
 
         if mod:GetSetting("LinePurple") then
           local casterId = unitCaster:GetId()
+          orbs[casterId] = unitCaster
           core:AddLineBetweenUnits("PURPLE_LINE_"..casterId, id, casterId, 7, "xkcdLightMagenta")
         end
       end,
       [core.E.DEBUFF_REMOVE] = function (self, id, spellId, name, unitCaster)
         core:DropMark(id)
-        core:RemoveLineBetweenUnits("PURPLE_LINE_"..unitCaster:GetId())
+        if unitCaster then
+          local casterId = unitCaster:GetId()
+          orbs[casterId] = nil
+          core:RemoveLineBetweenUnits("PURPLE_LINE_"..casterId)
+        else
+          for casterId, unit in next, orbs do
+            if not unit:IsValid() then
+              orbs[casterId] = nil
+              core:RemoveLineBetweenUnits("PURPLE_LINE_"..casterId)
+            end
+          end
+        end
+
       end,
     },
     [DEBUFF_SHOCKING_ATTRACTION] = {
