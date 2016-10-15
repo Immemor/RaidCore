@@ -58,6 +58,7 @@ local SPELLID_BLACKLISTED = {
   [70163] = "Atomic Spear", --T6
   [70164] = "Atomic Spear", --T7
   [70165] = "Atomic Spear", --T8
+  [79671] = "Empower", --Warrior whirlwind
   [41137] = "To the Pain", -- Warrior cheat death
   [84397] = "Unbreakable", -- Engineer cheat death
   [82748] = "Unbreakable", -- Engineer cheat death cooldown
