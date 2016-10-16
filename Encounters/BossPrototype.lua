@@ -483,8 +483,8 @@ function EncounterPrototype:OnTrig(tNames)
   if self.nTrigType == TRIG__ANY then
     for _, sMobName in next, self.EnableMob do
       if tNames[sMobName] then
-        for _, bInCombat in next, tNames[sMobName] do
-          if bInCombat then
+        for _, tUnit in next, tNames[sMobName] do
+          if tUnit:IsValid() and tUnit:IsInCombat() then
             return true
           end
         end
@@ -497,8 +497,8 @@ function EncounterPrototype:OnTrig(tNames)
         return false
       else
         local bResult = false
-        for _, bInCombat in next, tNames[sMobName] do
-          if bInCombat then
+        for _, tUnit in next, tNames[sMobName] do
+          if tUnit:IsValid() and tUnit:IsInCombat() then
             bResult = true
           end
         end

@@ -240,7 +240,7 @@ local function RemoveDelayedUnit(nId, sName)
   end
 end
 
-local function AddDelayedUnit(nId, sName, bInCombat)
+local function AddDelayedUnit(nId, tUnit, sName)
   local tMap = GetCurrentZoneMap()
   if tMap then
     local id1 = tMap.continentId
@@ -254,7 +254,7 @@ local function AddDelayedUnit(nId, sName, bInCombat)
       if not _tDelayedUnits[sName] then
         _tDelayedUnits[sName] = {}
       end
-      _tDelayedUnits[sName][nId] = bInCombat
+      _tDelayedUnits[sName][nId] = tUnit
     end
   end
 end
@@ -279,12 +279,21 @@ local function SearchEncounter()
   end
 end
 
+local function CleanDelayedUnits()
+  for sName, tDelayedList in next, _tDelayedUnits do
+    for nId, tUnit in next, tDelayedList do
+      if not tUnit:IsValid() or tUnit:IsDead() then
+        RemoveDelayedUnit(nId, sName)
+      end
+    end
+  end
+end
+
 local function ProcessDelayedUnit()
-  local tRemove = {}
   for nDelayedName, tDelayedList in next, _tDelayedUnits do
-    for nDelayedId, bInCombat in next, tDelayedList do
-      local tUnit = GetUnitById(nDelayedId)
-      if tUnit and tUnit:IsValid() then
+    for nDelayedId, tUnit in next, tDelayedList do
+      if tUnit:IsValid() then
+        local bInCombat = tUnit:IsInCombat()
         local s, sErrMsg = pcall(OnEncounterHookGeneric, RaidCore.E.UNIT_CREATED, nDelayedId, tUnit, nDelayedName)
         if not s then
           if RaidCore.db.profile.bLUAErrorMessage then
@@ -301,18 +310,12 @@ local function ProcessDelayedUnit()
             Log:Add("ERROR", sErrMsg)
           end
         end
-      else
-        table.insert(tRemove, {nId = nDelayedId, sName = nDelayedName})
       end
     end
   end
 
-  local nCount = #tRemove
-  for i = 1, nCount do
-    RemoveDelayedUnit(tRemove[i].nId, tRemove[i].sName)
-  end
+  CleanDelayedUnits()
 end
-
 ----------------------------------------------------------------------------------------------------
 -- RaidCore Initialization
 ----------------------------------------------------------------------------------------------------
@@ -326,7 +329,7 @@ function RaidCore:OnInitialize()
       ["OnChangeWorld"] = self.SEARCH_OnCheckMapZone,
       ["OnSubZoneChanged"] = self.SEARCH_OnCheckMapZone,
       ["OnCharacterCreated"] = self.SEARCH_OnCheckMapZone,
-      [RaidCore.E.UNIT_CREATED] = self.SEARCH_OnUnitCreated,
+      [RaidCore.E.UNIT_CREATED] = self.AddDelayedUnit,
       [RaidCore.E.ENTERED_COMBAT] = self.SEARCH_OnEnteredCombat,
       [RaidCore.E.UNIT_DESTROYED] = self.SEARCH_OnUnitDestroyed,
       ["OnReceivedMessage"] = self.SEARCH_OnReceivedMessage,
@@ -954,11 +957,6 @@ function RaidCore:SEARCH_OnCheckMapZone()
   end
 end
 
-function RaidCore:SEARCH_OnUnitCreated(nId, tUnit, sName)
-  local bInCombat = tUnit:IsInCombat()
-  AddDelayedUnit(nId, sName, bInCombat)
-end
-
 function RaidCore:SEARCH_OnEnteredCombat(nId, tUnit, sName, bInCombat)
   -- Manage the lower layer.
   if tUnit == GetPlayerUnit() then
@@ -980,7 +978,7 @@ function RaidCore:SEARCH_OnEnteredCombat(nId, tUnit, sName, bInCombat)
     end
   elseif not tUnit:IsInYourGroup() then
     if not _tCurrentEncounter then
-      AddDelayedUnit(nId, sName, bInCombat)
+      AddDelayedUnit(nId, tUnit, sName)
       if _bIsEncounterInProgress then
         SearchEncounter()
         if _tCurrentEncounter and not _tCurrentEncounter:IsEnabled() then
@@ -1038,6 +1036,7 @@ function RaidCore:RUNNING_WipeCheck()
   if _tCurrentEncounter then
     _tCurrentEncounter:Disable()
     _tCurrentEncounter = nil
+    CleanDelayedUnits()
   end
   self:ResetAll()
   -- Set the FSM in SEARCH mode.
