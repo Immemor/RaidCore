@@ -158,7 +158,7 @@ local previousAddPhase
 local firstShredderSaw
 local secondShredderSaw
 local playerUnit
-local startProgressBarTimer
+local prevShredderProgress
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 -----------------------------------------------------------------------------------------------------
@@ -168,8 +168,15 @@ function mod:OnBossEnable()
   phase = WALKING
   addPhase = 4
   previousAddPhase = 0
+  prevShredderProgress = 0
   firstShredderSaw = nil
   secondShredderSaw = nil
+  ApolloTimer.Create(1.1, false, "StartProgressBar", mod)
+end
+
+function mod:OnBossDisable()
+  mod:RemoveProgressBar("WALKING_PROGRESS")
+  mod:RemoveProgressBar("ADDS_PROGRESS")
 end
 
 mod:RegisterUnitEvents(core.E.ALL_UNITS, {
@@ -183,9 +190,12 @@ mod:RegisterUnitEvents(core.E.ALL_UNITS, {
   }
 )
 
-function mod:GetWalkingProgress()
+function mod:GetWalkingProgress(oldProgress)
   local pos1
   local pos2
+  if not mod.swabbieUnit then --voidslip
+    return oldProgress
+  end
   if phase == WALKING then
     pos1 = Vector3.New(mod.swabbieUnit:GetPosition())
     pos2 = START_POSITION
@@ -195,11 +205,12 @@ function mod:GetWalkingProgress()
   end
   local walkedDistance = (pos1 - pos2):Length()
   local progress = (walkedDistance / WALKING_DISTANCE) * 100
+  prevShredderProgress = progress
   return progress
 end
 
 function mod:GetAddSpawnProgess()
-  local currentProgress = mod:GetWalkingProgress() - previousAddPhase
+  local currentProgress = mod:GetWalkingProgress(prevShredderProgress) - previousAddPhase
   local waveSpawn = ADD_PHASES[addPhase] - previousAddPhase
   return (currentProgress/waveSpawn)*100
 end
@@ -235,8 +246,6 @@ function mod:StartProgressBar()
   local messageText = self.L["msg.swabbie.walking"]:format(self.L["msg.swabbie.walking.direction.north"])
   mod:AddProgressBar("WALKING_PROGRESS", messageText, mod.GetWalkingProgress, mod, mod.PhaseChange)
   mod:NextAddWave()
-  startProgressBarTimer:Stop()
-  startProgressBarTimer = nil
 end
 
 mod:RegisterUnitEvents({
@@ -304,19 +313,12 @@ mod:RegisterUnitEvents("unit.swabbie",{
       self.swabbieUnit = unit
     end,
     [core.E.UNIT_DESTROYED] = function(self, _, unit)
+      self.swabbieUnit = nil
       core:RemoveUnit(unit)
-      self:RemoveProgressBar("WALKING_PROGRESS")
-      self:RemoveProgressBar("ADDS_PROGRESS")
     end,
     [core.E.CAST_START] = {
       ["cast.swabbie.knockback"] = function()
         mod:AddMsg("KNOCKBACK", "msg.swabbie.knockback", 2, nil, "xkcdRed")
-      end
-    },
-    [core.E.CAST_END] = {
-      ["cast.swabbie.swoop"] = function()
-        startProgressBarTimer = ApolloTimer.Create(1, true, "StartProgressBar", mod)
-        startProgressBarTimer:Start()
       end
     },
   }
