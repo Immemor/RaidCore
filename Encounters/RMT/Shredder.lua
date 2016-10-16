@@ -171,7 +171,7 @@ function mod:OnBossEnable()
   prevShredderProgress = 0
   firstShredderSaw = nil
   secondShredderSaw = nil
-  ApolloTimer.Create(1.1, false, "StartProgressBar", mod)
+  ApolloTimer.Create(4.1, false, "StartProgressBar", mod)
 end
 
 function mod:OnBossDisable()
