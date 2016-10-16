@@ -159,6 +159,8 @@ local firstShredderSaw
 local secondShredderSaw
 local playerUnit
 local prevShredderProgress
+local startProgressBarTimer = ApolloTimer.Create(4, false, "StartProgressBar", mod)
+startProgressBarTimer:Stop() --thanks carbine
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 -----------------------------------------------------------------------------------------------------
@@ -171,7 +173,7 @@ function mod:OnBossEnable()
   prevShredderProgress = 0
   firstShredderSaw = nil
   secondShredderSaw = nil
-  ApolloTimer.Create(4.1, false, "StartProgressBar", mod)
+  startProgressBarTimer:Start()
 end
 
 function mod:OnBossDisable()
