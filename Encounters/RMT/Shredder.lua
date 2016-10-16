@@ -295,6 +295,10 @@ mod:RegisterUnitEvents({ "unit.add.brute", "unit.add.nabber" },{
 
 mod:RegisterUnitEvents("unit.swabbie",{
     [core.E.UNIT_CREATED] = function(self, _, unit)
+      -- filter out second unit that's there for some reason
+      if not unit:GetHealth() then
+        return
+      end
       core:AddUnit(unit)
       core:WatchUnit(unit, core.E.TRACK_CASTS)
       self.swabbieUnit = unit
