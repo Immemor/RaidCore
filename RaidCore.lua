@@ -329,7 +329,7 @@ function RaidCore:OnInitialize()
       ["OnChangeWorld"] = self.SEARCH_OnCheckMapZone,
       ["OnSubZoneChanged"] = self.SEARCH_OnCheckMapZone,
       ["OnCharacterCreated"] = self.SEARCH_OnCheckMapZone,
-      [RaidCore.E.UNIT_CREATED] = self.AddDelayedUnit,
+      [RaidCore.E.UNIT_CREATED] = self.SEARCH_OnUnitCreated,
       [RaidCore.E.ENTERED_COMBAT] = self.SEARCH_OnEnteredCombat,
       [RaidCore.E.UNIT_DESTROYED] = self.SEARCH_OnUnitDestroyed,
       ["OnReceivedMessage"] = self.SEARCH_OnReceivedMessage,
@@ -928,6 +928,10 @@ function RaidCore:GlobalEventHandler(sMethod, ...)
   if fFSMHandler then
     fFSMHandler(self, ...)
   end
+end
+
+function RaidCore:SEARCH_OnUnitCreated(nId, tUnit, sName)
+  AddDelayedUnit(nId, tUnit, sName)
 end
 
 function RaidCore:SEARCH_OnCheckMapZone()
