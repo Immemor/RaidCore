@@ -73,6 +73,7 @@
     <Script Name="Encounters/RMT/miniboss/Lockjaw.lua"/>
     <Script Name="Encounters/RMT/miniboss/Skooty.lua"/>
     <Script Name="Encounters/RMT/miniboss/Thrag.lua"/>
+    <Script Name="Encounters/RMT/miniboss/Kino.lua"/>
     <Script Name="Encounters/RMT/miniboss/Cropper.lua"/>
     <Script Name="Encounters/RMT/miniboss/Specialist.lua"/>
     <Script Name="Encounters/RMT/miniboss/Technician.lua"/>
