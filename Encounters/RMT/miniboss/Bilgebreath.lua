@@ -18,6 +18,7 @@ mod:RegisterTrigMob("ALL", { "unit.bilgebreath" })
 mod:RegisterEnglishLocale({
     -- Unit names.
     ["unit.bilgebreath"] = "Bilgebreath",
+    ["unit.remnant"] = "Odiferous Remnant",
     -- Cast names.
     -- Messages.
   })
@@ -28,7 +29,10 @@ mod:RegisterEnglishLocale({
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterUnitEvents("unit.bilgebreath",{
+mod:RegisterUnitEvents({
+    "unit.bilgebreath",
+    "unit.remnant",
+    },{
     [core.E.UNIT_CREATED] = function (_, _, unit)
       core:AddUnit(unit)
       core:WatchUnit(unit, core.E.TRACK_ALL)
