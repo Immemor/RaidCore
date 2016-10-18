@@ -81,4 +81,5 @@
     <Script Name="Encounters/RMT/miniboss/Technician.lua"/>
     <Script Name="Encounters/RMT/miniboss/Korgh.lua"/>
     <Script Name="Encounters/RMT/miniboss/Bilgebreath.lua"/>
+    <Script Name="Encounters/RMT/miniboss/Muburu.lua"/>
 </Addon>
