@@ -73,4 +73,5 @@
     <Script Name="Encounters/RMT/miniboss/Lockjaw.lua"/>
     <Script Name="Encounters/RMT/miniboss/Skooty.lua"/>
     <Script Name="Encounters/RMT/miniboss/Thrag.lua"/>
+    <Script Name="Encounters/RMT/miniboss/Cropper.lua"/>
 </Addon>
