@@ -30,9 +30,9 @@ local next, pcall = next, pcall
 -- Constants.
 ----------------------------------------------------------------------------------------------------
 -- Should be 5.23 when replacement tokens will works (see #88 issue).
-local RAIDCORE_CURRENT_VERSION = "6.2.3"
+local RAIDCORE_CURRENT_VERSION = "6.2.4"
 -- Should be deleted.
-local ADDON_DATE_VERSION = 16101118
+local ADDON_DATE_VERSION = 16101818
 -- Sometimes Carbine have inserted some no-break-space, for fun.
 -- Behavior seen with French language. This problem is not present in English.
 local NO_BREAK_SPACE = string.char(194, 160)
