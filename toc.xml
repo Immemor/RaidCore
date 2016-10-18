@@ -84,4 +84,5 @@
     <Script Name="Encounters/RMT/miniboss/Muburu.lua"/>
     <Script Name="Encounters/RMT/miniboss/Headshrinker.lua"/>
     <Script Name="Encounters/RMT/miniboss/Horror.lua"/>
+    <Script Name="Encounters/RMT/miniboss/Tiny.lua"/>
 </Addon>
