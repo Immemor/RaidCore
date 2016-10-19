@@ -60,6 +60,7 @@ local DEFAULT_SETTINGS = {
   ["Progress"] = {
     nBarHeight = 25,
     tAnchorPoints = { 0.25, 0.5, 0.25, 0.5 },
+    tAnchorOffsets = { -150, -300, 150, -50 },
     tSizingMinimum = { 150, 250 },
   },
   ["Message"] = {
