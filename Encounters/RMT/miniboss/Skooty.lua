@@ -18,7 +18,7 @@ mod:RegisterTrigMob("ALL", { "unit.skooty" })
 mod:RegisterEnglishLocale({
     -- Unit names.
     ["unit.skooty"] = "Assistant Technician Skooty",
-    ["unit.jumpstart"] = "unit.jumpstart",
+    ["unit.jumpstart"] = "Jumpstart Charge",
     -- Cast names.
     ["cast.skooty.cannon"] = "Pulse Cannon",
     -- Messages.
@@ -70,12 +70,12 @@ mod:RegisterUnitEvents("unit.skooty",{
 mod:RegisterUnitEvents("unit.jumpstart",{
     [core.E.UNIT_CREATED] = function (self, id, unit)
       if mod:GetSetting("BombLines") then
-        core:AddLineBetweenUnits("JUMP_START_LINE_%d"..id, playerUnit:GetId(), id, 5)
+        core:AddLineBetweenUnits("JUMP_START_LINE_"..id, playerUnit:GetId(), id, 5)
       end
     end,
     [core.E.UNIT_DESTROYED] = function (self, id, unit)
       if mod:GetSetting("BombLines") then
-        core:RemoveLineBetweenUnits("JUMP_START_LINE_%d"..id)
+        core:RemoveLineBetweenUnits("JUMP_START_LINE_"..id)
       end
     end,
   }

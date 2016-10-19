@@ -54,12 +54,12 @@ mod:RegisterUnitEvents("unit.thrag",{
 mod:RegisterUnitEvents("unit.jumpstart",{
     [core.E.UNIT_CREATED] = function (_, id, unit)
       if mod:GetSetting("BombLines") then
-        core:AddLineBetweenUnits("JUMP_START_LINE_%d"..id, playerUnit:GetId(), id, 5)
+        core:AddLineBetweenUnits("JUMP_START_LINE_"..id, playerUnit:GetId(), id, 5)
       end
     end,
     [core.E.UNIT_DESTROYED] = function (_, id)
       if mod:GetSetting("BombLines") then
-        core:RemoveLineBetweenUnits("JUMP_START_LINE_%d"..id)
+        core:RemoveLineBetweenUnits("JUMP_START_LINE_"..id)
       end
     end,
   }
