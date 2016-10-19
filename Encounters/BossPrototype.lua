@@ -412,7 +412,7 @@ function EncounterPrototype:GetSetting(sKey)
   return self.tSettings[sKey]
 end
 
-function EncounterPrototype:Tank()
+function EncounterPrototype:IsPlayerTank()
   local unit = GroupLib.GetGroupMember(1)
   if unit then return unit.bTank end
 end
