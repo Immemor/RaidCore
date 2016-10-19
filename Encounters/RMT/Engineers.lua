@@ -109,7 +109,7 @@ local ENGINEER_START_LOCATION = {
 ----------------------------------------------------------------------------------------------------
 -- Functions.
 ----------------------------------------------------------------------------------------------------
-local next = next
+local next, GetUnitById = next, GameLib.GetUnitById
 local function TableLength(table)
   local count = 0
   for _, _ in next, table do
@@ -289,15 +289,18 @@ mod:RegisterUnitEvents(core.E.ALL_UNITS, {
     end,
     [DEBUFF_ELECTROSHOCK_VULNERABILITY] = {
       [core.E.DEBUFF_ADD] = function(self, id, spellId, stack, timeRemaining, targetName)
+        local targetUnit
         if id == player.unit:GetId() then
+          targetUnit = player.unit
           mod:AddMsg("ELECTROSHOCK_MSG_YOU", "msg.engineer.electroshock.swap.you", 5, "Burn", "Red")
         else
+          targetUnit = GetUnitById(id)
           local messageId = string.format("ELECTROSHOCK_MSG_OTHER_%s", targetName)
           local electroshockOnX = self.L["msg.engineer.electroshock.swap.other"]:format(targetName)
           mod:AddMsg(messageId, electroshockOnX, 5, "Info", "xkcdBlue")
         end
         if mod:GetSetting("MarkerDebuff") then
-          core:MarkUnit(target, core.E.LOCATION_STATIC_CHEST, "E", "xkcdOrange")
+          core:MarkUnit(targetUnit, core.E.LOCATION_STATIC_CHEST, "E", "xkcdOrange")
         end
       end,
       [core.E.DEBUFF_REMOVE] = function(self, id, spellId, targetName)
