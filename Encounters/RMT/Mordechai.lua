@@ -46,7 +46,39 @@ mod:RegisterEnglishLocale({
     ["msg.orb.kinetic_link"] = "DPS THE ORB!",
     ["msg.orb.next"] = "Next Orb",
     ["msg.mordechai.shuriken.you"] = "SHURIKEN ON YOU"
-  })
+  }
+)
+mod:RegisterGermanLocale({
+    -- Unit names.
+    ["unit.anchor"] = "Airlock Anchor",
+    ["unit.orb"] = "Kinetic Orb",
+    ["unit.junk"] = "Airlock Junk",
+    ["unit.invis.0"] = "Hostile Invisible Unit for Fields (0 hit radius)", -- ??
+    ["unit.shuriken"] = "Ignores Collision Big Base Invisible Unit for Spells (1 hit radius)",
+    ["unit.turret"] = "Redmoon Turret",
+    -- Cast names.
+    ["cast.mordechai.shatter"] = "Shatter Shock",
+    ["cast.mordechai.barrage"] = "Vicious Barrage",
+    ["cast.turret.discharge"] = "Kinetic Discharge",
+    -- Datachrons.
+    ["chron.airlock.opened"] = "The airlock has been opened!",
+    ["chron.airlock.closed"] = "The airlock has been closed!",
+    -- Markers.
+    ["mark.anchor_1"] = "1",
+    ["mark.anchor_2"] = "2",
+    ["mark.anchor_3"] = "3",
+    ["mark.anchor_4"] = "4",
+
+    -- Messages.
+    ["msg.mordechai.shuriken.next"] = "Next Shuriken",
+    ["msg.mordechai.barrage.next"] = "Next Vicious Barrage",
+    ["msg.phase.start"] = "SUCKY SUCKY PHASE SOON",
+    ["msg.orb.spawned"] = "ORB",
+    ["msg.orb.kinetic_link"] = "DPS THE ORB!",
+    ["msg.orb.next"] = "Next Orb",
+    ["msg.mordechai.shuriken.you"] = "SHURIKEN ON YOU"
+  }
+)
 ----------------------------------------------------------------------------------------------------
 -- Settings.
 ----------------------------------------------------------------------------------------------------
