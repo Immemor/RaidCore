@@ -27,8 +27,14 @@ mod:RegisterEnglishLocale({
 ----------------------------------------------------------------------------------------------------
 -- Settings.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterDefaultSetting("PulseCannon")
+-- Visuals.
 mod:RegisterDefaultSetting("BombLines", false)
+-- Sounds.
+mod:RegisterDefaultSetting("SoundPulseCannon")
+-- Messages.
+mod:RegisterDefaultSetting("MessagePulseCannon")
+-- Binds.
+mod:RegisterMessageSetting("PULSECANNON", "EQUAL", "MessagePulseCannon", "SoundPulseCannon")
 ----------------------------------------------------------------------------------------------------
 -- Locals.
 ----------------------------------------------------------------------------------------------------
@@ -56,7 +62,7 @@ mod:RegisterUnitEvents("unit.skooty",{
       ["cast.skooty.cannon"] = function (self, id, castName)
         local target = skootyUnit and skootyUnit:GetTarget()
         if target and target:IsThePlayer() then
-          mod:AddMsg("PULSECANNON", self.L["msg.skooty.cannon.get_out"], 5, mod:GetSetting("PulseCannon") == true and "RunAway")
+          mod:AddMsg("PULSECANNON", self.L["msg.skooty.cannon.get_out"], 5, "RunAway")
         end
       end,
     }
