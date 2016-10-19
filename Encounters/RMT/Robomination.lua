@@ -46,7 +46,35 @@ mod:RegisterEnglishLocale({
     ["msg.cannon_arm.interrupt"] = "INTERRUPT CANNON %d",
     ["msg.spew.now"] = "Spew",
     ["msg.spew.next"] = "Next spew in",
-  })
+  }
+)
+mod:RegisterGermanLocale({
+    -- Unit names.
+    ["unit.flailing_arm"] = "Fuchtelnder Arm",
+    ["unit.scanning_eye"] = "Scanning Eye",
+    -- Cast names.
+    ["cast.laser"] = "Incineration Laser",
+    -- Datachron.
+    ["chron.robo.laser"] = "Robomination tries to incinerate ([^%s]+%s.+)$",
+    ["chron.robo.hides"] = "Die Robomination sinkt in den Müll hinab.",
+    ["chron.robo.shows"] = "The Robomination erupts back into the fight!",
+    -- Messages.
+    ["msg.snake.other"] = "SNAKE ON %s",
+    ["msg.snake.you"] = "SNAKE ON YOU",
+    ["msg.snake.near"] = "SNAKE NEAR ON %s",
+    ["msg.snake.next"] = "Next snake in",
+    ["msg.robo.laser.other"] = "LASER ON %s",
+    ["msg.robo.laser.you"] = "LASER ON YOU",
+    ["msg.robo.laser.next"] = "Next incinerate in",
+    ["msg.maze.coming"] = "MAZE SOON",
+    ["msg.maze.now"] = "CENTER",
+    ["msg.arms.next"] = "Arms spawning in",
+    ["msg.cannon_arm.spawned"] = "CANNON",
+    ["msg.cannon_arm.interrupt"] = "INTERRUPT CANNON",
+    ["msg.spew.now"] = "Spew",
+    ["msg.spew.next"] = "Next spew in",
+  }
+)
 ----------------------------------------------------------------------------------------------------
 -- Constants.
 ----------------------------------------------------------------------------------------------------
