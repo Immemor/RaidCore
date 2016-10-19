@@ -52,7 +52,7 @@ mod:RegisterEnglishLocale({
     ["msg.heat.generation"] = "Core Health",
   }
 )
-mod:RegisterEnglishLocale({
+mod:RegisterGermanLocale({
     -- Unit names.
     ["unit.fire_orb"] = "Plasmaentladung",
     -- Public Event Names.
