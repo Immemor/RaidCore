@@ -27,7 +27,6 @@ mod:RegisterEnglishLocale({
 ----------------------------------------------------------------------------------------------------
 -- Settings.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterDefaultSetting("Gigavolt", false)
 mod:RegisterDefaultSetting("BombLines", false)
 ----------------------------------------------------------------------------------------------------
 -- Constants.
@@ -47,27 +46,21 @@ function mod:OnBossEnable()
 end
 
 mod:RegisterUnitEvents("unit.thrag",{
-    ["OnUnitCreated"] = function (_, _, unit)
+    [core.E.UNIT_CREATED] = function (_, _, unit)
       core:AddUnit(unit)
       core:WatchUnit(unit, core.E.TRACK_CASTS)
-    end,
-    ["OnCastStart"] = function (_, _, _)
-      -- TODO: Redo
-      -- if self.L["cast.thrag.gigavolt"] == castName then
-      -- mod:AddMsg("GIGAVOLT", self.L["msg.thrag.gigavolt.get_out"], 5, mod:GetSetting("Gigavolt") == true and "RunAway")
-      -- end
     end,
   }
 )
 
 mod:RegisterUnitEvents("unit.jumpstart",{
-    ["OnUnitCreated"] = function (_, id, unit)
+    [core.E.UNIT_CREATED] = function (_, id, unit)
       jumpStarts[id] = unit
       if mod:GetSetting("BombLines") then
         core:AddLineBetweenUnits(string.format("JUMP_START_LINE %d", id), playerUnit:GetId(), id, 5)
       end
     end,
-    ["OnUnitDestroyed"] = function (_, id)
+    [core.E.UNIT_DESTROYED] = function (_, id)
       jumpStarts[id] = nil
       if mod:GetSetting("BombLines") then
         core:RemoveLineBetweenUnits(string.format("JUMP_START_LINE %d", id))

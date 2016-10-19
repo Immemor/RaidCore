@@ -43,26 +43,26 @@ function mod:OnBossEnable()
 end
 
 mod:RegisterUnitEvents("unit.skooty",{
-    ["OnUnitCreated"] = function (_, _, unit)
+    [core.E.UNIT_CREATED] = function (_, _, unit)
       core:AddUnit(unit)
       core:WatchUnit(unit, core.E.TRACK_CASTS)
     end,
-    ["OnCastStart"] = function (self, _, castName)
-      if self.L["cast.skooty.cannon"] == castName then
+    [core.E.CAST_START] = {
+      ["cast.skooty.cannon"] = function (self, _, castName)
         mod:AddMsg("PULSECANNON", self.L["msg.skooty.cannon.get_out"], 5, mod:GetSetting("PulseCannon") == true and "RunAway")
-      end
-    end,
+      end,
+    }
   }
 )
 
 mod:RegisterUnitEvents("unit.jumpstart",{
-    ["OnUnitCreated"] = function (_, id, unit)
+    [core.E.UNIT_CREATED] = function (_, id, unit)
       jumpStarts[id] = unit
       if mod:GetSetting("BombLines") then
         core:AddLineBetweenUnits(string.format("JUMP_START_LINE %d", id), playerUnit:GetId(), id, 5)
       end
     end,
-    ["OnUnitDestroyed"] = function (_, id)
+    [core.E.UNIT_DESTROYED] = function (_, id)
       jumpStarts[id] = nil
       if mod:GetSetting("BombLines") then
         core:RemoveLineBetweenUnits(string.format("JUMP_START_LINE %d", id))
