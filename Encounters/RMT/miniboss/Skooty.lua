@@ -34,6 +34,7 @@ mod:RegisterDefaultSetting("BombLines", false)
 ----------------------------------------------------------------------------------------------------
 local jumpStarts
 local playerUnit
+local skootyUnit
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
@@ -43,26 +44,33 @@ function mod:OnBossEnable()
 end
 
 mod:RegisterUnitEvents("unit.skooty",{
-    [core.E.UNIT_CREATED] = function (_, _, unit)
+    [core.E.UNIT_CREATED] = function (self, id, unit)
+      skootyUnit = unit
       core:AddUnit(unit)
       core:WatchUnit(unit, core.E.TRACK_CASTS)
     end,
+    [core.E.UNIT_DESTROYED] = function ()
+      skootyUnit = nil
+    end,
     [core.E.CAST_START] = {
-      ["cast.skooty.cannon"] = function (self, _, castName)
-        mod:AddMsg("PULSECANNON", self.L["msg.skooty.cannon.get_out"], 5, mod:GetSetting("PulseCannon") == true and "RunAway")
+      ["cast.skooty.cannon"] = function (self, id, castName)
+        local target = skootyUnit and skootyUnit:GetTarget()
+        if target and target:IsThePlayer() then
+          mod:AddMsg("PULSECANNON", self.L["msg.skooty.cannon.get_out"], 5, mod:GetSetting("PulseCannon") == true and "RunAway")
+        end
       end,
     }
   }
 )
 
 mod:RegisterUnitEvents("unit.jumpstart",{
-    [core.E.UNIT_CREATED] = function (_, id, unit)
+    [core.E.UNIT_CREATED] = function (self, id, unit)
       jumpStarts[id] = unit
       if mod:GetSetting("BombLines") then
         core:AddLineBetweenUnits(string.format("JUMP_START_LINE %d", id), playerUnit:GetId(), id, 5)
       end
     end,
-    [core.E.UNIT_DESTROYED] = function (_, id)
+    [core.E.UNIT_DESTROYED] = function (self, id)
       jumpStarts[id] = nil
       if mod:GetSetting("BombLines") then
         core:RemoveLineBetweenUnits(string.format("JUMP_START_LINE %d", id))
