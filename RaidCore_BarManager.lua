@@ -380,15 +380,19 @@ end
 
 function ProgressManager:UpdateBar(sKey, tBar)
   local nProgress
+  local barColor
   if tBar.tUpdate.tClass then
-    nProgress = tBar.tUpdate.fHandler(tBar.tUpdate.tClass, tBar.nPrevProgress)
+    nProgress, barColor = tBar.tUpdate.fHandler(tBar.tUpdate.tClass, tBar.nPrevProgress)
   else
-    nProgress = tBar.tUpdate.fHandler(tBar.nPrevProgress)
+    nProgress, barColor = tBar.tUpdate.fHandler(tBar.nPrevProgress)
   end
   if nProgress < 100 then
     tBar.wndProgressBar:SetProgress(nProgress)
     tBar.wndProgress:SetText(("%.1f%%"):format(nProgress))
     tBar.nPrevProgress = nProgress
+    if barColor then
+      tBar.wndProgressBar:SetBarColor(barColor)
+    end
   else
     if tBar.tCallback then
       table.insert(self.tTimeout, tBar.tCallback)
