@@ -38,7 +38,6 @@ mod:RegisterMessageSetting("PULSECANNON", "EQUAL", "MessagePulseCannon", "SoundP
 ----------------------------------------------------------------------------------------------------
 -- Locals.
 ----------------------------------------------------------------------------------------------------
-local jumpStarts
 local playerUnit
 local skootyUnit
 ----------------------------------------------------------------------------------------------------
@@ -46,7 +45,6 @@ local skootyUnit
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
   playerUnit = GameLib.GetPlayerUnit()
-  jumpStarts = {}
 end
 
 mod:RegisterUnitEvents("unit.skooty",{
@@ -71,15 +69,13 @@ mod:RegisterUnitEvents("unit.skooty",{
 
 mod:RegisterUnitEvents("unit.jumpstart",{
     [core.E.UNIT_CREATED] = function (self, id, unit)
-      jumpStarts[id] = unit
       if mod:GetSetting("BombLines") then
-        core:AddLineBetweenUnits(string.format("JUMP_START_LINE %d", id), playerUnit:GetId(), id, 5)
+        core:AddLineBetweenUnits("JUMP_START_LINE_%d"..id, playerUnit:GetId(), id, 5)
       end
     end,
-    [core.E.UNIT_DESTROYED] = function (self, id)
-      jumpStarts[id] = nil
+    [core.E.UNIT_DESTROYED] = function (self, id, unit)
       if mod:GetSetting("BombLines") then
-        core:RemoveLineBetweenUnits(string.format("JUMP_START_LINE %d", id))
+        core:RemoveLineBetweenUnits("JUMP_START_LINE_%d"..id)
       end
     end,
   }
