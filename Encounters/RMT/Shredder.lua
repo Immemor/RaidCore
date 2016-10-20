@@ -98,6 +98,12 @@ mod:RegisterMessageSetting("NABBER", "EQUAL", "MessageNecroticLash", "SoundNecro
 mod:RegisterMessageSetting("OOZE_MSG", "EQUAL", "MessageOozeStacksWarning", "SoundOozeStacksWarning")
 mod:RegisterMessageSetting("SAW_MSG_MID", "EQUAL", "MessageMidSawWarning", "SoundMidSawWarning")
 mod:RegisterMessageSetting("SAW_MSG_MID", "EQUAL", "MessageSawSafeSpot", "SoundSawSafeSpot")
+-- Progressbar defaults
+mod:RegisterDefaultTimerBarConfigs({
+    ["WALKING_PROGRESS"] = { sColor = "xkcdBrown", nPriority = 1},
+    ["ADDS_PROGRESS"] = { sColor = "xkcdOrange", nPriority = 2},
+  }
+)
 ----------------------------------------------------------------------------------------------------
 -- Constants.
 ----------------------------------------------------------------------------------------------------
