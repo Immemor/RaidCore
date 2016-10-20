@@ -49,7 +49,7 @@ mod:RegisterEnglishLocale({
     ["msg.core.health.high.warning"] = "%s HIGH HEALTH!",
     ["msg.core.health.low.warning"] = "%s LOW HEALTH!",
     ["msg.rocket_jump.moved"] = "%s MOVED",
-    ["msg.heat.generation"] = "Heat Generation",
+    ["msg.heat.generation"] = "Core Health",
   })
 ----------------------------------------------------------------------------------------------------
 -- Constants.
