@@ -43,7 +43,7 @@ mod:RegisterEnglishLocale({
     ["msg.maze.now"] = "CENTER",
     ["msg.arms.next"] = "Arms spawning in",
     ["msg.cannon_arm.spawned"] = "CANNON",
-    ["msg.cannon_arm.interrupt"] = "INTERRUPT CANNON",
+    ["msg.cannon_arm.interrupt"] = "INTERRUPT CANNON %d",
     ["msg.spew.now"] = "Spew",
     ["msg.spew.next"] = "Next spew in",
   })
@@ -118,6 +118,7 @@ mod:RegisterDefaultSetting("CompactorGridEdge", false)
 mod:RegisterDefaultSetting("LineCannonArm")
 mod:RegisterDefaultSetting("CrosshairLaser")
 mod:RegisterDefaultSetting("LineRoboMaze")
+mod:RegisterDefaultSetting("MarkerCannonInterrupt")
 -- Sounds.
 mod:RegisterDefaultSetting("SoundSnake")
 mod:RegisterDefaultSetting("SoundSnakeNear")
@@ -145,7 +146,7 @@ mod:RegisterMessageSetting("SNAKE_MSG_OTHER", "EQUAL", "MessageSnakeOther")
 mod:RegisterMessageSetting("ROBO_MAZE_CLOSE", "EQUAL", "MessagePhaseChangeClose", "SoundPhaseChangeClose")
 mod:RegisterMessageSetting("ROBO_MAZE_NOW", "EQUAL", "MessagePhaseChange", "SoundPhaseChange")
 mod:RegisterMessageSetting("ARMS_MSG_SPAWN", "EQUAL", "MessageArmSpawn", "SoundArmSpawn")
-mod:RegisterMessageSetting("ARMS_MSG_CAST", "EQUAL", "MessageCannonInterrupt", "SoundCannonInterrupt")
+mod:RegisterMessageSetting("ARMS_MSG_CAST_%d+", "MATCH", "MessageCannonInterrupt", "SoundCannonInterrupt")
 mod:RegisterMessageSetting("LASER_MSG", "EQUAL", "MessageLaser", "SoundLaser")
 mod:RegisterMessageSetting("SPEW_MSG", "EQUAL", "MessageSpew", "SoundSpew")
 -- Timer default configs.
@@ -337,9 +338,16 @@ function mod:RemoveCannonArmLines()
   end
 end
 
+function mod:MarkCannonArm(cannonArm)
+  if mod:GetSetting("MarkerCannonInterrupt") then
+    core:MarkUnit(cannonArm.unit, core.E.LOCATION_STATIC_FLOOR, cannonArm.interrupt)
+  end
+end
+
 mod:RegisterUnitEvents("unit.cannon_arm",{
-    ["OnUnitCreated"] = function (_, id, unit)
-      cannonArms[id] = unit
+    [core.E.UNIT_CREATED] = function (_, id, unit)
+      cannonArms[id] = {unit = unit, interrupt = 1}
+      mod:MarkCannonArm(cannonArms[id])
       core:WatchUnit(unit, core.E.TRACK_CASTS)
       if mod:GetSetting("LineCannonArm") then
         core:AddLineBetweenUnits(string.format("CANNON_ARM_LINE %d", id), playerUnit:GetId(), id, 5)
@@ -349,11 +357,16 @@ mod:RegisterUnitEvents("unit.cannon_arm",{
       end
       mod:AddMsg("ARMS_MSG_SPAWN", "msg.cannon_arm.spawned", 5, "Info", "xkcdWhite")
     end,
-    [core.E.CAST_START] = {
-      ["cast.cannon_fire"] = function(self, id)
+    ["cast.cannon_fire"] = {
+      [core.E.CAST_START] = function(self, id)
         if mod:GetDistanceBetweenUnits(playerUnit, GetUnitById(id)) < 45 then
-          mod:AddMsg("ARMS_MSG_CAST", "msg.cannon_arm.interrupt", 2, "Inferno", "xkcdOrange")
+          local msg = self.L["msg.cannon_arm.interrupt"]:format(cannonArms[id].interrupt)
+          mod:AddMsg("ARMS_MSG_CAST_"..id, msg, 2, "Inferno", "xkcdOrange")
         end
+        cannonArms[id].interrupt = cannonArms[id].interrupt + 1
+      end,
+      [core.E.CAST_END] = function(self, id)
+        mod:MarkCannonArm(cannonArms[id])
       end
     },
     [core.E.UNIT_DESTROYED] = function(_, id)
