@@ -327,57 +327,55 @@ function ProgressManager:AddBar(sKey, sText, tUpdate, tOptions, tCallback)
   assert(type(sText) == "string")
   assert(tUpdate and tUpdate.fHandler)
   assert(not tCallback or tCallback.fHandler)
-  local nProgress = 0
+  local nProgress
   if tUpdate.tClass then
     nProgress = tUpdate.fHandler(tUpdate.tClass, 0)
   else
     nProgress = tUpdate.fHandler(0)
   end
-  if nProgress < 100 then
-    -- Manage windows objects.
-    local wndMain = nil
-    if self.tBars[sKey] then
-      wndMain = self.tBars[sKey].wndMain
-    else
-      wndMain = Apollo.LoadForm(RaidCore.xmlDoc, "BarProgressTemplate", self.wndParent, self)
-    end
-    local wndBar = wndMain:FindChild("Border"):FindChild("bg")
-    local wndText = wndBar:FindChild("Text")
-    local wndProgress = wndBar:FindChild("Progress")
-    local wndProgressBar = wndBar:FindChild("ProgressBar")
-    wndMain:SetData(nProgress)
-    -- Manage bar itself.
-    wndMain:SetAnchorOffsets(0, 0, 0, self.tSettings.nBarHeight)
-    wndProgressBar:SetMax(100)
-    wndProgressBar:SetProgress(nProgress)
-    wndProgress:SetText(("%.1f%%"):format(nProgress))
-    wndText:SetText(sText)
-    if tOptions then
-      if tOptions.sColor then
-        wndProgressBar:SetBarColor(tOptions.sColor)
-      end
-    end
 
-    self.tBars[sKey] = {
-      -- About timer itself.
-      sText = sText,
-      EnableCountDown = EnableCountDown,
-      -- Get progress
-      tUpdate = tUpdate,
-      tCallback = tCallback,
-      -- Windows objects.
-      wndMain = wndMain,
-      wndText = wndText,
-      wndProgress = wndProgress,
-      wndProgressBar = wndProgressBar,
-      nPrevProgress = nProgress
-    }
-    ArrangeBar(self)
-    TimerStart()
+  -- Manage windows objects.
+  local wndMain
+  if self.tBars[sKey] then
+    wndMain = self.tBars[sKey].wndMain
   else
-    -- Delete the bar, check if exist is done in this function.
-    self:RemoveBar(sKey)
+    wndMain = Apollo.LoadForm(RaidCore.xmlDoc, "BarProgressTemplate", self.wndParent, self)
   end
+  local wndBar = wndMain:FindChild("Border"):FindChild("bg")
+  local wndText = wndBar:FindChild("Text")
+  local wndProgress = wndBar:FindChild("Progress")
+  local wndProgressBar = wndBar:FindChild("ProgressBar")
+  local nPriority = 99
+  -- Manage bar itself.
+  wndMain:SetAnchorOffsets(0, 0, 0, self.tSettings.nBarHeight)
+  wndProgressBar:SetMax(100)
+  wndProgressBar:SetProgress(nProgress)
+  wndProgress:SetText(("%.1f%%"):format(nProgress))
+  wndText:SetText(sText)
+  if tOptions then
+    if tOptions.sColor then
+      wndProgressBar:SetBarColor(tOptions.sColor)
+    end
+    nPriority = tOptions.nPriority or nPriority
+  end
+  wndMain:SetData(nPriority)
+
+  self.tBars[sKey] = {
+    -- About timer itself.
+    sText = sText,
+    nPriority = nPriority,
+    -- Get progress
+    tUpdate = tUpdate,
+    tCallback = tCallback,
+    -- Windows objects.
+    wndMain = wndMain,
+    wndText = wndText,
+    wndProgress = wndProgress,
+    wndProgressBar = wndProgressBar,
+    nPrevProgress = nProgress
+  }
+  ArrangeBar(self)
+  TimerStart()
 end
 
 function ProgressManager:UpdateBar(sKey, tBar)
@@ -388,7 +386,6 @@ function ProgressManager:UpdateBar(sKey, tBar)
     nProgress = tBar.tUpdate.fHandler(tBar.nPrevProgress)
   end
   if nProgress < 100 then
-    tBar.wndMain:SetData(nProgress)
     tBar.wndProgressBar:SetProgress(nProgress)
     tBar.wndProgress:SetText(("%.1f%%"):format(nProgress))
     tBar.nPrevProgress = nProgress
@@ -411,10 +408,10 @@ function ProgressManager:OnTimerUpdate()
   for _, tCallback in next, self.tTimeout do
     if tCallback.tClass then
       -- Call a function in a class.
-      tCallback.fHandler(tCallback.tClass, tCallback.tData)
+      tCallback.fHandler(tCallback.tClass)
     else
       -- Call a function ouside a class.
-      tCallback.fHandler(tCallback.tData)
+      tCallback.fHandler()
     end
   end
   self.tTimeout = nil

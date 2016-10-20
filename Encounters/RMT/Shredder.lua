@@ -36,6 +36,7 @@ mod:RegisterEnglishLocale({
     ["unit.add.cadet"] = "Risen Redmoon Cadet",
     ["unit.tether"] = "Tether Anchor",
     ["unit.junk_trap"] = "Junk Trap",
+    ["unit.bubble"] = "Hostile Invisible Unit for Fields (1.2 hit radius)",
     -- Datachron messages.
     ["chron.shredder.starting"] = "WARNING: THE SHREDDER IS STARTING!",
     -- Cast names.
@@ -72,6 +73,7 @@ mod:RegisterDefaultSetting("SquareTethers")
 mod:RegisterDefaultSetting("CrosshairAdds")
 mod:RegisterDefaultSetting("CrosshairPriority")
 mod:RegisterDefaultSetting("CrosshairTether")
+mod:RegisterDefaultSetting("CircleBubble")
 -- Sound.
 mod:RegisterDefaultSetting("SoundAdds")
 mod:RegisterDefaultSetting("SoundMiniboss")
@@ -96,6 +98,12 @@ mod:RegisterMessageSetting("NABBER", "EQUAL", "MessageNecroticLash", "SoundNecro
 mod:RegisterMessageSetting("OOZE_MSG", "EQUAL", "MessageOozeStacksWarning", "SoundOozeStacksWarning")
 mod:RegisterMessageSetting("SAW_MSG_MID", "EQUAL", "MessageMidSawWarning", "SoundMidSawWarning")
 mod:RegisterMessageSetting("SAW_MSG_MID", "EQUAL", "MessageSawSafeSpot", "SoundSawSafeSpot")
+-- Progressbar defaults
+mod:RegisterDefaultTimerBarConfigs({
+    ["WALKING_PROGRESS"] = { sColor = "xkcdBrown", nPriority = 1},
+    ["ADDS_PROGRESS"] = { sColor = "xkcdOrange", nPriority = 2},
+  }
+)
 ----------------------------------------------------------------------------------------------------
 -- Constants.
 ----------------------------------------------------------------------------------------------------
@@ -156,7 +164,9 @@ local previousAddPhase
 local firstShredderSaw
 local secondShredderSaw
 local playerUnit
-local startProgressBarTimer
+local prevShredderProgress
+local startProgressBarTimer = ApolloTimer.Create(4, false, "StartProgressBar", mod)
+startProgressBarTimer:Stop() --thanks carbine
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 -----------------------------------------------------------------------------------------------------
@@ -166,8 +176,15 @@ function mod:OnBossEnable()
   phase = WALKING
   addPhase = 4
   previousAddPhase = 0
+  prevShredderProgress = 0
   firstShredderSaw = nil
   secondShredderSaw = nil
+  startProgressBarTimer:Start()
+end
+
+function mod:OnBossDisable()
+  mod:RemoveProgressBar("WALKING_PROGRESS")
+  mod:RemoveProgressBar("ADDS_PROGRESS")
 end
 
 mod:RegisterUnitEvents(core.E.ALL_UNITS, {
@@ -181,9 +198,12 @@ mod:RegisterUnitEvents(core.E.ALL_UNITS, {
   }
 )
 
-function mod:GetWalkingProgress()
+function mod:GetWalkingProgress(oldProgress)
   local pos1
   local pos2
+  if not mod.swabbieUnit then --voidslip
+    return oldProgress
+  end
   if phase == WALKING then
     pos1 = Vector3.New(mod.swabbieUnit:GetPosition())
     pos2 = START_POSITION
@@ -193,11 +213,12 @@ function mod:GetWalkingProgress()
   end
   local walkedDistance = (pos1 - pos2):Length()
   local progress = (walkedDistance / WALKING_DISTANCE) * 100
+  prevShredderProgress = progress
   return progress
 end
 
 function mod:GetAddSpawnProgess()
-  local currentProgress = mod:GetWalkingProgress() - previousAddPhase
+  local currentProgress = mod:GetWalkingProgress(prevShredderProgress) - previousAddPhase
   local waveSpawn = ADD_PHASES[addPhase] - previousAddPhase
   return (currentProgress/waveSpawn)*100
 end
@@ -233,8 +254,6 @@ function mod:StartProgressBar()
   local messageText = self.L["msg.swabbie.walking"]:format(self.L["msg.swabbie.walking.direction.north"])
   mod:AddProgressBar("WALKING_PROGRESS", messageText, mod.GetWalkingProgress, mod, mod.PhaseChange)
   mod:NextAddWave()
-  startProgressBarTimer:Stop()
-  startProgressBarTimer = nil
 end
 
 mod:RegisterUnitEvents({
@@ -293,24 +312,21 @@ mod:RegisterUnitEvents({ "unit.add.brute", "unit.add.nabber" },{
 
 mod:RegisterUnitEvents("unit.swabbie",{
     [core.E.UNIT_CREATED] = function(self, _, unit)
+      -- filter out second unit that's there for some reason
+      if not unit:GetHealth() then
+        return
+      end
       core:AddUnit(unit)
       core:WatchUnit(unit, core.E.TRACK_CASTS)
       self.swabbieUnit = unit
     end,
     [core.E.UNIT_DESTROYED] = function(self, _, unit)
+      self.swabbieUnit = nil
       core:RemoveUnit(unit)
-      self:RemoveProgressBar("WALKING_PROGRESS")
-      self:RemoveProgressBar("ADDS_PROGRESS")
     end,
     [core.E.CAST_START] = {
       ["cast.swabbie.knockback"] = function()
         mod:AddMsg("KNOCKBACK", "msg.swabbie.knockback", 2, nil, "xkcdRed")
-      end
-    },
-    [core.E.CAST_END] = {
-      ["cast.swabbie.swoop"] = function()
-        startProgressBarTimer = ApolloTimer.Create(1, true, "StartProgressBar", mod)
-        startProgressBarTimer:Start()
       end
     },
   }
@@ -387,6 +403,18 @@ mod:RegisterUnitEvents({"unit.miniboss.regor", "unit.miniboss.braugh"},{
         core:RemoveMsg("MINIBOSS_SPAWN")
         mod:AddMsg("MINIBOSS_CAST", "msg.miniboss.interrupt", 5, "Inferno", "xkcdOrange")
       end
+    end,
+  }
+)
+
+mod:RegisterUnitEvents("unit.bubble",{
+    [core.E.UNIT_CREATED] = function(_, id)
+      if mod:GetSetting("CircleBubble") then
+        core:AddPolygon(id, id, 6.5, nil, 5, "white", 20)
+      end
+    end,
+    [core.E.UNIT_DESTROYED] = function(_, id)
+      core:RemovePolygon(id)
     end,
   }
 )

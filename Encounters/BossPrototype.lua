@@ -322,15 +322,18 @@ end
 -- @param tClass Class used by update action on a timer
 -- @param fHandler function to call to get progress
 -- @param tClass Class used by update action on a timer
--- @param tData Data forwarded by callback action on timeout
+-- @param sColor Color of the bar
+-- @param nPriority Order index of the bar compared to others 1-99
 --
 -- Note: If the English translation is not found, the current string will be used like that.
-function EncounterPrototype:AddProgressBar(sKey, sEnglishText, fHandler, tClass, fHandler2, tData)
+function EncounterPrototype:AddProgressBar(sKey, sEnglishText, fHandler, tClass, fHandler2, sColor, nPriority)
   local tOptions = {}
   local sLocalText = self.L[sEnglishText]
   if self.tDefaultTimerBarsOptions[sKey] then
     tOptions = self.tDefaultTimerBarsOptions[sKey]
   end
+  tOptions.sColor = sColor or tOptions.sColor
+  tOptions.nPriority = nPriority or tOptions.nPriority
   local tUpdate = nil
   if type(fHandler) == "function" then
     tUpdate = {
@@ -343,7 +346,6 @@ function EncounterPrototype:AddProgressBar(sKey, sEnglishText, fHandler, tClass,
     tCallback = {
       fHandler = fHandler2,
       tClass = tClass,
-      tData = tData,
     }
   end
   RaidCore:AddProgressBar(sKey, sLocalText, tUpdate, tOptions, tCallback)
