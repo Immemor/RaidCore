@@ -471,6 +471,7 @@ function RaidCore:CombatInterface_Init()
 
   -- Permanent registering.
   RegisterEventHandler("ChangeWorld", "CI_OnChangeWorld", self)
+  RegisterEventHandler("CharacterCreated", "CI_OnCharacterCreated", self)
   RegisterEventHandler("SubZoneChanged", "CI_OnSubZoneChanged", self)
 
   InterfaceSwitch(INTERFACE__DISABLE)
@@ -773,6 +774,10 @@ end
 
 function RaidCore:CI_OnChangeWorld()
   ManagerCall("OnChangeWorld")
+end
+
+function RaidCore:CI_OnCharacterCreated()
+  ManagerCall("OnCharacterCreated")
 end
 
 function RaidCore:CI_OnSubZoneChanged(nZoneId, sZoneName)

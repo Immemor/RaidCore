@@ -46,6 +46,9 @@ local TRIG_MOBS = {
   "unit.ravenok",
   "unit.pell",
   "unit.titan",
+  -- Extra units
+  "unit.ai",
+  "unit.computer",
 }
 
 mod:RegisterTrigMob("ANY", TRIG_MOBS)
@@ -68,6 +71,9 @@ mod:RegisterEnglishLocale({
     ["unit.pell"] = "Holographic Pell",
     ["unit.titan"] = "Holographic Titan",
     ["unit.buffer"] = "Invisible Unit s71975 - Aquatic Buffer", -- titan cast,
+    -- Extra units.
+    ["unit.ai"] = "SDC-AI",
+    ["unit.computer"] = "Super Duper Computer",
 
     ["unit.invis.0"] = "Hostile Invisible Unit for Fields (0 hit radius)",
     -- Cast names.
