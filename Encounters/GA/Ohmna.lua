@@ -168,7 +168,7 @@ function mod:OnBossEnable()
   pilarCount, boreCount, submergeCount = 1, 0, 0
   firstPull, OhmnaP3, OhmnaP4 = true, false, false
   mod:AddTimerBar("OPILAR", self.L["PILLAR %u"]:format(pilarCount), 25)
-  if self:Tank() then
+  if mod:IsPlayerTank() then
     mod:AddTimerBar("OBORE", "SWITCH TANK", 45)
   end
 end
@@ -218,7 +218,7 @@ function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
       if OhmnaP3 then return end
       local pilarActivated = self:OhmnaPE(pilarCount % 2)
       mod:AddTimerBar("OPILAR", self.L["PILLAR %u : %s"]:format(pilarCount, pilarActivated), 32)
-      if self:Tank() then
+      if mod:IsPlayerTank() then
         mod:AddTimerBar("OBORE", "SWITCH TANK", 45)
       end
     elseif sCastName == self.L["Genetic Torrent"] then
@@ -273,7 +273,7 @@ function mod:OnDatachron(sMessage)
     core:RemoveTimerBar("OTENT")
   elseif sMessage:find(self.L["Dreadphage Ohmna is bored"]) then
     boreCount = boreCount + 1
-    if boreCount < 2 and self:Tank() then
+    if boreCount < 2 and mod:IsPlayerTank() then
       mod:AddTimerBar("OBORE", "SWITCH TANK", 42)
     end
   elseif sMessage:find(self.L["The Archives tremble as Dreadphage Ohmna"]) then

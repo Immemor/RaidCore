@@ -224,7 +224,7 @@ function mod:OnDebuffUpdate(nId, nSpellId, nStack, fTimeRemaining)
   local tUnit = GetUnitById(nId)
 
   if nSpellId == DEBUFFID_DRENCHED or nSpellId == DEBUFFID_ENGULFED then
-    if (self:Tank() and nStack == 13) or (not self:Tank() and nStack == 10) then
+    if (mod:IsPlayerTank() and nStack == 13) or (not mod:IsPlayerTank() and nStack == 10) then
       if tUnit == GetPlayerUnit() then
         local sMessage = self.L["%d STACKS!"]:format(nStack)
         mod:AddMsg("STACK", sMessage, 5, mod:GetSetting("SoundHighDebuffStacks") and "Beware")

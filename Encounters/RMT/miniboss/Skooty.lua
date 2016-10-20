@@ -18,7 +18,7 @@ mod:RegisterTrigMob("ALL", { "unit.skooty" })
 mod:RegisterEnglishLocale({
     -- Unit names.
     ["unit.skooty"] = "Assistant Technician Skooty",
-    ["unit.jumpstart"] = "unit.jumpstart",
+    ["unit.jumpstart"] = "Jumpstart Charge",
     -- Cast names.
     ["cast.skooty.cannon"] = "Pulse Cannon",
     -- Messages.
@@ -27,45 +27,55 @@ mod:RegisterEnglishLocale({
 ----------------------------------------------------------------------------------------------------
 -- Settings.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterDefaultSetting("PulseCannon")
+-- Visuals.
 mod:RegisterDefaultSetting("BombLines", false)
+-- Sounds.
+mod:RegisterDefaultSetting("SoundPulseCannon")
+-- Messages.
+mod:RegisterDefaultSetting("MessagePulseCannon")
+-- Binds.
+mod:RegisterMessageSetting("PULSECANNON", "EQUAL", "MessagePulseCannon", "SoundPulseCannon")
 ----------------------------------------------------------------------------------------------------
 -- Locals.
 ----------------------------------------------------------------------------------------------------
-local jumpStarts
 local playerUnit
+local skootyUnit
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
   playerUnit = GameLib.GetPlayerUnit()
-  jumpStarts = {}
 end
 
 mod:RegisterUnitEvents("unit.skooty",{
-    ["OnUnitCreated"] = function (_, _, unit)
+    [core.E.UNIT_CREATED] = function (self, id, unit)
+      skootyUnit = unit
       core:AddUnit(unit)
       core:WatchUnit(unit, core.E.TRACK_CASTS)
     end,
-    ["OnCastStart"] = function (self, _, castName)
-      if self.L["cast.skooty.cannon"] == castName then
-        mod:AddMsg("PULSECANNON", self.L["msg.skooty.cannon.get_out"], 5, mod:GetSetting("PulseCannon") == true and "RunAway")
-      end
+    [core.E.UNIT_DESTROYED] = function ()
+      skootyUnit = nil
     end,
+    [core.E.CAST_START] = {
+      ["cast.skooty.cannon"] = function (self, id, castName)
+        local target = skootyUnit and skootyUnit:GetTarget()
+        if target and target:IsThePlayer() then
+          mod:AddMsg("PULSECANNON", self.L["msg.skooty.cannon.get_out"], 5, "RunAway")
+        end
+      end,
+    }
   }
 )
 
 mod:RegisterUnitEvents("unit.jumpstart",{
-    ["OnUnitCreated"] = function (_, id, unit)
-      jumpStarts[id] = unit
+    [core.E.UNIT_CREATED] = function (self, id, unit)
       if mod:GetSetting("BombLines") then
-        core:AddLineBetweenUnits(string.format("JUMP_START_LINE %d", id), playerUnit:GetId(), id, 5)
+        core:AddLineBetweenUnits("JUMP_START_LINE_"..id, playerUnit:GetId(), id, 5)
       end
     end,
-    ["OnUnitDestroyed"] = function (_, id)
-      jumpStarts[id] = nil
+    [core.E.UNIT_DESTROYED] = function (self, id, unit)
       if mod:GetSetting("BombLines") then
-        core:RemoveLineBetweenUnits(string.format("JUMP_START_LINE %d", id))
+        core:RemoveLineBetweenUnits("JUMP_START_LINE_"..id)
       end
     end,
   }

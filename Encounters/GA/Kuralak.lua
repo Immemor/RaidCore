@@ -216,7 +216,7 @@ function mod:OnDatachron(sMessage)
     mod:AddTimerBar("EGGS", "Next eggs", 66)
     mod:DisplayEggBestPosition()
   elseif sMessage:find(self.L["has been anesthetized"]) then
-    if self:Tank() then
+    if mod:IsPlayerTank() then
       mod:AddMsg("SIPHON", "SWITCH TANK", 5, mod:GetSetting("SoundSiphon") and "Alarm")
     end
     mod:AddTimerBar("SIPHON", "Next switch tank", 88)
