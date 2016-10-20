@@ -345,7 +345,7 @@ function ProgressManager:AddBar(sKey, sText, tUpdate, tOptions, tCallback)
   local wndText = wndBar:FindChild("Text")
   local wndProgress = wndBar:FindChild("Progress")
   local wndProgressBar = wndBar:FindChild("ProgressBar")
-  wndMain:SetData(nProgress)
+  local nPriority = 99
   -- Manage bar itself.
   wndMain:SetAnchorOffsets(0, 0, 0, self.tSettings.nBarHeight)
   wndProgressBar:SetMax(100)
@@ -356,11 +356,14 @@ function ProgressManager:AddBar(sKey, sText, tUpdate, tOptions, tCallback)
     if tOptions.sColor then
       wndProgressBar:SetBarColor(tOptions.sColor)
     end
+    nPriority = tOptions.nPriority or nPriority
   end
+  wndMain:SetData(nPriority)
 
   self.tBars[sKey] = {
     -- About timer itself.
     sText = sText,
+    nPriority = nPriority,
     -- Get progress
     tUpdate = tUpdate,
     tCallback = tCallback,
@@ -383,7 +386,6 @@ function ProgressManager:UpdateBar(sKey, tBar)
     nProgress = tBar.tUpdate.fHandler(tBar.nPrevProgress)
   end
   if nProgress < 100 then
-    tBar.wndMain:SetData(nProgress)
     tBar.wndProgressBar:SetProgress(nProgress)
     tBar.wndProgress:SetText(("%.1f%%"):format(nProgress))
     tBar.nPrevProgress = nProgress
@@ -406,10 +408,10 @@ function ProgressManager:OnTimerUpdate()
   for _, tCallback in next, self.tTimeout do
     if tCallback.tClass then
       -- Call a function in a class.
-      tCallback.fHandler(tCallback.tClass, tCallback.tData)
+      tCallback.fHandler(tCallback.tClass)
     else
       -- Call a function ouside a class.
-      tCallback.fHandler(tCallback.tData)
+      tCallback.fHandler()
     end
   end
   self.tTimeout = nil
