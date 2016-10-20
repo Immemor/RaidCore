@@ -49,6 +49,7 @@ mod:RegisterEnglishLocale({
     ["msg.core.health.high.warning"] = "%s HIGH HEALTH!",
     ["msg.core.health.low.warning"] = "%s LOW HEALTH!",
     ["msg.rocket_jump.moved"] = "%s MOVED",
+    ["msg.heat.generation"] = "Core Health",
   })
 ----------------------------------------------------------------------------------------------------
 -- Constants.
@@ -123,6 +124,7 @@ end
 local coreUnits
 local engineerUnits
 local player
+local coreMaxHealth
 
 local fireOrbTargetTestTimer = ApolloTimer.Create(1, false, "RegisterOrbTarget", mod)
 ----------------------------------------------------------------------------------------------------
@@ -181,6 +183,7 @@ function mod:OnBossEnable()
   player = {}
   player.unit = GameLib.GetPlayerUnit()
   player.location = 0
+  coreMaxHealth = nil
   engineerUnits = {}
   coreUnits = {}
   --locales
@@ -193,6 +196,26 @@ function mod:OnBossEnable()
 
   mod:AddTimerBar("NEXT_ELEKTROSHOCK_TIMER", "msg.engineer.electroshock.next", FIRST_ELECTROSHOCK_TIMER)
   mod:AddTimerBar("NEXT_LIQUIDATE_TIMER", "msg.warrior.liquidate.next", FIRST_LIQUIDATE_TIMER)
+  mod:AddProgressBar("HEAT_GENERATIOn", "msg.heat.generation", mod.GetCoreTotalHealthPercentage, mod)
+end
+
+function mod:GetCoreTotalHealthPercentage(oldValue)
+  if not coreMaxHealth then
+    return oldValue
+  end
+  local coreCurrentHealth = 0
+  local totalHealthPercent
+  local barColor = "xkcdRed"
+  for coreId, coreUnit in pairs(coreUnits) do
+    coreCurrentHealth = coreCurrentHealth + coreUnit.unit:GetHealth()
+  end
+  totalHealthPercent = (coreCurrentHealth / coreMaxHealth) * 100
+  if totalHealthPercent < 30 then
+    barColor = "xkcdGreen"
+  elseif totalHealthPercent < 33.3 then
+    barColor = "xkcdOrange"
+  end
+  return totalHealthPercent, barColor
 end
 
 function mod:OnBossDisable()
@@ -208,9 +231,10 @@ function mod:AddUnits()
   if mod:GetSetting("BarsCoreHealth") then
     core:AddUnitSpacer("CORE_SPACER")
   end
+  coreMaxHealth = 0
   for coreId, coreUnit in pairs(coreUnits) do
+    coreMaxHealth = coreMaxHealth + coreUnit.unit:GetMaxHealth()
     core:WatchUnit(coreUnit.unit, core.E.TRACK_BUFFS + core.E.TRACK_HEALTH)
-
     mod:UpdateCoreHealthMark(coreUnit)
     if mod:GetSetting("BarsCoreHealth") then
       core:AddUnit(coreUnit.unit, CORE_BAR_COLORS[coreId])
