@@ -23,6 +23,7 @@ mod:RegisterEnglishLocale({
     ["cast.skooty.cannon"] = "Pulse Cannon",
     -- Messages.
     ["msg.skooty.cannon.get_out"] = "GET OUT",
+    ["msg.skooty.cannon.get_out_tank"] = "TANK GET OUT",
   })
 ----------------------------------------------------------------------------------------------------
 -- Settings.
@@ -31,10 +32,13 @@ mod:RegisterEnglishLocale({
 mod:RegisterDefaultSetting("BombLines", false)
 -- Sounds.
 mod:RegisterDefaultSetting("SoundPulseCannon")
+mod:RegisterDefaultSetting("SoundPulseCannonTank")
 -- Messages.
 mod:RegisterDefaultSetting("MessagePulseCannon")
+mod:RegisterDefaultSetting("MessagePulseCannonTank")
 -- Binds.
 mod:RegisterMessageSetting("PULSECANNON", "EQUAL", "MessagePulseCannon", "SoundPulseCannon")
+mod:RegisterMessageSetting("PULSECANNON_TANK", "EQUAL", "MessagePulseCannonTank", "SoundPulseCannonTank")
 ----------------------------------------------------------------------------------------------------
 -- Locals.
 ----------------------------------------------------------------------------------------------------
@@ -57,10 +61,12 @@ mod:RegisterUnitEvents("unit.skooty",{
       skootyUnit = nil
     end,
     [core.E.CAST_START] = {
-      ["cast.skooty.cannon"] = function (self, id, castName)
+      ["cast.skooty.cannon"] = function ()
         local target = skootyUnit and skootyUnit:GetTarget()
         if target and target:IsThePlayer() then
-          mod:AddMsg("PULSECANNON", self.L["msg.skooty.cannon.get_out"], 5, "RunAway")
+          mod:AddMsg("PULSECANNON", "msg.skooty.cannon.get_out", 5, "RunAway")
+        else
+          mod:AddMsg("PULSECANNON_TANK", "msg.skooty.cannon.get_out_tank", 5, "Info", "xkcdWhite")
         end
       end,
     }
@@ -68,12 +74,12 @@ mod:RegisterUnitEvents("unit.skooty",{
 )
 
 mod:RegisterUnitEvents("unit.jumpstart",{
-    [core.E.UNIT_CREATED] = function (self, id, unit)
+    [core.E.UNIT_CREATED] = function (self, id)
       if mod:GetSetting("BombLines") then
         core:AddLineBetweenUnits("JUMP_START_LINE_"..id, playerUnit:GetId(), id, 5)
       end
     end,
-    [core.E.UNIT_DESTROYED] = function (self, id, unit)
+    [core.E.UNIT_DESTROYED] = function (self, id)
       if mod:GetSetting("BombLines") then
         core:RemoveLineBetweenUnits("JUMP_START_LINE_"..id)
       end
