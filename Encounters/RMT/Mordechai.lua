@@ -64,11 +64,6 @@ mod:RegisterGermanLocale({
     ["chron.airlock.opened"] = "The airlock has been opened!",
     ["chron.airlock.closed"] = "The airlock has been closed!",
     -- Markers.
-    ["mark.anchor_1"] = "1",
-    ["mark.anchor_2"] = "2",
-    ["mark.anchor_3"] = "3",
-    ["mark.anchor_4"] = "4",
-
     -- Messages.
     ["msg.mordechai.shuriken.next"] = "Next Shuriken",
     ["msg.mordechai.barrage.next"] = "Next Vicious Barrage",
