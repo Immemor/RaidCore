@@ -359,14 +359,16 @@ function EncounterPrototype:RemoveProgressBar(sKey)
   RaidCore:RemoveProgressBar(sKey)
 end
 
-function EncounterPrototype:PrepareEncounter()
-  -- Translate trigger names.
-  -- Replace english data by local data.
+function EncounterPrototype:TranslateTriggerNames()
   local tmp = {}
   for _, EnglishKey in next, self.tTriggerNames do
     table.insert(tmp, self.L[EnglishKey])
   end
   self.tTriggerNames = tmp
+end
+
+function EncounterPrototype:PrepareEncounter()
+  self:TranslateTriggerNames()
 end
 
 function EncounterPrototype:OnEnable()
