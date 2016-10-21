@@ -79,16 +79,16 @@ end
 -- Bind a message and sound settings to a message id to internally check
 -- if they should be displayed or sound not played.
 -- @param sKey key of the message.
--- @param sMatch Comparism type, RaidCore.E.COMPARE_EQUAL, RaidCore.E.COMPARE_MATCH, RaidCore.E.COMPARE_FIND.
+-- @param compareType Comparism type, RaidCore.E.COMPARE_EQUAL, RaidCore.E.COMPARE_MATCH, RaidCore.E.COMPARE_FIND.
 -- @param sMsgSetting Message setting id.
 -- @param sSoundSetting Sound setting id.
-function EncounterPrototype:RegisterMessageSetting(sKey, sMatch, sMsgSetting, sSoundSetting)
+function EncounterPrototype:RegisterMessageSetting(sKey, compareType, sMsgSetting, sSoundSetting)
   Assert:NotNilOrFalse(sKey, "Key is empty: %s", self.name)
-  Assert:EqualOr(sMatch, {RaidCore.E.COMPARE_MATCH, RaidCore.E.COMPARE_FIND, RaidCore.E.COMPARE_EQUAL},
-    "Invalid comparism type: %s, %s", self.name, tostring(sMatch)
+  Assert:EqualOr(compareType, {RaidCore.E.COMPARE_MATCH, RaidCore.E.COMPARE_FIND, RaidCore.E.COMPARE_EQUAL},
+    "Invalid comparism type: %s, %s", self.name, tostring(compareType)
   )
   --Most of the matches will be EQUAL so use a faster hashtable to look up settings
-  if sMatch == RaidCore.E.COMPARE_EQUAL then
+  if compareType == RaidCore.E.COMPARE_EQUAL then
     self.tSettingBindsEqual[sKey] = {
       sMsgSetting = sMsgSetting,
       sSoundSetting = sSoundSetting,
@@ -96,7 +96,7 @@ function EncounterPrototype:RegisterMessageSetting(sKey, sMatch, sMsgSetting, sS
   else
     table.insert(self.tSettingBinds, {
         sKey = sKey,
-        sMatch = sMatch,
+        compareType = compareType,
         sMsgSetting = sMsgSetting,
         sSoundSetting = sSoundSetting,
       }
@@ -112,15 +112,15 @@ function EncounterPrototype:GetSettingsForKey(sKey)
   local nCount = #self.tSettingBinds
   for i = 1, nCount do
     local tSettingBind = self.tSettingBinds[i]
-    local sMatch = tSettingBind.sMatch
+    local compareType = tSettingBind.compareType
     local sMsgKey = tSettingBind.sKey
     local result = nil
 
-    if sMatch == RaidCore.E.COMPARE_EQUAL then
+    if compareType == RaidCore.E.COMPARE_EQUAL then
       result = sMsgKey == sKey or nil
-    elseif sMatch == RaidCore.E.COMPARE_FIND then
+    elseif compareType == RaidCore.E.COMPARE_FIND then
       result = sKey:find(sMsgKey)
-    elseif sMatch == RaidCore.E.COMPARE_MATCH then
+    elseif compareType == RaidCore.E.COMPARE_MATCH then
       result = sKey:match(sMsgKey)
     end
     if result ~= nil then
