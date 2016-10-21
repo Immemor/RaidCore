@@ -380,8 +380,7 @@ function EncounterPrototype:CallIfExists(sFunctionName)
   end
 end
 
-function EncounterPrototype:OnEnable()
-  -- Copy settings for fast and secure access.
+function EncounterPrototype:CopySettings()
   self.tSettings = {}
   local tSettings = RaidCore.db.profile.Encounters[self:GetName()]
   if tSettings then
@@ -389,6 +388,10 @@ function EncounterPrototype:OnEnable()
       self.tSettings[k] = v
     end
   end
+end
+
+function EncounterPrototype:OnEnable()
+  self:CopySettings()
   -- TODO: Redefine this part.
   self.tDispelInfo = {}
   self:CallIfExists("SetupOptions")
