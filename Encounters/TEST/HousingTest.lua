@@ -22,7 +22,7 @@
 ----------------------------------------------------------------------------------------------------
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 --@alpha@
-local mod = core:NewEncounter("HousingTest", 36, 0, 60)
+local mod = core:NewEncounter("HousingTest", 36, 0, 60, true)
 --@end-alpha@
 if not mod then return end
 

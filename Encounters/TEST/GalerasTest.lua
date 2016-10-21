@@ -11,7 +11,7 @@
 ----------------------------------------------------------------------------------------------------
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 --@alpha@
-local mod = core:NewEncounter("GalerasTest", 6, 0, 16)
+local mod = core:NewEncounter("GalerasTest", 6, 0, 16, true)
 --@end-alpha@
 if not mod then return end
 

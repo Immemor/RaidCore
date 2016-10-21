@@ -517,7 +517,7 @@ function EncounterPrototype:OnTrig(tNames)
 end
 
 function EncounterPrototype:IsTestEncounter()
-  return self.displayName == "HousingTest" or self.displayName == "GalerasTest"
+  return self.isTestEncounter
 end
 
 function EncounterPrototype:IsTestEncounterEnabled()
@@ -558,7 +558,8 @@ end
 --@param continentId Id list or id number
 --@param parentMapId Id list or id number
 --@param mapId Id list or id number
-function RaidCore:NewEncounter(name, continentId, parentMapId, mapId)
+--@param isTestEncounter
+function RaidCore:NewEncounter(name, continentId, parentMapId, mapId, isTestEncounter)
   assert(name and continentId and parentMapId and mapId)
   -- Transform an unique key into a list with 1 entry, if needed.
   local continentIdList = type(continentId) == "table" and continentId or { continentId }
@@ -572,6 +573,7 @@ function RaidCore:NewEncounter(name, continentId, parentMapId, mapId)
   new.parentMapIdList = parentMapIdList
   new.mapIdList = mapIdList
   new.displayName = name
+  new.isTestEncounter = isTestEncounter
   new.tDefaultTimerBarsOptions = {}
   -- Register an empty locale table.
   new:RegisterEnglishLocale({})
