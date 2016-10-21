@@ -19,9 +19,8 @@ local Log = Apollo.GetPackage("Log-1.0").tPackage
 ----------------------------------------------------------------------------------------------------
 -- Copy of few objects to reduce the cpu load.
 -- Because all local objects are faster.
---------------------------------------------------------------------B--------------------------------
+----------------------------------------------------------------------------------------------------
 local GetPlayerUnit = GameLib.GetPlayerUnit
-local GetUnitById = GameLib.GetUnitById
 local GetCurrentZoneMap = GameLib.GetCurrentZoneMap
 local next, pcall = next, pcall
 
