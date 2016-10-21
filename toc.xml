@@ -8,6 +8,7 @@
     <Script Name="Libs/GeminiGUI/GeminiGUI.lua"/>
     <Script Name="Libs/LibJSON/LibJSON-2.5.lua"/>
     <Script Name="Libs/Log.lua"/>
+    <Script Name="Libs/Assert.lua"/>
     <!-- Global Locales -->
     <Script Name="Locales/enUS.lua"/>
     <Script Name="Locales/frFR.lua"/>
