@@ -47,6 +47,7 @@ end
 -- Encounter Prototype.
 ------------------------------------------------------------------------------
 function EncounterPrototype:RegisterTrigMob(nTrigType, tTrigList)
+  if type(tTrigList) == "string" then tTrigList = {tTrigList} end
   assert(type(tTrigList) == "table" and next(tTrigList) ~= nil,
     "Invalid trigger names on encounter: "..self.displayName..", "..tostring(tTrigList)
   )
