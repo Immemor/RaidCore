@@ -47,10 +47,10 @@ end
 ------------------------------------------------------------------------------
 function EncounterPrototype:RegisterTrigMob(nTrigType, tTrigList)
   tTrigList = type(tTrigList) == "string" and {tTrigList} or tTrigList
-  Assert:Table(tTrigList, "Trigger names is not a table: %s, %s", self.displayName, tostring(tTrigList))
-  Assert:EmptyTable(tTrigList, "Trigger names table is empty: %s", self.displayName)
+  Assert:Table(tTrigList, "Trigger names is not a table: %s, %s", self.name, tostring(tTrigList))
+  Assert:EmptyTable(tTrigList, "Trigger names table is empty: %s", self.name)
   Assert:EqualOr(nTrigType, {RaidCore.E.TRIGGER_ALL, RaidCore.E.TRIGGER_ANY},
-    "Invalid trigger type: %s, %s", self.displayName, tostring(nTrigType)
+    "Invalid trigger type: %s, %s", self.name, tostring(nTrigType)
   )
   if nTrigType == RaidCore.E.TRIGGER_ANY then
     self.OnTrigCheck = self.OnTrigAny
@@ -71,8 +71,8 @@ end
 -- @param sKey key to save/restore and use a setting.
 -- @param bDefaultSetting default setting.
 function EncounterPrototype:RegisterDefaultSetting(sKey, bDefaultSetting)
-  Assert:NotNilOrFalse(sKey, "Key is empty: %s", self.displayName)
-  Assert:Nil(self.tDefaultSettings[sKey], "Default setting already set: %s, %s", self.displayName, sKey)
+  Assert:NotNilOrFalse(sKey, "Key is empty: %s", self.name)
+  Assert:Nil(self.tDefaultSettings[sKey], "Default setting already set: %s, %s", self.name, sKey)
   self.tDefaultSettings[sKey] = bDefaultSetting == nil or bDefaultSetting
 end
 
@@ -83,9 +83,9 @@ end
 -- @param sMsgSetting Message setting id.
 -- @param sSoundSetting Sound setting id.
 function EncounterPrototype:RegisterMessageSetting(sKey, sMatch, sMsgSetting, sSoundSetting)
-  Assert:NotNilOrFalse(sKey, "Key is empty: %s", self.displayName)
+  Assert:NotNilOrFalse(sKey, "Key is empty: %s", self.name)
   Assert:EqualOr(sMatch, {RaidCore.E.COMPARE_MATCH, RaidCore.E.COMPARE_FIND, RaidCore.E.COMPARE_EQUAL},
-    "Invalid comparism type: %s, %s", self.displayName, tostring(sMatch)
+    "Invalid comparism type: %s, %s", self.name, tostring(sMatch)
   )
   --Most of the matches will be EQUAL so use a faster hashtable to look up settings
   if sMatch == RaidCore.E.COMPARE_EQUAL then
@@ -136,8 +136,8 @@ end
 -- @param tEventsHandlers Table of Events/Handlers pairs
 function EncounterPrototype:RegisterUnitEvents(tUnitNames, tEventsHandlers)
   tUnitNames = type(tUnitNames) == "string" and {tUnitNames} or tUnitNames
-  Assert:Table(tUnitNames, "Unit names not a table: %s, %s", self.displayName, tostring(tUnitNames))
-  Assert:Table(tEventsHandlers, "Event handlers not a table: %s, %s", self.displayName, tostring(tEventsHandlers))
+  Assert:Table(tUnitNames, "Unit names not a table: %s, %s", self.name, tostring(tUnitNames))
+  Assert:Table(tEventsHandlers, "Event handlers not a table: %s, %s", self.name, tostring(tEventsHandlers))
 
   local nSize = #tUnitNames
   for i = 1, nSize do
@@ -171,10 +171,10 @@ local SPELL_EVENTS = {
 }
 function EncounterPrototype:RegisterUnitSpellEvents(tUnitNames, primaryKey, tEventHandlers)
   tUnitNames = type(tUnitNames) == "string" and {tUnitNames} or tUnitNames
-  Assert:Table(tUnitNames, "Unit names not a table: %s, %s", self.displayName, tostring(tUnitNames))
-  Assert:Table(tEventHandlers, "Event handlers not a table: %s, %s", self.displayName, tostring(tEventHandlers))
+  Assert:Table(tUnitNames, "Unit names not a table: %s, %s", self.name, tostring(tUnitNames))
+  Assert:Table(tEventHandlers, "Event handlers not a table: %s, %s", self.name, tostring(tEventHandlers))
   Assert:TypeOr(primaryKey, {Assert.TYPES.STRING, Assert.TYPES.NUMBER},
-    "Invalid type for primary key: %s, %s", self.displayName, tostring(primaryKey)
+    "Invalid type for primary key: %s, %s", self.name, tostring(primaryKey)
   )
 
   local nSize = #tUnitNames
@@ -199,11 +199,11 @@ end
 -- @param sCastName Name of the cast or id of the buff
 -- @param fHandler Function to handle the event
 function EncounterPrototype:RegisterUnitSpellEvent(sUnitName, sMethodName, spellId, fHandler)
-  Assert:String(sUnitName, "Unit name not a string: %s, %s", self.displayName, tostring(sUnitName))
-  Assert:String(sMethodName, "Method name not a string: %s, %s", self.displayName, tostring(sMethodName))
-  Assert:Function(fHandler, "Handler not a function: %s, %s", self.displayName, tostring(fHandler))
+  Assert:String(sUnitName, "Unit name not a string: %s, %s", self.name, tostring(sUnitName))
+  Assert:String(sMethodName, "Method name not a string: %s, %s", self.name, tostring(sMethodName))
+  Assert:Function(fHandler, "Handler not a function: %s, %s", self.name, tostring(fHandler))
   Assert:TypeOr(spellId, {Assert.TYPES.STRING, Assert.TYPES.NUMBER},
-    "Invalid type for spell id: %s, %s", self.displayName, tostring(spellId)
+    "Invalid type for spell id: %s, %s", self.name, tostring(spellId)
   )
 
   sUnitName = self.L[sUnitName]
@@ -221,10 +221,10 @@ end
 --
 -- Note: If the English translation is not found, the current string will be used like that.
 function EncounterPrototype:RegisterDatachronEvent(sSearchMessage, compareType, fHandler)
-  Assert:String(sSearchMessage, "Datachron message not a string: %s, %s", self.displayName, tostring(sSearchMessage))
-  Assert:Function(fHandler, "Handler not a function: %s, %s", self.displayName, tostring(fHandler))
+  Assert:String(sSearchMessage, "Datachron message not a string: %s, %s", self.name, tostring(sSearchMessage))
+  Assert:Function(fHandler, "Handler not a function: %s, %s", self.name, tostring(fHandler))
   Assert:EqualOr(compareType, {RaidCore.E.COMPARE_MATCH, RaidCore.E.COMPARE_FIND, RaidCore.E.COMPARE_EQUAL},
-    "Invalid comparism type: %s, %s", self.displayName, tostring(compareType)
+    "Invalid comparism type: %s, %s", self.name, tostring(compareType)
   )
 
   sSearchMessage = self.L[sSearchMessage]
@@ -239,9 +239,9 @@ end
 --
 -- Note: If the English translation is not found, the current string will be used like that.
 function EncounterPrototype:RegisterUnitEvent(sUnitName, sMethodName, fHandler)
-  Assert:String(sUnitName, "Unit name not a string: %s, %s", self.displayName, tostring(sUnitName))
-  Assert:String(sMethodName, "Method name not a string: %s, %s", self.displayName, tostring(sMethodName))
-  Assert:Function(fHandler, "Handler not a function: %s, %s", self.displayName, tostring(fHandler))
+  Assert:String(sUnitName, "Unit name not a string: %s, %s", self.name, tostring(sUnitName))
+  Assert:String(sMethodName, "Method name not a string: %s, %s", self.name, tostring(sMethodName))
+  Assert:Function(fHandler, "Handler not a function: %s, %s", self.name, tostring(fHandler))
 
   sUnitName = self.L[sUnitName]
   self.tUnitEvents = DeepInit(self.tUnitEvents, sMethodName, sUnitName)
@@ -576,7 +576,7 @@ function RaidCore:NewEncounter(name, continentId, parentMapId, mapId, isTestEnco
   new.continentIdList = continentId
   new.parentMapIdList = parentMapId
   new.mapIdList = mapId
-  new.displayName = name
+  new.name = name
   new.isTestEncounter = isTestEncounter
   new.tDefaultTimerBarsOptions = {}
   new.tTriggerNames = {}
