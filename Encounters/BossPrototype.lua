@@ -374,6 +374,12 @@ function EncounterPrototype:PrepareEncounter()
   self:TranslateTriggerNames()
 end
 
+function EncounterPrototype:CallIfExists(sFunctionName)
+  if type(self[sFunctionName]) == "function" then
+    self[sFunctionName](self)
+  end
+end
+
 function EncounterPrototype:OnEnable()
   -- Copy settings for fast and secure access.
   self.tSettings = {}
@@ -385,14 +391,14 @@ function EncounterPrototype:OnEnable()
   end
   -- TODO: Redefine this part.
   self.tDispelInfo = {}
-  if self.SetupOptions then self:SetupOptions() end
-  if type(self.OnBossEnable) == "function" then self:OnBossEnable() end
+  self:CallIfExists("SetupOptions")
+  self:CallIfExists("OnBossEnable")
 end
 
 function EncounterPrototype:OnDisable()
-  if type(self.OnBossDisable) == "function" then self:OnBossDisable() end
+  self:CallIfExists("OnBossDisable")
   self:CancelAllTimers()
-  if type(self.OnWipe) == "function" then self:OnWipe() end
+  self:CallIfExists("OnWipe")
   self.tDispelInfo = nil
 end
 
