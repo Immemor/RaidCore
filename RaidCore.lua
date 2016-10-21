@@ -234,19 +234,25 @@ local function OnEncounterDatachronEvents(sMethod, ...)
   if sMethod ~= RaidCore.E.DATACHRON then
     return
   end
-  local tDatachronEvents = _tCurrentEncounter.tDatachronEvents or {}
   local sMessage = ...
+  local tDatachronEvents = _tCurrentEncounter.tDatachronEvents or {}
+  local tDatachronEventsEqual = _tCurrentEncounter.tDatachronEventsEqual or {}
+  tDatachronEventsEqual = tDatachronEventsEqual and tDatachronEventsEqual[sMessage] or {}
+
+  local nSize = #tDatachronEventsEqual
+  for i = 1, nSize do
+    tDatachronEventsEqual[i](_tCurrentEncounter, sMessage, true)
+  end
+
   for sSearchMessage, tEvents in next, tDatachronEvents do
-    local nSize = #tEvents
+    nSize = #tEvents
     for i = 1, nSize do
       local tEvent = tEvents[i]
       local compareType = tEvent.compareType
       local fHandler = tEvent.fHandler
       local result = nil
 
-      if compareType == RaidCore.E.COMPARE_EQUAL then
-        result = sSearchMessage == sMessage or nil
-      elseif compareType == RaidCore.E.COMPARE_FIND then
+      if compareType == RaidCore.E.COMPARE_FIND then
         result = sMessage:find(sSearchMessage)
       elseif compareType == RaidCore.E.COMPARE_MATCH then
         result = sMessage:match(sSearchMessage)

@@ -228,8 +228,13 @@ function EncounterPrototype:RegisterDatachronEvent(sSearchMessage, compareType, 
   )
 
   sSearchMessage = self.L[sSearchMessage]
-  self.tDatachronEvents = DeepInit(self.tDatachronEvents, sSearchMessage)
-  table.insert(self.tDatachronEvents[sSearchMessage], {fHandler = fHandler, compareType = compareType })
+  if compareType == RaidCore.E.COMPARE_EQUAL then
+    self.tDatachronEventsEqual = DeepInit(self.tDatachronEventsEqual, sSearchMessage)
+    table.insert(self.tDatachronEventsEqual[sSearchMessage], fHandler)
+  else
+    self.tDatachronEvents = DeepInit(self.tDatachronEvents, sSearchMessage)
+    table.insert(self.tDatachronEvents[sSearchMessage], {fHandler = fHandler, compareType = compareType })
+  end
 end
 
 -- Register events to a single unit
@@ -598,6 +603,7 @@ function RaidCore:NewEncounter(name, continentId, parentMapId, mapId, isTestEnco
   new.tDefaultSettings = {}
   new.tUnitEvents = {}
   new.tDatachronEvents = {}
+  new.tDatachronEventsEqual = {}
   new.tUnitSpellEvents = {}
   new.tSettingBinds = {}
   new.tSettingBindsEqual = {}
