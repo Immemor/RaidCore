@@ -48,7 +48,7 @@ mod:RegisterDefaultSetting("CrosshairTethers")
 mod:RegisterDefaultSetting("MessageShackles")
 mod:RegisterDefaultSetting("SoundShackles")
 
-mod:RegisterMessageSetting("CIRCLES", "EQUAL", "MessageShackles", "SoundShackles")
+mod:RegisterMessageSetting("CIRCLES", core.E.COMPARE_EQUAL, "MessageShackles", "SoundShackles")
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------

@@ -60,8 +60,8 @@ mod:RegisterDefaultSetting("SoundPulseCannonTank")
 mod:RegisterDefaultSetting("MessagePulseCannon")
 mod:RegisterDefaultSetting("MessagePulseCannonTank")
 -- Binds.
-mod:RegisterMessageSetting("PULSECANNON", "EQUAL", "MessagePulseCannon", "SoundPulseCannon")
-mod:RegisterMessageSetting("PULSECANNON_TANK", "EQUAL", "MessagePulseCannonTank", "SoundPulseCannonTank")
+mod:RegisterMessageSetting("PULSECANNON", core.E.COMPARE_EQUAL, "MessagePulseCannon", "SoundPulseCannon")
+mod:RegisterMessageSetting("PULSECANNON_TANK", core.E.COMPARE_EQUAL, "MessagePulseCannonTank", "SoundPulseCannonTank")
 ----------------------------------------------------------------------------------------------------
 -- Locals.
 ----------------------------------------------------------------------------------------------------
