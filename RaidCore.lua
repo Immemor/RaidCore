@@ -351,10 +351,8 @@ local function InitModuleZones(module, id1, id2, id3)
   _tEncountersPerZone[id1][id2][id3] = _tEncountersPerZone[id1][id2][id3] or {}
 
   table.insert(_tEncountersPerZone[id1][id2][id3], module)
-  if module.EnableMob then
-    for _, Mob in next, module.EnableMob do
-      _tTrigPerZone[id1][id2][id3][Mob] = true
-    end
+  for _, Mob in next, module.tTriggerNames do
+    _tTrigPerZone[id1][id2][id3][Mob] = true
   end
 end
 ----------------------------------------------------------------------------------------------------

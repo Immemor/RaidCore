@@ -47,7 +47,9 @@ end
 -- Encounter Prototype.
 ------------------------------------------------------------------------------
 function EncounterPrototype:RegisterTrigMob(nTrigType, tTrigList)
-  assert(type(tTrigList) == "table")
+  assert(type(tTrigList) == "table" and next(tTrigList) ~= nil,
+    "Invalid trigger names on encounter: "..self.displayName..", "..tostring(tTrigList)
+  )
   assert(nTrigType == RaidCore.E.TRIGGER_ANY or nTrigType == RaidCore.E.TRIGGER_ALL,
     "Invalid trigger type on encounter: "..self.displayName..", "..tostring(nTrigType)
   )
@@ -56,7 +58,7 @@ function EncounterPrototype:RegisterTrigMob(nTrigType, tTrigList)
   elseif nTrigType == RaidCore.E.TRIGGER_ALL then
     self.OnTrigCheck = self.OnTrigAll
   end
-  self.EnableMob = tTrigList
+  self.tTriggerNames = tTrigList
 end
 
 -- Register a default config for bar manager.
@@ -358,15 +360,13 @@ function EncounterPrototype:RemoveProgressBar(sKey)
 end
 
 function EncounterPrototype:PrepareEncounter()
-  local tmp = {}
   -- Translate trigger names.
-  if self.EnableMob then
-    -- Replace english data by local data.
-    for _, EnglishKey in next, self.EnableMob do
-      table.insert(tmp, self.L[EnglishKey])
-    end
+  -- Replace english data by local data.
+  local tmp = {}
+  for _, EnglishKey in next, self.tTriggerNames do
+    table.insert(tmp, self.L[EnglishKey])
   end
-  self.EnableMob = tmp
+  self.tTriggerNames = tmp
 end
 
 function EncounterPrototype:OnEnable()
@@ -472,7 +472,7 @@ function EncounterPrototype:SendIndMessage(sReason, tData)
 end
 
 function EncounterPrototype:OnTrigAny(tNames)
-  for _, sMobName in next, self.EnableMob do
+  for _, sMobName in next, self.tTriggerNames do
     if tNames[sMobName] then
       for _, tUnit in next, tNames[sMobName] do
         if tUnit:IsValid() and tUnit:IsInCombat() then
@@ -485,7 +485,7 @@ function EncounterPrototype:OnTrigAny(tNames)
 end
 
 function EncounterPrototype:OnTrigAll(tNames)
-  for _, sMobName in next, self.EnableMob do
+  for _, sMobName in next, self.tTriggerNames do
     if not tNames[sMobName] then
       return false
     else
@@ -508,9 +508,6 @@ end
 -- @return Any unit registered can start the encounter.
 function EncounterPrototype:OnTrig(tNames)
   if not self:IsTestEncounterEnabled() and self:IsTestEncounter() then
-    return false
-  end
-  if next(self.EnableMob) == nil then
     return false
   end
   return self:OnTrigCheck(tNames)
@@ -575,6 +572,7 @@ function RaidCore:NewEncounter(name, continentId, parentMapId, mapId, isTestEnco
   new.displayName = name
   new.isTestEncounter = isTestEncounter
   new.tDefaultTimerBarsOptions = {}
+  new.tTriggerNames = {}
   -- Register an empty locale table.
   new:RegisterEnglishLocale({})
   -- Retrieve Locale.
