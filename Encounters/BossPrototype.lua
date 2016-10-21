@@ -15,6 +15,8 @@ local EncounterPrototype = {}
 ------------------------------------------------------------------------------
 -- Locals
 ------------------------------------------------------------------------------
+local assert = assert
+
 local function RegisterLocale(tBoss, sLanguage, Locales)
   local GeminiLocale = Apollo.GetPackage("Gemini:Locale-1.0").tPackage
   local sName = "RaidCore_" .. tBoss:GetName()
@@ -46,8 +48,14 @@ end
 ------------------------------------------------------------------------------
 function EncounterPrototype:RegisterTrigMob(nTrigType, tTrigList)
   assert(type(tTrigList) == "table")
-  assert(type(nTrigType) == "number")
-  self.nTrigType = nTrigType
+  assert(nTrigType == RaidCore.E.TRIGGER_ANY or nTrigType == RaidCore.E.TRIGGER_ALL,
+    "Invalid trigger type on encounter: "..self.displayName..", "..tostring(nTrigType)
+  )
+  if nTrigType == RaidCore.E.TRIGGER_ANY then
+    self.OnTrigCheck = self.OnTrigAny
+  elseif nTrigType == RaidCore.E.TRIGGER_ALL then
+    self.OnTrigCheck = self.OnTrigAll
+  end
   self.EnableMob = tTrigList
 end
 
@@ -463,6 +471,38 @@ function EncounterPrototype:SendIndMessage(sReason, tData)
   RaidCore:SendMessage(msg)
 end
 
+function EncounterPrototype:OnTrigAny(tNames)
+  for _, sMobName in next, self.EnableMob do
+    if tNames[sMobName] then
+      for _, tUnit in next, tNames[sMobName] do
+        if tUnit:IsValid() and tUnit:IsInCombat() then
+          return true
+        end
+      end
+    end
+  end
+  return false
+end
+
+function EncounterPrototype:OnTrigAll(tNames)
+  for _, sMobName in next, self.EnableMob do
+    if not tNames[sMobName] then
+      return false
+    else
+      local bResult = false
+      for _, tUnit in next, tNames[sMobName] do
+        if tUnit:IsValid() and tUnit:IsInCombat() then
+          bResult = true
+        end
+      end
+      if not bResult then
+        return false
+      end
+    end
+  end
+  return true
+end
+
 --- Default trigger function to start an encounter.
 -- @param tNames Names of units without break space.
 -- @return Any unit registered can start the encounter.
@@ -474,36 +514,7 @@ function EncounterPrototype:OnTrig(tNames)
   if next(self.EnableMob) == nil then
     return false
   end
-  if self.nTrigType == RaidCore.E.TRIGGER_ANY then
-    for _, sMobName in next, self.EnableMob do
-      if tNames[sMobName] then
-        for _, tUnit in next, tNames[sMobName] do
-          if tUnit:IsValid() and tUnit:IsInCombat() then
-            return true
-          end
-        end
-      end
-    end
-    return false
-  elseif self.nTrigType == RaidCore.E.TRIGGER_ALL then
-    for _, sMobName in next, self.EnableMob do
-      if not tNames[sMobName] then
-        return false
-      else
-        local bResult = false
-        for _, tUnit in next, tNames[sMobName] do
-          if tUnit:IsValid() and tUnit:IsInCombat() then
-            bResult = true
-          end
-        end
-        if not bResult then
-          return false
-        end
-      end
-    end
-    return true
-  end
-  return false
+  return self:OnTrigCheck(tNames)
 end
 
 -- Create a world marker.
