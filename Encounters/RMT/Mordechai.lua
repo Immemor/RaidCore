@@ -51,15 +51,13 @@ mod:RegisterEnglishLocale({
 mod:RegisterGermanLocale({
     -- Unit names.
     -- ["unit.anchor"] = "Airlock Anchor",
-    -- ["unit.orb"] = "Kinetic Orb",
     -- ["unit.junk"] = "Airlock Junk",
-    -- ["unit.invis.0"] = "Hostile Invisible Unit for Fields (0 hit radius)", -- ??
+    ["unit.invis.0"] = "Freundliche unsichtbare Einheit für Felder (Trefferradius 0)", -- ??
     -- ["unit.shuriken"] = "Ignores Collision Big Base Invisible Unit for Spells (1 hit radius)",
-    -- ["unit.turret"] = "Redmoon Turret",
+    ["unit.turret"] = "Rotmonds Geschützturm",
     -- Cast names.
     -- ["cast.mordechai.shatter"] = "Shatter Shock",
     -- ["cast.mordechai.barrage"] = "Vicious Barrage",
-    -- ["cast.turret.discharge"] = "Kinetic Discharge",
     -- Datachrons.
     -- ["chron.airlock.opened"] = "The airlock has been opened!",
     -- ["chron.airlock.closed"] = "The airlock has been closed!",
@@ -77,15 +75,13 @@ mod:RegisterGermanLocale({
 mod:RegisterFrenchLocale({
     -- Unit names.
     -- ["unit.anchor"] = "Airlock Anchor",
-    -- ["unit.orb"] = "Kinetic Orb",
     -- ["unit.junk"] = "Airlock Junk",
-    -- ["unit.invis.0"] = "Hostile Invisible Unit for Fields (0 hit radius)", -- ??
+    ["unit.invis.0"] = "Unité hostile invisible de terrain (rayon de portée : 0)", -- ??
     -- ["unit.shuriken"] = "Ignores Collision Big Base Invisible Unit for Spells (1 hit radius)",
-    -- ["unit.turret"] = "Redmoon Turret",
+    ["unit.turret"] = "Tourelle de Rougelune",
     -- Cast names.
     -- ["cast.mordechai.shatter"] = "Shatter Shock",
     -- ["cast.mordechai.barrage"] = "Vicious Barrage",
-    -- ["cast.turret.discharge"] = "Kinetic Discharge",
     -- Datachrons.
     -- ["chron.airlock.opened"] = "The airlock has been opened!",
     -- ["chron.airlock.closed"] = "The airlock has been closed!",
