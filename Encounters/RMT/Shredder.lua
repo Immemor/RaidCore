@@ -69,16 +69,16 @@ mod:RegisterGermanLocale({
     -- Unit names.
     ["unit.saw.big"] = "Sägeblatt",
     ["unit.miniboss.braugh"] = "Braugh der Blähbauch",
-    ["unit.add.brute"] = "",
+    -- ["unit.add.brute"] = "",
     ["unit.tether"] = "Haltestrickverankerung",
     ["unit.bubble"] = "Feindselige unsichtbare Einheit für Felder (Trefferradius 1.2)",
     -- Datachron messages.
     ["chron.shredder.starting"] = "WARNUNG: DER SCHREDDER WIRD GESTARTET!",
     -- Cast names.
     ["cast.swabbie.knockback"] = "Untoten-Abwehrmittel",
-    ["cast.miniboss.crush"] = "",
-    ["cast.miniboss.gravedigger"] = "",
-    ["cast.miniboss.deathwail"] = "",
+    -- ["cast.miniboss.crush"] = "",
+    -- ["cast.miniboss.gravedigger"] = "",
+    -- ["cast.miniboss.deathwail"] = "",
     ["cast.nabber.lash"] = "Nekrotisches Peitschen",
     -- Messages.
     ["msg.swabbie.walking"] = "Läuft richtung %s",
@@ -97,30 +97,30 @@ mod:RegisterGermanLocale({
 mod:RegisterFrenchLocale({
     -- Unit names.
     ["unit.saw.big"] = "Lamesciea",
-    ["unit.miniboss.braugh"] = "",
-    ["unit.add.brute"] = "",
+    -- ["unit.miniboss.braugh"] = "",
+    -- ["unit.add.brute"] = "",
     ["unit.tether"] = "Ancre de Bride",
     ["unit.bubble"] = "Unité hostile invisible de terrain (zone d'effet 1,2)",
     -- Datachron messages.
     ["chron.shredder.starting"] = "ATTENTION : DÉMARRAGE DU BROYEUR !",
     -- Cast names.
     ["cast.swabbie.knockback"] = "Répulsif pour revenant",
-    ["cast.miniboss.crush"] = "",
-    ["cast.miniboss.gravedigger"] = "",
-    ["cast.miniboss.deathwail"] = "",
+    -- ["cast.miniboss.crush"] = "",
+    -- ["cast.miniboss.gravedigger"] = "",
+    -- ["cast.miniboss.deathwail"] = "",
     ["cast.nabber.lash"] = "Fouet nécrotique",
     -- Messages.
-    ["msg.swabbie.walking"] = "Läuft richtung %s",
-    ["msg.swabbie.walking.direction.north"] = "norden",
-    ["msg.swabbie.walking.direction.south"] = "süden",
-    ["msg.saw.middle"] = "SÄGE MITTE",
-    ["msg.saw.safe_spot"] = "LÜCKE %s",
-    ["msg.saw.safe_spot.left"] = "LINKS",
-    ["msg.saw.safe_spot.middle"] = "MITTE",
-    ["msg.saw.safe_spot.right"] = "RECHTS",
-    ["msg.adds.next"] = "Nächste Welle von adds kommt ...",
-    ["msg.nabber.spawned"] = "NABBER GESPAWNT",
-    ["msg.miniboss.spawned"] = "MINIBOSS GESPAWNT",
+    -- ["msg.swabbie.walking"] = "Läuft richtung %s",
+    -- ["msg.swabbie.walking.direction.north"] = "norden",
+    -- ["msg.swabbie.walking.direction.south"] = "süden",
+    -- ["msg.saw.middle"] = "SÄGE MITTE",
+    -- ["msg.saw.safe_spot"] = "LÜCKE %s",
+    -- ["msg.saw.safe_spot.left"] = "LINKS",
+    -- ["msg.saw.safe_spot.middle"] = "MITTE",
+    -- ["msg.saw.safe_spot.right"] = "RECHTS",
+    -- ["msg.adds.next"] = "Nächste Welle von adds kommt ...",
+    -- ["msg.nabber.spawned"] = "NABBER GESPAWNT",
+    -- ["msg.miniboss.spawned"] = "MINIBOSS GESPAWNT",
   }
 )
 ----------------------------------------------------------------------------------------------------
