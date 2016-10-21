@@ -14,7 +14,7 @@ if not mod then return end
 ----------------------------------------------------------------------------------------------------
 -- Registering combat.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterTrigMob("ANY", { "Experiment X-89" })
+mod:RegisterTrigMob(core.E.TRIGGER_ANY, { "Experiment X-89" })
 mod:RegisterEnglishLocale({
     -- Unit names.
     ["Experiment X-89"] = "Experiment X-89",

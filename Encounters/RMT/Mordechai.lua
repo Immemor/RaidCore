@@ -14,7 +14,7 @@ if not mod then return end
 ----------------------------------------------------------------------------------------------------
 -- Registering combat.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterTrigMob("ALL", { "unit.mordechai" })
+mod:RegisterTrigMob(core.E.TRIGGER_ALL, { "unit.mordechai" })
 mod:RegisterEnglishLocale({
     -- Unit names.
     ["unit.mordechai"] = "Mordechai Redmoon",

@@ -14,7 +14,7 @@ if not mod then return end
 ----------------------------------------------------------------------------------------------------
 -- Registering combat.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterTrigMob("ANY", { "Augmented Herald of Avatus" })
+mod:RegisterTrigMob(core.E.TRIGGER_ANY, { "Augmented Herald of Avatus" })
 mod:RegisterEnglishLocale({
     -- Unit names.
     ["Augmented Herald of Avatus"] = "Augmented Herald of Avatus",

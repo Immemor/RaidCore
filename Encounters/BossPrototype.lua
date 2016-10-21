@@ -13,17 +13,6 @@ local RaidCore = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCo
 local EncounterPrototype = {}
 
 ------------------------------------------------------------------------------
--- Constants
-------------------------------------------------------------------------------
--- Register state allowed.
-local TRIG__ALL = 1
-local TRIG__ANY = 2
-local TRIG_STATES = {
-  ["ALL"] = TRIG__ALL,
-  ["ANY"] = TRIG__ANY,
-}
-
-------------------------------------------------------------------------------
 -- Locals
 ------------------------------------------------------------------------------
 local function RegisterLocale(tBoss, sLanguage, Locales)
@@ -55,10 +44,9 @@ end
 ------------------------------------------------------------------------------
 -- Encounter Prototype.
 ------------------------------------------------------------------------------
-function EncounterPrototype:RegisterTrigMob(sTrigType, tTrigList)
+function EncounterPrototype:RegisterTrigMob(nTrigType, tTrigList)
   assert(type(tTrigList) == "table")
-  local nTrigType = TRIG_STATES[sTrigType:upper()]
-  assert(nTrigType)
+  assert(type(nTrigType) == "number")
   self.nTrigType = nTrigType
   self.EnableMob = tTrigList
 end
@@ -486,7 +474,7 @@ function EncounterPrototype:OnTrig(tNames)
   if next(self.EnableMob) == nil then
     return false
   end
-  if self.nTrigType == TRIG__ANY then
+  if self.nTrigType == RaidCore.E.TRIGGER_ANY then
     for _, sMobName in next, self.EnableMob do
       if tNames[sMobName] then
         for _, tUnit in next, tNames[sMobName] do
@@ -497,7 +485,7 @@ function EncounterPrototype:OnTrig(tNames)
       end
     end
     return false
-  elseif self.nTrigType == TRIG__ALL then
+  elseif self.nTrigType == RaidCore.E.TRIGGER_ALL then
     for _, sMobName in next, self.EnableMob do
       if not tNames[sMobName] then
         return false

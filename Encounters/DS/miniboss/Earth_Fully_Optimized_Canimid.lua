@@ -14,7 +14,7 @@ if not mod then return end
 ----------------------------------------------------------------------------------------------------
 -- Registering combat.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterTrigMob("ANY", { "Fully-Optimized Canimid" })
+mod:RegisterTrigMob(core.E.TRIGGER_ANY, { "Fully-Optimized Canimid" })
 mod:RegisterEnglishLocale({
     -- Unit names.
     ["Fully-Optimized Canimid"] = "Fully-Optimized Canimid",

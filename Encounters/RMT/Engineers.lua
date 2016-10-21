@@ -14,7 +14,7 @@ if not mod then return end
 ----------------------------------------------------------------------------------------------------
 -- Registering combat.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterTrigMob("ANY", {
+mod:RegisterTrigMob(core.E.TRIGGER_ANY, {
     "unit.warrior", "unit.engineer",
     "unit.fusion_core",
     "unit.cooling_turbine",

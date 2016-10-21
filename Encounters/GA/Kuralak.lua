@@ -14,7 +14,7 @@ if not mod then return end
 ----------------------------------------------------------------------------------------------------
 -- Registering combat.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterTrigMob("ANY", { "Kuralak the Defiler" })
+mod:RegisterTrigMob(core.E.TRIGGER_ANY, { "Kuralak the Defiler" })
 mod:RegisterEnglishLocale({
     -- Unit names.
     ["Kuralak the Defiler"] = "Kuralak the Defiler",

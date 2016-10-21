@@ -51,7 +51,7 @@ local TRIG_MOBS = {
   "unit.computer",
 }
 
-mod:RegisterTrigMob("ANY", TRIG_MOBS)
+mod:RegisterTrigMob(core.E.TRIGGER_ANY, TRIG_MOBS)
 mod:RegisterEnglishLocale({
     -- Unit names.
     -- Easy.

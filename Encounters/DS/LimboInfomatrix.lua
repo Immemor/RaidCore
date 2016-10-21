@@ -14,7 +14,7 @@ if not mod then return end
 ----------------------------------------------------------------------------------------------------
 -- Registering combat.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterTrigMob("ANY", { "Invisible Hate Unit" })
+mod:RegisterTrigMob(core.E.TRIGGER_ANY, { "Invisible Hate Unit" })
 mod:RegisterEnglishLocale({
     -- Unit names.
     ["Invisible Hate Unit"] = "Invisible Hate Unit",

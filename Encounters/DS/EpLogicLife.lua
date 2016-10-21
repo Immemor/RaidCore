@@ -14,7 +14,7 @@ if not mod then return end
 ----------------------------------------------------------------------------------------------------
 -- Registering combat.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterTrigMob("ALL", { "Mnemesis", "Visceralus" })
+mod:RegisterTrigMob(core.E.TRIGGER_ALL, { "Mnemesis", "Visceralus" })
 mod:RegisterEnglishLocale({
     -- Unit names.
     ["Essence of Life"] = "Essence of Life",

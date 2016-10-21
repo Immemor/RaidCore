@@ -14,7 +14,7 @@ if not mod then return end
 ----------------------------------------------------------------------------------------------------
 -- Registering combat.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterTrigMob("ALL", { "Hydroflux", "Mnemesis" })
+mod:RegisterTrigMob(core.E.TRIGGER_ALL, { "Hydroflux", "Mnemesis" })
 mod:RegisterEnglishLocale({
     -- Unit names.
     ["Mnemesis"] = "Mnemesis",

@@ -14,7 +14,7 @@ if not mod then return end
 ----------------------------------------------------------------------------------------------------
 -- Registering combat.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterTrigMob("ANY", { "Abstract Augmentation Algorithm" })
+mod:RegisterTrigMob(core.E.TRIGGER_ANY, { "Abstract Augmentation Algorithm" })
 mod:RegisterEnglishLocale({
     -- Unit names.
     ["Abstract Augmentation Algorithm"] = "Abstract Augmentation Algorithm",

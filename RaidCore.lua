@@ -119,6 +119,9 @@ RaidCore.E = {
   COMM_LAUNCH_BREAK = "LaunchBreak",
   COMM_SYNC_SUMMON = "SyncSummon",
   COMM_ENCOUNTER_IND = "Encounter_IND",
+  -- Triggers
+  TRIGGER_ALL = 1,
+  TRIGGER_ANY = 2,
 }
 
 local EVENT_UNIT_NAME_INDEX = {

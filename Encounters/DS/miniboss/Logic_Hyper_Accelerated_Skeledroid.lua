@@ -14,7 +14,7 @@ if not mod then return end
 ----------------------------------------------------------------------------------------------------
 -- Registering combat.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterTrigMob("ANY", { "Hyper-Accelerated Skeledroid" })
+mod:RegisterTrigMob(core.E.TRIGGER_ANY, { "Hyper-Accelerated Skeledroid" })
 mod:RegisterEnglishLocale({
     -- Unit names.
     ["Hyper-Accelerated Skeledroid"] = "Hyper-Accelerated Skeledroid",

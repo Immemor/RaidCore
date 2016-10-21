@@ -14,7 +14,7 @@ if not mod then return end
 ----------------------------------------------------------------------------------------------------
 -- Registering combat.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterTrigMob("ANY", { "Phage Maw" })
+mod:RegisterTrigMob(core.E.TRIGGER_ANY, { "Phage Maw" })
 mod:RegisterEnglishLocale({
     -- Unit names.
     ["Phage Maw"] = "Phage Maw",

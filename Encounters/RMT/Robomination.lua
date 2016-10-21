@@ -14,7 +14,7 @@ if not mod then return end
 ----------------------------------------------------------------------------------------------------
 -- Registering combat.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterTrigMob("ANY", { "unit.robo" })
+mod:RegisterTrigMob(core.E.TRIGGER_ANY, { "unit.robo" })
 mod:RegisterEnglishLocale({
     -- Unit names.
     ["unit.robo"] = "Robomination",
