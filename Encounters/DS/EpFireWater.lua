@@ -98,12 +98,14 @@ local nLastBombTime
 local tFireBombPlayersList
 local tFrostBombPlayersList
 local playerUnit
+local lastStack
 
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
   playerUnit = GameLib.GetPlayerUnit()
+  lastStack = 0
   nLastIceTombTime = 0
   nLastBombTime = 0
   tFireBombPlayersList = {}
@@ -223,8 +225,11 @@ end
 function mod:OnDebuffUpdate(nId, nSpellId, nStack, fTimeRemaining)
   if nSpellId == DEBUFFID_DRENCHED or nSpellId == DEBUFFID_ENGULFED then
     if nStack >= 10 and nId == playerUnit:GetId() then
-      local sMessage = self.L["%d STACKS!"]:format(nStack)
-      mod:AddMsg("STACK", sMessage, 5, mod:GetSetting("SoundHighDebuffStacks") and "Beware")
+      if nStack > lastStack then -- Stacks dropping off
+        local sMessage = self.L["%d STACKS!"]:format(nStack)
+        mod:AddMsg("STACK", sMessage, 5, mod:GetSetting("SoundHighDebuffStacks") and "Beware")
+      end
+      lastStack = nStack
     end
   end
 end
