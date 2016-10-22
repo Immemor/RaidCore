@@ -165,16 +165,24 @@ function mod:OnUnitCreated(nId, unit, sName)
       mod:AddTimerBar("TOMB", "Next ice tomb", 15)
     end
     core:AddUnit(unit)
-  elseif sName == self.L["Flame Wave"] and mod:GetSetting("LineFlameWaves") then
-    core:AddPixie(nId, 2, unit, nil, "Green", 10, 20, 0)
   end
 end
 
-function mod:OnUnitDestroyed(nId, tUnit, sName)
-  if sName == self.L["Flame Wave"] then
-    core:DropPixie(nId)
+function mod:OnFlameWaveCreated(id, unit, name)
+  if mod:GetSetting("LineFlameWaves") then
+    core:AddPixie(id, 2, unit, nil, "Green", 10, 20, 0)
   end
 end
+
+function mod:OnFlameWaveDestroyed(id, unit, name)
+  core:DropPixie(id)
+end
+
+mod:RegisterUnitEvents("Flame Wave", {
+    [core.E.UNIT_CREATED] = mod.OnFlameWaveCreated,
+    [core.E.UNIT_DESTROYED] = mod.OnFlameWaveDestroyed,
+  }
+)
 
 function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
   local tUnit = GetUnitById(nId)
