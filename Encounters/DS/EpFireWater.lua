@@ -222,17 +222,23 @@ function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
   end
 end
 
-function mod:OnDebuffUpdate(nId, nSpellId, nStack, fTimeRemaining)
-  if nSpellId == DEBUFFID_DRENCHED or nSpellId == DEBUFFID_ENGULFED then
-    if nStack >= 10 and nId == playerUnit:GetId() then
-      if nStack > lastStack then -- Stacks dropping off
-        local sMessage = self.L["%d STACKS!"]:format(nStack)
-        mod:AddMsg("STACK", sMessage, 5, mod:GetSetting("SoundHighDebuffStacks") and "Beware")
-      end
-      lastStack = nStack
+function mod:OnStacksUpdate(nId, nSpellId, nStack, fTimeRemaining)
+  if nStack >= 10 and nId == playerUnit:GetId() then
+    if nStack > lastStack then -- Stacks dropping off
+      local sMessage = self.L["%d STACKS!"]:format(nStack)
+      mod:AddMsg("STACK", sMessage, 5, mod:GetSetting("SoundHighDebuffStacks") and "Beware")
     end
+    lastStack = nStack
   end
 end
+
+mod:RegisterUnitEvents(core.E.ALL_UNITS, {
+    [core.E.DEBUFF_UPDATE] = {
+      [DEBUFFID_DRENCHED] = mod.OnStacksUpdate,
+      [DEBUFFID_ENGULFED] = mod.OnStacksUpdate,
+    }
+  }
+)
 
 function mod:OnDebuffRemove(nId, nSpellId)
   local tUnit = GetUnitById(nId)
