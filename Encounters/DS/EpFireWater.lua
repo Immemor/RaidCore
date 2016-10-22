@@ -93,16 +93,17 @@ local DEBUFFID_ENGULFED = 52876
 ----------------------------------------------------------------------------------------------------
 local GetUnitById = GameLib.GetUnitById
 local GetGameTime = GameLib.GetGameTime
-local GetPlayerUnit = GameLib.GetPlayerUnit
 local nLastIceTombTime
 local nLastBombTime
 local tFireBombPlayersList
 local tFrostBombPlayersList
+local playerUnit
 
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
+  playerUnit = GameLib.GetPlayerUnit()
   nLastIceTombTime = 0
   nLastBombTime = 0
   tFireBombPlayersList = {}
@@ -128,19 +129,18 @@ function mod:RemoveBombMarker(bomb_type, unit)
 end
 
 function mod:ApplyBombLines(bomb_type)
-  local tPlayerUnit = GetPlayerUnit()
   if bomb_type == "fire" then
     for key, value in pairs(tFrostBombPlayersList) do
       local unitId = value:GetId()
       if unitId then
-        core:AddPixie(unitId .. "_BOMB", 1, tPlayerUnit, value, "Blue", 5, 10, 10)
+        core:AddPixie(unitId .. "_BOMB", 1, playerUnit, value, "Blue", 5, 10, 10)
       end
     end
   elseif bomb_type == "frost" then
     for key, value in pairs(tFireBombPlayersList) do
       local unitId = value:GetId()
       if unitId then
-        core:AddPixie(unitId .. "_BOMB", 1, tPlayerUnit, value, "Red", 5, 10, 10)
+        core:AddPixie(unitId .. "_BOMB", 1, playerUnit, value, "Red", 5, 10, 10)
       end
     end
   end
@@ -184,7 +184,7 @@ function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
     end
     core:AddUnit(tUnit)
     tFireBombPlayersList[sUnitName] = tUnit
-    if nId == GetPlayerUnit():GetId() then
+    if nId == playerUnit:GetId() then
       mod:AddMsg("BOMB", "BOMBS ON YOU!", 5, mod:GetSetting("SoundBomb") and "RunAway")
       if mod:GetSetting("LineBombPlayers") then
         self:ScheduleTimer("ApplyBombLines", 1, "fire")
@@ -197,7 +197,7 @@ function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
     end
     core:AddUnit(tUnit)
     tFrostBombPlayersList[sUnitName] = tUnit
-    if nId == GetPlayerUnit():GetId() then
+    if nId == playerUnit:GetId() then
       mod:AddMsg("BOMB", "BOMBS ON YOU!", 5, mod:GetSetting("SoundBomb") and "RunAway")
       if mod:GetSetting("LineBombPlayers") then
         self:ScheduleTimer("ApplyBombLines", 1, "frost")
@@ -205,8 +205,8 @@ function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
     end
     self:ScheduleTimer("RemoveBombMarker", 10, "frost", tUnit)
   elseif nSpellId == DEBUFFID_ICE_TOMB then
-    if mod:GetSetting("LineIceTomb") and self:GetDistanceBetweenUnits(GetPlayerUnit(), tUnit) < 45 then
-      core:AddPixie(nId .. "_TOMB", 1, GetPlayerUnit(), tUnit, "Blue", 5, 10, 10)
+    if mod:GetSetting("LineIceTomb") and self:GetDistanceBetweenUnits(playerUnit, tUnit) < 45 then
+      core:AddPixie(nId .. "_TOMB", 1, playerUnit, tUnit, "Blue", 5, 10, 10)
     end
   end
 
@@ -221,11 +221,9 @@ function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
 end
 
 function mod:OnDebuffUpdate(nId, nSpellId, nStack, fTimeRemaining)
-  local tUnit = GetUnitById(nId)
-
   if nSpellId == DEBUFFID_DRENCHED or nSpellId == DEBUFFID_ENGULFED then
     if (mod:IsPlayerTank() and nStack == 13) or (not mod:IsPlayerTank() and nStack == 10) then
-      if tUnit == GetPlayerUnit() then
+      if nId == playerUnit:GetId() then
         local sMessage = self.L["%d STACKS!"]:format(nStack)
         mod:AddMsg("STACK", sMessage, 5, mod:GetSetting("SoundHighDebuffStacks") and "Beware")
       end
