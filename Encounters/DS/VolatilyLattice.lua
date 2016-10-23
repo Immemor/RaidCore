@@ -145,8 +145,8 @@ function mod:OnLaserDatachron(message, laserTargetName)
   local nPlayerId = tPlayerUnit:GetId()
   if nPlayerId and mod:GetSetting("OtherPlayerBeamMarkers") then
     core:MarkUnit(tPlayerUnit, nil, self.L["LASER"])
-    self:ScheduleTimer(function(nPlayerId)
-        core:DropMark(nPlayerId)
+    self:ScheduleTimer(function(id)
+        core:DropMark(id)
       end,
       15, nPlayerId
     )
