@@ -155,7 +155,7 @@ function mod:OnLaserDatachron(message, laserTargetName)
     isMyself = targetUnit:IsThePlayer()
     if mod:GetSetting("OtherPlayerBeamMarkers") then
       laserMarkId = targetUnit:GetId()
-      core:MarkUnit(targetUnit, nil, self.L["LASER"])
+      core:MarkUnit(targetUnit, core.E.LOCATION_STATIC_CHEST, self.L["LASER"], "xkcdRed")
     end
   end
   local text = self.L["BEAM on %s"]:format(laserTargetName)
