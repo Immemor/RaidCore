@@ -147,22 +147,26 @@ function mod:DropLaserMark(id)
   end
 end
 
+function mod:MarkOtherLaserTargets(unit)
+  if mod:GetSetting("OtherPlayerBeamMarkers") then
+    mod:MarkUnit(unit, core.E.LOCATION_STATIC_CHEST, "mark.laser", "xkcdRed")
+  end
+end
+
 function mod:OnLaserDatachron(message, laserTargetName)
   local targetUnit = GetPlayerUnitByName(laserTargetName)
   local isMyself = false
   local laserMarkId
   if targetUnit then
     isMyself = targetUnit:IsThePlayer()
-    if mod:GetSetting("OtherPlayerBeamMarkers") then
-      laserMarkId = targetUnit:GetId()
-      mod:MarkUnit(targetUnit, core.E.LOCATION_STATIC_CHEST, "mark.laser", "xkcdRed")
-    end
+    laserMarkId = targetUnit:GetId()
   end
   local text = self.L["BEAM on %s"]:format(laserTargetName)
   if isMyself then
     mod:AddMsg("BEAM", text, 5, mod:GetSetting("SoundBeamOnYou") and "RunAway")
   else
     mod:AddMsg("BEAM", text, 5, mod:GetSetting("SoundBeamOnOther") and "Info", "Blue")
+    mod:MarkOtherLaserTargets(targetUnit)
   end
   mod:AddTimerBar("BEAM", text, 15, nil, nil, mod.DropLaserMark, mod, laserMarkId)
 end
