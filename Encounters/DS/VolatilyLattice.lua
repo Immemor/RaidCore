@@ -101,6 +101,7 @@ mod:RegisterDefaultTimerBarConfigs({
 -- Locals.
 ----------------------------------------------------------------------------------------------------
 local GetPlayerUnit = GameLib.GetPlayerUnit
+local GetPlayerUnitByName = GameLib.GetPlayerUnitByName
 local GetGameTime = GameLib.GetGameTime
 local nDataDevourerLastPopTime
 
@@ -141,23 +142,26 @@ function mod:OnUnitDestroyed(nId, tUnit, sName)
 end
 
 function mod:OnLaserDatachron(message, laserTargetName)
-  local tPlayerUnit = GameLib.GetPlayerUnitByName(laserTargetName)
-  local nPlayerId = tPlayerUnit:GetId()
-  if nPlayerId and mod:GetSetting("OtherPlayerBeamMarkers") then
-    core:MarkUnit(tPlayerUnit, nil, self.L["LASER"])
-    self:ScheduleTimer(function(id)
-        core:DropMark(id)
-      end,
-      15, nPlayerId
-    )
+  local targetUnit = GetPlayerUnitByName(laserTargetName)
+  local isMyself = false
+  if targetUnit then
+    isMyself = targetUnit:IsThePlayer()
+    if mod:GetSetting("OtherPlayerBeamMarkers") then
+      core:MarkUnit(targetUnit, nil, self.L["LASER"])
+      mod:ScheduleTimer(function(id)
+          core:DropMark(id)
+        end,
+        15, targetUnit:GetId()
+      )
+    end
   end
-  local sText = self.L["BEAM on %s"]:format(laserTargetName)
-  if nPlayerId == GetPlayerUnit():GetId() then
-    mod:AddMsg("BEAM", sText, 5, mod:GetSetting("SoundBeamOnYou") and "RunAway")
+  local text = self.L["BEAM on %s"]:format(laserTargetName)
+  if isMyself then
+    mod:AddMsg("BEAM", text, 5, mod:GetSetting("SoundBeamOnYou") and "RunAway")
   else
-    mod:AddMsg("BEAM", sText, 5, mod:GetSetting("SoundBeamOnOther") and "Info", "Blue")
+    mod:AddMsg("BEAM", text, 5, mod:GetSetting("SoundBeamOnOther") and "Info", "Blue")
   end
-  mod:AddTimerBar("BEAM", sText, 15)
+  mod:AddTimerBar("BEAM", text, 15)
 end
 
 mod:RegisterDatachronEvent("chron.avatus.laser", "MATCH", mod.OnLaserDatachron)
