@@ -36,8 +36,9 @@ mod:RegisterEnglishLocale({
     -- Message bars.
     ["P2: SHIELD PHASE"] = "P2: SHIELD PHASE",
     ["P2: JUMP PHASE"] = "P2: JUMP PHASE",
-    ["LASER"] = "LASER",
     ["BEAM on %s"] = "BEAM on %s",
+    -- Marks
+    ["mark.laser"] = "LASER",
   })
 mod:RegisterFrenchLocale({
     -- Unit names.
@@ -60,7 +61,6 @@ mod:RegisterFrenchLocale({
     -- Message bars.
     ["P2: SHIELD PHASE"] = "P2: PHASE BOUCLIER",
     ["P2: JUMP PHASE"] = "P2: PHASE SAUTER",
-    ["LASER"] = "LASER",
     ["BEAM on %s"] = "LASER sur %s",
   })
 mod:RegisterGermanLocale({
@@ -155,7 +155,7 @@ function mod:OnLaserDatachron(message, laserTargetName)
     isMyself = targetUnit:IsThePlayer()
     if mod:GetSetting("OtherPlayerBeamMarkers") then
       laserMarkId = targetUnit:GetId()
-      core:MarkUnit(targetUnit, core.E.LOCATION_STATIC_CHEST, self.L["LASER"], "xkcdRed")
+      mod:MarkUnit(targetUnit, core.E.LOCATION_STATIC_CHEST, "mark.laser", "xkcdRed")
     end
   end
   local text = self.L["BEAM on %s"]:format(laserTargetName)
