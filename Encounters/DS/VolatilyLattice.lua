@@ -37,6 +37,7 @@ mod:RegisterEnglishLocale({
     ["P2: SHIELD PHASE"] = "P2: SHIELD PHASE",
     ["P2: JUMP PHASE"] = "P2: JUMP PHASE",
     ["BEAM on %s"] = "BEAM on %s",
+    ["msg.beam.you"] = "BEAM on YOU",
     -- Marks
     ["mark.laser"] = "LASER",
   })
@@ -62,6 +63,7 @@ mod:RegisterFrenchLocale({
     ["P2: SHIELD PHASE"] = "P2: PHASE BOUCLIER",
     ["P2: JUMP PHASE"] = "P2: PHASE SAUTER",
     ["BEAM on %s"] = "LASER sur %s",
+    ["msg.beam.you"] = "LASER sur VOUS",
   })
 mod:RegisterGermanLocale({
     -- Unit names.
@@ -72,6 +74,7 @@ mod:RegisterGermanLocale({
     -- Cast.
     ["Null and Void"] = "Unordnung und Chaos",
     -- Bar and messages.
+    ["msg.beam.you"] = "LASER auf DIR",
   })
 -- Default settings.
 mod:RegisterDefaultSetting("LineDataDevourers")
@@ -91,7 +94,9 @@ mod:RegisterDefaultTimerBarConfigs({
     ["BEAM"] = { sColor = "xkcdLipstickRed" },
     ["PILLAR_TIMEOUT"] = { sColor = "xkcdAppleGreen" },
     ["P2"] = { sColor = "xkcdBabyPurple" },
-  })
+  }
+)
+mod:RegisterMessageSetting("BEAM_YOU", "EQUAL", nil, "SoundBeamOnYou")
 
 ----------------------------------------------------------------------------------------------------
 -- Constants.
@@ -163,7 +168,7 @@ function mod:OnLaserDatachron(message, laserTargetName)
   end
   local text = self.L["BEAM on %s"]:format(laserTargetName)
   if isMyself then
-    mod:AddMsg("BEAM", text, 5, mod:GetSetting("SoundBeamOnYou") and "RunAway")
+    mod:AddMsg("BEAM_YOU", "msg.laser.you", 5, "RunAway")
   else
     mod:AddMsg("BEAM", text, 5, mod:GetSetting("SoundBeamOnOther") and "Info", "Blue")
     mod:MarkOtherLaserTargets(targetUnit)
