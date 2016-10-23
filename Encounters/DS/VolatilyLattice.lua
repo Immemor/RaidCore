@@ -18,7 +18,7 @@ mod:RegisterTrigMob(core.E.TRIGGER_ANY, { "Avatus" })
 mod:RegisterEnglishLocale({
     -- Unit names.
     ["Avatus"] = "Avatus",
-    ["Obstinate Logic Wall"] = "Obstinate Logic Wall",
+    ["unit.wall"] = "Obstinate Logic Wall",
     ["unit.devourer"] = "Data Devourer",
     -- Datachron messages.
     ["chron.avatus.laser"] = "Avatus sets his focus on ([^%s]+%s[^!]+)!",
@@ -45,7 +45,7 @@ mod:RegisterEnglishLocale({
 mod:RegisterFrenchLocale({
     -- Unit names.
     ["Avatus"] = "Avatus",
-    ["Obstinate Logic Wall"] = "Mur de logique obstiné",
+    ["unit.wall"] = "Mur de logique obstiné",
     ["unit.devourer"] = "Dévoreur de données",
     -- Datachron messages.
     --["chron.avatus.laser"] = "Avatus sets his focus on (.*)!", -- TODO: French translation missing !!!!
@@ -70,7 +70,7 @@ mod:RegisterFrenchLocale({
 mod:RegisterGermanLocale({
     -- Unit names.
     ["Avatus"] = "Avatus",
-    ["Obstinate Logic Wall"] = "Hartnäckige Logikmauer",
+    ["unit.wall"] = "Hartnäckige Logikmauer",
     ["unit.devourer"] = "Datenverschlinger",
     -- Datachron messages.
     -- Cast.
@@ -148,15 +148,15 @@ mod:RegisterUnitEvents("unit.devourer",{
   }
 )
 
-function mod:OnUnitCreated(nId, unit, sName)
-  if self.L["Obstinate Logic Wall"] == sName then
-    mod:RemoveTimerBar("PILLAR_TIMEOUT")
-    core:AddUnit(unit)
-    if mod:GetSetting("OtherLogicWallMarkers") then
-      core:MarkUnit(unit)
-    end
+function mod:OnWallCreated(id, unit, name)
+  mod:RemoveTimerBar("PILLAR_TIMEOUT")
+  core:AddUnit(unit)
+  if mod:GetSetting("OtherLogicWallMarkers") then
+    core:MarkUnit(unit)
   end
 end
+
+mod:RegisterUnitEvent("unit.wall", core.E.UNIT_CREATED, mod.OnWallCreated)
 
 function mod:DropLaserMark(id)
   if id then
