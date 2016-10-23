@@ -22,9 +22,9 @@ mod:RegisterEnglishLocale({
     ["unit.devourer"] = "Data Devourer",
     -- Datachron messages.
     ["chron.avatus.laser"] = "Avatus sets his focus on ([^%s]+%s[^!]+)!",
-    ["Avatus prepares to delete all"] = "Avatus prepares to delete all data!",
-    ["Secure Sector Enhancement"] = "The Secure Sector Enhancement Ports have been activated!",
-    ["Vertical Locomotion Enhancement"] = "The Vertical Locomotion Enhancement Ports have been activated!",
+    ["chron.avatus.delete"] = "Avatus prepares to delete all data!",
+    ["chron.station.secure"] = "The Secure Sector Enhancement Ports have been activated!",
+    ["chron.station.jump"] = "The Vertical Locomotion Enhancement Ports have been activated!",
     -- Cast.
     ["Null and Void"] = "Null and Void",
     -- Timer bars.
@@ -49,9 +49,9 @@ mod:RegisterFrenchLocale({
     ["unit.devourer"] = "Dévoreur de données",
     -- Datachron messages.
     --["chron.avatus.laser"] = "Avatus sets his focus on (.*)!", -- TODO: French translation missing !!!!
-    ["Avatus prepares to delete all"] = "Avatus se prépare à effacer toutes les données !",
-    ["Secure Sector Enhancement"] = "Les ports d'amélioration de secteur sécurisé ont été activés !",
-    ["Vertical Locomotion Enhancement"] = "Les ports d'amélioration de locomotion verticale ont été activés !",
+    ["chron.avatus.delete"] = "Avatus se prépare à effacer toutes les données !",
+    ["chron.station.secure"] = "Les ports d'amélioration de secteur sécurisé ont été activés !",
+    ["chron.station.jump"] = "Les ports d'amélioration de locomotion verticale ont été activés !",
     -- Cast.
     ["Null and Void"] = "Caduque",
     -- Timer bars.
@@ -100,8 +100,8 @@ mod:RegisterDefaultTimerBarConfigs({
     ["P2"] = { sColor = "xkcdBabyPurple" },
   }
 )
-mod:RegisterMessageSetting("BEAM_YOU", "EQUAL", nil, "SoundBeamOnYou")
-mod:RegisterMessageSetting("BEAM_OTHER", "EQUAL", nil, "SoundBeamOnOther")
+mod:RegisterMessageSetting("BEAM_YOU", core.E.COMPARE_EQUAL, nil, "SoundBeamOnYou")
+mod:RegisterMessageSetting("BEAM_OTHER", core.E.COMPARE_EQUAL, nil, "SoundBeamOnOther")
 
 ----------------------------------------------------------------------------------------------------
 -- Functions.
@@ -187,24 +187,28 @@ function mod:OnLaserDatachron(message, laserTargetName)
   end
   mod:AddTimerBar("BEAM", text, 15, nil, nil, mod.DropLaserMark, mod, laserMarkId)
 end
+mod:RegisterDatachronEvent("chron.avatus.laser", core.E.COMPARE_MATCH, mod.OnLaserDatachron)
 
-mod:RegisterDatachronEvent("chron.avatus.laser", "MATCH", mod.OnLaserDatachron)
-
-function mod:OnDatachron(sMessage)
-  if sMessage == self.L["Avatus prepares to delete all"] then
-    mod:AddMsg("PILLAR_TIMEOUT", "Pillar Timeout", 5, mod:GetSetting("SoundBigCast") and "Beware")
-    mod:AddTimerBar("PILLAR_TIMEOUT", "Pillar Timeout", 10)
-    mod:AddTimerBar("NEXT_PILLAR", "Next Pillar", 50)
-  elseif sMessage == self.L["Secure Sector Enhancement"] then
-    mod:AddMsg("P2", "P2: SHIELD PHASE", 5, mod:GetSetting("SoundShieldPhase") and "Alert")
-    mod:AddTimerBar("P2", "Explosion", 15, mod:GetSetting("SoundLaserCountDown"))
-    mod:AddTimerBar("BEAM", "Next Beam", 44)
-    mod:AddTimerBar("DATA_DEVOURER", "Next Data Devourer", 53)
-    mod:AddTimerBar("NEXT_PILLAR", "Next Pillar", 58)
-  elseif sMessage == self.L["Vertical Locomotion Enhancement"] then
-    mod:AddMsg("P2", "P2: JUMP PHASE", 5, mod:GetSetting("SoundJumpPhase") and "Alert")
-    mod:AddTimerBar("BEAM", "Next Beam", 58)
-    mod:AddTimerBar("DATA_DEVOURER", "Next Data Devourer", 68)
-    mod:AddTimerBar("NEXT_PILLAR", "Next Pillar", 75)
-  end
+function mod:OnDeleteDatachron(message)
+  mod:AddMsg("PILLAR_TIMEOUT", "Pillar Timeout", 5, mod:GetSetting("SoundBigCast") and "Beware")
+  mod:AddTimerBar("PILLAR_TIMEOUT", "Pillar Timeout", 10)
+  mod:AddTimerBar("NEXT_PILLAR", "Next Pillar", 50)
 end
+mod:RegisterDatachronEvent("chron.avatus.delete", core.E.COMPARE_EQUAL, mod.OnDeleteDatachron)
+
+function mod:OnSecureDatachron(message)
+  mod:AddMsg("P2", "P2: SHIELD PHASE", 5, mod:GetSetting("SoundShieldPhase") and "Alert")
+  mod:AddTimerBar("P2", "Explosion", 15, mod:GetSetting("SoundLaserCountDown"))
+  mod:AddTimerBar("BEAM", "Next Beam", 44)
+  mod:AddTimerBar("DATA_DEVOURER", "Next Data Devourer", 53)
+  mod:AddTimerBar("NEXT_PILLAR", "Next Pillar", 58)
+end
+mod:RegisterDatachronEvent("chron.station.secure", core.E.COMPARE_EQUAL, mod.OnSecureDatachron)
+
+function mod:OnJumpDatachron(message)
+  mod:AddMsg("P2", "P2: JUMP PHASE", 5, mod:GetSetting("SoundJumpPhase") and "Alert")
+  mod:AddTimerBar("BEAM", "Next Beam", 58)
+  mod:AddTimerBar("DATA_DEVOURER", "Next Data Devourer", 68)
+  mod:AddTimerBar("NEXT_PILLAR", "Next Pillar", 75)
+end
+mod:RegisterDatachronEvent("chron.station.jump", core.E.COMPARE_EQUAL, mod.OnJumpDatachron)
