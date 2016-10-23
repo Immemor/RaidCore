@@ -106,7 +106,6 @@ mod:RegisterMessageSetting("BEAM_OTHER", "EQUAL", nil, "SoundBeamOnOther")
 ----------------------------------------------------------------------------------------------------
 -- Functions.
 ----------------------------------------------------------------------------------------------------
-local GetPlayerUnit = GameLib.GetPlayerUnit
 local GetPlayerUnitByName = GameLib.GetPlayerUnitByName
 local GetGameTime = GameLib.GetGameTime
 
@@ -114,11 +113,13 @@ local GetGameTime = GameLib.GetGameTime
 -- Locals.
 ----------------------------------------------------------------------------------------------------
 local nDataDevourerLastPopTime
+local playerId
 
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
+  playerId = GameLib.GetPlayerUnit():GetId()
   nDataDevourerLastPopTime = 0
   mod:AddTimerBar("ENRAGE", "Enrage", 576)
   mod:AddTimerBar("DATA_DEVOURER", "Next Data Devourer", 10)
@@ -128,7 +129,7 @@ end
 function mod:OnUnitCreated(nId, unit, sName)
   if sName == self.L["Data Devourer"] then
     if mod:GetSetting("LineDataDevourers") then
-      local line = core:AddLineBetweenUnits(nId, GetPlayerUnit():GetId(), nId, 5, "blue")
+      local line = core:AddLineBetweenUnits(nId, playerId, nId, 5, "blue")
       line:SetMaxLengthVisible(45)
     end
     local nCurrentTime = GetGameTime()
