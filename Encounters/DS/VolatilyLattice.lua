@@ -173,27 +173,27 @@ function mod:DropLaserMark(id)
   end
 end
 
-function mod:MarkOtherLaserTargets(unit)
-  if mod:GetSetting("OtherPlayerBeamMarkers") then
+function mod:MarkOtherLaserTargets(isMyself, unit)
+  if not isMyself and mod:GetSetting("OtherPlayerBeamMarkers") then
     mod:MarkUnit(unit, core.E.LOCATION_STATIC_CHEST, "mark.laser", "xkcdRed")
+  end
+end
+
+function mod:ShowBeamMessages(isMyself, text)
+  if isMyself then
+    mod:AddMsg("BEAM_YOU", "msg.laser.you", 5, "RunAway")
+  else
+    mod:AddMsg("BEAM_OTHER", text, 5, "Info", "xkcdBlue")
   end
 end
 
 function mod:OnLaserDatachron(message, laserTargetName)
   local targetUnit = GetPlayerUnitByName(laserTargetName)
-  local isMyself = false
-  local laserMarkId
-  if targetUnit then
-    isMyself = targetUnit:IsThePlayer()
-    laserMarkId = targetUnit:GetId()
-  end
+  local isMyself = targetUnit and targetUnit:IsThePlayer() or false
+  local laserMarkId = targetUnit and targetUnit:GetId() or nil
   local text = self.L["msg.beam.x"]:format(laserTargetName)
-  if isMyself then
-    mod:AddMsg("BEAM_YOU", "msg.laser.you", 5, "RunAway")
-  else
-    mod:AddMsg("BEAM_OTHER", text, 5, "Info", "xkcdBlue")
-    mod:MarkOtherLaserTargets(targetUnit)
-  end
+  mod:ShowBeamMessages(isMyself, text)
+  mod:MarkOtherLaserTargets(isMyself, targetUnit)
   mod:AddTimerBar("BEAM", text, 15, nil, nil, mod.DropLaserMark, mod, laserMarkId)
 end
 mod:RegisterDatachronEvent("chron.avatus.laser", core.E.COMPARE_MATCH, mod.OnLaserDatachron)
