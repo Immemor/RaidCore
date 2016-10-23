@@ -141,18 +141,21 @@ function mod:OnUnitDestroyed(nId, tUnit, sName)
   end
 end
 
+function mod:DropLaserMark(id)
+  if id then
+    core:DropMark(id)
+  end
+end
+
 function mod:OnLaserDatachron(message, laserTargetName)
   local targetUnit = GetPlayerUnitByName(laserTargetName)
   local isMyself = false
+  local laserMarkId
   if targetUnit then
     isMyself = targetUnit:IsThePlayer()
     if mod:GetSetting("OtherPlayerBeamMarkers") then
+      laserMarkId = targetUnit:GetId()
       core:MarkUnit(targetUnit, nil, self.L["LASER"])
-      mod:ScheduleTimer(function(id)
-          core:DropMark(id)
-        end,
-        15, targetUnit:GetId()
-      )
     end
   end
   local text = self.L["BEAM on %s"]:format(laserTargetName)
@@ -161,7 +164,7 @@ function mod:OnLaserDatachron(message, laserTargetName)
   else
     mod:AddMsg("BEAM", text, 5, mod:GetSetting("SoundBeamOnOther") and "Info", "Blue")
   end
-  mod:AddTimerBar("BEAM", text, 15)
+  mod:AddTimerBar("BEAM", text, 15, nil, nil, mod.DropLaserMark, mod, laserMarkId)
 end
 
 mod:RegisterDatachronEvent("chron.avatus.laser", "MATCH", mod.OnLaserDatachron)
