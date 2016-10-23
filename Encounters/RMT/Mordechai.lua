@@ -37,7 +37,17 @@ mod:RegisterEnglishLocale({
     ["mark.anchor_2"] = "2",
     ["mark.anchor_3"] = "3",
     ["mark.anchor_4"] = "4",
-
+    -- Buffs.
+    ["buffs.airlock.decompression"] = "Decompression",
+    ["buffs.orb.discharge"] = "Kinetic Discharge",
+    ["buffs.mordechai.shatter"] = "Shatter Shock",
+    ["buffs.mordechai.attraction"] = "Shocking Attraction",
+    ["buffs.airlock.anchor"] = "Anchor Lockdown",
+    -- Says.
+    ["say.mordechai.airlock.open"] = "I'll send ye into the great black, ye gutless mud skuppers!",
+    ["say.mordechai.airlock.close"] = "Shut that bloody airlock, damn ye!",
+    ["say.mordechai.1"] = "Dine on me hot flux, lubbers!",
+    ["say.mordechai.3"] = "Where ye be goin', cowards? Ha ha! Nowhere but the grave!",
     -- Messages.
     ["msg.mordechai.shuriken.next"] = "Next Shuriken",
     ["msg.mordechai.barrage.next"] = "Next Vicious Barrage",
@@ -50,18 +60,20 @@ mod:RegisterEnglishLocale({
 )
 mod:RegisterGermanLocale({
     -- Unit names.
-    -- ["unit.anchor"] = "Airlock Anchor",
-    -- ["unit.junk"] = "Airlock Junk",
-    ["unit.invis.0"] = "Freundliche unsichtbare Einheit für Felder (Trefferradius 0)", -- ??
-    -- ["unit.shuriken"] = "Ignores Collision Big Base Invisible Unit for Spells (1 hit radius)",
+    ["unit.invis.0"] = "Feindselige unsichtbare Einheit für Felder (Trefferradius 0)", -- ??
     ["unit.turret"] = "Rotmonds Geschützturm",
     -- Cast names.
-    -- ["cast.mordechai.shatter"] = "Shatter Shock",
-    -- ["cast.mordechai.barrage"] = "Vicious Barrage",
     -- Datachrons.
-    -- ["chron.airlock.opened"] = "The airlock has been opened!",
-    -- ["chron.airlock.closed"] = "The airlock has been closed!",
     -- Markers.
+    -- Buffs.
+    ["buffs.org.kinetic_link"] = "Kinetische Verbindung",
+    ["buffs.orb.fixation"] = "Kinetische Fixierung",
+    -- Says.
+    ["say.mordechai.airlock.open"] = "Ich schicke euch in die Große Schwärze, ihr feigen Schlammspringer!",
+    ["say.mordechai.airlock.close"] = "Macht die verfluchte Luftschleuse zu, verdammt noch mal!",
+    ["say.mordechai.1"] = "Fresst meinen heißen Flux, ihr Landratten!",
+    ["say.mordechai.2"] = "Ab ins Nichts!",
+    ["say.mordechai.3"] = "Wo wollt ihr denn hin, ihr Memmen? Ha, ha! Höchstens in euer Grab!",
     -- Messages.
     -- ["msg.mordechai.shuriken.next"] = "Next Shuriken",
     -- ["msg.mordechai.barrage.next"] = "Next Vicious Barrage",
@@ -74,18 +86,20 @@ mod:RegisterGermanLocale({
 )
 mod:RegisterFrenchLocale({
     -- Unit names.
-    -- ["unit.anchor"] = "Airlock Anchor",
-    -- ["unit.junk"] = "Airlock Junk",
     ["unit.invis.0"] = "Unité hostile invisible de terrain (rayon de portée : 0)", -- ??
-    -- ["unit.shuriken"] = "Ignores Collision Big Base Invisible Unit for Spells (1 hit radius)",
     ["unit.turret"] = "Tourelle de Rougelune",
     -- Cast names.
-    -- ["cast.mordechai.shatter"] = "Shatter Shock",
-    -- ["cast.mordechai.barrage"] = "Vicious Barrage",
     -- Datachrons.
-    -- ["chron.airlock.opened"] = "The airlock has been opened!",
-    -- ["chron.airlock.closed"] = "The airlock has been closed!",
     -- Markers.
+    -- Buffs.
+    ["buffs.orb.kinetic_link"] = "Lien cinétique",
+    ["buffs.orb.fixation"] = "Fixation cinétique",
+    -- Says.
+    ["say.mordechai.airlock.open"] = "Vous allez bouffer des pissenlits par la racine, espèces de sabordeurs dégonflés !",
+    ["say.mordechai.airlock.close"] = "Fermez ce maudit sas, abrutis !",
+    ["say.mordechai.1"] = "Vous allez tous crever, bande d'asticots !",
+    ["say.mordechai.2"] = "Allez, ouste, dans l'vide !",
+    ["say.mordechai.3"] = "Où est-ce que vous pensez aller, bande de lâches ? Ha ha ! Ici, c'est l'terminus !",
     -- Messages.
     -- ["msg.mordechai.shuriken.next"] = "Next Shuriken",
     -- ["msg.mordechai.barrage.next"] = "Next Vicious Barrage",
