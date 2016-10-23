@@ -61,6 +61,8 @@ mod:RegisterGermanLocale({
     ["pub.spark_plug"] = "Zündkerze",
     ["pub.lubricant_nozzle"] = "Schmiermitteldüse",
     -- Cast names.
+    -- Datachrons.
+    ["chron.elektroshock"] = "([^%s]+%s[^%s]+) leidet unter „Electroshock“",
     -- Messages.
     -- ["msg.warrior.liquidate.next"] = "Next Liquidate in",
     -- ["msg.warrior.liquidate.stack"] = "Stack",
@@ -86,6 +88,7 @@ mod:RegisterFrenchLocale({
     ["pub.cooling_turbine"] = "Turbine de refroidissement",
     ["pub.spark_plug"] = "Bougie d'allumage",
     ["pub.lubricant_nozzle"] = "Embout de lubrification",
+    -- Datachrons.
     -- Cast names.
     -- Messages.
     -- ["msg.warrior.liquidate.next"] = "Next Liquidate in",
