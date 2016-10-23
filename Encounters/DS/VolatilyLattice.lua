@@ -21,7 +21,7 @@ mod:RegisterEnglishLocale({
     ["Obstinate Logic Wall"] = "Obstinate Logic Wall",
     ["Data Devourer"] = "Data Devourer",
     -- Datachron messages.
-    ["chron.avatus.laser"] = "Avatus sets his focus on (.*)!",
+    ["chron.avatus.laser"] = "Avatus sets his focus on ([^%s]+%s[^!]+)!",
     ["Avatus prepares to delete all"] = "Avatus prepares to delete all data!",
     ["Secure Sector Enhancement"] = "The Secure Sector Enhancement Ports have been activated!",
     ["Vertical Locomotion Enhancement"] = "The Vertical Locomotion Enhancement Ports have been activated!",
