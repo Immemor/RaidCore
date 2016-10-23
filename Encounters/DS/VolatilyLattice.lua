@@ -36,11 +36,12 @@ mod:RegisterEnglishLocale({
     -- Message bars.
     ["P2: SHIELD PHASE"] = "P2: SHIELD PHASE",
     ["P2: JUMP PHASE"] = "P2: JUMP PHASE",
-    ["BEAM on %s"] = "BEAM on %s",
+    ["msg.beam.x"] = "BEAM on %s",
     ["msg.beam.you"] = "BEAM on YOU",
     -- Marks
     ["mark.laser"] = "LASER",
-  })
+  }
+)
 mod:RegisterFrenchLocale({
     -- Unit names.
     ["Avatus"] = "Avatus",
@@ -62,9 +63,10 @@ mod:RegisterFrenchLocale({
     -- Message bars.
     ["P2: SHIELD PHASE"] = "P2: PHASE BOUCLIER",
     ["P2: JUMP PHASE"] = "P2: PHASE SAUTER",
-    ["BEAM on %s"] = "LASER sur %s",
+    ["msg.beam.x"] = "LASER sur %s",
     ["msg.beam.you"] = "LASER sur VOUS",
-  })
+  }
+)
 mod:RegisterGermanLocale({
     -- Unit names.
     ["Avatus"] = "Avatus",
@@ -74,8 +76,10 @@ mod:RegisterGermanLocale({
     -- Cast.
     ["Null and Void"] = "Unordnung und Chaos",
     -- Bar and messages.
+    ["msg.beam.x"] = "LASER auf %s",
     ["msg.beam.you"] = "LASER auf DIR",
-  })
+  }
+)
 -- Default settings.
 mod:RegisterDefaultSetting("LineDataDevourers")
 mod:RegisterDefaultSetting("SoundBeamOnYou")
@@ -97,6 +101,7 @@ mod:RegisterDefaultTimerBarConfigs({
   }
 )
 mod:RegisterMessageSetting("BEAM_YOU", "EQUAL", nil, "SoundBeamOnYou")
+mod:RegisterMessageSetting("BEAM_OTHER", "EQUAL", nil, "SoundBeamOnOther")
 
 ----------------------------------------------------------------------------------------------------
 -- Constants.
@@ -166,11 +171,11 @@ function mod:OnLaserDatachron(message, laserTargetName)
     isMyself = targetUnit:IsThePlayer()
     laserMarkId = targetUnit:GetId()
   end
-  local text = self.L["BEAM on %s"]:format(laserTargetName)
+  local text = self.L["msg.beam.x"]:format(laserTargetName)
   if isMyself then
     mod:AddMsg("BEAM_YOU", "msg.laser.you", 5, "RunAway")
   else
-    mod:AddMsg("BEAM", text, 5, mod:GetSetting("SoundBeamOnOther") and "Info", "Blue")
+    mod:AddMsg("BEAM_OTHER", text, 5, "Info", "xkcdBlue")
     mod:MarkOtherLaserTargets(targetUnit)
   end
   mod:AddTimerBar("BEAM", text, 15, nil, nil, mod.DropLaserMark, mod, laserMarkId)
