@@ -19,7 +19,7 @@ mod:RegisterEnglishLocale({
     -- Unit names.
     ["Avatus"] = "Avatus",
     ["Obstinate Logic Wall"] = "Obstinate Logic Wall",
-    ["Data Devourer"] = "Data Devourer",
+    ["unit.devourer"] = "Data Devourer",
     -- Datachron messages.
     ["chron.avatus.laser"] = "Avatus sets his focus on ([^%s]+%s[^!]+)!",
     ["Avatus prepares to delete all"] = "Avatus prepares to delete all data!",
@@ -46,7 +46,7 @@ mod:RegisterFrenchLocale({
     -- Unit names.
     ["Avatus"] = "Avatus",
     ["Obstinate Logic Wall"] = "Mur de logique obstiné",
-    ["Data Devourer"] = "Dévoreur de données",
+    ["unit.devourer"] = "Dévoreur de données",
     -- Datachron messages.
     --["chron.avatus.laser"] = "Avatus sets his focus on (.*)!", -- TODO: French translation missing !!!!
     ["Avatus prepares to delete all"] = "Avatus se prépare à effacer toutes les données !",
@@ -71,7 +71,7 @@ mod:RegisterGermanLocale({
     -- Unit names.
     ["Avatus"] = "Avatus",
     ["Obstinate Logic Wall"] = "Hartnäckige Logikmauer",
-    ["Data Devourer"] = "Datenverschlinger",
+    ["unit.devourer"] = "Datenverschlinger",
     -- Datachron messages.
     -- Cast.
     ["Null and Void"] = "Unordnung und Chaos",
@@ -112,7 +112,7 @@ local GetGameTime = GameLib.GetGameTime
 ----------------------------------------------------------------------------------------------------
 -- Locals.
 ----------------------------------------------------------------------------------------------------
-local nDataDevourerLastPopTime
+local lastDataDevourerTime
 local playerId
 
 ----------------------------------------------------------------------------------------------------
@@ -120,35 +120,41 @@ local playerId
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
   playerId = GameLib.GetPlayerUnit():GetId()
-  nDataDevourerLastPopTime = 0
+  lastDataDevourerTime = 0
   mod:AddTimerBar("ENRAGE", "Enrage", 576)
   mod:AddTimerBar("DATA_DEVOURER", "Next Data Devourer", 10)
   mod:AddTimerBar("NEXT_PILLAR", "Next Pillar", 45)
 end
 
+function mod:OnDataDevourerCreated(id, unit, name)
+  if mod:GetSetting("LineDataDevourers") then
+    local line = core:AddLineBetweenUnits(id, playerId, id, 5, "blue")
+    line:SetMaxLengthVisible(45)
+  end
+  local currentTime = GetGameTime()
+  if lastDataDevourerTime + 13 < currentTime then
+    lastDataDevourerTime = currentTime
+    mod:AddTimerBar("DATA_DEVOURER", "Next Data Devourer", 15)
+  end
+end
+
+function mod:OnDataDevourerDestroyed(id, unit, name)
+  core:RemoveLineBetweenUnits(id)
+end
+
+mod:RegisterUnitEvents("unit.devourer",{
+    [core.E.UNIT_CREATED] = mod.OnDataDevourerCreated,
+    [core.E.UNIT_DESTROYED] = mod.OnDataDevourerCreated,
+  }
+)
+
 function mod:OnUnitCreated(nId, unit, sName)
-  if sName == self.L["Data Devourer"] then
-    if mod:GetSetting("LineDataDevourers") then
-      local line = core:AddLineBetweenUnits(nId, playerId, nId, 5, "blue")
-      line:SetMaxLengthVisible(45)
-    end
-    local nCurrentTime = GetGameTime()
-    if nDataDevourerLastPopTime + 13 < nCurrentTime then
-      nDataDevourerLastPopTime = nCurrentTime
-      mod:AddTimerBar("DATA_DEVOURER", "Next Data Devourer", 15)
-    end
-  elseif self.L["Obstinate Logic Wall"] == sName then
+  if self.L["Obstinate Logic Wall"] == sName then
     mod:RemoveTimerBar("PILLAR_TIMEOUT")
     core:AddUnit(unit)
     if mod:GetSetting("OtherLogicWallMarkers") then
       core:MarkUnit(unit)
     end
-  end
-end
-
-function mod:OnUnitDestroyed(nId, tUnit, sName)
-  if sName == self.L["Data Devourer"] then
-    core:RemoveLineBetweenUnits(nId)
   end
 end
 
