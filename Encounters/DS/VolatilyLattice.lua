@@ -102,6 +102,9 @@ mod:RegisterDefaultTimerBarConfigs({
 )
 mod:RegisterMessageSetting("BEAM_YOU", core.E.COMPARE_EQUAL, nil, "SoundBeamOnYou")
 mod:RegisterMessageSetting("BEAM_OTHER", core.E.COMPARE_EQUAL, nil, "SoundBeamOnOther")
+mod:RegisterMessageSetting("P2_SHIELD", core.E.COMPARE_EQUAL, nil, "SoundShieldPhase")
+mod:RegisterMessageSetting("P2_JUMP", core.E.COMPARE_EQUAL, nil, "SoundJumpPhase")
+mod:RegisterMessageSetting("PILLAR_TIMEOUT", core.E.COMPARE_EQUAL, nil, "SoundBigCast")
 
 ----------------------------------------------------------------------------------------------------
 -- Functions.
@@ -190,14 +193,14 @@ end
 mod:RegisterDatachronEvent("chron.avatus.laser", core.E.COMPARE_MATCH, mod.OnLaserDatachron)
 
 function mod:OnDeleteDatachron(message)
-  mod:AddMsg("PILLAR_TIMEOUT", "Pillar Timeout", 5, mod:GetSetting("SoundBigCast") and "Beware")
+  mod:AddMsg("PILLAR_TIMEOUT", "Pillar Timeout", 5, "Beware")
   mod:AddTimerBar("PILLAR_TIMEOUT", "Pillar Timeout", 10)
   mod:AddTimerBar("NEXT_PILLAR", "Next Pillar", 50)
 end
 mod:RegisterDatachronEvent("chron.avatus.delete", core.E.COMPARE_EQUAL, mod.OnDeleteDatachron)
 
 function mod:OnSecureDatachron(message)
-  mod:AddMsg("P2", "P2: SHIELD PHASE", 5, mod:GetSetting("SoundShieldPhase") and "Alert")
+  mod:AddMsg("P2_SHIELD", "P2: SHIELD PHASE", 5, "Alert")
   mod:AddTimerBar("P2", "Explosion", 15, mod:GetSetting("SoundLaserCountDown"))
   mod:AddTimerBar("BEAM", "Next Beam", 44)
   mod:AddTimerBar("DATA_DEVOURER", "Next Data Devourer", 53)
@@ -206,7 +209,7 @@ end
 mod:RegisterDatachronEvent("chron.station.secure", core.E.COMPARE_EQUAL, mod.OnSecureDatachron)
 
 function mod:OnJumpDatachron(message)
-  mod:AddMsg("P2", "P2: JUMP PHASE", 5, mod:GetSetting("SoundJumpPhase") and "Alert")
+  mod:AddMsg("P2_JUMP", "P2: JUMP PHASE", 5, "Alert")
   mod:AddTimerBar("BEAM", "Next Beam", 58)
   mod:AddTimerBar("DATA_DEVOURER", "Next Data Devourer", 68)
   mod:AddTimerBar("NEXT_PILLAR", "Next Pillar", 75)
