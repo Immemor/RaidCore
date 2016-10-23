@@ -152,10 +152,9 @@ end
 function mod:OnDataDevourerDestroyed(id, unit, name)
   core:RemoveLineBetweenUnits(id)
 end
-
 mod:RegisterUnitEvents("unit.devourer",{
     [core.E.UNIT_CREATED] = mod.OnDataDevourerCreated,
-    [core.E.UNIT_DESTROYED] = mod.OnDataDevourerCreated,
+    [core.E.UNIT_DESTROYED] = mod.OnDataDevourerDestroyed,
   }
 )
 
@@ -166,7 +165,6 @@ function mod:OnWallCreated(id, unit, name)
     core:MarkUnit(unit)
   end
 end
-
 mod:RegisterUnitEvent("unit.wall", core.E.UNIT_CREATED, mod.OnWallCreated)
 
 function mod:DropLaserMark(id)
