@@ -21,7 +21,7 @@ mod:RegisterEnglishLocale({
     ["Obstinate Logic Wall"] = "Obstinate Logic Wall",
     ["Data Devourer"] = "Data Devourer",
     -- Datachron messages.
-    ["Avatus sets his focus on [PlayerName]!"] = "Avatus sets his focus on (.*)!",
+    ["chron.avatus.laser"] = "Avatus sets his focus on (.*)!",
     ["Avatus prepares to delete all"] = "Avatus prepares to delete all data!",
     ["Secure Sector Enhancement"] = "The Secure Sector Enhancement Ports have been activated!",
     ["Vertical Locomotion Enhancement"] = "The Vertical Locomotion Enhancement Ports have been activated!",
@@ -45,7 +45,7 @@ mod:RegisterFrenchLocale({
     ["Obstinate Logic Wall"] = "Mur de logique obstiné",
     ["Data Devourer"] = "Dévoreur de données",
     -- Datachron messages.
-    --["Avatus sets his focus on [PlayerName]!"] = "Avatus sets his focus on (.*)!", -- TODO: French translation missing !!!!
+    --["chron.avatus.laser"] = "Avatus sets his focus on (.*)!", -- TODO: French translation missing !!!!
     ["Avatus prepares to delete all"] = "Avatus se prépare à effacer toutes les données !",
     ["Secure Sector Enhancement"] = "Les ports d'amélioration de secteur sécurisé ont été activés !",
     ["Vertical Locomotion Enhancement"] = "Les ports d'amélioration de locomotion verticale ont été activés !",
@@ -140,38 +140,43 @@ function mod:OnUnitDestroyed(nId, tUnit, sName)
   end
 end
 
-function mod:OnDatachron(sMessage)
-  local sPlayerFocused = sMessage:match(self.L["Avatus sets his focus on [PlayerName]!"])
-  if sPlayerFocused then
-    local tPlayerUnit = GameLib.GetPlayerUnitByName(sPlayerFocused)
-    local nPlayerId = tPlayerUnit:GetId()
-    if nPlayerId and mod:GetSetting("OtherPlayerBeamMarkers") then
-      core:MarkUnit(tPlayerUnit, nil, self.L["LASER"])
-      self:ScheduleTimer(function(nPlayerId)
-          core:DropMark(nPlayerId)
-          end, 15, nPlayerId)
-      end
-      local sText = self.L["BEAM on %s"]:format(sPlayerFocused)
-      if nPlayerId == GetPlayerUnit():GetId() then
-        mod:AddMsg("BEAM", sText, 5, mod:GetSetting("SoundBeamOnYou") and "RunAway")
-      else
-        mod:AddMsg("BEAM", sText, 5, mod:GetSetting("SoundBeamOnOther") and "Info", "Blue")
-      end
-      mod:AddTimerBar("BEAM", sText, 15)
-    elseif sMessage == self.L["Avatus prepares to delete all"] then
-      mod:AddMsg("PILLAR_TIMEOUT", "Pillar Timeout", 5, mod:GetSetting("SoundBigCast") and "Beware")
-      mod:AddTimerBar("PILLAR_TIMEOUT", "Pillar Timeout", 10)
-      mod:AddTimerBar("NEXT_PILLAR", "Next Pillar", 50)
-    elseif sMessage == self.L["Secure Sector Enhancement"] then
-      mod:AddMsg("P2", "P2: SHIELD PHASE", 5, mod:GetSetting("SoundShieldPhase") and "Alert")
-      mod:AddTimerBar("P2", "Explosion", 15, mod:GetSetting("SoundLaserCountDown"))
-      mod:AddTimerBar("BEAM", "Next Beam", 44)
-      mod:AddTimerBar("DATA_DEVOURER", "Next Data Devourer", 53)
-      mod:AddTimerBar("NEXT_PILLAR", "Next Pillar", 58)
-    elseif sMessage == self.L["Vertical Locomotion Enhancement"] then
-      mod:AddMsg("P2", "P2: JUMP PHASE", 5, mod:GetSetting("SoundJumpPhase") and "Alert")
-      mod:AddTimerBar("BEAM", "Next Beam", 58)
-      mod:AddTimerBar("DATA_DEVOURER", "Next Data Devourer", 68)
-      mod:AddTimerBar("NEXT_PILLAR", "Next Pillar", 75)
-    end
+function mod:OnLaserDatachron(message, laserTargetName)
+  local tPlayerUnit = GameLib.GetPlayerUnitByName(laserTargetName)
+  local nPlayerId = tPlayerUnit:GetId()
+  if nPlayerId and mod:GetSetting("OtherPlayerBeamMarkers") then
+    core:MarkUnit(tPlayerUnit, nil, self.L["LASER"])
+    self:ScheduleTimer(function(nPlayerId)
+        core:DropMark(nPlayerId)
+      end,
+      15, nPlayerId
+    )
   end
+  local sText = self.L["BEAM on %s"]:format(laserTargetName)
+  if nPlayerId == GetPlayerUnit():GetId() then
+    mod:AddMsg("BEAM", sText, 5, mod:GetSetting("SoundBeamOnYou") and "RunAway")
+  else
+    mod:AddMsg("BEAM", sText, 5, mod:GetSetting("SoundBeamOnOther") and "Info", "Blue")
+  end
+  mod:AddTimerBar("BEAM", sText, 15)
+end
+
+mod:RegisterDatachronEvent("chron.avatus.laser", "MATCH", mod.OnLaserDatachron)
+
+function mod:OnDatachron(sMessage)
+  if sMessage == self.L["Avatus prepares to delete all"] then
+    mod:AddMsg("PILLAR_TIMEOUT", "Pillar Timeout", 5, mod:GetSetting("SoundBigCast") and "Beware")
+    mod:AddTimerBar("PILLAR_TIMEOUT", "Pillar Timeout", 10)
+    mod:AddTimerBar("NEXT_PILLAR", "Next Pillar", 50)
+  elseif sMessage == self.L["Secure Sector Enhancement"] then
+    mod:AddMsg("P2", "P2: SHIELD PHASE", 5, mod:GetSetting("SoundShieldPhase") and "Alert")
+    mod:AddTimerBar("P2", "Explosion", 15, mod:GetSetting("SoundLaserCountDown"))
+    mod:AddTimerBar("BEAM", "Next Beam", 44)
+    mod:AddTimerBar("DATA_DEVOURER", "Next Data Devourer", 53)
+    mod:AddTimerBar("NEXT_PILLAR", "Next Pillar", 58)
+  elseif sMessage == self.L["Vertical Locomotion Enhancement"] then
+    mod:AddMsg("P2", "P2: JUMP PHASE", 5, mod:GetSetting("SoundJumpPhase") and "Alert")
+    mod:AddTimerBar("BEAM", "Next Beam", 58)
+    mod:AddTimerBar("DATA_DEVOURER", "Next Data Devourer", 68)
+    mod:AddTimerBar("NEXT_PILLAR", "Next Pillar", 75)
+  end
+end
