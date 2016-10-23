@@ -81,15 +81,23 @@ mod:RegisterGermanLocale({
   }
 )
 -- Default settings.
+-- Visuals.
 mod:RegisterDefaultSetting("LineDataDevourers")
+mod:RegisterDefaultSetting("OtherPlayerBeamMarkers")
+mod:RegisterDefaultSetting("OtherLogicWallMarkers")
+-- Messages.
+mod:RegisterDefaultSetting("MessageBeamOnYou")
+mod:RegisterDefaultSetting("MessageBeamOnOther")
+mod:RegisterDefaultSetting("MessageBigCast")
+mod:RegisterDefaultSetting("MessageShieldPhase")
+mod:RegisterDefaultSetting("MessageJumpPhase")
+-- Sounds.
 mod:RegisterDefaultSetting("SoundBeamOnYou")
 mod:RegisterDefaultSetting("SoundBeamOnOther")
 mod:RegisterDefaultSetting("SoundBigCast")
 mod:RegisterDefaultSetting("SoundShieldPhase")
 mod:RegisterDefaultSetting("SoundJumpPhase")
 mod:RegisterDefaultSetting("SoundLaserCountDown")
-mod:RegisterDefaultSetting("OtherPlayerBeamMarkers")
-mod:RegisterDefaultSetting("OtherLogicWallMarkers")
 -- Timers default configs.
 mod:RegisterDefaultTimerBarConfigs({
     ["ENRAGE"] = { sColor = "xkcdAmethyst" },
@@ -100,11 +108,11 @@ mod:RegisterDefaultTimerBarConfigs({
     ["P2"] = { sColor = "xkcdBabyPurple" },
   }
 )
-mod:RegisterMessageSetting("BEAM_YOU", core.E.COMPARE_EQUAL, nil, "SoundBeamOnYou")
-mod:RegisterMessageSetting("BEAM_OTHER", core.E.COMPARE_EQUAL, nil, "SoundBeamOnOther")
-mod:RegisterMessageSetting("P2_SHIELD", core.E.COMPARE_EQUAL, nil, "SoundShieldPhase")
-mod:RegisterMessageSetting("P2_JUMP", core.E.COMPARE_EQUAL, nil, "SoundJumpPhase")
-mod:RegisterMessageSetting("PILLAR_TIMEOUT", core.E.COMPARE_EQUAL, nil, "SoundBigCast")
+mod:RegisterMessageSetting("BEAM_YOU", core.E.COMPARE_EQUAL, "MessageBeamOnYou", "SoundBeamOnYou")
+mod:RegisterMessageSetting("BEAM_OTHER", core.E.COMPARE_EQUAL, "MessageBeamOnOther", "SoundBeamOnOther")
+mod:RegisterMessageSetting("P2_SHIELD", core.E.COMPARE_EQUAL, "MessageShieldPhase", "SoundShieldPhase")
+mod:RegisterMessageSetting("P2_JUMP", core.E.COMPARE_EQUAL, "MessageJumpPhase", "SoundJumpPhase")
+mod:RegisterMessageSetting("PILLAR_TIMEOUT", core.E.COMPARE_EQUAL, "MessageBigCast", "SoundBigCast")
 
 ----------------------------------------------------------------------------------------------------
 -- Functions.
