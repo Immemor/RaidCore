@@ -14,10 +14,10 @@ if not mod then return end
 ----------------------------------------------------------------------------------------------------
 -- Registering combat.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterTrigMob(core.E.TRIGGER_ANY, { "Avatus" })
+mod:RegisterTrigMob(core.E.TRIGGER_ANY, { "unit.avatus" })
 mod:RegisterEnglishLocale({
     -- Unit names.
-    ["Avatus"] = "Avatus",
+    ["unit.avatus"] = "Avatus",
     ["unit.wall"] = "Obstinate Logic Wall",
     ["unit.devourer"] = "Data Devourer",
     -- Datachron messages.
@@ -26,16 +26,17 @@ mod:RegisterEnglishLocale({
     ["chron.station.secure"] = "The Secure Sector Enhancement Ports have been activated!",
     ["chron.station.jump"] = "The Vertical Locomotion Enhancement Ports have been activated!",
     -- Cast.
-    ["Null and Void"] = "Null and Void",
+    ["cast.avatus.null_void"] = "Null and Void",
     -- Timer bars.
-    ["Next Beam"] = "Next Beam",
-    ["Next Pillar"] = "Next Pillar",
-    ["Pillar Timeout"] = "Pillar Timeout",
-    ["Enrage"] = "Enrage",
-    ["Explosion"] = "Explosion",
+    ["msg.beam.next"] = "Next Beam",
+    ["msg.pillar.next"] = "Next Pillar",
+    ["msg.pillar.timeout"] = "Pillar Timeout",
+    ["msg.enrage"] = "Enrage",
+    ["msg.explosion"] = "Explosion",
+    ["msg.devourer.next"] = "Next Data Devourers",
     -- Message bars.
-    ["P2: SHIELD PHASE"] = "P2: SHIELD PHASE",
-    ["P2: JUMP PHASE"] = "P2: JUMP PHASE",
+    ["msg.phase.shield"] = "P2: SHIELD PHASE",
+    ["msg.phase.jump"] = "P2: JUMP PHASE",
     ["msg.beam.x"] = "BEAM on %s",
     ["msg.beam.you"] = "BEAM on YOU",
     -- Marks
@@ -44,7 +45,6 @@ mod:RegisterEnglishLocale({
 )
 mod:RegisterFrenchLocale({
     -- Unit names.
-    ["Avatus"] = "Avatus",
     ["unit.wall"] = "Mur de logique obstiné",
     ["unit.devourer"] = "Dévoreur de données",
     -- Datachron messages.
@@ -53,29 +53,34 @@ mod:RegisterFrenchLocale({
     ["chron.station.secure"] = "Les ports d'amélioration de secteur sécurisé ont été activés !",
     ["chron.station.jump"] = "Les ports d'amélioration de locomotion verticale ont été activés !",
     -- Cast.
-    ["Null and Void"] = "Caduque",
+    ["cast.avatus.null_void"] = "Caduque",
     -- Timer bars.
-    ["Next Beam"] = "Prochain Laser",
-    ["Next Pillar"] = "Prochain Pillier",
-    ["Pillar Timeout"] = "Pillier Expiration",
-    ["Enrage"] = "Enrage",
-    ["Explosion"] = "Explosion",
+    ["msg.beam.next"] = "Prochain Laser",
+    ["msg.pillar.next"] = "Prochain Pillier",
+    ["msg.devourer.next"] = "Prochain Dévoreur",
+    ["msg.pillar.timeout"] = "Pillier Expiration",
     -- Message bars.
-    ["P2: SHIELD PHASE"] = "P2: PHASE BOUCLIER",
-    ["P2: JUMP PHASE"] = "P2: PHASE SAUTER",
+    ["msg.phase.shield"] = "P2: PHASE BOUCLIER",
+    ["msg.phase.jump"] = "P2: PHASE SAUTER",
     ["msg.beam.x"] = "LASER sur %s",
     ["msg.beam.you"] = "LASER sur VOUS",
   }
 )
 mod:RegisterGermanLocale({
     -- Unit names.
-    ["Avatus"] = "Avatus",
     ["unit.wall"] = "Hartnäckige Logikmauer",
     ["unit.devourer"] = "Datenverschlinger",
     -- Datachron messages.
     -- Cast.
-    ["Null and Void"] = "Unordnung und Chaos",
+    ["cast.avatus.null_void"] = "Unordnung und Chaos",
+    -- Timer bars.
+    ["msg.beam.next"] = "Nächster Laser",
+    ["msg.pillar.next"] = "Nächste Säulen",
+    ["msg.devourer.next"] = "Nächste Datenverschlinger",
+    ["msg.pillar.timeout"] = "Säulen Time-out",
     -- Bar and messages.
+    ["msg.phase.shield"] = "P2: SCHILD-PHASE",
+    ["msg.phase.jump"] = "P2: SPRING-PHASE",
     ["msg.beam.x"] = "LASER auf %s",
     ["msg.beam.you"] = "LASER auf DIR",
   }
@@ -132,9 +137,9 @@ local playerId
 function mod:OnBossEnable()
   playerId = GameLib.GetPlayerUnit():GetId()
   lastDataDevourerTime = 0
-  mod:AddTimerBar("ENRAGE", "Enrage", 576)
-  mod:AddTimerBar("DATA_DEVOURER", "Next Data Devourer", 10)
-  mod:AddTimerBar("NEXT_PILLAR", "Next Pillar", 45)
+  mod:AddTimerBar("ENRAGE", "msg.enrage", 576)
+  mod:AddTimerBar("DATA_DEVOURER", "msg.devourer.next", 10)
+  mod:AddTimerBar("NEXT_PILLAR", "msg.pillar.next", 45)
 end
 
 function mod:OnDataDevourerCreated(id, unit, name)
@@ -145,7 +150,7 @@ function mod:OnDataDevourerCreated(id, unit, name)
   local currentTime = GetGameTime()
   if lastDataDevourerTime + 13 < currentTime then
     lastDataDevourerTime = currentTime
-    mod:AddTimerBar("DATA_DEVOURER", "Next Data Devourer", 15)
+    mod:AddTimerBar("DATA_DEVOURER", "msg.devourer.next", 15)
   end
 end
 
@@ -191,24 +196,24 @@ function mod:OnLaserDatachron(message, laserTargetName)
 end
 
 function mod:OnDeleteDatachron(message)
-  mod:AddMsg("PILLAR_TIMEOUT", "Pillar Timeout", 5, "Beware")
-  mod:AddTimerBar("PILLAR_TIMEOUT", "Pillar Timeout", 10)
-  mod:AddTimerBar("NEXT_PILLAR", "Next Pillar", 50)
+  mod:AddMsg("PILLAR_TIMEOUT", "msg.pillar.timeout", 5, "Beware")
+  mod:AddTimerBar("PILLAR_TIMEOUT", "msg.pillar.timeout", 10)
+  mod:AddTimerBar("NEXT_PILLAR", "msg.pillar.next", 50)
 end
 
 function mod:OnSecureDatachron(message)
-  mod:AddMsg("P2_SHIELD", "P2: SHIELD PHASE", 5, "Alert")
-  mod:AddTimerBar("P2", "Explosion", 15, mod:GetSetting("SoundLaserCountDown"))
-  mod:AddTimerBar("BEAM", "Next Beam", 44)
-  mod:AddTimerBar("DATA_DEVOURER", "Next Data Devourer", 53)
-  mod:AddTimerBar("NEXT_PILLAR", "Next Pillar", 58)
+  mod:AddMsg("P2_SHIELD", "msg.phase.shield", 5, "Alert")
+  mod:AddTimerBar("P2", "msg.explosion", 15, mod:GetSetting("SoundLaserCountDown"))
+  mod:AddTimerBar("BEAM", "msg.beam.next", 44)
+  mod:AddTimerBar("DATA_DEVOURER", "msg.devourer.next", 53)
+  mod:AddTimerBar("NEXT_PILLAR", "msg.pillar.next", 58)
 end
 
 function mod:OnJumpDatachron(message)
-  mod:AddMsg("P2_JUMP", "P2: JUMP PHASE", 5, "Alert")
-  mod:AddTimerBar("BEAM", "Next Beam", 58)
-  mod:AddTimerBar("DATA_DEVOURER", "Next Data Devourer", 68)
-  mod:AddTimerBar("NEXT_PILLAR", "Next Pillar", 75)
+  mod:AddMsg("P2_JUMP", "msg.phase.jump", 5, "Alert")
+  mod:AddTimerBar("BEAM", "msg.beam.next", 58)
+  mod:AddTimerBar("DATA_DEVOURER", "msg.devourer.next", 68)
+  mod:AddTimerBar("NEXT_PILLAR", "msg.pillar.next", 75)
 end
 
 ----------------------------------------------------------------------------------------------------
