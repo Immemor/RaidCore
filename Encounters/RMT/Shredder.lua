@@ -69,16 +69,15 @@ mod:RegisterGermanLocale({
     -- Unit names.
     ["unit.saw.big"] = "Sägeblatt",
     ["unit.miniboss.braugh"] = "Braugh der Blähbauch",
-    -- ["unit.add.brute"] = "",
     ["unit.tether"] = "Haltestrickverankerung",
     ["unit.bubble"] = "Feindselige unsichtbare Einheit für Felder (Trefferradius 1.2)",
     -- Datachron messages.
     ["chron.shredder.starting"] = "WARNUNG: DER SCHREDDER WIRD GESTARTET!",
     -- Cast names.
     ["cast.swabbie.knockback"] = "Untoten-Abwehrmittel",
-    -- ["cast.miniboss.crush"] = "",
-    -- ["cast.miniboss.gravedigger"] = "",
-    -- ["cast.miniboss.deathwail"] = "",
+    -- ["cast.miniboss.crush"] = "TODO",
+    -- ["cast.miniboss.gravedigger"] = "TODO",
+    -- ["cast.miniboss.deathwail"] = "TODO",
     ["cast.nabber.lash"] = "Nekrotisches Peitschen",
     -- Messages.
     ["msg.swabbie.walking"] = "Läuft richtung %s",
@@ -97,17 +96,16 @@ mod:RegisterGermanLocale({
 mod:RegisterFrenchLocale({
     -- Unit names.
     ["unit.saw.big"] = "Lamesciea",
-    -- ["unit.miniboss.braugh"] = "",
-    -- ["unit.add.brute"] = "",
+    -- ["unit.miniboss.braugh"] = "TODO",
     ["unit.tether"] = "Ancre de Bride",
     ["unit.bubble"] = "Unité hostile invisible de terrain (zone d'effet 1,2)",
     -- Datachron messages.
     ["chron.shredder.starting"] = "ATTENTION : DÉMARRAGE DU BROYEUR !",
     -- Cast names.
     ["cast.swabbie.knockback"] = "Répulsif pour revenant",
-    -- ["cast.miniboss.crush"] = "",
-    -- ["cast.miniboss.gravedigger"] = "",
-    -- ["cast.miniboss.deathwail"] = "",
+    -- ["cast.miniboss.crush"] = "TODO",
+    ["cast.miniboss.gravedigger"] = "Fossoyeur",
+    ["cast.miniboss.deathwail"] = "Gémissement mortel",
     ["cast.nabber.lash"] = "Fouet nécrotique",
     -- Messages.
     -- ["msg.swabbie.walking"] = "Läuft richtung %s",
