@@ -152,12 +152,6 @@ end
 function mod:OnDataDevourerDestroyed(id, unit, name)
   core:RemoveLineBetweenUnits(id)
 end
-mod:RegisterUnitEvents("unit.devourer",{
-    [core.E.UNIT_CREATED] = mod.OnDataDevourerCreated,
-    [core.E.UNIT_DESTROYED] = mod.OnDataDevourerDestroyed,
-  }
-)
-
 function mod:OnWallCreated(id, unit, name)
   mod:RemoveTimerBar("PILLAR_TIMEOUT")
   core:AddUnit(unit)
@@ -165,7 +159,6 @@ function mod:OnWallCreated(id, unit, name)
     core:MarkUnit(unit)
   end
 end
-mod:RegisterUnitEvent("unit.wall", core.E.UNIT_CREATED, mod.OnWallCreated)
 
 function mod:DropLaserMark(id)
   if id then
@@ -196,14 +189,12 @@ function mod:OnLaserDatachron(message, laserTargetName)
   mod:MarkOtherLaserTargets(isMyself, targetUnit)
   mod:AddTimerBar("BEAM", text, 15, nil, nil, mod.DropLaserMark, mod, laserMarkId)
 end
-mod:RegisterDatachronEvent("chron.avatus.laser", "MATCH", mod.OnLaserDatachron)
 
 function mod:OnDeleteDatachron(message)
   mod:AddMsg("PILLAR_TIMEOUT", "Pillar Timeout", 5, "Beware")
   mod:AddTimerBar("PILLAR_TIMEOUT", "Pillar Timeout", 10)
   mod:AddTimerBar("NEXT_PILLAR", "Next Pillar", 50)
 end
-mod:RegisterDatachronEvent("chron.avatus.delete", "EQUAL", mod.OnDeleteDatachron)
 
 function mod:OnSecureDatachron(message)
   mod:AddMsg("P2_SHIELD", "P2: SHIELD PHASE", 5, "Alert")
@@ -212,7 +203,6 @@ function mod:OnSecureDatachron(message)
   mod:AddTimerBar("DATA_DEVOURER", "Next Data Devourer", 53)
   mod:AddTimerBar("NEXT_PILLAR", "Next Pillar", 58)
 end
-mod:RegisterDatachronEvent("chron.station.secure", "EQUAL", mod.OnSecureDatachron)
 
 function mod:OnJumpDatachron(message)
   mod:AddMsg("P2_JUMP", "P2: JUMP PHASE", 5, "Alert")
@@ -220,4 +210,17 @@ function mod:OnJumpDatachron(message)
   mod:AddTimerBar("DATA_DEVOURER", "Next Data Devourer", 68)
   mod:AddTimerBar("NEXT_PILLAR", "Next Pillar", 75)
 end
+
+----------------------------------------------------------------------------------------------------
+-- Bind event handlers.
+----------------------------------------------------------------------------------------------------
+mod:RegisterUnitEvent("unit.wall", core.E.UNIT_CREATED, mod.OnWallCreated)
+mod:RegisterUnitEvents("unit.devourer",{
+    [core.E.UNIT_CREATED] = mod.OnDataDevourerCreated,
+    [core.E.UNIT_DESTROYED] = mod.OnDataDevourerDestroyed,
+  }
+)
+mod:RegisterDatachronEvent("chron.station.secure", "EQUAL", mod.OnSecureDatachron)
 mod:RegisterDatachronEvent("chron.station.jump", "EQUAL", mod.OnJumpDatachron)
+mod:RegisterDatachronEvent("chron.avatus.laser", "MATCH", mod.OnLaserDatachron)
+mod:RegisterDatachronEvent("chron.avatus.delete", "EQUAL", mod.OnDeleteDatachron)
