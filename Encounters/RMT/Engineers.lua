@@ -210,9 +210,9 @@ function mod:GetCoreTotalHealthPercentage(oldValue)
     coreCurrentHealth = coreCurrentHealth + coreUnit.unit:GetHealth()
   end
   totalHealthPercent = (coreCurrentHealth / coreMaxHealth) * 100
-  if totalHealthPercent < 30 then
+  if totalHealthPercent < 28.5 then
     barColor = "xkcdGreen"
-  elseif totalHealthPercent < 33.3 then
+  elseif totalHealthPercent < 30 then
     barColor = "xkcdOrange"
   end
   return totalHealthPercent, barColor
