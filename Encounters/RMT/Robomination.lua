@@ -51,13 +51,11 @@ mod:RegisterEnglishLocale({
 mod:RegisterGermanLocale({
     -- Unit names.
     ["unit.flailing_arm"] = "Fuchtelnder Arm",
-    -- ["unit.scanning_eye"] = "Scanning Eye",
     -- Cast names.
-    -- ["cast.laser"] = "Incineration Laser",
+    -- ["cast.laser"] = "TODO",
     -- Datachron.
-    -- ["chron.robo.laser"] = "Robomination tries to incinerate ([^%s]+%s.+)$",
+    -- ["chron.robo.laser"] = "TODO",
     ["chron.robo.hides"] = "Die Robomination sinkt in den Müll hinab.",
-    -- ["chron.robo.shows"] = "The Robomination erupts back into the fight!",
     -- Messages.
     -- ["msg.snake.other"] = "SNAKE ON %s",
     -- ["msg.snake.you"] = "SNAKE ON YOU",
@@ -78,13 +76,11 @@ mod:RegisterGermanLocale({
 mod:RegisterFrenchLocale({
     -- Unit names.
     ["unit.flailing_arm"] = "Bras agité",
-    -- ["unit.scanning_eye"] = "Scanning Eye",
     -- Cast names.
-    -- ["cast.laser"] = "Incineration Laser",
+    ["cast.laser"] = "Laser d'incinération",
     -- Datachron.
-    -- ["chron.robo.laser"] = "Robomination tries to incinerate ([^%s]+%s.+)$",
+    ["chron.robo.laser"] = "Robomination essaie d'incinérer ([^%s]+%s[^\.]+)\.",
     ["chron.robo.hides"] = "Robomination s'enfonce dans les ordures.",
-    -- ["chron.robo.shows"] = "The Robomination erupts back into the fight!",
     -- Messages.
     -- ["msg.snake.other"] = "SNAKE ON %s",
     -- ["msg.snake.you"] = "SNAKE ON YOU",
