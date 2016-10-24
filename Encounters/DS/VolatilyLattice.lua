@@ -108,11 +108,11 @@ mod:RegisterDefaultTimerBarConfigs({
     ["P2"] = { sColor = "xkcdBabyPurple" },
   }
 )
-mod:RegisterMessageSetting("BEAM_YOU", core.E.COMPARE_EQUAL, "MessageBeamOnYou", "SoundBeamOnYou")
-mod:RegisterMessageSetting("BEAM_OTHER", core.E.COMPARE_EQUAL, "MessageBeamOnOther", "SoundBeamOnOther")
-mod:RegisterMessageSetting("P2_SHIELD", core.E.COMPARE_EQUAL, "MessageShieldPhase", "SoundShieldPhase")
-mod:RegisterMessageSetting("P2_JUMP", core.E.COMPARE_EQUAL, "MessageJumpPhase", "SoundJumpPhase")
-mod:RegisterMessageSetting("PILLAR_TIMEOUT", core.E.COMPARE_EQUAL, "MessageBigCast", "SoundBigCast")
+mod:RegisterMessageSetting("BEAM_YOU", "EQUAL", "MessageBeamOnYou", "SoundBeamOnYou")
+mod:RegisterMessageSetting("BEAM_OTHER", "EQUAL", "MessageBeamOnOther", "SoundBeamOnOther")
+mod:RegisterMessageSetting("P2_SHIELD", "EQUAL", "MessageShieldPhase", "SoundShieldPhase")
+mod:RegisterMessageSetting("P2_JUMP", "EQUAL", "MessageJumpPhase", "SoundJumpPhase")
+mod:RegisterMessageSetting("PILLAR_TIMEOUT", "EQUAL", "MessageBigCast", "SoundBigCast")
 
 ----------------------------------------------------------------------------------------------------
 -- Functions.
@@ -196,14 +196,14 @@ function mod:OnLaserDatachron(message, laserTargetName)
   mod:MarkOtherLaserTargets(isMyself, targetUnit)
   mod:AddTimerBar("BEAM", text, 15, nil, nil, mod.DropLaserMark, mod, laserMarkId)
 end
-mod:RegisterDatachronEvent("chron.avatus.laser", core.E.COMPARE_MATCH, mod.OnLaserDatachron)
+mod:RegisterDatachronEvent("chron.avatus.laser", "MATCH", mod.OnLaserDatachron)
 
 function mod:OnDeleteDatachron(message)
   mod:AddMsg("PILLAR_TIMEOUT", "Pillar Timeout", 5, "Beware")
   mod:AddTimerBar("PILLAR_TIMEOUT", "Pillar Timeout", 10)
   mod:AddTimerBar("NEXT_PILLAR", "Next Pillar", 50)
 end
-mod:RegisterDatachronEvent("chron.avatus.delete", core.E.COMPARE_EQUAL, mod.OnDeleteDatachron)
+mod:RegisterDatachronEvent("chron.avatus.delete", "EQUAL", mod.OnDeleteDatachron)
 
 function mod:OnSecureDatachron(message)
   mod:AddMsg("P2_SHIELD", "P2: SHIELD PHASE", 5, "Alert")
@@ -212,7 +212,7 @@ function mod:OnSecureDatachron(message)
   mod:AddTimerBar("DATA_DEVOURER", "Next Data Devourer", 53)
   mod:AddTimerBar("NEXT_PILLAR", "Next Pillar", 58)
 end
-mod:RegisterDatachronEvent("chron.station.secure", core.E.COMPARE_EQUAL, mod.OnSecureDatachron)
+mod:RegisterDatachronEvent("chron.station.secure", "EQUAL", mod.OnSecureDatachron)
 
 function mod:OnJumpDatachron(message)
   mod:AddMsg("P2_JUMP", "P2: JUMP PHASE", 5, "Alert")
@@ -220,4 +220,4 @@ function mod:OnJumpDatachron(message)
   mod:AddTimerBar("DATA_DEVOURER", "Next Data Devourer", 68)
   mod:AddTimerBar("NEXT_PILLAR", "Next Pillar", 75)
 end
-mod:RegisterDatachronEvent("chron.station.jump", core.E.COMPARE_EQUAL, mod.OnJumpDatachron)
+mod:RegisterDatachronEvent("chron.station.jump", "EQUAL", mod.OnJumpDatachron)
