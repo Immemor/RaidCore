@@ -41,6 +41,7 @@ mod:RegisterEnglishLocale({
     ["mark.bombsite.b"] = "B",
     -- Messages.
     ["msg.bomb.next"] = "Next bombs in",
+    ["msg.bomb.priority"] = "Rush %s",
   }
 )
 mod:RegisterGermanLocale({
@@ -99,6 +100,29 @@ function mod:AddWorldMarkers()
   mod:SetWorldMarker("BOMBSITE_B", "mark.bombsite.b", WORLD_POSITIONS.BOMBSITES.B)
 end
 
+function mod:OnIncindiaryCreated(id, unit, name)
+  mod:StartNormalBombTimer()
+
+  local locationName = mod:GetPriorityBombLocationName(unit)
+  mod:ShowBombSpawnMessage(locationName)
+end
+
+function mod:GetPriorityBombLocationName(unit)
+  if mod:IsPositionNearA(unit:GetPosition()) then
+    return self.L["mark.bombsite.a"]
+  end
+  return self.L["mark.bombsite.b"]
+end
+
+function mod:IsPositionNearA(position)
+  return position.z > 45
+end
+
+function mod:ShowBombSpawnMessage(locationName)
+  local msg = self.L["msg.bomb.priority"]:format(locationName)
+  mod:AddMsg("BOMB_SPAWN", msg, 5, "Info", "xkcdWhite")
+end
+
 function mod:StartFirstBombTimer()
   mod:StartBombTimer(TIMERS.BOMBS.FIRST)
 end
@@ -115,7 +139,7 @@ function mod:AddUnit(id, unit, name)
   core:AddUnit(unit)
 end
 
-mod:RegisterUnitEvent("unit.caustic", core.E.UNIT_CREATED, mod.StartNormalBombTimer)
+mod:RegisterUnitEvent("unit.incindiary", core.E.UNIT_CREATED, mod.OnIncindiaryCreated)
 mod:RegisterUnitEvents({"unit.luk'ki", "unit.incindiary", "unit.caustic"},{
     [core.E.UNIT_CREATED] = mod.AddUnit,
   }
