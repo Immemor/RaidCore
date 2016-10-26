@@ -23,7 +23,24 @@ mod:RegisterEnglishLocale({
     ["cast.lockjaw.shackle"] = "Blaze Shackles",
     -- Messages.
     ["msg.lockjaw.shackle.dodge"] = "INTERRUPT",
-  })
+  }
+)
+mod:RegisterGermanLocale({
+    -- Unit names.
+    ["unit.lockjaw"] = "Hauptwärter Maulsperr",
+    ["unit.shackle"] = "Glutfessel",
+    -- Cast names.
+    ["cast.lockjaw.shackle"] = "Glutfesseln",
+  }
+)
+mod:RegisterGermanLocale({
+    -- Unit names.
+    ["unit.lockjaw"] = "Gardien en chef Tétanos",
+    ["unit.shackle"] = "Fer enflammé",
+    -- Cast names.
+    -- ["cast.lockjaw.shackle"] = "TODO",
+  }
+)
 ----------------------------------------------------------------------------------------------------
 -- Settings.
 ----------------------------------------------------------------------------------------------------
