@@ -8,16 +8,16 @@
 -- TODO
 ----------------------------------------------------------------------------------------------------
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
-local mod = core:NewEncounter("Headshrinker", 104, 0, 548)
+local mod = core:NewEncounter("W'gasa", 104, 548, 557)
 if not mod then return end
 
 ----------------------------------------------------------------------------------------------------
 -- Registering combat.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterTrigMob("ALL", { "unit.headshrinker" })
+mod:RegisterTrigMob("ALL", { "unit.w'gasa" })
 mod:RegisterEnglishLocale({
     -- Unit names.
-    ["unit.headshrinker"] = "Headshrinker W'gasa",
+    ["unit.w'gasa"] = "Headshrinker W'gasa",
     -- Cast names.
     -- Messages.
   })
@@ -28,7 +28,7 @@ mod:RegisterEnglishLocale({
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterUnitEvents({"unit.headshrinker"},{
+mod:RegisterUnitEvents({"unit.w'gasa"},{
     [core.E.UNIT_CREATED] = function (_, _, unit)
       core:AddUnit(unit)
       core:WatchUnit(unit, core.E.TRACK_ALL)
