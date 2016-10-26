@@ -8,16 +8,16 @@
 -- TODO
 ----------------------------------------------------------------------------------------------------
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
-local mod = core:NewEncounter("Specialist", 104, 0, 548)
+local mod = core:NewEncounter("Luk'Ki", 104, 0, 548)
 if not mod then return end
 
 ----------------------------------------------------------------------------------------------------
 -- Registering combat.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterTrigMob("ALL", { "unit.specialist" })
+mod:RegisterTrigMob("ALL", { "unit.luk'ki" })
 mod:RegisterEnglishLocale({
     -- Unit names.
-    ["unit.specialist"] = "Munitions Specialist Luk'ki",
+    ["unit.luk'ki"] = "Munitions Specialist Luk'ki",
     -- Cast names.
     -- Messages.
   })
@@ -28,7 +28,7 @@ mod:RegisterEnglishLocale({
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterUnitEvents({"unit.specialist"},{
+mod:RegisterUnitEvents({"unit.luk'ki"},{
     [core.E.UNIT_CREATED] = function (_, _, unit)
       core:AddUnit(unit)
       core:WatchUnit(unit, core.E.TRACK_ALL)

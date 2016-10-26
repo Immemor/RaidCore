@@ -8,16 +8,16 @@
 -- TODO
 ----------------------------------------------------------------------------------------------------
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
-local mod = core:NewEncounter("Technician", 104, 0, 548)
+local mod = core:NewEncounter("Dud'li", 104, 0, 548)
 if not mod then return end
 
 ----------------------------------------------------------------------------------------------------
 -- Registering combat.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterTrigMob("ALL", { "unit.technician" })
+mod:RegisterTrigMob("ALL", { "unit.dud'li" })
 mod:RegisterEnglishLocale({
     -- Unit names.
-    ["unit.technician"] = "Torpedo Technician Dud'li",
+    ["unit.dud'li"] = "Torpedo Technician Dud'li",
     -- Cast names.
     -- Messages.
   })
@@ -28,7 +28,7 @@ mod:RegisterEnglishLocale({
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterUnitEvents({"unit.technician"},{
+mod:RegisterUnitEvents({"unit.dud'li"},{
     [core.E.UNIT_CREATED] = function (_, _, unit)
       core:AddUnit(unit)
       core:WatchUnit(unit, core.E.TRACK_ALL)

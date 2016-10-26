@@ -77,8 +77,8 @@
     <Script Name="Encounters/RMT/miniboss/Thrag.lua"/>
     <Script Name="Encounters/RMT/miniboss/Kino.lua"/>
     <Script Name="Encounters/RMT/miniboss/Cropper.lua"/>
-    <Script Name="Encounters/RMT/miniboss/Specialist.lua"/>
-    <Script Name="Encounters/RMT/miniboss/Technician.lua"/>
+    <Script Name="Encounters/RMT/miniboss/Luk'Ki.lua"/>
+    <Script Name="Encounters/RMT/miniboss/Dud'li.lua"/>
     <Script Name="Encounters/RMT/miniboss/Korgh.lua"/>
     <Script Name="Encounters/RMT/miniboss/Bilgebreath.lua"/>
     <Script Name="Encounters/RMT/miniboss/Muburu.lua"/>
