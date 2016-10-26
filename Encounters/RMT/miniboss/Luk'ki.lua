@@ -88,9 +88,14 @@ local WORLD_POSITIONS = {
   }
 }
 ----------------------------------------------------------------------------------------------------
+-- Locals.
+----------------------------------------------------------------------------------------------------
+local playerId
+----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
+  playerId = GameLib.GetPlayerUnit():GetId()
   mod:StartFirstBombTimer()
   mod:AddWorldMarkers()
 end
@@ -101,10 +106,15 @@ function mod:AddWorldMarkers()
 end
 
 function mod:OnIncindiaryCreated(id, unit, name)
+  mod:DrawLineToBomb(id)
   mod:StartNormalBombTimer()
 
   local locationName = mod:GetPriorityBombLocationName(unit)
   mod:ShowBombSpawnMessage(locationName)
+end
+
+function mod:DrawLineToBomb(id)
+  core:AddLineBetweenUnits("PRIORITY_BOMB", playerId, id, 5)
 end
 
 function mod:GetPriorityBombLocationName(unit)
@@ -139,7 +149,15 @@ function mod:AddUnit(id, unit, name)
   core:AddUnit(unit)
 end
 
-mod:RegisterUnitEvent("unit.incindiary", core.E.UNIT_CREATED, mod.OnIncindiaryCreated)
+function mod:OnIncindiaryDestroyed(id, unit, name)
+  core:RemoveLineBetweenUnits("PRIORITY_BOMB")
+end
+
+mod:RegisterUnitEvents("unit.incindiary",{
+    [core.E.UNIT_CREATED] = mod.OnIncindiaryCreated,
+    [core.E.UNIT_DESTROYED] = mod.OnIncindiaryDestroyed,
+  }
+)
 mod:RegisterUnitEvents({"unit.luk'ki", "unit.incindiary", "unit.caustic"},{
     [core.E.UNIT_CREATED] = mod.AddUnit,
   }
