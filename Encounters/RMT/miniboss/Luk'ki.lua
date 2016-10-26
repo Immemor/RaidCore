@@ -56,7 +56,7 @@ mod:RegisterFrenchLocale({
   }
 )
 ----------------------------------------------------------------------------------------------------
--- Settings.
+-- Constants.
 ----------------------------------------------------------------------------------------------------
 local DEBUFFS = {
   CAUSTIC = 87690, -- Reduces incoming healing by 70%
@@ -65,10 +65,15 @@ local DEBUFFS = {
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterUnitEvents({"unit.luk'ki"},{
-    [core.E.UNIT_CREATED] = function (_, _, unit)
-      core:AddUnit(unit)
-      core:WatchUnit(unit, core.E.TRACK_ALL)
-    end,
+function mod:AddUnit(id, unit, name)
+  core:AddUnit(unit)
+end
+
+mod:RegisterUnitEvents({
+    "unit.luk'ki",
+    "unit.incindiary",
+    "unit.caustic",
+    },{
+    [core.E.UNIT_CREATED] = mod.AddUnit,
   }
 )
