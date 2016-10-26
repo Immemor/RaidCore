@@ -52,10 +52,10 @@ mod:RegisterGermanLocale({
     -- Unit names.
     ["unit.flailing_arm"] = "Fuchtelnder Arm",
     -- Cast names.
-    -- ["cast.laser"] = "TODO",
     -- Datachron.
-    -- ["chron.robo.laser"] = "TODO",
+    ["chron.robo.laser"] = "Die Robomination versucht, ([^%s]+%s[^%s]+) zu verbrennen.",
     ["chron.robo.hides"] = "Die Robomination sinkt in den Müll hinab.",
+    ["chron.robo.erupts"] = "Die Robomination stürzt sich erneut ins Gefecht!",
     -- Messages.
     -- ["msg.snake.other"] = "SNAKE ON %s",
     -- ["msg.snake.you"] = "SNAKE ON YOU",
