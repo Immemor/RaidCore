@@ -36,8 +36,8 @@ mod:RegisterEnglishLocale({
     ["unit.invis.random_rot"] = "Hostile Invisible Unit Random Rot (0 hit radius)", --?
     ["unit.caustic"] = "Caustic Warhead",
     ["unit.incindiary"] = "Incindiary Warhead",
-    -- Cast names.
     -- Messages.
+    ["msg.bomb.next"] = "Next bombs in",
   }
 )
 mod:RegisterGermanLocale({
@@ -53,6 +53,14 @@ mod:RegisterFrenchLocale({
     ["unit.invis.random_rot"] = "Corruption aléatoire unité hostile invisible (rayon de portée : 0)",
     -- Cast names.
     -- Messages.
+    ["msg.bomb.next"] = "Nächste Bomben in",
+  }
+)
+----------------------------------------------------------------------------------------------------
+-- Settings.
+----------------------------------------------------------------------------------------------------
+mod:RegisterDefaultTimerBarConfigs({
+    ["NEXT_BOMB_TIMER"] = {sColor = "xkcdBrown"},
   }
 )
 ----------------------------------------------------------------------------------------------------
@@ -62,18 +70,37 @@ local DEBUFFS = {
   CAUSTIC = 87690, -- Reduces incoming healing by 70%
   INCINDIARY = 87693, -- Damage over time?
 }
+local TIMERS = {
+  BOMBS = {
+    FIRST = 21,
+    NORMAL = 42,
+  }
+}
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
+function mod:OnBossEnable()
+  mod:StartFirstBombTimer()
+end
+
+function mod:StartFirstBombTimer()
+  mod:StartBombTimer(TIMERS.BOMBS.FIRST)
+end
+
+function mod:StartNormalBombTimer()
+  mod:StartBombTimer(TIMERS.BOMBS.NORMAL)
+end
+
+function mod:StartBombTimer(time)
+  mod:AddTimerBar("NEXT_BOMB_TIMER", "msg.bomb.next", time)
+end
+
 function mod:AddUnit(id, unit, name)
   core:AddUnit(unit)
 end
 
-mod:RegisterUnitEvents({
-    "unit.luk'ki",
-    "unit.incindiary",
-    "unit.caustic",
-    },{
+mod:RegisterUnitEvent("unit.caustic", core.E.UNIT_CREATED, mod.StartNormalBombTimer)
+mod:RegisterUnitEvents({"unit.luk'ki", "unit.incindiary", "unit.caustic"},{
     [core.E.UNIT_CREATED] = mod.AddUnit,
   }
 )
