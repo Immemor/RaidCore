@@ -77,7 +77,7 @@ mod:RegisterGermanLocale({
     ["cast.swabbie.knockback"] = "Untoten-Abwehrmittel",
     -- ["cast.miniboss.crush"] = "TODO",
     -- ["cast.miniboss.gravedigger"] = "TODO",
-    -- ["cast.miniboss.deathwail"] = "TODO",
+    ["cast.miniboss.deathwail"] = "Totenklage",
     ["cast.nabber.lash"] = "Nekrotisches Peitschen",
     -- Messages.
     ["msg.swabbie.walking"] = "Läuft richtung %s",
