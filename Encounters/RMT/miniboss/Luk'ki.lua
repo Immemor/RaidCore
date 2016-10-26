@@ -18,7 +18,7 @@ Reduces all incoming healing by 70% on all players.
 
 Strat:
 Explode caustic warhead first, use dmg reduction abilities like dGrid. Heal up
-after it explodes and let incendiary die by itself and then heal up again.
+after it explodes and let incindiary die by itself and then heal up again.
 --]]
 ----------------------------------------------------------------------------------------------------
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
@@ -32,13 +32,36 @@ mod:RegisterTrigMob("ALL", { "unit.luk'ki" })
 mod:RegisterEnglishLocale({
     -- Unit names.
     ["unit.luk'ki"] = "Munitions Specialist Luk'ki",
+    ["unit.invis.0"] = "Hostile Invisible Unit for Fields (0 hit radius)", --?
+    ["unit.invis.random_rot"] = "Hostile Invisible Unit Random Rot (0 hit radius)", --?
+    ["unit.caustic"] = "Caustic Warhead",
+    ["unit.incindiary"] = "Incindiary Warhead",
     -- Cast names.
     -- Messages.
-  })
+  }
+)
+mod:RegisterGermanLocale({
+    -- Unit names.
+    ["unit.invis.0"] = "Feindselige unsichtbare Einheit für Felder (Trefferradius 0)",
+    -- Cast names.
+    -- Messages.
+  }
+)
+mod:RegisterFrenchLocale({
+    -- Unit names.
+    ["unit.invis.0"] = "Unité hostile invisible de terrain (rayon de portée : 0)",
+    ["unit.invis.random_rot"] = "Corruption aléatoire unité hostile invisible (rayon de portée : 0)",
+    -- Cast names.
+    -- Messages.
+  }
+)
 ----------------------------------------------------------------------------------------------------
 -- Settings.
 ----------------------------------------------------------------------------------------------------
-
+local DEBUFFS = {
+  CAUSTIC = 87690, -- Reduces incoming healing by 70%
+  INCINDIARY = 87693, -- Damage over time?
+}
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
