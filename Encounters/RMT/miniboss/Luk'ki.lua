@@ -36,6 +36,9 @@ mod:RegisterEnglishLocale({
     ["unit.invis.random_rot"] = "Hostile Invisible Unit Random Rot (0 hit radius)", --?
     ["unit.caustic"] = "Caustic Warhead",
     ["unit.incindiary"] = "Incindiary Warhead",
+    -- Marks.
+    ["mark.bombsite.a"] = "A",
+    ["mark.bombsite.b"] = "B",
     -- Messages.
     ["msg.bomb.next"] = "Next bombs in",
   }
@@ -77,11 +80,23 @@ local TIMERS = {
     NORMAL = 42,
   }
 }
+local WORLD_POSITIONS = {
+  BOMBSITES = {
+    A = {x = 153.99252319336, y = 0.84451651573181, z = 77.654678344727},
+    B = {x = 153.99252319336, y = 0.84451651573181, z = -12.570874214172},
+  }
+}
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
   mod:StartFirstBombTimer()
+  mod:AddWorldMarkers()
+end
+
+function mod:AddWorldMarkers()
+  mod:SetWorldMarker("BOMBSITE_A", "mark.bombsite.a", WORLD_POSITIONS.BOMBSITES.A)
+  mod:SetWorldMarker("BOMBSITE_B", "mark.bombsite.b", WORLD_POSITIONS.BOMBSITES.B)
 end
 
 function mod:StartFirstBombTimer()
