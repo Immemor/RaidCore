@@ -8,7 +8,7 @@
 -- TODO
 ----------------------------------------------------------------------------------------------------
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
-local mod = core:NewEncounter("Laveka", 104, 0, 548)
+local mod = core:NewEncounter("Laveka", 104, 548, 559)
 if not mod then return end
 
 ----------------------------------------------------------------------------------------------------
