@@ -24,7 +24,30 @@ mod:RegisterEnglishLocale({
     -- Messages.
     ["msg.skooty.cannon.get_out"] = "GET OUT",
     ["msg.skooty.cannon.get_out_tank"] = "TANK GET OUT",
-  })
+  }
+)
+mod:RegisterGermanLocale({
+    -- Unit names.
+    ["unit.jumpstart"] = "Starthilfe-Ladung",
+    ["unit.tether"] = "Befestigungshaken",
+    -- Cast names.
+    ["cast.skooty.cannon"] = "Impulskanone",
+    -- Buffs.
+    ["buff.impulse"] = "Impulskanone",
+    ["buff.tether"] = "Alle Schotten dicht!",
+  }
+)
+mod:RegisterFrenchLocale({
+    -- Unit names.
+    ["unit.jumpstart"] = "Charge de démarrage",
+    ["unit.tether"] = "Crochet de verrouillage",
+    -- Cast names.
+    ["cast.skooty.cannon"] = "Canon à impulsions",
+    -- Buffs.
+    ["buff.impulse"] = "Canon à impulsions",
+    ["buff.tether"] = "Se préparer au pire",
+  }
+)
 ----------------------------------------------------------------------------------------------------
 -- Settings.
 ----------------------------------------------------------------------------------------------------

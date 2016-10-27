@@ -23,7 +23,18 @@ mod:RegisterEnglishLocale({
     ["cast.thrag.gigavolt"] = "Gigavolt",
     -- Messages.
     ["msg.thrag.gigavolt.get_out"] = "GET OUT",
-  })
+  }
+)
+mod:RegisterGermanLocale({
+    -- Unit names.
+    ["unit.jumpstart"] = "Starthilfe-Ladung",
+  }
+)
+mod:RegisterFrenchLocale({
+    -- Unit names.
+    ["unit.jumpstart"] = "Charge de démarrage",
+  }
+)
 ----------------------------------------------------------------------------------------------------
 -- Settings.
 ----------------------------------------------------------------------------------------------------
