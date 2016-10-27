@@ -179,7 +179,7 @@ end
 
 function mod:ShowBeamMessages(isMyself, text)
   if isMyself then
-    mod:AddMsg("BEAM_YOU", "msg.laser.you", 5, "RunAway")
+    mod:AddMsg("BEAM_YOU", "msg.beam.you", 5, "RunAway")
   else
     mod:AddMsg("BEAM_OTHER", text, 5, "Info", "xkcdBlue")
   end
