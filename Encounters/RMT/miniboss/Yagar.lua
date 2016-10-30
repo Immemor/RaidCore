@@ -14,23 +14,28 @@ if not mod then return end
 ----------------------------------------------------------------------------------------------------
 -- Registering combat.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterTrigMob("ALL", { "unit.yagar", "unit.disposal" })
+mod:RegisterTrigMob("ANY", { "unit.yagar", "unit.disposal" })
 mod:RegisterEnglishLocale({
     -- Unit names.
     ["unit.yagar"] = "Fry-Cook Yagar",
     ["unit.glob"] = "Sauce Glob",
     ["unit.disposal"] = "Garbage Disposal",
+    ["unit.grease"] = "Grease Fire",
+    ["unit.cubig"] = "Roasting Cubig",
     -- Cast names.
     -- Messages.
   })
 ----------------------------------------------------------------------------------------------------
--- Settings.
+-- Constants.
 ----------------------------------------------------------------------------------------------------
-
+local DEBUFFS = {
+  CHARCUTERIE = 87842, --Probably pig target
+  SIZZLING = 87747, -- ??
+}
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterUnitEvents({"unit.yagar", "unit.disposal"},{
+mod:RegisterUnitEvents({"unit.yagar", "unit.disposal", "unit.cubig"},{
     [core.E.UNIT_CREATED] = function (_, _, unit)
       core:AddUnit(unit)
       core:WatchUnit(unit, core.E.TRACK_ALL)
