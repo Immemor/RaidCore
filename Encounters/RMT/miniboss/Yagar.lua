@@ -14,11 +14,12 @@ if not mod then return end
 ----------------------------------------------------------------------------------------------------
 -- Registering combat.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterTrigMob("ALL", { "unit.yagar" })
+mod:RegisterTrigMob("ALL", { "unit.yagar", "unit.disposal" })
 mod:RegisterEnglishLocale({
     -- Unit names.
     ["unit.yagar"] = "Fry-Cook Yagar",
     ["unit.glob"] = "Sauce Glob",
+    ["unit.disposal"] = "Garbage Disposal",
     -- Cast names.
     -- Messages.
   })
@@ -29,7 +30,7 @@ mod:RegisterEnglishLocale({
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterUnitEvents("unit.yagar",{
+mod:RegisterUnitEvents({"unit.yagar", "unit.disposal"},{
     [core.E.UNIT_CREATED] = function (_, _, unit)
       core:AddUnit(unit)
       core:WatchUnit(unit, core.E.TRACK_ALL)
