@@ -14,10 +14,11 @@ if not mod then return end
 ----------------------------------------------------------------------------------------------------
 -- Registering combat.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterTrigMob("ALL", { "unit.kino" })
+mod:RegisterTrigMob("ANY", { "unit.kino", "unit.station" })
 mod:RegisterEnglishLocale({
     -- Unit names.
     ["unit.kino"] = "Mixmaster Kino",
+    ["unit.station"] = "DJ Station",
     -- Cast names.
     -- Messages.
   })
@@ -28,7 +29,7 @@ mod:RegisterEnglishLocale({
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterUnitEvents("unit.kino",{
+mod:RegisterUnitEvents({"unit.kino", "unit.station"},{
     [core.E.UNIT_CREATED] = function (_, _, unit)
       core:AddUnit(unit)
       core:WatchUnit(unit, core.E.TRACK_ALL)
