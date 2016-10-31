@@ -64,6 +64,14 @@ mod:RegisterFrenchLocale({
 ----------------------------------------------------------------------------------------------------
 -- Settings.
 ----------------------------------------------------------------------------------------------------
+-- Visual.
+mod:RegisterDefaultSetting("LineBombs")
+-- Messages.
+mod:RegisterDefaultSetting("MessageBombSpawn")
+-- Sound.
+mod:RegisterDefaultSetting("SoundBombSpawn")
+-- Binds.
+mod:RegisterMessageSetting("BOMB_SPAWN", "EQUAL", "MessageBombSpawn", "SoundBombSpawn")
 mod:RegisterDefaultTimerBarConfigs({
     ["NEXT_BOMB_TIMER"] = {sColor = "xkcdBrown"},
   }
@@ -114,7 +122,9 @@ function mod:OnIncindiaryCreated(id, unit, name)
 end
 
 function mod:DrawLineToBomb(id)
-  core:AddLineBetweenUnits("PRIORITY_BOMB", playerId, id, 5)
+  if mod:GetSetting("LineBombs") then
+    core:AddLineBetweenUnits("PRIORITY_BOMB", playerId, id, 5)
+  end
 end
 
 function mod:GetPriorityBombLocationName(unit)
