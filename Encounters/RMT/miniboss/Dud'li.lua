@@ -26,6 +26,9 @@ mod:RegisterEnglishLocale({
     -- Messages.
     ["msg.bomb.next"] = "Next bombs in",
     ["msg.bomb.spawn"] = "Bombs spawned",
+    ["msg.bomb.close"] = "%s exploding soon",
+    ["msg.flashbang"] = "Flashbang",
+    ["msg.radioactive"] = "Radioactive",
   }
 )
 mod:RegisterGermanLocale({
@@ -44,10 +47,13 @@ mod:RegisterFrenchLocale({
 -- Visual.
 -- Messages.
 mod:RegisterDefaultSetting("MessageBombSpawn")
+mod:RegisterDefaultSetting("MessageBombClose")
 -- Sound.
 mod:RegisterDefaultSetting("SoundBombSpawn")
+mod:RegisterDefaultSetting("SoundBombClose")
 -- Binds.
 mod:RegisterMessageSetting("BOMB_SPAWN", "EQUAL", "MessageBombSpawn", "SoundBombSpawn")
+mod:RegisterMessageSetting("BOMB_CLOSE_%d+", "MATCH", "MessageBombClose", "SoundBombClose")
 mod:RegisterDefaultTimerBarConfigs({
     ["NEXT_BOMB_TIMER"] = {sColor = "xkcdBrown"},
   }
@@ -70,11 +76,12 @@ local WORLD_POSITIONS = {
 ----------------------------------------------------------------------------------------------------
 -- Locals.
 ----------------------------------------------------------------------------------------------------
-
+local explosionMessagesSent
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
+  explosionMessagesSent = {}
   mod:StartFirstBombTimer()
   mod:AddWorldMarkers()
 end
@@ -116,10 +123,41 @@ function mod:AddUnit(id, unit, name)
   core:AddUnit(unit)
 end
 
-mod:RegisterUnitEvents("unit.warhead.flashbang",{
-    [core.E.UNIT_CREATED] = mod.OnFlashbangCreated,
+function mod:OnBombCreated(id, unit, name)
+  core:WatchUnit(unit, core.E.TRACK_HEALTH)
+  explosionMessagesSent[id] = false
+end
+
+function mod:IsBombCloseToExplosion(id, percent)
+  return not explosionMessagesSent[id] and percent <= 10
+end
+
+function mod:OnBombHealthChanged(id, percent, nickName)
+  if mod:IsBombCloseToExplosion(id, percent) then
+    explosionMessagesSent[id] = true
+    local msg = self.L["msg.bomb.close"]:format(nickName)
+    mod:AddMsg("BOMB_CLOSE_"..id, msg, 5, "Beware", "xkcdRed")
+  end
+end
+
+function mod:OnFlashbangHealthChanged(id, percent)
+  mod:OnBombHealthChanged(id, percent, self.L["msg.flashbang"])
+end
+
+function mod:OnRadioactiveHealthChanged(id, percent)
+  mod:OnBombHealthChanged(id, percent, self.L["msg.radioactive"])
+end
+
+mod:RegisterUnitEvents({"unit.warhead.radioactive", "unit.warhead.flashbang"},{
+    [core.E.UNIT_CREATED] = mod.OnBombCreated,
   }
 )
+mod:RegisterUnitEvents("unit.warhead.flashbang",{
+    [core.E.UNIT_CREATED] = mod.OnFlashbangCreated,
+    [core.E.HEALTH_CHANGED] = mod.OnFlashbangHealthChanged,
+  }
+)
+mod:RegisterUnitEvent("unit.warhead.radioactive", core.E.HEALTH_CHANGED, mod.OnRadioactiveHealthChanged)
 mod:RegisterUnitEvents({"unit.dud'li", "unit.warhead.radioactive", "unit.warhead.flashbang"},{
     [core.E.UNIT_CREATED] = mod.AddUnit,
   }
