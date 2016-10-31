@@ -127,7 +127,7 @@ end
 function mod:OnBombCreated(id, unit, name)
   core:WatchUnit(unit, core.E.TRACK_HEALTH)
   explosionMessagesSent[id] = false
-  if mod:GetSetting("CrosshairPriority") then
+  if mod:GetSetting("CrosshairBombs") then
     core:AddPicture(id, id, "Crosshair", 30, 0, 0, nil, "red")
   end
 end

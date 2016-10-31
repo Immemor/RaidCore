@@ -22,7 +22,7 @@ after it explodes and let incindiary die by itself and then heal up again.
 --]]
 ----------------------------------------------------------------------------------------------------
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
-local mod = core:NewEncounter("Luk'Ki", 104, 548, 555)
+local mod = core:NewEncounter("Luk'ki", 104, 548, 555)
 if not mod then return end
 
 ----------------------------------------------------------------------------------------------------
@@ -34,14 +34,17 @@ mod:RegisterEnglishLocale({
     ["unit.luk'ki"] = "Munitions Specialist Luk'ki",
     ["unit.invis.0"] = "Hostile Invisible Unit for Fields (0 hit radius)", --?
     ["unit.invis.random_rot"] = "Hostile Invisible Unit Random Rot (0 hit radius)", --?
-    ["unit.caustic"] = "Caustic Warhead",
-    ["unit.incindiary"] = "Incindiary Warhead",
+    ["unit.warhead.caustic"] = "Caustic Warhead",
+    ["unit.warhead.incindiary"] = "Incindiary Warhead",
     -- Marks.
     ["mark.bombsite.a"] = "A",
     ["mark.bombsite.b"] = "B",
     -- Messages.
     ["msg.bomb.next"] = "Next bombs in",
     ["msg.bomb.priority"] = "Rush %s",
+    ["msg.bomb.close"] = "%s exploding soon",
+    ["msg.caustic"] = "Caustic",
+    ["msg.incindiary"] = "Incindiary",
   }
 )
 mod:RegisterGermanLocale({
@@ -63,13 +66,17 @@ mod:RegisterFrenchLocale({
 -- Settings.
 ----------------------------------------------------------------------------------------------------
 -- Visual.
+mod:RegisterDefaultSetting("CrosshairBombs")
 mod:RegisterDefaultSetting("LineBombs")
 -- Messages.
 mod:RegisterDefaultSetting("MessageBombSpawn")
+mod:RegisterDefaultSetting("MessageBombClose")
 -- Sound.
 mod:RegisterDefaultSetting("SoundBombSpawn")
+mod:RegisterDefaultSetting("SoundBombClose")
 -- Binds.
 mod:RegisterMessageSetting("BOMB_SPAWN", "EQUAL", "MessageBombSpawn", "SoundBombSpawn")
+mod:RegisterMessageSetting("BOMB_CLOSE_%d+", "MATCH", "MessageBombClose", "SoundBombClose")
 mod:RegisterDefaultTimerBarConfigs({
     ["NEXT_BOMB_TIMER"] = {sColor = "xkcdBrown"},
   }
@@ -97,11 +104,13 @@ local WORLD_POSITIONS = {
 -- Locals.
 ----------------------------------------------------------------------------------------------------
 local playerId
+local explosionMessagesSent
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
   playerId = GameLib.GetPlayerUnit():GetId()
+  explosionMessagesSent = {}
   mod:StartFirstBombTimer()
   mod:AddWorldMarkers()
 end
@@ -161,12 +170,51 @@ function mod:OnIncindiaryDestroyed(id, unit, name)
   core:RemoveLineBetweenUnits("PRIORITY_BOMB")
 end
 
-mod:RegisterUnitEvents("unit.incindiary",{
-    [core.E.UNIT_CREATED] = mod.OnIncindiaryCreated,
-    [core.E.UNIT_DESTROYED] = mod.OnIncindiaryDestroyed,
+function mod:OnBombCreated(id, unit, name)
+  core:WatchUnit(unit, core.E.TRACK_HEALTH)
+  explosionMessagesSent[id] = false
+  if mod:GetSetting("CrosshairBombs") then
+    core:AddPicture(id, id, "Crosshair", 30, 0, 0, nil, "red")
+  end
+end
+
+function mod:OnBombDestroyed(id, unit, name)
+  core:RemovePicture(id)
+end
+
+function mod:IsBombCloseToExplosion(id, percent)
+  return not explosionMessagesSent[id] and percent <= 10
+end
+
+function mod:OnBombHealthChanged(id, percent, nickName)
+  if mod:IsBombCloseToExplosion(id, percent) then
+    explosionMessagesSent[id] = true
+    local msg = self.L["msg.bomb.close"]:format(nickName)
+    mod:AddMsg("BOMB_CLOSE_"..id, msg, 5, "Beware", "xkcdRed")
+  end
+end
+
+function mod:OnIncindiaryHealthChanged(id, percent)
+  mod:OnBombHealthChanged(id, percent, self.L["msg.incindiary"])
+end
+
+function mod:OnCausticHealthChanged(id, percent)
+  mod:OnBombHealthChanged(id, percent, self.L["msg.caustic"])
+end
+
+mod:RegisterUnitEvents({"unit.warhead.incindiary", "unit.warhead.caustic"},{
+    [core.E.UNIT_CREATED] = mod.OnBombCreated,
+    [core.E.UNIT_DESTROYED] = mod.OnBombDestroyed,
   }
 )
-mod:RegisterUnitEvents({"unit.luk'ki", "unit.incindiary", "unit.caustic"},{
+mod:RegisterUnitEvents("unit.warhead.incindiary",{
+    [core.E.UNIT_CREATED] = mod.OnIncindiaryCreated,
+    [core.E.UNIT_DESTROYED] = mod.OnIncindiaryDestroyed,
+    [core.E.HEALTH_CHANGED] = mod.OnIncindiaryHealthChanged,
+  }
+)
+mod:RegisterUnitEvent("unit.warhead.caustic", core.E.HEALTH_CHANGED, mod.OnCausticHealthChanged)
+mod:RegisterUnitEvents({"unit.luk'ki", "unit.warhead.incindiary", "unit.warhead.caustic"},{
     [core.E.UNIT_CREATED] = mod.AddUnit,
   }
 )
