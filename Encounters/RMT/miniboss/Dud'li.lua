@@ -126,6 +126,11 @@ end
 function mod:OnBombCreated(id, unit, name)
   core:WatchUnit(unit, core.E.TRACK_HEALTH)
   explosionMessagesSent[id] = false
+  core:AddPicture(id, id, "Crosshair", 30, 0, 0, nil, "red")
+end
+
+function mod:OnBombDestroyed(id, unit, name)
+  core:RemovePicture(id)
 end
 
 function mod:IsBombCloseToExplosion(id, percent)
@@ -150,6 +155,7 @@ end
 
 mod:RegisterUnitEvents({"unit.warhead.radioactive", "unit.warhead.flashbang"},{
     [core.E.UNIT_CREATED] = mod.OnBombCreated,
+    [core.E.UNIT_DESTROYED] = mod.OnBombDestroyed,
   }
 )
 mod:RegisterUnitEvents("unit.warhead.flashbang",{
