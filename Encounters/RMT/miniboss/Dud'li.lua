@@ -45,6 +45,7 @@ mod:RegisterFrenchLocale({
 -- Settings.
 ----------------------------------------------------------------------------------------------------
 -- Visual.
+mod:RegisterDefaultSetting("CrosshairBombs")
 -- Messages.
 mod:RegisterDefaultSetting("MessageBombSpawn")
 mod:RegisterDefaultSetting("MessageBombClose")
@@ -126,7 +127,9 @@ end
 function mod:OnBombCreated(id, unit, name)
   core:WatchUnit(unit, core.E.TRACK_HEALTH)
   explosionMessagesSent[id] = false
-  core:AddPicture(id, id, "Crosshair", 30, 0, 0, nil, "red")
+  if mod:GetSetting("CrosshairPriority") then
+    core:AddPicture(id, id, "Crosshair", 30, 0, 0, nil, "red")
+  end
 end
 
 function mod:OnBombDestroyed(id, unit, name)
