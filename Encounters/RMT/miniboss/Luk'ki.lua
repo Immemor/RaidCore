@@ -47,7 +47,6 @@ mod:RegisterEnglishLocale({
 mod:RegisterGermanLocale({
     -- Unit names.
     ["unit.invis.0"] = "Feindselige unsichtbare Einheit für Felder (Trefferradius 0)",
-    -- Cast names.
     -- Messages.
     ["msg.bomb.next"] = "Nächste Bomben in",
   }
@@ -56,7 +55,6 @@ mod:RegisterFrenchLocale({
     -- Unit names.
     ["unit.invis.0"] = "Unité hostile invisible de terrain (rayon de portée : 0)",
     ["unit.invis.random_rot"] = "Corruption aléatoire unité hostile invisible (rayon de portée : 0)",
-    -- Cast names.
     -- Messages.
     ["msg.bomb.next"] = "Prochaine bombe dans",
   }
