@@ -33,7 +33,7 @@ mod:RegisterGermanLocale({
     ["cast.lockjaw.shackle"] = "Glutfesseln",
   }
 )
-mod:RegisterGermanLocale({
+mod:RegisterFrenchLocale({
     -- Unit names.
     ["unit.lockjaw"] = "Gardien en chef Tétanos",
     ["unit.shackle"] = "Fer enflammé",
