@@ -38,7 +38,7 @@ mod:RegisterFrenchLocale({
     ["unit.lockjaw"] = "Gardien en chef Tétanos",
     ["unit.shackle"] = "Fer enflammé",
     -- Cast names.
-    -- ["cast.lockjaw.shackle"] = "TODO",
+    ["cast.lockjaw.shackle"] = "Fers enflammés",
   }
 )
 ----------------------------------------------------------------------------------------------------
