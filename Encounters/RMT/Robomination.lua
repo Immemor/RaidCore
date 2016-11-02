@@ -51,26 +51,10 @@ mod:RegisterEnglishLocale({
 mod:RegisterGermanLocale({
     -- Unit names.
     ["unit.flailing_arm"] = "Fuchtelnder Arm",
-    -- Cast names.
     -- Datachron.
     ["chron.robo.laser"] = "Die Robomination versucht, ([^%s]+%s[^%s]+) zu verbrennen.",
     ["chron.robo.hides"] = "Die Robomination sinkt in den Müll hinab.",
     ["chron.robo.erupts"] = "Die Robomination stürzt sich erneut ins Gefecht!",
-    -- Messages.
-    -- ["msg.snake.other"] = "SNAKE ON %s",
-    -- ["msg.snake.you"] = "SNAKE ON YOU",
-    -- ["msg.snake.near"] = "SNAKE NEAR ON %s",
-    -- ["msg.snake.next"] = "Next snake in",
-    -- ["msg.robo.laser.other"] = "LASER ON %s",
-    -- ["msg.robo.laser.you"] = "LASER ON YOU",
-    -- ["msg.robo.laser.next"] = "Next incinerate in",
-    -- ["msg.maze.coming"] = "MAZE SOON",
-    -- ["msg.maze.now"] = "CENTER",
-    -- ["msg.arms.next"] = "Arms spawning in",
-    -- ["msg.cannon_arm.spawned"] = "CANNON",
-    -- ["msg.cannon_arm.interrupt"] = "INTERRUPT CANNON",
-    -- ["msg.spew.now"] = "Spew",
-    -- ["msg.spew.next"] = "Next spew in",
   }
 )
 mod:RegisterFrenchLocale({
@@ -81,21 +65,6 @@ mod:RegisterFrenchLocale({
     -- Datachron.
     ["chron.robo.laser"] = "Robomination essaie d'incinérer ([^%s]+%s[^\.]+)\.",
     ["chron.robo.hides"] = "Robomination s'enfonce dans les ordures.",
-    -- Messages.
-    -- ["msg.snake.other"] = "SNAKE ON %s",
-    -- ["msg.snake.you"] = "SNAKE ON YOU",
-    -- ["msg.snake.near"] = "SNAKE NEAR ON %s",
-    -- ["msg.snake.next"] = "Next snake in",
-    -- ["msg.robo.laser.other"] = "LASER ON %s",
-    -- ["msg.robo.laser.you"] = "LASER ON YOU",
-    -- ["msg.robo.laser.next"] = "Next incinerate in",
-    -- ["msg.maze.coming"] = "MAZE SOON",
-    -- ["msg.maze.now"] = "CENTER",
-    -- ["msg.arms.next"] = "Arms spawning in",
-    -- ["msg.cannon_arm.spawned"] = "CANNON",
-    -- ["msg.cannon_arm.interrupt"] = "INTERRUPT CANNON",
-    -- ["msg.spew.now"] = "Spew",
-    -- ["msg.spew.next"] = "Next spew in",
   }
 )
 ----------------------------------------------------------------------------------------------------

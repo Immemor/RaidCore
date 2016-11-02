@@ -62,9 +62,6 @@ mod:RegisterGermanLocale({
     -- Unit names.
     ["unit.invis.0"] = "Feindselige unsichtbare Einheit für Felder (Trefferradius 0)", -- ??
     ["unit.turret"] = "Rotmonds Geschützturm",
-    -- Cast names.
-    -- Datachrons.
-    -- Markers.
     -- Buffs.
     ["buffs.org.kinetic_link"] = "Kinetische Verbindung",
     ["buffs.orb.fixation"] = "Kinetische Fixierung",
@@ -74,23 +71,12 @@ mod:RegisterGermanLocale({
     ["say.mordechai.1"] = "Fresst meinen heißen Flux, ihr Landratten!",
     ["say.mordechai.2"] = "Ab ins Nichts!",
     ["say.mordechai.3"] = "Wo wollt ihr denn hin, ihr Memmen? Ha, ha! Höchstens in euer Grab!",
-    -- Messages.
-    -- ["msg.mordechai.shuriken.next"] = "Next Shuriken",
-    -- ["msg.mordechai.barrage.next"] = "Next Vicious Barrage",
-    -- ["msg.phase.start"] = "SUCKY SUCKY PHASE SOON",
-    -- ["msg.orb.spawned"] = "ORB",
-    -- ["msg.orb.kinetic_link"] = "DPS THE ORB!",
-    -- ["msg.orb.next"] = "Next Orb",
-    -- ["msg.mordechai.shuriken.you"] = "SHURIKEN ON YOU",
   }
 )
 mod:RegisterFrenchLocale({
     -- Unit names.
     ["unit.invis.0"] = "Unité hostile invisible de terrain (rayon de portée : 0)", -- ??
     ["unit.turret"] = "Tourelle de Rougelune",
-    -- Cast names.
-    -- Datachrons.
-    -- Markers.
     -- Buffs.
     ["buffs.orb.kinetic_link"] = "Lien cinétique",
     ["buffs.orb.fixation"] = "Fixation cinétique",
@@ -100,14 +86,6 @@ mod:RegisterFrenchLocale({
     ["say.mordechai.1"] = "Vous allez tous crever, bande d'asticots !",
     ["say.mordechai.2"] = "Allez, ouste, dans l'vide !",
     ["say.mordechai.3"] = "Où est-ce que vous pensez aller, bande de lâches ? Ha ha ! Ici, c'est l'terminus !",
-    -- Messages.
-    -- ["msg.mordechai.shuriken.next"] = "Next Shuriken",
-    -- ["msg.mordechai.barrage.next"] = "Next Vicious Barrage",
-    -- ["msg.phase.start"] = "SUCKY SUCKY PHASE SOON",
-    -- ["msg.orb.spawned"] = "ORB",
-    -- ["msg.orb.kinetic_link"] = "DPS THE ORB!",
-    -- ["msg.orb.next"] = "Next Orb",
-    -- ["msg.mordechai.shuriken.you"] = "SHURIKEN ON YOU",
   }
 )
 ----------------------------------------------------------------------------------------------------

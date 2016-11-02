@@ -60,24 +60,8 @@ mod:RegisterGermanLocale({
     ["pub.cooling_turbine"] = "Kühlturbine",
     ["pub.spark_plug"] = "Zündkerze",
     ["pub.lubricant_nozzle"] = "Schmiermitteldüse",
-    -- Cast names.
     -- Datachrons.
     ["chron.elektroshock"] = "([^%s]+%s[^%s]+) leidet unter „Electroshock“",
-    -- Messages.
-    -- ["msg.warrior.liquidate.next"] = "Next Liquidate in",
-    -- ["msg.warrior.liquidate.stack"] = "Stack",
-    -- ["msg.engineer.electroshock.next"] = "Next Electroshock in",
-    -- ["msg.engineer.electroshock.swap.other"] = "%s SWAP TO WARRIOR",
-    -- ["msg.engineer.electroshock.swap.you"] = "YOU SWAP TO WARRIOR",
-    -- ["msg.engineer.electroshock.swap.return"] = "SWAP TO ENGINEER",
-    -- ["msg.fire_orb.next"] = "Next Fire Orb in",
-    -- ["msg.fire_orb.you"] = "FIRE ORB ON YOU",
-    -- ["msg.fire_orb.spawned"] = "Fire Orb",
-    -- ["msg.fire_orb.pop.timer"] = "Fire Orb is safe to pop in",
-    -- ["msg.fire_orb.pop.msg"] = "Pop the Orb",
-    -- ["msg.core.health.high.warning"] = "%s HIGH HEALTH!",
-    -- ["msg.core.health.low.warning"] = "%s LOW HEALTH!",
-    -- ["msg.rocket_jump.moved"] = "%s MOVED",
   }
 )
 mod:RegisterFrenchLocale({
@@ -88,23 +72,6 @@ mod:RegisterFrenchLocale({
     ["pub.cooling_turbine"] = "Turbine de refroidissement",
     ["pub.spark_plug"] = "Bougie d'allumage",
     ["pub.lubricant_nozzle"] = "Embout de lubrification",
-    -- Datachrons.
-    -- Cast names.
-    -- Messages.
-    -- ["msg.warrior.liquidate.next"] = "Next Liquidate in",
-    -- ["msg.warrior.liquidate.stack"] = "Stack",
-    -- ["msg.engineer.electroshock.next"] = "Next Electroshock in",
-    -- ["msg.engineer.electroshock.swap.other"] = "%s SWAP TO WARRIOR",
-    -- ["msg.engineer.electroshock.swap.you"] = "YOU SWAP TO WARRIOR",
-    -- ["msg.engineer.electroshock.swap.return"] = "SWAP TO ENGINEER",
-    -- ["msg.fire_orb.next"] = "Next Fire Orb in",
-    -- ["msg.fire_orb.you"] = "FIRE ORB ON YOU",
-    -- ["msg.fire_orb.spawned"] = "Fire Orb",
-    -- ["msg.fire_orb.pop.timer"] = "Fire Orb is safe to pop in",
-    -- ["msg.fire_orb.pop.msg"] = "Pop the Orb",
-    -- ["msg.core.health.high.warning"] = "%s HIGH HEALTH!",
-    -- ["msg.core.health.low.warning"] = "%s LOW HEALTH!",
-    -- ["msg.rocket_jump.moved"] = "%s MOVED",
   }
 )
 ----------------------------------------------------------------------------------------------------

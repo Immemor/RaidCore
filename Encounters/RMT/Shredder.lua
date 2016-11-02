@@ -107,18 +107,6 @@ mod:RegisterFrenchLocale({
     ["cast.miniboss.gravedigger"] = "Fossoyeur",
     ["cast.miniboss.deathwail"] = "Gémissement mortel",
     ["cast.nabber.lash"] = "Fouet nécrotique",
-    -- Messages.
-    -- ["msg.swabbie.walking"] = "Läuft richtung %s",
-    -- ["msg.swabbie.walking.direction.north"] = "norden",
-    -- ["msg.swabbie.walking.direction.south"] = "süden",
-    -- ["msg.saw.middle"] = "SÄGE MITTE",
-    -- ["msg.saw.safe_spot"] = "LÜCKE %s",
-    -- ["msg.saw.safe_spot.left"] = "LINKS",
-    -- ["msg.saw.safe_spot.middle"] = "MITTE",
-    -- ["msg.saw.safe_spot.right"] = "RECHTS",
-    -- ["msg.adds.next"] = "Nächste Welle von adds kommt ...",
-    -- ["msg.nabber.spawned"] = "NABBER GESPAWNT",
-    -- ["msg.miniboss.spawned"] = "MINIBOSS GESPAWNT",
   }
 )
 ----------------------------------------------------------------------------------------------------
