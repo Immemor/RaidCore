@@ -14,7 +14,7 @@ if not mod then return end
 ----------------------------------------------------------------------------------------------------
 -- Registering combat.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterTrigMob("ANY", { "unit.robo" })
+mod:RegisterTrigMob(core.E.TRIGGER_ANY, { "unit.robo" })
 mod:RegisterEnglishLocale({
     -- Unit names.
     ["unit.robo"] = "Robomination",
@@ -160,15 +160,15 @@ mod:RegisterDefaultSetting("MessageCannonInterrupt")
 mod:RegisterDefaultSetting("MessageLaser")
 mod:RegisterDefaultSetting("MessageSpew")
 -- Binds.
-mod:RegisterMessageSetting("SNAKE_MSG", "EQUAL", "MessageSnake", "SoundSnake")
-mod:RegisterMessageSetting("SNAKE_MSG_NEAR", "EQUAL", "MessageSnakeNear", "SoundSnakeNear")
-mod:RegisterMessageSetting("SNAKE_MSG_OTHER", "EQUAL", "MessageSnakeOther")
-mod:RegisterMessageSetting("ROBO_MAZE_CLOSE", "EQUAL", "MessagePhaseChangeClose", "SoundPhaseChangeClose")
-mod:RegisterMessageSetting("ROBO_MAZE_NOW", "EQUAL", "MessagePhaseChange", "SoundPhaseChange")
-mod:RegisterMessageSetting("ARMS_MSG_SPAWN", "EQUAL", "MessageArmSpawn", "SoundArmSpawn")
-mod:RegisterMessageSetting("ARMS_MSG_CAST_%d+", "MATCH", "MessageCannonInterrupt", "SoundCannonInterrupt")
-mod:RegisterMessageSetting("LASER_MSG", "EQUAL", "MessageLaser", "SoundLaser")
-mod:RegisterMessageSetting("SPEW_MSG", "EQUAL", "MessageSpew", "SoundSpew")
+mod:RegisterMessageSetting("SNAKE_MSG", core.E.COMPARE_EQUAL, "MessageSnake", "SoundSnake")
+mod:RegisterMessageSetting("SNAKE_MSG_NEAR", core.E.COMPARE_EQUAL, "MessageSnakeNear", "SoundSnakeNear")
+mod:RegisterMessageSetting("SNAKE_MSG_OTHER", core.E.COMPARE_EQUAL, "MessageSnakeOther")
+mod:RegisterMessageSetting("ROBO_MAZE_CLOSE", core.E.COMPARE_EQUAL, "MessagePhaseChangeClose", "SoundPhaseChangeClose")
+mod:RegisterMessageSetting("ROBO_MAZE_NOW", core.E.COMPARE_EQUAL, "MessagePhaseChange", "SoundPhaseChange")
+mod:RegisterMessageSetting("ARMS_MSG_SPAWN", core.E.COMPARE_EQUAL, "MessageArmSpawn", "SoundArmSpawn")
+mod:RegisterMessageSetting("ARMS_MSG_CAST_%d+", core.E.COMPARE_MATCH, "MessageCannonInterrupt", "SoundCannonInterrupt")
+mod:RegisterMessageSetting("LASER_MSG", core.E.COMPARE_EQUAL, "MessageLaser", "SoundLaser")
+mod:RegisterMessageSetting("SPEW_MSG", core.E.COMPARE_EQUAL, "MessageSpew", "SoundSpew")
 -- Timer default configs.
 mod:RegisterDefaultTimerBarConfigs({
     ["NEXT_SNAKE_TIMER"] = { sColor = "xkcdBrown" },
@@ -191,7 +191,7 @@ function mod:OnBossEnable()
   mod:DrawCompactorGrid()
 end
 
-mod:RegisterDatachronEvent("chron.robo.snake", "MATCH", function(self, _, snakeTargetName)
+mod:RegisterDatachronEvent("chron.robo.snake", core.E.COMPARE_MATCH, function(self, _, snakeTargetName)
     local snakeTarget = GetPlayerUnitByName(snakeTargetName)
     local isOnMyself = snakeTarget == playerUnit
     local isSnakeNearYou = not isOnMyself and mod:GetDistanceBetweenUnits(playerUnit, snakeTarget) < 10
@@ -218,7 +218,7 @@ mod:RegisterDatachronEvent("chron.robo.snake", "MATCH", function(self, _, snakeT
   end
 )
 
-mod:RegisterDatachronEvent("chron.robo.hides", "EQUAL", function ()
+mod:RegisterDatachronEvent("chron.robo.hides", core.E.COMPARE_EQUAL, function()
     phase = MAZE_PHASE
     mod:RemoveTimerBar("NEXT_SNAKE_TIMER")
     mod:RemoveTimerBar("NEXT_INCINERATE_TIMER")
@@ -234,7 +234,7 @@ mod:RegisterDatachronEvent("chron.robo.hides", "EQUAL", function ()
   end
 )
 
-mod:RegisterDatachronEvent("chron.robo.shows", "EQUAL", function ()
+mod:RegisterDatachronEvent("chron.robo.shows", core.E.COMPARE_EQUAL, function()
     phase = DPS_PHASE
     core:RemoveLineBetweenUnits("ROBO_MAZE_LINE")
     mod:AddTimerBar("NEXT_SNAKE_TIMER", "msg.snake.next", FIRST_SNAKE_TIMER)
@@ -245,7 +245,7 @@ mod:RegisterDatachronEvent("chron.robo.shows", "EQUAL", function ()
   end
 )
 
-mod:RegisterDatachronEvent("chron.robo.laser", "MATCH", function(self, _, laserTargetName)
+mod:RegisterDatachronEvent("chron.robo.laser", core.E.COMPARE_MATCH, function(self, _, laserTargetName)
     local laserTarget = GetPlayerUnitByName(laserTargetName)
     local isOnMyself = laserTarget == playerUnit
     local laserOnX

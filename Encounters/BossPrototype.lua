@@ -10,18 +10,8 @@
 ------------------------------------------------------------------------------
 
 local RaidCore = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
+local Assert = Apollo.GetPackage("RaidCore:Assert-1.0").tPackage
 local EncounterPrototype = {}
-
-------------------------------------------------------------------------------
--- Constants
-------------------------------------------------------------------------------
--- Register state allowed.
-local TRIG__ALL = 1
-local TRIG__ANY = 2
-local TRIG_STATES = {
-  ["ALL"] = TRIG__ALL,
-  ["ANY"] = TRIG__ANY,
-}
 
 ------------------------------------------------------------------------------
 -- Locals
@@ -55,18 +45,25 @@ end
 ------------------------------------------------------------------------------
 -- Encounter Prototype.
 ------------------------------------------------------------------------------
-function EncounterPrototype:RegisterTrigMob(sTrigType, tTrigList)
-  assert(type(tTrigList) == "table")
-  local nTrigType = TRIG_STATES[sTrigType:upper()]
-  assert(nTrigType)
-  self.nTrigType = nTrigType
-  self.EnableMob = tTrigList
+function EncounterPrototype:RegisterTrigMob(nTrigType, tTrigList)
+  tTrigList = type(tTrigList) == "string" and {tTrigList} or tTrigList
+  Assert:Table(tTrigList, "Trigger names is not a table: %s, %s", self.name, tostring(tTrigList))
+  Assert:EmptyTable(tTrigList, "Trigger names table is empty: %s", self.name)
+  Assert:EqualOr(nTrigType, {RaidCore.E.TRIGGER_ALL, RaidCore.E.TRIGGER_ANY},
+    "Invalid trigger type: %s, %s", self.name, tostring(nTrigType)
+  )
+  if nTrigType == RaidCore.E.TRIGGER_ANY then
+    self.OnTrigCheck = self.OnTrigAny
+  elseif nTrigType == RaidCore.E.TRIGGER_ALL then
+    self.OnTrigCheck = self.OnTrigAll
+  end
+  self.tTriggerNames = tTrigList
 end
 
 -- Register a default config for bar manager.
 -- @param tConfig Array of Timer Options indexed by the timer's key.
 function EncounterPrototype:RegisterDefaultTimerBarConfigs(tConfig)
-  assert(type(tConfig) == "table")
+  Assert:Table(tConfig)
   self.tDefaultTimerBarsOptions = tConfig
 end
 
@@ -74,22 +71,24 @@ end
 -- @param sKey key to save/restore and use a setting.
 -- @param bDefaultSetting default setting.
 function EncounterPrototype:RegisterDefaultSetting(sKey, bDefaultSetting)
-  assert(sKey)
-  assert(self.tDefaultSettings[sKey] == nil)
+  Assert:NotNilOrFalse(sKey, "Key is empty: %s", self.name)
+  Assert:Nil(self.tDefaultSettings[sKey], "Default setting already set: %s, %s", self.name, sKey)
   self.tDefaultSettings[sKey] = bDefaultSetting == nil or bDefaultSetting
 end
 
 -- Bind a message and sound settings to a message id to internally check
 -- if they should be displayed or sound not played.
 -- @param sKey key of the message.
--- @param sMatch Comparism type, "EQUAL", "MATCH", "FIND".
+-- @param compareType Comparism type, RaidCore.E.COMPARE_EQUAL, RaidCore.E.COMPARE_MATCH, RaidCore.E.COMPARE_FIND.
 -- @param sMsgSetting Message setting id.
 -- @param sSoundSetting Sound setting id.
-function EncounterPrototype:RegisterMessageSetting(sKey, sMatch, sMsgSetting, sSoundSetting)
-  assert(sKey)
-  assert(sMatch == "MATCH" or sMatch == "FIND" or sMatch == "EQUAL")
+function EncounterPrototype:RegisterMessageSetting(sKey, compareType, sMsgSetting, sSoundSetting)
+  Assert:NotNilOrFalse(sKey, "Key is empty: %s", self.name)
+  Assert:EqualOr(compareType, {RaidCore.E.COMPARE_MATCH, RaidCore.E.COMPARE_FIND, RaidCore.E.COMPARE_EQUAL},
+    "Invalid comparism type: %s, %s", self.name, tostring(compareType)
+  )
   --Most of the matches will be EQUAL so use a faster hashtable to look up settings
-  if sMatch == "EQUAL" then
+  if compareType == RaidCore.E.COMPARE_EQUAL then
     self.tSettingBindsEqual[sKey] = {
       sMsgSetting = sMsgSetting,
       sSoundSetting = sSoundSetting,
@@ -97,7 +96,7 @@ function EncounterPrototype:RegisterMessageSetting(sKey, sMatch, sMsgSetting, sS
   else
     table.insert(self.tSettingBinds, {
         sKey = sKey,
-        sMatch = sMatch,
+        compareType = compareType,
         sMsgSetting = sMsgSetting,
         sSoundSetting = sSoundSetting,
       }
@@ -113,15 +112,15 @@ function EncounterPrototype:GetSettingsForKey(sKey)
   local nCount = #self.tSettingBinds
   for i = 1, nCount do
     local tSettingBind = self.tSettingBinds[i]
-    local sMatch = tSettingBind.sMatch
+    local compareType = tSettingBind.compareType
     local sMsgKey = tSettingBind.sKey
     local result = nil
 
-    if sMatch == "EQUAL" then
+    if compareType == RaidCore.E.COMPARE_EQUAL then
       result = sMsgKey == sKey or nil
-    elseif sMatch == "FIND" then
+    elseif compareType == RaidCore.E.COMPARE_FIND then
       result = sKey:find(sMsgKey)
-    elseif sMatch == "MATCH" then
+    elseif compareType == RaidCore.E.COMPARE_MATCH then
       result = sKey:match(sMsgKey)
     end
     if result ~= nil then
@@ -136,11 +135,9 @@ end
 -- @param sUnitName String or table of Strings of unit names.
 -- @param tEventsHandlers Table of Events/Handlers pairs
 function EncounterPrototype:RegisterUnitEvents(tUnitNames, tEventsHandlers)
-  assert(type(tUnitNames) == "string" or type(tUnitNames) == "table")
-  assert(type(tEventsHandlers) == "table")
-  if type(tUnitNames) == "string" then
-    tUnitNames = {tUnitNames}
-  end
+  tUnitNames = type(tUnitNames) == "string" and {tUnitNames} or tUnitNames
+  Assert:Table(tUnitNames, "Unit names not a table: %s, %s", self.name, tostring(tUnitNames))
+  Assert:Table(tEventsHandlers, "Event handlers not a table: %s, %s", self.name, tostring(tEventsHandlers))
 
   local nSize = #tUnitNames
   for i = 1, nSize do
@@ -173,12 +170,13 @@ local SPELL_EVENTS = {
   [RaidCore.E.NPC_WHISPER] = true,
 }
 function EncounterPrototype:RegisterUnitSpellEvents(tUnitNames, primaryKey, tEventHandlers)
-  assert(type(tUnitNames) == "string" or type(tUnitNames) == "table")
-  assert(type(primaryKey) == "string" or type(primaryKey) == "number")
-  assert(type(tEventHandlers) == "table")
-  if type(tUnitNames) == "string" then
-    tUnitNames = {tUnitNames}
-  end
+  tUnitNames = type(tUnitNames) == "string" and {tUnitNames} or tUnitNames
+  Assert:Table(tUnitNames, "Unit names not a table: %s, %s", self.name, tostring(tUnitNames))
+  Assert:Table(tEventHandlers, "Event handlers not a table: %s, %s", self.name, tostring(tEventHandlers))
+  Assert:TypeOr(primaryKey, {Assert.TYPES.STRING, Assert.TYPES.NUMBER},
+    "Invalid type for primary key: %s, %s", self.name, tostring(primaryKey)
+  )
+
   local nSize = #tUnitNames
   for i = 1, nSize do
     local sUnitName = tUnitNames[i]
@@ -201,10 +199,13 @@ end
 -- @param sCastName Name of the cast or id of the buff
 -- @param fHandler Function to handle the event
 function EncounterPrototype:RegisterUnitSpellEvent(sUnitName, sMethodName, spellId, fHandler)
-  assert(type(sUnitName) == "string")
-  assert(type(sMethodName) == "string")
-  assert(type(spellId) == "string" or type(spellId) == "number")
-  assert(type(fHandler) == "function")
+  Assert:String(sUnitName, "Unit name not a string: %s, %s", self.name, tostring(sUnitName))
+  Assert:String(sMethodName, "Method name not a string: %s, %s", self.name, tostring(sMethodName))
+  Assert:Function(fHandler, "Handler not a function: %s, %s", self.name, tostring(fHandler))
+  Assert:TypeOr(spellId, {Assert.TYPES.STRING, Assert.TYPES.NUMBER},
+    "Invalid type for spell id: %s, %s", self.name, tostring(spellId)
+  )
+
   sUnitName = self.L[sUnitName]
   if type(spellId) == "string" then
     spellId = self.L[spellId]
@@ -215,17 +216,25 @@ end
 
 -- Register events to a datachron message
 -- @param sSearchMessage The message or parts of it
--- @param sMatch "MATCH" or "FIND" for comparing the sSearchMessage
+-- @param compareType COMPARE_EQUAL, COMPARE_FIND or COMPARE_MATCH for comparing the sSearchMessage
 -- @param fHandler Function to handle the event
 --
 -- Note: If the English translation is not found, the current string will be used like that.
-function EncounterPrototype:RegisterDatachronEvent(sSearchMessage, sMatch, fHandler)
-  assert(type(sSearchMessage) == "string")
-  assert(type(fHandler) == "function")
-  assert(sMatch == "MATCH" or sMatch == "FIND" or sMatch == "EQUAL")
+function EncounterPrototype:RegisterDatachronEvent(sSearchMessage, compareType, fHandler)
+  Assert:String(sSearchMessage, "Datachron message not a string: %s, %s", self.name, tostring(sSearchMessage))
+  Assert:Function(fHandler, "Handler not a function: %s, %s", self.name, tostring(fHandler))
+  Assert:EqualOr(compareType, {RaidCore.E.COMPARE_MATCH, RaidCore.E.COMPARE_FIND, RaidCore.E.COMPARE_EQUAL},
+    "Invalid comparism type: %s, %s", self.name, tostring(compareType)
+  )
+
   sSearchMessage = self.L[sSearchMessage]
-  self.tDatachronEvents = DeepInit(self.tDatachronEvents, sSearchMessage)
-  table.insert(self.tDatachronEvents[sSearchMessage], {fHandler = fHandler, sMatch = sMatch })
+  if compareType == RaidCore.E.COMPARE_EQUAL then
+    self.tDatachronEventsEqual = DeepInit(self.tDatachronEventsEqual, sSearchMessage)
+    table.insert(self.tDatachronEventsEqual[sSearchMessage], fHandler)
+  else
+    self.tDatachronEvents = DeepInit(self.tDatachronEvents, sSearchMessage)
+    table.insert(self.tDatachronEvents[sSearchMessage], {fHandler = fHandler, compareType = compareType })
+  end
 end
 
 -- Register events to a single unit
@@ -235,9 +244,10 @@ end
 --
 -- Note: If the English translation is not found, the current string will be used like that.
 function EncounterPrototype:RegisterUnitEvent(sUnitName, sMethodName, fHandler)
-  assert(type(sUnitName) == "string")
-  assert(type(sMethodName) == "string")
-  assert(type(fHandler) == "function")
+  Assert:String(sUnitName, "Unit name not a string: %s, %s", self.name, tostring(sUnitName))
+  Assert:String(sMethodName, "Method name not a string: %s, %s", self.name, tostring(sMethodName))
+  Assert:Function(fHandler, "Handler not a function: %s, %s", self.name, tostring(fHandler))
+
   sUnitName = self.L[sUnitName]
   self.tUnitEvents = DeepInit(self.tUnitEvents, sMethodName, sUnitName)
   table.insert(self.tUnitEvents[sMethodName][sUnitName], fHandler)
@@ -357,20 +367,25 @@ function EncounterPrototype:RemoveProgressBar(sKey)
   RaidCore:RemoveProgressBar(sKey)
 end
 
-function EncounterPrototype:PrepareEncounter()
+function EncounterPrototype:TranslateTriggerNames()
   local tmp = {}
-  -- Translate trigger names.
-  if self.EnableMob then
-    -- Replace english data by local data.
-    for _, EnglishKey in next, self.EnableMob do
-      table.insert(tmp, self.L[EnglishKey])
-    end
+  for _, EnglishKey in next, self.tTriggerNames do
+    table.insert(tmp, self.L[EnglishKey])
   end
-  self.EnableMob = tmp
+  self.tTriggerNames = tmp
 end
 
-function EncounterPrototype:OnEnable()
-  -- Copy settings for fast and secure access.
+function EncounterPrototype:PrepareEncounter()
+  self:TranslateTriggerNames()
+end
+
+function EncounterPrototype:CallIfExists(sFunctionName)
+  if type(self[sFunctionName]) == "function" then
+    self[sFunctionName](self)
+  end
+end
+
+function EncounterPrototype:CopySettings()
   self.tSettings = {}
   local tSettings = RaidCore.db.profile.Encounters[self:GetName()]
   if tSettings then
@@ -378,16 +393,20 @@ function EncounterPrototype:OnEnable()
       self.tSettings[k] = v
     end
   end
+end
+
+function EncounterPrototype:OnEnable()
+  self:CopySettings()
   -- TODO: Redefine this part.
   self.tDispelInfo = {}
-  if self.SetupOptions then self:SetupOptions() end
-  if type(self.OnBossEnable) == "function" then self:OnBossEnable() end
+  self:CallIfExists("SetupOptions")
+  self:CallIfExists("OnBossEnable")
 end
 
 function EncounterPrototype:OnDisable()
-  if type(self.OnBossDisable) == "function" then self:OnBossDisable() end
+  self:CallIfExists("OnBossDisable")
   self:CancelAllTimers()
-  if type(self.OnWipe) == "function" then self:OnWipe() end
+  self:CallIfExists("OnWipe")
   self.tDispelInfo = nil
 end
 
@@ -464,54 +483,61 @@ end
 
 function EncounterPrototype:SendIndMessage(sReason, tData)
   local msg = {
-    action = "Encounter_IND",
+    action = RaidCore.E.COMM_ENCOUNTER_IND,
     reason = sReason,
     data = tData,
   }
   RaidCore:SendMessage(msg)
 end
 
+function EncounterPrototype:OnTrigAny(tNames)
+  for _, sMobName in next, self.tTriggerNames do
+    if tNames[sMobName] then
+      for _, tUnit in next, tNames[sMobName] do
+        if tUnit:IsValid() and tUnit:IsInCombat() then
+          return true
+        end
+      end
+    end
+  end
+  return false
+end
+
+function EncounterPrototype:OnTrigAll(tNames)
+  for _, sMobName in next, self.tTriggerNames do
+    if not tNames[sMobName] then
+      return false
+    else
+      local bResult = false
+      for _, tUnit in next, tNames[sMobName] do
+        if tUnit:IsValid() and tUnit:IsInCombat() then
+          bResult = true
+        end
+      end
+      if not bResult then
+        return false
+      end
+    end
+  end
+  return true
+end
+
 --- Default trigger function to start an encounter.
 -- @param tNames Names of units without break space.
 -- @return Any unit registered can start the encounter.
 function EncounterPrototype:OnTrig(tNames)
-  if not RaidCore.db.profile.bEnableTestEncounters and
-  (self.displayName == "HousingTest" or self.displayName == "GalerasTest") then
+  if not self:IsTestEncounterEnabled() and self:IsTestEncounter() then
     return false
   end
-  if next(self.EnableMob) == nil then
-    return false
-  end
-  if self.nTrigType == TRIG__ANY then
-    for _, sMobName in next, self.EnableMob do
-      if tNames[sMobName] then
-        for _, tUnit in next, tNames[sMobName] do
-          if tUnit:IsValid() and tUnit:IsInCombat() then
-            return true
-          end
-        end
-      end
-    end
-    return false
-  elseif self.nTrigType == TRIG__ALL then
-    for _, sMobName in next, self.EnableMob do
-      if not tNames[sMobName] then
-        return false
-      else
-        local bResult = false
-        for _, tUnit in next, tNames[sMobName] do
-          if tUnit:IsValid() and tUnit:IsInCombat() then
-            bResult = true
-          end
-        end
-        if not bResult then
-          return false
-        end
-      end
-    end
-    return true
-  end
-  return false
+  return self:OnTrigCheck(tNames)
+end
+
+function EncounterPrototype:IsTestEncounter()
+  return self.isTestEncounter
+end
+
+function EncounterPrototype:IsTestEncounterEnabled()
+  return RaidCore.db.profile.bEnableTestEncounters
 end
 
 -- Create a world marker.
@@ -548,21 +574,26 @@ end
 --@param continentId Id list or id number
 --@param parentMapId Id list or id number
 --@param mapId Id list or id number
-function RaidCore:NewEncounter(name, continentId, parentMapId, mapId)
-  assert(name and continentId and parentMapId and mapId)
-  -- Transform an unique key into a list with 1 entry, if needed.
-  local continentIdList = type(continentId) == "table" and continentId or { continentId }
-  local parentMapIdList = type(parentMapId) == "table" and parentMapId or { parentMapId }
-  local mapIdList = type(mapId) == "table" and mapId or { mapId }
+--@param isTestEncounter
+function RaidCore:NewEncounter(name, continentId, parentMapId, mapId, isTestEncounter)
+  continentId = type(continentId) == "number" and {continentId} or continentId
+  parentMapId = type(parentMapId) == "number" and {parentMapId} or parentMapId
+  mapId = type(mapId) == "number" and {mapId} or mapId
+  Assert:String(name, "Encounter name not a string: %s", tostring(name))
+  Assert:Table(continentId, "continentId not a table: %s, %s", tostring(name), tostring(continentId))
+  Assert:Table(parentMapId, "parentMapId not a table: %s, %s", tostring(name), tostring(parentMapId))
+  Assert:Table(mapId, "mapId not a table: %s, %s", tostring(name), tostring(mapId))
 
   -- Create the new encounter, and set zone identifiers.
   -- Library already manage unique name.
   local new = self:NewModule(name)
-  new.continentIdList = continentIdList
-  new.parentMapIdList = parentMapIdList
-  new.mapIdList = mapIdList
-  new.displayName = name
+  new.continentIdList = continentId
+  new.parentMapIdList = parentMapId
+  new.mapIdList = mapId
+  new.name = name
+  new.isTestEncounter = isTestEncounter
   new.tDefaultTimerBarsOptions = {}
+  new.tTriggerNames = {}
   -- Register an empty locale table.
   new:RegisterEnglishLocale({})
   -- Retrieve Locale.
@@ -572,6 +603,7 @@ function RaidCore:NewEncounter(name, continentId, parentMapId, mapId)
   new.tDefaultSettings = {}
   new.tUnitEvents = {}
   new.tDatachronEvents = {}
+  new.tDatachronEventsEqual = {}
   new.tUnitSpellEvents = {}
   new.tSettingBinds = {}
   new.tSettingBindsEqual = {}

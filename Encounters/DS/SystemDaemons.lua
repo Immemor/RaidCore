@@ -16,7 +16,7 @@ if not mod then return end
 ----------------------------------------------------------------------------------------------------
 -- Registering combat.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterTrigMob("ANY", { "Binary System Daemon", "Null System Daemon" })
+mod:RegisterTrigMob(core.E.TRIGGER_ANY, { "Binary System Daemon", "Null System Daemon" })
 mod:RegisterEnglishLocale({
     -- Unit names.
     ["Binary System Daemon"] = "Binary System Daemon",

@@ -19,10 +19,8 @@ local Log = Apollo.GetPackage("Log-1.0").tPackage
 ----------------------------------------------------------------------------------------------------
 -- Copy of few objects to reduce the cpu load.
 -- Because all local objects are faster.
---------------------------------------------------------------------B--------------------------------
-local GetPlayerUnitByName = GameLib.GetPlayerUnitByName
+----------------------------------------------------------------------------------------------------
 local GetPlayerUnit = GameLib.GetPlayerUnit
-local GetUnitById = GameLib.GetUnitById
 local GetCurrentZoneMap = GameLib.GetCurrentZoneMap
 local next, pcall = next, pcall
 
@@ -33,14 +31,6 @@ local next, pcall = next, pcall
 local RAIDCORE_CURRENT_VERSION = "6.2.8"
 -- Should be deleted.
 local ADDON_DATE_VERSION = 16102618
--- Sometimes Carbine have inserted some no-break-space, for fun.
--- Behavior seen with French language. This problem is not present in English.
-local NO_BREAK_SPACE = string.char(194, 160)
-
-local MYCOLORS = {
-  ["Blue"] = "FF0066FF",
-  ["Green"] = "FF00CC00",
-}
 
 -- State Machine.
 local MAIN_FSM__SEARCH = 1
@@ -64,8 +54,11 @@ RaidCore.E = {
   NPC_SAY = "OnNPCSay",
   NPC_YELL = "OnNPCYell",
   NPC_WHISPER = "OnNPCWhisper",
+  COMBAT_LOG_HEAL = "OnCombatLogHeal",
+  SHOW_SHORTCUT_BAR = "OnShowShortcutBar",
   -- Special Keywords.
   ALL_UNITS = "**",
+  NO_BREAK_SPACE = string.char(194, 160),
   -- Tracking.
   TRACK_ALL = 0xFF,
   TRACK_BUFFS = 0x01,
@@ -77,6 +70,58 @@ RaidCore.E = {
   LOCATION_LEFT_ASS = 34,
   LOCATION_RIGHT_ASS = 35,
   LOCATION_STATIC_CHEST = 40,
+  -- Core Events.
+  CHANGE_WORLD = "OnChangeWorld",
+  SUB_ZONE_CHANGE = "OnSubZoneChanged",
+  RECEIVED_MESSAGE = "OnReceivedMessage",
+  CHARACTER_CREATED = "OnCharacterCreated",
+  -- Combat Interface States.
+  INTERFACE_DISABLE = 1,
+  INTERFACE_DETECTCOMBAT = 2,
+  INTERFACE_DETECTALL = 3,
+  INTERFACE_LIGHTENABLE = 4,
+  INTERFACE_FULLENABLE = 5,
+  -- Comparism types.
+  COMPARE_EQUAL = 1,
+  COMPARE_FIND = 2,
+  COMPARE_MATCH = 3,
+  -- Log.
+  ERROR = "ERROR",
+  CURRENT_ZONE_MAP = "CurrentZoneMap",
+  TRACK_UNIT = "TrackThisUnit",
+  UNTRACK_UNIT = "UnTrackThisUnit",
+  JOIN_CHANNEL_TRY = "JoinChannelTry",
+  JOIN_CHANNEL_STATUS = "JoinChannelStatus",
+  CHANNEL_COMM_STATUS = "ChannelCommStatus",
+  SEND_MESSAGE = "SendMessage",
+  SEND_MESSAGE_RESULT = "SendMessageResult",
+  -- Carbine Events.
+  EVENT_COMBAT_LOG_HEAL = "CombatLogHeal",
+  EVENT_UNIT_ENTERED_COMBAT = "UnitEnteredCombat",
+  EVENT_UNIT_CREATED = "UnitCreated",
+  EVENT_UNIT_DESTROYED = "UnitDestroyed",
+  EVENT_CHAT_MESSAGE = "ChatMessage",
+  EVENT_SHOW_ACTION_BAR_SHORTCUT = "ShowActionBarShortcut",
+  EVENT_BUFF_ADDED = "BuffAdded",
+  EVENT_BUFF_UPDATED = "BuffUpdated",
+  EVENT_BUFF_REMOVED = "BuffRemoved",
+  EVENT_CHANGE_WORLD = "ChangeWorld",
+  EVENT_SUB_ZONE_CHANGED = "SubZoneChanged",
+  EVENT_NEXT_FRAME = "NextFrame",
+  EVENT_WINDOWS_MANAGEMENT_READY = "WindowManagementReady",
+  EVENT_CHARACTER_CREATED = "CharacterCreated",
+  -- Comm events. Using numbers for these instead to save bandwidth would break
+  -- compatibility with older versions of raidcore.
+  COMM_VERSION_CHECK_REQUEST = "VersionCheckRequest",
+  COMM_VERSION_CHECK_REPLY = "VersionCheckReply",
+  COMM_NEWEST_VERSION = "NewestVersion",
+  COMM_LAUNCH_PULL = "LaunchPull",
+  COMM_LAUNCH_BREAK = "LaunchBreak",
+  COMM_SYNC_SUMMON = "SyncSummon",
+  COMM_ENCOUNTER_IND = "Encounter_IND",
+  -- Triggers
+  TRIGGER_ALL = 1,
+  TRIGGER_ANY = 2,
 }
 
 local EVENT_UNIT_NAME_INDEX = {
@@ -114,7 +159,6 @@ local EVENT_UNIT_SPELL_ID_INDEX = {
 ----------------------------------------------------------------------------------------------------
 -- Privates variables.
 ----------------------------------------------------------------------------------------------------
-local _wndrclog = nil
 local _tWipeTimer
 local _tTrigPerZone = {}
 local _tEncountersPerZone = {}
@@ -122,12 +166,9 @@ local _tDelayedUnits = {}
 local _bIsEncounterInProgress = false
 local _tCurrentEncounter = nil
 local _eCurrentFSM
-local _tEncounterHookHandlers
 local _tMainFSMHandlers
-local trackMaster = Apollo.GetAddon("TrackMaster")
 local markCount = 0
 local VCReply, VCtimer = {}, nil
-local empCD, empTimer = 5, nil
 
 ----------------------------------------------------------------------------------------------------
 -- Privates functions
@@ -193,21 +234,27 @@ local function OnEncounterDatachronEvents(sMethod, ...)
   if sMethod ~= RaidCore.E.DATACHRON then
     return
   end
-  local tDatachronEvents = _tCurrentEncounter.tDatachronEvents or {}
   local sMessage = ...
+  local tDatachronEvents = _tCurrentEncounter.tDatachronEvents or {}
+  local tDatachronEventsEqual = _tCurrentEncounter.tDatachronEventsEqual or {}
+  tDatachronEventsEqual = tDatachronEventsEqual and tDatachronEventsEqual[sMessage] or {}
+
+  local nSize = #tDatachronEventsEqual
+  for i = 1, nSize do
+    tDatachronEventsEqual[i](_tCurrentEncounter, sMessage, true)
+  end
+
   for sSearchMessage, tEvents in next, tDatachronEvents do
-    local nSize = #tEvents
+    nSize = #tEvents
     for i = 1, nSize do
       local tEvent = tEvents[i]
-      local sMatch = tEvent.sMatch
+      local compareType = tEvent.compareType
       local fHandler = tEvent.fHandler
       local result = nil
 
-      if sMatch == "EQUAL" then
-        result = sSearchMessage == sMessage or nil
-      elseif sMatch == "FIND" then
+      if compareType == RaidCore.E.COMPARE_FIND then
         result = sMessage:find(sSearchMessage)
-      elseif sMatch == "MATCH" then
+      elseif compareType == RaidCore.E.COMPARE_MATCH then
         result = sMessage:match(sSearchMessage)
       end
 
@@ -243,12 +290,9 @@ end
 local function AddDelayedUnit(nId, tUnit, sName)
   local tMap = GetCurrentZoneMap()
   if tMap then
-    local id1 = tMap.continentId
-    local id2 = tMap.parentZoneId
-    local id3 = tMap.id
-    local tTrig = _tTrigPerZone[id1]
-    tTrig = tTrig and tTrig[id2]
-    tTrig = tTrig and tTrig[id3]
+    local tTrig = _tTrigPerZone[tMap.continentId]
+    tTrig = tTrig and tTrig[tMap.parentZoneId]
+    tTrig = tTrig and tTrig[tMap.id]
     tTrig = tTrig and tTrig[sName]
     if tTrig then
       if not _tDelayedUnits[sName] then
@@ -262,12 +306,9 @@ end
 local function SearchEncounter()
   local tMap = GetCurrentZoneMap()
   if tMap then
-    local id1 = tMap.continentId
-    local id2 = tMap.parentZoneId
-    local id3 = tMap.id
-    local tEncounters = _tEncountersPerZone[id1]
-    tEncounters = tEncounters and tEncounters[id2]
-    tEncounters = tEncounters and tEncounters[id3] or {}
+    local tEncounters = _tEncountersPerZone[tMap.continentId]
+    tEncounters = tEncounters and tEncounters[tMap.parentZoneId]
+    tEncounters = tEncounters and tEncounters[tMap.id] or {}
     local nSize = #tEncounters
     for i = 1, nSize do
       local tEncounter = tEncounters[i]
@@ -294,27 +335,31 @@ local function ProcessDelayedUnit()
     for nDelayedId, tUnit in next, tDelayedList do
       if tUnit:IsValid() then
         local bInCombat = tUnit:IsInCombat()
-        local s, sErrMsg = pcall(OnEncounterHookGeneric, RaidCore.E.UNIT_CREATED, nDelayedId, tUnit, nDelayedName)
-        if not s then
-          if RaidCore.db.profile.bLUAErrorMessage then
-            RaidCore:Print(sErrMsg)
-          end
-          Log:Add("ERROR", sErrMsg)
-        end
+        local s, e = pcall(OnEncounterHookGeneric, RaidCore.E.UNIT_CREATED, nDelayedId, tUnit, nDelayedName)
+        RaidCore:HandlePcallResult(s, e)
         if bInCombat then
-          s, sErrMsg = pcall(OnEncounterHookGeneric, RaidCore.E.ENTERED_COMBAT, nDelayedId, tUnit, nDelayedName, bInCombat)
-          if not s then
-            if RaidCore.db.profile.bLUAErrorMessage then
-              RaidCore:Print(sErrMsg)
-            end
-            Log:Add("ERROR", sErrMsg)
-          end
+          s, e = pcall(OnEncounterHookGeneric, RaidCore.E.ENTERED_COMBAT, nDelayedId, tUnit, nDelayedName, bInCombat)
+          RaidCore:HandlePcallResult(s, e)
         end
       end
     end
   end
 
   CleanDelayedUnits()
+end
+
+local function InitModuleZones(module, id1, id2, id3)
+  _tTrigPerZone[id1] = _tTrigPerZone[id1] or {}
+  _tTrigPerZone[id1][id2] = _tTrigPerZone[id1][id2] or {}
+  _tTrigPerZone[id1][id2][id3] = _tTrigPerZone[id1][id2][id3] or {}
+  _tEncountersPerZone[id1] = _tEncountersPerZone[id1] or {}
+  _tEncountersPerZone[id1][id2] = _tEncountersPerZone[id1][id2] or {}
+  _tEncountersPerZone[id1][id2][id3] = _tEncountersPerZone[id1][id2][id3] or {}
+
+  table.insert(_tEncountersPerZone[id1][id2][id3], module)
+  for _, Mob in next, module.tTriggerNames do
+    _tTrigPerZone[id1][id2][id3][Mob] = true
+  end
 end
 ----------------------------------------------------------------------------------------------------
 -- RaidCore Initialization
@@ -326,17 +371,17 @@ end
 function RaidCore:OnInitialize()
   _tMainFSMHandlers = {
     [MAIN_FSM__SEARCH] = {
-      ["OnChangeWorld"] = self.SEARCH_OnCheckMapZone,
-      ["OnSubZoneChanged"] = self.SEARCH_OnCheckMapZone,
-      ["OnCharacterCreated"] = self.SEARCH_OnCheckMapZone,
+      [RaidCore.E.CHANGE_WORLD] = self.SEARCH_OnCheckMapZone,
+      [RaidCore.E.SUB_ZONE_CHANGE] = self.SEARCH_OnCheckMapZone,
+      [RaidCore.E.CHARACTER_CREATED] = self.SEARCH_OnCheckMapZone,
       [RaidCore.E.UNIT_CREATED] = self.SEARCH_OnUnitCreated,
       [RaidCore.E.ENTERED_COMBAT] = self.SEARCH_OnEnteredCombat,
       [RaidCore.E.UNIT_DESTROYED] = self.SEARCH_OnUnitDestroyed,
-      ["OnReceivedMessage"] = self.SEARCH_OnReceivedMessage,
+      [RaidCore.E.RECEIVED_MESSAGE] = self.SEARCH_OnReceivedMessage,
     },
     [MAIN_FSM__RUNNING] = {
       [RaidCore.E.ENTERED_COMBAT] = self.RUNNING_OnEnteredCombat,
-      ["OnReceivedMessage"] = self.RUNNING_OnReceivedMessage,
+      [RaidCore.E.RECEIVED_MESSAGE] = self.RUNNING_OnReceivedMessage,
       [RaidCore.E.UNIT_DESTROYED] = self.RUNNING_OnUnitDestroyed,
     },
   }
@@ -370,33 +415,43 @@ function RaidCore:OnInitialize()
       bDisableSelectiveTracking = false,
     }
   }
+
+  self.tCMD2function = {
+    ["config"] = self.DisplayMainWindow,
+    ["reset"] = self.ResetAll,
+    ["versioncheck"] = self.VersionCheck,
+    ["pull"] = self.LaunchPull,
+    ["break"] = self.LaunchBreak,
+    ["summon"] = self.SyncSummon,
+  }
+
+  for sCommand, fHandler in next, self.tCMD2function do
+    self.tCMD2function[self.L[sCommand]] = fHandler
+  end
+
+  self.tAction2function = {
+    [RaidCore.E.COMM_VERSION_CHECK_REQUEST] = self.VersionCheckRequest,
+    [RaidCore.E.COMM_VERSION_CHECK_REPLY] = self.VersionCheckReply,
+    [RaidCore.E.COMM_NEWEST_VERSION] = self.NewestVersionRequest,
+    [RaidCore.E.COMM_LAUNCH_PULL] = self.LaunchPullRequest,
+    [RaidCore.E.COMM_LAUNCH_BREAK] = self.LaunchBreakRequest,
+    [RaidCore.E.COMM_SYNC_SUMMON] = self.SyncSummonRequest,
+    [RaidCore.E.COMM_ENCOUNTER_IND] = self.EncounterInd,
+  }
+
   -- Final parsing about encounters.
   for name, module in self:IterateModules() do
-    local r, e = pcall(module.PrepareEncounter, module)
-    if not r then
-      self:Print(e)
-    else
-      for _, id1 in next, module.continentIdList do
-        if _tTrigPerZone[id1] == nil then
-          _tTrigPerZone[id1] = {}
-          _tEncountersPerZone[id1] = {}
-        end
-        for _, id2 in next, module.parentMapIdList do
-          if _tTrigPerZone[id1][id2] == nil then
-            _tTrigPerZone[id1][id2] = {}
-            _tEncountersPerZone[id1][id2] = {}
-          end
-          for _, id3 in next, module.mapIdList do
-            if _tTrigPerZone[id1][id2][id3] == nil then
-              _tTrigPerZone[id1][id2][id3] = {}
-              _tEncountersPerZone[id1][id2][id3] = {}
-            end
-            table.insert(_tEncountersPerZone[id1][id2][id3], module)
-            if module.EnableMob then
-              for _, Mob in next, module.EnableMob do
-                _tTrigPerZone[id1][id2][id3][Mob] = true
-              end
-            end
+    local s, e = pcall(module.PrepareEncounter, module)
+    if self:HandlePcallResult(s, e) then
+      for i = 1, #module.continentIdList do
+        for ii = 1, #module.parentMapIdList do
+          for iii = 1, #module.mapIdList do
+            InitModuleZones(
+              module,
+              module.continentIdList[i],
+              module.parentMapIdList[ii],
+              module.mapIdList[iii]
+            )
           end
         end
       end
@@ -415,9 +470,18 @@ function RaidCore:OnInitialize()
   self.worldmarker = {}
   _tWipeTimer = ApolloTimer.Create(0.5, true, "RUNNING_WipeCheck", self)
   _tWipeTimer:Stop()
-  self.lines = {}
   -- Initialize the Zone Detection.
   self:SEARCH_OnCheckMapZone()
+end
+
+function RaidCore:HandlePcallResult(success, error)
+  if not success then
+    if self.db.profile.bLUAErrorMessage then
+      self:Print(error)
+    end
+    Log:Add(RaidCore.E.ERROR, error)
+  end
+  return success
 end
 
 ----------------------------------------------------------------------------------------------------
@@ -456,16 +520,7 @@ function RaidCore:ProcessMessage(tMessage, nSenderId)
     return
   end
 
-  local tAction2function = {
-    ["VersionCheckRequest"] = self.VersionCheckRequest,
-    ["VersionCheckReply"] = self.VersionCheckReply,
-    ["NewestVersion"] = self.NewestVersionRequest,
-    ["LaunchPull"] = self.LaunchPullRequest,
-    ["LaunchBreak"] = self.LaunchBreakRequest,
-    ["SyncSummon"] = self.SyncSummonRequest,
-    ["Encounter_IND"] = self.EncounterInd,
-  }
-  local func = tAction2function[tMessage.action]
+  local func = self.tAction2function[tMessage.action]
   if func then
     func(self, tMessage, nSenderId)
   end
@@ -473,7 +528,7 @@ end
 
 function RaidCore:VersionCheckRequest(tMessage, nSenderId)
   local msg = {
-    action = "VersionCheckReply",
+    action = RaidCore.E.COMM_VERSION_CHECK_REPLY,
     version = ADDON_DATE_VERSION,
     tag = RAIDCORE_CURRENT_VERSION,
   }
@@ -496,7 +551,7 @@ function RaidCore:LaunchPullRequest(tMessage, nSenderId)
   if tMessage.cooldown then
     local tOptions = { bEmphasize = true }
     self:AddTimerBar("PULL", "PULL", tMessage.cooldown, nil, tOptions)
-    self:AddMsg("PULL", ("PULL in %s"):format(tMessage.cooldown), 2, MYCOLORS["Green"])
+    self:AddMsg("PULL", ("PULL in %s"):format(tMessage.cooldown), 2, nil, "Green")
   end
 end
 
@@ -504,8 +559,7 @@ function RaidCore:LaunchBreakRequest(tMessage, nSenderId)
   if tMessage.cooldown and tMessage.cooldown > 0 then
     local tOptions = { bEmphasize = true }
     self:AddTimerBar("BREAK", "BREAK", tMessage.cooldown, nil, tOptions)
-    self:AddMsg("BREAK", ("BREAK for %ss"):format(tMessage.cooldown), 5, MYCOLORS["Green"])
-    self:PlaySound("Long")
+    self:AddMsg("BREAK", ("BREAK for %ss"):format(tMessage.cooldown), 5, "Long", "Green")
   else
     self:RemoveTimerBar("BREAK")
     self:RemoveMsg("BREAK")
@@ -516,11 +570,11 @@ function RaidCore:SyncSummonRequest(tMessage, nSenderId)
   if not self.db.profile.bAcceptSummons or not self:isRaidManagement(tMessage.sender) then
     return false
   end
-  self:Print(tMessage.sender .. " requested that you accept a summon. Attempting to accept now.")
   local CSImsg = CSIsLib.GetActiveCSI()
-  if not CSImsg or not CSImsg["strContext"] then return end
+  if not CSImsg or not CSImsg.strContext then return end
 
-  if CSImsg["strContext"] == "Teleport to your group member?" then
+  if CSImsg.strContext == self.L["message.summon.csi"] then
+    self:Print(self.L["message.summon.request"]:format(tMessage.sender))
     if CSIsLib.IsCSIRunning() then
       CSIsLib.CSIProcessInteraction(true)
     end
@@ -542,10 +596,10 @@ function RaidCore:isPublicEventObjectiveActive(objectiveString)
     return false
   end
 
-  for eventId, event in pairs(activeEvents) do
+  for eventId, event in next, activeEvents do
     local objectives = event:GetObjectives()
     if objectives ~= nil then
-      for id, objective in pairs(objectives) do
+      for id, objective in next, objectives do
         if objective:GetShortDescription() == objectiveString then
           return objective:GetStatus() == 1
         end
@@ -556,7 +610,7 @@ function RaidCore:isPublicEventObjectiveActive(objectiveString)
 end
 
 function RaidCore:hasActiveEvent(tblEvents)
-  for key, value in pairs(tblEvents) do
+  for key, value in next, tblEvents do
     if self:isPublicEventObjectiveActive(key) then
       return true
     end
@@ -576,7 +630,6 @@ function RaidCore:MarkUnit(unit, location, mark, color)
     local nId = unit:GetId()
     if not self.mark[nId] then
       self.mark[nId] = {}
-      self.mark[nId]["unit"] = unit
       if not mark then
         markCount = markCount + 1
         self.mark[nId].number = tostring(markCount)
@@ -621,9 +674,8 @@ end
 
 -- Removes all the world markers
 function RaidCore:ResetWorldMarkers()
-  for k, over in pairs(self.worldmarker) do
-    over:Destroy()
-    self.worldmarker[k] = nil
+  for nId, _ in next, self.worldmarker do
+    self:DropWorldMarker(nId)
   end
 end
 
@@ -652,7 +704,6 @@ function RaidCore:DropWorldMarker(key)
   if self.worldmarker[key] then
     self.worldmarker[key]:Destroy()
     self.worldmarker[key] = nil
-    return true
   end
 end
 
@@ -669,14 +720,8 @@ function RaidCore:SetWorldMarker(key, sText, tPosition)
   end
 end
 
-function RaidCore:SetTarget(position)
-  if trackMaster ~= nil then
-    trackMaster:SetTarget(position)
-  end
-end
-
 function RaidCore:OnMarkUpdate()
-  for k, v in pairs(self.mark) do
+  for k, v in next, self.mark do
     if v.unit:GetPosition() then
       v.frame:SetWorldLocation(v.unit:GetPosition())
     end
@@ -693,34 +738,10 @@ function RaidCore:DropMark(key)
 end
 
 function RaidCore:ResetMarks()
-  for k, over in pairs(self.mark) do
-    over.frame:SetUnit(nil)
-    over.frame:Destroy()
-    self.mark[k] = nil
+  for nId, _ in next, self.mark do
+    self:DropMark(nId)
   end
   markCount = 0
-end
-
--- Obsolete way to test. PublicEventObjectif will be reworked later.
-function RaidCore:TestPE()
-  local tActiveEvents = PublicEvent.GetActiveEvents()
-  local i = RaidCore:isPublicEventObjectiveActive("Talk to Captain Tero")
-  self:Print("result ".. tostring(i))
-  i = RaidCore:isPublicEventObjectiveActive("Talk to Captain Teroxx")
-  self:Print("result ".. tostring(i))
-  for idx, peEvent in pairs(tActiveEvents) do
-    local test = peEvent:GetName()
-    local truc
-    self:Print(test)
-    for idObjective, peObjective in pairs(peEvent:GetObjectives()) do
-      test = peObjective:GetShortDescription()
-      if test == "North Power Core Energy" then
-        truc = peObjective:GetCount()
-        self:Print(test)
-        self:Print(truc)
-      end
-    end
-  end
 end
 
 function RaidCore:ResetAll()
@@ -735,8 +756,8 @@ function RaidCore:isRaidManagement(strName)
   if not GroupLib.InGroup() then return false end
   for nIdx=0, GroupLib.GetMemberCount() do
     local tGroupMember = GroupLib.GetGroupMember(nIdx)
-    if tGroupMember and tGroupMember["strCharacterName"] == strName then
-      if tGroupMember["bIsLeader"] or tGroupMember["bRaidAssistant"] then
+    if tGroupMember and tGroupMember.strCharacterName == strName then
+      if tGroupMember.bIsLeader or tGroupMember.bRaidAssistant then
         return true
       else
         return false
@@ -748,12 +769,7 @@ end
 
 function RaidCore:AutoCleanUnitDestroyed(nId, tUnit, sName)
   self:RemoveUnit(nId)
-  if self.mark[nId] then
-    local markFrame = self.mark[nId].frame
-    markFrame:SetUnit(nil)
-    markFrame:Destroy()
-    self.mark[nId] = nil
-  end
+  self:DropMark(nId)
 end
 
 ----------------------------------------------------------------------------------------------------
@@ -772,22 +788,13 @@ function RaidCore:OnRaidCoreOn(cmd, args)
     table.remove(tArgc, 1)
   end
 
-  local tCMD2function = {
-    ["config"] = self.DisplayMainWindow,
-    ["reset"] = self.ResetAll,
-    ["versioncheck"] = self.VersionCheck,
-    ["pull"] = self.LaunchPull,
-    ["break"] = self.LaunchBreak,
-    ["summon"] = self.SyncSummon,
-  }
-
-  local func = tCMD2function[command]
+  local func = self.tCMD2function[command]
   if func then
     func(self, tArgc)
   else
     self:Print(("Unknown command: %s"):format(command))
     local tAllCommands = {}
-    for k, v in pairs(tCMD2function) do
+    for k, v in next, self.tCMD2function do
       table.insert(tAllCommands, k)
     end
     local sAllCommands = table.concat(tAllCommands, ", ")
@@ -804,7 +811,7 @@ function RaidCore:VersionCheck()
     self:Print(self.L["Checking version on group member."])
     VCReply[GetPlayerUnit():GetName()] = ADDON_DATE_VERSION
     local msg = {
-      action = "VersionCheckRequest",
+      action = RaidCore.E.COMM_VERSION_CHECK_REQUEST,
     }
     VCtimer = ApolloTimer.Create(5, false, "VersionCheckResults", self)
     self:SendMessage(msg)
@@ -845,13 +852,13 @@ function RaidCore:VersionCheckResults()
   end
   if next(tOutdated) then
     self:Print("Outdated RaidCore Version:")
-    for sPlayerVersion, tList in pairs(tOutdated) do
+    for sPlayerVersion, tList in next, tOutdated do
       self:Print((" - '%s': %s"):format(sPlayerVersion, table.concat(tList, ", ")))
     end
   end
   self:Print(self.L["%d members are up to date."]:format(nMemberWithLasted))
   -- Send Msg to oudated players.
-  local msg = {action = "NewestVersion", version = nMaxVersion}
+  local msg = {action = RaidCore.E.COMM_NEWEST_VERSION, version = nMaxVersion}
   self:SendMessage(msg)
   self:ProcessMessage(msg)
   VCtimer = nil
@@ -861,7 +868,7 @@ function RaidCore:LaunchPull(tArgc)
   local nTime = #tArgc >= 1 and tonumber(tArgc[1])
   nTime = nTime and nTime > 2 and nTime or 10
   local msg = {
-    action = "LaunchPull",
+    action = RaidCore.E.COMM_LAUNCH_PULL,
     cooldown = nTime,
   }
   self:SendMessage(msg)
@@ -876,7 +883,7 @@ function RaidCore:LaunchBreak(tArgc)
     local nTime = #tArgc >= 1 and tonumber(tArgc[1])
     nTime = nTime and nTime > 2 and nTime or 600
     local msg = {
-      action = "LaunchBreak",
+      action = RaidCore.E.COMM_LAUNCH_BREAK,
       cooldown = nTime
     }
     self:SendMessage(msg)
@@ -904,7 +911,7 @@ function RaidCore:SyncSummon()
     return false
   end
   local msg = {
-    action = "SyncSummon",
+    action = RaidCore.E.COMM_SYNC_SUMMON,
   }
   self:SendMessage(msg)
 end
@@ -915,13 +922,8 @@ end
 function RaidCore:GlobalEventHandler(sMethod, ...)
   -- Call the encounter handler if we were in RUNNING.
   if _eCurrentFSM == MAIN_FSM__RUNNING then
-    local s, sErrMsg = pcall(OnEncounterHookGeneric, sMethod, ...)
-    if not s then
-      if self.db.profile.bLUAErrorMessage then
-        self:Print(sErrMsg)
-      end
-      Log:Add("ERROR", sErrMsg)
-    end
+    local s, e = pcall(OnEncounterHookGeneric, sMethod, ...)
+    self:HandlePcallResult(s, e)
   end
   -- Call the FSM handler, if needed.
   local fFSMHandler = _tMainFSMHandlers[_eCurrentFSM][sMethod]
@@ -938,22 +940,14 @@ function RaidCore:SEARCH_OnCheckMapZone()
   if not _bIsEncounterInProgress then
     local tMap = GetCurrentZoneMap()
     if tMap then
-      Log:Add("CurrentZoneMap", tMap.continentId, tMap.parentZoneId, tMap.id)
+      Log:Add(RaidCore.E.CURRENT_ZONE_MAP, tMap.continentId, tMap.parentZoneId, tMap.id)
       local tTrigInZone = _tTrigPerZone[tMap.continentId]
-      local bSearching = false
+      tTrigInZone = tTrigInZone and tTrigInZone[tMap.parentZoneId]
+      tTrigInZone = tTrigInZone and tTrigInZone[tMap.id]
       if tTrigInZone then
-        tTrigInZone = tTrigInZone[tMap.parentZoneId]
-        if tTrigInZone then
-          tTrigInZone = tTrigInZone[tMap.id]
-          if tTrigInZone then
-            bSearching = true
-          end
-        end
-      end
-      if bSearching then
-        self:CombatInterface_Activate("DetectAll")
+        self:CombatInterface_Activate(RaidCore.E.INTERFACE_DETECTALL)
       else
-        self:CombatInterface_Activate("Disable")
+        self:CombatInterface_Activate(RaidCore.E.INTERFACE_DISABLE)
       end
     else
       self:ScheduleTimer("SEARCH_OnCheckMapZone", 5)
@@ -969,7 +963,7 @@ function RaidCore:SEARCH_OnEnteredCombat(nId, tUnit, sName, bInCombat)
       _bIsEncounterInProgress = true
       -- Enable CombatInterface now to be able to log a combat
       -- not registered.
-      self:CombatInterface_Activate("FullEnable")
+      self:CombatInterface_Activate(RaidCore.E.INTERFACE_FULLENABLE)
       SearchEncounter()
       if _tCurrentEncounter and not _tCurrentEncounter:IsEnabled() then
         _eCurrentFSM = MAIN_FSM__RUNNING
@@ -1035,7 +1029,7 @@ function RaidCore:RUNNING_WipeCheck()
       return
     end
   end
-  self:CombatInterface_Activate("DetectAll")
+  self:CombatInterface_Activate(RaidCore.E.INTERFACE_DETECTALL)
   _bIsEncounterInProgress = false
   if _tCurrentEncounter then
     _tCurrentEncounter:Disable()
@@ -1074,7 +1068,7 @@ function RaidCore:OnStartTestScenario()
     self:AddUnit(GetPlayerUnit():GetTarget())
     targetId = GetPlayerUnit():GetTarget():GetId()
   end
-  self:AddMsg("TEST1", self.L["Start test scenario"], 5, "red")
+  self:AddMsg("TEST1", self.L["Start test scenario"], 5, nil, "red")
   for i = 1, 36 do
     local nForce = 1 - i / 36.0
     local tColor = { a = 1.0, r = 1 - nForce, g = nRandomGreen, b = nForce }
@@ -1107,7 +1101,6 @@ function RaidCore:OnStopTestScenario()
   self:RemovePolygon("TEST1")
   self:RemovePicture("TEST1")
   for i = 1, 36 do
-    local nForce = i / 36.0
     self:RemoveSimpleLine(("TEST%d"):format(i))
   end
   self:RemoveMsg("TEST1")

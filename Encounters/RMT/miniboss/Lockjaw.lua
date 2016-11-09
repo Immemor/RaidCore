@@ -14,7 +14,7 @@ if not mod then return end
 ----------------------------------------------------------------------------------------------------
 -- Registering combat.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterTrigMob("ALL", { "unit.lockjaw" })
+mod:RegisterTrigMob(core.E.TRIGGER_ALL, { "unit.lockjaw" })
 mod:RegisterEnglishLocale({
     -- Unit names.
     ["unit.lockjaw"] = "Chief Warden Lockjaw",
@@ -48,7 +48,7 @@ mod:RegisterDefaultSetting("CrosshairTethers")
 mod:RegisterDefaultSetting("MessageShackles")
 mod:RegisterDefaultSetting("SoundShackles")
 
-mod:RegisterMessageSetting("CIRCLES", "EQUAL", "MessageShackles", "SoundShackles")
+mod:RegisterMessageSetting("CIRCLES", core.E.COMPARE_EQUAL, "MessageShackles", "SoundShackles")
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------

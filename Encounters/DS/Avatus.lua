@@ -64,7 +64,7 @@ if not mod then return end
 ----------------------------------------------------------------------------------------------------
 -- Registering combat.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterTrigMob("ANY", { "Avatus" })
+mod:RegisterTrigMob(core.E.TRIGGER_ANY, { "Avatus" })
 mod:RegisterEnglishLocale({
     -- Unit names.
     ["Avatus"] = "Avatus",
@@ -231,7 +231,6 @@ mod:RegisterDefaultTimerBarConfigs({
 ----------------------------------------------------------------------------------------------------
 -- Constants.
 ----------------------------------------------------------------------------------------------------
-local NO_BREAK_SPACE = string.char(194, 160)
 local MAIN_PHASE = 1
 local LABYRINTH_PHASE = 2
 local GREEN_PHASE = 3
@@ -753,7 +752,7 @@ function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
           closest_holo_hand = hand
         end
       end
-      local sSpellName = closest_holo_hand["unit"]:GetCastName():gsub(NO_BREAK_SPACE, " ")
+      local sSpellName = closest_holo_hand["unit"]:GetCastName():gsub(core.E.NO_BREAK_SPACE, " ")
       if sSpellName == self.L["Crushing Blow"] then
         mod:AddMsg("CRBLOW", "INTERRUPT CRUSHING BLOW!", 5, mod:GetSetting("SoundHandInterrupt") and "Inferno")
       end

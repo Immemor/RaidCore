@@ -11,14 +11,14 @@
 ----------------------------------------------------------------------------------------------------
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 --@alpha@
-local mod = core:NewEncounter("GalerasTest", 6, 0, 16)
+local mod = core:NewEncounter("GalerasTest", 6, 0, 16, true)
 --@end-alpha@
 if not mod then return end
 
 ----------------------------------------------------------------------------------------------------
 -- Registering combat.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterTrigMob("ANY", { "Crimson Spiderbot", "Crimson Clanker" })
+mod:RegisterTrigMob(core.E.TRIGGER_ANY, { "Crimson Spiderbot", "Crimson Clanker" })
 mod:RegisterEnglishLocale({
     -- Unit names.
     ["Crimson Clanker"] = "Crimson Clanker",

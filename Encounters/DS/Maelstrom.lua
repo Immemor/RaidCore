@@ -14,7 +14,7 @@ if not mod then return end
 ----------------------------------------------------------------------------------------------------
 -- Registering combat.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterTrigMob("ANY", { "Maelstrom Authority" })
+mod:RegisterTrigMob(core.E.TRIGGER_ANY, { "Maelstrom Authority" })
 mod:RegisterEnglishLocale({
     -- Unit names.
     ["Wind Wall"] = "Wind Wall",

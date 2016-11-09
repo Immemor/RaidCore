@@ -96,6 +96,7 @@ globals = {
   "GetAccountRealmCharacter",
   "GetAddonInfo",
   "GetAddons",
+  "GetCurrentSubZoneName",
   "GetCurrentZoneName",
   "GetDemoTimeRemaining",
   "GetElderPoints",

@@ -14,7 +14,7 @@ if not mod then return end
 ----------------------------------------------------------------------------------------------------
 -- Registering combat.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterTrigMob("ANY", { "Gloomclaw" })
+mod:RegisterTrigMob(core.E.TRIGGER_ANY, { "Gloomclaw" })
 mod:RegisterEnglishLocale({
     -- Unit names.
     ["Gloomclaw"] = "Gloomclaw",
@@ -168,7 +168,7 @@ function mod:OnBossEnable()
 end
 
 function mod:OnWipe()
-  Apollo.RemoveEventHandler("CombatLogHeal", self)
+  Apollo.RemoveEventHandler(core.E.EVENT_COMBAT_LOG_HEAL, self)
   core:ResetWorldMarkers()
 end
 
@@ -239,7 +239,7 @@ function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
           core:SetWorldMarker("SECRIGHT", self.L["RIGHT"], rightSpawn[section])
         end
       end
-      Apollo.RegisterEventHandler("CombatLogHeal", "OnCombatLogHeal", self)
+      Apollo.RegisterEventHandler(core.E.EVENT_COMBAT_LOG_HEAL, "OnCombatLogHeal", self)
     elseif sMessage:find(self.L["Gloomclaw is reduced to a weakened state"]) then
       mod:RemoveTimerBar("RUPTURE")
       mod:RemoveTimerBar("CORRUPTION")
@@ -258,8 +258,7 @@ function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
 
   function mod:OnCombatLogHeal(tArgs)
     if tArgs.unitTarget then
-      local NO_BREAK_SPACE = string.char(194, 160)
-      local targetName = tArgs.unitTarget:GetName():gsub(NO_BREAK_SPACE, " ")
+      local targetName = tArgs.unitTarget:GetName():gsub(core.E.NO_BREAK_SPACE, " ")
       local targetId = tArgs.unitTarget:GetId()
       if targetName == self.L["Essence of Logic"] then
         if not essenceUp[targetId] then
@@ -268,7 +267,7 @@ function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
           core:MarkUnit(tArgs.unitTarget, 0, (essPos.x < 4310) and "L" or "R")
           core:AddUnit(tArgs.unitTarget)
           if #essenceUp == 2 then
-            Apollo.RemoveEventHandler("CombatLogHeal", self)
+            Apollo.RemoveEventHandler(core.E.EVENT_COMBAT_LOG_HEAL, self)
           end
         end
       end

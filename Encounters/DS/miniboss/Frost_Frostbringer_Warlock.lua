@@ -14,7 +14,7 @@ if not mod then return end
 ----------------------------------------------------------------------------------------------------
 -- Registering combat.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterTrigMob("ANY", { "Frostbringer Warlock" })
+mod:RegisterTrigMob(core.E.TRIGGER_ANY, { "Frostbringer Warlock" })
 mod:RegisterEnglishLocale({
     -- Unit names.
     ["Frostbringer Warlock"] = "Frostbringer Warlock",

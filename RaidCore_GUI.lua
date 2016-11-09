@@ -20,7 +20,7 @@ local RaidCore = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCo
 -- Copy of few objects to reduce the cpu load.
 -- Because all local objects are faster.
 ----------------------------------------------------------------------------------------------------
-local next, pcall, assert, error, ipairs = next, pcall, assert, error, ipairs
+local next, assert, error, ipairs = next, assert, error, ipairs
 local GetGameTime = GameLib.GetGameTime
 
 ----------------------------------------------------------------------------------------------------
@@ -29,6 +29,10 @@ local GetGameTime = GameLib.GetGameTime
 local ShowHideClass = {}
 local _wndUploadAction
 local _wndLogGrid
+local _wndLogSize
+local _wndLogErrorCount
+local _wndLogEventsCount
+local _bShowHidePanelActive
 local _TestTimer = nil
 
 ----------------------------------------------------------------------------------------------------
@@ -93,7 +97,7 @@ local function FillLogGrid(tDumpLog)
     _wndLogGrid:SetCellText(idx, 2, tLog[2])
     _wndLogGrid:SetCellText(idx, 3, tLog[3])
     -- Increase error counter on error logged.
-    if tLog[2] == "ERROR" then
+    if tLog[2] == RaidCore.E.ERROR then
       nErrorCount = nErrorCount + 1
     end
   end
@@ -105,8 +109,8 @@ local function Split(str, sep)
   assert(str)
   sep = sep or "%s"
   local r = {}
-  for str in string.gmatch(str, "([^"..sep.."]+)") do
-    table.insert(r, str)
+  for match in string.gmatch(str, "([^"..sep.."]+)") do
+    table.insert(r, match)
   end
   return r
 end
@@ -115,7 +119,7 @@ end
 -- ShowHide Class manager.
 ----------------------------------------------------------------------------------------------------
 function ShowHideClass:OnShowHideUpdate()
-  local left, top, right, bottom
+  local left, right
   local nCurrentTime = GetGameTime()
   local nEncounterDelta = RaidCore.nShowHideEncounterPanelTime - nCurrentTime
   local nLogDelta = RaidCore.nShowHideLogPanelTime - nCurrentTime
@@ -202,14 +206,14 @@ function ShowHideClass:OnShowHideUpdate()
 
   if nEncounterDelta == 0 and nLogDelta == 0 and nSettingsDelta == 0 then
     _bShowHidePanelActive = false
-    Apollo.RemoveEventHandler("NextFrame", self)
+    Apollo.RemoveEventHandler(RaidCore.E.EVENT_NEXT_FRAME, self)
   end
 end
 
 function ShowHideClass:StartUpdate()
   if not _bShowHidePanelActive then
     _bShowHidePanelActive = true
-    Apollo.RegisterEventHandler("NextFrame", "OnShowHideUpdate", self)
+    Apollo.RegisterEventHandler(RaidCore.E.EVENT_NEXT_FRAME, "OnShowHideUpdate", self)
   end
 end
 
@@ -295,7 +299,7 @@ function RaidCore:GUI_init(sVersion)
   _wndLogSize = self.wndLogTarget:FindChild("LogSize")
 
   -- Registering to Windows Manager.
-  Apollo.RegisterEventHandler("WindowManagementReady", "OnWindowManagementReady", self)
+  Apollo.RegisterEventHandler(RaidCore.E.EVENT_WINDOWS_MANAGEMENT_READY, "OnWindowManagementReady", self)
   self:OnWindowManagementReady() --Already is ready
 end
 
@@ -414,9 +418,9 @@ function RaidCore:OnTestScenarioButton(wndHandler, wndControl, eMouseButton)
   if bIsChecked then
     wndControl:SetText(self.L["Stop test scenario"])
     self:OnStartTestScenario()
-    _TestTimer = self:ScheduleTimer(function(wndControl)
-        wndControl:SetCheck(false)
-        wndControl:SetText(self.L["Start test scenario"])
+    _TestTimer = self:ScheduleTimer(function(wndControlInner)
+        wndControlInner:SetCheck(false)
+        wndControlInner:SetText(self.L["Start test scenario"])
         self:OnStopTestScenario()
       end,
       60, wndControl

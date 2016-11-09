@@ -14,7 +14,7 @@ if not mod then return end
 ----------------------------------------------------------------------------------------------------
 -- Registering combat.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterTrigMob("ANY", { "Frost-Boulder Avalanche" })
+mod:RegisterTrigMob(core.E.TRIGGER_ANY, { "Frost-Boulder Avalanche" })
 mod:RegisterEnglishLocale({
     -- Unit names.
     ["Frost-Boulder Avalanche"] = "Frost-Boulder Avalanche",

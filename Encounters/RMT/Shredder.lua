@@ -20,7 +20,7 @@ if not mod then return end
 ----------------------------------------------------------------------------------------------------
 -- Registering combat.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterTrigMob("ALL", { "unit.swabbie" })
+mod:RegisterTrigMob(core.E.TRIGGER_ALL, { "unit.swabbie" })
 mod:RegisterEnglishLocale({
     -- Unit names.
     ["unit.swabbie"] = "Swabbie Ski'Li",
@@ -136,13 +136,13 @@ mod:RegisterDefaultSetting("MessageOozeStacksWarning")
 mod:RegisterDefaultSetting("MessageMidSawWarning")
 mod:RegisterDefaultSetting("MessageSawSafeSpot")
 -- Binds.
-mod:RegisterMessageSetting("ADDS_MSG", "EQUAL", "MessageAdds", "SoundAdds")
-mod:RegisterMessageSetting("MINIBOSS_SPAWN", "EQUAL", "MessageMiniboss", "SoundMiniboss")
-mod:RegisterMessageSetting("MINIBOSS_CAST", "EQUAL", "MessageMinibossCast", "SoundMinibossCast")
-mod:RegisterMessageSetting("NABBER", "EQUAL", "MessageNecroticLash", "SoundNecroticLash")
-mod:RegisterMessageSetting("OOZE_MSG", "EQUAL", "MessageOozeStacksWarning", "SoundOozeStacksWarning")
-mod:RegisterMessageSetting("SAW_MSG_MID", "EQUAL", "MessageMidSawWarning", "SoundMidSawWarning")
-mod:RegisterMessageSetting("SAW_MSG_MID", "EQUAL", "MessageSawSafeSpot", "SoundSawSafeSpot")
+mod:RegisterMessageSetting("ADDS_MSG", core.E.COMPARE_EQUAL, "MessageAdds", "SoundAdds")
+mod:RegisterMessageSetting("MINIBOSS_SPAWN", core.E.COMPARE_EQUAL, "MessageMiniboss", "SoundMiniboss")
+mod:RegisterMessageSetting("MINIBOSS_CAST", core.E.COMPARE_EQUAL, "MessageMinibossCast", "SoundMinibossCast")
+mod:RegisterMessageSetting("NABBER", core.E.COMPARE_EQUAL, "MessageNecroticLash", "SoundNecroticLash")
+mod:RegisterMessageSetting("OOZE_MSG", core.E.COMPARE_EQUAL, "MessageOozeStacksWarning", "SoundOozeStacksWarning")
+mod:RegisterMessageSetting("SAW_MSG_MID", core.E.COMPARE_EQUAL, "MessageMidSawWarning", "SoundMidSawWarning")
+mod:RegisterMessageSetting("SAW_MSG_MID", core.E.COMPARE_EQUAL, "MessageSawSafeSpot", "SoundSawSafeSpot")
 -- Progressbar defaults
 mod:RegisterDefaultTimerBarConfigs({
     ["WALKING_PROGRESS"] = { sColor = "xkcdBrown", nPriority = 1},

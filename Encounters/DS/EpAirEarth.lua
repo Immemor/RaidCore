@@ -16,7 +16,7 @@ local GetGameTime = GameLib.GetGameTime
 ----------------------------------------------------------------------------------------------------
 -- Registering combat.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterTrigMob("ALL", { "Megalith", "Aileron" })
+mod:RegisterTrigMob(core.E.TRIGGER_ALL, { "Megalith", "Aileron" })
 mod:RegisterEnglishLocale({
     -- Unit names.
     ["Megalith"] = "Megalith",

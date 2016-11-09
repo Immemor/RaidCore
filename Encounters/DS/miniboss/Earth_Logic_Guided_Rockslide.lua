@@ -14,7 +14,7 @@ if not mod then return end
 ----------------------------------------------------------------------------------------------------
 -- Registering combat.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterTrigMob("ANY", { "Logic Guided Rockslide" })
+mod:RegisterTrigMob(core.E.TRIGGER_ANY, { "Logic Guided Rockslide" })
 mod:RegisterEnglishLocale({
     -- Unit names.
     ["Logic Guided Rockslide"] = "Logic Guided Rockslide",

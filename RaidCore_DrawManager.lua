@@ -123,14 +123,14 @@ end
 local function StartDrawing()
   if _bDrawManagerRunning ~= true then
     _bDrawManagerRunning = true
-    Apollo.RegisterEventHandler("NextFrame", "OnDrawUpdate", RaidCore)
+    Apollo.RegisterEventHandler(RaidCore.E.EVENT_NEXT_FRAME, "OnDrawUpdate", RaidCore)
   end
 end
 
 local function StopDrawing()
   if _bDrawManagerRunning == true then
     _bDrawManagerRunning = false
-    Apollo.RemoveEventHandler("NextFrame", RaidCore)
+    Apollo.RemoveEventHandler(RaidCore.E.EVENT_NEXT_FRAME, RaidCore)
   end
 end
 
@@ -751,12 +751,8 @@ function RaidCore:OnDrawUpdate()
       end
       for Key, tDraw in next, tDrawManager.tDraws do
         local tArg = tDrawManager.tSettings.bEnabled and tDraw or Key
-        local bStatus, sResult = pcall(fHandler, tDrawManager, tArg)
-        if not bStatus then
-          --@alpha@
-          RaidCore:Print(sResult)
-          --@end-alpha@
-        end
+        local s, e = pcall(fHandler, tDrawManager, tArg)
+        self:HandlePcallResult(s, e)
       end
       if next(tDrawManager.tDraws) then
         bIsEmpty = false

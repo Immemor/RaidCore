@@ -40,7 +40,6 @@ local TemplateManager = {}
 local TEMPLATE_MANAGER_META = { __index = TemplateManager }
 local VULNERABILITY = Unit.CodeEnumCCState.Vulnerability
 local BAR_UPDATE_PERIOD = 0.1
-local NO_BREAK_SPACE = string.char(194, 160)
 local DEFAULT_SETTINGS = {
   ['**'] = {
     bEnabled = true,
@@ -193,7 +192,7 @@ function TimerManager:AddBar(sKey, sText, nDuration, tCallback, tOptions)
 
   if nDuration > 0 then
     -- Manage windows objects.
-    local wndMain = nil
+    local wndMain
     if self.tBars[sKey] then
       -- Retrieve existing windows object.
       wndMain = self.tBars[sKey].wndMain
@@ -491,7 +490,7 @@ function UnitManager:UpdateBar(tBar)
   if tUnit and tUnit:IsValid() then
     local MaxHealth = tUnit:GetMaxHealth()
     local Health = tUnit:GetHealth()
-    local sName = tUnit:GetName():gsub(NO_BREAK_SPACE, " ")
+    local sName = tUnit:GetName():gsub(RaidCore.E.NO_BREAK_SPACE, " ")
     local bVunerable = tUnit:IsInCCState(VULNERABILITY)
     if Health and MaxHealth then
       local nPourcent = 100.0 * Health / MaxHealth
@@ -581,12 +580,12 @@ function UnitManager:UpdateBar(tBar)
       -- Process Armor bar
       local nArmorValue = tUnit:GetInterruptArmorValue()
       if nArmorValue and nArmorValue > 0 then
-        local left, top, right, bottom = tBar.wndBody:GetAnchorOffsets()
+        local left, top, _, bottom = tBar.wndBody:GetAnchorOffsets()
         tBar.wndBody:SetAnchorOffsets(left, top, -32, bottom)
         tBar.wndArmor:Show(true)
         tBar.wndArmorValue:SetText(nArmorValue)
       else
-        local left, top, right, bottom = tBar.wndBody:GetAnchorOffsets()
+        local left, top, _, bottom = tBar.wndBody:GetAnchorOffsets()
         tBar.wndBody:SetAnchorOffsets(left, top, 0, bottom)
         tBar.wndArmor:Show(false)
       end
@@ -635,7 +634,7 @@ function MessageManager:AddBar(sKey, sText, nDuration, tOptions)
 
   if nDuration > 0 then
     -- Manage windows objects.
-    local wndMain = nil
+    local wndMain
     if self.tBars[sKey] then
       -- Retrieve existing windows object.
       wndMain = self.tBars[sKey].wndMain
@@ -724,12 +723,8 @@ end
 
 function RaidCore:OnBarsUpdate()
   for _, tManager in next, _tManagers do
-    local r, sErr = pcall(tManager.OnTimerUpdate, tManager)
-    if not r then
-      --@alpha@
-      Print(sErr)
-      --@end-alpha@
-    end
+    local s, e = pcall(tManager.OnTimerUpdate, tManager)
+    self:HandlePcallResult(s, e)
   end
   -- Is there at least 1 bar remaining somewhere?
   local bIsEmpty = true

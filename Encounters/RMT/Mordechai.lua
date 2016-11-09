@@ -14,7 +14,7 @@ if not mod then return end
 ----------------------------------------------------------------------------------------------------
 -- Registering combat.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterTrigMob("ALL", { "unit.mordechai" })
+mod:RegisterTrigMob(core.E.TRIGGER_ALL, { "unit.mordechai" })
 mod:RegisterEnglishLocale({
     -- Unit names.
     ["unit.mordechai"] = "Mordechai Redmoon",
@@ -110,10 +110,10 @@ mod:RegisterDefaultSetting("MessageOrbLink")
 mod:RegisterDefaultSetting("MessageAirlockPhaseSoon")
 mod:RegisterDefaultSetting("MessageShockingAttraction")
 -- Binds.
-mod:RegisterMessageSetting("ORB_SPAWNED", "EQUAL", "MessageOrbSpawn", "SoundOrbSpawn")
-mod:RegisterMessageSetting("KINETIC_LINK_MSG", "EQUAL", "MessageOrbLink", "SoundOrbLink")
-mod:RegisterMessageSetting("SUCKY_PHASE", "EQUAL", "MessageAirlockPhaseSoon", "SoundAirlockPhaseSoon")
-mod:RegisterMessageSetting("SHOCKING_ATTRACTION", "EQUAL", "MessageShockingAttraction", "SoundShockingAttraction")
+mod:RegisterMessageSetting("ORB_SPAWNED", core.E.COMPARE_EQUAL, "MessageOrbSpawn", "SoundOrbSpawn")
+mod:RegisterMessageSetting("KINETIC_LINK_MSG", core.E.COMPARE_EQUAL, "MessageOrbLink", "SoundOrbLink")
+mod:RegisterMessageSetting("SUCKY_PHASE", core.E.COMPARE_EQUAL, "MessageAirlockPhaseSoon", "SoundAirlockPhaseSoon")
+mod:RegisterMessageSetting("SHOCKING_ATTRACTION", core.E.COMPARE_EQUAL, "MessageShockingAttraction", "SoundShockingAttraction")
 -- Timer default configs.
 mod:RegisterDefaultTimerBarConfigs({
     ["NEXT_ORB_TIMER"] = { sColor = "xkcdLightLightblue" },
@@ -271,7 +271,7 @@ mod:RegisterUnitEvents("unit.orb",{
   }
 )
 
-mod:RegisterDatachronEvent("chron.airlock.closed", "EQUAL", function()
+mod:RegisterDatachronEvent("chron.airlock.closed", core.E.COMPARE_EQUAL, function()
     isAirPhase = false
     mod:AddCleaveLines()
     mod:AddTimerBar("NEXT_SHURIKEN_TIMER", "msg.mordechai.shuriken.next", FIRST_SHURIKEN_TIMER, mod:GetSetting("SoundShurikenCountdown"))

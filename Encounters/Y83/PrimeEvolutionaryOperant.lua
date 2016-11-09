@@ -25,7 +25,7 @@ if not mod then return end
 ----------------------------------------------------------------------------------------------------
 -- Registering combat.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterTrigMob("ANY", {
+mod:RegisterTrigMob(core.E.TRIGGER_ANY, {
     "Prime Evolutionary Operant", "Prime Phage Distributor", "Organic Incinerator"
   })
 mod:RegisterEnglishLocale({

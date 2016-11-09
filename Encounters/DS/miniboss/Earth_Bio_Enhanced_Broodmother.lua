@@ -14,7 +14,7 @@ if not mod then return end
 ----------------------------------------------------------------------------------------------------
 -- Registering combat.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterTrigMob("ANY", { "Bio-Enhanced Broodmother" })
+mod:RegisterTrigMob(core.E.TRIGGER_ANY, { "Bio-Enhanced Broodmother" })
 mod:RegisterEnglishLocale({
     -- Unit names.
     ["Bio-Enhanced Broodmother"] = "Bio-Enhanced Broodmother",

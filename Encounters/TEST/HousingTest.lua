@@ -22,7 +22,7 @@
 ----------------------------------------------------------------------------------------------------
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 --@alpha@
-local mod = core:NewEncounter("HousingTest", 36, 0, 60)
+local mod = core:NewEncounter("HousingTest", 36, 0, 60, true)
 --@end-alpha@
 if not mod then return end
 
@@ -51,7 +51,7 @@ local TRIG_MOBS = {
   "unit.computer",
 }
 
-mod:RegisterTrigMob("ANY", TRIG_MOBS)
+mod:RegisterTrigMob(core.E.TRIGGER_ANY, TRIG_MOBS)
 mod:RegisterEnglishLocale({
     -- Unit names.
     -- Easy.
@@ -129,14 +129,14 @@ mod:RegisterDefaultSetting("TestDisabledSettingTwo", false)
 mod:RegisterDefaultSetting("TestEnabledSettingThree")
 mod:RegisterDefaultSetting("TestDisabledSettingThree", false)
 
-mod:RegisterMessageSetting("MSG_1", "EQUAL", "TestEnabledSettingOne", "TestEnabledSettingTwo")
-mod:RegisterMessageSetting("MSG_2", "EQUAL", "TestEnabledSettingOne", "TestDisabledSettingTwo")
-mod:RegisterMessageSetting("MSG_3", "EQUAL", "TestDisabledSettingOne", "TestEnabledSettingTwo")
-mod:RegisterMessageSetting("MSG_4", "EQUAL", "TestDisabledSettingOne", "TestDisabledSettingTwo")
-mod:RegisterMessageSetting("MSG_5", "EQUAL", nil, "TestEnabledSettingThree")
-mod:RegisterMessageSetting("MSG_6", "EQUAL", "TestEnabledSettingThree", nil)
-mod:RegisterMessageSetting("MSG_7", "EQUAL", nil, "TestDisabledSettingThree")
-mod:RegisterMessageSetting("MSG_8", "EQUAL", "TestDisabledSettingThree", nil)
+mod:RegisterMessageSetting("MSG_1", core.E.COMPARE_EQUAL, "TestEnabledSettingOne", "TestEnabledSettingTwo")
+mod:RegisterMessageSetting("MSG_2", core.E.COMPARE_EQUAL, "TestEnabledSettingOne", "TestDisabledSettingTwo")
+mod:RegisterMessageSetting("MSG_3", core.E.COMPARE_EQUAL, "TestDisabledSettingOne", "TestEnabledSettingTwo")
+mod:RegisterMessageSetting("MSG_4", core.E.COMPARE_EQUAL, "TestDisabledSettingOne", "TestDisabledSettingTwo")
+mod:RegisterMessageSetting("MSG_5", core.E.COMPARE_EQUAL, nil, "TestEnabledSettingThree")
+mod:RegisterMessageSetting("MSG_6", core.E.COMPARE_EQUAL, "TestEnabledSettingThree", nil)
+mod:RegisterMessageSetting("MSG_7", core.E.COMPARE_EQUAL, nil, "TestDisabledSettingThree")
+mod:RegisterMessageSetting("MSG_8", core.E.COMPARE_EQUAL, "TestDisabledSettingThree", nil)
 
 mod:RegisterDefaultSetting("TestEqualOne")
 mod:RegisterDefaultSetting("TestEqualTwo")
@@ -147,9 +147,9 @@ mod:RegisterDefaultSetting("TestFindTwo")
 mod:RegisterDefaultSetting("TestMatchOne")
 mod:RegisterDefaultSetting("TestMatchTwo")
 
-mod:RegisterMessageSetting("MSG_TEST_ONE", "EQUAL", "TestEqualOne", "TestEqualTwo")
-mod:RegisterMessageSetting("MSG_FIND_ME", "FIND", "TestFindOne", "TestFindTwo")
-mod:RegisterMessageSetting("MSG_MATCH_%d_ME", "MATCH", "TestMatchOne", "TestMatchTwo")
+mod:RegisterMessageSetting("MSG_TEST_ONE", core.E.COMPARE_EQUAL, "TestEqualOne", "TestEqualTwo")
+mod:RegisterMessageSetting("MSG_FIND_ME", core.E.COMPARE_FIND, "TestFindOne", "TestFindTwo")
+mod:RegisterMessageSetting("MSG_MATCH_%d_ME", core.E.COMPARE_MATCH, "TestMatchOne", "TestMatchTwo")
 ----------------------------------------------------------------------------------------------------
 -- Constants.
 ----------------------------------------------------------------------------------------------------
@@ -162,32 +162,32 @@ local EXPECTED_DATACHRON_RESULTS = {
   {
     registerMessage = "chron.equal.first",
     message = "chron.equal.first",
-    match = "EQUAL",
+    match = core.E.COMPARE_EQUAL,
     result = true,
     },{
     registerMessage = "chron.equal.second",
     message = "chron.equal.second",
-    match = "EQUAL",
+    match = core.E.COMPARE_EQUAL,
     result = true,
     },{
     registerMessage = "chron.find.first.partial",
     message = "chron.find.first.full",
-    match = "FIND",
+    match = core.E.COMPARE_FIND,
     result = 4,
     },{
     registerMessage = "chron.find.second.partial",
     message = "chron.find.second.full",
-    match = "FIND",
+    match = core.E.COMPARE_FIND,
     result = 10,
     },{
     registerMessage = "chron.match.first.partial",
     message = "chron.match.first.full",
-    match = "MATCH",
+    match = core.E.COMPARE_MATCH,
     result = "Zod Bain",
     },{
     registerMessage = "chron.match.second.partial",
     message = "chron.match.second.full",
-    match = "MATCH",
+    match = core.E.COMPARE_MATCH,
     result = "Zod Bain",
   },
 }
