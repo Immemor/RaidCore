@@ -50,7 +50,30 @@ mod:RegisterEnglishLocale({
     ["msg.core.health.low.warning"] = "%s LOW HEALTH!",
     ["msg.rocket_jump.moved"] = "%s MOVED",
     ["msg.heat.generation"] = "Core Health",
-  })
+  }
+)
+mod:RegisterGermanLocale({
+    -- Unit names.
+    ["unit.fire_orb"] = "Plasmaentladung",
+    -- Public Event Names.
+    ["pub.fusion_core"] = "Fusionskern",
+    ["pub.cooling_turbine"] = "Kühlturbine",
+    ["pub.spark_plug"] = "Zündkerze",
+    ["pub.lubricant_nozzle"] = "Schmiermitteldüse",
+    -- Datachrons.
+    ["chron.elektroshock"] = "([^%s]+%s[^%s]+) leidet unter „Electroshock“",
+  }
+)
+mod:RegisterFrenchLocale({
+    -- Unit names.
+    ["unit.fire_orb"] = "Plasma déchargé",
+    -- Public Event Names.
+    ["pub.fusion_core"] = "Noyau de fusion",
+    ["pub.cooling_turbine"] = "Turbine de refroidissement",
+    ["pub.spark_plug"] = "Bougie d'allumage",
+    ["pub.lubricant_nozzle"] = "Embout de lubrification",
+  }
+)
 ----------------------------------------------------------------------------------------------------
 -- Constants.
 ----------------------------------------------------------------------------------------------------

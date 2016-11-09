@@ -63,7 +63,52 @@ mod:RegisterEnglishLocale({
     ["msg.nabber.interrupt"] = "INTERRUPT NABBER",
     ["msg.miniboss.spawned"] = "MINIBOSS SPAWNED",
     ["msg.miniboss.interrupt"] = "INTERRUPT MINIBOSS",
-  })
+  }
+)
+mod:RegisterGermanLocale({
+    -- Unit names.
+    ["unit.saw.big"] = "Sägeblatt",
+    ["unit.miniboss.braugh"] = "Braugh der Blähbauch",
+    ["unit.tether"] = "Haltestrickverankerung",
+    ["unit.bubble"] = "Feindselige unsichtbare Einheit für Felder (Trefferradius 1.2)",
+    -- Datachron messages.
+    ["chron.shredder.starting"] = "WARNUNG: DER SCHREDDER WIRD GESTARTET!",
+    -- Cast names.
+    ["cast.swabbie.knockback"] = "Untoten-Abwehrmittel",
+    -- ["cast.miniboss.crush"] = "TODO",
+    -- ["cast.miniboss.gravedigger"] = "TODO",
+    ["cast.miniboss.deathwail"] = "Totenklage",
+    ["cast.nabber.lash"] = "Nekrotisches Peitschen",
+    -- Messages.
+    ["msg.swabbie.walking"] = "Läuft richtung %s",
+    ["msg.swabbie.walking.direction.north"] = "norden",
+    ["msg.swabbie.walking.direction.south"] = "süden",
+    ["msg.saw.middle"] = "SÄGE MITTE",
+    ["msg.saw.safe_spot"] = "LÜCKE %s",
+    ["msg.saw.safe_spot.left"] = "LINKS",
+    ["msg.saw.safe_spot.middle"] = "MITTE",
+    ["msg.saw.safe_spot.right"] = "RECHTS",
+    ["msg.adds.next"] = "Nächste Welle von adds kommt ...",
+    ["msg.nabber.spawned"] = "NABBER GESPAWNT",
+    ["msg.miniboss.spawned"] = "MINIBOSS GESPAWNT",
+  }
+)
+mod:RegisterFrenchLocale({
+    -- Unit names.
+    ["unit.saw.big"] = "Lamesciea",
+    -- ["unit.miniboss.braugh"] = "TODO",
+    ["unit.tether"] = "Ancre de Bride",
+    ["unit.bubble"] = "Unité hostile invisible de terrain (zone d'effet 1,2)",
+    -- Datachron messages.
+    ["chron.shredder.starting"] = "ATTENTION : DÉMARRAGE DU BROYEUR !",
+    -- Cast names.
+    ["cast.swabbie.knockback"] = "Répulsif pour revenant",
+    -- ["cast.miniboss.crush"] = "TODO",
+    ["cast.miniboss.gravedigger"] = "Fossoyeur",
+    ["cast.miniboss.deathwail"] = "Gémissement mortel",
+    ["cast.nabber.lash"] = "Fouet nécrotique",
+  }
+)
 ----------------------------------------------------------------------------------------------------
 -- Settings
 ----------------------------------------------------------------------------------------------------

@@ -46,7 +46,27 @@ mod:RegisterEnglishLocale({
     ["msg.cannon_arm.interrupt"] = "INTERRUPT CANNON %d",
     ["msg.spew.now"] = "Spew",
     ["msg.spew.next"] = "Next spew in",
-  })
+  }
+)
+mod:RegisterGermanLocale({
+    -- Unit names.
+    ["unit.flailing_arm"] = "Fuchtelnder Arm",
+    -- Datachron.
+    ["chron.robo.laser"] = "Die Robomination versucht, ([^%s]+%s[^%s]+) zu verbrennen.",
+    ["chron.robo.hides"] = "Die Robomination sinkt in den Müll hinab.",
+    ["chron.robo.erupts"] = "Die Robomination stürzt sich erneut ins Gefecht!",
+  }
+)
+mod:RegisterFrenchLocale({
+    -- Unit names.
+    ["unit.flailing_arm"] = "Bras agité",
+    -- Cast names.
+    ["cast.laser"] = "Laser d'incinération",
+    -- Datachron.
+    ["chron.robo.laser"] = "Robomination essaie d'incinérer ([^%s]+%s[^\.]+)\.",
+    ["chron.robo.hides"] = "Robomination s'enfonce dans les ordures.",
+  }
+)
 ----------------------------------------------------------------------------------------------------
 -- Constants.
 ----------------------------------------------------------------------------------------------------
