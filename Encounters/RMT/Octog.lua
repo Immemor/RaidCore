@@ -87,7 +87,6 @@ mod:RegisterUnitEvents({
     },{
     [core.E.UNIT_CREATED] = function (_, _, unit)
       core:AddUnit(unit)
-      core:WatchUnit(unit)
     end,
   }
 )
@@ -104,7 +103,7 @@ end
 mod:RegisterUnitEvents("unit.octog",{
     [core.E.UNIT_CREATED] = function (_, _, unit)
       core:AddUnit(unit)
-      core:WatchUnit(unit)
+      core:WatchUnit(unit, core.E.TRACK_CASTS + core.E.TRACK_HEALTH)
     end,
     [core.E.HEALTH_CHANGED] = function(_, _, percent)
       if mod:IsPhaseClose(ORBS_CLOSE, percent) then
