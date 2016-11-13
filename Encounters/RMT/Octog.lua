@@ -134,13 +134,3 @@ mod:RegisterUnitEvents("unit.octog",{
     },
   }
 )
-
-mod:RegisterUnitEvents({
-    "unit.squirgling",
-    "unit.pool",
-    },{
-    [core.E.UNIT_CREATED] = function (_, _, unit)
-      core:WatchUnit(unit)
-    end,
-  }
-)
