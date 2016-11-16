@@ -14,7 +14,7 @@ if not mod then return end
 ----------------------------------------------------------------------------------------------------
 -- Registering combat.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterTrigMob("ALL", { "unit.cropper" })
+mod:RegisterTrigMob(core.E.TRIGGER_ALL, { "unit.cropper" })
 mod:RegisterEnglishLocale({
     -- Unit names.
     ["unit.cropper"] = "Cropper Gho'Deke",

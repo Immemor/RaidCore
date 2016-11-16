@@ -14,7 +14,7 @@ if not mod then return end
 ----------------------------------------------------------------------------------------------------
 -- Registering combat.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterTrigMob("ALL", { "unit.antru", "unit.interro" })
+mod:RegisterTrigMob(core.E.TRIGGER_ALL, { "unit.antru", "unit.interro" })
 mod:RegisterEnglishLocale({
     -- Unit names.
     ["unit.antru"] = "Rackmaster Antru",

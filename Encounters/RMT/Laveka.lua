@@ -14,7 +14,7 @@ if not mod then return end
 ----------------------------------------------------------------------------------------------------
 -- Registering combat.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterTrigMob("ALL", { "unit.laveka" })
+mod:RegisterTrigMob(core.E.TRIGGER_ALL, { "unit.laveka" })
 mod:RegisterEnglishLocale({
     -- Unit names.
     ["unit.laveka"] = "Laveka the Dark-Hearted",

@@ -14,7 +14,7 @@ if not mod then return end
 ----------------------------------------------------------------------------------------------------
 -- Registering combat.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterTrigMob("ALL", { "unit.horror" })
+mod:RegisterTrigMob(core.E.TRIGGER_ALL, { "unit.horror" })
 mod:RegisterEnglishLocale({
     -- Unit names.
     ["unit.horror"] = "Untombed Horror",

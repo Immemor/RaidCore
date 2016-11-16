@@ -14,7 +14,7 @@ if not mod then return end
 ----------------------------------------------------------------------------------------------------
 -- Registering combat.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterTrigMob("ANY", { "unit.kino", "unit.station" })
+mod:RegisterTrigMob(core.E.TRIGGER_ANY, { "unit.kino", "unit.station" })
 mod:RegisterEnglishLocale({
     -- Unit names.
     ["unit.kino"] = "Mixmaster Kino",

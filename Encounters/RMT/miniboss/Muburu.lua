@@ -14,7 +14,7 @@ if not mod then return end
 ----------------------------------------------------------------------------------------------------
 -- Registering combat.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterTrigMob("ALL", { "unit.muburu" })
+mod:RegisterTrigMob(core.E.TRIGGER_ALL, { "unit.muburu" })
 mod:RegisterEnglishLocale({
     -- Unit names.
     ["unit.muburu"] = "Bonedoctor Muburu",

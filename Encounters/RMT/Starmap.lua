@@ -14,7 +14,7 @@ if not mod then return end
 ----------------------------------------------------------------------------------------------------
 -- Registering combat.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterTrigMob("ALL", { "unit.alpha_cassus" })
+mod:RegisterTrigMob(core.E.TRIGGER_ALL, { "unit.alpha_cassus" })
 mod:RegisterEnglishLocale({
     -- Unit names.
     ["unit.alpha_cassus"] = "Alpha Cassus",
