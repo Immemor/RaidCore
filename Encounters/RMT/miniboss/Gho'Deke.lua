@@ -8,16 +8,16 @@
 -- TODO
 ----------------------------------------------------------------------------------------------------
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
-local mod = core:NewEncounter("Cropper", 104, 548, 553)
+local mod = core:NewEncounter("Gho'Deke", 104, 548, 553)
 if not mod then return end
 
 ----------------------------------------------------------------------------------------------------
 -- Registering combat.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterTrigMob(core.E.TRIGGER_ALL, { "unit.cropper" })
+mod:RegisterTrigMob(core.E.TRIGGER_ALL, { "unit.gho'deke" })
 mod:RegisterEnglishLocale({
     -- Unit names.
-    ["unit.cropper"] = "Cropper Gho'Deke",
+    ["unit.gho'deke"] = "Cropper Gho'Deke",
     ["unit.rootbrute"] = "Rotten Rootbrute",
     ["unit.stumpkin"] = "Scorching Stumpkin",
 
@@ -32,7 +32,7 @@ mod:RegisterEnglishLocale({
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 mod:RegisterUnitEvents({
-    "unit.cropper",
+    "unit.gho'deke",
     "unit.rootbrute",
     "unit.stumpkin",
     },{
