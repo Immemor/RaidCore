@@ -40,7 +40,7 @@ mod:RegisterDefaultTimerBarConfigs({
 local TIMERS = {
   SICK_BEATS = {
     SPEEDUP = 40,
-    START = 5.5,
+    INITIAL_INTERVAL = 5.5,
   },
   BASS = {
     NORMAL = 40,
@@ -54,7 +54,7 @@ local sickBeatsInterval
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-  sickBeatsInterval = TIMERS.SICK_BEATS.START
+  sickBeatsInterval = TIMERS.SICK_BEATS.INITIAL_INTERVAL
   mod:StartSpeedupTimer()
   mod:StartBassTimer()
 end
