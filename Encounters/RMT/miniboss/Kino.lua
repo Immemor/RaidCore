@@ -22,8 +22,8 @@ mod:RegisterEnglishLocale({
     -- Cast names.
     ["cast.kino.bass"] = "Drop the Bass",
     -- Messages.
-    ["msg.kino.sick_beats.timer"] = "Sick beats interval %ds",
-    ["msg.kino.sick_beats.speedup"] = "Sick beats every %ds",
+    ["msg.kino.sick_beats.timer"] = "Sick beats interval %.1fs",
+    ["msg.kino.sick_beats.speedup"] = "Sick beats every %.1fs",
     ["msg.kino.bass.timer"] = "Dropping the bass in",
   })
 ----------------------------------------------------------------------------------------------------
