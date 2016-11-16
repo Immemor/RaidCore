@@ -20,15 +20,18 @@ mod:RegisterEnglishLocale({
     ["unit.kino"] = "Mixmaster Kino",
     ["unit.station"] = "DJ Station",
     -- Cast names.
+    ["cast.kino.bass"] = "Drop the Bass",
     -- Messages.
     ["msg.kino.sick_beats.timer"] = "Sick beats interval %ds",
     ["msg.kino.sick_beats.speedup"] = "Sick beats every %ds",
+    ["msg.kino.bass.timer"] = "Dropping the bass in",
   })
 ----------------------------------------------------------------------------------------------------
 -- Settings.
 ----------------------------------------------------------------------------------------------------
 mod:RegisterDefaultTimerBarConfigs({
     ["NEXT_SICK_BEATS_SPEEDUP"] = {sColor = "xkcdRed"},
+    ["NEXT_BASS_DROP"] = {sColor = "xkcdPurple"},
   }
 )
 ----------------------------------------------------------------------------------------------------
@@ -38,6 +41,9 @@ local TIMERS = {
   SICK_BEATS = {
     SPEEDUP = 40,
     START = 5.5,
+  },
+  BASS = {
+    NORMAL = 40,
   }
 }
 ----------------------------------------------------------------------------------------------------
@@ -50,6 +56,11 @@ local sickBeatsInterval
 function mod:OnBossEnable()
   sickBeatsInterval = TIMERS.SICK_BEATS.START
   mod:StartSpeedupTimer()
+  mod:StartBassTimer()
+end
+
+function mod:StartBassTimer()
+  mod:AddTimerBar("NEXT_BASS_DROP", "msg.kino.bass.timer", TIMERS.BASS.NORMAL)
 end
 
 function mod:StartSpeedupTimer()
@@ -71,7 +82,23 @@ end
 mod:RegisterUnitEvents({"unit.kino", "unit.station"},{
     [core.E.UNIT_CREATED] = function (_, _, unit)
       core:AddUnit(unit)
-      core:WatchUnit(unit, core.E.TRACK_ALL)
+      core:WatchUnit(unit, core.E.TRACK_CAST)
     end,
+  }
+)
+
+function mod:OnBassCastStart()
+  mod:RemoveTimerBar("NEXT_BASS_DROP")
+end
+
+function mod:OnBassCastEnd()
+  mod:StartBassTimer()
+end
+
+mod:RegisterUnitEvents("unit.kino",{
+    ["cast.kino.bass"] = {
+      [core.E.CAST_START] = mod.OnBassCastStart,
+      [core.E.CAST_END] = mod.OnBassCastEnd,
+    }
   }
 )
