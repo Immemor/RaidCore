@@ -75,8 +75,8 @@ mod:RegisterDefaultSetting("MessageBombClose")
 mod:RegisterDefaultSetting("SoundBombSpawn")
 mod:RegisterDefaultSetting("SoundBombClose")
 -- Binds.
-mod:RegisterMessageSetting("BOMB_SPAWN", "EQUAL", "MessageBombSpawn", "SoundBombSpawn")
-mod:RegisterMessageSetting("BOMB_CLOSE_%d+", "MATCH", "MessageBombClose", "SoundBombClose")
+mod:RegisterMessageSetting("BOMB_SPAWN", core.E.COMPARE_EQUAL, "MessageBombSpawn", "SoundBombSpawn")
+mod:RegisterMessageSetting("BOMB_CLOSE_%d+", core.E.COMPARE_MATCH, "MessageBombClose", "SoundBombClose")
 mod:RegisterDefaultTimerBarConfigs({
     ["NEXT_BOMB_TIMER"] = {sColor = "xkcdBrown"},
   }
