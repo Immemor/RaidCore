@@ -1,18 +1,18 @@
 ﻿Function Upload-FTPFile ($Url, $Credentials, $Filepath) {
-    $webclient = New-Object System.Net.WebClient 
+    $webclient = New-Object System.Net.WebClient
     $webclient.Credentials = $Credentials
     $file = Get-Item -Path $Filepath
-    $uri = New-Object System.Uri($Url + $file.Name) 
+    $uri = New-Object System.Uri($Url + $file.Name)
     Write-Host $uri
-    $webclient.UploadFile($uri, $file) 
+    $webclient.UploadFile($uri, $file)
 }
 
 Function Test-FTPConnection($url, $credentials){
     Try{
         $request = [Net.WebRequest]::Create($url)
         $request.Method = [System.Net.WebRequestMethods+FTP]::ListDirectory
-        if ($credentials) { 
-            $request.Credentials = $credentials 
+        if ($credentials) {
+            $request.Credentials = $credentials
         }
         $response = $request.GetResponse()
         return $true
@@ -58,12 +58,12 @@ If(!(Test-Path $dest))
 
 robocopy.exe $source $dest @params /XD @XD /XF @XF
 
-[System.IO.Compression.ZipFile]::CreateFromDirectory($dest, $itemname, "Fastest", $true) 
+[System.IO.Compression.ZipFile]::CreateFromDirectory($dest, $itemname, "Fastest", $true)
 
 Get-ChildItem -Path $dest -Recurse | Remove-Item -force -recurse
-Remove-Item $dest -Force 
+Remove-Item $dest -Force
 
-$ftp = "ftp://raidcore.fakegaming.eu/builds/"
+$ftp = "ftp://raidcore.fakegaming.eu/httpdocs/builds/"
 $user = "raidcore"
 $pass = Read-Host "Please put in the password to upload RaidCore to the website"
 
