@@ -143,6 +143,10 @@ function mod:OnSupernovaStart()
   mod:RemoveTimerBar("NEXT_FLAMETHROWER_TIMER")
 end
 
+function mod:OnSupernovaEnd()
+  mod:AddTimerBar("NEXT_HOOKSHOT_TIMER", "msg.hookshot.next", TIMERS.HOOKSHOT.NORMAL)
+end
+
 function mod:OnHookshotStart()
   mod:AddMsg("HOOKSHOT_CAST", "msg.octog.hookshot", 2, "Beware", "xkcdRed")
 end
@@ -181,6 +185,7 @@ mod:RegisterUnitEvents("unit.octog",{
     },
     ["cast.supernova"] = {
       [core.E.CAST_START] = mod.OnSupernovaStart,
+      [core.E.CAST_END] = mod.OnSupernovaEnd,
     },
     ["cast.hookshot"] = {
       [core.E.CAST_START] = mod.OnHookshotStart,
