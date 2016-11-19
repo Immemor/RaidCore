@@ -34,6 +34,7 @@ mod:RegisterEnglishLocale({
     ["msg.midphase.coming"] = "Midphase coming soon",
     ["msg.midphase.started"] = "MIDPHASE",
     ["msg.flamethrower.interrupt"] = "INTERRUPT OCTOG",
+    ["msg.octog.hookshot"] = "HOOKSHOT",
   }
 )
 ----------------------------------------------------------------------------------------------------
@@ -45,16 +46,19 @@ mod:RegisterDefaultSetting("SoundChaosOrbSoon")
 mod:RegisterDefaultSetting("SoundMidphaseSoon")
 mod:RegisterDefaultSetting("SoundMidphaseStarted")
 mod:RegisterDefaultSetting("SoundFlamethrowerInterrupt")
+mod:RegisterDefaultSetting("SoundHookshot")
 -- Messages.
 mod:RegisterDefaultSetting("MessageChaosOrbSoon")
 mod:RegisterDefaultSetting("MessageMidphaseSoon")
 mod:RegisterDefaultSetting("MessageMidphaseStarted")
 mod:RegisterDefaultSetting("MessageFlamethrowerInterrupt")
+mod:RegisterDefaultSetting("MessageHookshot")
 -- Binds.
 mod:RegisterMessageSetting("CHAOS_ORB_SOON", core.E.COMPARE_EQUAL, "MessageChaosOrbSoon", "MessageChaosOrbSoon")
 mod:RegisterMessageSetting("MIDPHASE_SOON", core.E.COMPARE_EQUAL, "MessageMidphaseSoon", "SoundMidphaseSoon")
 mod:RegisterMessageSetting("MIDPHASE_STARTED", core.E.COMPARE_EQUAL, "MessageMidphaseStarted", "SoundMidphaseStarted")
 mod:RegisterMessageSetting("FLAMETHROWER_MSG_CAST", core.E.COMPARE_EQUAL, "MessageFlamethrowerInterrupt", "SoundFlamethrowerInterrupt")
+mod:RegisterMessageSetting("HOOKSHOT_CAST", core.E.COMPARE_EQUAL, "MessageHookshot", "SoundHookshot")
 
 ----------------------------------------------------------------------------------------------------
 -- Constants.
@@ -135,6 +139,10 @@ function mod:OnSupernovaStart()
   mod:RemoveTimerBar("NEXT_FLAMETHROWER_TIMER")
 end
 
+function mod:OnHookshotStart()
+  mod:AddMsg("HOOKSHOT_CAST", "msg.octog.hookshot", 2, "Beware", "xkcdRed")
+end
+
 function mod:OnHookshotEnd()
   mod:AddTimerBar("NEXT_HOOKSHOT_TIMER", "msg.hookshot.next", TIMERS.HOOKSHOT.NORMAL)
 end
@@ -167,6 +175,7 @@ mod:RegisterUnitEvents("unit.octog",{
       [core.E.CAST_START] = mod.OnSupernovaStart,
     },
     ["cast.hookshot"] = {
+      [core.E.CAST_START] = mod.OnHookshotStart,
       [core.E.CAST_END] = mod.OnHookshotEnd,
     },
   }
