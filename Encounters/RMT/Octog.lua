@@ -71,6 +71,7 @@ mod:RegisterDefaultTimerBarConfigs({
     ["NEXT_HOOKSHOT_TIMER"] = { sColor = "xkcdBrown" },
     ["NEXT_FLAMETHROWER_TIMER"] = { sColor = "xkcdRed" },
     ["NEXT_ORB_TIMER"] = { sColor = "xkcdPurple" },
+    ["SUPERNOVA_WIPE_TIMER"] = { bEmphasize = true, sColor = "xkcdRed" }
   }
 )
 ----------------------------------------------------------------------------------------------------
@@ -103,6 +104,9 @@ local TIMERS = {
   },
   ORB = {
     SECOND = 80,
+  },
+  SUPERNOVA = {
+    WIPE = 25,
   }
 }
 
@@ -153,9 +157,11 @@ function mod:OnSupernovaStart()
   mod:AddMsg("MIDPHASE_STARTED", "msg.midphase.started", 5, "Info", "xkcdWhite")
   mod:RemoveTimerBar("NEXT_HOOKSHOT_TIMER")
   mod:RemoveTimerBar("NEXT_FLAMETHROWER_TIMER")
+  mod:AddTimerBar("SUPERNOVA_WIPE_TIMER", "msg.octog.supernova.wipe", TIMERS.SUPERNOVA.WIPE)
 end
 
 function mod:OnSupernovaEnd()
+  mod:RemoveTimerBar("SUPERNOVA_WIPE_TIMER")
   mod:AddTimerBar("NEXT_HOOKSHOT_TIMER", "msg.octog.hookshot.next", TIMERS.HOOKSHOT.NORMAL)
   mod:RemoveMsg("ASTRAL_SHIELD_STACKS")
 end
