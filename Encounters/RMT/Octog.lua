@@ -23,6 +23,7 @@ mod:RegisterEnglishLocale({
     ["unit.pool"] = "Noxious Ink Pool",
     -- NPC says.
     ["say.octog.orb"] = "Stay close! The feast be about to begin!",
+    ["say.octog.supernova"] = "Ye'll be helpless soon... and I'll be fed!",
     -- Cast names.
     ["cast.octog.supernova"] = "Supernova",
     ["cast.octog.hookshot"] = "Hookshot",
@@ -199,8 +200,10 @@ mod:RegisterUnitEvents("unit.octog",{
       [core.E.CAST_START] = mod.OnFlamethrowerStart,
       [core.E.CAST_END] = mod.OnFlamethrowerEnd,
     },
+    ["say.octog.supernova"] = {
+      [core.E.NPC_SAY] = mod.OnSupernovaStart,
+    },
     ["cast.octog.supernova"] = {
-      [core.E.CAST_START] = mod.OnSupernovaStart,
       [core.E.CAST_END] = mod.OnSupernovaEnd,
     },
     ["cast.octog.hookshot"] = {
