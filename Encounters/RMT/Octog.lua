@@ -145,7 +145,7 @@ mod:RegisterUnitEvents("unit.octog",{
         mod:AddTimerBar("NEXT_HOOKSHOT_TIMER", "msg.hookshot.next", HOOKSHOT_TIMER)
       end,
       ["cast.flamethrower"] = function(self)
-        mod:AddTimerBar("NEXT_HOOKSHOT_TIMER", "msg.flamethrower.next", FLAMETHROWER_TIMER)
+        mod:AddTimerBar("NEXT_FLAMETHROWER_TIMER", "msg.flamethrower.next", FLAMETHROWER_TIMER)
       end
     },
   }
