@@ -125,37 +125,51 @@ function mod:IsPhaseClose(phase, percent)
   return false
 end
 
+function mod:OnFlamethrowerStart()
+  mod:RemoveTimerBar("NEXT_FLAMETHROWER_TIMER")
+  mod:AddMsg("FLAMETHROWER_MSG_CAST", "msg.flamethrower.interrupt", 2, "Inferno", "xkcdOrange")
+end
+
+function mod:OnFlamethrowerEnd()
+  mod:AddTimerBar("NEXT_FLAMETHROWER_TIMER", "msg.flamethrower.next", TIMERS.FLAMETHROWER.NORMAL)
+end
+
+function mod:OnSupernovaStart()
+  mod:AddMsg("MIDPHASE_STARTED", "msg.midphase.started", 5, "Info", "xkcdWhite")
+  mod:RemoveTimerBar("NEXT_HOOKSHOT_TIMER")
+  mod:RemoveTimerBar("NEXT_FLAMETHROWER_TIMER")
+end
+
+function mod:OnHookshotEnd()
+  mod:AddTimerBar("NEXT_HOOKSHOT_TIMER", "msg.hookshot.next", TIMERS.HOOKSHOT.NORMAL)
+end
+
+function mod:OnOctogCreated(id, unit)
+  core:AddUnit(unit)
+  core:WatchUnit(unit, core.E.TRACK_CASTS + core.E.TRACK_HEALTH)
+end
+
+function mod:OnOctogHealthChanged(id, percent)
+  if mod:IsPhaseClose(ORBS_CLOSE, percent) then
+    mod:AddMsg("CHAOS_ORB_SOON", "msg.chaos.orbs.coming", 5, "Info", "xkcdWhite")
+  end
+  if mod:IsPhaseClose(PHASES_CLOSE, percent) then
+    mod:AddMsg("MIDPHASE_SOON", "msg.midphase.coming", 5, "Info", "xkcdWhite")
+  end
+end
+
 mod:RegisterUnitEvents("unit.octog",{
-    [core.E.UNIT_CREATED] = function (_, _, unit)
-      core:AddUnit(unit)
-      core:WatchUnit(unit, core.E.TRACK_CASTS + core.E.TRACK_HEALTH)
-    end,
-    [core.E.HEALTH_CHANGED] = function(_, _, percent)
-      if mod:IsPhaseClose(ORBS_CLOSE, percent) then
-        mod:AddMsg("CHAOS_ORB_SOON", "msg.chaos.orbs.coming", 5, "Info", "xkcdWhite")
-      end
-      if mod:IsPhaseClose(PHASES_CLOSE, percent) then
-        mod:AddMsg("MIDPHASE_SOON", "msg.midphase.coming", 5, "Info", "xkcdWhite")
-      end
-    end,
-    [core.E.CAST_START] = {
-      ["cast.supernova"] = function(self)
-        mod:AddMsg("MIDPHASE_STARTED", "msg.midphase.started", 5, "Info", "xkcdWhite")
-        mod:RemoveTimerBar("NEXT_HOOKSHOT_TIMER")
-        mod:RemoveTimerBar("NEXT_FLAMETHROWER_TIMER")
-      end,
-      ["cast.flamethrower"] = function(self)
-        mod:RemoveTimerBar("NEXT_FLAMETHROWER_TIMER")
-        mod:AddMsg("FLAMETHROWER_MSG_CAST", "msg.flamethrower.interrupt", 2, "Inferno", "xkcdOrange")
-      end
+    [core.E.UNIT_CREATED] = mod.OnOctogCreated,
+    [core.E.HEALTH_CHANGED] = mod.OnOctogHealthChanged,
+    ["cast.flamethrower"] = {
+      [core.E.CAST_START] = mod.OnFlamethrowerStart,
+      [core.E.CAST_END] = mod.OnFlamethrowerEnd,
     },
-    [core.E.CAST_END] = {
-      ["cast.hookshot"] = function(self)
-        mod:AddTimerBar("NEXT_HOOKSHOT_TIMER", "msg.hookshot.next", TIMERS.HOOKSHOT.NORMAL)
-      end,
-      ["cast.flamethrower"] = function(self)
-        mod:AddTimerBar("NEXT_FLAMETHROWER_TIMER", "msg.flamethrower.next", TIMERS.FLAMETHROWER.NORMAL)
-      end
+    ["cast.supernova"] = {
+      [core.E.CAST_START] = mod.OnSupernovaStart,
+    },
+    ["cast.hookshot"] = {
+      [core.E.CAST_END] = mod.OnHookshotEnd,
     },
   }
 )
