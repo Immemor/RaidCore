@@ -33,11 +33,13 @@ mod:RegisterEnglishLocale({
     ["msg.octog.flamethrower.next"] = "Next flamethrower in",
     ["msg.octog.flamethrower.interrupt"] = "INTERRUPT OCTOG",
     ["msg.octog.hookshot"] = "HOOKSHOT",
+    ["msg.octog.supernova.wipe"] = "Supernova end in",
     ["msg.orb.first"] = "First orb soon",
     ["msg.orb.next"] = "%d orbs in",
     ["msg.orb.spawn"] = "%d orbs spawning",
     ["msg.midphase.coming"] = "Midphase coming soon",
     ["msg.midphase.started"] = "MIDPHASE",
+
   }
 )
 ----------------------------------------------------------------------------------------------------
