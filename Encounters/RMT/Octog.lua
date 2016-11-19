@@ -30,7 +30,7 @@ mod:RegisterEnglishLocale({
     -- Messages.
     ["msg.hookshot.next"] = "Next hookshot in",
     ["msg.flamethrower.next"] = "Next flamethrower in",
-    ["msg.chaos.orbs.coming"] = "Chaos orb(s) coming soon",
+    ["msg.orb.first"] = "First orb soon",
     ["msg.midphase.coming"] = "Midphase coming soon",
     ["msg.midphase.started"] = "MIDPHASE",
     ["msg.flamethrower.interrupt"] = "INTERRUPT OCTOG",
@@ -97,7 +97,6 @@ local TIMERS = {
 -- Health trackers
 local ORBS_CLOSE = {
   {UPPER = 86.5, LOWER = 85.5}, -- 85
-  {UPPER = 71.5, LOWER = 70.5}, -- 70
 }
 
 local PHASES_CLOSE = {
@@ -161,7 +160,7 @@ end
 
 function mod:OnOctogHealthChanged(id, percent)
   if mod:IsPhaseClose(ORBS_CLOSE, percent) then
-    mod:AddMsg("CHAOS_ORB_SOON", "msg.chaos.orbs.coming", 5, "Info", "xkcdWhite")
+    mod:AddMsg("CHAOS_ORB_SOON", "msg.orb.first", 5, "Info", "xkcdWhite")
   end
   if mod:IsPhaseClose(PHASES_CLOSE, percent) then
     mod:AddMsg("MIDPHASE_SOON", "msg.midphase.coming", 5, "Info", "xkcdWhite")
