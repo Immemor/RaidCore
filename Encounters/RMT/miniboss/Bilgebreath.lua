@@ -31,7 +31,6 @@ mod:RegisterEnglishLocale({
 ----------------------------------------------------------------------------------------------------
 mod:RegisterUnitEvents({
     "unit.bilgebreath",
-    "unit.remnant",
     },{
     [core.E.UNIT_CREATED] = function (_, _, unit)
       core:AddUnit(unit)
