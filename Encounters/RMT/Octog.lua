@@ -104,7 +104,7 @@ local TIMERS = {
 }
 
 -- Health trackers
-local ORBS_CLOSE = {
+local FIRST_ORB_CLOSE = {
   {UPPER = 86.5, LOWER = 85.5}, -- 85
 }
 
@@ -169,7 +169,7 @@ function mod:OnOctogCreated(id, unit)
 end
 
 function mod:OnOctogHealthChanged(id, percent)
-  if mod:IsPhaseClose(ORBS_CLOSE, percent) then
+  if mod:IsPhaseClose(FIRST_ORB_CLOSE, percent) then
     mod:AddMsg("CHAOS_ORB_SOON", "msg.orb.first", 5, "Info", "xkcdWhite")
   end
   if mod:IsPhaseClose(PHASES_CLOSE, percent) then
