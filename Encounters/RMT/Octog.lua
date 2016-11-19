@@ -24,19 +24,19 @@ mod:RegisterEnglishLocale({
     -- NPC says.
     ["say.octog.orb"] = "Stay close! The feast be about to begin!",
     -- Cast names.
-    ["cast.supernova"] = "Supernova",
-    ["cast.hookshot"] = "Hookshot",
-    ["cast.flamethrower"] = "Flamethrower",
+    ["cast.octog.supernova"] = "Supernova",
+    ["cast.octog.hookshot"] = "Hookshot",
+    ["cast.octog.flamethrower"] = "Flamethrower",
     -- Messages.
-    ["msg.hookshot.next"] = "Next hookshot in",
-    ["msg.flamethrower.next"] = "Next flamethrower in",
+    ["msg.octog.hookshot.next"] = "Next hookshot in",
+    ["msg.octog.flamethrower.next"] = "Next flamethrower in",
+    ["msg.octog.flamethrower.interrupt"] = "INTERRUPT OCTOG",
+    ["msg.octog.hookshot"] = "HOOKSHOT",
     ["msg.orb.first"] = "First orb soon",
     ["msg.orb.next"] = "%d orbs in",
     ["msg.orb.spawn"] = "%d orbs spawning",
     ["msg.midphase.coming"] = "Midphase coming soon",
     ["msg.midphase.started"] = "MIDPHASE",
-    ["msg.flamethrower.interrupt"] = "INTERRUPT OCTOG",
-    ["msg.octog.hookshot"] = "HOOKSHOT",
   }
 )
 ----------------------------------------------------------------------------------------------------
@@ -120,8 +120,8 @@ local orbCount
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
   orbCount = 0
-  mod:AddTimerBar("NEXT_HOOKSHOT_TIMER", "msg.hookshot.next", TIMERS.HOOKSHOT.FIRST)
-  mod:AddTimerBar("NEXT_FLAMETHROWER_TIMER", "msg.flamethrower.next", TIMERS.FLAMETHROWER.NORMAL)
+  mod:AddTimerBar("NEXT_HOOKSHOT_TIMER", "msg.octog.hookshot.next", TIMERS.HOOKSHOT.FIRST)
+  mod:AddTimerBar("NEXT_FLAMETHROWER_TIMER", "msg.octog.flamethrower.next", TIMERS.FLAMETHROWER.NORMAL)
 end
 
 function mod:IsPhaseClose(phase, percent)
@@ -134,7 +134,7 @@ function mod:IsPhaseClose(phase, percent)
 end
 
 function mod:DisplayInterruptFlamethrower()
-  mod:AddMsg("FLAMETHROWER_MSG_CAST", "msg.flamethrower.interrupt", 2, "Inferno", "xkcdOrange")
+  mod:AddMsg("FLAMETHROWER_MSG_CAST", "msg.octog.flamethrower.interrupt", 2, "Inferno", "xkcdOrange")
 end
 
 function mod:OnFlamethrowerStart()
@@ -143,7 +143,7 @@ function mod:OnFlamethrowerStart()
 end
 
 function mod:OnFlamethrowerEnd()
-  mod:AddTimerBar("NEXT_FLAMETHROWER_TIMER", "msg.flamethrower.next", TIMERS.FLAMETHROWER.NORMAL)
+  mod:AddTimerBar("NEXT_FLAMETHROWER_TIMER", "msg.octog.flamethrower.next", TIMERS.FLAMETHROWER.NORMAL)
 end
 
 function mod:OnSupernovaStart()
@@ -153,7 +153,7 @@ function mod:OnSupernovaStart()
 end
 
 function mod:OnSupernovaEnd()
-  mod:AddTimerBar("NEXT_HOOKSHOT_TIMER", "msg.hookshot.next", TIMERS.HOOKSHOT.NORMAL)
+  mod:AddTimerBar("NEXT_HOOKSHOT_TIMER", "msg.octog.hookshot.next", TIMERS.HOOKSHOT.NORMAL)
 end
 
 function mod:OnHookshotStart()
@@ -161,7 +161,7 @@ function mod:OnHookshotStart()
 end
 
 function mod:OnHookshotEnd()
-  mod:AddTimerBar("NEXT_HOOKSHOT_TIMER", "msg.hookshot.next", TIMERS.HOOKSHOT.NORMAL)
+  mod:AddTimerBar("NEXT_HOOKSHOT_TIMER", "msg.octog.hookshot.next", TIMERS.HOOKSHOT.NORMAL)
 end
 
 function mod:OnOctogCreated(id, unit)
@@ -195,15 +195,15 @@ end
 mod:RegisterUnitEvents("unit.octog",{
     [core.E.UNIT_CREATED] = mod.OnOctogCreated,
     [core.E.HEALTH_CHANGED] = mod.OnOctogHealthChanged,
-    ["cast.flamethrower"] = {
+    ["cast.octog.flamethrower"] = {
       [core.E.CAST_START] = mod.OnFlamethrowerStart,
       [core.E.CAST_END] = mod.OnFlamethrowerEnd,
     },
-    ["cast.supernova"] = {
+    ["cast.octog.supernova"] = {
       [core.E.CAST_START] = mod.OnSupernovaStart,
       [core.E.CAST_END] = mod.OnSupernovaEnd,
     },
-    ["cast.hookshot"] = {
+    ["cast.octog.hookshot"] = {
       [core.E.CAST_START] = mod.OnHookshotStart,
       [core.E.CAST_END] = mod.OnHookshotEnd,
     },
