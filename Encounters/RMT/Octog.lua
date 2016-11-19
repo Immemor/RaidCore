@@ -76,10 +76,15 @@ local BUFFS = {
   ASTRAL_SHIELD_STACKS = 85643, --Immune to damage.
 }
 
--- Timers.
-local FIRST_HOOKSHOT_TIMER = 10
-local HOOKSHOT_TIMER = 45
-local FLAMETHROWER_TIMER = 40
+local TIMERS = {
+  HOOKSHOT = {
+    FIRST = 10,
+    NORMAL = 45,
+  },
+  FLAMETHROWER = {
+    NORMAL = 40,
+  }
+}
 
 -- Health trackers
 local ORBS_CLOSE = {
@@ -98,8 +103,8 @@ local PHASES_CLOSE = {
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-  mod:AddTimerBar("NEXT_HOOKSHOT_TIMER", "msg.hookshot.next", FIRST_HOOKSHOT_TIMER)
-  mod:AddTimerBar("NEXT_FLAMETHROWER_TIMER", "msg.flamethrower.next", FLAMETHROWER_TIMER)
+  mod:AddTimerBar("NEXT_HOOKSHOT_TIMER", "msg.hookshot.next", TIMERS.HOOKSHOT.FIRST)
+  mod:AddTimerBar("NEXT_FLAMETHROWER_TIMER", "msg.flamethrower.next", TIMERS.FLAMETHROWER.NORMAL)
 end
 
 mod:RegisterUnitEvents({
@@ -140,15 +145,16 @@ mod:RegisterUnitEvents("unit.octog",{
         mod:RemoveTimerBar("NEXT_FLAMETHROWER_TIMER")
       end,
       ["cast.flamethrower"] = function(self)
+        mod:RemoveTimerBar("NEXT_FLAMETHROWER_TIMER")
         mod:AddMsg("FLAMETHROWER_MSG_CAST", "msg.flamethrower.interrupt", 2, "Inferno", "xkcdOrange")
       end
     },
     [core.E.CAST_END] = {
       ["cast.hookshot"] = function(self)
-        mod:AddTimerBar("NEXT_HOOKSHOT_TIMER", "msg.hookshot.next", HOOKSHOT_TIMER)
+        mod:AddTimerBar("NEXT_HOOKSHOT_TIMER", "msg.hookshot.next", TIMERS.HOOKSHOT.NORMAL)
       end,
       ["cast.flamethrower"] = function(self)
-        mod:AddTimerBar("NEXT_FLAMETHROWER_TIMER", "msg.flamethrower.next", FLAMETHROWER_TIMER)
+        mod:AddTimerBar("NEXT_FLAMETHROWER_TIMER", "msg.flamethrower.next", TIMERS.FLAMETHROWER.NORMAL)
       end
     },
   }
