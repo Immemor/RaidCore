@@ -214,8 +214,7 @@ end
 
 function mod:DrawOrbCircle(id, unit, color)
   if mod:GetSetting("CircleOrb") then
-    --TODO find out radius
-    --core:AddPolygon(id, unit, 10, nil, 5, color, 20)
+    core:AddPolygon(id, unit, 16.5, nil, 5, color, 20)
   end
 end
 
