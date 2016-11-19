@@ -58,6 +58,7 @@ mod:RegisterDefaultSetting("MessageMidphaseStarted")
 mod:RegisterDefaultSetting("MessageFlamethrowerInterrupt")
 mod:RegisterDefaultSetting("MessageHookshot")
 mod:RegisterDefaultSetting("MessageOrbSpawn")
+mod:RegisterDefaultSetting("MessageAstralShield")
 -- Binds.
 mod:RegisterMessageSetting("CHAOS_ORB_SOON", core.E.COMPARE_EQUAL, "MessageChaosOrbSoon", "MessageChaosOrbSoon")
 mod:RegisterMessageSetting("ORB_SPAWN", core.E.COMPARE_EQUAL, "MessageOrbSpawn", "SoundOrbSpawn")
@@ -65,6 +66,7 @@ mod:RegisterMessageSetting("MIDPHASE_SOON", core.E.COMPARE_EQUAL, "MessageMidpha
 mod:RegisterMessageSetting("MIDPHASE_STARTED", core.E.COMPARE_EQUAL, "MessageMidphaseStarted", "SoundMidphaseStarted")
 mod:RegisterMessageSetting("FLAMETHROWER_MSG_CAST", core.E.COMPARE_EQUAL, "MessageFlamethrowerInterrupt", "SoundFlamethrowerInterrupt")
 mod:RegisterMessageSetting("HOOKSHOT_CAST", core.E.COMPARE_EQUAL, "MessageHookshot", "SoundHookshot")
+mod:RegisterMessageSetting("ASTRAL_SHIELD_STACKS", core.E.COMPARE_EQUAL, "MessageAstralShield")
 mod:RegisterDefaultTimerBarConfigs({
     ["NEXT_HOOKSHOT_TIMER"] = { sColor = "xkcdBrown" },
     ["NEXT_FLAMETHROWER_TIMER"] = { sColor = "xkcdRed" },
@@ -155,6 +157,7 @@ end
 
 function mod:OnSupernovaEnd()
   mod:AddTimerBar("NEXT_HOOKSHOT_TIMER", "msg.octog.hookshot.next", TIMERS.HOOKSHOT.NORMAL)
+  mod:RemoveMsg("ASTRAL_SHIELD_STACKS")
 end
 
 function mod:OnHookshotStart()
@@ -166,7 +169,7 @@ function mod:OnHookshotEnd()
 end
 
 function mod:OnOctogCreated(id, unit)
-  core:WatchUnit(unit, core.E.TRACK_CASTS + core.E.TRACK_HEALTH)
+  core:WatchUnit(unit, core.E.TRACK_CASTS + core.E.TRACK_HEALTH + core.E.TRACK_BUFFS)
 end
 
 function mod:OnOctogHealthChanged(id, percent)
@@ -193,6 +196,10 @@ function mod:OnOrbsSpawning()
   mod:AddMsg("ORB_SPAWN", msg, 2, "Info", "xkcdWhite")
 end
 
+function mod:OnAstralShieldUpdate(id, spellId, stacks)
+  mod:AddMsg("ASTRAL_SHIELD_STACKS", stacks, 5, nil, "xkcdOrange")
+end
+
 mod:RegisterUnitEvents("unit.octog",{
     [core.E.UNIT_CREATED] = mod.OnOctogCreated,
     [core.E.HEALTH_CHANGED] = mod.OnOctogHealthChanged,
@@ -212,6 +219,9 @@ mod:RegisterUnitEvents("unit.octog",{
     },
     ["say.octog.orb"] = {
       [core.E.NPC_SAY] = mod.OnOrbsSpawning,
+    },
+    [BUFFS.ASTRAL_SHIELD_STACKS] = {
+      [core.E.BUFF_UPDATE] = mod.OnAstralShieldUpdate,
     }
   }
 )
