@@ -87,7 +87,7 @@ local BUFFS = {
 local TIMERS = {
   HOOKSHOT = {
     FIRST = 10,
-    NORMAL = 45,
+    NORMAL = 30,
   },
   FLAMETHROWER = {
     NORMAL = 40,
@@ -168,6 +168,10 @@ function mod:AddUnit(id, unit)
   core:AddUnit(unit)
 end
 
+function mod:OnOrbsSpawning()
+  mod:AddMsg("ORB_SPAWN", "msg.octog.hookshot", 2, "Beware", "xkcdRed")
+end
+
 mod:RegisterUnitEvents("unit.octog",{
     [core.E.UNIT_CREATED] = mod.OnOctogCreated,
     [core.E.HEALTH_CHANGED] = mod.OnOctogHealthChanged,
@@ -182,6 +186,9 @@ mod:RegisterUnitEvents("unit.octog",{
       [core.E.CAST_START] = mod.OnHookshotStart,
       [core.E.CAST_END] = mod.OnHookshotEnd,
     },
+    ["say.octog.orb"] = {
+      [core.E.NPC_SAY] = mod.OnOrbsSpawning,
+    }
   }
 )
 
