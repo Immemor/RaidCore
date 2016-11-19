@@ -424,12 +424,7 @@ function SimpleLine:AddDraw(Key, Origin, nOffset, nLength, nRotation, nWidth, sC
     y = NewVector3({ 0, 1, 0 }),
     z = NewVector3({ nSin, 0, nCos }),
   }
-  if OriginType == "number" then
-    -- Origin is the Id of an unit.
-    tDraw.tOriginUnit = GetUnitById(Origin)
-    tDraw.tFromVector = nil
-    tDraw.tToVector = nil
-  else
+  if OriginType == "table" then
     -- Origin is the result of a GetPosition()
     local tOriginVector = NewVector3(Origin)
     local tFacingVector = NewVector3(DEFAULT_NORTH_FACING)
@@ -440,6 +435,14 @@ function SimpleLine:AddDraw(Key, Origin, nOffset, nLength, nRotation, nWidth, sC
     tDraw.tOriginUnit = nil
     tDraw.tFromVector = tOriginVector + tVectorA
     tDraw.tToVector = tOriginVector + tVectorB
+  else
+    local tUnit = Origin
+    if OriginType == "number" then
+      tUnit = GetUnitById(Origin)
+    end
+    tDraw.tOriginUnit = tUnit
+    tDraw.tFromVector = nil
+    tDraw.tToVector = nil
   end
   -- Save this object (new or not).
   self.tDraws[Key] = tDraw
@@ -559,6 +562,8 @@ function Polygon:AddDraw(Key, Origin, nRadius, nRotation, nWidth, sColor, nSide)
   if OriginType == "number" then
     -- Origin is the Id of an unit.
     tDraw.tOriginUnit = GetUnitById(Origin)
+  elseif OriginType == "userdata" then
+    tDraw.tOriginUnit = Origin
   else
     -- Origin is the result of a GetPosition()
     tDraw.tOriginUnit = nil
@@ -656,7 +661,7 @@ end
 
 function Picture:AddDraw(Key, Origin, sSprite, nSpriteSize, nRotation, nDistance, nHeight, sColor)
   local OriginType = type(Origin)
-  assert(OriginType == "number" or OriginType == "table")
+  assert(OriginType == "number" or OriginType == "table" or OriginType == "userdata")
 
   -- Register a new object to manage.
   local tDraw = self.tDraws[Key] or NewDraw()
@@ -676,15 +681,7 @@ function Picture:AddDraw(Key, Origin, sSprite, nSpriteSize, nRotation, nDistance
     z = NewVector3({ nSin, 0, nCos }),
   }
 
-  if OriginType == "number" then
-    -- Origin is the Id of an unit.
-    local tUnit = GetUnitById(Origin)
-    tDraw.tOriginUnit = tUnit
-    local nRaceId = tUnit and tUnit:GetRaceId()
-    if nRaceId and HEIGHT_PER_RACEID[nRaceId] then
-      tDraw.nHeight = HEIGHT_PER_RACEID[nRaceId]
-    end
-  else
+  if OriginType == "table" then
     -- Origin is the result of a GetPosition()
     tDraw.tOriginUnit = nil
     -- Precomputing coordonate of the polygon with constant origin.
@@ -693,6 +690,16 @@ function Picture:AddDraw(Key, Origin, sSprite, nSpriteSize, nRotation, nDistance
     local tRefVector = tFacingVector * tDraw.nDistance
     tDraw.tVector = tOriginVector + Rotation(tRefVector, tDraw.RotationMatrix)
     tDraw.tVector.y = tDraw.tVector.y + tDraw.nHeight
+  else
+    local tUnit = Origin
+    if OriginType == "number" then
+      tUnit = GetUnitById(Origin)
+    end
+    tDraw.tOriginUnit = tUnit
+    local nRaceId = tUnit and tUnit:GetRaceId()
+    if nRaceId and HEIGHT_PER_RACEID[nRaceId] then
+      tDraw.nHeight = HEIGHT_PER_RACEID[nRaceId]
+    end
   end
   -- Save this object (new or not).
   self.tDraws[Key] = tDraw
