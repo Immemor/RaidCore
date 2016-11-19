@@ -73,7 +73,7 @@ mod:RegisterDefaultTimerBarConfigs({
     ["NEXT_HOOKSHOT_TIMER"] = { sColor = "xkcdBrown" },
     ["NEXT_FLAMETHROWER_TIMER"] = { sColor = "xkcdRed" },
     ["NEXT_ORB_TIMER"] = { sColor = "xkcdPurple" },
-    ["SUPERNOVA_WIPE_TIMER"] = { bEmphasize = true, sColor = "xkcdRed" }
+    ["SUPERNOVA_WIPE_TIMER"] = { sColor = "xkcdRed" }
   }
 )
 ----------------------------------------------------------------------------------------------------
