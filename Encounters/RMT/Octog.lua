@@ -21,6 +21,8 @@ mod:RegisterEnglishLocale({
     ["unit.squirgling"] = "Squirgling",
     ["unit.orb"] = "Chaos Orb",
     ["unit.pool"] = "Noxious Ink Pool",
+    -- NPC says.
+    ["say.octog.orb"] = "Stay close! The feast be about to begin!",
     -- Cast names.
     ["cast.supernova"] = "Supernova",
     ["cast.hookshot"] = "Hookshot",
@@ -32,7 +34,8 @@ mod:RegisterEnglishLocale({
     ["msg.midphase.coming"] = "Midphase coming soon",
     ["msg.midphase.started"] = "MIDPHASE",
     ["msg.flamethrower.interrupt"] = "INTERRUPT OCTOG",
-  })
+  }
+)
 ----------------------------------------------------------------------------------------------------
 -- Settings.
 ----------------------------------------------------------------------------------------------------
