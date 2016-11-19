@@ -31,6 +31,8 @@ mod:RegisterEnglishLocale({
     ["msg.hookshot.next"] = "Next hookshot in",
     ["msg.flamethrower.next"] = "Next flamethrower in",
     ["msg.orb.first"] = "First orb soon",
+    ["msg.orb.next"] = "%d orbs in",
+    ["msg.orb.spawn"] = "%d orbs spawning",
     ["msg.midphase.coming"] = "Midphase coming soon",
     ["msg.midphase.started"] = "MIDPHASE",
     ["msg.flamethrower.interrupt"] = "INTERRUPT OCTOG",
@@ -47,14 +49,17 @@ mod:RegisterDefaultSetting("SoundMidphaseSoon")
 mod:RegisterDefaultSetting("SoundMidphaseStarted")
 mod:RegisterDefaultSetting("SoundFlamethrowerInterrupt")
 mod:RegisterDefaultSetting("SoundHookshot")
+mod:RegisterDefaultSetting("SoundOrbSpawn")
 -- Messages.
 mod:RegisterDefaultSetting("MessageChaosOrbSoon")
 mod:RegisterDefaultSetting("MessageMidphaseSoon")
 mod:RegisterDefaultSetting("MessageMidphaseStarted")
 mod:RegisterDefaultSetting("MessageFlamethrowerInterrupt")
 mod:RegisterDefaultSetting("MessageHookshot")
+mod:RegisterDefaultSetting("MessageOrbSpawn")
 -- Binds.
 mod:RegisterMessageSetting("CHAOS_ORB_SOON", core.E.COMPARE_EQUAL, "MessageChaosOrbSoon", "MessageChaosOrbSoon")
+mod:RegisterMessageSetting("ORB_SPAWN", core.E.COMPARE_EQUAL, "MessageOrbSpawn", "SoundOrbSpawn")
 mod:RegisterMessageSetting("MIDPHASE_SOON", core.E.COMPARE_EQUAL, "MessageMidphaseSoon", "SoundMidphaseSoon")
 mod:RegisterMessageSetting("MIDPHASE_STARTED", core.E.COMPARE_EQUAL, "MessageMidphaseStarted", "SoundMidphaseStarted")
 mod:RegisterMessageSetting("FLAMETHROWER_MSG_CAST", core.E.COMPARE_EQUAL, "MessageFlamethrowerInterrupt", "SoundFlamethrowerInterrupt")
@@ -62,6 +67,7 @@ mod:RegisterMessageSetting("HOOKSHOT_CAST", core.E.COMPARE_EQUAL, "MessageHooksh
 mod:RegisterDefaultTimerBarConfigs({
     ["NEXT_HOOKSHOT_TIMER"] = { sColor = "xkcdBrown" },
     ["NEXT_FLAMETHROWER_TIMER"] = { sColor = "xkcdRed" },
+    ["NEXT_ORB_TIMER"] = { sColor = "xkcdPurple" },
   }
 )
 ----------------------------------------------------------------------------------------------------
@@ -91,6 +97,9 @@ local TIMERS = {
   },
   FLAMETHROWER = {
     NORMAL = 40,
+  },
+  ORB = {
+    SECOND = 80,
   }
 }
 
@@ -105,11 +114,12 @@ local PHASES_CLOSE = {
 ----------------------------------------------------------------------------------------------------
 -- Locals.
 ----------------------------------------------------------------------------------------------------
-
+local orbCount
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
+  orbCount = 0
   mod:AddTimerBar("NEXT_HOOKSHOT_TIMER", "msg.hookshot.next", TIMERS.HOOKSHOT.FIRST)
   mod:AddTimerBar("NEXT_FLAMETHROWER_TIMER", "msg.flamethrower.next", TIMERS.FLAMETHROWER.NORMAL)
 end
@@ -165,6 +175,11 @@ function mod:OnOctogHealthChanged(id, percent)
   if mod:IsPhaseClose(PHASES_CLOSE, percent) then
     mod:AddMsg("MIDPHASE_SOON", "msg.midphase.coming", 5, "Info", "xkcdWhite")
   end
+  if percent == 85 then
+    --TODO what happens after midphase
+    local msg = self.L["msg.orb.next"]:format(2)
+    mod:AddTimerBar("NEXT_ORB_TIMER", msg, TIMERS.ORB.SECOND)
+  end
 end
 
 function mod:AddUnit(id, unit)
@@ -172,7 +187,9 @@ function mod:AddUnit(id, unit)
 end
 
 function mod:OnOrbsSpawning()
-  mod:AddMsg("ORB_SPAWN", "msg.octog.hookshot", 2, "Beware", "xkcdRed")
+  orbCount = orbCount + 1
+  local msg = self.L["msg.orb.spawn"]:format(orbCount)
+  mod:AddMsg("ORB_SPAWN", msg, 2, "Info", "xkcdWhite")
 end
 
 mod:RegisterUnitEvents("unit.octog",{
