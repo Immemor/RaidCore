@@ -116,9 +116,13 @@ function mod:IsPhaseClose(phase, percent)
   return false
 end
 
+function mod:DisplayInterruptFlamethrower()
+  mod:AddMsg("FLAMETHROWER_MSG_CAST", "msg.flamethrower.interrupt", 2, "Inferno", "xkcdOrange")
+end
+
 function mod:OnFlamethrowerStart()
   mod:RemoveTimerBar("NEXT_FLAMETHROWER_TIMER")
-  mod:AddMsg("FLAMETHROWER_MSG_CAST", "msg.flamethrower.interrupt", 2, "Inferno", "xkcdOrange")
+  mod:ScheduleTimer("DisplayInterruptFlamethrower", 1)
 end
 
 function mod:OnFlamethrowerEnd()
