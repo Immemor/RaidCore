@@ -59,7 +59,11 @@ mod:RegisterMessageSetting("MIDPHASE_SOON", core.E.COMPARE_EQUAL, "MessageMidpha
 mod:RegisterMessageSetting("MIDPHASE_STARTED", core.E.COMPARE_EQUAL, "MessageMidphaseStarted", "SoundMidphaseStarted")
 mod:RegisterMessageSetting("FLAMETHROWER_MSG_CAST", core.E.COMPARE_EQUAL, "MessageFlamethrowerInterrupt", "SoundFlamethrowerInterrupt")
 mod:RegisterMessageSetting("HOOKSHOT_CAST", core.E.COMPARE_EQUAL, "MessageHookshot", "SoundHookshot")
-
+mod:RegisterDefaultTimerBarConfigs({
+    ["NEXT_HOOKSHOT_TIMER"] = { sColor = "xkcdBrown" },
+    ["NEXT_FLAMETHROWER_TIMER"] = { sColor = "xkcdRed" },
+  }
+)
 ----------------------------------------------------------------------------------------------------
 -- Constants.
 ----------------------------------------------------------------------------------------------------
