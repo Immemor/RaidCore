@@ -39,13 +39,13 @@ mod:RegisterEnglishLocale({
     ["msg.orb.spawn"] = "%d orbs spawning",
     ["msg.midphase.coming"] = "Midphase coming soon",
     ["msg.midphase.started"] = "MIDPHASE",
-
   }
 )
 ----------------------------------------------------------------------------------------------------
 -- Settings.
 ----------------------------------------------------------------------------------------------------
 -- Visuals.
+mod:RegisterDefaultSetting("CircleOrb")
 -- Sounds.
 mod:RegisterDefaultSetting("SoundChaosOrbSoon")
 mod:RegisterDefaultSetting("SoundMidphaseSoon")
@@ -126,11 +126,13 @@ local PHASES_CLOSE = {
 -- Locals.
 ----------------------------------------------------------------------------------------------------
 local orbCount
+local playerId
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
   orbCount = 0
+  playerId = GameLib.GetPlayerUnit():GetId()
   mod:AddTimerBar("NEXT_HOOKSHOT_TIMER", "msg.octog.hookshot.next", TIMERS.HOOKSHOT.FIRST)
   mod:AddTimerBar("NEXT_FLAMETHROWER_TIMER", "msg.octog.flamethrower.next", TIMERS.FLAMETHROWER.NORMAL)
 end
@@ -210,6 +212,27 @@ function mod:OnAstralShieldUpdate(id, spellId, stacks)
   mod:AddMsg("ASTRAL_SHIELD_STACKS", stacks, 5, nil, "xkcdOrange")
 end
 
+function mod:DrawOrbCircle(id, unit, color)
+  if mod:GetSetting("CircleOrb") then
+    --TODO find out radius
+    --core:AddPolygon(id, unit, 10, nil, 5, color, 20)
+  end
+end
+
+function mod:OnOrbCreated(id, unit)
+  mod:DrawOrbCircle(id, unit, "xkcdGreen")
+end
+
+function mod:OnOrbDestroyed(id, unit)
+  core:RemovePolygon(id)
+end
+
+function mod:OnChaosTetherAdd(id, spellId, stacks, timeRemaining, sName, unitCaster)
+  if id == playerId and unitCaster and unitCaster:IsValid() then
+    mod:DrawOrbCircle(unitCaster:GetId(), unitCaster, "xkcdRed")
+  end
+end
+
 mod:RegisterUnitEvents("unit.octog",{
     [core.E.UNIT_CREATED] = mod.OnOctogCreated,
     [core.E.HEALTH_CHANGED] = mod.OnOctogHealthChanged,
@@ -236,6 +259,12 @@ mod:RegisterUnitEvents("unit.octog",{
   }
 )
 
+mod:RegisterUnitEvents("unit.orb", {
+    [core.E.UNIT_CREATED] = mod.OnOrbCreated,
+    [core.E.UNIT_DESTROYED] = mod.OnOrbDestroyed,
+  }
+)
+mod:RegisterUnitSpellEvent(core.E.ALL_UNITS, core.E.BUFF_ADD, DEBUFFS.CHAOS_TETHER, mod.OnChaosTetherAdd)
 mod:RegisterUnitEvents({"unit.orb", "unit.octog"}, {
     [core.E.UNIT_CREATED] = mod.AddUnit,
   }
