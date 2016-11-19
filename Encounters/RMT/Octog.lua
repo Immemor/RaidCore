@@ -107,15 +107,6 @@ function mod:OnBossEnable()
   mod:AddTimerBar("NEXT_FLAMETHROWER_TIMER", "msg.flamethrower.next", TIMERS.FLAMETHROWER.NORMAL)
 end
 
-mod:RegisterUnitEvents({
-    "unit.orb",
-    },{
-    [core.E.UNIT_CREATED] = function (_, _, unit)
-      core:AddUnit(unit)
-    end,
-  }
-)
-
 function mod:IsPhaseClose(phase, percent)
   for i = 1, #phase do
     if percent >= phase[i].LOWER and percent <= phase[i].UPPER then
@@ -145,7 +136,6 @@ function mod:OnHookshotEnd()
 end
 
 function mod:OnOctogCreated(id, unit)
-  core:AddUnit(unit)
   core:WatchUnit(unit, core.E.TRACK_CASTS + core.E.TRACK_HEALTH)
 end
 
@@ -156,6 +146,10 @@ function mod:OnOctogHealthChanged(id, percent)
   if mod:IsPhaseClose(PHASES_CLOSE, percent) then
     mod:AddMsg("MIDPHASE_SOON", "msg.midphase.coming", 5, "Info", "xkcdWhite")
   end
+end
+
+function mod:AddUnit(id, unit)
+  core:AddUnit(unit)
 end
 
 mod:RegisterUnitEvents("unit.octog",{
@@ -171,5 +165,10 @@ mod:RegisterUnitEvents("unit.octog",{
     ["cast.hookshot"] = {
       [core.E.CAST_END] = mod.OnHookshotEnd,
     },
+  }
+)
+
+mod:RegisterUnitEvents({"unit.orb", "unit.octog"}, {
+    [core.E.UNIT_CREATED] = mod.AddUnit,
   }
 )
