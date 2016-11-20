@@ -263,7 +263,7 @@ mod:RegisterUnitEvents("unit.orb", {
     [core.E.UNIT_DESTROYED] = mod.OnOrbDestroyed,
   }
 )
-mod:RegisterUnitSpellEvent(core.E.ALL_UNITS, core.E.BUFF_ADD, DEBUFFS.CHAOS_TETHER, mod.OnChaosTetherAdd)
+mod:RegisterUnitSpellEvent(core.E.ALL_UNITS, core.E.DEBUFF_ADD, DEBUFFS.CHAOS_TETHER, mod.OnChaosTetherAdd)
 mod:RegisterUnitEvents({"unit.orb", "unit.octog"}, {
     [core.E.UNIT_CREATED] = mod.AddUnit,
   }
