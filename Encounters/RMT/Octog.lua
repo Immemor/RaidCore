@@ -169,7 +169,7 @@ end
 function mod:OnSupernovaEnd()
   mod:RemoveTimerBar("SUPERNOVA_WIPE_TIMER")
   mod:AddTimerBar("NEXT_HOOKSHOT_TIMER", "msg.octog.hookshot.next", TIMERS.HOOKSHOT.NORMAL)
-  mod:RemoveMsg("ASTRAL_SHIELD_STACKS")
+  core:RemoveMsg("ASTRAL_SHIELD_STACKS")
 end
 
 function mod:OnHookshotStart()
