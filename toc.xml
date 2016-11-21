@@ -69,7 +69,22 @@
     <Script Name="Encounters/RMT/Robomination.lua"/>
     <Script Name="Encounters/RMT/Engineers.lua"/>
     <Script Name="Encounters/RMT/Mordechai.lua"/>
+    <Script Name="Encounters/RMT/Octog.lua"/>
+    <Script Name="Encounters/RMT/Starmap.lua"/>
+    <Script Name="Encounters/RMT/Laveka.lua"/>
     <Script Name="Encounters/RMT/miniboss/Lockjaw.lua"/>
-	<Script Name="Encounters/RMT/miniboss/Skooty.lua"/>
-	<Script Name="Encounters/RMT/miniboss/Thrag.lua"/>
+    <Script Name="Encounters/RMT/miniboss/Skooty.lua"/>
+    <Script Name="Encounters/RMT/miniboss/Thrag.lua"/>
+    <Script Name="Encounters/RMT/miniboss/Kino.lua"/>
+    <Script Name="Encounters/RMT/miniboss/Gho'Deke.lua"/>
+    <Script Name="Encounters/RMT/miniboss/Luk'Ki.lua"/>
+    <Script Name="Encounters/RMT/miniboss/Dud'li.lua"/>
+    <Script Name="Encounters/RMT/miniboss/Korgh.lua"/>
+    <Script Name="Encounters/RMT/miniboss/Bilgebreath.lua"/>
+    <Script Name="Encounters/RMT/miniboss/Muburu.lua"/>
+    <Script Name="Encounters/RMT/miniboss/W'gasa.lua"/>
+    <Script Name="Encounters/RMT/miniboss/Horror.lua"/>
+    <Script Name="Encounters/RMT/miniboss/Tiny.lua"/>
+    <Script Name="Encounters/RMT/miniboss/Antru.lua"/>
+    <Script Name="Encounters/RMT/miniboss/Yagar.lua"/>
 </Addon>
