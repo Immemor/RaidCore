@@ -46,6 +46,7 @@ mod:RegisterEnglishLocale({
 ----------------------------------------------------------------------------------------------------
 -- Visuals.
 mod:RegisterDefaultSetting("CircleOrb")
+mod:RegisterDefaultSetting("MarkOrb")
 -- Sounds.
 mod:RegisterDefaultSetting("SoundChaosOrbSoon")
 mod:RegisterDefaultSetting("SoundMidphaseSoon")
@@ -127,6 +128,7 @@ local PHASES_CLOSE = {
 ----------------------------------------------------------------------------------------------------
 local orbCount
 local playerId
+local currentOrbNumber
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
@@ -203,6 +205,7 @@ function mod:AddUnit(id, unit)
 end
 
 function mod:OnOrbsSpawning()
+  currentOrbNumber = 0
   orbCount = orbCount + 1
   local msg = self.L["msg.orb.spawn"]:format(orbCount)
   mod:AddMsg("ORB_SPAWN", msg, 2, "Info", "xkcdWhite")
@@ -218,8 +221,16 @@ function mod:DrawOrbCircle(id, unit, color)
   end
 end
 
+function mod:MarkOrbWithNumber(unit)
+  if mod:GetSetting("MarkOrb") then
+    core:MarkUnit(unit, core.E.LOCATION_STATIC_FLOOR, currentOrbNumber)
+  end
+end
+
 function mod:OnOrbCreated(id, unit)
+  currentOrbNumber = currentOrbNumber + 1
   mod:DrawOrbCircle(id, unit, "xkcdGreen")
+  mod:MarkOrbWithNumber(unit)
 end
 
 function mod:OnOrbDestroyed(id, unit)
