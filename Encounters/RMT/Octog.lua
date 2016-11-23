@@ -43,10 +43,10 @@ mod:RegisterEnglishLocale({
 )
 mod:RegisterFrenchLocale({
     -- Unit names.
-    ["unit.octog"] = "DÈvore-Astre le Vorace",
+    ["unit.octog"] = "D√©vore-Astre le Vorace",
     -- NPC says.
-    ["say.octog.orb"] = "Reste l‡ ! Le festin va bientÙt commencer !",
-    ["say.octog.supernova"] = "BientÙt, tu pourras plus rien faire... et moi, j'aurai plus faim !",
+    ["say.octog.orb"] = "Reste l√† ! Le festin va bient√¥t commencer !",
+    ["say.octog.supernova"] = "Bient√¥t, tu pourras plus rien faire... et moi, j'aurai plus faim !",
     -- Cast names.
     ["cast.octog.supernova"] = "Supernova",
     ["cast.octog.hookshot"] = "Hookshot",
@@ -255,6 +255,15 @@ function mod:OnChaosTetherAdd(id, spellId, stacks, timeRemaining, sName, unitCas
   end
 end
 
+function mod:OnPoolCreated(id, unit)
+  --5.5, 7.55
+  core:AddPolygon(id, unit, 8.75, nil, 1, "xkcdBlack", 15)
+end
+
+function mod:OnPoolDestroyed(id, unit)
+  core:RemovePolygon(id)
+end
+
 mod:RegisterUnitEvents("unit.octog",{
     [core.E.UNIT_CREATED] = mod.OnOctogCreated,
     [core.E.HEALTH_CHANGED] = mod.OnOctogHealthChanged,
@@ -289,5 +298,10 @@ mod:RegisterUnitEvents("unit.orb", {
 mod:RegisterUnitSpellEvent(core.E.ALL_UNITS, core.E.DEBUFF_ADD, DEBUFFS.CHAOS_TETHER, mod.OnChaosTetherAdd)
 mod:RegisterUnitEvents({"unit.orb", "unit.octog"}, {
     [core.E.UNIT_CREATED] = mod.AddUnit,
+  }
+)
+mod:RegisterUnitEvents("unit.pool", {
+    [core.E.UNIT_CREATED] = mod.OnPoolCreated,
+    [core.E.UNIT_DESTROYED] = mod.OnPoolDestroyed,
   }
 )
