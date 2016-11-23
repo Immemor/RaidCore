@@ -34,10 +34,10 @@ mod:RegisterEnglishLocale({
     ["unit.pulsar"] = "Pulsar",
     ["unit.world_ender"] = "World Ender",
     -- Cast names.
-    ["unit.alpha.flare"] = "Solar Flare",
+    ["cast.alpha.flare"] = "Solar Flare",
     -- Datachron.
-    ["unit.world_ender.aldinari"] = "A World Ender is heading to the Aldinari's orbit.",
-    ["unit.world_ender.vulpes_nix"] = "A World Ender is heading to the Vulpes Nix's orbit.",
+    ["chron.world_ender.aldinari"] = "A World Ender is heading to the Aldinari's orbit.",
+    ["chron.world_ender.vulpes_nix"] = "A World Ender is heading to the Vulpes Nix's orbit.",
     -- Messages.
   }
 )
