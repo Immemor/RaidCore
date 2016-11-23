@@ -41,6 +41,18 @@ mod:RegisterEnglishLocale({
     ["msg.midphase.started"] = "MIDPHASE",
   }
 )
+mod:RegisterFrenchLocale({
+    -- Unit names.
+    ["unit.octog"] = "Dévore-Astre le Vorace",
+    -- NPC says.
+    ["say.octog.orb"] = "Reste là ! Le festin va bientôt commencer !",
+    ["say.octog.supernova"] = "Bientôt, tu pourras plus rien faire... et moi, j'aurai plus faim !",
+    -- Cast names.
+    ["cast.octog.supernova"] = "Supernova",
+    ["cast.octog.hookshot"] = "Hookshot",
+    ["cast.octog.flamethrower"] = "Flamethrower",
+  }
+)
 ----------------------------------------------------------------------------------------------------
 -- Settings.
 ----------------------------------------------------------------------------------------------------
