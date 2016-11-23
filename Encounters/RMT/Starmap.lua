@@ -14,13 +14,14 @@ if not mod then return end
 ----------------------------------------------------------------------------------------------------
 -- Registering combat.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterTrigMob(core.E.TRIGGER_ALL, { "unit.alpha_cassus" })
+mod:RegisterTrigMob(core.E.TRIGGER_ALL, { "unit.alpha" })
 mod:RegisterEnglishLocale({
     -- Unit names.
-    ["unit.alpha_cassus"] = "Alpha Cassus",
+    ["unit.alpha"] = "Alpha Cassus",
     -- Cast names.
     -- Messages.
-  })
+  }
+)
 ----------------------------------------------------------------------------------------------------
 -- Settings.
 ----------------------------------------------------------------------------------------------------
@@ -28,7 +29,7 @@ mod:RegisterEnglishLocale({
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterUnitEvents("unit.alpha_cassus",{
+mod:RegisterUnitEvents("unit.alpha",{
     [core.E.UNIT_CREATED] = function (_, _, unit)
       core:AddUnit(unit)
       core:WatchUnit(unit, core.E.TRACK_ALL)
