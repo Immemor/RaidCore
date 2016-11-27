@@ -156,7 +156,7 @@ local playerId
 local currentOrbNumber
 local inkPools
 local drawPools
-local updatePoolTimer = ApolloTimer.Create(TIMERS.POOL.UPDATE, false, "OnUpdatePoolTimer", mod)
+local updatePoolTimer = ApolloTimer.Create(TIMERS.POOL.UPDATE, true, "OnUpdatePoolTimer", mod)
 updatePoolTimer:Stop()
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
