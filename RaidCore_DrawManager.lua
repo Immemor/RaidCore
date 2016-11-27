@@ -127,6 +127,18 @@ local function StartDrawing()
   end
 end
 
+local function GetOriginType(origin)
+  local originType = type(origin)
+  if originType == "userdata" then
+    if origin.GetRaceId then
+      originType = "unit"
+    elseif origin.Normal then
+      originType = "vector"
+    end
+  end
+  return originType
+end
+
 local function StopDrawing()
   if _bDrawManagerRunning == true then
     _bDrawManagerRunning = false
@@ -384,8 +396,8 @@ function SimpleLine:UpdateDraw(tDraw)
 end
 
 function SimpleLine:AddDraw(Key, Origin, nOffset, nLength, nRotation, nWidth, sColor, nNumberOfDot, nOffsetOrigin)
-  local OriginType = type(Origin)
-  assert(OriginType == "number" or OriginType == "table" or OriginType == "userdata")
+  local OriginType = GetOriginType(Origin)
+  assert(OriginType == "number" or OriginType == "table" or OriginType == "unit" or OriginType == "vector")
 
   if self.tDraws[Key] then
     -- To complex to manage new definition with nNumberOfDot which change,
@@ -424,7 +436,7 @@ function SimpleLine:AddDraw(Key, Origin, nOffset, nLength, nRotation, nWidth, sC
     y = NewVector3({ 0, 1, 0 }),
     z = NewVector3({ nSin, 0, nCos }),
   }
-  if OriginType == "table" then
+  if OriginType == "table" or OriginType == "vector" then
     -- Origin is the result of a GetPosition()
     local tOriginVector = NewVector3(Origin)
     local tFacingVector = NewVector3(DEFAULT_NORTH_FACING)
@@ -536,8 +548,8 @@ function Polygon:UpdateDraw(tDraw)
 end
 
 function Polygon:AddDraw(Key, Origin, nRadius, nRotation, nWidth, sColor, nSide)
-  local OriginType = type(Origin)
-  assert(OriginType == "number" or OriginType == "table" or OriginType == "userdata")
+  local OriginType = GetOriginType(Origin)
+  assert(OriginType == "number" or OriginType == "table" or OriginType == "unit" or OriginType == "vector")
 
   if self.tDraws[Key] then
     -- To complex to manage new definition with nSide which change,
@@ -562,7 +574,7 @@ function Polygon:AddDraw(Key, Origin, nRadius, nRotation, nWidth, sColor, nSide)
   if OriginType == "number" then
     -- Origin is the Id of an unit.
     tDraw.tOriginUnit = GetUnitById(Origin)
-  elseif OriginType == "userdata" then
+  elseif OriginType == "unit" then
     tDraw.tOriginUnit = Origin
   else
     -- Origin is the result of a GetPosition()
@@ -660,8 +672,8 @@ function Picture:UpdateDraw(tDraw)
 end
 
 function Picture:AddDraw(Key, Origin, sSprite, nSpriteSize, nRotation, nDistance, nHeight, sColor)
-  local OriginType = type(Origin)
-  assert(OriginType == "number" or OriginType == "table" or OriginType == "userdata")
+  local OriginType = GetOriginType(Origin)
+  assert(OriginType == "number" or OriginType == "table" or OriginType == "unit" or OriginType == "vector")
 
   -- Register a new object to manage.
   local tDraw = self.tDraws[Key] or NewDraw()
@@ -681,7 +693,7 @@ function Picture:AddDraw(Key, Origin, sSprite, nSpriteSize, nRotation, nDistance
     z = NewVector3({ nSin, 0, nCos }),
   }
 
-  if OriginType == "table" then
+  if OriginType == "table" or OriginType == "vector" then
     -- Origin is the result of a GetPosition()
     tDraw.tOriginUnit = nil
     -- Precomputing coordonate of the polygon with constant origin.
