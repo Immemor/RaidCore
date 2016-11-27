@@ -90,6 +90,11 @@ mod:RegisterDefaultTimerBarConfigs({
   }
 )
 ----------------------------------------------------------------------------------------------------
+-- Functions.
+----------------------------------------------------------------------------------------------------
+local GetGameTime = GameLib.GetGameTime
+local next, floor = next, math.floor
+----------------------------------------------------------------------------------------------------
 -- Constants.
 ----------------------------------------------------------------------------------------------------
 -- Debuffs and Buffs.
@@ -122,6 +127,10 @@ local TIMERS = {
   },
   SUPERNOVA = {
     WIPE = 25,
+  },
+  POOL = {
+    UPDATE = 0.25,
+    GROW = 7.5,
   }
 }
 
@@ -135,20 +144,35 @@ local PHASES_CLOSE = {
   {UPPER = 36.5, LOWER = 35.5}, -- 35
   {UPPER = 6.5, LOWER = 5.5}, -- 5
 }
+
+local POOL_SIZES = {
+  5.5, 7.55, 9.3, 11.6, 13.5, 15.5, 17.5
+}
 ----------------------------------------------------------------------------------------------------
 -- Locals.
 ----------------------------------------------------------------------------------------------------
 local orbCount
 local playerId
 local currentOrbNumber
+local inkPools
+local drawPools
+local updatePoolTimer = ApolloTimer.Create(TIMERS.POOL.UPDATE, false, "OnUpdatePoolTimer", mod)
+updatePoolTimer:Stop()
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
   orbCount = 0
+  inkPools = {}
+  drawPools = false
   playerId = GameLib.GetPlayerUnit():GetId()
   mod:AddTimerBar("NEXT_HOOKSHOT_TIMER", "msg.octog.hookshot.next", TIMERS.HOOKSHOT.FIRST)
   mod:AddTimerBar("NEXT_FLAMETHROWER_TIMER", "msg.octog.flamethrower.next", TIMERS.FLAMETHROWER.NORMAL)
+  updatePoolTimer:Start()
+end
+
+function mod:OnBossDisable()
+  updatePoolTimer:Stop()
 end
 
 function mod:IsPhaseClose(phase, percent)
@@ -221,6 +245,7 @@ function mod:OnOrbsSpawning()
   orbCount = orbCount + 1
   local msg = self.L["msg.orb.spawn"]:format(orbCount)
   mod:AddMsg("ORB_SPAWN", msg, 2, "Info", "xkcdWhite")
+  mod:DrawPools()
 end
 
 function mod:OnAstralShieldUpdate(id, spellId, stacks)
@@ -255,13 +280,62 @@ function mod:OnChaosTetherAdd(id, spellId, stacks, timeRemaining, sName, unitCas
   end
 end
 
+function mod:DrawPools()
+  drawPools = true
+  for id, inkPool in next, inkPools do
+    mod:DrawPool(inkPool)
+  end
+end
+
+function mod:RemovePools()
+  drawPools = false
+  for id, inkPool in next, inkPools do
+    mod:RemovePool(inkPool)
+  end
+end
+
+function mod:RemovePool(inkPool)
+  core:RemovePolygon(inkPool.id)
+end
+
+function mod:DrawPool(inkPool)
+  if drawPools then
+    local poolSize = POOL_SIZES[inkPool.currentSizeIndex]
+    if not poolSize then
+      return
+    end
+    core:AddPolygon(inkPool.id, inkPool.unit, poolSize, nil, 1, "xkcdBlack", 15)
+  end
+end
+
+function mod:UpdatePoolSize(inkPool, poolSizeIndex)
+  if inkPool.currentSizeIndex ~= poolSizeIndex then
+    inkPool.currentSizeIndex = poolSizeIndex
+    mod:DrawPool(inkPool)
+  end
+end
+
+function mod:OnUpdatePoolTimer()
+  local currentTime = GetGameTime()
+  for id, inkPool in next, inkPools do
+    local poolSizeIndex = floor((currentTime - inkPool.creationTime)/TIMERS.POOL.GROW) + 1
+    mod:UpdatePoolSize(inkPool, poolSizeIndex)
+  end
+end
+
 function mod:OnPoolCreated(id, unit)
-  --5.5, 7.55
-  core:AddPolygon(id, unit, 8.75, nil, 1, "xkcdBlack", 15)
+  inkPools[id] = {
+    creationTime = GetGameTime(),
+    unit = unit,
+    currentSizeIndex = 1,
+    id = id,
+  }
+  mod:DrawPool(inkPools[id])
 end
 
 function mod:OnPoolDestroyed(id, unit)
-  core:RemovePolygon(id)
+  mod:RemovePool(inkPools[id])
+  inkPools[id] = nil
 end
 
 mod:RegisterUnitEvents("unit.octog",{
@@ -286,7 +360,10 @@ mod:RegisterUnitEvents("unit.octog",{
     },
     [BUFFS.ASTRAL_SHIELD_STACKS] = {
       [core.E.BUFF_UPDATE] = mod.OnAstralShieldUpdate,
-    }
+    },
+    [BUFFS.CHAOS_ORBS] = {
+      [core.E.BUFF_REMOVE] = mod.RemovePools,
+    },
   }
 )
 
