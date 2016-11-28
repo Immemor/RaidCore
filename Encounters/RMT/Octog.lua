@@ -59,6 +59,7 @@ mod:RegisterFrenchLocale({
 -- Visuals.
 mod:RegisterDefaultSetting("CircleOrb")
 mod:RegisterDefaultSetting("MarkOrb")
+mod:RegisterDefaultSetting("CircleInkPools")
 -- Sounds.
 mod:RegisterDefaultSetting("SoundChaosOrbSoon")
 mod:RegisterDefaultSetting("SoundMidphaseSoon")
@@ -307,7 +308,7 @@ function mod:RemovePool(inkPool)
 end
 
 function mod:DrawPool(inkPool)
-  if drawPools then
+  if drawPools and mod:GetSetting("CircleInkPools") then
     local poolSize = POOL_SIZES[inkPool.currentSizeIndex]
     core:AddPolygon(inkPool.id, inkPool.unit, poolSize, nil, 1, "xkcdBlack", 15)
   end
