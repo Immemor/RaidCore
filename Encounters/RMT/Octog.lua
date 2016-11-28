@@ -93,7 +93,7 @@ mod:RegisterDefaultTimerBarConfigs({
 -- Functions.
 ----------------------------------------------------------------------------------------------------
 local GetGameTime = GameLib.GetGameTime
-local next, floor = next, math.floor
+local next, floor, max = next, math.floor, math.max
 ----------------------------------------------------------------------------------------------------
 -- Constants.
 ----------------------------------------------------------------------------------------------------
@@ -124,6 +124,7 @@ local TIMERS = {
   },
   ORB = {
     SECOND = 80,
+    NORMAL = 85,
   },
   SUPERNOVA = {
     WIPE = 25,
@@ -152,6 +153,7 @@ local POOL_SIZES = {
 -- Locals.
 ----------------------------------------------------------------------------------------------------
 local orbCount
+local nextOrbTime
 local playerId
 local currentOrbNumber
 local inkPools
@@ -201,6 +203,7 @@ function mod:OnSupernovaStart()
   mod:AddMsg("MIDPHASE_STARTED", "msg.midphase.started", 5, "Info", "xkcdWhite")
   mod:RemoveTimerBar("NEXT_HOOKSHOT_TIMER")
   mod:RemoveTimerBar("NEXT_FLAMETHROWER_TIMER")
+  mod:RemoveTimerBar("NEXT_ORB_TIMER")
   mod:AddTimerBar("SUPERNOVA_WIPE_TIMER", "msg.octog.supernova.wipe", TIMERS.SUPERNOVA.WIPE)
 end
 
@@ -208,6 +211,7 @@ function mod:OnSupernovaEnd()
   mod:RemoveTimerBar("SUPERNOVA_WIPE_TIMER")
   mod:AddTimerBar("NEXT_HOOKSHOT_TIMER", "msg.octog.hookshot.next", TIMERS.HOOKSHOT.NORMAL)
   core:RemoveMsg("ASTRAL_SHIELD_STACKS")
+  mod:StartOrbTimer(max(nextOrbTime - GetGameTime(), 10))
 end
 
 function mod:OnHookshotStart()
@@ -229,15 +233,15 @@ function mod:OnOctogHealthChanged(id, percent)
   if mod:IsPhaseClose(PHASES_CLOSE, percent) then
     mod:AddMsg("MIDPHASE_SOON", "msg.midphase.coming", 5, "Info", "xkcdWhite")
   end
-  if percent == 85 then
-    --TODO what happens after midphase
-    local msg = self.L["msg.orb.next"]:format(2)
-    mod:AddTimerBar("NEXT_ORB_TIMER", msg, TIMERS.ORB.SECOND)
-  end
 end
 
 function mod:AddUnit(id, unit)
   core:AddUnit(unit)
+end
+
+function mod:StartOrbTimer(timer)
+  local msg = self.L["msg.orb.next"]:format(orbCount)
+  mod:AddTimerBar("NEXT_ORB_TIMER", msg, timer)
 end
 
 function mod:OnOrbsSpawning()
@@ -246,6 +250,10 @@ function mod:OnOrbsSpawning()
   local msg = self.L["msg.orb.spawn"]:format(orbCount)
   mod:AddMsg("ORB_SPAWN", msg, 2, "Info", "xkcdWhite")
   mod:DrawPools()
+
+  local orbTimer = orbCount == 1 and TIMERS.ORB.SECOND or TIMERS.ORB.NORMAL
+  mod:StartOrbTimer(orbTimer)
+  nextOrbTime = GetGameTime() + orbTimer
 end
 
 function mod:OnAstralShieldUpdate(id, spellId, stacks)
