@@ -110,6 +110,7 @@ RaidCore.E = {
   EVENT_NEXT_FRAME = "NextFrame",
   EVENT_WINDOWS_MANAGEMENT_READY = "WindowManagementReady",
   EVENT_CHARACTER_CREATED = "CharacterCreated",
+  EVENT_DISPLAY_RAIDCORE_WINDOW= "DisplayRaidCoreMainWindow",
   -- Comm events. Using numbers for these instead to save bandwidth would break
   -- compatibility with older versions of raidcore.
   COMM_VERSION_CHECK_REQUEST = "VersionCheckRequest",
