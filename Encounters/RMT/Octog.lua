@@ -301,15 +301,12 @@ end
 function mod:DrawPool(inkPool)
   if drawPools then
     local poolSize = POOL_SIZES[inkPool.currentSizeIndex]
-    if not poolSize then
-      return
-    end
     core:AddPolygon(inkPool.id, inkPool.unit, poolSize, nil, 1, "xkcdBlack", 15)
   end
 end
 
 function mod:UpdatePoolSize(inkPool, poolSizeIndex)
-  if inkPool.currentSizeIndex ~= poolSizeIndex then
+  if inkPool.currentSizeIndex ~= poolSizeIndex and poolSizeIndex <= #POOL_SIZES then
     inkPool.currentSizeIndex = poolSizeIndex
     mod:DrawPool(inkPool)
   end
