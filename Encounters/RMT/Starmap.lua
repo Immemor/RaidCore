@@ -38,6 +38,7 @@ mod:RegisterEnglishLocale({
     -- Datachron.
     ["chron.world_ender.aldinari"] = "A World Ender is heading to the Aldinari's orbit.",
     ["chron.world_ender.vulpes_nix"] = "A World Ender is heading to the Vulpes Nix's orbit.",
+    ["chron.world_ender.cassus"] = "A World Ender is heading to the Cassus' orbit.",
     -- Messages.
     ["msg.asteroid.next"] = "Asteroids in",
     ["msg.world_ender.next"] = "World Ender in",
