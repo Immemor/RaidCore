@@ -75,7 +75,7 @@ local asteroidClusterCount
 function mod:OnBossEnable()
   asteroidCount = 0
   asteroidClusterCount = 0
-  mod:AddTimerBar("NEXT_ASTEROID_TIMER", "msg.asteroid.next",TIMERS.ASTEROIDS.NORMAL)
+  mod:AddTimerBar("NEXT_ASTEROID_TIMER", "msg.asteroid.next", TIMERS.ASTEROIDS.NORMAL)
   mod:AddTimerBar("NEXT_WORLD_ENDER_TIMER", "msg.world_ender.next", TIMERS.WORLD_ENDER.FIRST)
 end
 
