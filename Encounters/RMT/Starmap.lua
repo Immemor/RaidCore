@@ -39,6 +39,8 @@ mod:RegisterEnglishLocale({
     ["chron.world_ender.aldinari"] = "A World Ender is heading to the Aldinari's orbit.",
     ["chron.world_ender.vulpes_nix"] = "A World Ender is heading to the Vulpes Nix's orbit.",
     -- Messages.
+    ["msg.asteroid.next"] = "Asteroids in",
+    ["msg.world_ender.next"] = "World Ender in",
   }
 )
 ----------------------------------------------------------------------------------------------------
@@ -51,13 +53,63 @@ local DEBUFFS = {
   PULSAR = 87542,
   BURNING_ATMOSPHERE = 84301,
 }
+
+local TIMERS = {
+  WORLD_ENDER = {
+    FIRST = 52,
+    NORMAL = 78,
+  },
+  ASTEROIDS = {
+    NORMAL = 26,
+    NEXT_IS_WORLD_ENDER = 52,
+  },
+}
+----------------------------------------------------------------------------------------------------
+-- Locals.
+----------------------------------------------------------------------------------------------------
+local asteroidCount
+local asteroidClusterCount
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
+function mod:OnBossEnable()
+  asteroidCount = 0
+  asteroidClusterCount = 0
+  mod:AddTimerBar("NEXT_ASTEROID_TIMER", "msg.asteroid.next",TIMERS.ASTEROIDS.NORMAL)
+  mod:AddTimerBar("NEXT_WORLD_ENDER_TIMER", "msg.world_ender.next", TIMERS.WORLD_ENDER.FIRST)
+end
+
 mod:RegisterUnitEvents("unit.alpha",{
     [core.E.UNIT_CREATED] = function (_, _, unit)
       core:AddUnit(unit)
       core:WatchUnit(unit, core.E.TRACK_ALL)
     end,
+  }
+)
+
+mod:RegisterUnitEvents("unit.asteroid",{
+    [core.E.UNIT_CREATED] = function (_, _, unit)
+      core:AddUnit(unit)
+      asteroidCount = asteroidCount + 1
+      if asteroidCount >= 4 then
+        asteroidCount = 0
+        asteroidClusterCount = asteroidClusterCount + 1
+      end
+      local timer = TIMERS.ASTEROIDS.NORMAL
+      if asteroidClusterCount >= 2 then
+        asteroidClusterCount = 0
+        timer = TIMERS.ASTEROIDS.NEXT_IS_WORLD_ENDER
+      end
+      mod:AddTimerBar("NEXT_ASTEROID_TIMER", "msg.asteroid.next", timer)
+    end
+  }
+)
+
+mod:RegisterUnitEvents("unit.world_ender",{
+    [core.E.UNIT_CREATED] = function (_, _, unit)
+      core:AddUnit(unit)
+      asteroidClusterCount = 0
+      mod:AddTimerBar("NEXT_WORLD_ENDER_TIMER", "msg.world_ender.next", TIMERS.WORLD_ENDER.NORMAL)
+    end
   }
 )
