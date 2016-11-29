@@ -41,7 +41,7 @@ mod:RegisterEnglishLocale({
     -- Messages.
     ["msg.asteroid.next"] = "Asteroids in",
     ["msg.world_ender.next"] = "World Ender in",
-    ["msg.solar.stacks"] = "%d STACKS",
+    ["msg.solar_winds.high_stacks"] = "HIGH SOLAR STACKS",
   }
 )
 ----------------------------------------------------------------------------------------------------
@@ -71,12 +71,14 @@ local TIMERS = {
 local asteroidCount
 local asteroidClusterCount
 local playerId
+local solarWindsStack
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
   asteroidCount = 0
   asteroidClusterCount = 0
+  solarWindsStack = 0
   playerId = GameLib.GetPlayerUnit():GetId()
   mod:AddTimerBar("NEXT_ASTEROID_TIMER", "msg.asteroid.next", TIMERS.ASTEROIDS.NORMAL)
   mod:AddTimerBar("NEXT_WORLD_ENDER_TIMER", "msg.world_ender.next", TIMERS.WORLD_ENDER.FIRST)
@@ -88,7 +90,7 @@ function mod:OnAlphaCassusCreated(id, unit)
 end
 
 function mod:OnAsteroidCreated(id, unit)
-  core:AddLineBetweenUnits("ASTEROID_LINE_%s" .. id, playerId, id, 4, "xkcdOrange")
+  core:AddLineBetweenUnits("ASTEROID_LINE_" .. id, playerId, id, 3, "xkcdOrange")
   asteroidCount = asteroidCount + 1
   if asteroidCount >= 4 then
     asteroidCount = 0
@@ -103,19 +105,19 @@ function mod:OnAsteroidCreated(id, unit)
 end
 
 function mod:OnAsteroidDestroyed(id, _)
-  core:RemoveLineBetweenUnits("ASTEROID_LINE_%s" .. id)
+  core:RemoveLineBetweenUnits("ASTEROID_LINE_" .. id)
 end
 
 function mod:OnWorldEnderCreated(id, unit)
   core:AddUnit(unit)
   asteroidClusterCount = 0
   mod:AddTimerBar("NEXT_WORLD_ENDER_TIMER", "msg.world_ender.next", TIMERS.WORLD_ENDER.NORMAL)
-  core:AddLineBetweenUnits("WORLD_ENDER_%s" .. id, playerId, id, 6, "xkcdCyan")
+  core:AddLineBetweenUnits("WORLD_ENDER_" .. id, playerId, id, 6, "xkcdCyan")
 end
 
 function mod:OnWorldEnderDestroyed(id, unit)
-  asteroidCount = asteroidCount - 1
-  core:RemoveLineBetweenUnits("WORLD_ENDER_%s" .. id)
+  asteroidCount = asteroidCount - 3
+  core:RemoveLineBetweenUnits("WORLD_ENDER_" .. id)
 end
 
 function mod:OnDebrisCreated(id, unit)
@@ -126,16 +128,14 @@ function mod:OnDebrisDestroyed(id, unit)
   core:RemovePicture("DEBRIS_PICTURE_" .. id)
 end
 
-mod:RegisterUnitEvents(core.E.ALL_UNITS, {
-    [DEBUFFS.SOLAR_WINDS] = {
-      [core.E.DEBUFF_UPDATE] = function(self, id, _, stack)
-        if playerId == id and stack == 6 then
-          mod:AddMsg("SOLAR_WINDS_MSG", string.format(self.L["msg.solar.stacks"], stack), 5, "Beware", "xkcdBloodOrange")
-        end
-      end
-    },
-  }
-)
+function mod:OnSolarWindsUpdated(id, _, stack)
+  if playerId == id then
+    if stack == 5 and solarWindsStack < stack then
+      mod:AddMsg("SOLAR_WINDS_MSG", "msg.solar_winds.high_stacks", 5, "Beware", "white")
+    end
+    solarWindsStack = stack
+  end
+end
 
 mod:RegisterUnitEvents("unit.alpha",{
     [core.E.UNIT_CREATED] = mod.OnAlphaCassusCreated,
@@ -148,10 +148,17 @@ mod:RegisterUnitEvents("unit.asteroid",{
 )
 mod:RegisterUnitEvents("unit.world_ender",{
     [core.E.UNIT_CREATED] = mod.OnWorldEnderCreated,
+    [core.E.UNIT_DESTROYED] = mod.OnWorldEnderDestroyed,
   }
 )
 mod:RegisterUnitEvents("unit.debris",{
     [core.E.UNIT_CREATED] = mod.OnDebrisCreated,
     [core.E.UNIT_DESTROYED] = mod.OnDebrisDestroyed,
+  }
+)
+mod:RegisterUnitEvents(core.E.ALL_UNITS,{
+    [DEBUFFS.SOLAR_WINDS] = {
+      [core.E.DEBUFF_UPDATE] = mod.OnSolarWindsUpdated,
+    }
   }
 )
