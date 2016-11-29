@@ -79,37 +79,41 @@ function mod:OnBossEnable()
   mod:AddTimerBar("NEXT_WORLD_ENDER_TIMER", "msg.world_ender.next", TIMERS.WORLD_ENDER.FIRST)
 end
 
+function mod:OnAlphaCassusCreated(id, unit)
+  core:AddUnit(unit)
+  core:WatchUnit(unit, core.E.TRACK_ALL)
+end
+
+function mod:OnAsteroidCreated(id, unit)
+  core:AddUnit(unit)
+  asteroidCount = asteroidCount + 1
+  if asteroidCount >= 4 then
+    asteroidCount = 0
+    asteroidClusterCount = asteroidClusterCount + 1
+  end
+  local timer = TIMERS.ASTEROIDS.NORMAL
+  if asteroidClusterCount >= 2 then
+    asteroidClusterCount = 0
+    timer = TIMERS.ASTEROIDS.NEXT_IS_WORLD_ENDER
+  end
+  mod:AddTimerBar("NEXT_ASTEROID_TIMER", "msg.asteroid.next", timer)
+end
+
+function mod:OnWorldEnderCreated(id, unit)
+  core:AddUnit(unit)
+  asteroidClusterCount = 0
+  mod:AddTimerBar("NEXT_WORLD_ENDER_TIMER", "msg.world_ender.next", TIMERS.WORLD_ENDER.NORMAL)
+end
+
 mod:RegisterUnitEvents("unit.alpha",{
-    [core.E.UNIT_CREATED] = function (_, _, unit)
-      core:AddUnit(unit)
-      core:WatchUnit(unit, core.E.TRACK_ALL)
-    end,
+    [core.E.UNIT_CREATED] = mod.OnAlphaCassusCreated,
   }
 )
-
 mod:RegisterUnitEvents("unit.asteroid",{
-    [core.E.UNIT_CREATED] = function (_, _, unit)
-      core:AddUnit(unit)
-      asteroidCount = asteroidCount + 1
-      if asteroidCount >= 4 then
-        asteroidCount = 0
-        asteroidClusterCount = asteroidClusterCount + 1
-      end
-      local timer = TIMERS.ASTEROIDS.NORMAL
-      if asteroidClusterCount >= 2 then
-        asteroidClusterCount = 0
-        timer = TIMERS.ASTEROIDS.NEXT_IS_WORLD_ENDER
-      end
-      mod:AddTimerBar("NEXT_ASTEROID_TIMER", "msg.asteroid.next", timer)
-    end
+    [core.E.UNIT_CREATED] = mod.OnAsteroidCreated,
   }
 )
-
 mod:RegisterUnitEvents("unit.world_ender",{
-    [core.E.UNIT_CREATED] = function (_, _, unit)
-      core:AddUnit(unit)
-      asteroidClusterCount = 0
-      mod:AddTimerBar("NEXT_WORLD_ENDER_TIMER", "msg.world_ender.next", TIMERS.WORLD_ENDER.NORMAL)
-    end
+    [core.E.UNIT_CREATED] = mod.OnWorldEnderCreated,
   }
 )
