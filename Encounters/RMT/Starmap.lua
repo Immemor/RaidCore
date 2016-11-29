@@ -88,7 +88,7 @@ function mod:OnAlphaCassusCreated(id, unit)
 end
 
 function mod:OnAsteroidCreated(id, unit)
-  core:AddLineBetweenUnits("ASTEROID_LINE_%s" .. id, playerId, id, 4, "Blue")
+  core:AddLineBetweenUnits("ASTEROID_LINE_%s" .. id, playerId, id, 4, "xkcdOrange")
   asteroidCount = asteroidCount + 1
   if asteroidCount >= 4 then
     asteroidCount = 0
@@ -110,7 +110,7 @@ function mod:OnWorldEnderCreated(id, unit)
   core:AddUnit(unit)
   asteroidClusterCount = 0
   mod:AddTimerBar("NEXT_WORLD_ENDER_TIMER", "msg.world_ender.next", TIMERS.WORLD_ENDER.NORMAL)
-  core:AddLineBetweenUnits("WORLD_ENDER_%s" .. id, playerId, id, 6, "Red")
+  core:AddLineBetweenUnits("WORLD_ENDER_%s" .. id, playerId, id, 6, "xkcdCyan")
 end
 
 function mod:OnWorldEnderDestroyed(id, unit)
