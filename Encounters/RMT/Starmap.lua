@@ -69,12 +69,14 @@ local TIMERS = {
 ----------------------------------------------------------------------------------------------------
 local asteroidCount
 local asteroidClusterCount
+local playerId
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
   asteroidCount = 0
   asteroidClusterCount = 0
+  playerId = GameLib.GetPlayerUnit():GetId()
   mod:AddTimerBar("NEXT_ASTEROID_TIMER", "msg.asteroid.next", TIMERS.ASTEROIDS.NORMAL)
   mod:AddTimerBar("NEXT_WORLD_ENDER_TIMER", "msg.world_ender.next", TIMERS.WORLD_ENDER.FIRST)
 end
@@ -85,7 +87,7 @@ function mod:OnAlphaCassusCreated(id, unit)
 end
 
 function mod:OnAsteroidCreated(id, unit)
-  core:AddUnit(unit)
+  core:AddLineBetweenUnits("ASTEROID_LINE_%s" .. id, playerId, id, 6, "red")
   asteroidCount = asteroidCount + 1
   if asteroidCount >= 4 then
     asteroidCount = 0
@@ -99,10 +101,26 @@ function mod:OnAsteroidCreated(id, unit)
   mod:AddTimerBar("NEXT_ASTEROID_TIMER", "msg.asteroid.next", timer)
 end
 
+function mod:OnAsteroidDestroyed(id, _)
+  core:RemoveLineBetweenUnits("ASTEROID_LINE_%s" .. id)
+end
+
 function mod:OnWorldEnderCreated(id, unit)
   core:AddUnit(unit)
   asteroidClusterCount = 0
   mod:AddTimerBar("NEXT_WORLD_ENDER_TIMER", "msg.world_ender.next", TIMERS.WORLD_ENDER.NORMAL)
+end
+
+function mod:OnWorldEnderDestroyed(id, unit)
+  asteroidCount = asteroidCount - 1
+end
+
+function mod:OnDebrisCreated(id, unit)
+  core:AddPicture("DEBRIS_PICTURE_" .. id, id, "Crosshair", 40, nil, nil, nil, "red")
+end
+
+function mod:OnDebrisDestroyed(id, unit)
+  core:RemovePicture("DEBRIS_PICTURE_" .. id)
 end
 
 mod:RegisterUnitEvents("unit.alpha",{
@@ -111,9 +129,15 @@ mod:RegisterUnitEvents("unit.alpha",{
 )
 mod:RegisterUnitEvents("unit.asteroid",{
     [core.E.UNIT_CREATED] = mod.OnAsteroidCreated,
+    [core.E.UNIT_DESTROYED] = mod.OnAsteroidDestroyed,
   }
 )
 mod:RegisterUnitEvents("unit.world_ender",{
     [core.E.UNIT_CREATED] = mod.OnWorldEnderCreated,
+  }
+)
+mod:RegisterUnitEvents("unit.debris",{
+    [core.E.UNIT_CREATED] = mod.OnDebrisCreated,
+    [core.E.UNIT_DESTROYED] = mod.OnDebrisDestroyed,
   }
 )
