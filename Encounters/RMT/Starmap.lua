@@ -46,6 +46,10 @@ mod:RegisterEnglishLocale({
   }
 )
 ----------------------------------------------------------------------------------------------------
+-- Functions.
+----------------------------------------------------------------------------------------------------
+local next = next
+----------------------------------------------------------------------------------------------------
 -- Constants.
 ----------------------------------------------------------------------------------------------------
 local DEBUFFS = {
@@ -66,6 +70,18 @@ local TIMERS = {
     NEXT_IS_WORLD_ENDER = 52,
   },
 }
+
+local PLANETS = {
+  ["unit.aldinari"] = {
+    INDICATOR_COLOR = "xkcdPurple",
+  },
+  ["unit.cassus"] = {
+    INDICATOR_COLOR = "xkcdCyan",
+  },
+  ["unit.vulpes_nix"] = {
+    INDICATOR_COLOR = "xkcdBrown",
+  }
+}
 ----------------------------------------------------------------------------------------------------
 -- Locals.
 ----------------------------------------------------------------------------------------------------
@@ -73,6 +89,8 @@ local asteroidCount
 local asteroidClusterCount
 local playerId
 local solarWindsStack
+local planets
+local alphaCassus
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
@@ -80,14 +98,56 @@ function mod:OnBossEnable()
   asteroidCount = 0
   asteroidClusterCount = 0
   solarWindsStack = 0
+  planets = {}
+  alphaCassus = nil
+  for locale, planet in next, PLANETS do
+    PLANETS[self.L[locale]] = planet
+  end
   playerId = GameLib.GetPlayerUnit():GetId()
   mod:AddTimerBar("NEXT_ASTEROID_TIMER", "msg.asteroid.next", TIMERS.ASTEROIDS.NORMAL)
   mod:AddTimerBar("NEXT_WORLD_ENDER_TIMER", "msg.world_ender.next", TIMERS.WORLD_ENDER.FIRST)
 end
 
+function mod:OnPlanetCreated(id, unit, name)
+  planets[id] = {
+    id = id,
+    unit = unit,
+    indicatorColor = PLANETS[name].INDICATOR_COLOR,
+  }
+  if alphaCassus then
+    mod:DrawPlanetTankIndicator(planets[id])
+  end
+end
+
+function mod:OnPlanetDestroyed(id, unit)
+  planets[id] = nil
+  core:RemoveLineBetweenUnits(id)
+end
+
+function mod:DrawPlanetTankIndicator(planet)
+  core:AddLineBetweenUnits(planet.id, alphaCassus.id, planet.id, 10, planet.indicatorColor, nil, 8, 3.5)
+end
+
+function mod:DrawPlanetTankIndicators()
+  for id, planet in next, planets do
+    mod:DrawPlanetTankIndicator(planet)
+  end
+end
+
 function mod:OnAlphaCassusCreated(id, unit)
+  alphaCassus = {
+    id = id,
+    unit = unit,
+  }
   core:AddUnit(unit)
   core:WatchUnit(unit, core.E.TRACK_ALL)
+  mod:DrawPlanetTankIndicators()
+  core:AddSimpleLine(id, unit, 8, 3.5, nil, 10, "xkcdRed")
+end
+
+function mod:OnAlphaCassusDestroyed(id, unit)
+  core:RemoveSimpleLine(id)
+  alphaCassus = nil
 end
 
 function mod:OnAsteroidCreated(id, unit)
@@ -140,6 +200,7 @@ end
 
 mod:RegisterUnitEvents("unit.alpha",{
     [core.E.UNIT_CREATED] = mod.OnAlphaCassusCreated,
+    [core.E.UNIT_DESTROYED] = mod.OnAlphaCassusDestroyed,
   }
 )
 mod:RegisterUnitEvents("unit.asteroid",{
@@ -161,5 +222,14 @@ mod:RegisterUnitEvents(core.E.ALL_UNITS,{
     [DEBUFFS.SOLAR_WINDS] = {
       [core.E.DEBUFF_UPDATE] = mod.OnSolarWindsUpdated,
     }
+  }
+)
+mod:RegisterUnitEvents({
+    "unit.aldinari",
+    "unit.cassus",
+    "unit.vulpes_nix",
+    },{
+    [core.E.UNIT_CREATED] = mod.OnPlanetCreated,
+    [core.E.UNIT_DESTROYED] = mod.OnPlanetDestroyed,
   }
 )
