@@ -43,6 +43,7 @@ mod:RegisterEnglishLocale({
     ["msg.asteroid.next"] = "Asteroids in",
     ["msg.world_ender.next"] = "World Ender in",
     ["msg.solar_winds.high_stacks"] = "HIGH SOLAR STACKS",
+    ["msg.world_ender.spawned"] = "World Ender Spawned",
   }
 )
 ----------------------------------------------------------------------------------------------------
@@ -159,7 +160,7 @@ function mod:OnAlphaCassusDestroyed(id, unit)
 end
 
 function mod:OnAsteroidCreated(id, unit)
-  core:AddLineBetweenUnits("ASTEROID_LINE_" .. id, playerId, id, 3, "xkcdOrange")
+  core:AddLineBetweenUnits("ASTEROID_LINE_" .. id, playerId, id, 3, "xkcdOrange", nil, nil, 8)
   asteroidCount = asteroidCount + 1
   if asteroidCount >= 4 then
     asteroidCount = 0
@@ -182,6 +183,7 @@ function mod:OnWorldEnderCreated(id, unit)
   asteroidClusterCount = 0
   mod:AddTimerBar("NEXT_WORLD_ENDER_TIMER", "msg.world_ender.next", TIMERS.WORLD_ENDER.NORMAL)
   core:AddLineBetweenUnits("WORLD_ENDER_" .. id, playerId, id, 6, "xkcdCyan")
+  mod:AddMsg("WORLD_ENDER_SPAWN_MSG", "msg.word_ender_spawn", 5, "Beware", "xkcdCyan")
 end
 
 function mod:OnWorldEnderDestroyed(id, unit)
