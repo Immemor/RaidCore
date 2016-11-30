@@ -95,6 +95,7 @@ RaidCore.E = {
   CHANNEL_COMM_STATUS = "ChannelCommStatus",
   SEND_MESSAGE = "SendMessage",
   SEND_MESSAGE_RESULT = "SendMessageResult",
+  SPAWN_LOCATION = "SpawnLocation",
   -- Carbine Events.
   EVENT_COMBAT_LOG_HEAL = "CombatLogHeal",
   EVENT_UNIT_ENTERED_COMBAT = "UnitEnteredCombat",
@@ -410,6 +411,7 @@ function RaidCore:OnInitialize()
       bSoundEnabled = true,
       bAcceptSummons = true,
       bLUAErrorMessage = false,
+      bLogSpawnLocations = false,
       bReadyCheckOnBreakTimeout = true,
       sReadyCheckMessage = self.L["Raid Resume"],
       bEnableTestEncounters = false,
