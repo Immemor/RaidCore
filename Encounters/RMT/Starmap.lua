@@ -181,7 +181,7 @@ end
 function mod:OnWorldEnderCreated(id, unit)
   core:AddUnit(unit)
   asteroidClusterCount = 0
-  mod:AddTimerBar("NEXT_WORLD_ENDER_TIMER", "msg.world_ender.next", TIMERS.WORLD_ENDER.NORMAL)
+  mod:AddTimerBar("NEXT_WORLD_ENDER_TIMER", "msg.world_ender.next", TIMERS.WORLD_ENDER.NORMAL, true)
   core:AddLineBetweenUnits("WORLD_ENDER_" .. id, playerId, id, 6, "xkcdCyan")
   mod:AddMsg("WORLD_ENDER_SPAWN_MSG", "msg.word_ender_spawn", 5, "Beware", "xkcdCyan")
 end
