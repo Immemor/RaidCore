@@ -312,7 +312,8 @@ function mod:OnCriticalMassAdded(id)
 end
 
 function mod:OnDebrisFieldCreated(id, unit)
-  core:AddSimpleLine(id, unit, nil, 20, -15, 15, "xkcdRed")
+  --TODO: positive rotation
+  --core:AddSimpleLine(id, unit, nil, 20, -15, 15, "xkcdRed")
 end
 
 mod:RegisterUnitEvents("unit.alpha",{
