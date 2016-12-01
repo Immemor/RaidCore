@@ -176,7 +176,7 @@ function mod:StartAsteroidTimer()
 end
 
 function mod:StartSecondAsteroidTimer()
-  mod:AddTimerBar("NEXT_ASTEROID_TIMER", "msg.asteroid.next", TIMERS.ASTEROIDS.NEXT_IS_WORLD_ENDER, nil, nil)
+  mod:AddTimerBar("NEXT_ASTEROID_TIMER", "msg.asteroid.next", TIMERS.ASTEROIDS.NEXT_IS_WORLD_ENDER)
 end
 
 function mod:SetCardinalMarkers()
