@@ -44,6 +44,7 @@ mod:RegisterEnglishLocale({
     ["msg.world_ender.next"] = "World Ender in",
     ["msg.solar_winds.high_stacks"] = "HIGH SOLAR STACKS",
     ["msg.world_ender.spawned"] = "World Ender Spawned",
+    ["msg.mid_phase.soon"] = "Mid phase soon",
     -- Markers.
     ["mark.cardinal.N"] = "N",
     ["mark.cardinal.S"] = "S",
@@ -108,6 +109,12 @@ local ENDER_SPAWN_MARKERS = {
   [3] = Vector3.New(-43.89, -95.98, 279.71),
   [4] = Vector3.New(-157.29, -95.91, 363.64),
   [5] = Vector3.New(-19.37, -95.79, 414.22),
+}
+
+local PHASES_CLOSE = {
+  {UPPER = 76.5, LOWER = 75.5},
+  --{UPPER = ?, LOWER = ?},
+  --{UPPER = ?, LOWER = ?},
 }
 
 local CARDINAL_MARKERS = {
@@ -189,6 +196,15 @@ function mod:OnAlphaCassusCreated(id, unit)
   core:AddSimpleLine(id, unit, 8, 3.5, nil, 10, "xkcdRed")
 end
 
+function mod:OnAlphaCassusHealthChanged(_, _, percent)
+  for i = 1, #PHASES_CLOSE do
+    if percent >= PHASES_CLOSE[i].LOWER and percent <= PHASES_CLOSE[i].UPPER then
+      mod:AddMsg("MID_PHASE", "msg.mid_phase.soon", 5, "Info", "xkcdWhite")
+      break
+    end
+  end
+end
+
 function mod:OnAlphaCassusDestroyed(id, unit)
   core:RemoveSimpleLine(id)
   alphaCassus = nil
@@ -249,6 +265,7 @@ end
 mod:RegisterUnitEvents("unit.alpha",{
     [core.E.UNIT_CREATED] = mod.OnAlphaCassusCreated,
     [core.E.UNIT_DESTROYED] = mod.OnAlphaCassusDestroyed,
+    [core.E.HEALTH_CHANGED] = mod.OnAlphaCassusHealthChanged,
   }
 )
 mod:RegisterUnitEvents("unit.asteroid",{
