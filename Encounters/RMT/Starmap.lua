@@ -44,6 +44,16 @@ mod:RegisterEnglishLocale({
     ["msg.world_ender.next"] = "World Ender in",
     ["msg.solar_winds.high_stacks"] = "HIGH SOLAR STACKS",
     ["msg.world_ender.spawned"] = "World Ender Spawned",
+    -- Markers.
+    ["mark.cardinal.N"] = "N",
+    ["mark.cardinal.S"] = "S",
+    ["mark.cardinal.E"] = "E",
+    ["mark.cardinal.W"] = "W",
+    ["mark.world_ender.1"] = "W1",
+    ["mark.world_ender.2"] = "W2",
+    ["mark.world_ender.3"] = "W3",
+    ["mark.world_ender.4"] = "W4",
+    ["mark.world_ender.5"] = "W5",
   }
 )
 ----------------------------------------------------------------------------------------------------
@@ -91,6 +101,21 @@ local PLANETS = {
     INDICATOR_COLOR = "xkcdBrown",
   }
 }
+
+local ENDER_SPAWN_MARKERS = {
+  [1] = Vector3.New(-159.57, -95.93, 346.34),
+  [2] = Vector3.New(-149.60, -96.06, 315.52),
+  [3] = Vector3.New(-43.89, -95.98, 279.71),
+  [4] = Vector3.New(-157.29, -95.91, 363.64),
+  [5] = Vector3.New(-19.37, -95.79, 414.22),
+}
+
+local CARDINAL_MARKERS = {
+  ["N"] = Vector3.New(-76.75, -96.21, 309.26),
+  ["S"] = Vector3.New(-76.55, -96.21, 405.18),
+  ["E"] = Vector3.New(-30.00, -96.22, 357.03),
+  ["W"] = Vector3.New(-124.81, -96.21, 356.96),
+}
 ----------------------------------------------------------------------------------------------------
 -- Locals.
 ----------------------------------------------------------------------------------------------------
@@ -100,6 +125,7 @@ local playerId
 local solarWindsStack
 local planets
 local alphaCassus
+local worldEnderCount
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
@@ -107,6 +133,7 @@ function mod:OnBossEnable()
   asteroidCount = 0
   asteroidClusterCount = 0
   solarWindsStack = 0
+  worldEnderCount = 1
   planets = {}
   alphaCassus = nil
   for locale, planet in next, PLANETS do
@@ -115,6 +142,14 @@ function mod:OnBossEnable()
   playerId = GameLib.GetPlayerUnit():GetId()
   mod:AddTimerBar("NEXT_ASTEROID_TIMER", "msg.asteroid.next", TIMERS.ASTEROIDS.NORMAL)
   mod:AddTimerBar("NEXT_WORLD_ENDER_TIMER", "msg.world_ender.next", TIMERS.WORLD_ENDER.FIRST)
+  mod:SetCardinalMarkers()
+  mod:SetWorldMarker("WORLD_ENDER_MARKER_"..worldEnderCount, "mark.world_ender."..worldEnderCount, ENDER_SPAWN_MARKERS[worldEnderCount], "xkcdCyan")
+end
+
+function mod:SetCardinalMarkers()
+  for direction, location in next, CARDINAL_MARKERS do
+    mod:SetWorldMarker("CARDINAL_"..direction, "mark.cardinal."..direction, location)
+  end
 end
 
 function mod:OnPlanetCreated(id, unit, name)
@@ -189,6 +224,9 @@ end
 function mod:OnWorldEnderDestroyed(id, unit)
   asteroidCount = asteroidCount - 3
   core:RemoveLineBetweenUnits("WORLD_ENDER_" .. id)
+  mod:DropWorldMarker("WORLD_ENDER_MARKER_" .. worldEnderCount)
+  worldEnderCount = worldEnderCount + 1
+  mod:SetWorldMarker("WORLD_ENDER_MARKER_"..worldEnderCount, "mark.world_ender."..worldEnderCount, ENDER_SPAWN_MARKERS[worldEnderCount], "xkcdCyan")
 end
 
 function mod:OnDebrisCreated(id, unit)
