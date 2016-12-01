@@ -199,6 +199,7 @@ function mod:OnPlanetCreated(id, unit, name)
     unit = unit,
     indicatorColor = PLANETS[name].INDICATOR_COLOR,
   }
+  core:AddUnit(unit, PLANETS[name].INDICATOR_COLOR)
   if alphaCassus then
     mod:DrawPlanetTankIndicator(planets[id])
   end
