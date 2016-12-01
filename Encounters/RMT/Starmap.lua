@@ -163,7 +163,7 @@ function mod:OnBossEnable()
     PLANETS[self.L[locale]] = planet
   end
   playerId = GameLib.GetPlayerUnit():GetId()
-  mod:StartAsteroidTimer()
+  mod:StartSecondAsteroidTimer()
   mod:AddTimerBar("NEXT_WORLD_ENDER_TIMER", "msg.world_ender.next", TIMERS.WORLD_ENDER.FIRST, mod:GetSetting("CountdownWorldender"))
   mod:SetCardinalMarkers()
   if mod:GetSetting("MarkWorldenderSpawn") then
@@ -176,6 +176,10 @@ function mod:StartAsteroidTimer()
 end
 
 function mod:StartSecondAsteroidTimer()
+  mod:AddTimerBar("NEXT_ASTEROID_TIMER", "msg.asteroid.next", TIMERS.ASTEROIDS.NORMAL, nil, nil, mod.StartThirdAsteroidTimer, mod)
+end
+
+function mod:StartThirdAsteroidTimer()
   mod:AddTimerBar("NEXT_ASTEROID_TIMER", "msg.asteroid.next", TIMERS.ASTEROIDS.NEXT_IS_WORLD_ENDER)
 end
 
