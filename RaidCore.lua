@@ -718,23 +718,14 @@ function RaidCore:DropWorldMarker(key)
   end
 end
 
-function RaidCore:SetWorldMarker(key, sText, tPosition, slip)
+function RaidCore:SetWorldMarker(key, sText, tPosition, sColor)
   assert(key)
   local sLocalizedTest = self.L[sText]
   local tWorldMarker = self.worldmarker[key]
-  RaidCore:Print(slip)
   if not tWorldMarker and sText and tPosition then
-    if not slip then
-      self:CreateWorldMarker(key, sLocalizedTest, tPosition)
-    else
-      self:CreateWorldMarker(key, sLocalizedTest, tPosition, slip)
-    end
+    self:CreateWorldMarker(key, sLocalizedTest, tPosition, sColor)
   elseif tWorldMarker and (sText or tPosition) then
-    if not slip then
-      self:UpdateWorldMarker(key, sLocalizedTest, tPosition)
-    else
-      self:UpdateWorldMarker(key, sLocalizedTest, tPosition, slip)
-    end
+    self:UpdateWorldMarker(key, sLocalizedTest, tPosition, sColor)
   elseif tWorldMarker and not sLocalizedTest and not tPosition then
     self:DropWorldMarker(key)
   end
