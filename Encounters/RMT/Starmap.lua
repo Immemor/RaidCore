@@ -65,6 +65,7 @@ mod:RegisterDefaultSetting("IndicatorPlanets")
 mod:RegisterDefaultSetting("IndicatorAsteroids")
 mod:RegisterDefaultSetting("MarkCardinal")
 mod:RegisterDefaultSetting("MarkWorldenderSpawn")
+mod:RegisterDefaultSetting("LineWorldender")
 -- Sounds.
 mod:RegisterDefaultSetting("CountdownWorldender")
 mod:RegisterDefaultSetting("SoundWorldenderSpawn")
@@ -253,7 +254,9 @@ end
 function mod:OnWorldEnderCreated(id, unit)
   core:AddUnit(unit)
   mod:AddTimerBar("NEXT_WORLD_ENDER_TIMER", "msg.world_ender.next", TIMERS.WORLD_ENDER.NORMAL, mod:GetSetting("CountdownWorldender"))
-  core:AddLineBetweenUnits("WORLD_ENDER_" .. id, playerId, id, 6, "xkcdCyan")
+  if mod:GetSetting("LineWorldender") then
+    core:AddLineBetweenUnits("WORLD_ENDER_" .. id, playerId, id, 6, "xkcdCyan")
+  end
   mod:AddMsg("WORLD_ENDER_SPAWN_MSG", "msg.word_ender_spawn", 5, "Beware", "xkcdCyan")
   mod:StartAsteroidTimer()
 end
