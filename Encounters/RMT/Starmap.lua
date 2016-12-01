@@ -228,7 +228,7 @@ function mod:OnAlphaCassusCreated(id, unit)
   core:AddUnit(unit)
   core:WatchUnit(unit, core.E.TRACK_ALL)
   mod:DrawPlanetTankIndicators()
-  core:AddSimpleLine(id, unit, 8, 3.5, nil, 10, "xkcdRed")
+  core:AddSimpleLine(id, unit, 8, 20, nil, 10, "xkcdRed")
 end
 
 function mod:OnAlphaCassusHealthChanged(id, percent)
