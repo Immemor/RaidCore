@@ -66,6 +66,7 @@ mod:RegisterDefaultSetting("IndicatorAsteroids")
 mod:RegisterDefaultSetting("MarkCardinal")
 mod:RegisterDefaultSetting("MarkWorldenderSpawn")
 mod:RegisterDefaultSetting("LineWorldender")
+mod:RegisterDefaultSetting("LineAsteroids")
 mod:RegisterDefaultSetting("LineAlphaCassusCleave")
 -- Sounds.
 mod:RegisterDefaultSetting("CountdownWorldender")
@@ -252,6 +253,9 @@ end
 function mod:OnAsteroidCreated(id, unit)
   if mod:GetSetting("IndicatorAsteroids") then
     core:AddLineBetweenUnits("ASTEROID_LINE_" .. id, playerId, id, 5, "xkcdOrange", nil, nil, 10)
+  end
+  if mod:GetSetting("LineAsteroids") then
+    core:AddSimpleLine(id, unit, 0, 10, nil, 4, "xkcdBananaYellow")
   end
 end
 
