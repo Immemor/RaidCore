@@ -60,6 +60,25 @@ mod:RegisterEnglishLocale({
 ----------------------------------------------------------------------------------------------------
 -- Settings.
 ----------------------------------------------------------------------------------------------------
+-- Visuals.
+mod:RegisterDefaultSetting("IndicatorPlanets")
+mod:RegisterDefaultSetting("IndicatorAsteroids")
+mod:RegisterDefaultSetting("MarkCardinal")
+mod:RegisterDefaultSetting("MarkWorldenderSpawn")
+-- Sounds.
+mod:RegisterDefaultSetting("CountdownWorldender")
+mod:RegisterDefaultSetting("SoundWorldenderSpawn")
+mod:RegisterDefaultSetting("SoundMidphaseSoon")
+mod:RegisterDefaultSetting("SoundSolarWindStacksWarning")
+-- Messages.
+mod:RegisterDefaultSetting("MessageWorldenderSpawn")
+mod:RegisterDefaultSetting("MessageMidphaseSoon")
+mod:RegisterDefaultSetting("MessageSolarWindStacksWarning")
+-- Binds.
+mod:RegisterMessageSetting("WORLD_ENDER_SPAWN_MSG", core.E.COMPARE_EQUAL, "MessageWorldenderSpawn", "SoundWorldenderSpawn")
+mod:RegisterMessageSetting("MID_PHASE", core.E.COMPARE_EQUAL, "MessageMidphaseSoon", "SoundMidphaseSoon")
+mod:RegisterMessageSetting("SOLAR_WINDS_MSG", core.E.COMPARE_EQUAL, "MessageSolarWindStacksWarning", "SoundSolarWindStacksWarning")
+
 mod:RegisterDefaultTimerBarConfigs({
     ["NEXT_WORLD_ENDER_TIMER"] = { sColor = "xkcdCyan" },
     ["NEXT_ASTEROID_TIMER"] = { sColor = "xkcdOrange" },
@@ -148,12 +167,17 @@ function mod:OnBossEnable()
   end
   playerId = GameLib.GetPlayerUnit():GetId()
   mod:AddTimerBar("NEXT_ASTEROID_TIMER", "msg.asteroid.next", TIMERS.ASTEROIDS.NORMAL)
-  mod:AddTimerBar("NEXT_WORLD_ENDER_TIMER", "msg.world_ender.next", TIMERS.WORLD_ENDER.FIRST)
+  mod:AddTimerBar("NEXT_WORLD_ENDER_TIMER", "msg.world_ender.next", TIMERS.WORLD_ENDER.FIRST, mod:GetSetting("CountdownWorldender"))
   mod:SetCardinalMarkers()
-  mod:SetWorldMarker("WORLD_ENDER_MARKER_"..worldEnderCount, "mark.world_ender."..worldEnderCount, ENDER_SPAWN_MARKERS[worldEnderCount], "xkcdCyan")
+  if mod:GetSetting("MarkWorldenderSpawn") then
+    mod:SetWorldMarker("WORLD_ENDER_MARKER_"..worldEnderCount, "mark.world_ender."..worldEnderCount, ENDER_SPAWN_MARKERS[worldEnderCount], "xkcdCyan")
+  end
 end
 
 function mod:SetCardinalMarkers()
+  if not mod:GetSetting("MarkCardinal") then
+    return
+  end
   for direction, location in next, CARDINAL_MARKERS do
     mod:SetWorldMarker("CARDINAL_"..direction, "mark.cardinal."..direction, location)
   end
@@ -176,7 +200,9 @@ function mod:OnPlanetDestroyed(id, unit)
 end
 
 function mod:DrawPlanetTankIndicator(planet)
-  core:AddLineBetweenUnits(planet.id, alphaCassus.id, planet.id, 10, planet.indicatorColor, nil, 8, 3.5)
+  if mod:GetSetting("IndicatorPlanets") then
+    core:AddLineBetweenUnits(planet.id, alphaCassus.id, planet.id, 10, planet.indicatorColor, nil, 8, 3.5)
+  end
 end
 
 function mod:DrawPlanetTankIndicators()
@@ -211,7 +237,9 @@ function mod:OnAlphaCassusDestroyed(id, unit)
 end
 
 function mod:OnAsteroidCreated(id, unit)
-  core:AddLineBetweenUnits("ASTEROID_LINE_" .. id, playerId, id, 3, "xkcdOrange", nil, nil, 8)
+  if mod:GetSetting("IndicatorAsteroids") then
+    core:AddLineBetweenUnits("ASTEROID_LINE_" .. id, playerId, id, 3, "xkcdOrange", nil, nil, 8)
+  end
   asteroidCount = asteroidCount + 1
   if asteroidCount >= 4 then
     asteroidCount = 0
@@ -232,7 +260,7 @@ end
 function mod:OnWorldEnderCreated(id, unit)
   core:AddUnit(unit)
   asteroidClusterCount = 0
-  mod:AddTimerBar("NEXT_WORLD_ENDER_TIMER", "msg.world_ender.next", TIMERS.WORLD_ENDER.NORMAL, true)
+  mod:AddTimerBar("NEXT_WORLD_ENDER_TIMER", "msg.world_ender.next", TIMERS.WORLD_ENDER.NORMAL, mod:GetSetting("CountdownWorldender"))
   core:AddLineBetweenUnits("WORLD_ENDER_" .. id, playerId, id, 6, "xkcdCyan")
   mod:AddMsg("WORLD_ENDER_SPAWN_MSG", "msg.word_ender_spawn", 5, "Beware", "xkcdCyan")
 end
@@ -242,7 +270,10 @@ function mod:OnWorldEnderDestroyed(id, unit)
   core:RemoveLineBetweenUnits("WORLD_ENDER_" .. id)
   mod:DropWorldMarker("WORLD_ENDER_MARKER_" .. worldEnderCount)
   worldEnderCount = worldEnderCount + 1
-  mod:SetWorldMarker("WORLD_ENDER_MARKER_"..worldEnderCount, "mark.world_ender."..worldEnderCount, ENDER_SPAWN_MARKERS[worldEnderCount], "xkcdCyan")
+
+  if mod:GetSetting("MarkWorldenderSpawn") then
+    mod:SetWorldMarker("WORLD_ENDER_MARKER_"..worldEnderCount, "mark.world_ender."..worldEnderCount, ENDER_SPAWN_MARKERS[worldEnderCount], "xkcdCyan")
+  end
 end
 
 function mod:OnDebrisCreated(id, unit)
