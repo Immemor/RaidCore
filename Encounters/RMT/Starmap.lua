@@ -145,8 +145,6 @@ local CARDINAL_MARKERS = {
 ----------------------------------------------------------------------------------------------------
 -- Locals.
 ----------------------------------------------------------------------------------------------------
-local asteroidCount
-local asteroidClusterCount
 local playerId
 local solarWindsStack
 local planets
@@ -156,8 +154,6 @@ local worldEnderCount
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-  asteroidCount = 0
-  asteroidClusterCount = 0
   solarWindsStack = 0
   worldEnderCount = 1
   planets = {}
@@ -166,12 +162,20 @@ function mod:OnBossEnable()
     PLANETS[self.L[locale]] = planet
   end
   playerId = GameLib.GetPlayerUnit():GetId()
-  --mod:AddTimerBar("NEXT_ASTEROID_TIMER", "msg.asteroid.next", TIMERS.ASTEROIDS.NORMAL)
+  mod:StartAsteroidTimer()
   mod:AddTimerBar("NEXT_WORLD_ENDER_TIMER", "msg.world_ender.next", TIMERS.WORLD_ENDER.FIRST, mod:GetSetting("CountdownWorldender"))
   mod:SetCardinalMarkers()
   if mod:GetSetting("MarkWorldenderSpawn") then
     mod:SetWorldMarker("WORLD_ENDER_MARKER_"..worldEnderCount, "mark.world_ender."..worldEnderCount, ENDER_SPAWN_MARKERS[worldEnderCount], "xkcdCyan")
   end
+end
+
+function mod:StartAsteroidTimer()
+  mod:AddTimerBar("NEXT_ASTEROID_TIMER", "msg.asteroid.next", TIMERS.ASTEROIDS.NORMAL, nil, nil, mod.StartSecondAsteroidTimer, mod)
+end
+
+function mod:StartSecondAsteroidTimer()
+  mod:AddTimerBar("NEXT_ASTEROID_TIMER", "msg.asteroid.next", TIMERS.ASTEROIDS.NEXT_IS_WORLD_ENDER, nil, nil)
 end
 
 function mod:SetCardinalMarkers()
@@ -240,17 +244,6 @@ function mod:OnAsteroidCreated(id, unit)
   if mod:GetSetting("IndicatorAsteroids") then
     core:AddLineBetweenUnits("ASTEROID_LINE_" .. id, playerId, id, 3, "xkcdOrange", nil, nil, 8)
   end
-  asteroidCount = asteroidCount + 1
-  if asteroidCount >= 4 then
-    asteroidCount = 0
-    asteroidClusterCount = asteroidClusterCount + 1
-  end
-  local timer = TIMERS.ASTEROIDS.NORMAL
-  if asteroidClusterCount >= 2 then
-    asteroidClusterCount = 0
-    timer = TIMERS.ASTEROIDS.NEXT_IS_WORLD_ENDER
-  end
-  --mod:AddTimerBar("NEXT_ASTEROID_TIMER", "msg.asteroid.next", timer)
 end
 
 function mod:OnAsteroidDestroyed(id, _)
@@ -259,14 +252,13 @@ end
 
 function mod:OnWorldEnderCreated(id, unit)
   core:AddUnit(unit)
-  asteroidClusterCount = 0
   mod:AddTimerBar("NEXT_WORLD_ENDER_TIMER", "msg.world_ender.next", TIMERS.WORLD_ENDER.NORMAL, mod:GetSetting("CountdownWorldender"))
   core:AddLineBetweenUnits("WORLD_ENDER_" .. id, playerId, id, 6, "xkcdCyan")
   mod:AddMsg("WORLD_ENDER_SPAWN_MSG", "msg.word_ender_spawn", 5, "Beware", "xkcdCyan")
+  mod:StartAsteroidTimer()
 end
 
 function mod:OnWorldEnderDestroyed(id, unit)
-  asteroidCount = asteroidCount - 3
   core:RemoveLineBetweenUnits("WORLD_ENDER_" .. id)
   mod:DropWorldMarker("WORLD_ENDER_MARKER_" .. worldEnderCount)
   worldEnderCount = worldEnderCount + 1
