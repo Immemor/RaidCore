@@ -296,6 +296,10 @@ function mod:OnSolarWindsUpdated(id, _, stack)
   end
 end
 
+function mod:OnDebrisFieldCreated(id, unit)
+  core:AddSimpleLine(id, unit, nil, 20, -15, 15, "xkcdRed")
+end
+
 mod:RegisterUnitEvents("unit.alpha",{
     [core.E.UNIT_CREATED] = mod.OnAlphaCassusCreated,
     [core.E.UNIT_DESTROYED] = mod.OnAlphaCassusDestroyed,
@@ -330,5 +334,9 @@ mod:RegisterUnitEvents({
     },{
     [core.E.UNIT_CREATED] = mod.OnPlanetCreated,
     [core.E.UNIT_DESTROYED] = mod.OnPlanetDestroyed,
+  }
+)
+mod:RegisterUnitEvents("unit.debris_field",{
+    [core.E.UNIT_CREATED] = mod.OnDebrisFieldCreated,
   }
 )
