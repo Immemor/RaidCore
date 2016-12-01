@@ -132,8 +132,8 @@ local ENDER_SPAWN_MARKERS = {
 
 local PHASES_CLOSE = {
   {UPPER = 76.5, LOWER = 75.5},
-  --{UPPER = ?, LOWER = ?},
-  --{UPPER = ?, LOWER = ?},
+  {UPPER = 46.5, LOWER = 45.5},
+  {UPPER = 13.5, LOWER = 12.5},
 }
 
 local CARDINAL_MARKERS = {
