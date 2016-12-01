@@ -43,6 +43,7 @@ mod:RegisterEnglishLocale({
     ["msg.asteroid.next"] = "Asteroids in",
     ["msg.world_ender.next"] = "World Ender in",
     ["msg.solar_winds.high_stacks"] = "HIGH SOLAR STACKS",
+    ["msg.critical_mass.you"] = "CRITICAL MASS",
     ["msg.world_ender.spawned"] = "World Ender Spawned",
     ["msg.mid_phase.soon"] = "Mid phase soon",
     -- Markers.
@@ -73,14 +74,17 @@ mod:RegisterDefaultSetting("CountdownWorldender")
 mod:RegisterDefaultSetting("SoundWorldenderSpawn")
 mod:RegisterDefaultSetting("SoundMidphaseSoon")
 mod:RegisterDefaultSetting("SoundSolarWindStacksWarning")
+mod:RegisterDefaultSetting("SoundCriticalMassYouWarning")
 -- Messages.
 mod:RegisterDefaultSetting("MessageWorldenderSpawn")
 mod:RegisterDefaultSetting("MessageMidphaseSoon")
 mod:RegisterDefaultSetting("MessageSolarWindStacksWarning")
+mod:RegisterDefaultSetting("MessageCriticalMassYouWarning")
 -- Binds.
 mod:RegisterMessageSetting("WORLD_ENDER_SPAWN_MSG", core.E.COMPARE_EQUAL, "MessageWorldenderSpawn", "SoundWorldenderSpawn")
 mod:RegisterMessageSetting("MID_PHASE", core.E.COMPARE_EQUAL, "MessageMidphaseSoon", "SoundMidphaseSoon")
 mod:RegisterMessageSetting("SOLAR_WINDS_MSG", core.E.COMPARE_EQUAL, "MessageSolarWindStacksWarning", "SoundSolarWindStacksWarning")
+mod:RegisterMessageSetting("CRITICAL_MASS_MSG", core.E.COMPARE_EQUAL, "MessageCriticalMassYouWarning", "SoundCriticalMassYouWarning")
 
 mod:RegisterDefaultTimerBarConfigs({
     ["NEXT_WORLD_ENDER_TIMER"] = { sColor = "xkcdCyan" },
@@ -100,6 +104,7 @@ local DEBUFFS = {
   ACCUMULATING_MASS = 84344,
   PULSAR = 87542,
   BURNING_ATMOSPHERE = 84301,
+  CRITICAL_MASS = 84345,
 }
 
 local TIMERS = {
@@ -300,6 +305,12 @@ function mod:OnSolarWindsUpdated(id, _, stack)
   end
 end
 
+function mod:OnCriticalMassAdded(id)
+  if playerId == id then
+    mod:AddMsg("CRITICAL_MASS_MSG", "msg.critical_mass.you", 5, "Inferno", "white")
+  end
+end
+
 function mod:OnDebrisFieldCreated(id, unit)
   core:AddSimpleLine(id, unit, nil, 20, -15, 15, "xkcdRed")
 end
@@ -328,6 +339,9 @@ mod:RegisterUnitEvents("unit.debris",{
 mod:RegisterUnitEvents(core.E.ALL_UNITS,{
     [DEBUFFS.SOLAR_WINDS] = {
       [core.E.DEBUFF_UPDATE] = mod.OnSolarWindsUpdated,
+    },
+    [DEBUFFS.CRITICAL_MASS] = {
+      [core.E.DEBUFF_ADD] = mod.OnCriticalMassAdded,
     }
   }
 )
