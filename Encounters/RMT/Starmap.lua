@@ -166,7 +166,7 @@ function mod:OnBossEnable()
     PLANETS[self.L[locale]] = planet
   end
   playerId = GameLib.GetPlayerUnit():GetId()
-  mod:AddTimerBar("NEXT_ASTEROID_TIMER", "msg.asteroid.next", TIMERS.ASTEROIDS.NORMAL)
+  --mod:AddTimerBar("NEXT_ASTEROID_TIMER", "msg.asteroid.next", TIMERS.ASTEROIDS.NORMAL)
   mod:AddTimerBar("NEXT_WORLD_ENDER_TIMER", "msg.world_ender.next", TIMERS.WORLD_ENDER.FIRST, mod:GetSetting("CountdownWorldender"))
   mod:SetCardinalMarkers()
   if mod:GetSetting("MarkWorldenderSpawn") then
@@ -250,7 +250,7 @@ function mod:OnAsteroidCreated(id, unit)
     asteroidClusterCount = 0
     timer = TIMERS.ASTEROIDS.NEXT_IS_WORLD_ENDER
   end
-  mod:AddTimerBar("NEXT_ASTEROID_TIMER", "msg.asteroid.next", timer)
+  --mod:AddTimerBar("NEXT_ASTEROID_TIMER", "msg.asteroid.next", timer)
 end
 
 function mod:OnAsteroidDestroyed(id, _)
