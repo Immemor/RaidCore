@@ -254,15 +254,10 @@ end
 function mod:OnWorldEnderCreated(id, unit)
   core:AddUnit(unit)
   mod:AddTimerBar("NEXT_WORLD_ENDER_TIMER", "msg.world_ender.next", TIMERS.WORLD_ENDER.NORMAL, mod:GetSetting("CountdownWorldender"))
-<<<<<<< 979b1bd270264983dc63bfaf3913159a88b6ae13
   if mod:GetSetting("LineWorldender") then
     core:AddLineBetweenUnits("WORLD_ENDER_" .. id, playerId, id, 6, "xkcdCyan")
   end
   mod:AddMsg("WORLD_ENDER_SPAWN_MSG", "msg.world_ender.spawned", 5, "Beware", "xkcdCyan")
-=======
-  core:AddLineBetweenUnits("WORLD_ENDER_" .. id, playerId, id, 6, "xkcdCyan")
-  mod:AddMsg("WORLD_ENDER_SPAWN_MSG", "msg.word_ender.spawn", 5, "Beware", "xkcdCyan")
->>>>>>> 1a463ad3d9cae308fd442da0bd22efbd8d82a1d2
   mod:StartAsteroidTimer()
 end
 
