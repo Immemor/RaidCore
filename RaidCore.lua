@@ -686,11 +686,11 @@ function RaidCore:CreateWorldMarker(key, sText, tPosition, color)
   local markFrame = Apollo.LoadForm(self.xmlDoc, "MarkFrame", "InWorldHudStratum", self)
   markFrame:SetWorldLocation(tPosition)
   markFrame:FindChild("Name"):SetText(sText)
-  self.worldmarker[key] = markFrame
-  self:MarkerVisibilityHandler(markFrame)
   if color then
     markFrame:FindChild("Name"):SetTextColor(color)
   end
+  self:MarkerVisibilityHandler(markFrame)
+  self.worldmarker[key] = markFrame
 end
 
 function RaidCore:UpdateWorldMarker(key, sText, tPosition, color)
