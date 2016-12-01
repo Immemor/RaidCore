@@ -66,6 +66,7 @@ mod:RegisterDefaultSetting("IndicatorAsteroids")
 mod:RegisterDefaultSetting("MarkCardinal")
 mod:RegisterDefaultSetting("MarkWorldenderSpawn")
 mod:RegisterDefaultSetting("LineWorldender")
+mod:RegisterDefaultSetting("LineAlphaCassusCleave")
 -- Sounds.
 mod:RegisterDefaultSetting("CountdownWorldender")
 mod:RegisterDefaultSetting("SoundWorldenderSpawn")
@@ -228,7 +229,9 @@ function mod:OnAlphaCassusCreated(id, unit)
   core:AddUnit(unit)
   core:WatchUnit(unit, core.E.TRACK_ALL)
   mod:DrawPlanetTankIndicators()
-  core:AddSimpleLine(id, unit, 8, 20, nil, 10, "xkcdRed")
+  if mod:GetSetting("LineAlphaCassusCleave") then
+    core:AddSimpleLine(id, unit, 8, 20, nil, 10, "xkcdRed")
+  end
 end
 
 function mod:OnAlphaCassusHealthChanged(id, percent)
