@@ -682,15 +682,18 @@ function RaidCore:ResetWorldMarkers()
   end
 end
 
-function RaidCore:CreateWorldMarker(key, sText, tPosition)
+function RaidCore:CreateWorldMarker(key, sText, tPosition, color)
   local markFrame = Apollo.LoadForm(self.xmlDoc, "MarkFrame", "InWorldHudStratum", self)
   markFrame:SetWorldLocation(tPosition)
   markFrame:FindChild("Name"):SetText(sText)
   self.worldmarker[key] = markFrame
   self:MarkerVisibilityHandler(markFrame)
+  if color then
+    markFrame:FindChild("Name"):SetTextColor(color)
+  end
 end
 
-function RaidCore:UpdateWorldMarker(key, sText, tPosition)
+function RaidCore:UpdateWorldMarker(key, sText, tPosition, color)
   if sText then
     local wndText = self.worldmarker[key]:FindChild("Name")
     if wndText:GetText() ~= sText then
@@ -701,6 +704,11 @@ function RaidCore:UpdateWorldMarker(key, sText, tPosition)
   if tPosition then
     self.worldmarker[key]:SetWorldLocation(tPosition)
   end
+
+  if color then
+    local wndText = self.worldmarker[key]:FindChild("Name")
+    wndText:SetTextColor(color)
+  end
 end
 
 function RaidCore:DropWorldMarker(key)
@@ -710,14 +718,23 @@ function RaidCore:DropWorldMarker(key)
   end
 end
 
-function RaidCore:SetWorldMarker(key, sText, tPosition)
+function RaidCore:SetWorldMarker(key, sText, tPosition, slip)
   assert(key)
   local sLocalizedTest = self.L[sText]
   local tWorldMarker = self.worldmarker[key]
+  RaidCore:Print(slip)
   if not tWorldMarker and sText and tPosition then
-    self:CreateWorldMarker(key, sLocalizedTest, tPosition)
+    if not slip then
+      self:CreateWorldMarker(key, sLocalizedTest, tPosition)
+    else
+      self:CreateWorldMarker(key, sLocalizedTest, tPosition, slip)
+    end
   elseif tWorldMarker and (sText or tPosition) then
-    self:UpdateWorldMarker(key, sLocalizedTest, tPosition)
+    if not slip then
+      self:UpdateWorldMarker(key, sLocalizedTest, tPosition)
+    else
+      self:UpdateWorldMarker(key, sLocalizedTest, tPosition, slip)
+    end
   elseif tWorldMarker and not sLocalizedTest and not tPosition then
     self:DropWorldMarker(key)
   end
