@@ -227,7 +227,7 @@ function mod:OnAlphaCassusCreated(id, unit)
   core:AddSimpleLine(id, unit, 8, 3.5, nil, 10, "xkcdRed")
 end
 
-function mod:OnAlphaCassusHealthChanged(_, _, percent)
+function mod:OnAlphaCassusHealthChanged(id, percent)
   for i = 1, #PHASES_CLOSE do
     if percent >= PHASES_CLOSE[i].LOWER and percent <= PHASES_CLOSE[i].UPPER then
       mod:AddMsg("MID_PHASE", "msg.mid_phase.soon", 5, "Info", "xkcdWhite")
