@@ -41,11 +41,25 @@ mod:RegisterEnglishLocale({
     ["msg.midphase.started"] = "MIDPHASE",
   }
 )
+mod:RegisterFrenchLocale({
+    -- Unit names.
+    ["unit.octog"] = "Dévore-Astre le Vorace",
+    -- NPC says.
+    ["say.octog.orb"] = "Reste là ! Le festin va bientôt commencer !",
+    ["say.octog.supernova"] = "Bientôt, tu pourras plus rien faire... et moi, j'aurai plus faim !",
+    -- Cast names.
+    ["cast.octog.supernova"] = "Supernova",
+    ["cast.octog.hookshot"] = "Hookshot",
+    ["cast.octog.flamethrower"] = "Flamethrower",
+  }
+)
 ----------------------------------------------------------------------------------------------------
 -- Settings.
 ----------------------------------------------------------------------------------------------------
 -- Visuals.
 mod:RegisterDefaultSetting("CircleOrb")
+mod:RegisterDefaultSetting("MarkOrb")
+mod:RegisterDefaultSetting("CircleInkPools")
 -- Sounds.
 mod:RegisterDefaultSetting("SoundChaosOrbSoon")
 mod:RegisterDefaultSetting("SoundMidphaseSoon")
@@ -77,6 +91,11 @@ mod:RegisterDefaultTimerBarConfigs({
   }
 )
 ----------------------------------------------------------------------------------------------------
+-- Functions.
+----------------------------------------------------------------------------------------------------
+local GetGameTime = GameLib.GetGameTime
+local next, floor, max = next, math.floor, math.max
+----------------------------------------------------------------------------------------------------
 -- Constants.
 ----------------------------------------------------------------------------------------------------
 -- Debuffs and Buffs.
@@ -106,9 +125,14 @@ local TIMERS = {
   },
   ORB = {
     SECOND = 80,
+    NORMAL = 85,
   },
   SUPERNOVA = {
     WIPE = 25,
+  },
+  POOL = {
+    UPDATE = 0.25,
+    GROW = 7.5,
   }
 }
 
@@ -122,19 +146,36 @@ local PHASES_CLOSE = {
   {UPPER = 36.5, LOWER = 35.5}, -- 35
   {UPPER = 6.5, LOWER = 5.5}, -- 5
 }
+
+local POOL_SIZES = {
+  5.5, 7.55, 9.3, 11.6, 13.5, 15.5, 17.5
+}
 ----------------------------------------------------------------------------------------------------
 -- Locals.
 ----------------------------------------------------------------------------------------------------
 local orbCount
+local nextOrbTime
 local playerId
+local currentOrbNumber
+local inkPools
+local drawPools
+local updatePoolTimer = ApolloTimer.Create(TIMERS.POOL.UPDATE, true, "OnUpdatePoolTimer", mod)
+updatePoolTimer:Stop()
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
   orbCount = 0
+  inkPools = {}
+  drawPools = false
   playerId = GameLib.GetPlayerUnit():GetId()
   mod:AddTimerBar("NEXT_HOOKSHOT_TIMER", "msg.octog.hookshot.next", TIMERS.HOOKSHOT.FIRST)
   mod:AddTimerBar("NEXT_FLAMETHROWER_TIMER", "msg.octog.flamethrower.next", TIMERS.FLAMETHROWER.NORMAL)
+  updatePoolTimer:Start()
+end
+
+function mod:OnBossDisable()
+  updatePoolTimer:Stop()
 end
 
 function mod:IsPhaseClose(phase, percent)
@@ -163,6 +204,7 @@ function mod:OnSupernovaStart()
   mod:AddMsg("MIDPHASE_STARTED", "msg.midphase.started", 5, "Info", "xkcdWhite")
   mod:RemoveTimerBar("NEXT_HOOKSHOT_TIMER")
   mod:RemoveTimerBar("NEXT_FLAMETHROWER_TIMER")
+  mod:RemoveTimerBar("NEXT_ORB_TIMER")
   mod:AddTimerBar("SUPERNOVA_WIPE_TIMER", "msg.octog.supernova.wipe", TIMERS.SUPERNOVA.WIPE)
 end
 
@@ -170,6 +212,7 @@ function mod:OnSupernovaEnd()
   mod:RemoveTimerBar("SUPERNOVA_WIPE_TIMER")
   mod:AddTimerBar("NEXT_HOOKSHOT_TIMER", "msg.octog.hookshot.next", TIMERS.HOOKSHOT.NORMAL)
   core:RemoveMsg("ASTRAL_SHIELD_STACKS")
+  mod:StartOrbTimer(max(nextOrbTime - GetGameTime(), 10))
 end
 
 function mod:OnHookshotStart()
@@ -191,21 +234,27 @@ function mod:OnOctogHealthChanged(id, percent)
   if mod:IsPhaseClose(PHASES_CLOSE, percent) then
     mod:AddMsg("MIDPHASE_SOON", "msg.midphase.coming", 5, "Info", "xkcdWhite")
   end
-  if percent == 85 then
-    --TODO what happens after midphase
-    local msg = self.L["msg.orb.next"]:format(2)
-    mod:AddTimerBar("NEXT_ORB_TIMER", msg, TIMERS.ORB.SECOND)
-  end
 end
 
 function mod:AddUnit(id, unit)
   core:AddUnit(unit)
 end
 
+function mod:StartOrbTimer(timer)
+  local msg = self.L["msg.orb.next"]:format(orbCount)
+  mod:AddTimerBar("NEXT_ORB_TIMER", msg, timer)
+end
+
 function mod:OnOrbsSpawning()
+  currentOrbNumber = 0
   orbCount = orbCount + 1
   local msg = self.L["msg.orb.spawn"]:format(orbCount)
   mod:AddMsg("ORB_SPAWN", msg, 2, "Info", "xkcdWhite")
+  mod:DrawPools()
+
+  local orbTimer = orbCount == 1 and TIMERS.ORB.SECOND or TIMERS.ORB.NORMAL
+  mod:StartOrbTimer(orbTimer)
+  nextOrbTime = GetGameTime() + orbTimer
 end
 
 function mod:OnAstralShieldUpdate(id, spellId, stacks)
@@ -218,8 +267,16 @@ function mod:DrawOrbCircle(id, unit, color)
   end
 end
 
+function mod:MarkOrbWithNumber(unit)
+  if mod:GetSetting("MarkOrb") then
+    core:MarkUnit(unit, core.E.LOCATION_STATIC_FLOOR, currentOrbNumber)
+  end
+end
+
 function mod:OnOrbCreated(id, unit)
+  currentOrbNumber = currentOrbNumber + 1
   mod:DrawOrbCircle(id, unit, "xkcdGreen")
+  mod:MarkOrbWithNumber(unit)
 end
 
 function mod:OnOrbDestroyed(id, unit)
@@ -230,6 +287,61 @@ function mod:OnChaosTetherAdd(id, spellId, stacks, timeRemaining, sName, unitCas
   if id == playerId and unitCaster and unitCaster:IsValid() then
     mod:DrawOrbCircle(unitCaster:GetId(), unitCaster, "xkcdRed")
   end
+end
+
+function mod:DrawPools()
+  drawPools = true
+  for id, inkPool in next, inkPools do
+    mod:DrawPool(inkPool)
+  end
+end
+
+function mod:RemovePools()
+  drawPools = false
+  for id, inkPool in next, inkPools do
+    mod:RemovePool(inkPool)
+  end
+end
+
+function mod:RemovePool(inkPool)
+  core:RemovePolygon(inkPool.id)
+end
+
+function mod:DrawPool(inkPool)
+  if drawPools and mod:GetSetting("CircleInkPools") then
+    local poolSize = POOL_SIZES[inkPool.currentSizeIndex]
+    core:AddPolygon(inkPool.id, inkPool.unit, poolSize, nil, 1, "xkcdBlack", 15)
+  end
+end
+
+function mod:UpdatePoolSize(inkPool, poolSizeIndex)
+  if inkPool.currentSizeIndex ~= poolSizeIndex and poolSizeIndex <= #POOL_SIZES then
+    inkPool.currentSizeIndex = poolSizeIndex
+    mod:DrawPool(inkPool)
+  end
+end
+
+function mod:OnUpdatePoolTimer()
+  local currentTime = GetGameTime()
+  for id, inkPool in next, inkPools do
+    local poolSizeIndex = floor((currentTime - inkPool.creationTime)/TIMERS.POOL.GROW) + 1
+    mod:UpdatePoolSize(inkPool, poolSizeIndex)
+  end
+end
+
+function mod:OnPoolCreated(id, unit)
+  inkPools[id] = {
+    creationTime = GetGameTime(),
+    unit = unit,
+    currentSizeIndex = 1,
+    id = id,
+  }
+  mod:DrawPool(inkPools[id])
+end
+
+function mod:OnPoolDestroyed(id, unit)
+  mod:RemovePool(inkPools[id])
+  inkPools[id] = nil
 end
 
 mod:RegisterUnitEvents("unit.octog",{
@@ -254,7 +366,10 @@ mod:RegisterUnitEvents("unit.octog",{
     },
     [BUFFS.ASTRAL_SHIELD_STACKS] = {
       [core.E.BUFF_UPDATE] = mod.OnAstralShieldUpdate,
-    }
+    },
+    [BUFFS.CHAOS_ORBS] = {
+      [core.E.BUFF_REMOVE] = mod.RemovePools,
+    },
   }
 )
 
@@ -266,5 +381,10 @@ mod:RegisterUnitEvents("unit.orb", {
 mod:RegisterUnitSpellEvent(core.E.ALL_UNITS, core.E.DEBUFF_ADD, DEBUFFS.CHAOS_TETHER, mod.OnChaosTetherAdd)
 mod:RegisterUnitEvents({"unit.orb", "unit.octog"}, {
     [core.E.UNIT_CREATED] = mod.AddUnit,
+  }
+)
+mod:RegisterUnitEvents("unit.pool", {
+    [core.E.UNIT_CREATED] = mod.OnPoolCreated,
+    [core.E.UNIT_DESTROYED] = mod.OnPoolDestroyed,
   }
 )
