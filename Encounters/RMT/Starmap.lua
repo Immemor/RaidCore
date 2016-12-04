@@ -72,6 +72,7 @@ mod:RegisterDefaultSetting("LineAsteroids")
 mod:RegisterDefaultSetting("LineAlphaCassusCleave")
 mod:RegisterDefaultSetting("CirclePlanetOrbits")
 mod:RegisterDefaultSetting("CircleAldinariOrbitOnly")
+mod:RegisterDefaultSetting("MarkerDebrisField")
 -- Sounds.
 mod:RegisterDefaultSetting("CountdownWorldender")
 mod:RegisterDefaultSetting("SoundWorldenderSpawn")
@@ -345,8 +346,13 @@ function mod:OnCriticalMassRemoved(id)
 end
 
 function mod:OnDebrisFieldCreated(id, unit)
-  --TODO: positive rotation
-  --core:AddSimpleLine(id, unit, nil, 20, -15, 15, "xkcdRed")
+  if mod:GetSetting("MarkerDebrisField") then
+    core:AddPicture("DEBRIS_FIELD_MARKER"..id, unit, "IconSprites:Icon_Windows_UI_SabotageBomb_Red", 40)
+  end
+end
+
+function mod:OnDebrisFieldDestroyed(id, unit)
+  core:RemovePicture("DEBRIS_FIELD_MARKER"..id)
 end
 
 mod:RegisterUnitEvents("unit.alpha",{
@@ -372,6 +378,7 @@ mod:RegisterUnitEvents("unit.debris",{
 )
 mod:RegisterUnitEvents(core.E.ALL_UNITS,{
     [DEBUFFS.SOLAR_WINDS] = {
+      [core.E.DEBUFF_ADD] = mod.OnSolarWindsUpdated,
       [core.E.DEBUFF_UPDATE] = mod.OnSolarWindsUpdated,
     },
     [DEBUFFS.CRITICAL_MASS] = {
@@ -391,5 +398,6 @@ mod:RegisterUnitEvents({
 )
 mod:RegisterUnitEvents("unit.debris_field",{
     [core.E.UNIT_CREATED] = mod.OnDebrisFieldCreated,
+    [core.E.UNIT_DESTROYED] = mod.OnDebrisFieldDestroyed,
   }
 )
