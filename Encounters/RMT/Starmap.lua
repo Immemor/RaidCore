@@ -323,7 +323,7 @@ end
 function mod:MarkPlanetsWithSolarWindTime(remainingTime)
   local stringTime = string.format("%.1f", remainingTime)
   for id, planet in next, planets do
-    core:MarkUnit(planet.unit, core.E.LOCATION_STATIC_CHEST, stringTime)
+    core:MarkUnit(planet.unit, core.E.LOCATION_STATIC_FLOOR, stringTime)
   end
 end
 
