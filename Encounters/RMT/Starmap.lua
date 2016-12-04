@@ -297,7 +297,7 @@ end
 
 function mod:OnAsteroidCreated(id, unit)
   if mod:GetSetting("IndicatorAsteroids") then
-    core:AddLineBetweenUnits("ASTEROID_LINE_" .. id, playerId, id, 5, "xkcdOrange", nil, nil, 10)
+    core:AddLineBetweenUnits("ASTEROID_LINE_" .. id, alphaCassus.id, id, 10, "xkcdBrown", nil, 8, 3.5)
   end
   if mod:GetSetting("LineAsteroids") then
     core:AddSimpleLine(id, unit, 0, 16, nil, 6, "xkcdBananaYellow")
