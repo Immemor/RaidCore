@@ -70,6 +70,7 @@ mod:RegisterDefaultSetting("CirclePlanetOrbits")
 mod:RegisterDefaultSetting("CircleAldinariOrbitOnly")
 mod:RegisterDefaultSetting("MarkDebrisField")
 mod:RegisterDefaultSetting("MarkSolarWindTimer")
+mod:RegisterDefaultSetting("CrosshairCosmicDebris")
 -- Sounds.
 mod:RegisterDefaultSetting("CountdownWorldender")
 mod:RegisterDefaultSetting("SoundWorldenderSpawn")
@@ -330,7 +331,9 @@ function mod:OnWorldEnderDestroyed(id, unit)
 end
 
 function mod:OnDebrisCreated(id, unit)
-  core:AddPicture("DEBRIS_PICTURE_" .. id, id, "Crosshair", 40, nil, nil, nil, "red")
+  if mod:GetSetting("CrosshairCosmicDebris") then
+    core:AddPicture("DEBRIS_PICTURE_" .. id, id, "Crosshair", 40, nil, nil, nil, "xkcdRed")
+  end
 end
 
 function mod:OnDebrisDestroyed(id, unit)

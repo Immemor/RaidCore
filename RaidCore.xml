@@ -2254,6 +2254,11 @@
                 <Event Name="ButtonUncheck" Function="OnButtonCheckBoxSwitched"/>
                 <Event Name="WindowLoad" Function="OnWindowLoad"/>
             </Control>
+            <Control Class="Button" Base="HologramSprites:HoloCheckBoxBtn" Font="Nameplates" ButtonType="Check" RadioGroup="" LAnchorPoint="0.5" LAnchorOffset="5" TAnchorPoint="0" TAnchorOffset="155" RAnchorPoint="1" RAnchorOffset="-10" BAnchorPoint="0" BAnchorOffset="177" DT_VCENTER="1" DT_CENTER="0" BGColor="UI_BtnBGDefault" TextColor="gray" NormalTextColor="UI_BtnTextDefault" PressedTextColor="UI_BtnTextDefault" FlybyTextColor="UI_BtnTextDefault" PressedFlybyTextColor="UI_BtnTextDefault" DisabledTextColor="UI_BtnTextDefault" TooltipType="OnCursor" Name="Encounters_Starmap_CrosshairCosmicDebris" TooltipColor="" FocusedTextColor="ffffffff" Text="Crosshairs on cosmic debris" TextId="" Template="HologramControl1" DrawAsCheckbox="1" DT_SINGLELINE="1">
+                <Event Name="ButtonCheck" Function="OnButtonCheckBoxSwitched"/>
+                <Event Name="ButtonUncheck" Function="OnButtonCheckBoxSwitched"/>
+                <Event Name="WindowLoad" Function="OnWindowLoad"/>
+            </Control>
         </Control>
     </Form>
     <Form Class="Window" LAnchorPoint="0" LAnchorOffset="0" TAnchorPoint="0" TAnchorOffset="0" RAnchorPoint="1" RAnchorOffset="0" BAnchorPoint="1" BAnchorOffset="0" RelativeToClient="1" Font="Default" Text="" BGColor="UI_WindowBGDefault" TextColor="UI_WindowTextDefault" Template="Holo_Scrolllist_Options" TooltipType="OnCursor" Name="ConfigForm_Octog" Border="1" Picture="1" SwallowMouseClicks="1" Moveable="1" Escapable="1" Overlapped="1" TooltipColor="" Visible="0" Tooltip="">
