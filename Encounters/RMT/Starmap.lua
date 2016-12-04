@@ -73,6 +73,7 @@ mod:RegisterDefaultSetting("LineAlphaCassusCleave")
 mod:RegisterDefaultSetting("CirclePlanetOrbits")
 mod:RegisterDefaultSetting("CircleAldinariOrbitOnly")
 mod:RegisterDefaultSetting("MarkDebrisField")
+mod:RegisterDefaultSetting("MarkSolarWindTimer")
 -- Sounds.
 mod:RegisterDefaultSetting("CountdownWorldender")
 mod:RegisterDefaultSetting("SoundWorldenderSpawn")
@@ -321,6 +322,7 @@ function mod:OnDebrisDestroyed(id, unit)
 end
 
 function mod:MarkPlanetsWithSolarWindTime(remainingTime)
+  if not mod:GetSetting("MarkSolarWindTimer") then return end
   local stringTime = string.format("%.1f", remainingTime)
   for id, planet in next, planets do
     core:MarkUnit(planet.unit, core.E.LOCATION_STATIC_FLOOR, stringTime)
