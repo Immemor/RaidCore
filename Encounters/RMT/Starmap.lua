@@ -183,6 +183,7 @@ function mod:OnBossEnable()
   if mod:GetSetting("MarkWorldenderSpawn") then
     mod:SetWorldMarker("WORLD_ENDER_MARKER_"..worldEnderCount, "mark.world_ender."..worldEnderCount, ENDER_SPAWN_MARKERS[worldEnderCount], "xkcdCyan")
   end
+  core:AddUnitSpacer("WORLD_ENDER_SPACE", nil, 2)
 end
 
 function mod:StartAsteroidTimer()
@@ -214,7 +215,7 @@ function mod:OnPlanetCreated(id, unit, name)
     indicatorColor = PLANETS[name].INDICATOR_COLOR,
     orbitSize = PLANETS[name].ORBIT,
   }
-  core:AddUnit(unit, PLANETS[name].INDICATOR_COLOR)
+  core:AddUnit(unit, PLANETS[name].INDICATOR_COLOR, 1)
   if alphaCassus then
     mod:DrawPlanetTankIndicator(planets[id])
   end
@@ -242,7 +243,7 @@ function mod:OnAlphaCassusCreated(id, unit)
     id = id,
     unit = unit,
   }
-  core:AddUnit(unit, "xkcdOrange")
+  core:AddUnit(unit, "xkcdOrange", 0)
   core:WatchUnit(unit, core.E.TRACK_ALL)
   mod:DrawPlanetTankIndicators()
   if mod:GetSetting("LineAlphaCassusCleave") then
@@ -278,7 +279,7 @@ function mod:OnAsteroidDestroyed(id, _)
 end
 
 function mod:OnWorldEnderCreated(id, unit)
-  core:AddUnit(unit)
+  core:AddUnit(unit, "xkcdCyan", 3)
   mod:AddTimerBar("NEXT_WORLD_ENDER_TIMER", "msg.world_ender.next", TIMERS.WORLD_ENDER.NORMAL, mod:GetSetting("CountdownWorldender"))
   if mod:GetSetting("LineWorldender") then
     core:AddLineBetweenUnits("WORLD_ENDER_" .. id, playerId, id, 6, "xkcdCyan")
