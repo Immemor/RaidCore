@@ -275,7 +275,7 @@ function mod:OnAlphaCassusCreated(id, unit)
     unit = unit,
   }
   core:AddUnit(unit, "xkcdOrange", 0)
-  core:WatchUnit(unit, core.E.TRACK_ALL)
+  core:WatchUnit(unit, core.E.TRACK_HEALTH)
   mod:DrawPlanetTankIndicators()
   if mod:GetSetting("LineAlphaCassusCleave") then
     core:AddSimpleLine(id, unit, 8, 20, nil, 10, "xkcdRed")
