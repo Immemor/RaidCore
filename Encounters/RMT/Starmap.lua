@@ -39,6 +39,7 @@ mod:RegisterEnglishLocale({
     ["chron.world_ender.aldinari"] = "A World Ender is heading to the Aldinari's orbit.",
     ["chron.world_ender.vulpes_nix"] = "A World Ender is heading to the Vulpes Nix's orbit.",
     ["chron.world_ender.cassus"] = "A World Ender is heading to the Cassus' orbit.",
+    ["chron.critical_mass"] = "([^%s]+%s[^%s]+) has reached Critical Mass!",
     -- Messages.
     ["msg.asteroid.next"] = "Asteroids in",
     ["msg.world_ender.next"] = "World Ender in",
@@ -69,6 +70,8 @@ mod:RegisterDefaultSetting("MarkWorldenderSpawn")
 mod:RegisterDefaultSetting("LineWorldender")
 mod:RegisterDefaultSetting("LineAsteroids")
 mod:RegisterDefaultSetting("LineAlphaCassusCleave")
+mod:RegisterDefaultSetting("CirclePlanetOrbits")
+mod:RegisterDefaultSetting("CircleAldinariOrbitOnly")
 -- Sounds.
 mod:RegisterDefaultSetting("CountdownWorldender")
 mod:RegisterDefaultSetting("SoundWorldenderSpawn")
@@ -206,6 +209,7 @@ function mod:OnPlanetCreated(id, unit, name)
   planets[id] = {
     id = id,
     unit = unit,
+    name = name,
     indicatorColor = PLANETS[name].INDICATOR_COLOR,
     orbitSize = PLANETS[name].ORBIT,
   }
@@ -309,9 +313,34 @@ function mod:OnSolarWindsUpdated(id, _, stack)
   end
 end
 
+function mod:DrawPlanetOrbits()
+  if not mod:GetSetting("CirclePlanetOrbits") then return end
+  for id, planet in next, planets do
+    if not mod:GetSetting("CircleAldinariOrbitOnly") or planet.name == self.L["unit.aldinari"] then
+      core:AddPolygon("LOWER_ORBIT_"..id, ALPHA_CASSUS_POSITION, planet.orbitSize.LOWER, nil, 5, planet.indicatorColor, 40)
+      core:AddPolygon("UPPER_ORBIT_"..id, ALPHA_CASSUS_POSITION, planet.orbitSize.UPPER, nil, 5, planet.indicatorColor, 40)
+    end
+  end
+end
+
+function mod:RemovePlanetOrbits()
+  for id, planet in next, planets do
+    core:RemovePolygon("LOWER_ORBIT_"..id)
+    core:RemovePolygon("UPPER_ORBIT_"..id)
+  end
+end
+
 function mod:OnCriticalMassAdded(id)
   if playerId == id then
     mod:AddMsg("CRITICAL_MASS_MSG", "msg.critical_mass.you", 5, "Inferno", "white")
+    mod:DrawPlanetOrbits()
+  end
+end
+
+function mod:OnCriticalMassRemoved(id)
+  if playerId == id then
+    mod:RemoveMsg("CRITICAL_MASS_MSG")
+    mod:RemovePlanetOrbits()
   end
 end
 
@@ -347,6 +376,7 @@ mod:RegisterUnitEvents(core.E.ALL_UNITS,{
     },
     [DEBUFFS.CRITICAL_MASS] = {
       [core.E.DEBUFF_ADD] = mod.OnCriticalMassAdded,
+      [core.E.DEBUFF_REMOVE] = mod.OnCriticalMassRemoved,
     }
   }
 )
