@@ -72,7 +72,7 @@ mod:RegisterDefaultSetting("LineAsteroids")
 mod:RegisterDefaultSetting("LineAlphaCassusCleave")
 mod:RegisterDefaultSetting("CirclePlanetOrbits")
 mod:RegisterDefaultSetting("CircleAldinariOrbitOnly")
-mod:RegisterDefaultSetting("MarkerDebrisField")
+mod:RegisterDefaultSetting("MarkDebrisField")
 -- Sounds.
 mod:RegisterDefaultSetting("CountdownWorldender")
 mod:RegisterDefaultSetting("SoundWorldenderSpawn")
@@ -346,7 +346,7 @@ function mod:OnCriticalMassRemoved(id)
 end
 
 function mod:OnDebrisFieldCreated(id, unit)
-  if mod:GetSetting("MarkerDebrisField") then
+  if mod:GetSetting("MarkDebrisField") then
     core:AddPicture("DEBRIS_FIELD_MARKER"..id, unit, "IconSprites:Icon_Windows_UI_SabotageBomb_Red", 40)
   end
 end
