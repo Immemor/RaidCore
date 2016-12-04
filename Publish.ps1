@@ -38,9 +38,9 @@ $XD = @("RaidCore", ".git")
 $XF = @("*.zip", "*.ps1", ".luacheckrc")
 
 $file = "$source\RaidCore.lua"
-$match = (Get-Content $file) | Where-Object {$_ -match "local RAIDCORE_CURRENT_VERSION = `"(\d+.\d+.\d)`""}
+$match = (Get-Content $file) | Where-Object {$_ -match "local RAIDCORE_CURRENT_VERSION = (`"[^`"]+`")"}
 
-Write-Host "Current RaidCore version is:" $matches[0]
+Write-Host "Current RaidCore version is:" $matches[1]
 $newversion = Read-Host "Please put in what version you want RaidCore to be at."
 
 $addon_date_version = $Date = Get-Date -format "yyMMddHH"
