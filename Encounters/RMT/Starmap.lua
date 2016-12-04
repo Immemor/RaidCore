@@ -195,6 +195,10 @@ function mod:OnBossEnable()
   core:AddUnitSpacer("WORLD_ENDER_SPACE", nil, 2)
 end
 
+function mod:OnBossDisable()
+  solarWindTimer:Stop()
+end
+
 function mod:StartAsteroidTimer()
   mod:AddTimerBar("NEXT_ASTEROID_TIMER", "msg.asteroid.next", TIMERS.ASTEROIDS.NORMAL, nil, nil, mod.StartSecondAsteroidTimer, mod)
 end
