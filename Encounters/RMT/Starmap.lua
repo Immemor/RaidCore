@@ -121,15 +121,18 @@ local TIMERS = {
 local PLANETS = {
   ["unit.aldinari"] = {
     INDICATOR_COLOR = "xkcdPurple",
+    ORBIT = {LOWER = 16, UPPER = 23}
   },
   ["unit.cassus"] = {
     INDICATOR_COLOR = "xkcdCyan",
+    ORBIT = {LOWER = 36, UPPER = 44}
   },
   ["unit.vulpes_nix"] = {
     INDICATOR_COLOR = "xkcdBrown",
+    ORBIT = {LOWER = 53, UPPER = 65}
   }
 }
-
+local ALPHA_CASSUS_POSITION = Vector3.New(-76.779495239258, -95, 356.81430053711)
 local ENDER_SPAWN_MARKERS = {
   [1] = Vector3.New(-159.57, -95.93, 346.34),
   [2] = Vector3.New(-149.60, -96.06, 315.52),
@@ -204,6 +207,7 @@ function mod:OnPlanetCreated(id, unit, name)
     id = id,
     unit = unit,
     indicatorColor = PLANETS[name].INDICATOR_COLOR,
+    orbitSize = PLANETS[name].ORBIT,
   }
   core:AddUnit(unit, PLANETS[name].INDICATOR_COLOR)
   if alphaCassus then
