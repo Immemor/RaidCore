@@ -99,6 +99,7 @@ mod:RegisterDefaultTimerBarConfigs({
 -- Functions.
 ----------------------------------------------------------------------------------------------------
 local next = next
+local GetTickCount = GameLib.GetTickCount
 ----------------------------------------------------------------------------------------------------
 -- Constants.
 ----------------------------------------------------------------------------------------------------
@@ -120,6 +121,10 @@ local TIMERS = {
     NORMAL = 26,
     NEXT_IS_WORLD_ENDER = 52,
   },
+  SOLAR_WIND = {
+    UPDATE = 0.1,
+    INTERVAL = 4,
+  }
 }
 
 local PLANETS = {
@@ -162,6 +167,9 @@ local CARDINAL_MARKERS = {
 ----------------------------------------------------------------------------------------------------
 local playerId
 local solarWindsStack
+local solarWindStartTick
+local solarWindTimer = ApolloTimer.Create(TIMERS.SOLAR_WIND.UPDATE, true, "OnUpdateSolarWindTimer", mod)
+solarWindTimer:Stop()
 local planets
 local alphaCassus
 local worldEnderCount
@@ -171,6 +179,7 @@ local worldEnderCount
 function mod:OnBossEnable()
   solarWindsStack = 0
   worldEnderCount = 1
+  solarWindStartTick = 0
   planets = {}
   alphaCassus = nil
   for locale, planet in next, PLANETS do
@@ -222,6 +231,7 @@ function mod:OnPlanetCreated(id, unit, name)
 end
 
 function mod:OnPlanetDestroyed(id, unit)
+  core:DropMark(id)
   planets[id] = nil
   core:RemoveLineBetweenUnits(id)
 end
@@ -306,13 +316,48 @@ function mod:OnDebrisDestroyed(id, unit)
   core:RemovePicture("DEBRIS_PICTURE_" .. id)
 end
 
-function mod:OnSolarWindsUpdated(id, _, stack)
-  if playerId == id then
-    if stack == 5 and solarWindsStack < stack then
+function mod:MarkPlanetsWithSolarWindTime(remainingTime)
+  local stringTime = string.format("%.1f", remainingTime)
+  for id, planet in next, planets do
+    core:MarkUnit(planet.unit, core.E.LOCATION_STATIC_CHEST, stringTime)
+  end
+end
+
+function mod:RemoveSolarWindPlanetMarks()
+  for id, planet in next, planets do
+    core:DropMark(planet.id)
+  end
+end
+
+function mod:OnUpdateSolarWindTimer()
+  local remainingTime = TIMERS.SOLAR_WIND.INTERVAL - ((GetTickCount() - solarWindStartTick) / 1000)
+  if remainingTime < 0 then
+    solarWindTimer:Stop()
+    mod:RemoveSolarWindPlanetMarks()
+  else
+    mod:MarkPlanetsWithSolarWindTime(remainingTime)
+  end
+end
+
+function mod:StartSolarWindTimer()
+  solarWindStartTick = GetTickCount()
+  solarWindTimer:Start()
+end
+
+function mod:OnSolarWindsAdded(id, spellId, stack, timeRemaining)
+  if playerId ~= id then return end
+  mod:StartSolarWindTimer()
+end
+
+function mod:OnSolarWindsUpdated(id, spellId, stack, timeRemaining)
+  if playerId ~= id then return end
+  if solarWindsStack < stack then
+    mod:StartSolarWindTimer()
+    if stack == 5 then
       mod:AddMsg("SOLAR_WINDS_MSG", "msg.solar_winds.high_stacks", 5, "Beware", "white")
     end
-    solarWindsStack = stack
   end
+  solarWindsStack = stack
 end
 
 function mod:DrawPlanetOrbits()
@@ -379,7 +424,7 @@ mod:RegisterUnitEvents("unit.debris",{
 )
 mod:RegisterUnitEvents(core.E.ALL_UNITS,{
     [DEBUFFS.SOLAR_WINDS] = {
-      [core.E.DEBUFF_ADD] = mod.OnSolarWindsUpdated,
+      [core.E.DEBUFF_ADD] = mod.OnSolarWindsAdded,
       [core.E.DEBUFF_UPDATE] = mod.OnSolarWindsUpdated,
     },
     [DEBUFFS.CRITICAL_MASS] = {
