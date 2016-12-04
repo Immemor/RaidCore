@@ -52,11 +52,7 @@ mod:RegisterEnglishLocale({
     ["mark.cardinal.S"] = "S",
     ["mark.cardinal.E"] = "E",
     ["mark.cardinal.W"] = "W",
-    ["mark.world_ender.1"] = "W1",
-    ["mark.world_ender.2"] = "W2",
-    ["mark.world_ender.3"] = "W3",
-    ["mark.world_ender.4"] = "W4",
-    ["mark.world_ender.5"] = "W5",
+    ["mark.world_ender.spawn_location"] = "W%d",
   }
 )
 ----------------------------------------------------------------------------------------------------
@@ -143,20 +139,20 @@ local PLANETS = {
   }
 }
 local ALPHA_CASSUS_POSITION = Vector3.New(-76.779495239258, -95, 356.81430053711)
-local ENDER_SPAWN_MARKERS = {
-  [1] = Vector3.New(-159.57, -95.93, 346.34),
-  [2] = Vector3.New(-149.60, -96.06, 315.52),
-  [3] = Vector3.New(-43.89, -95.98, 279.71),
-  [4] = Vector3.New(-157.29, -95.91, 363.64),
-  [5] = Vector3.New(-19.37, -95.79, 414.22),
-}
-
 local PHASES_CLOSE = {
   {UPPER = 76.5, LOWER = 75.5},
   {UPPER = 46.5, LOWER = 45.5},
   {UPPER = 13.5, LOWER = 12.5},
 }
 
+--From LUI-BossMods
+local ENDER_SPAWN_MARKERS = {
+  Vector3.New(-159.57, -95.93, 346.34),
+  Vector3.New(-149.60, -96.06, 315.52),
+  Vector3.New(-43.89, -95.98, 279.71),
+  Vector3.New(-157.29, -95.91, 363.64),
+  Vector3.New(-19.37, -95.79, 414.22),
+}
 local CARDINAL_MARKERS = {
   ["N"] = Vector3.New(-76.75, -96.21, 309.26),
   ["S"] = Vector3.New(-76.55, -96.21, 405.18),
@@ -180,9 +176,9 @@ local worldEnders
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-  lastWorldEnderUnit = nil
+  lastWorldEnder = nil
   solarWindsStack = 0
-  worldEnderCount = 1
+  worldEnderCount = 0
   solarWindStartTick = 0
   worldEnders = {}
   planets = {}
@@ -194,14 +190,20 @@ function mod:OnBossEnable()
   mod:StartSecondAsteroidTimer()
   mod:AddTimerBar("NEXT_WORLD_ENDER_TIMER", "msg.world_ender.next", TIMERS.WORLD_ENDER.FIRST, mod:GetSetting("CountdownWorldender"))
   mod:SetCardinalMarkers()
-  if mod:GetSetting("MarkWorldenderSpawn") then
-    mod:SetWorldMarker("WORLD_ENDER_MARKER_"..worldEnderCount, "mark.world_ender."..worldEnderCount, ENDER_SPAWN_MARKERS[worldEnderCount], "xkcdCyan")
-  end
+  mod:DrawWorldEnderMarkers()
   core:AddUnitSpacer("WORLD_ENDER_SPACE", nil, 2)
 end
 
 function mod:OnBossDisable()
   solarWindTimer:Stop()
+end
+
+function mod:DrawWorldEnderMarkers()
+  if not mod:GetSetting("MarkWorldenderSpawn") then return end
+  for i = 1, #ENDER_SPAWN_MARKERS do
+    local msg = self.L["mark.world_ender.spawn_location"]:format(i)
+    mod:SetWorldMarker("WORLD_ENDER_MARKER_"..i, msg, ENDER_SPAWN_MARKERS[i], "xkcdCyan")
+  end
 end
 
 function mod:StartAsteroidTimer()
@@ -307,6 +309,7 @@ function mod:OnAsteroidDestroyed(id, _)
 end
 
 function mod:OnWorldEnderCreated(id, unit)
+  worldEnderCount = worldEnderCount + 1
   lastWorldEnder = {
     id = id,
     unit = unit,
@@ -318,16 +321,11 @@ function mod:OnWorldEnderCreated(id, unit)
   end
   mod:AddMsg("WORLD_ENDER_SPAWN_MSG", "msg.world_ender.spawned", 5, "Beware", "xkcdCyan")
   mod:StartAsteroidTimer()
+  mod:DropWorldMarker("WORLD_ENDER_MARKER_" .. worldEnderCount)
 end
 
 function mod:OnWorldEnderDestroyed(id, unit)
   core:RemoveLineBetweenUnits("WORLD_ENDER_" .. id)
-  mod:DropWorldMarker("WORLD_ENDER_MARKER_" .. worldEnderCount)
-  worldEnderCount = worldEnderCount + 1
-
-  if mod:GetSetting("MarkWorldenderSpawn") then
-    mod:SetWorldMarker("WORLD_ENDER_MARKER_"..worldEnderCount, "mark.world_ender."..worldEnderCount, ENDER_SPAWN_MARKERS[worldEnderCount], "xkcdCyan")
-  end
   worldEnders[id] = nil
 end
 
