@@ -411,7 +411,7 @@ end
 
 function mod:OnCriticalMassRemoved(id)
   if playerId == id then
-    mod:RemoveMsg("CRITICAL_MASS_MSG")
+    core:RemoveMsg("CRITICAL_MASS_MSG")
     mod:RemovePlanetOrbits()
   end
 end
