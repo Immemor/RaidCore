@@ -174,13 +174,17 @@ solarWindTimer:Stop()
 local planets
 local alphaCassus
 local worldEnderCount
+local lastWorldEnder
+local worldEnders
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
+  lastWorldEnderUnit = nil
   solarWindsStack = 0
   worldEnderCount = 1
   solarWindStartTick = 0
+  worldEnders = {}
   planets = {}
   alphaCassus = nil
   for locale, planet in next, PLANETS do
@@ -235,10 +239,19 @@ function mod:OnPlanetCreated(id, unit, name)
   end
 end
 
-function mod:OnPlanetDestroyed(id, unit)
+function mod:RemoveWorldEnderLine(targetName)
+  for id, worldEnder in next, worldEnders do
+    if worldEnder.targetName == targetName then
+      core:RemoveLineBetweenUnits("WORLD_ENDER_" .. id)
+    end
+  end
+end
+
+function mod:OnPlanetDestroyed(id, unit, name)
   core:DropMark(id)
   planets[id] = nil
   core:RemoveLineBetweenUnits(id)
+  mod:RemoveWorldEnderLine(name)
 end
 
 function mod:DrawPlanetTankIndicator(planet)
@@ -294,6 +307,10 @@ function mod:OnAsteroidDestroyed(id, _)
 end
 
 function mod:OnWorldEnderCreated(id, unit)
+  lastWorldEnder = {
+    id = id,
+    unit = unit,
+  }
   core:AddUnit(unit, "xkcdCyan", 3)
   mod:AddTimerBar("NEXT_WORLD_ENDER_TIMER", "msg.world_ender.next", TIMERS.WORLD_ENDER.NORMAL, mod:GetSetting("CountdownWorldender"))
   if mod:GetSetting("LineWorldender") then
@@ -311,6 +328,7 @@ function mod:OnWorldEnderDestroyed(id, unit)
   if mod:GetSetting("MarkWorldenderSpawn") then
     mod:SetWorldMarker("WORLD_ENDER_MARKER_"..worldEnderCount, "mark.world_ender."..worldEnderCount, ENDER_SPAWN_MARKERS[worldEnderCount], "xkcdCyan")
   end
+  worldEnders[id] = nil
 end
 
 function mod:OnDebrisCreated(id, unit)
@@ -407,6 +425,26 @@ function mod:OnDebrisFieldDestroyed(id, unit)
   core:RemovePicture("DEBRIS_FIELD_MARKER"..id)
 end
 
+function mod:OnWorldEnderTarget(targetName)
+  lastWorldEnder.targetName = targetName
+  worldEnders[lastWorldEnder.id] = lastWorldEnder
+end
+
+function mod:OnWorldEnderTargetAldinari()
+  mod:OnWorldEnderTarget(self.L["unit.aldinari"])
+end
+
+function mod:OnWorldEnderTargetVulpesNix()
+  mod:OnWorldEnderTarget(self.L["unit.vulpes_nix"])
+end
+
+function mod:OnWorldEnderTargetCassus()
+  mod:OnWorldEnderTarget(self.L["unit.cassus"])
+end
+
+mod:RegisterDatachronEvent("chron.world_ender.aldinari", core.E.COMPARE_EQUAL, mod.OnWorldEnderTargetAldinari)
+mod:RegisterDatachronEvent("chron.world_ender.vulpes_nix", core.E.COMPARE_EQUAL, mod.OnWorldEnderTargetVulpesNix)
+mod:RegisterDatachronEvent("chron.world_ender.cassus", core.E.COMPARE_EQUAL, mod.OnWorldEnderTargetCassus)
 mod:RegisterUnitEvents("unit.alpha",{
     [core.E.UNIT_CREATED] = mod.OnAlphaCassusCreated,
     [core.E.UNIT_DESTROYED] = mod.OnAlphaCassusDestroyed,
