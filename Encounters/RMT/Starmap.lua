@@ -139,6 +139,12 @@ local PLANETS = {
     ORBIT = {LOWER = 53, UPPER = 65}
   }
 }
+local tempPlanets = PLANETS
+PLANETS = {}
+for locale, planet in next, tempPlanets do
+  PLANETS[mod.L[locale]] = planet
+end
+
 local ALPHA_CASSUS_POSITION = Vector3.New(-76.779495239258, -95, 356.81430053711)
 local PHASES_CLOSE = {
   {UPPER = 76.5, LOWER = 75.5},
@@ -184,9 +190,6 @@ function mod:OnBossEnable()
   worldEnders = {}
   planets = {}
   alphaCassus = nil
-  for locale, planet in next, PLANETS do
-    PLANETS[self.L[locale]] = planet
-  end
   playerId = GameLib.GetPlayerUnit():GetId()
   mod:StartSecondAsteroidTimer()
   mod:AddTimerBar("NEXT_WORLD_ENDER_TIMER", "msg.world_ender.next", TIMERS.WORLD_ENDER.FIRST, mod:GetSetting("CountdownWorldender"))
@@ -387,18 +390,18 @@ end
 
 function mod:DrawPlanetOrbits()
   if not mod:GetSetting("CirclePlanetOrbits") then return end
-  for id, planet in next, planets do
-    if not mod:GetSetting("CircleAldinariOrbitOnly") or planet.name == self.L["unit.aldinari"] then
-      core:AddPolygon("LOWER_ORBIT_"..id, ALPHA_CASSUS_POSITION, planet.orbitSize.LOWER, nil, 5, planet.indicatorColor, 40)
-      core:AddPolygon("UPPER_ORBIT_"..id, ALPHA_CASSUS_POSITION, planet.orbitSize.UPPER, nil, 5, planet.indicatorColor, 40)
+  for name, planet in next, PLANETS do
+    if not mod:GetSetting("CircleAldinariOrbitOnly") or name == self.L["unit.aldinari"] then
+      core:AddPolygon("LOWER_ORBIT_"..name, ALPHA_CASSUS_POSITION, planet.ORBIT.LOWER, nil, 5, planet.INDICATOR_COLOR, 40)
+      core:AddPolygon("UPPER_ORBIT_"..name, ALPHA_CASSUS_POSITION, planet.ORBIT.UPPER, nil, 5, planet.INDICATOR_COLOR, 40)
     end
   end
 end
 
 function mod:RemovePlanetOrbits()
-  for id, planet in next, planets do
-    core:RemovePolygon("LOWER_ORBIT_"..id)
-    core:RemovePolygon("UPPER_ORBIT_"..id)
+  for name, planet in next, PLANETS do
+    core:RemovePolygon("LOWER_ORBIT_"..name)
+    core:RemovePolygon("UPPER_ORBIT_"..name)
   end
 end
 
