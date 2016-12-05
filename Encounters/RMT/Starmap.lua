@@ -166,6 +166,10 @@ local CARDINAL_MARKERS = {
   ["E"] = Vector3.New(-30.00, -96.22, 357.03),
   ["W"] = Vector3.New(-124.81, -96.21, 356.96),
 }
+local CLEAVE_COLORS = {
+  [0] = "xkcdGreen",
+  [1] = "xkcdRed",
+}
 ----------------------------------------------------------------------------------------------------
 -- Locals.
 ----------------------------------------------------------------------------------------------------
@@ -179,6 +183,7 @@ local alphaCassus
 local worldEnderCount
 local lastWorldEnder
 local worldEnders
+local solarFlareCount
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
@@ -190,6 +195,7 @@ function mod:OnBossEnable()
   worldEnders = {}
   planets = {}
   alphaCassus = nil
+  solarFlareCount = 0
   playerId = GameLib.GetPlayerUnit():GetId()
   mod:StartSecondAsteroidTimer()
   mod:AddTimerBar("NEXT_WORLD_ENDER_TIMER", "msg.world_ender.next", TIMERS.WORLD_ENDER.FIRST, mod:GetSetting("CountdownWorldender"))
@@ -271,18 +277,26 @@ function mod:DrawPlanetTankIndicators()
     mod:DrawPlanetTankIndicator(planet)
   end
 end
-
 function mod:OnAlphaCassusCreated(id, unit)
   alphaCassus = {
     id = id,
     unit = unit,
   }
   core:AddUnit(unit, "xkcdOrange", 0)
-  core:WatchUnit(unit, core.E.TRACK_HEALTH)
+  core:WatchUnit(unit, core.E.TRACK_HEALTH + core.E.TRACK_CASTS)
   mod:DrawPlanetTankIndicators()
+  mod:UpdateAlphaCassusCleaveLine()
+end
+
+function mod:UpdateAlphaCassusCleaveLine()
   if mod:GetSetting("LineAlphaCassusCleave") then
-    core:AddSimpleLine(id, unit, 8, 20, nil, 10, "xkcdRed")
+    core:AddSimpleLine(alphaCassus.id, alphaCassus.unit, 8, 20, nil, 10, CLEAVE_COLORS[solarFlareCount%2])
   end
+end
+
+function mod:OnSolarFlareEnd(id)
+  solarFlareCount = solarFlareCount + 1
+  mod:UpdateAlphaCassusCleaveLine()
 end
 
 function mod:OnAlphaCassusHealthChanged(id, percent)
@@ -453,6 +467,9 @@ mod:RegisterUnitEvents("unit.alpha",{
     [core.E.UNIT_CREATED] = mod.OnAlphaCassusCreated,
     [core.E.UNIT_DESTROYED] = mod.OnAlphaCassusDestroyed,
     [core.E.HEALTH_CHANGED] = mod.OnAlphaCassusHealthChanged,
+    ["cast.alpha.flare"] = {
+      [core.E.CAST_END] = mod.OnSolarFlareEnd,
+    }
   }
 )
 mod:RegisterUnitEvents("unit.asteroid",{
