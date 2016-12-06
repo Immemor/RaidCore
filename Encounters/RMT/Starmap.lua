@@ -479,6 +479,10 @@ function mod:OnWorldEnderEnterWormhole(id)
   end
 end
 
+function mod:OnMidphaseStart()
+  solarFlareCount = 0
+end
+
 mod:RegisterDatachronEvent("chron.world_ender.aldinari", core.E.COMPARE_EQUAL, mod.OnWorldEnderTargetAldinari)
 mod:RegisterDatachronEvent("chron.world_ender.vulpes_nix", core.E.COMPARE_EQUAL, mod.OnWorldEnderTargetVulpesNix)
 mod:RegisterDatachronEvent("chron.world_ender.cassus", core.E.COMPARE_EQUAL, mod.OnWorldEnderTargetCassus)
@@ -488,6 +492,9 @@ mod:RegisterUnitEvents("unit.alpha",{
     [core.E.HEALTH_CHANGED] = mod.OnAlphaCassusHealthChanged,
     ["cast.alpha.flare"] = {
       [core.E.CAST_END] = mod.OnSolarFlareEnd,
+    },
+    ["cast.alpha.catastrophic"] = {
+      [core.E.CAST_START] = mod.OnMidphaseStart,
     }
   }
 )
