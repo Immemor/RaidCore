@@ -480,7 +480,7 @@ function mod:OnWorldEnderEnterWormhole(id)
 end
 
 function mod:OnMidphaseStart()
-  solarFlareCount = 0
+  solarFlareCount = 1
 end
 
 mod:RegisterDatachronEvent("chron.world_ender.aldinari", core.E.COMPARE_EQUAL, mod.OnWorldEnderTargetAldinari)
