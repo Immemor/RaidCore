@@ -67,7 +67,7 @@ mod:RegisterDefaultSetting("LineWorldender")
 mod:RegisterDefaultSetting("LineAsteroids")
 mod:RegisterDefaultSetting("LineAlphaCassusCleave")
 mod:RegisterDefaultSetting("CirclePlanetOrbits")
-mod:RegisterDefaultSetting("CircleAldinariOrbitOnly")
+mod:RegisterDefaultSetting("CirclePermanentPlanetOrbits", false)
 mod:RegisterDefaultSetting("MarkDebrisField")
 mod:RegisterDefaultSetting("MarkSolarWindTimer")
 mod:RegisterDefaultSetting("CrosshairCosmicDebris")
@@ -202,6 +202,9 @@ function mod:OnBossEnable()
   mod:SetCardinalMarkers()
   mod:DrawWorldEnderMarkers()
   core:AddUnitSpacer("WORLD_ENDER_SPACE", nil, 2)
+  if mod:GetSetting("CirclePermanentPlanetOrbits") then
+    mod:DrawPlanetOrbits()
+  end
 end
 
 function mod:OnBossDisable()
@@ -405,14 +408,13 @@ end
 function mod:DrawPlanetOrbits()
   if not mod:GetSetting("CirclePlanetOrbits") then return end
   for name, planet in next, PLANETS do
-    if not mod:GetSetting("CircleAldinariOrbitOnly") or name == self.L["unit.aldinari"] then
-      core:AddPolygon("LOWER_ORBIT_"..name, ALPHA_CASSUS_POSITION, planet.ORBIT.LOWER, nil, 5, planet.INDICATOR_COLOR, 40)
-      core:AddPolygon("UPPER_ORBIT_"..name, ALPHA_CASSUS_POSITION, planet.ORBIT.UPPER, nil, 5, planet.INDICATOR_COLOR, 40)
-    end
+    core:AddPolygon("LOWER_ORBIT_"..name, ALPHA_CASSUS_POSITION, planet.ORBIT.LOWER, nil, 5, planet.INDICATOR_COLOR, 40)
+    core:AddPolygon("UPPER_ORBIT_"..name, ALPHA_CASSUS_POSITION, planet.ORBIT.UPPER, nil, 5, planet.INDICATOR_COLOR, 40)
   end
 end
 
 function mod:RemovePlanetOrbits()
+  if mod:GetSetting("CirclePermanentPlanetOrbits") then return end
   for name, planet in next, PLANETS do
     core:RemovePolygon("LOWER_ORBIT_"..name)
     core:RemovePolygon("UPPER_ORBIT_"..name)
