@@ -481,6 +481,7 @@ end
 
 function mod:OnMidphaseStart()
   solarFlareCount = 0
+  mod:UpdateAlphaCassusCleaveLine()
 end
 
 mod:RegisterDatachronEvent("chron.world_ender.aldinari", core.E.COMPARE_EQUAL, mod.OnWorldEnderTargetAldinari)
