@@ -46,6 +46,7 @@ mod:RegisterEnglishLocale({
     ["msg.solar_winds.high_stacks"] = "HIGH SOLAR STACKS",
     ["msg.critical_mass.you"] = "CRITICAL MASS",
     ["msg.world_ender.spawned"] = "World Ender Spawned",
+    ["msg.world_ender.falling"] = "World Ender falling into the sun",
     ["msg.mid_phase.soon"] = "Mid phase soon",
     -- Markers.
     ["mark.cardinal.N"] = "N",
@@ -77,16 +78,19 @@ mod:RegisterDefaultSetting("SoundWorldenderSpawn")
 mod:RegisterDefaultSetting("SoundMidphaseSoon")
 mod:RegisterDefaultSetting("SoundSolarWindStacksWarning")
 mod:RegisterDefaultSetting("SoundCriticalMassYouWarning")
+mod:RegisterDefaultSetting("SoundWorldEnderFalling")
 -- Messages.
 mod:RegisterDefaultSetting("MessageWorldenderSpawn")
 mod:RegisterDefaultSetting("MessageMidphaseSoon")
 mod:RegisterDefaultSetting("MessageSolarWindStacksWarning")
 mod:RegisterDefaultSetting("MessageCriticalMassYouWarning")
+mod:RegisterDefaultSetting("MessageWorldEnderFalling")
 -- Binds.
 mod:RegisterMessageSetting("WORLD_ENDER_SPAWN_MSG", core.E.COMPARE_EQUAL, "MessageWorldenderSpawn", "SoundWorldenderSpawn")
 mod:RegisterMessageSetting("MID_PHASE", core.E.COMPARE_EQUAL, "MessageMidphaseSoon", "SoundMidphaseSoon")
 mod:RegisterMessageSetting("SOLAR_WINDS_MSG", core.E.COMPARE_EQUAL, "MessageSolarWindStacksWarning", "SoundSolarWindStacksWarning")
 mod:RegisterMessageSetting("CRITICAL_MASS_MSG", core.E.COMPARE_EQUAL, "MessageCriticalMassYouWarning", "SoundCriticalMassYouWarning")
+mod:RegisterMessageSetting("WORLD_ENDER_FALLING", core.E.COMPARE_EQUAL, "MessageWorldEnderFalling", "SoundWorldEnderFalling")
 
 mod:RegisterDefaultTimerBarConfigs({
     ["NEXT_WORLD_ENDER_TIMER"] = { sColor = "xkcdCyan" },
@@ -108,6 +112,10 @@ local DEBUFFS = {
   PULSAR = 87542,
   BURNING_ATMOSPHERE = 84301,
   CRITICAL_MASS = 84345,
+}
+
+local BUFFS = {
+  WORMHOLE = 84343,
 }
 
 local TIMERS = {
@@ -254,10 +262,11 @@ function mod:OnPlanetCreated(id, unit, name)
   end
 end
 
-function mod:RemoveWorldEnderLine(targetName)
+function mod:OnWorldEnderTargetDestroyed(targetName)
   for id, worldEnder in next, worldEnders do
     if worldEnder.targetName == targetName then
       core:RemoveLineBetweenUnits("WORLD_ENDER_" .. id)
+      worldEnder.targetDestroyed = true
     end
   end
 end
@@ -266,7 +275,7 @@ function mod:OnPlanetDestroyed(id, unit, name)
   core:DropMark(id)
   planets[id] = nil
   core:RemoveLineBetweenUnits(id)
-  mod:RemoveWorldEnderLine(name)
+  mod:OnWorldEnderTargetDestroyed(name)
 end
 
 function mod:DrawPlanetTankIndicator(planet)
@@ -336,6 +345,7 @@ function mod:OnWorldEnderCreated(id, unit)
     unit = unit,
   }
   core:AddUnit(unit, "xkcdCyan", 3)
+  core:WatchUnit(unit, core.E.TRACK_BUFFS)
   mod:AddTimerBar("NEXT_WORLD_ENDER_TIMER", "msg.world_ender.next", TIMERS.WORLD_ENDER.NORMAL, mod:GetSetting("CountdownWorldender"))
   if mod:GetSetting("LineWorldender") then
     core:AddLineBetweenUnits("WORLD_ENDER_" .. id, playerId, id, 6, "xkcdCyan")
@@ -462,6 +472,12 @@ function mod:OnWorldEnderTargetCassus()
   mod:OnWorldEnderTarget(self.L["unit.cassus"])
 end
 
+function mod:OnWorldEnderEnterWormhole(id)
+  if worldEnders[id].targetDestroyed then
+    mod:AddMsg("WORLD_ENDER_FALLING", "msg.world_ender.falling", 5, "Beware", "xkcdOrange")
+  end
+end
+
 mod:RegisterDatachronEvent("chron.world_ender.aldinari", core.E.COMPARE_EQUAL, mod.OnWorldEnderTargetAldinari)
 mod:RegisterDatachronEvent("chron.world_ender.vulpes_nix", core.E.COMPARE_EQUAL, mod.OnWorldEnderTargetVulpesNix)
 mod:RegisterDatachronEvent("chron.world_ender.cassus", core.E.COMPARE_EQUAL, mod.OnWorldEnderTargetCassus)
@@ -482,6 +498,9 @@ mod:RegisterUnitEvents("unit.asteroid",{
 mod:RegisterUnitEvents("unit.world_ender",{
     [core.E.UNIT_CREATED] = mod.OnWorldEnderCreated,
     [core.E.UNIT_DESTROYED] = mod.OnWorldEnderDestroyed,
+    [BUFFS.WORMHOLE] = {
+      [core.E.BUFF_ADD] = mod.OnWorldEnderEnterWormhole,
+    }
   }
 )
 mod:RegisterUnitEvents("unit.debris",{
