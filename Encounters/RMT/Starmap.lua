@@ -35,6 +35,7 @@ mod:RegisterEnglishLocale({
     ["unit.world_ender"] = "World Ender",
     -- Cast names.
     ["cast.alpha.flare"] = "Solar Flare",
+    ["cast.alpha.catastrophic"] = "Catastrophic Solar Event",
     -- Datachron.
     ["chron.world_ender.aldinari"] = "A World Ender is heading to the Aldinari's orbit.",
     ["chron.world_ender.vulpes_nix"] = "A World Ender is heading to the Vulpes Nix's orbit.",
