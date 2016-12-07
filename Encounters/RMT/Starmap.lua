@@ -33,9 +33,17 @@ mod:RegisterEnglishLocale({
     ["unit.debris_field"] = "Debris Field",
     ["unit.pulsar"] = "Pulsar",
     ["unit.world_ender"] = "World Ender",
+    ["unit.wormhole"] = "Wormhole",
     -- Cast names.
     ["cast.alpha.flare"] = "Solar Flare",
     ["cast.alpha.catastrophic"] = "Catastrophic Solar Event",
+    -- Buffs.
+    ["buff.alpha.wind"] = "Solar Winds",
+    ["buff.alpha.irradiated"] = "Irradiated Armor",
+    ["buff.debris.mass.accumulating"] = "Accumulating Mass",
+    ["buff.debris.mass.critical"] = "Critical Mass",
+    ["buff.wormhole.wormhole"] = "Wormhole",
+    ["buff.pulsar.pulsar"] = "Pulsar",
     -- Datachron.
     ["chron.world_ender.aldinari"] = "A World Ender is heading to the Aldinari's orbit.",
     ["chron.world_ender.vulpes_nix"] = "A World Ender is heading to the Vulpes Nix's orbit.",
@@ -55,6 +63,21 @@ mod:RegisterEnglishLocale({
     ["mark.cardinal.E"] = "E",
     ["mark.cardinal.W"] = "W",
     ["mark.world_ender.spawn_location"] = "W%d",
+  }
+)
+mod:RegisterFrenchLocale({
+    -- Unit names.
+    ["unit.asteroid"] = "Astéroïde menaçant",
+    ["unit.debris_field"] = "Champ de débris",
+    -- Cast names.
+    ["cast.alpha.catastrophic"] = "Événement solaire catastrophique",
+    -- Buffs.
+    ["buff.alpha.wind"] = "Vents solaires",
+    ["buff.alpha.irradiated"] = "Armure irradiée",
+    -- Datachron.
+    ["chron.world_ender.aldinari"] = "A World Ender is heading to the d'Aldinari orbit.",
+    ["chron.world_ender.vulpes_nix"] = "A World Ender is heading to the de Vulpes Nix orbit.",
+    ["chron.world_ender.cassus"] = "A World Ender is heading to the de Cassus orbit.",
   }
 )
 ----------------------------------------------------------------------------------------------------
