@@ -367,7 +367,9 @@ function mod:OnWorldEnderCreated(id, unit)
   lastWorldEnder = {
     id = id,
     unit = unit,
+    targetName = self.L["unit.alpha"],
   }
+  worldEnders[id] = lastWorldEnder
   core:AddUnit(unit, "xkcdCyan", 3)
   core:WatchUnit(unit, core.E.TRACK_BUFFS)
   mod:AddTimerBar("NEXT_WORLD_ENDER_TIMER", "msg.world_ender.next", TIMERS.WORLD_ENDER.NORMAL, mod:GetSetting("CountdownWorldender"))
@@ -480,8 +482,7 @@ function mod:OnDebrisFieldDestroyed(id, unit)
 end
 
 function mod:OnWorldEnderTarget(targetName)
-  lastWorldEnder.targetName = targetName
-  worldEnders[lastWorldEnder.id] = lastWorldEnder
+  worldEnders[lastWorldEnder.id].targetName = targetName
 end
 
 function mod:OnWorldEnderTargetAldinari()
