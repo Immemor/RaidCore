@@ -120,7 +120,7 @@ function mod:StartBombTimer(time)
   mod:AddTimerBar("NEXT_BOMB_TIMER", "msg.bomb.next", time)
 end
 
-function mod:AddUnit(id, unit, name)
+function mod:OnBarUnitCreated(id, unit, name)
   core:AddUnit(unit)
 end
 
@@ -168,6 +168,6 @@ mod:RegisterUnitEvents("unit.warhead.flashbang",{
 )
 mod:RegisterUnitEvent("unit.warhead.radioactive", core.E.HEALTH_CHANGED, mod.OnRadioactiveHealthChanged)
 mod:RegisterUnitEvents({"unit.dud'li", "unit.warhead.radioactive", "unit.warhead.flashbang"},{
-    [core.E.UNIT_CREATED] = mod.AddUnit,
+    [core.E.UNIT_CREATED] = mod.OnBarUnitCreated,
   }
 )
