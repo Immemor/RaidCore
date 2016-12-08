@@ -131,10 +131,14 @@ function EncounterPrototype:GetSettingsForKey(sKey)
   return {}
 end
 
-function EncounterPrototype:AddUnit(tUnit)
+function EncounterPrototype:AddUnit(tUnit, barColor, nPriority, tMarkers)
   Assert:Userdata(tUnit, "Not a unit: %s, %s", self.name, tostring(tUnit))
   local tUnitBarConfig = self.tUnitBarConfig[tUnit:GetName()] or {}
-  RaidCore:AddUnit(tUnit, tUnitBarConfig.barColor, tUnitBarConfig.nPriority, tUnitBarConfig.tMidphases)
+  RaidCore:AddUnit(tUnit,
+    tUnitBarConfig.barColor or barColor,
+    tUnitBarConfig.nPriority or nPriority,
+    tUnitBarConfig.tMidphases or tMarkers
+  )
 end
 
 -- Set default settings for a unit bar
