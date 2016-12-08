@@ -148,7 +148,7 @@ function EncounterPrototype:RegisterUnitBarConfig(sUnitName, tUnitBarConfig)
   Assert:String(sUnitName, "Unit name not a string: %s, %s", self.name, tostring(sUnitName))
   Assert:Table(tUnitBarConfig, "Unit config not a table: %s, %s", self.name, tostring(tUnitBarConfig))
   sUnitName = self.L[sUnitName]
-  self.tUnitBarConfig[sUnitName] = DeepInit(self.tUnitBarConfig, sUnitName)
+  self.tUnitBarConfig = DeepInit(self.tUnitBarConfig, sUnitName)
   self.tUnitBarConfig[sUnitName].barColor = tUnitBarConfig.barColor
   self.tUnitBarConfig[sUnitName].nPriority = tUnitBarConfig.nPriority
 
@@ -187,7 +187,7 @@ function EncounterPrototype:RegisterMidphase(sUnitName, tMidphase)
   tMidphase.opacity = tMidphase.opacity or 1
 
   sUnitName = self.L[sUnitName]
-  self.tUnitBarConfig[sUnitName].tMidphases = DeepInit(self.tUnitBarConfig, sUnitName, "tMidphases")
+  self.tUnitBarConfig = DeepInit(self.tUnitBarConfig, sUnitName, "tMidphases")
   table.insert(self.tUnitBarConfig[sUnitName].tMidphases, tMidphase)
 end
 
