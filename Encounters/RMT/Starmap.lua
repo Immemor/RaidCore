@@ -121,6 +121,21 @@ mod:RegisterDefaultTimerBarConfigs({
     ["NEXT_ASTEROID_TIMER"] = { sColor = "xkcdOrange" },
   }
 )
+mod:RegisterUnitBarConfig("unit.alpha", {
+    barColor = "xkcdOrange",
+    nPriority = 0,
+    tMidphases = {
+      {percent = 75},
+      {percent = 45},
+      {percent = 12},
+    }
+  }
+)
+mod:RegisterUnitBarConfig("unit.world_ender", {
+    barColor = "xkcdCyan",
+    nPriority = 3,
+  }
+)
 ----------------------------------------------------------------------------------------------------
 -- Functions.
 ----------------------------------------------------------------------------------------------------
@@ -280,7 +295,7 @@ function mod:OnPlanetCreated(id, unit, name)
     indicatorColor = PLANETS[name].INDICATOR_COLOR,
     orbitSize = PLANETS[name].ORBIT,
   }
-  core:AddUnit(unit, PLANETS[name].INDICATOR_COLOR, 1)
+  mod:AddUnit(unit, PLANETS[name].INDICATOR_COLOR, 1)
   if alphaCassus then
     mod:DrawPlanetTankIndicator(planets[id])
   end
@@ -318,7 +333,7 @@ function mod:OnAlphaCassusCreated(id, unit)
     id = id,
     unit = unit,
   }
-  core:AddUnit(unit, "xkcdOrange", 0)
+  mod:AddUnit(unit)
   core:WatchUnit(unit, core.E.TRACK_HEALTH + core.E.TRACK_CASTS)
   mod:DrawPlanetTankIndicators()
   mod:UpdateAlphaCassusCleaveLine()
@@ -370,7 +385,7 @@ function mod:OnWorldEnderCreated(id, unit)
     targetName = self.L["unit.alpha"],
   }
   worldEnders[id] = lastWorldEnder
-  core:AddUnit(unit, "xkcdCyan", 3)
+  mod:AddUnit(unit)
   core:WatchUnit(unit, core.E.TRACK_BUFFS)
   mod:AddTimerBar("NEXT_WORLD_ENDER_TIMER", "msg.world_ender.next", TIMERS.WORLD_ENDER.NORMAL, mod:GetSetting("CountdownWorldender"))
   if mod:GetSetting("LineWorldender") then
