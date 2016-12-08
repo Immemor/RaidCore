@@ -157,6 +157,19 @@ function EncounterPrototype:RegisterUnitBarConfig(sUnitName, tUnitBarConfig)
   end
 end
 
+function EncounterPrototype:IsMidphaseClose(sUnitName, nPercent)
+  local tUnitBarConfig = self.tUnitBarConfig[self.L[sUnitName]] or {}
+  if tUnitBarConfig.tMidphases then
+    for i = 1, #tUnitBarConfig.tMidphases do
+      local tMidphase = tUnitBarConfig.tMidphases[i]
+      if nPercent >= tMidphase.lower and nPercent <= tMidphase.upper then
+        return true
+      end
+    end
+  end
+  return false
+end
+
 -- Set midphases for a unit
 -- @param sUnitName Name of the unit
 -- @param tMidphases Table containing midphases.
@@ -185,6 +198,9 @@ function EncounterPrototype:RegisterMidphase(sUnitName, tMidphase)
   end
   tMidphase.color = tMidphase.color or "xkcdRed"
   tMidphase.opacity = tMidphase.opacity or 1
+  --TODO add these thresholds to some variable for adjustable calls?
+  tMidphase.lower = tMidphase.percent + 1 - 0.05
+  tMidphase.upper = tMidphase.percent + 1 + 0.05
 
   sUnitName = self.L[sUnitName]
   self.tUnitBarConfig = DeepInit(self.tUnitBarConfig, sUnitName, "tMidphases")
