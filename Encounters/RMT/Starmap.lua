@@ -350,12 +350,9 @@ function mod:OnSolarFlareEnd(id)
   mod:UpdateAlphaCassusCleaveLine()
 end
 
-function mod:OnAlphaCassusHealthChanged(id, percent)
-  for i = 1, #PHASES_CLOSE do
-    if percent >= PHASES_CLOSE[i].LOWER and percent <= PHASES_CLOSE[i].UPPER then
-      mod:AddMsg("MID_PHASE", "msg.mid_phase.soon", 5, "Info", "xkcdWhite")
-      break
-    end
+function mod:OnAlphaCassusHealthChanged(id, percent, name)
+  if mod:IsMidphaseClose(name, percent) then
+    mod:AddMsg("MID_PHASE", "msg.mid_phase.soon", 5, "Info", "xkcdWhite")
   end
 end
 
