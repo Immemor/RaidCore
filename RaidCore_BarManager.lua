@@ -426,7 +426,7 @@ end
 ----------------------------------------------------------------------------------------------------
 local UnitManager = NewManager("Health")
 
-function UnitManager:AddBar(nId, sColor)
+function UnitManager:AddBar(nId, sColor, nPriority)
   assert(GetUnitById(nId))
   if (self.tBars[nId] and self.tBars[nId].isSpacer) or not self.tBars[nId] then
     local sMark = RaidCore.mark[nId] and RaidCore.mark[nId].number
@@ -470,7 +470,7 @@ function UnitManager:AddBar(nId, sColor)
         wndArmor = wndArmor,
         wndArmorValue = wndArmor:FindChild("Value"),
       }
-      wndMain:SetData(GetGameTime())
+      wndMain:SetData(nPriority or GetGameTime())
       wndMain:SetAnchorOffsets(0, 0, 0, self.tSettings.nBarHeight)
       self:UpdateBar(self.tBars[nId])
       ArrangeBar(self)
@@ -599,7 +599,7 @@ function UnitManager:OnTimerUpdate()
   end
 end
 
-function UnitManager:AddSpacer(key, nHeight)
+function UnitManager:AddSpacer(key, nHeight, nPriority)
   assert(key)
   if nHeight == nil then
     nHeight = self.tSettings.nBarHeight
@@ -613,7 +613,7 @@ function UnitManager:AddSpacer(key, nHeight)
     -- Create a new bar.
     wndMain = Apollo.LoadForm(RaidCore.xmlDoc, "BarSpacerTemplate", self.wndParent, self)
   end
-  wndMain:SetData(GetGameTime())
+  wndMain:SetData(nPriority or GetGameTime())
   wndMain:SetAnchorOffsets(0, 0, 0, nHeight)
 
   self.tBars[key] = {
@@ -806,14 +806,14 @@ function RaidCore:RemoveProgressBar(sKey)
   ProgressManager:RemoveBar(sKey)
 end
 
-function RaidCore:AddUnit(tUnit, sColor)
+function RaidCore:AddUnit(tUnit, sColor, nPriority)
   assert(type(tUnit) == "userdata")
   local nId = tUnit:GetId()
-  UnitManager:AddBar(nId, sColor)
+  UnitManager:AddBar(nId, sColor, nPriority)
 end
 
-function RaidCore:AddUnitSpacer(key, nHeight)
-  UnitManager:AddSpacer(key, nHeight)
+function RaidCore:AddUnitSpacer(key, nHeight, nPriority)
+  UnitManager:AddSpacer(key, nHeight, nPriority)
 end
 
 function RaidCore:RemoveUnit(nId)

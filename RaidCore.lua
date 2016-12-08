@@ -95,6 +95,7 @@ RaidCore.E = {
   CHANNEL_COMM_STATUS = "ChannelCommStatus",
   SEND_MESSAGE = "SendMessage",
   SEND_MESSAGE_RESULT = "SendMessageResult",
+  SPAWN_LOCATION = "SpawnLocation",
   -- Carbine Events.
   EVENT_COMBAT_LOG_HEAL = "CombatLogHeal",
   EVENT_UNIT_ENTERED_COMBAT = "UnitEnteredCombat",
@@ -410,6 +411,7 @@ function RaidCore:OnInitialize()
       bSoundEnabled = true,
       bAcceptSummons = true,
       bLUAErrorMessage = false,
+      bLogSpawnLocations = false,
       bReadyCheckOnBreakTimeout = true,
       sReadyCheckMessage = self.L["Raid Resume"],
       bEnableTestEncounters = false,
@@ -680,15 +682,18 @@ function RaidCore:ResetWorldMarkers()
   end
 end
 
-function RaidCore:CreateWorldMarker(key, sText, tPosition)
+function RaidCore:CreateWorldMarker(key, sText, tPosition, color)
   local markFrame = Apollo.LoadForm(self.xmlDoc, "MarkFrame", "InWorldHudStratum", self)
   markFrame:SetWorldLocation(tPosition)
   markFrame:FindChild("Name"):SetText(sText)
-  self.worldmarker[key] = markFrame
+  if color then
+    markFrame:FindChild("Name"):SetTextColor(color)
+  end
   self:MarkerVisibilityHandler(markFrame)
+  self.worldmarker[key] = markFrame
 end
 
-function RaidCore:UpdateWorldMarker(key, sText, tPosition)
+function RaidCore:UpdateWorldMarker(key, sText, tPosition, color)
   if sText then
     local wndText = self.worldmarker[key]:FindChild("Name")
     if wndText:GetText() ~= sText then
@@ -699,6 +704,11 @@ function RaidCore:UpdateWorldMarker(key, sText, tPosition)
   if tPosition then
     self.worldmarker[key]:SetWorldLocation(tPosition)
   end
+
+  if color then
+    local wndText = self.worldmarker[key]:FindChild("Name")
+    wndText:SetTextColor(color)
+  end
 end
 
 function RaidCore:DropWorldMarker(key)
@@ -708,14 +718,14 @@ function RaidCore:DropWorldMarker(key)
   end
 end
 
-function RaidCore:SetWorldMarker(key, sText, tPosition)
+function RaidCore:SetWorldMarker(key, sText, tPosition, sColor)
   assert(key)
   local sLocalizedTest = self.L[sText]
   local tWorldMarker = self.worldmarker[key]
   if not tWorldMarker and sText and tPosition then
-    self:CreateWorldMarker(key, sLocalizedTest, tPosition)
+    self:CreateWorldMarker(key, sLocalizedTest, tPosition, sColor)
   elseif tWorldMarker and (sText or tPosition) then
-    self:UpdateWorldMarker(key, sLocalizedTest, tPosition)
+    self:UpdateWorldMarker(key, sLocalizedTest, tPosition, sColor)
   elseif tWorldMarker and not sLocalizedTest and not tPosition then
     self:DropWorldMarker(key)
   end

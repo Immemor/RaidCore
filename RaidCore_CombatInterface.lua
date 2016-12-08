@@ -159,6 +159,9 @@ local function ExtraLog2Text(k, nRefTime, tParam)
   elseif k == RaidCore.E.CURRENT_ZONE_MAP then
     local sFormat = "ContinentId=%u ZoneId=%u Id=%u"
     sResult = sFormat:format(tParam[1], tParam[2], tParam[3])
+  elseif k == RaidCore.E.SPAWN_LOCATION then
+    local sFormat = "Id=%u sName=\"%s\" x=%f y=%f z=%f"
+    sResult = sFormat:format(tParam[1], tParam[2], tParam[3], tParam[4], tParam[5])
   end
   return sResult
 end
@@ -167,6 +170,12 @@ Log:SetExtra2String(ExtraLog2Text)
 ----------------------------------------------------------------------------------------------------
 -- Privates functions: unit processing
 ----------------------------------------------------------------------------------------------------
+local function LogUnitSpawnLocation(nId, sName, tPosition)
+  if RaidCore.db.profile.bLogSpawnLocations then
+    Log:Add(RaidCore.E.SPAWN_LOCATION, nId, sName, tPosition.x, tPosition.y, tPosition.z)
+  end
+end
+
 local function GetBuffs(tUnit)
   local r = {}
   if not tUnit then
@@ -313,6 +322,7 @@ end
 function RaidCore:IsUnitInGroup(tUnit)
   return tUnit:IsInYourGroup() or tUnit:IsThePlayer()
 end
+
 ----------------------------------------------------------------------------------------------------
 -- Privates functions: State Machine
 ----------------------------------------------------------------------------------------------------
@@ -554,6 +564,7 @@ function RaidCore:CI_OnUnitCreated(tUnit)
     if not bIsPetPlayer and not _tAllUnits[nId] then
       _tAllUnits[nId] = true
       ManagerCall(RaidCore.E.UNIT_CREATED, nId, tUnit, sName)
+      LogUnitSpawnLocation(nId, sName, tUnit:GetPosition())
     end
   end
 end

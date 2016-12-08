@@ -309,11 +309,19 @@ function LineBetween:UpdateDraw(tDraw)
   else
     tVectorTo = tDraw.tVectorTo
   end
-
+  if tDraw.nOffset > 0 or tDraw.nLength > 0 and tVectorTo and tVectorFrom then
+    local tNormal = (tVectorTo - tVectorFrom):Normal()
+    local tVectorA = tNormal * (tDraw.nOffset)
+    if tDraw.nLength > 0 then
+      local tVectorB = tNormal * (tDraw.nLength + tDraw.nOffset)
+      tVectorTo = tVectorFrom + tVectorB
+    end
+    tVectorFrom = tVectorFrom + tVectorA
+  end
   UpdateLine(tDraw, tVectorFrom, tVectorTo)
 end
 
-function LineBetween:AddDraw(Key, FromOrigin, ToOrigin, nWidth, sColor, nNumberOfDot)
+function LineBetween:AddDraw(Key, FromOrigin, ToOrigin, nWidth, sColor, nNumberOfDot, nOffset, nLength)
   if self.tDraws[Key] then
     -- To complex to manage new definition with nNumberOfDot which change,
     -- simplest to remove previous.
@@ -330,6 +338,8 @@ function LineBetween:AddDraw(Key, FromOrigin, ToOrigin, nWidth, sColor, nNumberO
   tDraw.sColor = sColor or tDraw.sColor
   tDraw.nNumberOfDot = nNumberOfDot or DOT_IS_A_LINE
   tDraw.nPixieIdDot = tDraw.nPixieIdDot or {}
+  tDraw.nOffset = nOffset or 0
+  tDraw.nLength = nLength or 0
   -- Preprocessing of the 'From'.
   if type(FromOrigin) == "number" then
     -- FromOrigin is the Id of an unit.
