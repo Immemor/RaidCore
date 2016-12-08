@@ -28,6 +28,18 @@ mod:RegisterEnglishLocale({
     ["cast.octog.supernova"] = "Supernova",
     ["cast.octog.hookshot"] = "Hookshot",
     ["cast.octog.flamethrower"] = "Flamethrower",
+    ["cast.octog.squirgling"] = "Summon Squirglings",
+    -- Buffs.
+    ["buff.pool.ink"] = "Noxious Ink",
+    ["buff.squirgling.smasher"] = "Squirgling Smasher",
+    ["buff.octog.rend"] = "Rend",
+    ["buff.octog.flamethrower"] = "Space Fire",
+    ["buff.octog.shield"] = "Astral Shield",
+    ["buff.octog.orb.channel"] = "Chaos Orbs",
+    ["buff.octog.orb.amplifier"] = "Chaos Amplifier",
+    ["buff.orb.target"] = "Chaos Orb",
+    ["buff.orb.tether"] = "Chaos Tether",
+    ["buff.orb.energies"] = "Chaotic Energies",
     -- Messages.
     ["msg.octog.hookshot.next"] = "Next hookshot in",
     ["msg.octog.flamethrower.next"] = "Next flamethrower in",
@@ -47,10 +59,9 @@ mod:RegisterFrenchLocale({
     -- NPC says.
     ["say.octog.orb"] = "Reste là ! Le festin va bientôt commencer !",
     ["say.octog.supernova"] = "Bientôt, tu pourras plus rien faire... et moi, j'aurai plus faim !",
-    -- Cast names.
-    ["cast.octog.supernova"] = "Supernova",
-    ["cast.octog.hookshot"] = "Hookshot",
-    ["cast.octog.flamethrower"] = "Flamethrower",
+    -- Buffs.
+    ["buff.orb.energies"] = "Énergies chaotiques",
+    ["buff.octog.flamethrower"] = "Feu spatial",
   }
 )
 ----------------------------------------------------------------------------------------------------
