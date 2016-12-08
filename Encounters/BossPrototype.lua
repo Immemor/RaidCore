@@ -134,18 +134,19 @@ end
 function EncounterPrototype:AddUnit(tUnit)
   Assert:Userdata(tUnit, "Not a unit: %s, %s", self.name, tostring(tUnit))
   local tUnitBarConfig = self.tUnitBarConfig[tUnit:GetName()] or {}
-  RaidCore:AddUnit(tUnit, tUnitBarConfig.barColor, nil, tUnitBarConfig.tMidphases)
+  RaidCore:AddUnit(tUnit, tUnitBarConfig.barColor, tUnitBarConfig.nPriority, tUnitBarConfig.tMidphases)
 end
 
 -- Set default settings for a unit bar
 -- @param sUnitName Name of the unit
--- @param tUnitBarConfig Table of configs containing: barColor, table of midphases
+-- @param tUnitBarConfig Table of configs containing: barColor, nPriority, table of midphases
 function EncounterPrototype:RegisterUnitBarConfig(sUnitName, tUnitBarConfig)
   Assert:String(sUnitName, "Unit name not a string: %s, %s", self.name, tostring(sUnitName))
   Assert:Table(tUnitBarConfig, "Unit config not a table: %s, %s", self.name, tostring(tUnitBarConfig))
   sUnitName = self.L[sUnitName]
   self.tUnitBarConfig[sUnitName] = DeepInit(self.tUnitBarConfig, sUnitName)
   self.tUnitBarConfig[sUnitName].barColor = tUnitBarConfig.barColor
+  self.tUnitBarConfig[sUnitName].nPriority = tUnitBarConfig.nPriority
 
   if tUnitBarConfig.tMidphases then
     self:RegisterMidphases(sUnitName, tUnitBarConfig.tMidphases)
