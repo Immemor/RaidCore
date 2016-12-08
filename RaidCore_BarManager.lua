@@ -118,6 +118,15 @@ local function ArrangeBar(tManager)
   tManager.wndParent:ArrangeChildrenVert(nSort, fSort)
 end
 
+local function BuildProgressbarMarker(tMarker, parent, context)
+  local wndMarker = Apollo.LoadForm(RaidCore.xmlDoc, "ProgressbarMarkerTemplate", parent, context)
+  wndMarker:SetBGColor(tMarker.color)
+  wndMarker:SetBGOpacity(tMarker.opacity)
+  local left = tMarker.startPercent / 100
+  local right = tMarker.endPercent / 100
+  wndMarker:SetAnchorPoints(left , 0, right, 1)
+end
+
 local function Number2ShortString(val)
   local r
   if val < 1000 then
@@ -426,7 +435,7 @@ end
 ----------------------------------------------------------------------------------------------------
 local UnitManager = NewManager("Health")
 
-function UnitManager:AddBar(nId, sColor, nPriority)
+function UnitManager:AddBar(nId, sColor, nPriority, tMarkers)
   assert(GetUnitById(nId))
   if (self.tBars[nId] and self.tBars[nId].isSpacer) or not self.tBars[nId] then
     local sMark = RaidCore.mark[nId] and RaidCore.mark[nId].number
@@ -439,6 +448,12 @@ function UnitManager:AddBar(nId, sColor, nPriority)
       local wndAbsorb = wndBody:FindChild("Absorb")
       local wndMark = wndMain:FindChild("Mark")
       local wndArmor = wndMain:FindChild("Armor")
+      if tMarkers then
+        local wndMarkerContainer = wndUnit:FindChild("MarkerContainer")
+        for i = 1, #tMarkers do
+          BuildProgressbarMarker(tMarkers[i], wndMarkerContainer, self)
+        end
+      end
       self.tBars[nId] = {
         nId = nId,
         sMark = sMark,
@@ -806,10 +821,10 @@ function RaidCore:RemoveProgressBar(sKey)
   ProgressManager:RemoveBar(sKey)
 end
 
-function RaidCore:AddUnit(tUnit, sColor, nPriority)
+function RaidCore:AddUnit(tUnit, sColor, nPriority, tMarkers)
   assert(type(tUnit) == "userdata")
   local nId = tUnit:GetId()
-  UnitManager:AddBar(nId, sColor, nPriority)
+  UnitManager:AddBar(nId, sColor, nPriority, tMarkers)
 end
 
 function RaidCore:AddUnitSpacer(key, nHeight, nPriority)
