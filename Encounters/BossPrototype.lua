@@ -187,7 +187,7 @@ function EncounterPrototype:RegisterMidphase(sUnitName, tMidphase)
   tMidphase.opacity = tMidphase.opacity or 1
 
   sUnitName = self.L[sUnitName]
-  self.tUnitBarConfig[sUnitName] = DeepInit(self.tUnitBarConfig, sUnitName, "tMidphases")
+  self.tUnitBarConfig[sUnitName].tMidphases = DeepInit(self.tUnitBarConfig, sUnitName, "tMidphases")
   table.insert(self.tUnitBarConfig[sUnitName].tMidphases, tMidphase)
 end
 
