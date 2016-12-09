@@ -403,7 +403,7 @@ function mod:RemoveCleaveLines()
   core:RemoveSimpleLine("CLEAVE_BACK_LEFT2")
 end
 
-mod.RegisterUnitEvents({
+mod:RegisterUnitEvents({
     "unit.mordechai",
     "unit.anchor",
     "unit.orb",
