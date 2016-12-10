@@ -14,10 +14,10 @@ if not mod then return end
 ----------------------------------------------------------------------------------------------------
 -- Registering combat.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterTrigMob(core.E.TRIGGER_ANY, { "Gloomclaw" })
+mod:RegisterTrigMob(core.E.TRIGGER_ANY, { "unit.gloomclaw" })
 mod:RegisterEnglishLocale({
     -- Unit names.
-    ["Gloomclaw"] = "Gloomclaw",
+    ["unit.gloomclaw"] = "Gloomclaw",
     ["Corrupted Ravager"] = "Corrupted Ravager",
     ["Empowered Ravager"] = "Empowered Ravager",
     ["Strain Parasite"] = "Strain Parasite",
@@ -49,7 +49,7 @@ mod:RegisterEnglishLocale({
   })
 mod:RegisterFrenchLocale({
     -- Unit names.
-    ["Gloomclaw"] = "Serrenox",
+    ["unit.gloomclaw"] = "Serrenox",
     ["Corrupted Ravager"] = "Ravageur corrompu",
     ["Empowered Ravager"] = "Ravageur renforcé",
     ["Strain Parasite"] = "Parasite de la Souillure",
@@ -81,7 +81,7 @@ mod:RegisterFrenchLocale({
   })
 mod:RegisterGermanLocale({
     -- Unit names.
-    ["Gloomclaw"] = "Düsterklaue",
+    ["unit.gloomclaw"] = "Düsterklaue",
     ["Corrupted Ravager"] = "Korrumpierter Verwüster",
     ["Strain Parasite"] = "Transmutierten-Parasit",
     ["Gloomclaw Skurge"] = "Düsterklauen-Geißel",
@@ -110,7 +110,8 @@ mod:RegisterDefaultTimerBarConfigs({
     ["WAVE"] = { sColor = "xkcdBrightOrange" },
     ["CORRUPTION"] = { sColor = "xkcdBrown" },
     ["MOO"] = { sColor = "xkcdBurntYellow" },
-  })
+  }
+)
 
 ----------------------------------------------------------------------------------------------------
 -- Constants.
@@ -175,14 +176,14 @@ end
 function mod:OnUnitCreated(nId, tUnit, sName)
   if sName == self.L["Corrupted Ravager"] or sName == self.L["Empowered Ravager"] then
     core:WatchUnit(tUnit, core.E.TRACK_CASTS)
-  elseif sName == self.L["Gloomclaw"] then
+  elseif sName == self.L["unit.gloomclaw"] then
     core:AddUnit(tUnit)
     core:WatchUnit(tUnit, core.E.TRACK_CASTS)
   end
 end
 
 function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
-  if sName == self.L["Gloomclaw"] and sCastName == self.L["Rupture"] then
+  if sName == self.L["unit.gloomclaw"] and sCastName == self.L["Rupture"] then
     ruptCount = ruptCount + 1
     mod:AddMsg("RUPTURE", self.L["INTERRUPT %s"]:format(sName:upper()), 5, mod:GetSetting("SoundRuptureInterrupt") and "Destruction")
     if ruptCount == 1 then
