@@ -17,44 +17,44 @@
 -- In "Green" phase, there are 24 pillars. An number will be add between two pillars.
 -- So 12 numbers will be displayed like this:
 --
---        9
---     A     8
---   B         7
---  .     +     6
---   1         5
---     2     4
---        3
+-- 9
+-- A 8
+-- B 7
+-- . + 6
+-- 1 5
+-- 2 4
+-- 3
 --
 -- The center is { x = 618.21, z =-174.2 }, and the unit called "Unstoppable Object Simulation"
 -- start on West, on the dot so. The dot Pillars are unusable.
 --
 -- With n from 1 to 12, coordonates are:
 -- {{{
---   Angle(n) = PI + (n - 1) * PI / 6
---   Position(n) = {
---       x = 618.21 + 70 * cos(Angle(n)),
---       z = -174.2 + 70 * sin(Angle(n))
---   }
+-- Angle(n) = PI + (n - 1) * PI / 6
+-- Position(n) = {
+-- x = 618.21 + 70 * cos(Angle(n)),
+-- z = -174.2 + 70 * sin(Angle(n))
+-- }
 -- }}}
 -- Results are stored in GREEN_ROOM_MARKERS constant.
 --
 -- Extra Informations. Few pillars positions collected:
 -- {
---     { x = 671.276489, z = -174.475327 },
---     { x = 565.161865, z = -174.289658 },
---     { x = 618.183533, z = -227.125458 },
---     { x = 661.742126, z = -249.719589 },
---     { x = 574.576834, z = -98.386374 },
---     { x = 530.910645, z = -174.166290 },
---     { x = 645.375183, z = -128.802170 },
---     { x = 663.878540, z = -201.568573 },
---     { x = 591.531921, z = -128.216736 },
---     { x = 693.861572, z = -218.121765 },
---     { x = 705.460144, z = -174.510483 },
---     { x = 618.322693, z = -86.674301 },
---     { x = 618.349182, z = -121.058273 },
---     { x = 644.759949, z = -220.22229 },
---     { x = 542.987549, z = -129.588684 },
+-- { x = 671.276489, z = -174.475327 },
+-- { x = 565.161865, z = -174.289658 },
+-- { x = 618.183533, z = -227.125458 },
+-- { x = 661.742126, z = -249.719589 },
+-- { x = 574.576834, z = -98.386374 },
+-- { x = 530.910645, z = -174.166290 },
+-- { x = 645.375183, z = -128.802170 },
+-- { x = 663.878540, z = -201.568573 },
+-- { x = 591.531921, z = -128.216736 },
+-- { x = 693.861572, z = -218.121765 },
+-- { x = 705.460144, z = -174.510483 },
+-- { x = 618.322693, z = -86.674301 },
+-- { x = 618.349182, z = -121.058273 },
+-- { x = 644.759949, z = -220.22229 },
+-- { x = 542.987549, z = -129.588684 },
 -- }
 ----------------------------------------------------------------------------------------------------
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
@@ -226,8 +226,17 @@ mod:RegisterDefaultTimerBarConfigs({
     ["PURGE_CYCLE"] = { sColor = "xkcdBluishGreen" },
     ["PURGE_INCREASE"] = { sColor = "xkcdDeepOrange" },
     ["SUPPORT_CANNON"] = { sColor = "xkcdBrightLilac" },
-  })
-
+  }
+)
+mod:RegisterUnitBarConfig("unit.avatus", {
+    nPriority = 0,
+    tMidphases = {
+      {percent = 75},
+      {percent = 50},
+      {percent = 25},
+    }
+  }
+)
 ----------------------------------------------------------------------------------------------------
 -- Constants.
 ----------------------------------------------------------------------------------------------------
@@ -444,7 +453,7 @@ function mod:OnUnitCreated(nId, unit, sName)
 
   if self.L["unit.avatus"] == sName then
     SetMarkersByPhase(MAIN_PHASE)
-    core:AddUnit(unit)
+    mod:AddUnit(unit)
     core:WatchUnit(unit)
     if mod:GetSetting("LineCleaveBoss") then
       core:AddPixie(unit:GetId(), 2, unit, nil, "Green", 10, 22, 0)
@@ -459,7 +468,7 @@ function mod:OnUnitCreated(nId, unit, sName)
     -- Portals have same name, actual boss has HP, portals have nil value.
     if nHealth then
       SetMarkersByPhase(YELLOW_PHASE)
-      core:AddUnit(unit)
+      mod:AddUnit(unit)
       core:WatchUnit(unit)
       if mod:GetSetting("LineCleaveYellowRoomBoss") then
         core:AddPixie(nId, 2, unit, nil, "Red", 5, 35, 0)
@@ -474,7 +483,7 @@ function mod:OnUnitCreated(nId, unit, sName)
     -- Portals have same name, actual boss has HP, portals have nil value.
     if nHealth then
       SetMarkersByPhase(GREEN_PHASE)
-      core:AddUnit(unit)
+      mod:AddUnit(unit)
       core:WatchUnit(unit)
     else
       -- Draw a line to the green portal.
@@ -488,7 +497,7 @@ function mod:OnUnitCreated(nId, unit, sName)
       local bDisplayPurgeList = RED_PHASE == nCurrentPhase
       SetMarkersByPhase(BLUE_PHASE)
       nInfiniteLogicLoopId = nId
-      core:AddUnit(unit)
+      mod:AddUnit(unit)
       core:WatchUnit(unit)
       -- Cheat on the last purge date, to avoid some troubles with:
       -- * players who come from red phase.
@@ -508,7 +517,7 @@ function mod:OnUnitCreated(nId, unit, sName)
   elseif sName == self.L["Holo Hand"] then
     bDisplayHandsPictures = false
     RefreshHoloHandPictures()
-    core:AddUnit(unit)
+    mod:AddUnit(unit)
     core:WatchUnit(unit)
     table.insert(tHoloHandsList, nId, { ["unit"] = unit} )
     mod:AddMsg("HHAND", "HOLO HAND SPAWNED", 5, "Info")
@@ -521,7 +530,7 @@ function mod:OnUnitCreated(nId, unit, sName)
     if nHealth then
       -- Red room.
       SetMarkersByPhase(RED_PHASE)
-      core:AddUnit(unit)
+      mod:AddUnit(unit)
       core:WatchUnit(unit)
     else
       -- Draw a line to the red portal.
@@ -529,7 +538,7 @@ function mod:OnUnitCreated(nId, unit, sName)
     end
   elseif sName == self.L["Holo Cannon"] then
     if nHealth then
-      core:AddUnit(unit)
+      mod:AddUnit(unit)
     end
     if mod:GetSetting("LineCannons") then
       core:AddPixie(unit:GetId(), 2, unit, nil, "Blue", 5, 100, 0)
@@ -540,7 +549,7 @@ function mod:OnUnitCreated(nId, unit, sName)
       core:AddPixie(unit:GetId(), 2, unit, nil, "Blue", 5, -7, 0)
     end
   elseif sName == self.L["Support Cannon"] then
-    core:AddUnit(unit)
+    mod:AddUnit(unit)
     local nCurrentTime = GetGameTime()
     if nLastSupportCannonPopTime + 20 < nCurrentTime then
       nLastSupportCannonPopTime = nCurrentTime
@@ -828,3 +837,16 @@ function mod:ReceiveIndMessage(sFrom, sReason, data)
     BuildBlueRoomPurgeOrderedList()
   end
 end
+
+function mod:OnAvatusHealthChanged(id, percent, name)
+  if bWarningSwitchPhaseDone then return end
+  if mod:IsMidphaseClose(name, percent) then
+    bWarningSwitchPhaseDone = true
+    mod:AddMsg("AVAP2", "P2 SOON!", 5, mod:GetSetting("SoundPortalPhase") and "Info")
+  end
+end
+
+mod:RegisterUnitEvents("unit.avatus",{
+    [core.E.HEALTH_CHANGED] = mod.OnAvatusHealthChanged,
+  }
+)
