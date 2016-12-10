@@ -112,7 +112,17 @@ mod:RegisterDefaultTimerBarConfigs({
     ["MOO"] = { sColor = "xkcdBurntYellow" },
   }
 )
-
+mod:RegisterUnitBarConfig("unit.gloomclaw", {
+    nPriority = 0,
+    tMidphases = {
+      {percent = 85},
+      {percent = 65},
+      {percent = 45},
+      {percent = 25},
+      {percent = 16},
+    }
+  }
+)
 ----------------------------------------------------------------------------------------------------
 -- Constants.
 ----------------------------------------------------------------------------------------------------
@@ -177,7 +187,7 @@ function mod:OnUnitCreated(nId, tUnit, sName)
   if sName == self.L["Corrupted Ravager"] or sName == self.L["Empowered Ravager"] then
     core:WatchUnit(tUnit, core.E.TRACK_CASTS)
   elseif sName == self.L["unit.gloomclaw"] then
-    core:AddUnit(tUnit)
+    mod:AddUnit(tUnit)
     core:WatchUnit(tUnit, core.E.TRACK_CASTS)
   end
 end
@@ -266,7 +276,7 @@ function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
           essenceUp[targetId] = true
           local essPos = tArgs.unitTarget:GetPosition()
           core:MarkUnit(tArgs.unitTarget, 0, (essPos.x < 4310) and "L" or "R")
-          core:AddUnit(tArgs.unitTarget)
+          mod:AddUnit(tArgs.unitTarget)
           if #essenceUp == 2 then
             Apollo.RemoveEventHandler(core.E.EVENT_COMBAT_LOG_HEAL, self)
           end
