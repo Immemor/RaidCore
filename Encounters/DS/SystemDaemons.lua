@@ -167,8 +167,24 @@ mod:RegisterDefaultTimerBarConfigs({
     ["PURGE_NULL"] = { sColor = "xkcdBrickOrange" },
     ["PURGE_BINARY"] = { sColor = "xkcdBrickOrange" },
     ["BLACKIC"] = { sColor = "vdarkgray" },
-  })
-
+  }
+)
+mod:RegisterUnitBarConfig("unit.daemon.binary", {
+    nPriority = 0,
+    tMidphases = {
+      {percent = 70},
+      {percent = 30},
+    }
+  }
+)
+mod:RegisterUnitBarConfig("unit.daemon.null", {
+    nPriority = 1,
+    tMidphases = {
+      {percent = 70},
+      {percent = 30},
+    }
+  }
+)
 ----------------------------------------------------------------------------------------------------
 -- Constants.
 ----------------------------------------------------------------------------------------------------
@@ -251,7 +267,7 @@ function mod:OnUnitCreated(nId, unit, sName)
   or sName == self.L["Viral Diffusion Inhibitor"] then
 
     if sName == self.L["Defragmentation Unit"] or sName == self.L["Radiation Dispersion Unit"] then
-      core:AddUnit(unit)
+      mod:AddUnit(unit)
       core:WatchUnit(unit)
     end
 
@@ -285,19 +301,19 @@ function mod:OnUnitCreated(nId, unit, sName)
     if probeCount == 2 then probeCount = 3 end
     if GetCurrentSubZoneName():find(self.L["Infinite Generator Core"]) then core:MarkUnit(unit, 1, 3) end
   elseif sName == self.L["Enhancement Module"] then
-    core:AddUnit(unit)
+    mod:AddUnit(unit)
     if mod:GetSetting("LineOnModulesMidphase") then
       core:AddLine(nId .. "_1", 2, unit, nil, 1, 25, 90)
       core:AddLine(nId .. "_2", 2, unit, nil, 2, 25, -90)
     end
   elseif sName == self.L["unit.daemon.null"] then
-    core:AddUnit(unit)
+    mod:AddUnit(unit)
     core:WatchUnit(unit)
     core:MarkUnit(unit, 0, self.L["MARKER south"])
     nNullSystemDaemonId = nId
     addLineBetweenSystemDaemon(nNullSystemDaemonId, nBinarySystemDaemonId)
   elseif sName == self.L["unit.daemon.binary"] then
-    core:AddUnit(unit)
+    mod:AddUnit(unit)
     core:WatchUnit(unit)
     core:MarkUnit(unit, 0, self.L["MARKER north"])
     nBinarySystemDaemonId = nId
@@ -309,18 +325,6 @@ function mod:OnUnitDestroyed(nId, tUnit, sName)
   if sName == self.L["Enhancement Module"] then
     core:DropLine(nId .. "_1")
     core:DropLine(nId .. "_2")
-  end
-end
-
-function mod:OnHealthChanged(nId, nPourcent, sName)
-  if sName == self.L["unit.daemon.binary"] or sName == self.L["unit.daemon.null"] then
-    if nPourcent >= 70 and nPourcent <= 72 and not phase2warn and not phase2 then
-      phase2warn = true
-      mod:AddMsg("SDP2", "P2 SOON !", 5, mod:GetSetting("SoundPhase2Soon") and "Algalon")
-    elseif nPourcent >= 30 and nPourcent <= 32 and not phase2warn and not phase2 then
-      phase2warn = true
-      mod:AddMsg("SDP2", "P2 SOON !", 5, mod:GetSetting("SoundPhase2Soon") and "Algalon")
-    end
   end
 end
 
@@ -450,3 +454,15 @@ function mod:OnDatachron(sMessage)
     self:ScheduleTimer("NextWave", 5)
   end
 end
+
+function mod:OnDaemonsHealthChanged(id, percent, name)
+  if mod:IsMidphaseClose(name, percent) and not phase2warn and not phase2 then
+    phase2warn = true
+    mod:AddMsg("SDP2", "P2 SOON !", 5, mod:GetSetting("SoundPhase2Soon") and "Algalon")
+  end
+end
+
+mod:RegisterUnitEvents({"unit.daemon.binary", "unit.daemon.null"},{
+    [core.E.HEALTH_CHANGED] = mod.OnDaemonsHealthChanged,
+  }
+)
