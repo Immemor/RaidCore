@@ -135,13 +135,6 @@ local ENGINEER_START_LOCATION = {
 -- Functions.
 ----------------------------------------------------------------------------------------------------
 local next, GetUnitById = next, GameLib.GetUnitById
-local function TableLength(table)
-  local count = 0
-  for _, _ in next, table do
-    count = count + 1
-  end
-  return count
-end
 ----------------------------------------------------------------------------------------------------
 -- Locals.
 ----------------------------------------------------------------------------------------------------
