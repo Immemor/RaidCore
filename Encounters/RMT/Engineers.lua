@@ -207,7 +207,7 @@ function mod:OnBossEnable()
   player = {}
   player.unit = GameLib.GetPlayerUnit()
   player.location = 0
-  coreMaxHealth = nil
+  coreMaxHealth = 0
   engineerUnits = {}
   coreUnits = {}
   --locales
@@ -216,6 +216,10 @@ function mod:OnBossEnable()
   end
   for name, id in pairs(ENGINEER_NAMES) do
     ENGINEER_NAMES[self.L[name]] = id
+  end
+
+  if mod:GetSetting("BarsCoreHealth") then
+    core:AddUnitSpacer("CORE_SPACER", nil, 2)
   end
 
   mod:AddTimerBar("NEXT_ELEKTROSHOCK_TIMER", "msg.engineer.electroshock.next", FIRST_ELECTROSHOCK_TIMER)
@@ -240,42 +244,6 @@ function mod:GetCoreTotalHealthPercentage(oldValue)
     barColor = "xkcdOrange"
   end
   return totalHealthPercent, barColor
-end
-
-function mod:OnBossDisable()
-  mod:RemoveUnits()
-end
-
-function mod:AddUnits()
-  mod:RemoveUnits()
-  for _, engineer in pairs(engineerUnits) do
-    core:WatchUnit(engineer.unit, core.E.TRACK_CASTS)
-    core:AddUnit(engineer.unit)
-  end
-  if mod:GetSetting("BarsCoreHealth") then
-    core:AddUnitSpacer("CORE_SPACER")
-  end
-  coreMaxHealth = 0
-  for coreId, coreUnit in pairs(coreUnits) do
-    coreMaxHealth = coreMaxHealth + coreUnit.unit:GetMaxHealth()
-    core:WatchUnit(coreUnit.unit, core.E.TRACK_BUFFS + core.E.TRACK_HEALTH)
-    mod:UpdateCoreHealthMark(coreUnit)
-    if mod:GetSetting("BarsCoreHealth") then
-      core:AddUnit(coreUnit.unit, CORE_BAR_COLORS[coreId])
-    end
-  end
-end
-
-function mod:RemoveUnits()
-  for _, engineer in pairs(engineerUnits) do
-    core:RemoveUnit(engineer.unit)
-  end
-  if mod:GetSetting("BarsCoreHealth") then
-    core:RemoveUnit("CORE_SPACER")
-    for _, coreUnit in pairs(coreUnits) do
-      core:RemoveUnit(coreUnit.unit)
-    end
-  end
 end
 
 function mod:GetUnitPlatform(unit)
@@ -375,37 +343,38 @@ function mod:IsPlayerOnPlatform(coreId)
   return player.location == coreId
 end
 
-mod:RegisterUnitEvents({
-    "unit.engineer", "unit.warrior",
-    "unit.fusion_core",
-    "unit.cooling_turbine",
-    "unit.spark_plug",
-    "unit.lubricant_nozzle"
-    },{
-    [core.E.UNIT_CREATED] = function(_, _, unit, name)
-      if CORE_NAMES[name] ~= nil then
-        coreUnits[CORE_NAMES[name]] = {
-          unit = unit,
-          healthWarning = false,
-          enabled = false,
-          percent = 30,
-        }
-      elseif ENGINEER_NAMES[name] ~= nil then
-        local engineerId = ENGINEER_NAMES[name]
-        engineerUnits[engineerId] = {
-          unit = unit,
-          location = ENGINEER_START_LOCATION[engineerId],
-        }
-      end
-      if TableLength(coreUnits) == 4 and TableLength(engineerUnits) == 2 then
-        mod:AddUnits()
-      end
-    end,
-    [core.E.UNIT_DESTROYED] = function(_, _, _, name)
-      if ENGINEER_NAMES[name] ~= nil then
-        engineerUnits[ENGINEER_NAMES[name]] = nil
-      end
-    end,
+function mod:OnEngineerCreated(id, unit, name)
+  local engineerId = ENGINEER_NAMES[name]
+  engineerUnits[engineerId] = {
+    unit = unit,
+    location = ENGINEER_START_LOCATION[engineerId],
+  }
+  core:WatchUnit(unit, core.E.TRACK_CASTS)
+  mod:AddUnit(unit, nil, 1)
+end
+
+function mod:OnCoreCreated(id, unit, name)
+  coreUnits[CORE_NAMES[name]] = {
+    unit = unit,
+    healthWarning = false,
+    enabled = false,
+    percent = 30,
+  }
+  coreMaxHealth = coreMaxHealth + unit:GetMaxHealth()
+  core:WatchUnit(unit, core.E.TRACK_BUFFS + core.E.TRACK_HEALTH)
+  mod:UpdateCoreHealthMark(coreUnits[CORE_NAMES[name]])
+  if mod:GetSetting("BarsCoreHealth") then
+    mod:AddUnit(unit, CORE_BAR_COLORS[CORE_NAMES[name]], 3)
+  end
+end
+
+function mod:OnEngineerDestroyed(id, unit, name)
+  engineerUnits[ENGINEER_NAMES[name]] = nil
+end
+
+mod:RegisterUnitEvents({"unit.engineer", "unit.warrior"}, {
+    [core.E.UNIT_CREATED] = mod.OnEngineerCreated,
+    [core.E.UNIT_DESTROYED] = mod.OnEngineerDestroyed,
   }
 )
 
@@ -416,6 +385,7 @@ mod:RegisterUnitEvents({
     "unit.spark_plug",
     "unit.lubricant_nozzle"
     },{
+    [core.E.UNIT_CREATED] = mod.OnCoreCreated,
     [core.E.HEALTH_CHANGED] = function(self, _, percent, name)
       local coreId = CORE_NAMES[name]
       local coreUnit = coreUnits[coreId]
