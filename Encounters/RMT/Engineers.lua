@@ -20,7 +20,8 @@ mod:RegisterTrigMob(core.E.TRIGGER_ANY, {
     "unit.cooling_turbine",
     "unit.spark_plug",
     "unit.lubricant_nozzle"
-  })
+  }
+)
 mod:RegisterEnglishLocale({
     -- Unit names.
     ["unit.fusion_core"] = "Fusion Core",
