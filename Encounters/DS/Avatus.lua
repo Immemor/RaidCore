@@ -64,10 +64,10 @@ if not mod then return end
 ----------------------------------------------------------------------------------------------------
 -- Registering combat.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterTrigMob(core.E.TRIGGER_ANY, { "Avatus" })
+mod:RegisterTrigMob(core.E.TRIGGER_ANY, { "unit.avatus" })
 mod:RegisterEnglishLocale({
     -- Unit names.
-    ["Avatus"] = "Avatus",
+    ["unit.avatus"] = "Avatus",
     ["Holo Hand"] = "Holo Hand",
     ["Mobius Physics Constructor"] = "Mobius Physics Constructor",
     ["Unstoppable Object Simulation"] = "Unstoppable Object Simulation",
@@ -122,7 +122,7 @@ mod:RegisterEnglishLocale({
   })
 mod:RegisterFrenchLocale({
     -- Unit names.
-    ["Avatus"] = "Avatus",
+    ["unit.avatus"] = "Avatus",
     ["Holo Hand"] = "Holo-main",
     ["Mobius Physics Constructor"] = "Constructeur de physique de Möbius",
     ["Unstoppable Object Simulation"] = "Simulacre invincible",
@@ -177,7 +177,7 @@ mod:RegisterFrenchLocale({
   })
 mod:RegisterGermanLocale({
     -- Unit names.
-    ["Avatus"] = "Avatus",
+    ["unit.avatus"] = "Avatus",
     ["Holo Hand"] = "Holohand",
     ["Mobius Physics Constructor"] = "Mobius Physikkonstrukteur",
     ["Unstoppable Object Simulation"] = "Unaufhaltbare Objektsimulation",
@@ -442,7 +442,7 @@ end
 function mod:OnUnitCreated(nId, unit, sName)
   local nHealth = unit:GetHealth()
 
-  if self.L["Avatus"] == sName then
+  if self.L["unit.avatus"] == sName then
     SetMarkersByPhase(MAIN_PHASE)
     core:AddUnit(unit)
     core:WatchUnit(unit)
@@ -572,7 +572,7 @@ function mod:OnUnitDestroyed(nId, tUnit, sName)
     end
   elseif sName == self.L["Holo Cannon"] then
     core:DropPixie(nId)
-  elseif sName == self.L["Avatus"] then
+  elseif sName == self.L["unit.avatus"] then
     core:DropPixie(nId)
     core:RemovePicture("HAND1")
     core:RemovePicture("HAND2")
@@ -707,7 +707,7 @@ function mod:OnBuffRemove(nId, nSpellId)
 end
 
 function mod:OnHealthChanged(nId, nPourcent, sName)
-  if sName == self.L["Avatus"] then
+  if sName == self.L["unit.avatus"] then
     if not bWarningSwitchPhaseDone then
       if nPourcent >= 75 and nPourcent <= 76 then
         bWarningSwitchPhaseDone = true
@@ -728,7 +728,7 @@ function mod:OnHealthChanged(nId, nPourcent, sName)
 end
 
 function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
-  if self.L["Avatus"] == sName then
+  if self.L["unit.avatus"] == sName then
     if self.L["Obliteration Beam"] == sCastName then
       local EndOfCannon = nHoloCannonActivationTime + HOLO_CANNONS_DURATION[nMainPhaseCount]
       local NextBeam = GetGameTime() + 37
