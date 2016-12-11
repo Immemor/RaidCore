@@ -28,9 +28,9 @@ local next, pcall = next, pcall
 -- Constants.
 ----------------------------------------------------------------------------------------------------
 -- Should be 5.23 when replacement tokens will works (see #88 issue).
-local RAIDCORE_CURRENT_VERSION = "6.3.0"
+local RAIDCORE_CURRENT_VERSION = "6.3.1-beta.7"
 -- Should be deleted.
-local ADDON_DATE_VERSION = 16120817
+local ADDON_DATE_VERSION = 16121119
 
 -- State Machine.
 local MAIN_FSM__SEARCH = 1
