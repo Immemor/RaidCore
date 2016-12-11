@@ -91,6 +91,7 @@ mod:RegisterDefaultSetting("MarkWorldenderSpawn")
 mod:RegisterDefaultSetting("LineWorldender")
 mod:RegisterDefaultSetting("LineAsteroids")
 mod:RegisterDefaultSetting("LineAlphaCassusCleave")
+mod:RegisterDefaultSetting("LineCosmicDebris", false)
 mod:RegisterDefaultSetting("CirclePlanetOrbits")
 mod:RegisterDefaultSetting("CirclePermanentPlanetOrbits", false)
 mod:RegisterDefaultSetting("MarkDebrisField")
@@ -402,10 +403,14 @@ function mod:OnDebrisCreated(id, unit)
   if mod:GetSetting("CrosshairCosmicDebris") then
     core:AddPicture("DEBRIS_PICTURE_" .. id, id, "Crosshair", 40, nil, nil, nil, "xkcdRed")
   end
+  if mod:GetSetting("LineCosmicDebris") then
+    core:AddLineBetweenUnits("DEBRIS_LINE" .. id, playerId, id, 4, "xkcdOrange")
+  end
 end
 
 function mod:OnDebrisDestroyed(id, unit)
   core:RemovePicture("DEBRIS_PICTURE_" .. id)
+  core:RemoveLineBetweenUnits("DEBRIS_LINE" .. id)
 end
 
 function mod:MarkPlanetsWithSolarWindTime(remainingTime)
