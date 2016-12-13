@@ -199,6 +199,10 @@ local PHASES_CLOSE = {
   {UPPER = 46.5, LOWER = 45.5},
   {UPPER = 13.5, LOWER = 12.5},
 }
+local CLEAVE_COLORS = {
+  [0] = "xkcdGreen",
+  [1] = "xkcdRed",
+}
 
 --From LUI-BossMods
 local ENDER_SPAWN_MARKERS = {
@@ -213,10 +217,6 @@ local CARDINAL_MARKERS = {
   ["S"] = Vector3.New(-76.55, -96.21, 405.18),
   ["E"] = Vector3.New(-30.00, -96.22, 357.03),
   ["W"] = Vector3.New(-124.81, -96.21, 356.96),
-}
-local CLEAVE_COLORS = {
-  [0] = "xkcdGreen",
-  [1] = "xkcdRed",
 }
 ----------------------------------------------------------------------------------------------------
 -- Locals.
