@@ -88,6 +88,7 @@ mod:RegisterDefaultSetting("IndicatorPlanets")
 mod:RegisterDefaultSetting("IndicatorAsteroids")
 mod:RegisterDefaultSetting("MarkCardinal")
 mod:RegisterDefaultSetting("MarkWorldenderSpawn")
+mod:RegisterDefaultSetting("MarkAsteroidCount")
 mod:RegisterDefaultSetting("LineWorldender")
 mod:RegisterDefaultSetting("LineAsteroids")
 mod:RegisterDefaultSetting("LineAlphaCassusCleave")
@@ -172,6 +173,11 @@ local TIMERS = {
     INTERVAL = 4,
   }
 }
+local DISTANCES = {
+  ALPHA_CASSUS = {
+    OUTER_RING = 84,
+  }
+}
 
 local PLANETS = {
   ["unit.aldinari"] = {
@@ -232,6 +238,7 @@ local worldEnderCount
 local lastWorldEnder
 local worldEnders
 local solarFlareCount
+local asteroidWaveCounter
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
@@ -244,6 +251,7 @@ function mod:OnBossEnable()
   planets = {}
   alphaCassus = nil
   solarFlareCount = 0
+  asteroidWaveCounter = 0
   playerId = GameLib.GetPlayerUnit():GetId()
   mod:StartSecondAsteroidTimer()
   mod:AddTimerBar("NEXT_WORLD_ENDER_TIMER", "msg.world_ender.next", TIMERS.WORLD_ENDER.FIRST, mod:GetSetting("CountdownWorldender"))
@@ -362,12 +370,27 @@ function mod:OnAlphaCassusDestroyed(id, unit)
   alphaCassus = nil
 end
 
+function mod:GetAsteroidMark(unit)
+  local mark = 5
+  if mod:GetDistanceBetweenUnits(unit, alphaCassus.unit) > DISTANCES.ALPHA_CASSUS.OUTER_RING then
+    asteroidWaveCounter = asteroidWaveCounter + 1
+    mark = asteroidWaveCounter
+    if asteroidWaveCounter == 4 then
+      asteroidWaveCounter = 0
+    end
+  end
+  return mark
+end
+
 function mod:OnAsteroidCreated(id, unit)
   if mod:GetSetting("IndicatorAsteroids") then
     core:AddLineBetweenUnits("ASTEROID_LINE_" .. id, alphaCassus.id, id, 10, "xkcdBrown", nil, 8, 3.5)
   end
   if mod:GetSetting("LineAsteroids") then
     core:AddSimpleLine(id, unit, 0, 16, nil, 6, "xkcdBananaYellow")
+  end
+  if mod:GetSetting("MarkAsteroidCount") then
+    core:MarkUnit(unit, core.E.LOCATION_STATIC_CHEST, mod:GetAsteroidMark(unit))
   end
 end
 
