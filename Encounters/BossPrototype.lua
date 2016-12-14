@@ -131,6 +131,82 @@ function EncounterPrototype:GetSettingsForKey(sKey)
   return {}
 end
 
+function EncounterPrototype:AddUnit(tUnit, barColor, nPriority, tMarkers)
+  Assert:Userdata(tUnit, "Not a unit: %s, %s", self.name, tostring(tUnit))
+  local tUnitBarConfig = self.tUnitBarConfig[tUnit:GetName()] or {}
+  RaidCore:AddUnit(tUnit,
+    tUnitBarConfig.barColor or barColor,
+    tUnitBarConfig.nPriority or nPriority,
+    tUnitBarConfig.tMidphases or tMarkers
+  )
+end
+
+-- Set default settings for a unit bar
+-- @param sUnitName Name of the unit
+-- @param tUnitBarConfig Table of configs containing: barColor, nPriority, table of midphases
+function EncounterPrototype:RegisterUnitBarConfig(sUnitName, tUnitBarConfig)
+  Assert:String(sUnitName, "Unit name not a string: %s, %s", self.name, tostring(sUnitName))
+  Assert:Table(tUnitBarConfig, "Unit config not a table: %s, %s", self.name, tostring(tUnitBarConfig))
+  sUnitName = self.L[sUnitName]
+  self.tUnitBarConfig = DeepInit(self.tUnitBarConfig, sUnitName)
+  self.tUnitBarConfig[sUnitName].barColor = tUnitBarConfig.barColor
+  self.tUnitBarConfig[sUnitName].nPriority = tUnitBarConfig.nPriority
+
+  if tUnitBarConfig.tMidphases then
+    self:RegisterMidphases(sUnitName, tUnitBarConfig.tMidphases)
+  end
+end
+
+function EncounterPrototype:IsMidphaseClose(sUnitName, nPercent)
+  local tUnitBarConfig = self.tUnitBarConfig[self.L[sUnitName]] or {}
+  if tUnitBarConfig.tMidphases then
+    for i = 1, #tUnitBarConfig.tMidphases do
+      local tMidphase = tUnitBarConfig.tMidphases[i]
+      if nPercent >= tMidphase.lower and nPercent <= tMidphase.upper then
+        return true
+      end
+    end
+  end
+  return false
+end
+
+-- Set midphases for a unit
+-- @param sUnitName Name of the unit
+-- @param tMidphases Table containing midphases.
+function EncounterPrototype:RegisterMidphases(sUnitName, tMidphases)
+  Assert:String(sUnitName, "Unit name not a string: %s, %s", self.name, tostring(sUnitName))
+  Assert:Table(tMidphases, "Phases not a table: %s, %s", self.name, tostring(tMidphases))
+  for i = 1, #tMidphases do
+    self:RegisterMidphase(sUnitName, tMidphases[i])
+  end
+end
+
+-- Set midphases for a unit
+-- @param sUnitName Name of the unit
+-- @param tMidphase Table containing possible attributes:
+-- percent, color(optional), startPercent(optional), endPercent(optional), opacity(optional)
+function EncounterPrototype:RegisterMidphase(sUnitName, tMidphase)
+  Assert:String(sUnitName, "Unit name not a string: %s, %s", self.name, tostring(sUnitName))
+  Assert:Table(tMidphase, "Phase not a table: %s, %s", self.name, tostring(tMidphase))
+  Assert:Number(tMidphase.percent, "Missing midphase percent: %s, %s", self.name, tostring(tMidphase.percent))
+
+  if not tMidphase.startPercent then
+    tMidphase.startPercent = tMidphase.percent - 0.75
+  end
+  if not tMidphase.endPercent then
+    tMidphase.endPercent = tMidphase.percent + 0.75
+  end
+  tMidphase.color = tMidphase.color or "xkcdRed"
+  tMidphase.opacity = tMidphase.opacity or 1
+  --TODO add these thresholds to some variable for adjustable calls?
+  tMidphase.lower = tMidphase.percent + 1 - 0.05
+  tMidphase.upper = tMidphase.percent + 1 + 0.05
+
+  sUnitName = self.L[sUnitName]
+  self.tUnitBarConfig = DeepInit(self.tUnitBarConfig, sUnitName, "tMidphases")
+  table.insert(self.tUnitBarConfig[sUnitName].tMidphases, tMidphase)
+end
+
 -- Register events to a single unit or a list of units
 -- @param sUnitName String or table of Strings of unit names.
 -- @param tEventsHandlers Table of Events/Handlers pairs
@@ -607,5 +683,6 @@ function RaidCore:NewEncounter(name, continentId, parentMapId, mapId, isTestEnco
   new.tUnitSpellEvents = {}
   new.tSettingBinds = {}
   new.tSettingBindsEqual = {}
+  new.tUnitBarConfig = {}
   return new
 end

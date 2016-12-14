@@ -16,11 +16,11 @@ if not mod then return end
 ----------------------------------------------------------------------------------------------------
 -- Registering combat.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterTrigMob(core.E.TRIGGER_ANY, { "Binary System Daemon", "Null System Daemon" })
+mod:RegisterTrigMob(core.E.TRIGGER_ANY, { "unit.daemon.binary", "unit.daemon.null" })
 mod:RegisterEnglishLocale({
     -- Unit names.
-    ["Binary System Daemon"] = "Binary System Daemon",
-    ["Null System Daemon"] = "Null System Daemon",
+    ["unit.daemon.binary"] = "Binary System Daemon",
+    ["unit.daemon.null"] = "Null System Daemon",
     ["Brute Force Algorithm"] = "Brute Force Algorithm",
     ["Encryption Program"] = "Encryption Program",
     ["Radiation Dispersion Unit"] = "Radiation Dispersion Unit",
@@ -65,8 +65,8 @@ mod:RegisterEnglishLocale({
   })
 mod:RegisterFrenchLocale({
     -- Unit names.
-    ["Binary System Daemon"] = "Daemon 2.0",
-    ["Null System Daemon"] = "Daemon 1.0",
+    ["unit.daemon.binary"] = "Daemon 2.0",
+    ["unit.daemon.null"] = "Daemon 1.0",
     ["Brute Force Algorithm"] = "Algorithme de force brute",
     ["Encryption Program"] = "Programme de cryptage",
     ["Radiation Dispersion Unit"] = "Unité de dispersion de radiations",
@@ -111,8 +111,8 @@ mod:RegisterFrenchLocale({
   })
 mod:RegisterGermanLocale({
     -- Unit names.
-    ["Binary System Daemon"] = "Binärsystem-Dämon",
-    ["Null System Daemon"] = "Nullsystem-Dämon",
+    ["unit.daemon.binary"] = "Binärsystem-Dämon",
+    ["unit.daemon.null"] = "Nullsystem-Dämon",
     ["Brute Force Algorithm"] = "Brachialgewalt-Algorithmus",
     ["Encryption Program"] = "Verschlüsselungsprogramm",
     ["Radiation Dispersion Unit"] = "Strahlungsverteilungseinheit",
@@ -167,8 +167,24 @@ mod:RegisterDefaultTimerBarConfigs({
     ["PURGE_NULL"] = { sColor = "xkcdBrickOrange" },
     ["PURGE_BINARY"] = { sColor = "xkcdBrickOrange" },
     ["BLACKIC"] = { sColor = "vdarkgray" },
-  })
-
+  }
+)
+mod:RegisterUnitBarConfig("unit.daemon.binary", {
+    nPriority = 0,
+    tMidphases = {
+      {percent = 70},
+      {percent = 30},
+    }
+  }
+)
+mod:RegisterUnitBarConfig("unit.daemon.null", {
+    nPriority = 1,
+    tMidphases = {
+      {percent = 70},
+      {percent = 30},
+    }
+  }
+)
 ----------------------------------------------------------------------------------------------------
 -- Constants.
 ----------------------------------------------------------------------------------------------------
@@ -251,7 +267,7 @@ function mod:OnUnitCreated(nId, unit, sName)
   or sName == self.L["Viral Diffusion Inhibitor"] then
 
     if sName == self.L["Defragmentation Unit"] or sName == self.L["Radiation Dispersion Unit"] then
-      core:AddUnit(unit)
+      mod:AddUnit(unit)
       core:WatchUnit(unit)
     end
 
@@ -285,19 +301,19 @@ function mod:OnUnitCreated(nId, unit, sName)
     if probeCount == 2 then probeCount = 3 end
     if GetCurrentSubZoneName():find(self.L["Infinite Generator Core"]) then core:MarkUnit(unit, 1, 3) end
   elseif sName == self.L["Enhancement Module"] then
-    core:AddUnit(unit)
+    mod:AddUnit(unit)
     if mod:GetSetting("LineOnModulesMidphase") then
       core:AddLine(nId .. "_1", 2, unit, nil, 1, 25, 90)
       core:AddLine(nId .. "_2", 2, unit, nil, 2, 25, -90)
     end
-  elseif sName == self.L["Null System Daemon"] then
-    core:AddUnit(unit)
+  elseif sName == self.L["unit.daemon.null"] then
+    mod:AddUnit(unit)
     core:WatchUnit(unit)
     core:MarkUnit(unit, 0, self.L["MARKER south"])
     nNullSystemDaemonId = nId
     addLineBetweenSystemDaemon(nNullSystemDaemonId, nBinarySystemDaemonId)
-  elseif sName == self.L["Binary System Daemon"] then
-    core:AddUnit(unit)
+  elseif sName == self.L["unit.daemon.binary"] then
+    mod:AddUnit(unit)
     core:WatchUnit(unit)
     core:MarkUnit(unit, 0, self.L["MARKER north"])
     nBinarySystemDaemonId = nId
@@ -312,41 +328,29 @@ function mod:OnUnitDestroyed(nId, tUnit, sName)
   end
 end
 
-function mod:OnHealthChanged(nId, nPourcent, sName)
-  if sName == self.L["Binary System Daemon"] or sName == self.L["Null System Daemon"] then
-    if nPourcent >= 70 and nPourcent <= 72 and not phase2warn and not phase2 then
-      phase2warn = true
-      mod:AddMsg("SDP2", "P2 SOON !", 5, mod:GetSetting("SoundPhase2Soon") and "Algalon")
-    elseif nPourcent >= 30 and nPourcent <= 32 and not phase2warn and not phase2 then
-      phase2warn = true
-      mod:AddMsg("SDP2", "P2 SOON !", 5, mod:GetSetting("SoundPhase2Soon") and "Algalon")
-    end
-  end
-end
-
 function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
   local tUnit = GetUnitById(nId)
 
-  if sName == self.L["Binary System Daemon"] and sCastName == self.L["Power Surge"] then
+  if sName == self.L["unit.daemon.binary"] and sCastName == self.L["Power Surge"] then
     if phase2 and self:GetDistanceBetweenUnits(GameLib.GetPlayerUnit(), tUnit) < 40 then
       mod:AddMsg("SURGE", "INTERRUPT NORTH", 5, mod:GetSetting("SoundPowerSurge") and "Alert")
     end
-  elseif sName == self.L["Null System Daemon"] and sCastName == self.L["Power Surge"] then
+  elseif sName == self.L["unit.daemon.null"] and sCastName == self.L["Power Surge"] then
     if phase2 and self:GetDistanceBetweenUnits(GameLib.GetPlayerUnit(), tUnit) < 40 then
       mod:AddMsg("SURGE", "INTERRUPT SOUTH", 5, mod:GetSetting("SoundPowerSurge") and "Alert")
     end
   elseif sCastName == "Purge" then
     if mod:GetSetting("TimerNextPurge") then
       if self:GetDistanceBetweenUnits(GameLib.GetPlayerUnit(), tUnit) < 40 then
-        if sName == self.L["Null System Daemon"] then
+        if sName == self.L["unit.daemon.null"] then
           mod:AddTimerBar("PURGE_NULL", "Next purge on south daemon", 27)
-        elseif sName == self.L["Binary System Daemon"] then
+        elseif sName == self.L["unit.daemon.binary"] then
           mod:AddTimerBar("PURGE_BINARY", "Next purge on north daemon", 27)
         end
       elseif phase2 then
-        if sName == self.L["Null System Daemon"] then
+        if sName == self.L["unit.daemon.null"] then
           mod:AddTimerBar("PURGE_NULL", "Next purge on south daemon", 27)
-        elseif sName == self.L["Binary System Daemon"] then
+        elseif sName == self.L["unit.daemon.binary"] then
           mod:AddTimerBar("PURGE_BINARY", "Next purge on north daemon", 27)
         end
       end
@@ -450,3 +454,15 @@ function mod:OnDatachron(sMessage)
     self:ScheduleTimer("NextWave", 5)
   end
 end
+
+function mod:OnDaemonsHealthChanged(id, percent, name)
+  if mod:IsMidphaseClose(name, percent) and not phase2warn and not phase2 then
+    phase2warn = true
+    mod:AddMsg("SDP2", "P2 SOON !", 5, mod:GetSetting("SoundPhase2Soon") and "Algalon")
+  end
+end
+
+mod:RegisterUnitEvents({"unit.daemon.binary", "unit.daemon.null"},{
+    [core.E.HEALTH_CHANGED] = mod.OnDaemonsHealthChanged,
+  }
+)

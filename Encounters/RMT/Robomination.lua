@@ -92,12 +92,6 @@ local MAZE_SPEW_TIMER = 10
 
 local ARMS_TIMER = 45
 
--- Health trackers
-local FIRST_MAZE_PHASE_UPPER_HEALTH = 76.5
-local FIRST_MAZE_PHASE_LOWER_HEALTH = 75.5
-local SECOND_MAZE_PHASE_UPPER_HEALTH = 51.5
-local SECOND_MAZE_PHASE_LOWER_HEALTH = 50.5
-
 -- Compactors.
 local COMPACTORS_EDGE = {
   { y = -203.4208984375, x = 0.71257400512695, z = -1349.8697509766 },
@@ -176,6 +170,22 @@ mod:RegisterDefaultTimerBarConfigs({
     ["NEXT_INCINERATE_TIMER"] = { sColor = "red" },
   }
 )
+mod:RegisterUnitBarConfig("unit.robo", {
+    nPriority = 0,
+    tMidphases = {
+      {percent = 75},
+      {percent = 50},
+    }
+  }
+)
+mod:RegisterUnitBarConfig("unit.scanning_eye", {
+    tMidphases = {
+      {percent = 75},
+      {percent = 50},
+      {percent = 25},
+    }
+  }
+)
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
@@ -189,6 +199,10 @@ function mod:OnBossEnable()
   mod:AddTimerBar("NEXT_SNAKE_TIMER", "msg.snake.next", FIRST_SNAKE_TIMER)
   mod:AddTimerBar("NEXT_SPEW_TIMER", "msg.spew.next", FIRST_SPEW_TIMER)
   mod:DrawCompactorGrid()
+end
+
+function mod:OnBarUnitCreated(id, unit, name)
+  mod:AddUnit(unit)
 end
 
 mod:RegisterDatachronEvent("chron.robo.snake", core.E.COMPARE_MATCH, function(self, _, snakeTargetName)
@@ -309,9 +323,7 @@ mod:RegisterUnitEvents({
     "unit.robo",
     "unit.scanning_eye",
     },{
-    [core.E.UNIT_CREATED] = function(_, _, unit)
-      core:AddUnit(unit)
-    end,
+    [core.E.UNIT_CREATED] = mod.OnBarUnitCreated,
   }
 )
 
@@ -401,8 +413,8 @@ mod:RegisterUnitEvents("unit.robo",{
       core:WatchUnit(unit, core.E.TRACK_CASTS + core.E.TRACK_HEALTH)
       roboUnit = unit
     end,
-    [core.E.HEALTH_CHANGED] = function(_, _, percent)
-      if (percent >= FIRST_MAZE_PHASE_LOWER_HEALTH and percent <= FIRST_MAZE_PHASE_UPPER_HEALTH) or (percent >= SECOND_MAZE_PHASE_LOWER_HEALTH and percent <= SECOND_MAZE_PHASE_UPPER_HEALTH) then
+    [core.E.HEALTH_CHANGED] = function(self, id, percent, name)
+      if mod:IsMidphaseClose(name, percent) then
         mod:AddMsg("ROBO_MAZE_CLOSE", "msg.maze.coming", 5, "Info", "xkcdWhite")
       end
     end,

@@ -101,6 +101,16 @@ mod:RegisterDefaultTimerBarConfigs({
     ["SUPERNOVA_WIPE_TIMER"] = { sColor = "xkcdRed" }
   }
 )
+mod:RegisterUnitBarConfig("unit.octog", {
+    nPriority = 0,
+    tMidphases = {
+      {percent = 85, color = "xkcdPurplePink"},
+      {percent = 65},
+      {percent = 35},
+      {percent = 5},
+    }
+  }
+)
 ----------------------------------------------------------------------------------------------------
 -- Functions.
 ----------------------------------------------------------------------------------------------------
@@ -145,17 +155,6 @@ local TIMERS = {
     UPDATE = 0.25,
     GROW = 7.5,
   }
-}
-
--- Health trackers
-local FIRST_ORB_CLOSE = {
-  {UPPER = 86.5, LOWER = 85.5}, -- 85
-}
-
-local PHASES_CLOSE = {
-  {UPPER = 66.5, LOWER = 65.5}, -- 65
-  {UPPER = 36.5, LOWER = 35.5}, -- 35
-  {UPPER = 6.5, LOWER = 5.5}, -- 5
 }
 
 local POOL_SIZES = {
@@ -238,17 +237,19 @@ function mod:OnOctogCreated(id, unit)
   core:WatchUnit(unit, core.E.TRACK_CASTS + core.E.TRACK_HEALTH + core.E.TRACK_BUFFS)
 end
 
-function mod:OnOctogHealthChanged(id, percent)
-  if mod:IsPhaseClose(FIRST_ORB_CLOSE, percent) then
-    mod:AddMsg("CHAOS_ORB_SOON", "msg.orb.first", 5, "Info", "xkcdWhite")
-  end
-  if mod:IsPhaseClose(PHASES_CLOSE, percent) then
-    mod:AddMsg("MIDPHASE_SOON", "msg.midphase.coming", 5, "Info", "xkcdWhite")
+function mod:OnOctogHealthChanged(id, percent, name)
+  local isMidPhaseClose = mod:IsMidphaseClose(name, percent)
+  if isMidPhaseClose then
+    if percent > 84 then
+      mod:AddMsg("CHAOS_ORB_SOON", "msg.orb.first", 5, "Info", "xkcdWhite")
+    else
+      mod:AddMsg("MIDPHASE_SOON", "msg.midphase.coming", 5, "Info", "xkcdWhite")
+    end
   end
 end
 
-function mod:AddUnit(id, unit)
-  core:AddUnit(unit)
+function mod:OnBarUnitCreated(id, unit)
+  mod:AddUnit(unit)
 end
 
 function mod:StartOrbTimer(timer)
@@ -391,7 +392,7 @@ mod:RegisterUnitEvents("unit.orb", {
 )
 mod:RegisterUnitSpellEvent(core.E.ALL_UNITS, core.E.DEBUFF_ADD, DEBUFFS.CHAOS_TETHER, mod.OnChaosTetherAdd)
 mod:RegisterUnitEvents({"unit.orb", "unit.octog"}, {
-    [core.E.UNIT_CREATED] = mod.AddUnit,
+    [core.E.UNIT_CREATED] = mod.OnBarUnitCreated,
   }
 )
 mod:RegisterUnitEvents("unit.pool", {

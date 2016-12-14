@@ -121,6 +121,20 @@ mod:RegisterDefaultTimerBarConfigs({
     ["NEXT_SHURIKEN_TIMER"] = { sColor = "xkcdBlue" },
   }
 )
+mod:RegisterUnitBarConfig("unit.mordechai", {
+    nPriority = 0,
+    tMidphases = {
+      {percent = 85},
+      {percent = 60},
+      {percent = 35},
+      {percent = 10},
+    }
+  }
+)
+mod:RegisterUnitBarConfig("unit.orb", {
+    barColor = "xkcdPurplePink",
+  }
+)
 ----------------------------------------------------------------------------------------------------
 -- Functions.
 ----------------------------------------------------------------------------------------------------
@@ -184,6 +198,10 @@ end
 function mod:OnBossDisable()
 end
 
+function mod:OnBarUnitCreated(id, unit, name)
+  mod:AddUnit(unit)
+end
+
 mod:RegisterUnitEvents("unit.turret",{
     [core.E.UNIT_CREATED] = function(_, _, unit)
       core:WatchUnit(unit, core.E.TRACK_CASTS)
@@ -199,7 +217,6 @@ mod:RegisterUnitEvents("unit.turret",{
 mod:RegisterUnitEvents("unit.mordechai",{
     [core.E.UNIT_CREATED] = function(_, _, unit)
       mordechai = unit
-      core:AddUnit(unit)
       core:WatchUnit(unit, core.E.TRACK_CASTS + core.E.TRACK_HEALTH)
       mod:AddCleaveLines()
     end,
@@ -235,7 +252,6 @@ mod:RegisterUnitEvents("unit.mordechai",{
 mod:RegisterUnitEvents("unit.anchor",{
     [core.E.UNIT_CREATED] = function(_, id, unit)
       anchors[id] = unit
-      core:AddUnit(unit)
       core:WatchUnit(unit, core.E.TRACK_HEALTH)
       if mod:GetSetting("MarkerAnchorHP") then
         core:MarkUnit(unit, 0, 100)
@@ -386,3 +402,12 @@ function mod:RemoveCleaveLines()
   core:RemoveSimpleLine("CLEAVE_FRONT_LEFT2")
   core:RemoveSimpleLine("CLEAVE_BACK_LEFT2")
 end
+
+mod:RegisterUnitEvents({
+    "unit.mordechai",
+    "unit.anchor",
+    "unit.orb",
+    },{
+    [core.E.UNIT_CREATED] = mod.OnBarUnitCreated,
+  }
+)
