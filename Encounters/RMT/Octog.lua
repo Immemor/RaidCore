@@ -101,7 +101,7 @@ mod:RegisterDefaultTimerBarConfigs({
     ["SUPERNOVA_WIPE_TIMER"] = { sColor = "xkcdRed" }
   }
 )
-mod:RegisterUnitBarConfig("unit.mordechai", {
+mod:RegisterUnitBarConfig("unit.octog", {
     nPriority = 0,
     tMidphases = {
       {percent = 85, color = "xkcdPurplePink"},
