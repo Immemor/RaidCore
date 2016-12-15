@@ -88,9 +88,11 @@ mod:RegisterDefaultSetting("IndicatorPlanets")
 mod:RegisterDefaultSetting("IndicatorAsteroids")
 mod:RegisterDefaultSetting("MarkCardinal")
 mod:RegisterDefaultSetting("MarkWorldenderSpawn")
+mod:RegisterDefaultSetting("MarkAsteroidCount")
 mod:RegisterDefaultSetting("LineWorldender")
 mod:RegisterDefaultSetting("LineAsteroids")
 mod:RegisterDefaultSetting("LineAlphaCassusCleave")
+mod:RegisterDefaultSetting("LineCosmicDebris", false)
 mod:RegisterDefaultSetting("CirclePlanetOrbits")
 mod:RegisterDefaultSetting("CirclePermanentPlanetOrbits", false)
 mod:RegisterDefaultSetting("MarkDebrisField")
@@ -171,6 +173,11 @@ local TIMERS = {
     INTERVAL = 4,
   }
 }
+local DISTANCES = {
+  ALPHA_CASSUS = {
+    OUTER_RING = 84,
+  }
+}
 
 local PLANETS = {
   ["unit.aldinari"] = {
@@ -198,6 +205,10 @@ local PHASES_CLOSE = {
   {UPPER = 46.5, LOWER = 45.5},
   {UPPER = 13.5, LOWER = 12.5},
 }
+local CLEAVE_COLORS = {
+  [0] = "xkcdGreen",
+  [1] = "xkcdRed",
+}
 
 --From LUI-BossMods
 local ENDER_SPAWN_MARKERS = {
@@ -213,10 +224,6 @@ local CARDINAL_MARKERS = {
   ["E"] = Vector3.New(-30.00, -96.22, 357.03),
   ["W"] = Vector3.New(-124.81, -96.21, 356.96),
 }
-local CLEAVE_COLORS = {
-  [0] = "xkcdGreen",
-  [1] = "xkcdRed",
-}
 ----------------------------------------------------------------------------------------------------
 -- Locals.
 ----------------------------------------------------------------------------------------------------
@@ -231,6 +238,7 @@ local worldEnderCount
 local lastWorldEnder
 local worldEnders
 local solarFlareCount
+local asteroidWaveCounter
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
@@ -243,6 +251,7 @@ function mod:OnBossEnable()
   planets = {}
   alphaCassus = nil
   solarFlareCount = 0
+  asteroidWaveCounter = 0
   playerId = GameLib.GetPlayerUnit():GetId()
   mod:StartSecondAsteroidTimer()
   mod:AddTimerBar("NEXT_WORLD_ENDER_TIMER", "msg.world_ender.next", TIMERS.WORLD_ENDER.FIRST, mod:GetSetting("CountdownWorldender"))
@@ -361,12 +370,27 @@ function mod:OnAlphaCassusDestroyed(id, unit)
   alphaCassus = nil
 end
 
+function mod:GetAsteroidMark(unit)
+  local mark = 5
+  if mod:GetDistanceBetweenUnits(unit, alphaCassus.unit) > DISTANCES.ALPHA_CASSUS.OUTER_RING then
+    asteroidWaveCounter = asteroidWaveCounter + 1
+    mark = asteroidWaveCounter
+    if asteroidWaveCounter == 4 then
+      asteroidWaveCounter = 0
+    end
+  end
+  return mark
+end
+
 function mod:OnAsteroidCreated(id, unit)
   if mod:GetSetting("IndicatorAsteroids") then
     core:AddLineBetweenUnits("ASTEROID_LINE_" .. id, alphaCassus.id, id, 10, "xkcdBrown", nil, 8, 3.5)
   end
   if mod:GetSetting("LineAsteroids") then
     core:AddSimpleLine(id, unit, 0, 16, nil, 6, "xkcdBananaYellow")
+  end
+  if mod:GetSetting("MarkAsteroidCount") then
+    core:MarkUnit(unit, core.E.LOCATION_STATIC_CHEST, mod:GetAsteroidMark(unit))
   end
 end
 
@@ -402,10 +426,14 @@ function mod:OnDebrisCreated(id, unit)
   if mod:GetSetting("CrosshairCosmicDebris") then
     core:AddPicture("DEBRIS_PICTURE_" .. id, id, "Crosshair", 40, nil, nil, nil, "xkcdRed")
   end
+  if mod:GetSetting("LineCosmicDebris") then
+    core:AddLineBetweenUnits("DEBRIS_LINE" .. id, playerId, id, 4, "xkcdOrange")
+  end
 end
 
 function mod:OnDebrisDestroyed(id, unit)
   core:RemovePicture("DEBRIS_PICTURE_" .. id)
+  core:RemoveLineBetweenUnits("DEBRIS_LINE" .. id)
 end
 
 function mod:MarkPlanetsWithSolarWindTime(remainingTime)
