@@ -253,7 +253,7 @@ function mod:OnBarUnitCreated(id, unit)
 end
 
 function mod:StartOrbTimer(timer)
-  local msg = self.L["msg.orb.next"]:format(orbCount)
+  local msg = self.L["msg.orb.next"]:format(orbCount + 1)
   mod:AddTimerBar("NEXT_ORB_TIMER", msg, timer)
 end
 
