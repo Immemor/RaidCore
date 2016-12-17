@@ -300,59 +300,29 @@ function mod:StartProgressBar()
   mod:NextAddWave()
 end
 
-mod:RegisterUnitEvents({
-    "unit.add.nabber",
-    "unit.miniboss.regor",
-    "unit.miniboss.braugh",
-    },{
-    [core.E.UNIT_CREATED] = function(_, _, unit)
-      core:WatchUnit(unit, core.E.TRACK_CASTS + core.E.TRACK_HEALTH)
-    end,
-  }
-)
+function mod:OnTrashWithCastsCreated(id, unit, name)
+  core:WatchUnit(unit, core.E.TRACK_CASTS + core.E.TRACK_HEALTH)
+end
 
-mod:RegisterUnitEvents({
-    "unit.add.grunt",
-    "unit.add.brute",
-    "unit.add.pouncer",
-    "unit.add.plunderer",
-    "unit.add.cadet"
-    },{
-    [core.E.UNIT_CREATED] = function(_, _, unit)
-      core:WatchUnit(unit, core.E.TRACK_HEALTH)
-    end,
-  }
-)
+function mod:OnTrashCreated(id, unit, name)
+  core:WatchUnit(unit, core.E.TRACK_HEALTH)
+end
 
-mod:RegisterUnitEvents({
-    "unit.add.nabber",
-    "unit.add.grunt",
-    "unit.miniboss.regor",
-    "unit.miniboss.braugh",
-    "unit.add.brute",
-    "unit.add.pouncer",
-    "unit.add.plunderer",
-    "unit.add.cadet"
-    },{
-    [core.E.UNIT_DESTROYED] = function(_, id)
-      core:RemovePicture(id)
-    end,
-    [core.E.HEALTH_CHANGED] = function(_, id, percent)
-      if percent <= 1 and mod:GetSetting("CrosshairAdds") then
-        core:AddPicture(id, id, "Crosshair", 20)
-      end
-    end,
-  }
-)
+function mod:OnTrashDestroyed(id, unit, name)
+  core:RemovePicture(id)
+end
 
-mod:RegisterUnitEvents({ "unit.add.brute", "unit.add.nabber" },{
-    [core.E.UNIT_CREATED] = function(_, id)
-      if mod:GetSetting("CrosshairPriority") then
-        core:AddPicture(id, id, "Crosshair", 30, 0, 0, nil, "red")
-      end
-    end,
-  }
-)
+function mod:OnTrashHealthChanged(id, percent)
+  if percent <= 1 and mod:GetSetting("CrosshairAdds") then
+    core:AddPicture(id, id, "Crosshair", 20)
+  end
+end
+
+function mod:OnPriorityTrashCreated(id, unit, name)
+  if mod:GetSetting("CrosshairPriority") then
+    core:AddPicture(id, id, "Crosshair", 30, 0, 0, nil, "red")
+  end
+end
 
 function mod:OnSwabbieCreated(id, unit, name)
   -- filter out second unit that's there for some reason
@@ -471,6 +441,46 @@ end
 ----------------------------------------------------------------------------------------------------
 -- Bind event handlers.
 ----------------------------------------------------------------------------------------------------
+mod:RegisterUnitEvents({
+    "unit.add.nabber",
+    "unit.miniboss.regor",
+    "unit.miniboss.braugh",
+    },{
+    [core.E.UNIT_CREATED] = mod.OnTrashWithCastsCreated,
+  }
+)
+
+mod:RegisterUnitEvents({
+    "unit.add.grunt",
+    "unit.add.brute",
+    "unit.add.pouncer",
+    "unit.add.plunderer",
+    "unit.add.cadet"
+    },{
+    [core.E.UNIT_CREATED] = mod.OnTrashCreated,
+  }
+)
+
+mod:RegisterUnitEvents({
+    "unit.add.nabber",
+    "unit.add.grunt",
+    "unit.miniboss.regor",
+    "unit.miniboss.braugh",
+    "unit.add.brute",
+    "unit.add.pouncer",
+    "unit.add.plunderer",
+    "unit.add.cadet"
+    },{
+    [core.E.HEALTH_CHANGED] = mod.OnTrashHealthChanged,
+    [core.E.UNIT_DESTROYED] = mod.OnTrashDestroyed,
+  }
+)
+
+mod:RegisterUnitEvents({"unit.add.brute", "unit.add.nabber"},{
+    [core.E.UNIT_CREATED] = mod.OnPriorityTrashCreated,
+  }
+)
+
 mod:RegisterUnitEvents("unit.swabbie",{
     [core.E.UNIT_CREATED] = mod.OnSwabbieCreated,
     [core.E.UNIT_DESTROYED] = mod.OnSwabbieDestroyed,
