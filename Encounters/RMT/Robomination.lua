@@ -71,8 +71,10 @@ mod:RegisterFrenchLocale({
 -- Constants.
 ----------------------------------------------------------------------------------------------------
 -- Spell ids.
-local DEBUFF_SNAKE = 75126
-local DEBUFF_LASER = 75626
+local DEBUFFS = {
+  SNAKE = 75126,
+  LASER = 75626,
+}
 
 -- Phases.
 local DPS_PHASE = 1
@@ -308,10 +310,10 @@ end
 
 mod:RegisterUnitEvents(core.E.ALL_UNITS, {
     [core.E.DEBUFF_REMOVE] = {
-      [DEBUFF_SNAKE] = function()
+      [DEBUFFS.SNAKE] = function()
         core:RemovePicture("SNAKE_CROSSHAIR")
       end,
-      [DEBUFF_LASER] = function()
+      [DEBUFFS.LASER] = function()
         core:RemovePicture("LASER_CROSSHAIR")
       end,
     },
