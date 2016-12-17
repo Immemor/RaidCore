@@ -52,27 +52,37 @@ mod:RegisterMessageSetting("CIRCLES", core.E.COMPARE_EQUAL, "MessageShackles", "
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
+function mod:OnLockjawCreated(id, unit, name)
+  core:AddUnit(unit)
+  core:WatchUnit(unit, core.E.TRACK_CASTS)
+end
+
+function mod:OnLockjawShackleEnd()
+  mod:AddMsg("CIRCLES", "msg.lockjaw.shackle.dodge", 5, "Inferno", "xkcdOrange")
+end
+
+function mod:OnShackleCreated(id, unit, name)
+  if mod:GetSetting("CrosshairTethers") then
+    core:AddPicture(id, unit, "Crosshair", 25)
+  end
+end
+
+function mod:OnShackleDestroyed(id, unit, name)
+  core:RemovePicture(id)
+end
+
+----------------------------------------------------------------------------------------------------
+-- Bind event handlers.
+----------------------------------------------------------------------------------------------------
 mod:RegisterUnitEvents("unit.lockjaw",{
-    [core.E.UNIT_CREATED] = function (_, _, unit)
-      core:AddUnit(unit)
-      core:WatchUnit(unit, core.E.TRACK_CASTS)
-    end,
+    [core.E.UNIT_CREATED] = mod.OnLockjawCreated,
     [core.E.CAST_END] = {
-      ["cast.lockjaw.shackle"] = function(self)
-        mod:AddMsg("CIRCLES", "msg.lockjaw.shackle.dodge", 5, "Inferno", "xkcdOrange")
-      end
+      ["cast.lockjaw.shackle"] = mod.OnLockjawShackleEnd,
     },
   }
 )
-
 mod:RegisterUnitEvents("unit.shackle",{
-    [core.E.UNIT_CREATED] = function (_, id)
-      if mod:GetSetting("CrosshairTethers") then
-        core:AddPicture(id, id, "Crosshair", 25)
-      end
-    end,
-    [core.E.UNIT_DESTROYED] = function (_, id)
-      core:RemovePicture(id)
-    end,
+    [core.E.UNIT_CREATED] = mod.OnShackleCreated,
+    [core.E.UNIT_DESTROYED] = mod.OnShackleDestroyed,
   }
 )
