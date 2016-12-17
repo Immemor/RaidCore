@@ -232,7 +232,7 @@ function mod:OnSnakeTarget(message, snakeTargetName)
   end
 
   if mod:GetSetting("CrosshairSnake") then
-    core:AddPicture("SNAKE_CROSSHAIR", snakeTarget:GetId(), "Crosshair", 20)
+    core:AddPicture("SNAKE_CROSSHAIR", snakeTarget, "Crosshair", 20)
   end
 
   mod:RemoveTimerBar("NEXT_SNAKE_TIMER")
@@ -275,7 +275,7 @@ function mod:OnLaserTarget(message, laserTargetName)
   end
 
   if mod:GetSetting("CrosshairLaser") then
-    core:AddPicture("LASER_CROSSHAIR", laserTarget:GetId(), "Crosshair", 30, 0, 0, nil, "Red")
+    core:AddPicture("LASER_CROSSHAIR", laserTarget, "Crosshair", 30, 0, 0, nil, "Red")
   end
 
   mod:RemoveTimerBar("NEXT_INCINERATE_TIMER")
@@ -334,7 +334,7 @@ function mod:OnArmDestroyed(id, unit, name)
     if mazeArmCount == 0 then
       mod:RedrawCannonArmLines()
       if mod:GetSetting("LineRoboMaze") then
-        core:AddLineBetweenUnits("ROBO_MAZE_LINE", playerUnit:GetId(), roboUnit:GetId(), 8)
+        core:AddLineBetweenUnits("ROBO_MAZE_LINE", playerUnit, roboUnit, 8)
       end
     end
   end
@@ -342,8 +342,8 @@ end
 
 function mod:RedrawCannonArmLines()
   if mod:GetSetting("LineCannonArm") then
-    for id, _ in pairs(cannonArms) do
-      core:AddLineBetweenUnits("CANNON_ARM_LINE_"..id, playerUnit:GetId(), id, 5)
+    for id, cannonArm in pairs(cannonArms) do
+      core:AddLineBetweenUnits("CANNON_ARM_LINE_"..id, playerUnit, cannonArm.unit, 5)
     end
   end
 end
@@ -367,7 +367,7 @@ function mod:OnCannonArmCreated(id, unit, name)
   mod:MarkCannonArm(cannonArms[id])
   core:WatchUnit(unit, core.E.TRACK_CASTS)
   if mod:GetSetting("LineCannonArm") then
-    core:AddLineBetweenUnits("CANNON_ARM_LINE_"..id, playerUnit:GetId(), id, 5)
+    core:AddLineBetweenUnits("CANNON_ARM_LINE_"..id, playerUnit, unit, 5)
   end
   if phase == DPS_PHASE then
     mod:AddTimerBar("NEXT_ARMS_TIMER", "msg.arms.next", TIMERS.ARMS.NORMAL)

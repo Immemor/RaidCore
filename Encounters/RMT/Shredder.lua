@@ -322,7 +322,7 @@ end
 
 function mod:OnPriorityTrashCreated(id, unit, name)
   if mod:GetSetting("CrosshairPriority") then
-    core:AddPicture(id, id, "Crosshair", 30, 0, 0, nil, "red")
+    core:AddPicture(id, unit, "Crosshair", 30, 0, 0, nil, "red")
   end
 end
 
@@ -412,7 +412,7 @@ end
 
 function mod:OnBubbleCreated(id, unit, name)
   if mod:GetSetting("CircleBubble") then
-    core:AddPolygon(id, id, 6.5, nil, 5, "white", 20)
+    core:AddPolygon(id, unit, 6.5, nil, 5, "white", 20)
   end
 end
 
@@ -422,7 +422,7 @@ end
 
 function mod:OnTetherCreated(id, unit, name)
   if mod:GetSetting("CrosshairTether") then
-    core:AddPicture(id, id, "Crosshair", 25, 0, 0, nil, "FFFFF569")
+    core:AddPicture(id, unit, "Crosshair", 25, 0, 0, nil, "FFFFF569")
   end
 end
 
@@ -432,7 +432,7 @@ end
 
 function mod:OnJunkTrapCreated(id, unit, name)
   if mod:GetSetting("SquareTethers") then
-    core:AddPolygon(id, id, 5, 45, 6, nil, 4)
+    core:AddPolygon(id, unit, 5, 45, 6, nil, 4)
   end
 end
 
