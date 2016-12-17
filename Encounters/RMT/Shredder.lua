@@ -442,7 +442,6 @@ end
 -- Bind event handlers.
 ----------------------------------------------------------------------------------------------------
 mod:RegisterUnitSpellEvent(core.E.ALL_UNITS, core.E.DEBUFF_UPDATE, DEBUFF_OOZING_BILE, mod.OnOozingBileUpdate)
-
 mod:RegisterUnitEvents({
     "unit.add.nabber",
     "unit.miniboss.regor",
@@ -451,7 +450,6 @@ mod:RegisterUnitEvents({
     [core.E.UNIT_CREATED] = mod.OnTrashWithCastsCreated,
   }
 )
-
 mod:RegisterUnitEvents({
     "unit.add.grunt",
     "unit.add.brute",
@@ -462,7 +460,6 @@ mod:RegisterUnitEvents({
     [core.E.UNIT_CREATED] = mod.OnTrashCreated,
   }
 )
-
 mod:RegisterUnitEvents({
     "unit.add.nabber",
     "unit.add.grunt",
@@ -477,12 +474,10 @@ mod:RegisterUnitEvents({
     [core.E.UNIT_DESTROYED] = mod.OnTrashDestroyed,
   }
 )
-
 mod:RegisterUnitEvents({"unit.add.brute", "unit.add.nabber"},{
     [core.E.UNIT_CREATED] = mod.OnPriorityTrashCreated,
   }
 )
-
 mod:RegisterUnitEvents("unit.swabbie",{
     [core.E.UNIT_CREATED] = mod.OnSwabbieCreated,
     [core.E.UNIT_DESTROYED] = mod.OnSwabbieDestroyed,
@@ -491,13 +486,11 @@ mod:RegisterUnitEvents("unit.swabbie",{
     },
   }
 )
-
 mod:RegisterUnitEvents("unit.saw.big",{
     [core.E.UNIT_CREATED] = mod.OnBigSawCreated,
     [core.E.UNIT_DESTROYED] = mod.OnBigSawDestroyed,
   }
 )
-
 mod:RegisterUnitEvents("unit.add.nabber",{
     [core.E.UNIT_CREATED] = mod.OnNabberCreated,
     [core.E.UNIT_DESTROYED] = mod.OnNabberDestroyed,
@@ -506,7 +499,6 @@ mod:RegisterUnitEvents("unit.add.nabber",{
     },
   }
 )
-
 mod:RegisterUnitEvents({"unit.miniboss.regor", "unit.miniboss.braugh"},{
     [core.E.UNIT_CREATED] = mod.OnMinibossCreated,
     [core.E.CAST_START] = {
@@ -516,19 +508,16 @@ mod:RegisterUnitEvents({"unit.miniboss.regor", "unit.miniboss.braugh"},{
     },
   }
 )
-
 mod:RegisterUnitEvents("unit.bubble",{
     [core.E.UNIT_CREATED] = mod.OnBubbleCreated,
     [core.E.UNIT_DESTROYED] = mod.OnBubbleDestroyed,
   }
 )
-
 mod:RegisterUnitEvents("unit.tether",{
     [core.E.UNIT_CREATED] = mod.OnTetherCreated,
     [core.E.UNIT_DESTROYED] = mod.OnTetherDestroyed,
   }
 )
-
 mod:RegisterUnitEvents("unit.junk_trap",{
     [core.E.UNIT_CREATED] = mod.OnJunkTrapCreated,
     [core.E.UNIT_DESTROYED] = mod.OnJunkTrapDestroyed,
