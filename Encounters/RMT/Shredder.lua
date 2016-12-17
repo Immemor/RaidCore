@@ -452,17 +452,15 @@ mod:RegisterUnitEvents({"unit.miniboss.regor", "unit.miniboss.braugh"},{
   }
 )
 
-mod:RegisterUnitEvents("unit.bubble",{
-    [core.E.UNIT_CREATED] = function(_, id)
-      if mod:GetSetting("CircleBubble") then
-        core:AddPolygon(id, id, 6.5, nil, 5, "white", 20)
-      end
-    end,
-    [core.E.UNIT_DESTROYED] = function(_, id)
-      core:RemovePolygon(id)
-    end,
-  }
-)
+function mod:OnBubbleCreated(id, unit, name)
+  if mod:GetSetting("CircleBubble") then
+    core:AddPolygon(id, id, 6.5, nil, 5, "white", 20)
+  end
+end
+
+function mod:OnBubbleDestroyed(id, unit, name)
+  core:RemovePolygon(id)
+end
 
 function mod:OnTetherCreated(id, unit, name)
   if mod:GetSetting("CrosshairTether") then
@@ -487,6 +485,12 @@ end
 ----------------------------------------------------------------------------------------------------
 -- Bind event handlers.
 ----------------------------------------------------------------------------------------------------
+mod:RegisterUnitEvents("unit.bubble",{
+    [core.E.UNIT_CREATED] = mod.OnBubbleCreated,
+    [core.E.UNIT_DESTROYED] = mod.OnBubbleDestroyed,
+  }
+)
+
 mod:RegisterUnitEvents("unit.tether",{
     [core.E.UNIT_CREATED] = mod.OnTetherCreated,
     [core.E.UNIT_DESTROYED] = mod.OnTetherDestroyed,
