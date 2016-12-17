@@ -35,8 +35,8 @@ mod:RegisterEnglishLocale({
     ["msg.explosion"] = "Explosion",
     ["msg.devourer.next"] = "Next Data Devourers",
     -- Message bars.
-    ["msg.phase.shield"] = "P2: SHIELD PHASE",
-    ["msg.phase.jump"] = "P2: JUMP PHASE",
+    ["msg.phase.shield"] = "SHIELD PHASE",
+    ["msg.phase.jump"] = "JUMP PHASE",
     ["msg.beam.x"] = "BEAM on %s",
     ["msg.beam.you"] = "BEAM on YOU",
     -- Marks
@@ -60,8 +60,8 @@ mod:RegisterFrenchLocale({
     ["msg.devourer.next"] = "Prochain Dévoreur",
     ["msg.pillar.timeout"] = "Pillier Expiration",
     -- Message bars.
-    ["msg.phase.shield"] = "P2: PHASE BOUCLIER",
-    ["msg.phase.jump"] = "P2: PHASE SAUTER",
+    ["msg.phase.shield"] = "PHASE BOUCLIER",
+    ["msg.phase.jump"] = "PHASE SAUTER",
     ["msg.beam.x"] = "LASER sur %s",
     ["msg.beam.you"] = "LASER sur VOUS",
   }
@@ -79,8 +79,8 @@ mod:RegisterGermanLocale({
     ["msg.devourer.next"] = "Nächste Datenverschlinger",
     ["msg.pillar.timeout"] = "Säulen Time-out",
     -- Bar and messages.
-    ["msg.phase.shield"] = "P2: SCHILD-PHASE",
-    ["msg.phase.jump"] = "P2: SPRING-PHASE",
+    ["msg.phase.shield"] = "SCHILD-PHASE",
+    ["msg.phase.jump"] = "SPRING-PHASE",
     ["msg.beam.x"] = "LASER auf %s",
     ["msg.beam.you"] = "LASER auf DIR",
   }
