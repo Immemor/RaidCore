@@ -210,6 +210,7 @@ local prevShredderProgress
 local startProgressBarTimer = ApolloTimer.Create(4, false, "StartProgressBar", mod)
 startProgressBarTimer:Stop() --thanks carbine
 local nabbers
+local lastOozingBileStack
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 -----------------------------------------------------------------------------------------------------
@@ -222,6 +223,7 @@ function mod:OnBossEnable()
   prevShredderProgress = 0
   firstShredderSaw = nil
   secondShredderSaw = nil
+  lastOozingBileStack = 0
   nabbers = {}
   startProgressBarTimer:Start()
 end
@@ -231,16 +233,14 @@ function mod:OnBossDisable()
   mod:RemoveProgressBar("ADDS_PROGRESS")
 end
 
-mod:RegisterUnitEvents(core.E.ALL_UNITS, {
-    [DEBUFF_OOZING_BILE] = {
-      [core.E.DEBUFF_UPDATE] = function(self, id, _, stack)
-        if playerUnit:GetId() == id and stack == 8 then
-          mod:AddMsg("OOZE_MSG", string.format(self.L["msg.bile.stacks"], stack), 5, "Beware", "xkcdAcidGreen")
-        end
-      end
-    },
-  }
-)
+function mod:OnOozingBileUpdate(id, spellId, stack)
+  if playerUnit:GetId() == id then
+    if stack > lastOozingBileStack and stack == 8 then
+      mod:AddMsg("OOZE_MSG", string.format(self.L["msg.bile.stacks"], stack), 5, "Beware", "xkcdAcidGreen")
+    end
+    lastOozingBileStack = stack
+  end
+end
 
 function mod:GetWalkingProgress(oldProgress)
   local pos1
@@ -441,6 +441,8 @@ end
 ----------------------------------------------------------------------------------------------------
 -- Bind event handlers.
 ----------------------------------------------------------------------------------------------------
+mod:RegisterUnitSpellEvent(core.E.ALL_UNITS, core.E.DEBUFF_UPDATE, DEBUFF_OOZING_BILE, mod.OnOozingBileUpdate)
+
 mod:RegisterUnitEvents({
     "unit.add.nabber",
     "unit.miniboss.regor",
