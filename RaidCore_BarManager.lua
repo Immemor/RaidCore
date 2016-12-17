@@ -76,6 +76,7 @@ local DEFAULT_SETTINGS = {
     bDisplayCast = true,
     bDisplayAbsorb = true,
     bDisplayShield = true,
+    bDisplayMidphase = true,
   },
 }
 
@@ -448,7 +449,7 @@ function UnitManager:AddBar(nId, sColor, nPriority, tMarkers)
       local wndAbsorb = wndBody:FindChild("Absorb")
       local wndMark = wndMain:FindChild("Mark")
       local wndArmor = wndMain:FindChild("Armor")
-      if tMarkers then
+      if self.tSettings.bDisplayMidphase and tMarkers then
         local wndMarkerContainer = wndUnit:FindChild("MarkerContainer")
         for i = 1, #tMarkers do
           BuildProgressbarMarker(tMarkers[i], wndMarkerContainer, self)
