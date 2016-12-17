@@ -332,6 +332,8 @@ function LineBetween:AddDraw(Key, FromOrigin, ToOrigin, nWidth, sColor, nNumberO
       self:RemoveDraw(Key)
     end
   end
+  local FromOriginType = GetOriginType(FromOrigin)
+  local ToOriginType = GetOriginType(ToOrigin)
   -- Get saved object or create a new table.
   local tDraw = self.tDraws[Key] or NewDraw()
   tDraw.nWidth = nWidth or 4.0
@@ -341,24 +343,32 @@ function LineBetween:AddDraw(Key, FromOrigin, ToOrigin, nWidth, sColor, nNumberO
   tDraw.nOffset = nOffset or 0
   tDraw.nLength = nLength or 0
   -- Preprocessing of the 'From'.
-  if type(FromOrigin) == "number" then
-    -- FromOrigin is the Id of an unit.
-    tDraw.tUnitFrom = GetUnitById(FromOrigin)
-    tDraw.tVectorFrom = nil
-  else
+  if FromOriginType == "table" or FromOriginType == "vector" then
     -- FromOrigin is the result of a GetPosition()
     tDraw.tUnitFrom = nil
     tDraw.tVectorFrom = NewVector3(FromOrigin)
+  else
+    local tUnit = FromOrigin
+    if FromOriginType == "number" then
+      tUnit = GetUnitById(FromOrigin)
+    end
+    -- FromOrigin is the Id of an unit.
+    tDraw.tUnitFrom = tUnit
+    tDraw.tVectorFrom = nil
   end
   -- Preprocessing of the 'To'.
-  if type(ToOrigin) == "number" then
-    -- ToOrigin is the Id of an unit.
-    tDraw.tUnitTo = GetUnitById(ToOrigin)
-    tDraw.tVectorTo = nil
-  else
+  if ToOriginType == "table" or ToOriginType == "vector" then
     -- ToOrigin is the result of a GetPosition()
     tDraw.tUnitTo = nil
     tDraw.tVectorTo = NewVector3(ToOrigin)
+  else
+    local tUnit = ToOrigin
+    if ToOriginType == "number" then
+      tUnit = GetUnitById(ToOrigin)
+    end
+    -- ToOrigin is the Id of an unit.
+    tDraw.tUnitTo = tUnit
+    tDraw.tVectorTo = nil
   end
   -- Save this object (new or not).
   self.tDraws[Key] = tDraw
