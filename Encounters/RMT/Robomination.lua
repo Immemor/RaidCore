@@ -213,79 +213,75 @@ function mod:OnBarUnitCreated(id, unit, name)
   mod:AddUnit(unit)
 end
 
-mod:RegisterDatachronEvent("chron.robo.snake", core.E.COMPARE_MATCH, function(self, _, snakeTargetName)
-    local snakeTarget = GetPlayerUnitByName(snakeTargetName)
-    local isOnMyself = snakeTarget == playerUnit
-    local isSnakeNearYou = not isOnMyself and mod:GetDistanceBetweenUnits(playerUnit, snakeTarget) < 10
-    if isOnMyself then
-      mod:AddMsg("SNAKE_MSG", "msg.snake.you", 5, "RunAway", "xkcdBlue")
-    elseif isSnakeNearYou then
-      local sound = "RunAway"
-      local msg = self.L["msg.snake.near"]:format(snakeTarget:GetName())
-      if mod:GetSetting("SoundSnakeNearAlt") then
-        sound = "Destruction"
-      end
-      mod:AddMsg("SNAKE_MSG_NEAR", msg, 5, sound, "xkcdBlue")
-    else
-      local msg = self.L["msg.snake.other"]:format(snakeTarget:GetName())
-      mod:AddMsg("SNAKE_MSG_OTHER", msg, 5, nil, "xkcdBlue")
+function mod:OnSnakeTarget(message, snakeTargetName)
+  local snakeTarget = GetPlayerUnitByName(snakeTargetName)
+  local isOnMyself = snakeTarget == playerUnit
+  local isSnakeNearYou = not isOnMyself and mod:GetDistanceBetweenUnits(playerUnit, snakeTarget) < 10
+  if isOnMyself then
+    mod:AddMsg("SNAKE_MSG", "msg.snake.you", 5, "RunAway", "xkcdBlue")
+  elseif isSnakeNearYou then
+    local sound = "RunAway"
+    local msg = self.L["msg.snake.near"]:format(snakeTarget:GetName())
+    if mod:GetSetting("SoundSnakeNearAlt") then
+      sound = "Destruction"
     end
-
-    if mod:GetSetting("CrosshairSnake") then
-      core:AddPicture("SNAKE_CROSSHAIR", snakeTarget:GetId(), "Crosshair", 20)
-    end
-
-    mod:RemoveTimerBar("NEXT_SNAKE_TIMER")
-    mod:AddTimerBar("NEXT_SNAKE_TIMER", "msg.snake.next", TIMERS.SNAKE.NORMAL)
+    mod:AddMsg("SNAKE_MSG_NEAR", msg, 5, sound, "xkcdBlue")
+  else
+    local msg = self.L["msg.snake.other"]:format(snakeTarget:GetName())
+    mod:AddMsg("SNAKE_MSG_OTHER", msg, 5, nil, "xkcdBlue")
   end
-)
 
-mod:RegisterDatachronEvent("chron.robo.hides", core.E.COMPARE_EQUAL, function()
-    phase = MAZE_PHASE
-    mod:RemoveTimerBar("NEXT_SNAKE_TIMER")
-    mod:RemoveTimerBar("NEXT_INCINERATE_TIMER")
-    mod:RemoveTimerBar("NEXT_SPEW_TIMER")
-    mod:RemoveTimerBar("NEXT_ARMS_TIMER")
-    core:RemovePicture("SNAKE_CROSSHAIR")
-    core:RemovePicture("LASER_CROSSHAIR")
-
-    core:RemoveMsg("ROBO_MAZE_CLOSE")
-    mod:AddMsg("ROBO_MAZE_NOW", "msg.maze.now", 5, "Info", "xkcdWhite")
-    mod:RemoveCompactorGrid()
-    mod:RemoveCannonArmLines()
+  if mod:GetSetting("CrosshairSnake") then
+    core:AddPicture("SNAKE_CROSSHAIR", snakeTarget:GetId(), "Crosshair", 20)
   end
-)
 
-mod:RegisterDatachronEvent("chron.robo.shows", core.E.COMPARE_EQUAL, function()
-    phase = DPS_PHASE
-    core:RemoveLineBetweenUnits("ROBO_MAZE_LINE")
-    mod:AddTimerBar("NEXT_SNAKE_TIMER", "msg.snake.next", TIMERS.SNAKE.FIRST)
-    mod:AddTimerBar("NEXT_SPEW_TIMER", "msg.spew.next", TIMERS.SPEW.AFTER_MID)
-    mod:AddTimerBar("NEXT_INCINERATE_TIMER", "msg.robo.laser.next", TIMERS.LASER.FIRST, mod:GetSetting("SoundLaser"))
-    mod:AddTimerBar("NEXT_ARMS_TIMER", "msg.arms.next", TIMERS.ARMS.NORMAL)
-    mod:DrawCompactorGrid()
+  mod:RemoveTimerBar("NEXT_SNAKE_TIMER")
+  mod:AddTimerBar("NEXT_SNAKE_TIMER", "msg.snake.next", TIMERS.SNAKE.NORMAL)
+end
+
+function mod:OnRobominationHides()
+  phase = MAZE_PHASE
+  mod:RemoveTimerBar("NEXT_SNAKE_TIMER")
+  mod:RemoveTimerBar("NEXT_INCINERATE_TIMER")
+  mod:RemoveTimerBar("NEXT_SPEW_TIMER")
+  mod:RemoveTimerBar("NEXT_ARMS_TIMER")
+  core:RemovePicture("SNAKE_CROSSHAIR")
+  core:RemovePicture("LASER_CROSSHAIR")
+
+  core:RemoveMsg("ROBO_MAZE_CLOSE")
+  mod:AddMsg("ROBO_MAZE_NOW", "msg.maze.now", 5, "Info", "xkcdWhite")
+  mod:RemoveCompactorGrid()
+  mod:RemoveCannonArmLines()
+end
+
+function mod:OnRobominationShows()
+  phase = DPS_PHASE
+  core:RemoveLineBetweenUnits("ROBO_MAZE_LINE")
+  mod:AddTimerBar("NEXT_SNAKE_TIMER", "msg.snake.next", TIMERS.SNAKE.FIRST)
+  mod:AddTimerBar("NEXT_SPEW_TIMER", "msg.spew.next", TIMERS.SPEW.AFTER_MID)
+  mod:AddTimerBar("NEXT_INCINERATE_TIMER", "msg.robo.laser.next", TIMERS.LASER.FIRST, mod:GetSetting("SoundLaser"))
+  mod:AddTimerBar("NEXT_ARMS_TIMER", "msg.arms.next", TIMERS.ARMS.NORMAL)
+  mod:DrawCompactorGrid()
+end
+
+function mod:OnLaserTarget(message, laserTargetName)
+  local laserTarget = GetPlayerUnitByName(laserTargetName)
+  local isOnMyself = laserTarget == playerUnit
+  local laserOnX
+  if isOnMyself then
+    laserOnX = "msg.robo.laser.you"
+  else
+    laserOnX = self.L["msg.robo.laser.other"]:format(laserTarget:GetName())
   end
-)
 
-mod:RegisterDatachronEvent("chron.robo.laser", core.E.COMPARE_MATCH, function(self, _, laserTargetName)
-    local laserTarget = GetPlayerUnitByName(laserTargetName)
-    local isOnMyself = laserTarget == playerUnit
-    local laserOnX
-    if isOnMyself then
-      laserOnX = "msg.robo.laser.you"
-    else
-      laserOnX = self.L["msg.robo.laser.other"]:format(laserTarget:GetName())
-    end
-
-    if mod:GetSetting("CrosshairLaser") then
-      core:AddPicture("LASER_CROSSHAIR", laserTarget:GetId(), "Crosshair", 30, 0, 0, nil, "Red")
-    end
-
-    mod:RemoveTimerBar("NEXT_INCINERATE_TIMER")
-    mod:AddTimerBar("NEXT_INCINERATE_TIMER", "msg.robo.laser.next", TIMERS.LASER.NORMAL, mod:GetSetting("SoundLaser"))
-    mod:AddMsg("LASER_MSG", laserOnX, 5, "Burn", "xkcdRed")
+  if mod:GetSetting("CrosshairLaser") then
+    core:AddPicture("LASER_CROSSHAIR", laserTarget:GetId(), "Crosshair", 30, 0, 0, nil, "Red")
   end
-)
+
+  mod:RemoveTimerBar("NEXT_INCINERATE_TIMER")
+  mod:AddTimerBar("NEXT_INCINERATE_TIMER", "msg.robo.laser.next", TIMERS.LASER.NORMAL, mod:GetSetting("SoundLaser"))
+  mod:AddMsg("LASER_MSG", laserOnX, 5, "Burn", "xkcdRed")
+end
 
 function mod:DrawCompactorGrid()
   mod:HelperCompactorGrid(COMPACTORS_EDGE, false, true)
@@ -416,6 +412,10 @@ end
 ----------------------------------------------------------------------------------------------------
 -- Bind event handlers.
 ----------------------------------------------------------------------------------------------------
+mod:RegisterDatachronEvent("chron.robo.hides", core.E.COMPARE_EQUAL, mod.OnRobominationHides)
+mod:RegisterDatachronEvent("chron.robo.shows", core.E.COMPARE_EQUAL, mod.OnRobominationShows)
+mod:RegisterDatachronEvent("chron.robo.snake", core.E.COMPARE_MATCH, mod.OnSnakeTarget)
+mod:RegisterDatachronEvent("chron.robo.laser", core.E.COMPARE_MATCH, mod.OnLaserTarget)
 mod:RegisterUnitEvents(core.E.ALL_UNITS, {
     [core.E.DEBUFF_REMOVE] = {
       [DEBUFFS.SNAKE] = mod.OnSnakeDebuffRemove,
