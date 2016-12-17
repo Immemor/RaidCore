@@ -63,7 +63,7 @@ mod:RegisterFrenchLocale({
     -- Cast names.
     ["cast.laser"] = "Laser d'incinération",
     -- Datachron.
-    ["chron.robo.laser"] = "Robomination essaie d'incinérer ([^%s]+%s[^\.]+)\.",
+    ["chron.robo.laser"] = "Robomination essaie d'incinérer ([^%s]+%s[^%.]+)%.",
     ["chron.robo.hides"] = "Robomination s'enfonce dans les ordures.",
   }
 )
