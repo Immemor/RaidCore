@@ -408,22 +408,31 @@ mod:RegisterUnitEvents("unit.cannon_arm",{
   }
 )
 
+function mod:OnRobominationCreated(id, unit, name)
+  core:WatchUnit(unit, core.E.TRACK_CASTS + core.E.TRACK_HEALTH)
+  roboUnit = unit
+end
+
+function mod:OnRobominationHealthChanged(id, percent, name)
+  if mod:IsMidphaseClose(name, percent) then
+    mod:AddMsg("ROBO_MAZE_CLOSE", "msg.maze.coming", 5, "Info", "xkcdWhite")
+  end
+end
+
+function mod:OnRobominationSpewStart()
+  mod:RemoveTimerBar("NEXT_SPEW_TIMER")
+  mod:AddTimerBar("NEXT_SPEW_TIMER", "msg.spew.next", SPEW_TIMER)
+  mod:AddMsg("SPEW_MSG", "msg.spew.now", 4, "Beware", "xkcdAcidGreen")
+end
+
+----------------------------------------------------------------------------------------------------
+-- Bind event handlers.
+----------------------------------------------------------------------------------------------------
 mod:RegisterUnitEvents("unit.robo",{
-    [core.E.UNIT_CREATED] = function(_, _, unit)
-      core:WatchUnit(unit, core.E.TRACK_CASTS + core.E.TRACK_HEALTH)
-      roboUnit = unit
-    end,
-    [core.E.HEALTH_CHANGED] = function(self, id, percent, name)
-      if mod:IsMidphaseClose(name, percent) then
-        mod:AddMsg("ROBO_MAZE_CLOSE", "msg.maze.coming", 5, "Info", "xkcdWhite")
-      end
-    end,
+    [core.E.UNIT_CREATED] = mod.OnRobominationCreated,
+    [core.E.HEALTH_CHANGED] = mod.OnRobominationHealthChanged,
     [core.E.CAST_START] = {
-      ["cast.spew"] = function(self, _)
-        mod:RemoveTimerBar("NEXT_SPEW_TIMER")
-        mod:AddTimerBar("NEXT_SPEW_TIMER", "msg.spew.next", SPEW_TIMER)
-        mod:AddMsg("SPEW_MSG", "msg.spew.now", 4, "Beware", "xkcdAcidGreen")
-      end
+      ["cast.spew"] = mod.OnRobominationSpewStart,
     },
   }
 )
