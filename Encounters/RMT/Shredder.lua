@@ -181,7 +181,9 @@ local SHREDDER = 1
 local ADD_PHASES = circular{ 11, 45, 66, 0 }
 
 -- Spell ids.
-local DEBUFF_OOZING_BILE = 84321
+local DEBUFFS = {
+  OOZING_BILE = 84321,
+}
 
 -- Saw stuff.
 local WEST_POSITION = -42
@@ -441,7 +443,7 @@ end
 ----------------------------------------------------------------------------------------------------
 -- Bind event handlers.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterUnitSpellEvent(core.E.ALL_UNITS, core.E.DEBUFF_UPDATE, DEBUFF_OOZING_BILE, mod.OnOozingBileUpdate)
+mod:RegisterUnitSpellEvent(core.E.ALL_UNITS, core.E.DEBUFF_UPDATE, DEBUFFS.OOZING_BILE, mod.OnOozingBileUpdate)
 mod:RegisterUnitEvents({
     "unit.add.nabber",
     "unit.miniboss.regor",
