@@ -333,25 +333,23 @@ mod:RegisterUnitEvents("unit.scanning_eye",{
   }
 )
 
-mod:RegisterUnitEvents({"unit.arm.cannon", "unit.arm.flailing"},{
-    [core.E.UNIT_CREATED] = function()
-      if phase == MID_MAZE_PHASE then
-        mazeArmCount = mazeArmCount + 1
+function mod:OnArmCreated(id, unit, name)
+  if phase == MID_MAZE_PHASE then
+    mazeArmCount = mazeArmCount + 1
+  end
+end
+
+function mod:OnArmDestroyed(id, unit, name)
+  if phase == MID_MAZE_PHASE then
+    mazeArmCount = mazeArmCount - 1
+    if mazeArmCount == 0 then
+      mod:RedrawCannonArmLines()
+      if mod:GetSetting("LineRoboMaze") then
+        core:AddLineBetweenUnits("ROBO_MAZE_LINE", playerUnit:GetId(), roboUnit:GetId(), 8)
       end
-    end,
-    [core.E.UNIT_DESTROYED] = function()
-      if phase == MID_MAZE_PHASE then
-        mazeArmCount = mazeArmCount - 1
-        if mazeArmCount == 0 then
-          mod:RedrawCannonArmLines()
-          if mod:GetSetting("LineRoboMaze") then
-            core:AddLineBetweenUnits("ROBO_MAZE_LINE", playerUnit:GetId(), roboUnit:GetId(), 8)
-          end
-        end
-      end
-    end,
-  }
-)
+    end
+  end
+end
 
 function mod:RedrawCannonArmLines()
   if mod:GetSetting("LineCannonArm") then
@@ -425,6 +423,11 @@ end
 ----------------------------------------------------------------------------------------------------
 -- Bind event handlers.
 ----------------------------------------------------------------------------------------------------
+mod:RegisterUnitEvents({"unit.arm.cannon", "unit.arm.flailing"},{
+    [core.E.UNIT_CREATED] = mod.OnArmCreated,
+    [core.E.UNIT_DESTROYED] = mod.OnArmDestroyed,
+  }
+)
 mod:RegisterUnitEvents({
     "unit.arm.cannon",
     "unit.arm.flailing",
