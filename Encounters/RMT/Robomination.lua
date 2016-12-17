@@ -385,37 +385,35 @@ function mod:MarkCannonArm(cannonArm)
   end
 end
 
-mod:RegisterUnitEvents("unit.arm.cannon",{
-    [core.E.UNIT_CREATED] = function (_, id, unit)
-      cannonArms[id] = {unit = unit, interrupt = 1}
-      mod:MarkCannonArm(cannonArms[id])
-      core:WatchUnit(unit, core.E.TRACK_CASTS)
-      if mod:GetSetting("LineCannonArm") then
-        core:AddLineBetweenUnits(string.format("CANNON_ARM_LINE %d", id), playerUnit:GetId(), id, 5)
-      end
-      if phase == DPS_PHASE then
-        mod:AddTimerBar("NEXT_ARMS_TIMER", "msg.arms.next", TIMERS.ARMS.NORMAL)
-      end
-      mod:AddMsg("ARMS_MSG_SPAWN", "msg.arm.cannon.spawned", 5, "Info", "xkcdWhite")
-    end,
-    ["cast.arm.cannon.fire"] = {
-      [core.E.CAST_START] = function(self, id)
-        if mod:GetDistanceBetweenUnits(playerUnit, GetUnitById(id)) < 45 then
-          local msg = self.L["msg.arm.cannon.interrupt"]:format(cannonArms[id].interrupt)
-          mod:AddMsg("ARMS_MSG_CAST_"..id, msg, 2, "Inferno", "xkcdOrange")
-        end
-        cannonArms[id].interrupt = cannonArms[id].interrupt + 1
-      end,
-      [core.E.CAST_END] = function(self, id)
-        mod:MarkCannonArm(cannonArms[id])
-      end
-    },
-    [core.E.UNIT_DESTROYED] = function(_, id)
-      cannonArms[id] = nil
-      core:RemoveLineBetweenUnits(string.format("CANNON_ARM_LINE %d", id))
-    end,
-  }
-)
+function mod:OnCannonArmCreated(id, unit, name)
+  cannonArms[id] = {unit = unit, interrupt = 1}
+  mod:MarkCannonArm(cannonArms[id])
+  core:WatchUnit(unit, core.E.TRACK_CASTS)
+  if mod:GetSetting("LineCannonArm") then
+    core:AddLineBetweenUnits(string.format("CANNON_ARM_LINE %d", id), playerUnit:GetId(), id, 5)
+  end
+  if phase == DPS_PHASE then
+    mod:AddTimerBar("NEXT_ARMS_TIMER", "msg.arms.next", TIMERS.ARMS.NORMAL)
+  end
+  mod:AddMsg("ARMS_MSG_SPAWN", "msg.arm.cannon.spawned", 5, "Info", "xkcdWhite")
+end
+
+function mod:OnCannonArmDestroyed(id, unit, name)
+  cannonArms[id] = nil
+  core:RemoveLineBetweenUnits(string.format("CANNON_ARM_LINE %d", id))
+end
+
+function mod:OnCannonFireStart(id)
+  if mod:GetDistanceBetweenUnits(playerUnit, cannonArms[id].unit) < 45 then
+    local msg = self.L["msg.arm.cannon.interrupt"]:format(cannonArms[id].interrupt)
+    mod:AddMsg("ARMS_MSG_CAST_"..id, msg, 2, "Inferno", "xkcdOrange")
+  end
+  cannonArms[id].interrupt = cannonArms[id].interrupt + 1
+end
+
+function mod:OnCannonFireEnd(id)
+  mod:MarkCannonArm(cannonArms[id])
+end
 
 function mod:OnRobominationCreated(id, unit, name)
   core:WatchUnit(unit, core.E.TRACK_CASTS + core.E.TRACK_HEALTH)
@@ -437,6 +435,16 @@ end
 ----------------------------------------------------------------------------------------------------
 -- Bind event handlers.
 ----------------------------------------------------------------------------------------------------
+mod:RegisterUnitEvents("unit.arm.cannon",{
+    [core.E.UNIT_CREATED] = mod.OnCannonArmCreated,
+    [core.E.UNIT_DESTROYED] = mod.OnCannonArmDestroyed,
+    ["cast.arm.cannon.fire"] = {
+      [core.E.CAST_START] = mod.OnCannonFireStart,
+      [core.E.CAST_END] = mod.OnCannonFireEnd,
+    },
+  }
+)
+
 mod:RegisterUnitEvents("unit.robo",{
     [core.E.UNIT_CREATED] = mod.OnRobominationCreated,
     [core.E.HEALTH_CHANGED] = mod.OnRobominationHealthChanged,
