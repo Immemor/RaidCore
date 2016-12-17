@@ -387,7 +387,7 @@ function mod:DetermineSawLocation(unit)
   end
 end
 
-function mod:HandleShredderSaw(sawLocation)
+function mod:ProcessMidphaseSaw(sawLocation)
   if firstShredderSaw == nil then
     firstShredderSaw = sawLocation
     return
@@ -410,7 +410,7 @@ function mod:OnBigSawCreated(id, unit, name)
   if phase == WALKING and sawLocation == SAW_MID then
     mod:AddMsg("SAW_MSG_MID", "msg.saw.middle", 5, "Beware", "xkcdRed")
   elseif phase == SHREDDER then
-    mod:HandleShredderSaw(sawLocation)
+    mod:ProcessMidphaseSaw(sawLocation)
   end
 end
 
