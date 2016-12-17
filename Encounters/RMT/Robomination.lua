@@ -366,7 +366,7 @@ mod:RegisterUnitEvents({"unit.arm.cannon", "unit.arm.flailing"},{
 function mod:RedrawCannonArmLines()
   if mod:GetSetting("LineCannonArm") then
     for id, _ in pairs(cannonArms) do
-      core:AddLineBetweenUnits(string.format("CANNON_ARM_LINE %d", id), playerUnit:GetId(), id, 5)
+      core:AddLineBetweenUnits("CANNON_ARM_LINE_"..id, playerUnit:GetId(), id, 5)
     end
   end
 end
@@ -374,7 +374,7 @@ end
 function mod:RemoveCannonArmLines()
   if mod:GetSetting("LineCannonArm") then
     for id, _ in pairs(cannonArms) do
-      core:RemoveLineBetweenUnits(string.format("CANNON_ARM_LINE %d", id))
+      core:RemoveLineBetweenUnits("CANNON_ARM_LINE_"..id)
     end
   end
 end
@@ -390,7 +390,7 @@ function mod:OnCannonArmCreated(id, unit, name)
   mod:MarkCannonArm(cannonArms[id])
   core:WatchUnit(unit, core.E.TRACK_CASTS)
   if mod:GetSetting("LineCannonArm") then
-    core:AddLineBetweenUnits(string.format("CANNON_ARM_LINE %d", id), playerUnit:GetId(), id, 5)
+    core:AddLineBetweenUnits("CANNON_ARM_LINE_"..id, playerUnit:GetId(), id, 5)
   end
   if phase == DPS_PHASE then
     mod:AddTimerBar("NEXT_ARMS_TIMER", "msg.arms.next", TIMERS.ARMS.NORMAL)
@@ -400,7 +400,7 @@ end
 
 function mod:OnCannonArmDestroyed(id, unit, name)
   cannonArms[id] = nil
-  core:RemoveLineBetweenUnits(string.format("CANNON_ARM_LINE %d", id))
+  core:RemoveLineBetweenUnits("CANNON_ARM_LINE_"..id)
 end
 
 function mod:OnCannonFireStart(id)
