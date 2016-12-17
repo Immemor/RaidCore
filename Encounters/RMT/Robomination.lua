@@ -314,17 +314,13 @@ function mod:HelperCompactorGrid(compactors, isCorner, isAdding)
   end
 end
 
-mod:RegisterUnitEvents(core.E.ALL_UNITS, {
-    [core.E.DEBUFF_REMOVE] = {
-      [DEBUFFS.SNAKE] = function()
-        core:RemovePicture("SNAKE_CROSSHAIR")
-      end,
-      [DEBUFFS.LASER] = function()
-        core:RemovePicture("LASER_CROSSHAIR")
-      end,
-    },
-  }
-)
+function mod:OnSnakeDebuffRemove()
+  core:RemovePicture("SNAKE_CROSSHAIR")
+end
+
+function mod:OnLaserDebuffRemove()
+  core:RemovePicture("LASER_CROSSHAIR")
+end
 
 function mod:OnScanningEyeCreated(id, unit, name)
   phase = MID_MAZE_PHASE
@@ -420,6 +416,13 @@ end
 ----------------------------------------------------------------------------------------------------
 -- Bind event handlers.
 ----------------------------------------------------------------------------------------------------
+mod:RegisterUnitEvents(core.E.ALL_UNITS, {
+    [core.E.DEBUFF_REMOVE] = {
+      [DEBUFFS.SNAKE] = mod.OnSnakeDebuffRemove,
+      [DEBUFFS.LASER] = mod.OnLaserDebuffRemove,
+    },
+  }
+)
 mod:RegisterUnitEvent("unit.scanning_eye", core.E.UNIT_DESTROYED, mod.OnScanningEyeCreated)
 mod:RegisterUnitEvents({"unit.arm.cannon", "unit.arm.flailing"},{
     [core.E.UNIT_CREATED] = mod.OnArmCreated,
