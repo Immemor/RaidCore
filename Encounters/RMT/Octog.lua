@@ -104,7 +104,7 @@ mod:RegisterDefaultTimerBarConfigs({
 mod:RegisterUnitBarConfig("unit.octog", {
     nPriority = 0,
     tMidphases = {
-      {percent = 85, color = "xkcdPurplePink"},
+      {percent = 85, color = "xkcdBlack"},
       {percent = 65},
       {percent = 35},
       {percent = 5},
