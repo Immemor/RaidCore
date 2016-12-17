@@ -82,17 +82,24 @@ local MAZE_PHASE = 2
 local MID_MAZE_PHASE = 3
 
 -- Timers.
-local FIRST_SNAKE_TIMER = 7.5
-local SNAKE_TIMER = 17.5
-
-local FIRST_INCINERATE_TIMER = 18.5
-local INCINERATE_TIMER = 42.5
-
-local FIRST_SPEW_TIMER = 15.6
-local SPEW_TIMER = 31.75
-local MAZE_SPEW_TIMER = 10
-
-local ARMS_TIMER = 45
+local TIMERS = {
+  SNAKE = {
+    FIRST = 7.5,
+    NORMAL = 17.5,
+  },
+  LASER = {
+    FIRST = 18.5,
+    NORMAL = 42.5,
+  },
+  SPEW = {
+    FIRST = 15.6,
+    NORMAL = 31.75,
+    AFTER_MID = 10,
+  },
+  ARMS = {
+    NORMAL = 45,
+  }
+}
 
 -- Compactors.
 local COMPACTORS_EDGE = {
@@ -197,9 +204,9 @@ function mod:OnBossEnable()
   roboUnit = nil
   cannonArms = {}
   playerUnit = GameLib.GetPlayerUnit()
-  mod:AddTimerBar("NEXT_ARMS_TIMER", "msg.arms.next", ARMS_TIMER)
-  mod:AddTimerBar("NEXT_SNAKE_TIMER", "msg.snake.next", FIRST_SNAKE_TIMER)
-  mod:AddTimerBar("NEXT_SPEW_TIMER", "msg.spew.next", FIRST_SPEW_TIMER)
+  mod:AddTimerBar("NEXT_ARMS_TIMER", "msg.arms.next", TIMERS.ARMS.NORMAL)
+  mod:AddTimerBar("NEXT_SNAKE_TIMER", "msg.snake.next", TIMERS.SNAKE.FIRST)
+  mod:AddTimerBar("NEXT_SPEW_TIMER", "msg.spew.next", TIMERS.SPEW.FIRST)
   mod:DrawCompactorGrid()
 end
 
@@ -230,7 +237,7 @@ mod:RegisterDatachronEvent("chron.robo.snake", core.E.COMPARE_MATCH, function(se
     end
 
     mod:RemoveTimerBar("NEXT_SNAKE_TIMER")
-    mod:AddTimerBar("NEXT_SNAKE_TIMER", "msg.snake.next", SNAKE_TIMER)
+    mod:AddTimerBar("NEXT_SNAKE_TIMER", "msg.snake.next", TIMERS.SNAKE.NORMAL)
   end
 )
 
@@ -253,10 +260,10 @@ mod:RegisterDatachronEvent("chron.robo.hides", core.E.COMPARE_EQUAL, function()
 mod:RegisterDatachronEvent("chron.robo.shows", core.E.COMPARE_EQUAL, function()
     phase = DPS_PHASE
     core:RemoveLineBetweenUnits("ROBO_MAZE_LINE")
-    mod:AddTimerBar("NEXT_SNAKE_TIMER", "msg.snake.next", FIRST_SNAKE_TIMER)
-    mod:AddTimerBar("NEXT_SPEW_TIMER", "msg.spew.next", MAZE_SPEW_TIMER)
-    mod:AddTimerBar("NEXT_INCINERATE_TIMER", "msg.robo.laser.next", FIRST_INCINERATE_TIMER, mod:GetSetting("SoundLaser"))
-    mod:AddTimerBar("NEXT_ARMS_TIMER", "msg.arms.next", ARMS_TIMER)
+    mod:AddTimerBar("NEXT_SNAKE_TIMER", "msg.snake.next", TIMERS.SNAKE.FIRST)
+    mod:AddTimerBar("NEXT_SPEW_TIMER", "msg.spew.next", TIMERS.SPEW.AFTER_MID)
+    mod:AddTimerBar("NEXT_INCINERATE_TIMER", "msg.robo.laser.next", TIMERS.LASER.FIRST, mod:GetSetting("SoundLaser"))
+    mod:AddTimerBar("NEXT_ARMS_TIMER", "msg.arms.next", TIMERS.ARMS.NORMAL)
     mod:DrawCompactorGrid()
   end
 )
@@ -276,7 +283,7 @@ mod:RegisterDatachronEvent("chron.robo.laser", core.E.COMPARE_MATCH, function(se
     end
 
     mod:RemoveTimerBar("NEXT_INCINERATE_TIMER")
-    mod:AddTimerBar("NEXT_INCINERATE_TIMER", "msg.robo.laser.next", INCINERATE_TIMER, mod:GetSetting("SoundLaser"))
+    mod:AddTimerBar("NEXT_INCINERATE_TIMER", "msg.robo.laser.next", TIMERS.LASER.NORMAL, mod:GetSetting("SoundLaser"))
     mod:AddMsg("LASER_MSG", laserOnX, 5, "Burn", "xkcdRed")
   end
 )
@@ -387,7 +394,7 @@ mod:RegisterUnitEvents("unit.arm.cannon",{
         core:AddLineBetweenUnits(string.format("CANNON_ARM_LINE %d", id), playerUnit:GetId(), id, 5)
       end
       if phase == DPS_PHASE then
-        mod:AddTimerBar("NEXT_ARMS_TIMER", "msg.arms.next", ARMS_TIMER)
+        mod:AddTimerBar("NEXT_ARMS_TIMER", "msg.arms.next", TIMERS.ARMS.NORMAL)
       end
       mod:AddMsg("ARMS_MSG_SPAWN", "msg.arm.cannon.spawned", 5, "Info", "xkcdWhite")
     end,
@@ -423,7 +430,7 @@ end
 
 function mod:OnRobominationSpewStart()
   mod:RemoveTimerBar("NEXT_SPEW_TIMER")
-  mod:AddTimerBar("NEXT_SPEW_TIMER", "msg.spew.next", SPEW_TIMER)
+  mod:AddTimerBar("NEXT_SPEW_TIMER", "msg.spew.next", TIMERS.SPEW.NORMAL)
   mod:AddMsg("SPEW_MSG", "msg.spew.now", 4, "Beware", "xkcdAcidGreen")
 end
 
