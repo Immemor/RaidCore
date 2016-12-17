@@ -476,14 +476,21 @@ mod:RegisterUnitEvents("unit.tether",{
   }
 )
 
+function mod:OnJunkTrapCreated(id, unit, name)
+  if mod:GetSetting("SquareTethers") then
+    core:AddPolygon(id, id, 5, 45, 6, nil, 4)
+  end
+end
+
+function mod:OnJunkTrapDestroyed(id, unit, name)
+  core:RemovePolygon(id)
+end
+
+----------------------------------------------------------------------------------------------------
+-- Bind event handlers.
+----------------------------------------------------------------------------------------------------
 mod:RegisterUnitEvents("unit.junk_trap",{
-    [core.E.UNIT_CREATED] = function(_, id)
-      if mod:GetSetting("SquareTethers") then
-        core:AddPolygon(id, id, 5, 45, 6, nil, 4)
-      end
-    end,
-    [core.E.UNIT_DESTROYED] = function(_, id)
-      core:RemovePolygon(id)
-    end,
+    [core.E.UNIT_CREATED] = mod.OnJunkTrapCreated,
+    [core.E.UNIT_DESTROYED] = mod.OnJunkTrapDestroyed,
   }
 )
