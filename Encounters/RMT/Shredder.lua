@@ -354,27 +354,22 @@ mod:RegisterUnitEvents({ "unit.add.brute", "unit.add.nabber" },{
   }
 )
 
-mod:RegisterUnitEvents("unit.swabbie",{
-    [core.E.UNIT_CREATED] = function(self, _, unit)
-      -- filter out second unit that's there for some reason
-      if not unit:GetHealth() then
-        return
-      end
-      core:AddUnit(unit)
-      core:WatchUnit(unit, core.E.TRACK_CASTS)
-      self.swabbieUnit = unit
-    end,
-    [core.E.UNIT_DESTROYED] = function(self, _, unit)
-      self.swabbieUnit = nil
-      core:RemoveUnit(unit)
-    end,
-    [core.E.CAST_START] = {
-      ["cast.swabbie.knockback"] = function()
-        mod:AddMsg("KNOCKBACK", "msg.swabbie.knockback", 2, nil, "xkcdRed")
-      end
-    },
-  }
-)
+function mod:OnSwabbieCreated(id, unit, name)
+  -- filter out second unit that's there for some reason
+  if not unit:GetHealth() then return end
+  core:AddUnit(unit)
+  core:WatchUnit(unit, core.E.TRACK_CASTS)
+  self.swabbieUnit = unit
+end
+
+function mod:OnSwabbieDestroyed(id, unit, name)
+  self.swabbieUnit = nil
+  core:RemoveUnit(unit)
+end
+
+function mod:OnSwabbieKnockStart()
+  mod:AddMsg("KNOCKBACK", "msg.swabbie.knockback", 2, nil, "xkcdRed")
+end
 
 function mod:DetermineSawLocation(unit)
   local x = unit:GetPosition().x
@@ -476,6 +471,15 @@ end
 ----------------------------------------------------------------------------------------------------
 -- Bind event handlers.
 ----------------------------------------------------------------------------------------------------
+mod:RegisterUnitEvents("unit.swabbie",{
+    [core.E.UNIT_CREATED] = mod.OnSwabbieCreated,
+    [core.E.UNIT_DESTROYED] = mod.OnSwabbieDestroyed,
+    [core.E.CAST_START] = {
+      ["cast.swabbie.knockback"] = mod.OnSwabbieKnockStart,
+    },
+  }
+)
+
 mod:RegisterUnitEvents("unit.saw.big",{
     [core.E.UNIT_CREATED] = mod.OnBigSawCreated,
     [core.E.UNIT_DESTROYED] = mod.OnBigSawDestroyed,
