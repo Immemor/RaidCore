@@ -113,11 +113,11 @@ mod:RegisterDefaultTimerBarConfigs({
     ["P2"] = { sColor = "xkcdBabyPurple" },
   }
 )
-mod:RegisterMessageSetting("BEAM_YOU", "EQUAL", "MessageBeamOnYou", "SoundBeamOnYou")
-mod:RegisterMessageSetting("BEAM_OTHER", "EQUAL", "MessageBeamOnOther", "SoundBeamOnOther")
-mod:RegisterMessageSetting("P2_SHIELD", "EQUAL", "MessageShieldPhase", "SoundShieldPhase")
-mod:RegisterMessageSetting("P2_JUMP", "EQUAL", "MessageJumpPhase", "SoundJumpPhase")
-mod:RegisterMessageSetting("PILLAR_TIMEOUT", "EQUAL", "MessageBigCast", "SoundBigCast")
+mod:RegisterMessageSetting("BEAM_YOU", core.E.COMPARE_EQUAL, "MessageBeamOnYou", "SoundBeamOnYou")
+mod:RegisterMessageSetting("BEAM_OTHER", core.E.COMPARE_EQUAL, "MessageBeamOnOther", "SoundBeamOnOther")
+mod:RegisterMessageSetting("P2_SHIELD", core.E.COMPARE_EQUAL, "MessageShieldPhase", "SoundShieldPhase")
+mod:RegisterMessageSetting("P2_JUMP", core.E.COMPARE_EQUAL, "MessageJumpPhase", "SoundJumpPhase")
+mod:RegisterMessageSetting("PILLAR_TIMEOUT", core.E.COMPARE_EQUAL, "MessageBigCast", "SoundBigCast")
 
 ----------------------------------------------------------------------------------------------------
 -- Functions.
@@ -225,7 +225,7 @@ mod:RegisterUnitEvents("unit.devourer",{
     [core.E.UNIT_DESTROYED] = mod.OnDataDevourerDestroyed,
   }
 )
-mod:RegisterDatachronEvent("chron.station.secure", "EQUAL", mod.OnSecureDatachron)
-mod:RegisterDatachronEvent("chron.station.jump", "EQUAL", mod.OnJumpDatachron)
-mod:RegisterDatachronEvent("chron.avatus.laser", "MATCH", mod.OnLaserDatachron)
-mod:RegisterDatachronEvent("chron.avatus.delete", "EQUAL", mod.OnDeleteDatachron)
+mod:RegisterDatachronEvent("chron.station.secure", core.E.COMPARE_EQUAL, mod.OnSecureDatachron)
+mod:RegisterDatachronEvent("chron.station.jump", core.E.COMPARE_EQUAL, mod.OnJumpDatachron)
+mod:RegisterDatachronEvent("chron.avatus.laser", core.E.COMPARE_MATCH, mod.OnLaserDatachron)
+mod:RegisterDatachronEvent("chron.avatus.delete", core.E.COMPARE_EQUAL, mod.OnDeleteDatachron)
