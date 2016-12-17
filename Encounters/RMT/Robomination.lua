@@ -19,13 +19,13 @@ mod:RegisterEnglishLocale({
     -- Unit names.
     ["unit.robo"] = "Robomination",
     ["unit.trash_compactor"] = "Trash Compactor",
-    ["unit.cannon_arm"] = "Cannon Arm",
-    ["unit.flailing_arm"] = "Flailing Arm",
+    ["unit.arm.cannon"] = "Cannon Arm",
+    ["unit.arm.flailing"] = "Flailing Arm",
     ["unit.scanning_eye"] = "Scanning Eye",
     -- Cast names.
-    ["cast.cannon_fire"] = "Cannon Fire",
-    ["cast.laser"] = "Incineration Laser",
-    ["cast.spew"] = "Noxious Belch",
+    ["cast.arm.cannon.fire"] = "Cannon Fire",
+    ["cast.robo.laser"] = "Incineration Laser",
+    ["cast.robo.spew"] = "Noxious Belch",
     -- Datachron.
     ["chron.robo.snake"] = "Robomination tries to crush ([^%s]+%s[^!]+)!$",
     ["chron.robo.laser"] = "Robomination tries to incinerate ([^%s]+%s.+)$",
@@ -42,15 +42,15 @@ mod:RegisterEnglishLocale({
     ["msg.maze.coming"] = "MAZE SOON",
     ["msg.maze.now"] = "CENTER",
     ["msg.arms.next"] = "Arms spawning in",
-    ["msg.cannon_arm.spawned"] = "CANNON",
-    ["msg.cannon_arm.interrupt"] = "INTERRUPT CANNON %d",
+    ["msg.arm.cannon.spawned"] = "CANNON",
+    ["msg.arm.cannon.interrupt"] = "INTERRUPT CANNON %d",
     ["msg.spew.now"] = "Spew",
     ["msg.spew.next"] = "Next spew in",
   }
 )
 mod:RegisterGermanLocale({
     -- Unit names.
-    ["unit.flailing_arm"] = "Fuchtelnder Arm",
+    ["unit.arm.flailing"] = "Fuchtelnder Arm",
     -- Datachron.
     ["chron.robo.laser"] = "Die Robomination versucht, ([^%s]+%s[^%s]+) zu verbrennen.",
     ["chron.robo.hides"] = "Die Robomination sinkt in den Müll hinab.",
@@ -59,9 +59,9 @@ mod:RegisterGermanLocale({
 )
 mod:RegisterFrenchLocale({
     -- Unit names.
-    ["unit.flailing_arm"] = "Bras agité",
+    ["unit.arm.flailing"] = "Bras agité",
     -- Cast names.
-    ["cast.laser"] = "Laser d'incinération",
+    ["cast.robo.laser"] = "Laser d'incinération",
     -- Datachron.
     ["chron.robo.laser"] = "Robomination essaie d'incinérer ([^%s]+%s[^%.]+)%.",
     ["chron.robo.hides"] = "Robomination s'enfonce dans les ordures.",
@@ -318,8 +318,8 @@ mod:RegisterUnitEvents(core.E.ALL_UNITS, {
   }
 )
 mod:RegisterUnitEvents({
-    "unit.cannon_arm",
-    "unit.flailing_arm",
+    "unit.arm.cannon",
+    "unit.arm.flailing",
     "unit.robo",
     "unit.scanning_eye",
     },{
@@ -334,7 +334,7 @@ mod:RegisterUnitEvents("unit.scanning_eye",{
   }
 )
 
-mod:RegisterUnitEvents({"unit.cannon_arm", "unit.flailing_arm"},{
+mod:RegisterUnitEvents({"unit.arm.cannon", "unit.arm.flailing"},{
     [core.E.UNIT_CREATED] = function()
       if phase == MID_MAZE_PHASE then
         mazeArmCount = mazeArmCount + 1
@@ -376,7 +376,7 @@ function mod:MarkCannonArm(cannonArm)
   end
 end
 
-mod:RegisterUnitEvents("unit.cannon_arm",{
+mod:RegisterUnitEvents("unit.arm.cannon",{
     [core.E.UNIT_CREATED] = function (_, id, unit)
       cannonArms[id] = {unit = unit, interrupt = 1}
       mod:MarkCannonArm(cannonArms[id])
@@ -387,12 +387,12 @@ mod:RegisterUnitEvents("unit.cannon_arm",{
       if phase == DPS_PHASE then
         mod:AddTimerBar("NEXT_ARMS_TIMER", "msg.arms.next", ARMS_TIMER)
       end
-      mod:AddMsg("ARMS_MSG_SPAWN", "msg.cannon_arm.spawned", 5, "Info", "xkcdWhite")
+      mod:AddMsg("ARMS_MSG_SPAWN", "msg.arm.cannon.spawned", 5, "Info", "xkcdWhite")
     end,
-    ["cast.cannon_fire"] = {
+    ["cast.arm.cannon.fire"] = {
       [core.E.CAST_START] = function(self, id)
         if mod:GetDistanceBetweenUnits(playerUnit, GetUnitById(id)) < 45 then
-          local msg = self.L["msg.cannon_arm.interrupt"]:format(cannonArms[id].interrupt)
+          local msg = self.L["msg.arm.cannon.interrupt"]:format(cannonArms[id].interrupt)
           mod:AddMsg("ARMS_MSG_CAST_"..id, msg, 2, "Inferno", "xkcdOrange")
         end
         cannonArms[id].interrupt = cannonArms[id].interrupt + 1
@@ -432,7 +432,7 @@ mod:RegisterUnitEvents("unit.robo",{
     [core.E.UNIT_CREATED] = mod.OnRobominationCreated,
     [core.E.HEALTH_CHANGED] = mod.OnRobominationHealthChanged,
     [core.E.CAST_START] = {
-      ["cast.spew"] = mod.OnRobominationSpewStart,
+      ["cast.robo.spew"] = mod.OnRobominationSpewStart,
     },
   }
 )
