@@ -192,7 +192,7 @@ function mod:OnLaserDatachron(message, laserTargetName)
   local text = self.L["msg.beam.x"]:format(laserTargetName)
   mod:ShowBeamMessages(isMyself, text)
   mod:MarkOtherLaserTargets(isMyself, targetUnit)
-  mod:AddTimerBar("BEAM", text, 15, nil, nil, mod.DropLaserMark, mod, laserMarkId)
+  mod:AddTimerBar("BEAM_DROP", text, 15, nil, nil, mod.DropLaserMark, mod, laserMarkId)
 end
 
 function mod:OnDeleteDatachron(message)
