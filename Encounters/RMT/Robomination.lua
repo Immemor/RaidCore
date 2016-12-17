@@ -326,12 +326,9 @@ mod:RegisterUnitEvents(core.E.ALL_UNITS, {
   }
 )
 
-mod:RegisterUnitEvents("unit.scanning_eye",{
-    [core.E.UNIT_DESTROYED] = function()
-      phase = MID_MAZE_PHASE
-    end,
-  }
-)
+function mod:OnScanningEyeCreated(id, unit, name)
+  phase = MID_MAZE_PHASE
+end
 
 function mod:OnArmCreated(id, unit, name)
   if phase == MID_MAZE_PHASE then
@@ -423,6 +420,7 @@ end
 ----------------------------------------------------------------------------------------------------
 -- Bind event handlers.
 ----------------------------------------------------------------------------------------------------
+mod:RegisterUnitEvent("unit.scanning_eye", core.E.UNIT_DESTROYED, mod.OnScanningEyeCreated)
 mod:RegisterUnitEvents({"unit.arm.cannon", "unit.arm.flailing"},{
     [core.E.UNIT_CREATED] = mod.OnArmCreated,
     [core.E.UNIT_DESTROYED] = mod.OnArmDestroyed,
