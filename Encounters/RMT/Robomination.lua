@@ -325,15 +325,6 @@ mod:RegisterUnitEvents(core.E.ALL_UNITS, {
     },
   }
 )
-mod:RegisterUnitEvents({
-    "unit.arm.cannon",
-    "unit.arm.flailing",
-    "unit.robo",
-    "unit.scanning_eye",
-    },{
-    [core.E.UNIT_CREATED] = mod.OnBarUnitCreated,
-  }
-)
 
 mod:RegisterUnitEvents("unit.scanning_eye",{
     [core.E.UNIT_DESTROYED] = function()
@@ -434,6 +425,15 @@ end
 ----------------------------------------------------------------------------------------------------
 -- Bind event handlers.
 ----------------------------------------------------------------------------------------------------
+mod:RegisterUnitEvents({
+    "unit.arm.cannon",
+    "unit.arm.flailing",
+    "unit.robo",
+    "unit.scanning_eye",
+    },{
+    [core.E.UNIT_CREATED] = mod.OnBarUnitCreated,
+  }
+)
 mod:RegisterUnitEvents("unit.arm.cannon",{
     [core.E.UNIT_CREATED] = mod.OnCannonArmCreated,
     [core.E.UNIT_DESTROYED] = mod.OnCannonArmDestroyed,
@@ -443,7 +443,6 @@ mod:RegisterUnitEvents("unit.arm.cannon",{
     },
   }
 )
-
 mod:RegisterUnitEvents("unit.robo",{
     [core.E.UNIT_CREATED] = mod.OnRobominationCreated,
     [core.E.HEALTH_CHANGED] = mod.OnRobominationHealthChanged,
