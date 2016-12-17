@@ -437,20 +437,14 @@ mod:RegisterUnitEvents("unit.add.nabber",{
   }
 )
 
-mod:RegisterUnitEvents({"unit.miniboss.regor", "unit.miniboss.braugh"},{
-    [core.E.UNIT_CREATED] = function()
-      mod:AddMsg("MINIBOSS", "msg.miniboss.spawned", 5, "Info", "xkcdWhite")
-    end,
-    [core.E.CAST_START] = function(self, _, castName)
-      if self.L["cast.miniboss.gravedigger"] == castName or
-      self.L["cast.miniboss.deathwail"] == castName or
-      self.L["cast.miniboss.crush"] == castName then
-        core:RemoveMsg("MINIBOSS_SPAWN")
-        mod:AddMsg("MINIBOSS_CAST", "msg.miniboss.interrupt", 5, "Inferno", "xkcdOrange")
-      end
-    end,
-  }
-)
+function mod:OnMinibossCreated(id, unit, name)
+  mod:AddMsg("MINIBOSS", "msg.miniboss.spawned", 5, "Info", "xkcdWhite")
+end
+
+function mod:OnMinibossCastStart()
+  core:RemoveMsg("MINIBOSS_SPAWN")
+  mod:AddMsg("MINIBOSS_CAST", "msg.miniboss.interrupt", 5, "Inferno", "xkcdOrange")
+end
 
 function mod:OnBubbleCreated(id, unit, name)
   if mod:GetSetting("CircleBubble") then
@@ -485,6 +479,16 @@ end
 ----------------------------------------------------------------------------------------------------
 -- Bind event handlers.
 ----------------------------------------------------------------------------------------------------
+mod:RegisterUnitEvents({"unit.miniboss.regor", "unit.miniboss.braugh"},{
+    [core.E.UNIT_CREATED] = mod.OnMinibossCreated,
+    [core.E.CAST_START] = {
+      ["cast.miniboss.gravedigger"] = mod.OnMinibossCastStart,
+      ["cast.miniboss.deathwail"] = mod.OnMinibossCastStart,
+      ["cast.miniboss.crush"] = mod.OnMinibossCastStart,
+    },
+  }
+)
+
 mod:RegisterUnitEvents("unit.bubble",{
     [core.E.UNIT_CREATED] = mod.OnBubbleCreated,
     [core.E.UNIT_DESTROYED] = mod.OnBubbleDestroyed,
