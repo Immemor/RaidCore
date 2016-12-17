@@ -196,10 +196,7 @@ local SAW_SAFESPOT = {
   [SAW_WEST + SAW_EAST] = "msg.saw.safe_spot.middle",
   [SAW_MID + SAW_EAST] = "msg.saw.safe_spot.right",
 }
-----------------------------------------------------------------------------------------------------
--- Functions.
-----------------------------------------------------------------------------------------------------
-local GetUnitById = GameLib.GetUnitById
+
 ----------------------------------------------------------------------------------------------------
 -- Locals.
 ----------------------------------------------------------------------------------------------------
@@ -212,6 +209,7 @@ local playerUnit
 local prevShredderProgress
 local startProgressBarTimer = ApolloTimer.Create(4, false, "StartProgressBar", mod)
 startProgressBarTimer:Stop() --thanks carbine
+local nabbers
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 -----------------------------------------------------------------------------------------------------
@@ -224,6 +222,7 @@ function mod:OnBossEnable()
   prevShredderProgress = 0
   firstShredderSaw = nil
   secondShredderSaw = nil
+  nabbers = {}
   startProgressBarTimer:Start()
 end
 
@@ -421,21 +420,21 @@ mod:RegisterUnitEvents("unit.saw.big",{
   }
 )
 
-mod:RegisterUnitEvents("unit.add.nabber",{
-    [core.E.UNIT_CREATED] = function()
-      core:RemoveMsg("ADDS_MSG")
-      mod:AddMsg("ADDS_MSG", "msg.nabber.spawned", 5, "Info", "xkcdWhite")
-    end,
-    [core.E.CAST_START] = {
-      ["cast.nabber.lash"] = function(self, id)
-        local unit = GetUnitById(id)
-        if mod:GetDistanceBetweenUnits(playerUnit, unit) < 45 then
-          mod:AddMsg("NABBER", "msg.nabber.interrupt", 5, "Inferno", "xkcdOrange")
-        end
-      end
-    },
-  }
-)
+function mod:OnNabberCreated(id, unit, name)
+  nabbers[id] = unit
+  core:RemoveMsg("ADDS_MSG")
+  mod:AddMsg("ADDS_MSG", "msg.nabber.spawned", 5, "Info", "xkcdWhite")
+end
+
+function mod:OnNabberDestroyed(id, unit, name)
+  nabbers[id] = nil
+end
+
+function mod:OnNabberLashStart(id)
+  if mod:GetDistanceBetweenUnits(playerUnit, nabbers[id]) < 45 then
+    mod:AddMsg("NABBER", "msg.nabber.interrupt", 5, "Inferno", "xkcdOrange")
+  end
+end
 
 function mod:OnMinibossCreated(id, unit, name)
   mod:AddMsg("MINIBOSS", "msg.miniboss.spawned", 5, "Info", "xkcdWhite")
@@ -479,6 +478,15 @@ end
 ----------------------------------------------------------------------------------------------------
 -- Bind event handlers.
 ----------------------------------------------------------------------------------------------------
+mod:RegisterUnitEvents("unit.add.nabber",{
+    [core.E.UNIT_CREATED] = mod.OnNabberCreated,
+    [core.E.UNIT_DESTROYED] = mod.OnNabberDestroyed,
+    [core.E.CAST_START] = {
+      ["cast.nabber.lash"] = mod.OnNabberLashStart,
+    },
+  }
+)
+
 mod:RegisterUnitEvents({"unit.miniboss.regor", "unit.miniboss.braugh"},{
     [core.E.UNIT_CREATED] = mod.OnMinibossCreated,
     [core.E.CAST_START] = {
