@@ -464,17 +464,15 @@ mod:RegisterUnitEvents("unit.bubble",{
   }
 )
 
-mod:RegisterUnitEvents("unit.tether",{
-    [core.E.UNIT_CREATED] = function(_, id)
-      if mod:GetSetting("CrosshairTether") then
-        core:AddPicture(id, id, "Crosshair", 25, 0, 0, nil, "FFFFF569")
-      end
-    end,
-    [core.E.UNIT_DESTROYED] = function(_, id)
-      core:RemovePicture(id)
-    end,
-  }
-)
+function mod:OnTetherCreated(id, unit, name)
+  if mod:GetSetting("CrosshairTether") then
+    core:AddPicture(id, id, "Crosshair", 25, 0, 0, nil, "FFFFF569")
+  end
+end
+
+function mod:OnTetherDestroyed(id, unit, name)
+  core:RemovePicture(id)
+end
 
 function mod:OnJunkTrapCreated(id, unit, name)
   if mod:GetSetting("SquareTethers") then
@@ -489,6 +487,12 @@ end
 ----------------------------------------------------------------------------------------------------
 -- Bind event handlers.
 ----------------------------------------------------------------------------------------------------
+mod:RegisterUnitEvents("unit.tether",{
+    [core.E.UNIT_CREATED] = mod.OnTetherCreated,
+    [core.E.UNIT_DESTROYED] = mod.OnTetherDestroyed,
+  }
+)
+
 mod:RegisterUnitEvents("unit.junk_trap",{
     [core.E.UNIT_CREATED] = mod.OnJunkTrapCreated,
     [core.E.UNIT_DESTROYED] = mod.OnJunkTrapDestroyed,
