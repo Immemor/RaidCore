@@ -402,23 +402,21 @@ function mod:HandleShredderSaw(sawLocation)
   mod:AddMsg("SAW_MSG_SAFE", msg, 5, "Info", "xkcdGreen")
 end
 
-mod:RegisterUnitEvents("unit.saw.big",{
-    [core.E.UNIT_CREATED] = function(_, id, unit)
-      if mod:GetSetting("LineSawblade") then
-        core:AddPixie(id, 2, unit, nil, "Red", 10, 60, 0)
-      end
-      local sawLocation = mod:DetermineSawLocation(unit)
-      if phase == WALKING and sawLocation == SAW_MID then
-        mod:AddMsg("SAW_MSG_MID", "msg.saw.middle", 5, "Beware", "xkcdRed")
-      elseif phase == SHREDDER then
-        mod:HandleShredderSaw(sawLocation)
-      end
-    end,
-    [core.E.UNIT_DESTROYED] = function(_, id)
-      core:DropPixie(id)
-    end,
-  }
-)
+function mod:OnBigSawCreated(id, unit, name)
+  if mod:GetSetting("LineSawblade") then
+    core:AddPixie(id, 2, unit, nil, "Red", 10, 60, 0)
+  end
+  local sawLocation = mod:DetermineSawLocation(unit)
+  if phase == WALKING and sawLocation == SAW_MID then
+    mod:AddMsg("SAW_MSG_MID", "msg.saw.middle", 5, "Beware", "xkcdRed")
+  elseif phase == SHREDDER then
+    mod:HandleShredderSaw(sawLocation)
+  end
+end
+
+function mod:OnBigSawDestroyed(id, unit, name)
+  core:DropPixie(id)
+end
 
 function mod:OnNabberCreated(id, unit, name)
   nabbers[id] = unit
@@ -478,6 +476,12 @@ end
 ----------------------------------------------------------------------------------------------------
 -- Bind event handlers.
 ----------------------------------------------------------------------------------------------------
+mod:RegisterUnitEvents("unit.saw.big",{
+    [core.E.UNIT_CREATED] = mod.OnBigSawCreated,
+    [core.E.UNIT_DESTROYED] = mod.OnBigSawDestroyed,
+  }
+)
+
 mod:RegisterUnitEvents("unit.add.nabber",{
     [core.E.UNIT_CREATED] = mod.OnNabberCreated,
     [core.E.UNIT_DESTROYED] = mod.OnNabberDestroyed,
