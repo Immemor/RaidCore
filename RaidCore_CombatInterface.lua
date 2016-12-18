@@ -585,16 +585,14 @@ function RaidCore:CI_UpdateBuffs(myUnit)
   self:HandlePcallResult(s, e)
 end
 
-function RaidCore:CI_UpdateCasts(myUnit, nId)
+function RaidCore:CI_UpdateCasts(myUnit, nId, nCurrentTime)
   -- Process cast tracking.
   local bCasting = myUnit.tUnit:IsCasting()
-  local nCurrentTime
   local sCastName
   local nCastDuration
   local nCastElapsed
   local nCastEndTime
   if bCasting then
-    nCurrentTime = GetGameTime()
     sCastName = myUnit.tUnit:GetCastName()
     nCastDuration = myUnit.tUnit:GetCastDuration()
     nCastElapsed = myUnit.tUnit:GetCastElapsed()
@@ -641,7 +639,7 @@ function RaidCore:CI_UpdateCasts(myUnit, nId)
   elseif myUnit.tCast.bCasting then
     if not myUnit.tCast.bSuccess then
       -- Let's compare with the nCastEndTime
-      local nThreshold = GetGameTime() + SCAN_PERIOD
+      local nThreshold = nCurrentTime + SCAN_PERIOD
       local bIsInterrupted
       if nThreshold < myUnit.tCast.nCastEndTime then
         bIsInterrupted = true
@@ -673,6 +671,7 @@ function RaidCore:CI_UpdateHealth(myUnit, nId)
 end
 
 function RaidCore:CI_OnScanUpdate()
+  local nCurrentTime = GetGameTime()
   for nId, data in next, _tTrackedUnits do
     if data.tUnit:IsValid() then
       -- Process name update.
@@ -682,7 +681,7 @@ function RaidCore:CI_OnScanUpdate()
         self:CI_UpdateBuffs(data, nId)
       end
       if data.bTrackCasts then
-        self:CI_UpdateCasts(data, nId)
+        self:CI_UpdateCasts(data, nId, nCurrentTime)
       end
       if data.bTrackHealth then
         self:CI_UpdateHealth(data, nId)
