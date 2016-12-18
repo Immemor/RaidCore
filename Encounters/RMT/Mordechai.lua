@@ -403,6 +403,9 @@ function mod:RemoveCleaveLines()
   core:RemoveSimpleLine("CLEAVE_BACK_LEFT2")
 end
 
+----------------------------------------------------------------------------------------------------
+-- Bind event handlers.
+----------------------------------------------------------------------------------------------------
 mod:RegisterUnitEvents({
     "unit.mordechai",
     "unit.anchor",
