@@ -463,6 +463,9 @@ function SimpleLine:AddDraw(Key, Origin, nOffset, nLength, nRotation, nWidth, sC
     local tFacingVector = NewVector3(DEFAULT_NORTH_FACING)
     local tVectorA = tFacingVector * (tDraw.nOffset)
     local tVectorB = tFacingVector * (tDraw.nLength + tDraw.nOffset)
+    if tDraw.nOffsetOrigin then
+      tOriginVector = tOriginVector + Rotation(tFacingVector, tDraw.RotationMatrix90) * tDraw.nOffsetOrigin
+    end
     tVectorA = Rotation(tVectorA, tDraw.RotationMatrix)
     tVectorB = Rotation(tVectorB, tDraw.RotationMatrix)
     tDraw.tOriginUnit = nil
