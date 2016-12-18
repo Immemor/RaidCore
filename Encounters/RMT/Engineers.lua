@@ -152,8 +152,6 @@ local coreUnits
 local engineerUnits
 local player
 local coreMaxHealth
-
-local fireOrbTargetTestTimer = ApolloTimer.Create(1, false, "RegisterOrbTarget", mod)
 ----------------------------------------------------------------------------------------------------
 -- Settings.
 ----------------------------------------------------------------------------------------------------
@@ -488,7 +486,6 @@ mod:RegisterUnitEvents("unit.fire_orb",{
       mod:RemoveTimerBar("NEXT_FIRE_ORB_TIMER")
       mod:AddTimerBar("NEXT_FIRE_ORB_TIMER", "msg.fire_orb.next", TIMERS.FIRE_ORB.NORMAL)
       mod:AddTimerBar(string.format("FIRE_ORB_SAFE_TIMER %d", id), "msg.fire_orb.pop.timer", TIMERS.FIRE_ORB.SAFE, false, "Red", mod.PopFireOrb, mod)
-      fireOrbTargetTestTimer:Start()
     end,
     [core.E.UNIT_DESTROYED] = function(_, id)
       mod:RemoveTimerBar(string.format("FIRE_ORB_SAFE_TIMER %d", id))
