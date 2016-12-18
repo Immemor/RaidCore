@@ -484,14 +484,20 @@ function mod:PopFireOrb()
   end
 end
 
+function mod:OnFireOrbCreated(id, unit, name)
+  mod:AddTimerBar("NEXT_FIRE_ORB_TIMER", "msg.fire_orb.next", TIMERS.FIRE_ORB.NORMAL)
+  mod:AddTimerBar("FIRE_ORB_SAFE_TIMER_"..id, "msg.fire_orb.pop.timer", TIMERS.FIRE_ORB.SAFE, false, "Red", mod.PopFireOrb, mod)
+end
+
+function mod:OnFireOrbDestroyed(id, unit, name)
+  mod:RemoveTimerBar("FIRE_ORB_SAFE_TIMER_"..id)
+end
+
+----------------------------------------------------------------------------------------------------
+-- Bind event handlers.
+----------------------------------------------------------------------------------------------------
 mod:RegisterUnitEvents("unit.fire_orb",{
-    [core.E.UNIT_CREATED] = function(self, id, unit)
-      mod:RemoveTimerBar("NEXT_FIRE_ORB_TIMER")
-      mod:AddTimerBar("NEXT_FIRE_ORB_TIMER", "msg.fire_orb.next", TIMERS.FIRE_ORB.NORMAL)
-      mod:AddTimerBar(string.format("FIRE_ORB_SAFE_TIMER %d", id), "msg.fire_orb.pop.timer", TIMERS.FIRE_ORB.SAFE, false, "Red", mod.PopFireOrb, mod)
-    end,
-    [core.E.UNIT_DESTROYED] = function(_, id)
-      mod:RemoveTimerBar(string.format("FIRE_ORB_SAFE_TIMER %d", id))
-    end,
+    [core.E.UNIT_CREATED] = mod.OnFireOrbCreated,
+    [core.E.UNIT_DESTROYED] = mod.OnFireOrbDestroyed,
   }
 )
