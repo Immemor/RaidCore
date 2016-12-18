@@ -543,6 +543,9 @@ function mod:OnMidphaseStart()
   mod:UpdateAlphaCassusCleaveLine()
 end
 
+----------------------------------------------------------------------------------------------------
+-- Bind event handlers.
+----------------------------------------------------------------------------------------------------
 mod:RegisterDatachronEvent("chron.world_ender.aldinari", core.E.COMPARE_EQUAL, mod.OnWorldEnderTargetAldinari)
 mod:RegisterDatachronEvent("chron.world_ender.vulpes_nix", core.E.COMPARE_EQUAL, mod.OnWorldEnderTargetVulpesNix)
 mod:RegisterDatachronEvent("chron.world_ender.cassus", core.E.COMPARE_EQUAL, mod.OnWorldEnderTargetCassus)
