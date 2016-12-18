@@ -87,16 +87,22 @@ local BUFFS = {
   INSULATION = 83987,
 }
 
--- Timers
-local FIRST_ELECTROSHOCK_TIMER = 11
-local ELECTROSHOCK_TIMER = 18
-local JUMP_ELECTROSHOCK_TIMER = 12
-local FIRST_FIRE_ORB_TIMER = 21
-local NEXT_FIRE_ORB_TIMER = 24
-local FIRE_ORB_SAFE_TIMER = 18
-
-local FIRST_LIQUIDATE_TIMER = 12
-local LIQUIDATE_TIMER = 22
+local TIMERS = {
+  ELECTROSHOCK = {
+    FIRST = 11,
+    JUMP = 12,
+    NORMAL = 18,
+  },
+  FIRE_ORB = {
+    FIRST = 21,
+    NORMAL = 24,
+    SAFE = 18,
+  },
+  LIQUIDATE = {
+    FIRST = 12,
+    NORMAL = 22,
+  }
+}
 
 local CORE_HEALTH_LOW_PERCENTAGE = 15
 local CORE_HEALTH_LOW_WARN_PERCENTAGE = 20
@@ -219,8 +225,8 @@ function mod:OnBossEnable()
     core:AddUnitSpacer("CORE_SPACER", nil, 2)
   end
 
-  mod:AddTimerBar("NEXT_ELEKTROSHOCK_TIMER", "msg.engineer.electroshock.next", FIRST_ELECTROSHOCK_TIMER)
-  mod:AddTimerBar("NEXT_LIQUIDATE_TIMER", "msg.warrior.liquidate.next", FIRST_LIQUIDATE_TIMER)
+  mod:AddTimerBar("NEXT_ELEKTROSHOCK_TIMER", "msg.engineer.electroshock.next", TIMERS.ELECTROSHOCK.FIRST)
+  mod:AddTimerBar("NEXT_LIQUIDATE_TIMER", "msg.warrior.liquidate.next", TIMERS.LIQUIDATE.FIRST)
   mod:AddProgressBar("HEAT_GENERATIOn", "msg.heat.generation", mod.GetCoreTotalHealthPercentage, mod)
 end
 
@@ -264,7 +270,7 @@ function mod:OnEngiChangeLocation(engineerId, _, newLocation)
   end
   if newLocation == FUSION_CORE then
     mod:RemoveTimerBar("NEXT_FIRE_ORB_TIMER")
-    mod:AddTimerBar("NEXT_FIRE_ORB_TIMER", "msg.fire_orb.next", FIRST_FIRE_ORB_TIMER)
+    mod:AddTimerBar("NEXT_FIRE_ORB_TIMER", "msg.fire_orb.next", TIMERS.FIRE_ORB.FIRST)
   end
 end
 
@@ -437,7 +443,7 @@ mod:RegisterUnitEvents("unit.warrior",{
     [core.E.CAST_END] = {
       ["cast.warrior.liquidate"] = function(self)
         mod:RemoveTimerBar("NEXT_LIQUIDATE_TIMER")
-        mod:AddTimerBar("NEXT_LIQUIDATE_TIMER", "msg.warrior.liquidate.next", LIQUIDATE_TIMER)
+        mod:AddTimerBar("NEXT_LIQUIDATE_TIMER", "msg.warrior.liquidate.next", TIMERS.LIQUIDATE.NORMAL)
       end
     },
   }
@@ -458,14 +464,14 @@ mod:RegisterUnitEvents("unit.engineer",{
     [core.E.CAST_END] = {
       ["cast.rocket_jump"] = function(self)
         mod:RemoveTimerBar("NEXT_ELEKTROSHOCK_TIMER")
-        mod:AddTimerBar("NEXT_ELEKTROSHOCK_TIMER", "msg.engineer.electroshock.next", JUMP_ELECTROSHOCK_TIMER)
+        mod:AddTimerBar("NEXT_ELEKTROSHOCK_TIMER", "msg.engineer.electroshock.next", TIMERS.ELECTROSHOCK.JUMP)
       end,
       ["cast.engineer.electroshock"] = function()
         if mod:GetSetting("LineElectroshock") then
           core:DropPixie("ELECTROSHOCK_PIXIE")
         end
         mod:RemoveTimerBar("NEXT_ELEKTROSHOCK_TIMER")
-        mod:AddTimerBar("NEXT_ELEKTROSHOCK_TIMER", "msg.engineer.electroshock.next", ELECTROSHOCK_TIMER)
+        mod:AddTimerBar("NEXT_ELEKTROSHOCK_TIMER", "msg.engineer.electroshock.next", TIMERS.ELECTROSHOCK.NORMAL)
       end
     },
   }
@@ -480,8 +486,8 @@ end
 mod:RegisterUnitEvents("unit.fire_orb",{
     [core.E.UNIT_CREATED] = function(self, id, unit)
       mod:RemoveTimerBar("NEXT_FIRE_ORB_TIMER")
-      mod:AddTimerBar("NEXT_FIRE_ORB_TIMER", "msg.fire_orb.next", NEXT_FIRE_ORB_TIMER)
-      mod:AddTimerBar(string.format("FIRE_ORB_SAFE_TIMER %d", id), "msg.fire_orb.pop.timer", FIRE_ORB_SAFE_TIMER, false, "Red", mod.PopFireOrb, mod)
+      mod:AddTimerBar("NEXT_FIRE_ORB_TIMER", "msg.fire_orb.next", TIMERS.FIRE_ORB.NORMAL)
+      mod:AddTimerBar(string.format("FIRE_ORB_SAFE_TIMER %d", id), "msg.fire_orb.pop.timer", TIMERS.FIRE_ORB.SAFE, false, "Red", mod.PopFireOrb, mod)
       fireOrbTargetTestTimer:Start()
     end,
     [core.E.UNIT_DESTROYED] = function(_, id)
