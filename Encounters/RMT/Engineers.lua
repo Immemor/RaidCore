@@ -450,33 +450,27 @@ mod:RegisterUnitEvents("unit.warrior",{
   }
 )
 
--- Engineer
-mod:RegisterUnitEvents("unit.engineer",{
-    [core.E.CAST_START] = {
-      ["cast.engineer.electroshock"] = function(self)
-        if mod:GetSetting("LineElectroshock") then
-          core:AddPixie("ELECTROSHOCK_PIXIE", 2, engineerUnits[ENGINEER].unit, nil, "Red", 10, 80, 0)
-        end
-        if mod:IsPlayerOnPlatform(engineerUnits[ENGINEER].location) then
-          mod:AddMsg("ELECTROSHOCK_CAST_MSG", "cast.engineer.electroshock", 5, "Beware", "xkcdOrange")
-        end
-      end
-    },
-    [core.E.CAST_END] = {
-      ["cast.rocket_jump"] = function(self)
-        mod:RemoveTimerBar("NEXT_ELEKTROSHOCK_TIMER")
-        mod:AddTimerBar("NEXT_ELEKTROSHOCK_TIMER", "msg.engineer.electroshock.next", TIMERS.ELECTROSHOCK.JUMP)
-      end,
-      ["cast.engineer.electroshock"] = function()
-        if mod:GetSetting("LineElectroshock") then
-          core:DropPixie("ELECTROSHOCK_PIXIE")
-        end
-        mod:RemoveTimerBar("NEXT_ELEKTROSHOCK_TIMER")
-        mod:AddTimerBar("NEXT_ELEKTROSHOCK_TIMER", "msg.engineer.electroshock.next", TIMERS.ELECTROSHOCK.NORMAL)
-      end
-    },
-  }
-)
+function mod:OnEngineerElectroshockStart()
+  if mod:GetSetting("LineElectroshock") then
+    core:AddPixie("ELECTROSHOCK_PIXIE", 2, engineerUnits[ENGINEER].unit, nil, "Red", 10, 80, 0)
+  end
+  if mod:IsPlayerOnPlatform(engineerUnits[ENGINEER].location) then
+    mod:AddMsg("ELECTROSHOCK_CAST_MSG", "cast.engineer.electroshock", 5, "Beware", "xkcdOrange")
+  end
+end
+
+function mod:OnEngineerElectroshockEnd()
+  if mod:GetSetting("LineElectroshock") then
+    core:DropPixie("ELECTROSHOCK_PIXIE")
+  end
+  mod:RemoveTimerBar("NEXT_ELEKTROSHOCK_TIMER")
+  mod:AddTimerBar("NEXT_ELEKTROSHOCK_TIMER", "msg.engineer.electroshock.next", TIMERS.ELECTROSHOCK.NORMAL)
+end
+
+function mod:OnEngineerRocketJumpEnd()
+  mod:RemoveTimerBar("NEXT_ELEKTROSHOCK_TIMER")
+  mod:AddTimerBar("NEXT_ELEKTROSHOCK_TIMER", "msg.engineer.electroshock.next", TIMERS.ELECTROSHOCK.JUMP)
+end
 
 function mod:PopFireOrb()
   if mod:IsPlayerOnPlatform(FUSION_CORE) then
@@ -496,6 +490,16 @@ end
 ----------------------------------------------------------------------------------------------------
 -- Bind event handlers.
 ----------------------------------------------------------------------------------------------------
+mod:RegisterUnitEvents("unit.engineer",{
+    ["cast.engineer.electroshock"] = {
+      [core.E.CAST_START] = mod.OnEngineerElectroshockStart,
+      [core.E.CAST_END] = mod.OnEngineerElectroshockEnd,
+    },
+    ["cast.rocket_jump"] = {
+      [core.E.CAST_END] = mod.OnEngineerRocketJumpEnd,
+    },
+  }
+)
 mod:RegisterUnitEvents("unit.fire_orb",{
     [core.E.UNIT_CREATED] = mod.OnFireOrbCreated,
     [core.E.UNIT_DESTROYED] = mod.OnFireOrbDestroyed,
