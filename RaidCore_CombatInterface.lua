@@ -39,6 +39,7 @@ local binaryAnd = bit32.band
 -- Constants.
 ----------------------------------------------------------------------------------------------------
 local SCAN_PERIOD = 0.1 -- in seconds.
+local TRACKED_BUFFS_PERIOD = 0.25 -- in seconds.
 -- Array with chat permission.
 local CHANNEL_HANDLERS = {
   [ChatSystemLib.ChatChannel_Say] = nil,
@@ -72,10 +73,12 @@ local _bDetectAllEnable = false
 local _bUnitInCombatEnable = false
 local _bRunning = false
 local _tScanTimer = nil
+local _tTrackedDebuffTimer = nil
 local _CommChannelTimer = nil
 local _nCommChannelRetry = 5
 local _tAllUnits = {}
 local _tTrackedUnits = {}
+local _tTrackedBuffs = {}
 local _RaidCoreChannelComm = nil
 local _nNumShortcuts
 local _CI_State
@@ -298,9 +301,34 @@ function RaidCore:CI_OnBuff(tUnit, tBuff, sMsgBuff, sMsgDebuff)
   return sEvent, nUnitId, nSpellId, sName
 end
 
+local function UpdateTrackedBuff(sEvent, nUnitId, nSpellId, sName, tBuff)
+  _tTrackedBuffs[nUnitId..nSpellId] = {
+    sEvent = sEvent,
+    nUnitId = nUnitId,
+    nSpellId = nSpellId,
+    sName = sName,
+    tBuff = tBuff,
+    nEndTime = GetGameTime() + tBuff.fTimeRemaining + TRACKED_BUFFS_PERIOD * 2,
+  }
+end
+
+local function DeleteTrackedBuff(nUnitId, nSpellId)
+  _tTrackedBuffs[nUnitId..nSpellId] = nil
+end
+
+local function DelayFireTrackedDebuff(tTrackedBuff)
+  local sEvent = RaidCore.E.DEBUFF_REMOVE
+  if tTrackedBuff.sEvent == RaidCore.E.BUFF_ADD or tTrackedBuff.sEvent == RaidCore.E.BUFF_ADD then
+    sEvent = RaidCore.E.BUFF_REMOVE
+  end
+  ManagerCall(sEvent, tTrackedBuff.nUnitId, tTrackedBuff.nSpellId, tTrackedBuff.sName, tTrackedBuff.tBuff.unitCaster)
+  DeleteTrackedBuff(tTrackedBuff.nUnitId, tTrackedBuff.nSpellId)
+end
+
 function RaidCore:CI_OnBuffAdded(tUnit, tBuff)
   local sEvent, nUnitId, nSpellId, sName = self:CI_OnBuff(tUnit, tBuff, RaidCore.E.BUFF_ADD, RaidCore.E.DEBUFF_ADD)
   if nUnitId then
+    UpdateTrackedBuff(sEvent, nUnitId, nSpellId, sName, tBuff)
     ManagerCall(sEvent, nUnitId, nSpellId, tBuff.nCount, tBuff.fTimeRemaining, sName, tBuff.unitCaster)
   end
 end
@@ -308,6 +336,7 @@ end
 function RaidCore:CI_OnBuffUpdated(tUnit, tBuff)
   local sEvent, nUnitId, nSpellId, sName = self:CI_OnBuff(tUnit, tBuff, RaidCore.E.BUFF_UPDATE, RaidCore.E.DEBUFF_UPDATE)
   if nUnitId then
+    UpdateTrackedBuff(sEvent, nUnitId, nSpellId, sName, tBuff)
     ManagerCall(sEvent, nUnitId, nSpellId, tBuff.nCount, tBuff.fTimeRemaining, sName, tBuff.unitCaster)
   end
 end
@@ -315,6 +344,7 @@ end
 function RaidCore:CI_OnBuffRemoved(tUnit, tBuff)
   local sEvent, nUnitId, nSpellId, sName = self:CI_OnBuff(tUnit, tBuff, RaidCore.E.BUFF_REMOVE, RaidCore.E.DEBUFF_REMOVE)
   if nUnitId then
+    DeleteTrackedBuff(nUnitId, nSpellId)
     ManagerCall(sEvent, nUnitId, nSpellId, sName, tBuff.unitCaster)
   end
 end
@@ -355,8 +385,10 @@ local function FullActivate(bEnable)
     RegisterEventHandler(RaidCore.E.EVENT_BUFF_UPDATED, "CI_OnBuffUpdated", RaidCore)
     RegisterEventHandler(RaidCore.E.EVENT_BUFF_REMOVED, "CI_OnBuffRemoved", RaidCore)
     _tScanTimer:Start()
+    _tTrackedDebuffTimer:Start()
   elseif _bRunning == true and bEnable == false then
     _tScanTimer:Stop()
+    _tTrackedDebuffTimer:Stop()
     RemoveEventHandler(RaidCore.E.EVENT_CHAT_MESSAGE, RaidCore)
     RemoveEventHandler(RaidCore.E.EVENT_SHOW_ACTION_BAR_SHORTCUT, RaidCore)
     RemoveEventHandler(RaidCore.E.EVENT_BUFF_ADDED, RaidCore)
@@ -366,6 +398,7 @@ local function FullActivate(bEnable)
     -- Clear private data.
     _tTrackedUnits = {}
     _tAllUnits = {}
+    _tTrackedBuffs = {}
   end
   _bRunning = bEnable
 end
@@ -456,6 +489,8 @@ function RaidCore:CombatInterface_Init()
   _tTrackedUnits = {}
   _tScanTimer = ApolloTimer.Create(SCAN_PERIOD, true, "CI_OnScanUpdate", self)
   _tScanTimer:Stop()
+  _tTrackedDebuffTimer = ApolloTimer.Create(TRACKED_BUFFS_PERIOD, true, "CI_OnCheckTrackedBuffs", self)
+  _tTrackedDebuffTimer:Stop()
 
   -- Permanent registering.
   RegisterEventHandler(RaidCore.E.EVENT_CHANGE_WORLD, "CI_OnChangeWorld", self)
@@ -666,6 +701,15 @@ function RaidCore:CI_UpdateHealth(myUnit, nId)
     if myUnit.nPreviousHealthPercent ~= nPercent then
       myUnit.nPreviousHealthPercent = nPercent
       ManagerCall(RaidCore.E.HEALTH_CHANGED, nId, nPercent, myUnit.sName)
+    end
+  end
+end
+
+function RaidCore:CI_OnCheckTrackedBuffs()
+  local nCurrentTime = GetGameTime()
+  for id, tTrackedBuff in next, _tTrackedBuffs do
+    if tTrackedBuff.nEndTime < nCurrentTime then
+      DelayFireTrackedDebuff(tTrackedBuff)
     end
   end
 end
