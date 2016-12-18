@@ -397,10 +397,7 @@ end
 ----------------------------------------------------------------------------------------------------
 -- Bind event handlers.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterUnitEvents("unit.orb",{
-    [core.E.UNIT_CREATED] = mod.OnOrbCreated,
-  }
-)
+mod:RegisterUnitEvent("unit.orb", core.E.UNIT_CREATED, mod.OnOrbCreated)
 mod:RegisterDatachronEvent("chron.airlock.closed", core.E.COMPARE_EQUAL, mod.OnAirlockClosed)
 mod:RegisterUnitEvents(core.E.ALL_UNITS, {
     [core.E.UNIT_DESTROYED] = mod.OnAnyUnitDestroyed,
