@@ -44,6 +44,7 @@ mod:RegisterDefaultSetting("BombLines", false)
 -- Locals.
 ----------------------------------------------------------------------------------------------------
 local playerUnit
+
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
@@ -51,28 +52,29 @@ function mod:OnBossEnable()
   playerUnit = GameLib.GetPlayerUnit()
 end
 
-mod:RegisterUnitEvents("unit.thrag",{
-    [core.E.UNIT_CREATED] = function (_, _, unit)
-      core:AddUnit(unit)
-      core:WatchUnit(unit, core.E.TRACK_CASTS)
-    end,
-  }
-)
+function mod:OnThragCreated(id, unit, name)
+  core:AddUnit(unit)
+end
 
-mod:RegisterUnitEvents("unit.jumpstart",{
-    [core.E.UNIT_CREATED] = function (_, id, unit)
-      if mod:GetSetting("BombLines") then
-        core:AddLineBetweenUnits("JUMP_START_LINE_"..id, playerUnit:GetId(), id, 5)
-      end
-    end,
-    [core.E.UNIT_DESTROYED] = function (_, id)
-      if mod:GetSetting("BombLines") then
-        core:RemoveLineBetweenUnits("JUMP_START_LINE_"..id)
-      end
-    end,
-  }
-)
+function mod:OnJumpstartCreated(id, unit, name)
+  if mod:GetSetting("BombLines") then
+    core:AddLineBetweenUnits("JUMP_START_LINE_"..id, playerUnit, unit, 5)
+  end
+end
+
+function mod:OnJumpstartDestroyed(id, unit, name)
+  core:RemoveLineBetweenUnits("JUMP_START_LINE_"..id)
+end
 
 ----------------------------------------------------------------------------------------------------
 -- Bind event handlers.
 ----------------------------------------------------------------------------------------------------
+mod:RegisterUnitEvents("unit.thrag",{
+    [core.E.UNIT_CREATED] = mod.OnThragCreated,
+  }
+)
+mod:RegisterUnitEvents("unit.jumpstart",{
+    [core.E.UNIT_CREATED] = mod.OnJumpstartCreated,
+    [core.E.UNIT_DESTROYED] = mod.OnJumpstartDestroyed,
+  }
+)

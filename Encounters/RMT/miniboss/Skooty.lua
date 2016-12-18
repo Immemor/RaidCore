@@ -109,7 +109,7 @@ end
 ----------------------------------------------------------------------------------------------------
 mod:RegisterUnitEvents("unit.jumpstart",{
     [core.E.UNIT_CREATED] = mod.OnJumpstartCreated,
-    [core.E.UNIT_DESTROYED] = mod.RemoveLineBetweenUnits,
+    [core.E.UNIT_DESTROYED] = mod.OnJumpstartDestroyed,
   }
 )
 mod:RegisterUnitEvents("unit.skooty",{
