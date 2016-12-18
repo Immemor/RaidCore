@@ -212,10 +212,6 @@ function mod:OnMordechaiCreated(id, unit, name)
   mod:AddCleaveLines()
 end
 
-function mod:OnMordechaiDestroyed(id, unit, name)
-  mod:RemoveCleaveLines()
-end
-
 function mod:OnMordechaiHealthChanged(id, percent, name)
   if mod:IsMidphaseClose(name, percent) then
     mod:AddMsg("SUCKY_PHASE", "msg.phase.start", 5, "Info", "xkcdWhite")
@@ -372,7 +368,7 @@ end
 ----------------------------------------------------------------------------------------------------
 mod:RegisterUnitEvents("unit.mordechai",{
     [core.E.UNIT_CREATED] = mod.OnMordechaiCreated,
-    [core.E.UNIT_DESTROYED] = mod.OnMordechaiDestroyed,
+    [core.E.UNIT_DESTROYED] = mod.RemoveCleaveLines,
     [core.E.HEALTH_CHANGED] = mod.OnMordechaiHealthChanged,
     ["cast.mordechai.shatter"] = {
       [core.E.CAST_START] = mod.OnMordechaiShatterStart,
