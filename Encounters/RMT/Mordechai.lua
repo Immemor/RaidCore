@@ -146,12 +146,6 @@ local DEBUFF_NULLIFIED = 85614 -- Green
 local DEBUFF_KINETIC_LINK = 86797 -- Purple
 local DEBUFF_SHOCKING_ATTRACTION = 86861
 
-local PHASES_CLOSE = {
-  {UPPER = 86.5, LOWER = 85.5},
-  {UPPER = 61.5, LOWER = 60.5},
-  {UPPER = 36.5, LOWER = 35.5},
-  {UPPER = 11.5, LOWER = 10.5},
-}
 local FIRST_SHURIKEN_TIMER = 11
 local SHURIKEN_TIMER = 22
 local FIRST_BARRAGE_TIMER = 19
@@ -210,40 +204,31 @@ function mod:OnTurretCastOrbStart()
   mod:AddTimerBar("NEXT_ORB_TIMER", "msg.orb.next", ORB_TIMER)
 end
 
-mod:RegisterUnitEvents("unit.mordechai",{
-    [core.E.UNIT_CREATED] = function(_, _, unit)
-      mordechai = unit
-      core:WatchUnit(unit, core.E.TRACK_CASTS + core.E.TRACK_HEALTH)
-      mod:AddCleaveLines()
-    end,
-    [core.E.HEALTH_CHANGED] = function(_, _, percent)
-      for i = 1, #PHASES_CLOSE do
-        if percent >= PHASES_CLOSE[i].LOWER and percent <= PHASES_CLOSE[i].UPPER then
-          mod:AddMsg("SUCKY_PHASE", "msg.phase.start", 5, "Info", "xkcdWhite")
-          break
-        end
-      end
-    end,
-    ["cast.mordechai.shatter"] = {
-      [core.E.CAST_START] = function()
-        mod:AddTimerBar("NEXT_SHURIKEN_TIMER", "msg.mordechai.shuriken.next", SHURIKEN_TIMER, mod:GetSetting("SoundShurikenCountdown"))
-        mod:RemoveCleaveLines()
-      end,
-      [core.E.CAST_END] = function()
-        mod:AddCleaveLines()
-      end,
-    },
-    ["cast.mordechai.barrage"] = {
-      [core.E.CAST_START] = function()
-        mod:AddTimerBar("NEXT_BARRAGE_TIMER", "msg.mordechai.barrage.next", BARRAGE_TIMER)
-        mod:RemoveCleaveLines()
-      end,
-      [core.E.CAST_END] = function()
-        mod:AddCleaveLines()
-      end,
-    },
-  }
-)
+function mod:OnMordechaiCreated(id, unit, name)
+  mordechai = unit
+  core:WatchUnit(unit, core.E.TRACK_CASTS + core.E.TRACK_HEALTH)
+  mod:AddCleaveLines()
+end
+
+function mod:OnMordechaiDestroyed(id, unit, name)
+  mod:RemoveCleaveLines()
+end
+
+function mod:OnMordechaiHealthChanged(id, percent, name)
+  if mod:IsMidphaseClose(name, percent) then
+    mod:AddMsg("SUCKY_PHASE", "msg.phase.start", 5, "Info", "xkcdWhite")
+  end
+end
+
+function mod:OnMordechaiShatterStart()
+  mod:AddTimerBar("NEXT_SHURIKEN_TIMER", "msg.mordechai.shuriken.next", SHURIKEN_TIMER, mod:GetSetting("SoundShurikenCountdown"))
+  mod:RemoveCleaveLines()
+end
+
+function mod:OnMordechaiBarrageStart()
+  mod:AddTimerBar("NEXT_BARRAGE_TIMER", "msg.mordechai.barrage.next", BARRAGE_TIMER)
+  mod:RemoveCleaveLines()
+end
 
 function mod:OnAnchorCreated(id, unit, name)
   anchors[id] = unit
@@ -392,6 +377,20 @@ end
 ----------------------------------------------------------------------------------------------------
 -- Bind event handlers.
 ----------------------------------------------------------------------------------------------------
+mod:RegisterUnitEvents("unit.mordechai",{
+    [core.E.UNIT_CREATED] = mod.OnMordechaiCreated,
+    [core.E.UNIT_DESTROYED] = mod.OnMordechaiDestroyed,
+    [core.E.HEALTH_CHANGED] = mod.OnMordechaiHealthChanged,
+    ["cast.mordechai.shatter"] = {
+      [core.E.CAST_START] = mod.OnMordechaiShatterStart,
+      [core.E.CAST_END] = mod.AddCleaveLines,
+    },
+    ["cast.mordechai.barrage"] = {
+      [core.E.CAST_START] = mod.OnMordechaiBarrageStart,
+      [core.E.CAST_END] = mod.AddCleaveLines,
+    },
+  }
+)
 mod:RegisterUnitEvents("unit.turret",{
     [core.E.UNIT_CREATED] = mod.OnTurretCreated,
     ["cast.turret.discharge"] = {
