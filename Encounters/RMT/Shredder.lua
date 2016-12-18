@@ -12,12 +12,6 @@ local mod = core:NewEncounter("Shredder", 104, 548, 549)
 if not mod then return end
 
 ----------------------------------------------------------------------------------------------------
--- TODO
-----------------------------------------------------------------------------------------------------
---make tether visible, probably have to add rectangles to raidcore
---add phases are different later on
-
-----------------------------------------------------------------------------------------------------
 -- Registering combat.
 ----------------------------------------------------------------------------------------------------
 mod:RegisterTrigMob(core.E.TRIGGER_ALL, { "unit.swabbie" })
