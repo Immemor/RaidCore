@@ -22,6 +22,7 @@ require "GroupLib"
 require "Vector3"
 
 local RaidCore = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
+local Assert = Apollo.GetPackage("RaidCore:Assert-1.0").tPackage
 
 ----------------------------------------------------------------------------------------------------
 -- Copy of few objects to reduce the cpu load.
@@ -151,6 +152,22 @@ local function GetOriginType(origin)
     end
   end
   return originType
+end
+
+local function ProcessOrigin(origin)
+  local originType = GetOriginType(origin)
+  local originUnit = nil
+  local originVector = nil
+  if originType == "number" then
+    originUnit = GetUnitById(origin)
+  elseif originType == "unit" then
+    originUnit = origin
+  elseif originType == "table" then
+    originVector = NewVector3(origin)
+  elseif originType == "vector" then
+    originVector = origin
+  end
+  return originUnit, originVector
 end
 
 local function StopDrawing()
@@ -356,34 +373,29 @@ function LineBetween:AddDraw(Key, FromOrigin, ToOrigin, nWidth, sColor, nNumberO
   tDraw.nPixieIdDot = tDraw.nPixieIdDot or {}
   tDraw.nOffset = nOffset or 0
   tDraw.nLength = nLength or 0
-  -- Preprocessing of the 'From'.
-  if FromOriginType == "table" or FromOriginType == "vector" then
-    -- FromOrigin is the result of a GetPosition()
+
+  local tFromOriginUnit, tFromOriginVector = ProcessOrigin(FromOrigin)
+  if tFromOriginVector then
     tDraw.tUnitFrom = nil
-    tDraw.tVectorFrom = NewVector3(FromOrigin)
-  else
-    local tUnit = FromOrigin
-    if FromOriginType == "number" then
-      tUnit = GetUnitById(FromOrigin)
-    end
-    -- FromOrigin is the Id of an unit.
-    tDraw.tUnitFrom = tUnit
+    tDraw.tVectorFrom = tFromOriginVector
+  elseif tFromOriginUnit then
+    tDraw.tUnitFrom = tFromOriginUnit
     tDraw.tVectorFrom = nil
-  end
-  -- Preprocessing of the 'To'.
-  if ToOriginType == "table" or ToOriginType == "vector" then
-    -- ToOrigin is the result of a GetPosition()
-    tDraw.tUnitTo = nil
-    tDraw.tVectorTo = NewVector3(ToOrigin)
   else
-    local tUnit = ToOrigin
-    if ToOriginType == "number" then
-      tUnit = GetUnitById(ToOrigin)
-    end
-    -- ToOrigin is the Id of an unit.
-    tDraw.tUnitTo = tUnit
-    tDraw.tVectorTo = nil
+    Assert:Assert(false, "No valid from origin found: %s", tostring(FromOrigin))
   end
+
+  local tToOriginUnit, tToOriginVector = ProcessOrigin(ToOrigin)
+  if tToOriginVector then
+    tDraw.tUnitTo = nil
+    tDraw.tVectorTo = tToOriginVector
+  elseif tToOriginUnit then
+    tDraw.tUnitTo = tToOriginUnit
+    tDraw.tVectorTo = nil
+  else
+    Assert:Assert(false, "No valid to origin found: %s", tostring(ToOrigin))
+  end
+
   -- Save this object (new or not).
   self.tDraws[Key] = tDraw
   -- Start the draw update service.
@@ -430,9 +442,6 @@ function SimpleLine:UpdateDraw(tDraw)
 end
 
 function SimpleLine:AddDraw(Key, Origin, nOffset, nLength, nRotation, nWidth, sColor, nNumberOfDot, nOffsetOrigin)
-  local OriginType = GetOriginType(Origin)
-  assert(OriginType == "number" or OriginType == "table" or OriginType == "unit" or OriginType == "vector")
-
   if self.tDraws[Key] then
     -- To complex to manage new definition with nNumberOfDot which change,
     -- simplest to remove previous.
@@ -457,9 +466,8 @@ function SimpleLine:AddDraw(Key, Origin, nOffset, nLength, nRotation, nWidth, sC
   tDraw.RotationMatrix = CreateRotationMatrix(tDraw.nRotation)
   tDraw.RotationMatrix90 = CreateRotationMatrix(90)
 
-  if OriginType == "table" or OriginType == "vector" then
-    -- Origin is the result of a GetPosition()
-    local tOriginVector = NewVector3(Origin)
+  local tOriginUnit, tOriginVector = ProcessOrigin(Origin)
+  if tOriginVector then
     local tFacingVector = NewVector3(DEFAULT_NORTH_FACING)
     local tVectorA = tFacingVector * (tDraw.nOffset)
     local tVectorB = tFacingVector * (tDraw.nLength + tDraw.nOffset)
@@ -471,14 +479,12 @@ function SimpleLine:AddDraw(Key, Origin, nOffset, nLength, nRotation, nWidth, sC
     tDraw.tOriginUnit = nil
     tDraw.tFromVector = tOriginVector + tVectorA
     tDraw.tToVector = tOriginVector + tVectorB
-  else
-    local tUnit = Origin
-    if OriginType == "number" then
-      tUnit = GetUnitById(Origin)
-    end
-    tDraw.tOriginUnit = tUnit
+  elseif tOriginUnit then
+    tDraw.tOriginUnit = tOriginUnit
     tDraw.tFromVector = nil
     tDraw.tToVector = nil
+  else
+    Assert:Assert(false, "No valid origin found: %s", tostring(Origin))
   end
   -- Save this object (new or not).
   self.tDraws[Key] = tDraw
@@ -565,9 +571,6 @@ function Polygon:UpdateDraw(tDraw)
 end
 
 function Polygon:AddDraw(Key, Origin, nRadius, nRotation, nWidth, sColor, nSide)
-  local OriginType = GetOriginType(Origin)
-  assert(OriginType == "number" or OriginType == "table" or OriginType == "unit" or OriginType == "vector")
-
   if self.tDraws[Key] then
     -- To complex to manage new definition with nSide which change,
     -- simplest to remove previous.
@@ -588,23 +591,22 @@ function Polygon:AddDraw(Key, Origin, nRadius, nRotation, nWidth, sColor, nSide)
   tDraw.nPixieIds = tDraw.nPixieIds or {}
   tDraw.tVectors = tDraw.tVectors or {}
 
-  if OriginType == "number" then
-    -- Origin is the Id of an unit.
-    tDraw.tOriginUnit = GetUnitById(Origin)
-  elseif OriginType == "unit" then
-    tDraw.tOriginUnit = Origin
-  else
-    -- Origin is the result of a GetPosition()
+  local tOriginUnit, tOriginVector = ProcessOrigin(Origin)
+  if tOriginVector then
     tDraw.tOriginUnit = nil
     -- Precomputing coordonate of the polygon with constant origin.
-    local tOriginVector = NewVector3(Origin)
     local tFacingVector = NewVector3(DEFAULT_NORTH_FACING)
     local tRefVector = tFacingVector * tDraw.nRadius
     for i = 1, tDraw.nSide do
       local CornerRotate = CreateRotationMatrix(360 * i / tDraw.nSide + tDraw.nRotation)
       tDraw.tVectors[i] = tOriginVector + Rotation(tRefVector, CornerRotate)
     end
+  elseif tOriginUnit then
+    tDraw.tOriginUnit = tOriginUnit
+  else
+    Assert:Assert(false, "No valid origin found: %s", tostring(Origin))
   end
+
   -- Save this object (new or not).
   self.tDraws[Key] = tDraw
   -- Start the draw update service.
@@ -683,10 +685,6 @@ function Picture:UpdateDraw(tDraw)
 end
 
 function Picture:AddDraw(Key, Origin, sSprite, nSpriteSize, nRotation, nDistance, nHeight, sColor)
-  local OriginType = GetOriginType(Origin)
-  assert(OriginType == "number" or OriginType == "table" or OriginType == "unit" or OriginType == "vector")
-
-  -- Register a new object to manage.
   local tDraw = self.tDraws[Key] or NewDraw()
   tDraw.sSprite = sSprite or tDraw.sSprite
   tDraw.nRotation = nRotation or 0
@@ -697,11 +695,10 @@ function Picture:AddDraw(Key, Origin, sSprite, nSpriteSize, nRotation, nDistance
   -- Preprocessing.
   tDraw.RotationMatrix = CreateRotationMatrix(tDraw.nRotation)
 
-  if OriginType == "table" or OriginType == "vector" then
-    -- Origin is the result of a GetPosition()
+  local tOriginUnit, tOriginVector = ProcessOrigin(Origin)
+  if tOriginVector then
     tDraw.tOriginUnit = nil
     -- Precomputing coordonate of the polygon with constant origin.
-    local tOriginVector = NewVector3(Origin)
     local tFacingVector = NewVector3(DEFAULT_NORTH_FACING)
     local tRefVector = tFacingVector * tDraw.nDistance
     if tDraw.RotationMatrix then
@@ -709,16 +706,14 @@ function Picture:AddDraw(Key, Origin, sSprite, nSpriteSize, nRotation, nDistance
     end
     tDraw.tVector = tOriginVector + tRefVector
     tDraw.tVector.y = tDraw.tVector.y + tDraw.nHeight
-  else
-    local tUnit = Origin
-    if OriginType == "number" then
-      tUnit = GetUnitById(Origin)
-    end
-    tDraw.tOriginUnit = tUnit
-    local nRaceId = tUnit and tUnit:GetRaceId()
+  elseif tOriginUnit then
+    tDraw.tOriginUnit = tOriginUnit
+    local nRaceId = tOriginUnit and tOriginUnit:GetRaceId()
     if nRaceId and HEIGHT_PER_RACEID[nRaceId] then
       tDraw.nHeight = HEIGHT_PER_RACEID[nRaceId]
     end
+  else
+    Assert:Assert(false, "No valid origin found: %s", tostring(Origin))
   end
   -- Save this object (new or not).
   self.tDraws[Key] = tDraw
