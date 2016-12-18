@@ -112,7 +112,21 @@ local function NewManager(sText)
   return new
 end
 
+local function CreateRotationMatrix(nRotation)
+  if not nRotation or nRotation%360 == 0 then return nil end
+
+  local nRad = math.rad(nRotation)
+  local nCos = math.cos(nRad)
+  local nSin = math.sin(nRad)
+  return {
+    x = NewVector3({ nCos, 0, -nSin }),
+    y = NewVector3({ 0, 1, 0 }),
+    z = NewVector3({ nSin, 0, nCos }),
+  }
+end
+
 local function Rotation(tVector, tMatrixTeta)
+  if not tMatrixTeta then return tVector end
   local r = {}
   for axis1, R in next, tMatrixTeta do
     r[axis1] = tVector.x * R.x + tVector.y * R.y + tVector.z * R.z
@@ -434,28 +448,15 @@ function SimpleLine:AddDraw(Key, Origin, nOffset, nLength, nRotation, nWidth, sC
   tDraw.nOffset = nOffset or 0
   tDraw.nLength = nLength or 10
   tDraw.nWidth = nWidth or 4
+  tDraw.nRotation = nRotation or 0
   tDraw.sColor = sColor or tDraw.sColor
   tDraw.nNumberOfDot = nNumberOfDot or DOT_IS_A_LINE
   tDraw.nPixieIdDot = tDraw.nPixieIdDot or {}
   tDraw.nOffsetOrigin = nOffsetOrigin or nil
   -- Preprocessing.
-  local nRad = math.rad(nRotation or 0)
-  local nCos = math.cos(nRad)
-  local nSin = math.sin(nRad)
-  tDraw.RotationMatrix = {
-    x = NewVector3({ nCos, 0, -nSin }),
-    y = NewVector3({ 0, 1, 0 }),
-    z = NewVector3({ nSin, 0, nCos }),
-  }
+  tDraw.RotationMatrix = CreateRotationMatrix(tDraw.nRotation)
+  tDraw.RotationMatrix90 = CreateRotationMatrix(90)
 
-  nRad = math.rad(90)
-  nCos = math.cos(nRad)
-  nSin = math.sin(nRad)
-  tDraw.RotationMatrix90 = {
-    x = NewVector3({ nCos, 0, -nSin }),
-    y = NewVector3({ 0, 1, 0 }),
-    z = NewVector3({ nSin, 0, nCos }),
-  }
   if OriginType == "table" or OriginType == "vector" then
     -- Origin is the result of a GetPosition()
     local tOriginVector = NewVector3(Origin)
@@ -506,14 +507,7 @@ function Polygon:UpdateDraw(tDraw)
       local tRefVector = tFacingVector * tDraw.nRadius
       tVectors = {}
       for i = 1, tDraw.nSide do
-        local nRad = math.rad(360 * i / tDraw.nSide + tDraw.nRotation)
-        local nCos = math.cos(nRad)
-        local nSin = math.sin(nRad)
-        local CornerRotate = {
-          x = NewVector3({ nCos, 0, -nSin }),
-          y = NewVector3({ 0, 1, 0 }),
-          z = NewVector3({ nSin, 0, nCos }),
-        }
+        local CornerRotate = CreateRotationMatrix(360 * i / tDraw.nSide + tDraw.nRotation)
         tVectors[i] = tOriginVector + Rotation(tRefVector, CornerRotate)
       end
     end
@@ -604,14 +598,7 @@ function Polygon:AddDraw(Key, Origin, nRadius, nRotation, nWidth, sColor, nSide)
     local tFacingVector = NewVector3(DEFAULT_NORTH_FACING)
     local tRefVector = tFacingVector * tDraw.nRadius
     for i = 1, tDraw.nSide do
-      local nRad = math.rad(360 * i / tDraw.nSide + tDraw.nRotation)
-      local nCos = math.cos(nRad)
-      local nSin = math.sin(nRad)
-      local CornerRotate = {
-        x = NewVector3({ nCos, 0, -nSin }),
-        y = NewVector3({ 0, 1, 0 }),
-        z = NewVector3({ nSin, 0, nCos }),
-      }
+      local CornerRotate = CreateRotationMatrix(360 * i / tDraw.nSide + tDraw.nRotation)
       tDraw.tVectors[i] = tOriginVector + Rotation(tRefVector, CornerRotate)
     end
   end
@@ -648,7 +635,8 @@ function Picture:UpdateDraw(tDraw)
       local tOriginVector = NewVector3(tOriginUnit:GetPosition())
       local tFacingVector = NewVector3(tOriginUnit:GetFacing())
       local tRefVector = tFacingVector * tDraw.nDistance
-      tVector = tOriginVector + Rotation(tRefVector, tDraw.RotationMatrix)
+      tRefVector = Rotation(tRefVector, tDraw.RotationMatrix)
+      tVector = tOriginVector + tRefVector
       tVector.y = tVector.y + tDraw.nHeight
     end
   else
@@ -704,14 +692,7 @@ function Picture:AddDraw(Key, Origin, sSprite, nSpriteSize, nRotation, nDistance
   tDraw.nSpriteSize = nSpriteSize or 30
   tDraw.sColor = sColor or "white"
   -- Preprocessing.
-  local nRad = math.rad(tDraw.nRotation or 0)
-  local nCos = math.cos(nRad)
-  local nSin = math.sin(nRad)
-  tDraw.RotationMatrix = {
-    x = NewVector3({ nCos, 0, -nSin }),
-    y = NewVector3({ 0, 1, 0 }),
-    z = NewVector3({ nSin, 0, nCos }),
-  }
+  tDraw.RotationMatrix = CreateRotationMatrix(tDraw.nRotation)
 
   if OriginType == "table" or OriginType == "vector" then
     -- Origin is the result of a GetPosition()
@@ -720,7 +701,10 @@ function Picture:AddDraw(Key, Origin, sSprite, nSpriteSize, nRotation, nDistance
     local tOriginVector = NewVector3(Origin)
     local tFacingVector = NewVector3(DEFAULT_NORTH_FACING)
     local tRefVector = tFacingVector * tDraw.nDistance
-    tDraw.tVector = tOriginVector + Rotation(tRefVector, tDraw.RotationMatrix)
+    if tDraw.RotationMatrix then
+      tRefVector = Rotation(tRefVector, tDraw.RotationMatrix)
+    end
+    tDraw.tVector = tOriginVector + tRefVector
     tDraw.tVector.y = tDraw.tVector.y + tDraw.nHeight
   else
     local tUnit = Origin
