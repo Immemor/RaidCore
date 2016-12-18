@@ -377,12 +377,6 @@ function mod:OnEngineerDestroyed(id, unit, name)
   engineerUnits[ENGINEER_NAMES[name]] = nil
 end
 
-mod:RegisterUnitEvents({"unit.engineer", "unit.warrior"}, {
-    [core.E.UNIT_CREATED] = mod.OnEngineerCreated,
-    [core.E.UNIT_DESTROYED] = mod.OnEngineerDestroyed,
-  }
-)
-
 -- Cores
 mod:RegisterUnitEvents({
     "unit.fusion_core",
@@ -484,6 +478,11 @@ end
 ----------------------------------------------------------------------------------------------------
 -- Bind event handlers.
 ----------------------------------------------------------------------------------------------------
+mod:RegisterUnitEvents({"unit.engineer", "unit.warrior"}, {
+    [core.E.UNIT_CREATED] = mod.OnEngineerCreated,
+    [core.E.UNIT_DESTROYED] = mod.OnEngineerDestroyed,
+  }
+)
 mod:RegisterUnitEvents("unit.warrior",{
     ["cast.warrior.liquidate"] = {
       [core.E.CAST_START ]= mod.OnWarriorLiquidateStart,
