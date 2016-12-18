@@ -365,7 +365,7 @@ end
 
 function mod:OnBigSawCreated(id, unit, name)
   if mod:GetSetting("LineSawblade") then
-    core:AddPixie(id, 2, unit, nil, "Red", 10, 60, 0)
+    core:AddSimpleLine(id, unit, nil, 60, nil, 10, "Red")
   end
   local sawLocation = mod:DetermineSawLocation(unit)
   if phase == WALKING and sawLocation == SAW_MID then
@@ -376,7 +376,7 @@ function mod:OnBigSawCreated(id, unit, name)
 end
 
 function mod:OnBigSawDestroyed(id, unit, name)
-  core:DropPixie(id)
+  core:RemoveSimpleLine(id)
 end
 
 function mod:OnNabberCreated(id, unit, name)
