@@ -280,12 +280,9 @@ mod:RegisterUnitEvents("unit.anchor",{
   }
 )
 
-mod:RegisterUnitEvents("unit.orb",{
-    [core.E.UNIT_CREATED] = function()
-      mod:AddMsg("ORB_SPAWNED", "msg.orb.spawned", 5, "Info", "xkcdWhite")
-    end
-  }
-)
+function mod:OnOrbCreated()
+  mod:AddMsg("ORB_SPAWNED", "msg.orb.spawned", 5, "Info", "xkcdWhite")
+end
 
 function mod:OnAirlockClosed()
   isAirPhase = false
@@ -400,6 +397,10 @@ end
 ----------------------------------------------------------------------------------------------------
 -- Bind event handlers.
 ----------------------------------------------------------------------------------------------------
+mod:RegisterUnitEvents("unit.orb",{
+    [core.E.UNIT_CREATED] = mod.OnOrbCreated,
+  }
+)
 mod:RegisterDatachronEvent("chron.airlock.closed", core.E.COMPARE_EQUAL, mod.OnAirlockClosed)
 mod:RegisterUnitEvents(core.E.ALL_UNITS, {
     [core.E.UNIT_DESTROYED] = mod.OnAnyUnitDestroyed,
