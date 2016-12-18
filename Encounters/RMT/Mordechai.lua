@@ -287,17 +287,16 @@ mod:RegisterUnitEvents("unit.orb",{
   }
 )
 
-mod:RegisterDatachronEvent("chron.airlock.closed", core.E.COMPARE_EQUAL, function()
-    isAirPhase = false
-    mod:AddCleaveLines()
-    mod:AddTimerBar("NEXT_SHURIKEN_TIMER", "msg.mordechai.shuriken.next", FIRST_SHURIKEN_TIMER, mod:GetSetting("SoundShurikenCountdown"))
-    mod:AddTimerBar("NEXT_ORB_TIMER", "msg.orb.next", FIRST_ORB_MIDPHASE_TIMER)
-    if numberOfAirPhases >= 2 then
-      mod:AddTimerBar("NEXT_BARRAGE_TIMER", "msg.mordechai.barrage.next", FIRST_BARRAGE_TIMER)
-    end
-    mod:AddAnchorWorldMarkers()
+function mod:OnAirlockClosed()
+  isAirPhase = false
+  mod:AddCleaveLines()
+  mod:AddTimerBar("NEXT_SHURIKEN_TIMER", "msg.mordechai.shuriken.next", FIRST_SHURIKEN_TIMER, mod:GetSetting("SoundShurikenCountdown"))
+  mod:AddTimerBar("NEXT_ORB_TIMER", "msg.orb.next", FIRST_ORB_MIDPHASE_TIMER)
+  if numberOfAirPhases >= 2 then
+    mod:AddTimerBar("NEXT_BARRAGE_TIMER", "msg.mordechai.barrage.next", FIRST_BARRAGE_TIMER)
   end
-)
+  mod:AddAnchorWorldMarkers()
+end
 
 function mod:OnAnyUnitDestroyed(id, unit, name)
   core:DropMark(id)
@@ -401,6 +400,7 @@ end
 ----------------------------------------------------------------------------------------------------
 -- Bind event handlers.
 ----------------------------------------------------------------------------------------------------
+mod:RegisterDatachronEvent("chron.airlock.closed", core.E.COMPARE_EQUAL, mod.OnAirlockClosed)
 mod:RegisterUnitEvents(core.E.ALL_UNITS, {
     [core.E.UNIT_DESTROYED] = mod.OnAnyUnitDestroyed,
     [DEBUFF_KINETIC_LINK] = {
