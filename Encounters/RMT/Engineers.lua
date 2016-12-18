@@ -294,54 +294,50 @@ function mod:UpdateCoreHealthMark(coreUnit)
   core:MarkUnit(coreUnit.unit, 0, percent, color)
 end
 
-mod:RegisterUnitEvents(core.E.ALL_UNITS, {
-    [core.E.UNIT_DESTROYED] = function (self, id)
-      core:DropMark(id)
-    end,
-    [DEBUFFS.ELECTROSHOCK_VULNERABILITY] = {
-      [core.E.DEBUFF_ADD] = function(self, id, spellId, stack, timeRemaining, targetName)
-        local targetUnit
-        if id == player.unit:GetId() then
-          targetUnit = player.unit
-          mod:AddMsg("ELECTROSHOCK_MSG_YOU", "msg.engineer.electroshock.swap.you", 5, "Burn", "Red")
-        else
-          targetUnit = GetUnitById(id)
-          local messageId = string.format("ELECTROSHOCK_MSG_OTHER_%s", targetName)
-          local electroshockOnX = self.L["msg.engineer.electroshock.swap.other"]:format(targetName)
-          mod:AddMsg(messageId, electroshockOnX, 5, "Info", "xkcdBlue")
-        end
-        if mod:GetSetting("MarkerDebuff") then
-          core:MarkUnit(targetUnit, core.E.LOCATION_STATIC_CHEST, "E", "xkcdOrange")
-        end
-      end,
-      [core.E.DEBUFF_REMOVE] = function(self, id, spellId, targetName)
-        if id == player.unit:GetId() then
-          mod:AddMsg("ELECTROSHOCK_MSG_OVER", "msg.engineer.electroshock.swap.return", 5, "Burn", "xkcdGreen")
-        end
-        core:DropMark(id)
-      end,
-    },
-    [DEBUFFS.ION_CLASH] = {
-      [core.E.DEBUFF_ADD] = function(_, id)
-        if mod:GetSetting("VisualIonClashCircle") then
-          core:AddPolygon("ION_CLASH", id, 9, 0, 10, "xkcdBlue", 64)
-        end
-      end,
-      [core.E.DEBUFF_REMOVE] = function()
-        core:RemovePolygon("ION_CLASH")
-      end,
-    },
-    [core.E.DEBUFF_ADD] = {
-      [DEBUFFS.ATOMIC_ATTRACTION] = function(self, id, spellId, stack, timeRemaining, targetName)
-        if id == player.unit:GetId() then
-          mod:AddMsg("DISCHARGED_PLASMA_MSG", "msg.fire_orb.you", 5, "RunAway", "xkcdLightRed")
-        elseif mod:IsPlayerOnPlatform(FUSION_CORE) then
-          mod:AddMsg("DISCHARGED_PLASMA_MSG_SPAWN", "msg.fire_orb.spawned", 2, "Info", "xkcdWhite")
-        end
-      end,
-    },
-  }
-)
+function mod:OnAnyUnitDestroyed(id, unit, name)
+  core:DropMark(id)
+end
+
+function mod:OnElectroshockAdd(id, spellId, stack, timeRemaining, targetName)
+  local targetUnit
+  if id == player.unit:GetId() then
+    targetUnit = player.unit
+    mod:AddMsg("ELECTROSHOCK_MSG_YOU", "msg.engineer.electroshock.swap.you", 5, "Burn", "Red")
+  else
+    targetUnit = GetUnitById(id)
+    local messageId = string.format("ELECTROSHOCK_MSG_OTHER_%s", targetName)
+    local electroshockOnX = self.L["msg.engineer.electroshock.swap.other"]:format(targetName)
+    mod:AddMsg(messageId, electroshockOnX, 5, "Info", "xkcdBlue")
+  end
+  if mod:GetSetting("MarkerDebuff") then
+    core:MarkUnit(targetUnit, core.E.LOCATION_STATIC_CHEST, "E", "xkcdOrange")
+  end
+end
+
+function mod:OnElectroshockRemove(id, spellId, targetName)
+  if id == player.unit:GetId() then
+    mod:AddMsg("ELECTROSHOCK_MSG_OVER", "msg.engineer.electroshock.swap.return", 5, "Burn", "xkcdGreen")
+  end
+  core:DropMark(id)
+end
+
+function mod:OnIonClashAdd(id, spellId, stack, timeRemaining, name)
+  if mod:GetSetting("VisualIonClashCircle") then
+    core:AddPolygon("ION_CLASH", id, 9, 0, 10, "xkcdBlue", 64)
+  end
+end
+
+function mod:OnIonClashRemove(id, spellId, name)
+  core:RemovePolygon("ION_CLASH")
+end
+
+function mod:OnAtomicAttactionAdd(id, spellId, stack, timeRemaining, targetName)
+  if id == player.unit:GetId() then
+    mod:AddMsg("DISCHARGED_PLASMA_MSG", "msg.fire_orb.you", 5, "RunAway", "xkcdLightRed")
+  elseif mod:IsPlayerOnPlatform(FUSION_CORE) then
+    mod:AddMsg("DISCHARGED_PLASMA_MSG_SPAWN", "msg.fire_orb.spawned", 2, "Info", "xkcdWhite")
+  end
+end
 
 function mod:IsPlayerOnPlatform(coreId)
   player.location = mod:GetUnitPlatform(player.unit)
@@ -468,6 +464,21 @@ end
 ----------------------------------------------------------------------------------------------------
 -- Bind event handlers.
 ----------------------------------------------------------------------------------------------------
+mod:RegisterUnitEvents(core.E.ALL_UNITS, {
+    [core.E.UNIT_DESTROYED] = mod.OnAnyUnitDestroyed,
+    [DEBUFFS.ELECTROSHOCK_VULNERABILITY] = {
+      [core.E.DEBUFF_ADD] = mod.OnElectroshockAdd,
+      [core.E.DEBUFF_REMOVE] = mod.OnElectroshockRemove,
+    },
+    [DEBUFFS.ION_CLASH] = {
+      [core.E.DEBUFF_ADD] = mod.OnIonClashAdd,
+      [core.E.DEBUFF_REMOVE] = mod.OnIonClashRemove,
+    },
+    [core.E.DEBUFF_ADD] = {
+      [DEBUFFS.ATOMIC_ATTRACTION] = mod.OnAtomicAttactionAdd,
+    },
+  }
+)
 mod:RegisterUnitEvents({
     "unit.fusion_core",
     "unit.cooling_turbine",
