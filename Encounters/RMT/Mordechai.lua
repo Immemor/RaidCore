@@ -142,9 +142,11 @@ local GetUnitById = GameLib.GetUnitById
 ----------------------------------------------------------------------------------------------------
 -- Constants.
 ----------------------------------------------------------------------------------------------------
-local DEBUFF_NULLIFIED = 85614 -- Green
-local DEBUFF_KINETIC_LINK = 86797 -- Purple
-local DEBUFF_SHOCKING_ATTRACTION = 86861
+local DEBUFFS = {
+  NULLIFIED = 85614, -- Green
+  KINETIC_LINK = 86797, -- Purple
+  SHOCKING_ATTRACTION = 86861,
+}
 
 local FIRST_SHURIKEN_TIMER = 11
 local SHURIKEN_TIMER = 22
@@ -408,11 +410,11 @@ mod:RegisterUnitEvent("unit.orb", core.E.UNIT_CREATED, mod.OnOrbCreated)
 mod:RegisterDatachronEvent("chron.airlock.closed", core.E.COMPARE_EQUAL, mod.OnAirlockClosed)
 mod:RegisterUnitEvents(core.E.ALL_UNITS, {
     [core.E.UNIT_DESTROYED] = mod.OnAnyUnitDestroyed,
-    [DEBUFF_KINETIC_LINK] = {
+    [DEBUFFS.KINETIC_LINK] = {
       [core.E.DEBUFF_ADD] = mod.OnKineticLinkAdded,
       [core.E.DEBUFF_REMOVE] = mod.OnKineticLinkRemoved,
     },
-    [DEBUFF_SHOCKING_ATTRACTION] = {
+    [DEBUFFS.SHOCKING_ATTRACTION] = {
       [core.E.DEBUFF_ADD] = mod.OnShockingAttractionAdded,
       [core.E.DEBUFF_REMOVE] = mod.OnShockingAttractionRemoved,
     },
