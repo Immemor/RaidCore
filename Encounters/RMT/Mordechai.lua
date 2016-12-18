@@ -202,17 +202,13 @@ function mod:OnBarUnitCreated(id, unit, name)
   mod:AddUnit(unit)
 end
 
-mod:RegisterUnitEvents("unit.turret",{
-    [core.E.UNIT_CREATED] = function(_, _, unit)
-      core:WatchUnit(unit, core.E.TRACK_CASTS)
-    end,
-    ["cast.turret.discharge"] = {
-      [core.E.CAST_START] = function()
-        mod:AddTimerBar("NEXT_ORB_TIMER", "msg.orb.next", ORB_TIMER)
-      end
-    }
-  }
-)
+function mod:OnTurretCreated(id, unit, name)
+  core:WatchUnit(unit, core.E.TRACK_CASTS)
+end
+
+function mod:OnTurretCastOrbStart()
+  mod:AddTimerBar("NEXT_ORB_TIMER", "msg.orb.next", ORB_TIMER)
+end
 
 mod:RegisterUnitEvents("unit.mordechai",{
     [core.E.UNIT_CREATED] = function(_, _, unit)
@@ -396,6 +392,13 @@ end
 ----------------------------------------------------------------------------------------------------
 -- Bind event handlers.
 ----------------------------------------------------------------------------------------------------
+mod:RegisterUnitEvents("unit.turret",{
+    [core.E.UNIT_CREATED] = mod.OnTurretCreated,
+    ["cast.turret.discharge"] = {
+      [core.E.CAST_START] = mod.OnTurretCastOrb,
+    }
+  }
+)
 mod:RegisterUnitEvents("unit.anchor",{
     [core.E.UNIT_CREATED] = mod.OnAnchorCreated,
     [core.E.UNIT_DESTROYED] = mod.OnAnchorDestroyed,
