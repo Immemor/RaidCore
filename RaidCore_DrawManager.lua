@@ -177,8 +177,7 @@ local function StopDrawing()
   end
 end
 
-local function UpdateLine(tDraw, tVectorFrom, tVectorTo)
-  local tScreenLocTo, tScreenLocFrom = nil, nil
+local function ShouldDrawBeVisible(tDraw, tVectorFrom, tVectorTo)
   local bShouldBeVisible = true
   if tDraw.nMaxLengthVisible or tDraw.nMinLengthVisible then
     local len = (tVectorTo - tVectorFrom):Length()
@@ -188,82 +187,99 @@ local function UpdateLine(tDraw, tVectorFrom, tVectorTo)
       bShouldBeVisible = false
     end
   end
+  return bShouldBeVisible
+end
+
+local function DestroyPixie(tDraw)
+  if tDraw.nPixieIdFull then
+    _wndOverlay:DestroyPixie(tDraw.nPixieIdFull)
+    tDraw.nPixieIdFull = nil
+  end
+  if next(tDraw.nPixieIdDot) then
+    for _, nPixieIdDot in next, tDraw.nPixieIdDot do
+      _wndOverlay:DestroyPixie(nPixieIdDot)
+    end
+    tDraw.nPixieIdDot = {}
+  end
+end
+
+local function UpdatePixieLine(tDraw, tScreenLocFrom, tScreenLocTo)
+  local tPixieAttributs = {
+    bLine = true,
+    fWidth = tDraw.nWidth,
+    cr = tDraw.sColor,
+    loc = {
+      fPoints = FPOINT_NULL,
+      nOffsets = {
+        tScreenLocFrom.x,
+        tScreenLocFrom.y,
+        tScreenLocTo.x,
+        tScreenLocTo.y,
+      },
+    },
+  }
+  if tDraw.nPixieIdFull then
+    _wndOverlay:UpdatePixie(tDraw.nPixieIdFull, tPixieAttributs)
+  else
+    tDraw.nPixieIdFull = _wndOverlay:AddPixie(tPixieAttributs)
+  end
+end
+
+local function UpdatePixieDots(tDraw, tScreenLocFrom, tScreenLocTo, tVectorFrom, tVectorTo)
+  local tVectorPlayer = NewVector3(GetPlayerUnit():GetPosition())
+  for i = 1, tDraw.nNumberOfDot do
+    local nRatio = (i - 1) / (tDraw.nNumberOfDot - 1)
+    local tVectorDot = Vector3.InterpolateLinear(tVectorFrom, tVectorTo, nRatio)
+    local tScreenLocDot = WorldLocToScreenPoint(tVectorDot)
+    if tScreenLocDot.z > 0 then
+      local nDistance2Player = (tVectorPlayer - tVectorDot):Length()
+      local nScale = math.min(40 / nDistance2Player, 1)
+      nScale = math.max(nScale, 0.5) * tDraw.nSpriteSize
+      local tVector = tScreenLocTo - tScreenLocFrom
+      local tPixieAttributs = {
+        bLine = false,
+        strSprite = tDraw.sSprite,
+        cr = tDraw.sColor,
+        fRotation = math.deg(math.atan2(tVector.y, tVector.x)) + 90,
+        loc = {
+          fPoints = FPOINT_NULL,
+          nOffsets = {
+            tScreenLocDot.x - nScale,
+            tScreenLocDot.y - nScale ,
+            tScreenLocDot.x + nScale,
+            tScreenLocDot.y + nScale,
+          },
+        },
+      }
+      if tDraw.nPixieIdDot[i] then
+        _wndOverlay:UpdatePixie(tDraw.nPixieIdDot[i], tPixieAttributs)
+      else
+        tDraw.nPixieIdDot[i] = _wndOverlay:AddPixie(tPixieAttributs)
+      end
+    else
+      _wndOverlay:DestroyPixie(tDraw.nPixieIdDot[i])
+      tDraw.nPixieIdDot[i] = nil
+    end
+  end
+end
+
+local function UpdateLine(tDraw, tVectorFrom, tVectorTo)
+  local tScreenLocTo, tScreenLocFrom = nil, nil
+  local bShouldBeVisible = ShouldDrawBeVisible(tDraw, tVectorFrom, tVectorTo)
   if bShouldBeVisible then
     tScreenLocTo = WorldLocToScreenPoint(tVectorTo)
     tScreenLocFrom = WorldLocToScreenPoint(tVectorFrom)
   end
-  if tScreenLocFrom and tScreenLocTo and (tScreenLocFrom.z > 0 or tScreenLocTo.z > 0) then
-    if tDraw.nNumberOfDot == DOT_IS_A_LINE then
-      local tPixieAttributs = {
-        bLine = true,
-        fWidth = tDraw.nWidth,
-        cr = tDraw.sColor,
-        loc = {
-          fPoints = FPOINT_NULL,
-          nOffsets = {
-            tScreenLocFrom.x,
-            tScreenLocFrom.y,
-            tScreenLocTo.x,
-            tScreenLocTo.y,
-          },
-        },
-      }
-      if tDraw.nPixieIdFull then
-        _wndOverlay:UpdatePixie(tDraw.nPixieIdFull, tPixieAttributs)
-      else
-        tDraw.nPixieIdFull = _wndOverlay:AddPixie(tPixieAttributs)
-      end
-    else
-      local tVectorPlayer = NewVector3(GetPlayerUnit():GetPosition())
-      for i = 1, tDraw.nNumberOfDot do
-        local nRatio = (i - 1) / (tDraw.nNumberOfDot - 1)
-        local tVectorDot = Vector3.InterpolateLinear(tVectorFrom, tVectorTo, nRatio)
-        local tScreenLocDot = WorldLocToScreenPoint(tVectorDot)
-        if tScreenLocDot.z > 0 then
-          local nDistance2Player = (tVectorPlayer - tVectorDot):Length()
-          local nScale = math.min(40 / nDistance2Player, 1)
-          nScale = math.max(nScale, 0.5) * tDraw.nSpriteSize
-          local tVector = tScreenLocTo - tScreenLocFrom
-          local tPixieAttributs = {
-            bLine = false,
-            strSprite = tDraw.sSprite,
-            cr = tDraw.sColor,
-            fRotation = math.deg(math.atan2(tVector.y, tVector.x)) + 90,
-            loc = {
-              fPoints = FPOINT_NULL,
-              nOffsets = {
-                tScreenLocDot.x - nScale,
-                tScreenLocDot.y - nScale ,
-                tScreenLocDot.x + nScale,
-                tScreenLocDot.y + nScale,
-              },
-            },
-          }
-          if tDraw.nPixieIdDot[i] then
-            _wndOverlay:UpdatePixie(tDraw.nPixieIdDot[i], tPixieAttributs)
-          else
-            tDraw.nPixieIdDot[i] = _wndOverlay:AddPixie(tPixieAttributs)
-          end
-        else
-          _wndOverlay:DestroyPixie(tDraw.nPixieIdDot[i])
-          tDraw.nPixieIdDot[i] = nil
-        end
-      end
-    end
+
+  if not bShouldBeVisible or (tScreenLocFrom.z <= 0 and tScreenLocTo.z <= 0) then
+    DestroyPixie(tDraw)
+    return
+  end
+
+  if tDraw.nNumberOfDot == DOT_IS_A_LINE then
+    UpdatePixieLine(tDraw, tScreenLocFrom, tScreenLocTo)
   else
-    -- Remove the pixie if:
-    -- * At least one unit is not available.
-    -- * The Line is out of sight.
-    if tDraw.nPixieIdFull then
-      _wndOverlay:DestroyPixie(tDraw.nPixieIdFull)
-      tDraw.nPixieIdFull = nil
-    end
-    if next(tDraw.nPixieIdDot) then
-      for _, nPixieIdDot in next, tDraw.nPixieIdDot do
-        _wndOverlay:DestroyPixie(nPixieIdDot)
-      end
-      tDraw.nPixieIdDot = {}
-    end
+    UpdatePixieDots(tDraw, tScreenLocTo, tScreenLocFrom, tVectorFrom, tVectorTo)
   end
 end
 
