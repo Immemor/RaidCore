@@ -426,7 +426,7 @@ end
 
 function mod:OnEngineerElectroshockStart()
   if mod:GetSetting("LineElectroshock") then
-    core:AddPixie("ELECTROSHOCK_PIXIE", 2, engineerUnits[ENGINEER].unit, nil, "Red", 10, 80, 0)
+    core:AddSimpleLine("ELECTROSHOCK", engineerUnits[ENGINEER].unit, nil, 80, nil, 10, "xkcdRed")
   end
   if mod:IsPlayerOnPlatform(engineerUnits[ENGINEER].location) then
     mod:AddMsg("ELECTROSHOCK_CAST_MSG", "cast.engineer.electroshock", 5, "Beware", "xkcdOrange")
@@ -434,9 +434,7 @@ function mod:OnEngineerElectroshockStart()
 end
 
 function mod:OnEngineerElectroshockEnd()
-  if mod:GetSetting("LineElectroshock") then
-    core:DropPixie("ELECTROSHOCK_PIXIE")
-  end
+  core:RemoveSimpleLine("ELECTROSHOCK")
   mod:RemoveTimerBar("NEXT_ELEKTROSHOCK_TIMER")
   mod:AddTimerBar("NEXT_ELEKTROSHOCK_TIMER", "msg.engineer.electroshock.next", TIMERS.ELECTROSHOCK.NORMAL)
 end
