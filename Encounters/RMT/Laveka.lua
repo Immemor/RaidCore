@@ -20,7 +20,8 @@ mod:RegisterEnglishLocale({
     ["unit.laveka"] = "Laveka the Dark-Hearted",
     -- Cast names.
     -- Messages.
-  })
+  }
+)
 ----------------------------------------------------------------------------------------------------
 -- Settings.
 ----------------------------------------------------------------------------------------------------
@@ -28,10 +29,15 @@ mod:RegisterEnglishLocale({
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
+function mod:OnLavekaCreated(id, unit, name)
+  core:AddUnit(unit)
+  core:WatchUnit(unit, core.E.TRACK_ALL)
+end
+
+----------------------------------------------------------------------------------------------------
+-- Bind event handlers.
+----------------------------------------------------------------------------------------------------
 mod:RegisterUnitEvents("unit.laveka",{
-    [core.E.UNIT_CREATED] = function (_, _, unit)
-      core:AddUnit(unit)
-      core:WatchUnit(unit, core.E.TRACK_ALL)
-    end,
+    [core.E.UNIT_CREATED] = mod.OnLavekaCreated,
   }
 )
