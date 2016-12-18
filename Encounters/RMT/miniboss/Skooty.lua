@@ -75,42 +75,48 @@ function mod:OnBossEnable()
   playerUnit = GameLib.GetPlayerUnit()
 end
 
-mod:RegisterUnitEvents("unit.skooty",{
-    [core.E.UNIT_CREATED] = function (self, id, unit)
-      skootyUnit = unit
-      core:AddUnit(unit)
-      core:WatchUnit(unit, core.E.TRACK_CASTS)
-    end,
-    [core.E.UNIT_DESTROYED] = function ()
-      skootyUnit = nil
-    end,
-    [core.E.CAST_START] = {
-      ["cast.skooty.cannon"] = function ()
-        local target = skootyUnit and skootyUnit:GetTarget()
-        if target and target:IsThePlayer() then
-          mod:AddMsg("PULSECANNON", "msg.skooty.cannon.get_out", 5, "RunAway")
-        else
-          mod:AddMsg("PULSECANNON_TANK", "msg.skooty.cannon.get_out_tank", 5, "Info", "xkcdWhite")
-        end
-      end,
-    }
-  }
-)
+function mod:OnSkootyCreated(id, unit, name)
+  skootyUnit = unit
+  core:AddUnit(unit)
+  core:WatchUnit(unit, core.E.TRACK_CASTS)
+end
 
-mod:RegisterUnitEvents("unit.jumpstart",{
-    [core.E.UNIT_CREATED] = function (self, id)
-      if mod:GetSetting("BombLines") then
-        core:AddLineBetweenUnits("JUMP_START_LINE_"..id, playerUnit:GetId(), id, 5)
-      end
-    end,
-    [core.E.UNIT_DESTROYED] = function (self, id)
-      if mod:GetSetting("BombLines") then
-        core:RemoveLineBetweenUnits("JUMP_START_LINE_"..id)
-      end
-    end,
-  }
-)
+function mod:OnSkootyDestroyed(id, unit, name)
+  skootyUnit = nil
+end
+
+function mod:OnSkootyCannonStart()
+  local target = skootyUnit and skootyUnit:GetTarget()
+  if target and target:IsThePlayer() then
+    mod:AddMsg("PULSECANNON", "msg.skooty.cannon.get_out", 5, "RunAway")
+  else
+    mod:AddMsg("PULSECANNON_TANK", "msg.skooty.cannon.get_out_tank", 5, "Info", "xkcdWhite")
+  end
+end
+
+function mod:OnJumpstartCreated(id, unit, name)
+  if mod:GetSetting("BombLines") then
+    core:AddLineBetweenUnits("JUMP_START_LINE_"..id, playerUnit, unit, 5)
+  end
+end
+
+function mod:OnJumpstartDestroyed(id, unit, name)
+  core:RemoveLineBetweenUnits("JUMP_START_LINE_"..id)
+end
 
 ----------------------------------------------------------------------------------------------------
 -- Bind event handlers.
 ----------------------------------------------------------------------------------------------------
+mod:RegisterUnitEvents("unit.jumpstart",{
+    [core.E.UNIT_CREATED] = mod.OnJumpstartCreated,
+    [core.E.UNIT_DESTROYED] = mod.RemoveLineBetweenUnits,
+  }
+)
+mod:RegisterUnitEvents("unit.skooty",{
+    [core.E.UNIT_CREATED] = mod.OnSkootyCreated,
+    [core.E.UNIT_DESTROYED] = mod.OnSkootyDestroyed,
+    [core.E.CAST_START] = {
+      ["cast.skooty.cannon"] = mod.OnSkootyCannonStart,
+    }
+  }
+)
