@@ -156,6 +156,9 @@ function mod:OnRadioactiveHealthChanged(id, percent)
   mod:OnBombHealthChanged(id, percent, self.L["msg.radioactive"])
 end
 
+----------------------------------------------------------------------------------------------------
+-- Bind event handlers.
+----------------------------------------------------------------------------------------------------
 mod:RegisterUnitEvents({"unit.warhead.radioactive", "unit.warhead.flashbang"},{
     [core.E.UNIT_CREATED] = mod.OnBombCreated,
     [core.E.UNIT_DESTROYED] = mod.OnBombDestroyed,

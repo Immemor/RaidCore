@@ -202,6 +202,9 @@ function mod:OnCausticHealthChanged(id, percent)
   mod:OnBombHealthChanged(id, percent, self.L["msg.caustic"])
 end
 
+----------------------------------------------------------------------------------------------------
+-- Bind event handlers.
+----------------------------------------------------------------------------------------------------
 mod:RegisterUnitEvents({"unit.warhead.incindiary", "unit.warhead.caustic"},{
     [core.E.UNIT_CREATED] = mod.OnBombCreated,
     [core.E.UNIT_DESTROYED] = mod.OnBombDestroyed,

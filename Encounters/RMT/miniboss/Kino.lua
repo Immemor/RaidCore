@@ -95,6 +95,9 @@ function mod:OnBassCastEnd()
   mod:StartBassTimer()
 end
 
+----------------------------------------------------------------------------------------------------
+-- Bind event handlers.
+----------------------------------------------------------------------------------------------------
 mod:RegisterUnitEvents("unit.kino",{
     ["cast.kino.bass"] = {
       [core.E.CAST_START] = mod.OnBassCastStart,
