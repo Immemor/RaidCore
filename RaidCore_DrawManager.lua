@@ -179,20 +179,18 @@ end
 
 local function UpdateLine(tDraw, tVectorFrom, tVectorTo)
   local tScreenLocTo, tScreenLocFrom = nil, nil
-  if tVectorFrom and tVectorTo then
-    local bShouldBeVisible = true
-    if tDraw.nMaxLengthVisible or tDraw.nMinLengthVisible then
-      local len = (tVectorTo - tVectorFrom):Length()
-      if tDraw.nMaxLengthVisible and tDraw.nMaxLengthVisible < len then
-        bShouldBeVisible = false
-      elseif tDraw.nMinLengthVisible and tDraw.nMinLengthVisible > len then
-        bShouldBeVisible = false
-      end
+  local bShouldBeVisible = true
+  if tDraw.nMaxLengthVisible or tDraw.nMinLengthVisible then
+    local len = (tVectorTo - tVectorFrom):Length()
+    if tDraw.nMaxLengthVisible and tDraw.nMaxLengthVisible < len then
+      bShouldBeVisible = false
+    elseif tDraw.nMinLengthVisible and tDraw.nMinLengthVisible > len then
+      bShouldBeVisible = false
     end
-    if bShouldBeVisible then
-      tScreenLocTo = WorldLocToScreenPoint(tVectorTo)
-      tScreenLocFrom = WorldLocToScreenPoint(tVectorFrom)
-    end
+  end
+  if bShouldBeVisible then
+    tScreenLocTo = WorldLocToScreenPoint(tVectorTo)
+    tScreenLocFrom = WorldLocToScreenPoint(tVectorFrom)
   end
   if tScreenLocFrom and tScreenLocTo and (tScreenLocFrom.z > 0 or tScreenLocTo.z > 0) then
     if tDraw.nNumberOfDot == DOT_IS_A_LINE then
@@ -325,18 +323,14 @@ end
 local LineBetween = NewManager("LineBetween")
 
 function LineBetween:UpdateDraw(tDraw)
-  local tVectorFrom, tVectorTo
+  local tVectorFrom, tVectorTo = tDraw.tVectorFrom, tDraw.tVectorTo
   if tDraw.tUnitFrom then
     tVectorFrom = NewVector3(tDraw.tUnitFrom:GetPosition())
-  else
-    tVectorFrom = tDraw.tVectorFrom
   end
   if tDraw.tUnitTo then
     tVectorTo = NewVector3(tDraw.tUnitTo:GetPosition())
-  else
-    tVectorTo = tDraw.tVectorTo
   end
-  if tDraw.nOffset > 0 or tDraw.nLength > 0 and tVectorTo and tVectorFrom then
+  if tDraw.nOffset > 0 or tDraw.nLength > 0 then
     local tNormal = (tVectorTo - tVectorFrom):Normal()
     local tVectorA = tNormal * (tDraw.nOffset)
     if tDraw.nLength > 0 then
@@ -413,11 +407,10 @@ end
 local SimpleLine = NewManager("SimpleLine")
 
 function SimpleLine:UpdateDraw(tDraw)
-  local tVectorTo, tVectorFrom
-  local tOriginUnit = tDraw.tOriginUnit
-  if tOriginUnit then
-    local tOriginVector = NewVector3(tOriginUnit:GetPosition())
-    local tFacingVector = NewVector3(tOriginUnit:GetFacing())
+  local tVectorTo, tVectorFrom = tDraw.tToVector, tDraw.tFromVector
+  if tDraw.tOriginUnit then
+    local tOriginVector = NewVector3(tDraw.tOriginUnit:GetPosition())
+    local tFacingVector = NewVector3(tDraw.tOriginUnit:GetFacing())
     if tDraw.nOffsetOrigin then
       tOriginVector = tOriginVector + Rotation(tFacingVector, tDraw.RotationMatrix90) * tDraw.nOffsetOrigin
     end
@@ -427,9 +420,6 @@ function SimpleLine:UpdateDraw(tDraw)
     tVectorB = Rotation(tVectorB, tDraw.RotationMatrix)
     tVectorFrom = tOriginVector + tVectorA
     tVectorTo = tOriginVector + tVectorB
-  else
-    tVectorTo = tDraw.tToVector
-    tVectorFrom = tDraw.tFromVector
   end
 
   UpdateLine(tDraw, tVectorFrom, tVectorTo)
@@ -501,7 +491,7 @@ end
 local Polygon = NewManager("Polygon")
 
 function Polygon:UpdateDraw(tDraw)
-  local tVectors
+  local tVectors = tDraw.tVectors
   local tOriginUnit = tDraw.tOriginUnit
   if tOriginUnit then
     local tOriginVector = NewVector3(tOriginUnit:GetPosition())
@@ -512,48 +502,37 @@ function Polygon:UpdateDraw(tDraw)
       local CornerRotate = CreateRotationMatrix(360 * i / tDraw.nSide + tDraw.nRotation)
       tVectors[i] = tOriginVector + Rotation(tRefVector, CornerRotate)
     end
-  else
-    tVectors = tDraw.tVectors
   end
-  if tVectors then
-    -- Convert all 3D coordonate of game in 2D coordonnate of screen
-    local tScreenLoc = {}
-    for i = 1, tDraw.nSide do
-      tScreenLoc[i] = WorldLocToScreenPoint(tVectors[i])
-    end
-    for i = 1, tDraw.nSide do
-      local j = i == tDraw.nSide and 1 or i + 1
-      if tScreenLoc[i].z > 0 or tScreenLoc[j].z > 0 then
-        local tPixieAttributs = {
-          bLine = true,
-          fWidth = tDraw.nWidth,
-          cr = tDraw.sColor,
-          loc = {
-            fPoints = FPOINT_NULL,
-            nOffsets = {
-              tScreenLoc[i].x,
-              tScreenLoc[i].y,
-              tScreenLoc[j].x,
-              tScreenLoc[j].y,
-            },
+
+  -- Convert all 3D coordonate of game in 2D coordonnate of screen
+  local tScreenLoc = {}
+  for i = 1, tDraw.nSide do
+    tScreenLoc[i] = WorldLocToScreenPoint(tVectors[i])
+  end
+  for i = 1, tDraw.nSide do
+    local j = i == tDraw.nSide and 1 or i + 1
+    if tScreenLoc[i].z > 0 or tScreenLoc[j].z > 0 then
+      local tPixieAttributs = {
+        bLine = true,
+        fWidth = tDraw.nWidth,
+        cr = tDraw.sColor,
+        loc = {
+          fPoints = FPOINT_NULL,
+          nOffsets = {
+            tScreenLoc[i].x,
+            tScreenLoc[i].y,
+            tScreenLoc[j].x,
+            tScreenLoc[j].y,
           },
-        }
-        if tDraw.nPixieIds[i] then
-          _wndOverlay:UpdatePixie(tDraw.nPixieIds[i], tPixieAttributs)
-        else
-          tDraw.nPixieIds[i] = _wndOverlay:AddPixie(tPixieAttributs)
-        end
+        },
+      }
+      if tDraw.nPixieIds[i] then
+        _wndOverlay:UpdatePixie(tDraw.nPixieIds[i], tPixieAttributs)
       else
-        -- The Line is out of sight.
-        if tDraw.nPixieIds[i] then
-          _wndOverlay:DestroyPixie(tDraw.nPixieIds[i])
-          tDraw.nPixieIds[i] = nil
-        end
+        tDraw.nPixieIds[i] = _wndOverlay:AddPixie(tPixieAttributs)
       end
-    end
-  else
-    -- Unit is not valid.
-    for i = 1, tDraw.nSide do
+    else
+      -- The Line is out of sight.
       if tDraw.nPixieIds[i] then
         _wndOverlay:DestroyPixie(tDraw.nPixieIds[i])
         tDraw.nPixieIds[i] = nil
@@ -625,7 +604,7 @@ end
 local Picture = NewManager("Picture")
 
 function Picture:UpdateDraw(tDraw)
-  local tVector
+  local tVector = tDraw.tVector
   local tOriginUnit = tDraw.tOriginUnit
   if tOriginUnit then
     local tOriginVector = NewVector3(tOriginUnit:GetPosition())
@@ -634,42 +613,38 @@ function Picture:UpdateDraw(tDraw)
     tRefVector = Rotation(tRefVector, tDraw.RotationMatrix)
     tVector = tOriginVector + tRefVector
     tVector.y = tVector.y + tDraw.nHeight
-  else
-    tVector = tDraw.tVector
   end
-  if tVector then
-    -- Convert the 3D coordonate of game in 2D coordonnate of screen
-    local tScreenLoc = WorldLocToScreenPoint(tVector)
-    if tScreenLoc.z > 0 then
-      local tVectorPlayer = NewVector3(GetPlayerUnit():GetPosition())
-      local nDistance2Player = (tVectorPlayer - tVector):Length()
-      local nScale = math.min(40 / nDistance2Player, 1)
-      nScale = math.max(nScale, 0.5) * tDraw.nSpriteSize
-      local tPixieAttributs = {
-        bLine = false,
-        strSprite = tDraw.sSprite,
-        cr = tDraw.sColor,
-        loc = {
-          fPoints = FPOINT_NULL,
-          nOffsets = {
-            tScreenLoc.x - nScale,
-            tScreenLoc.y - nScale,
-            tScreenLoc.x + nScale,
-            tScreenLoc.y + nScale,
-          },
+
+  local tScreenLoc = WorldLocToScreenPoint(tVector)
+  if tScreenLoc.z > 0 then
+    local tVectorPlayer = NewVector3(GetPlayerUnit():GetPosition())
+    local nDistance2Player = (tVectorPlayer - tVector):Length()
+    local nScale = math.min(40 / nDistance2Player, 1)
+    nScale = math.max(nScale, 0.5) * tDraw.nSpriteSize
+    local tPixieAttributs = {
+      bLine = false,
+      strSprite = tDraw.sSprite,
+      cr = tDraw.sColor,
+      loc = {
+        fPoints = FPOINT_NULL,
+        nOffsets = {
+          tScreenLoc.x - nScale,
+          tScreenLoc.y - nScale,
+          tScreenLoc.x + nScale,
+          tScreenLoc.y + nScale,
         },
-      }
-      if tDraw.nPixieId then
-        _wndOverlay:UpdatePixie(tDraw.nPixieId, tPixieAttributs)
-      else
-        tDraw.nPixieId = _wndOverlay:AddPixie(tPixieAttributs)
-      end
+      },
+    }
+    if tDraw.nPixieId then
+      _wndOverlay:UpdatePixie(tDraw.nPixieId, tPixieAttributs)
     else
-      -- The Line is out of sight.
-      if tDraw.nPixieId then
-        _wndOverlay:DestroyPixie(tDraw.nPixieId)
-        tDraw.nPixieId = nil
-      end
+      tDraw.nPixieId = _wndOverlay:AddPixie(tPixieAttributs)
+    end
+  else
+    -- The Line is out of sight.
+    if tDraw.nPixieId then
+      _wndOverlay:DestroyPixie(tDraw.nPixieId)
+      tDraw.nPixieId = nil
     end
   end
 end
