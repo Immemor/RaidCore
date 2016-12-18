@@ -377,52 +377,42 @@ function mod:OnEngineerDestroyed(id, unit, name)
   engineerUnits[ENGINEER_NAMES[name]] = nil
 end
 
--- Cores
-mod:RegisterUnitEvents({
-    "unit.fusion_core",
-    "unit.cooling_turbine",
-    "unit.spark_plug",
-    "unit.lubricant_nozzle"
-    },{
-    [core.E.UNIT_CREATED] = mod.OnCoreCreated,
-    [core.E.HEALTH_CHANGED] = function(self, _, percent, name)
-      local coreId = CORE_NAMES[name]
-      local coreUnit = coreUnits[coreId]
-      coreUnit.percent = percent
-      mod:UpdateCoreHealthMark(coreUnit)
+function mod:OnCoreHealthChanged(id, percent, name)
+  local coreId = CORE_NAMES[name]
+  local coreUnit = coreUnits[coreId]
+  coreUnit.percent = percent
+  mod:UpdateCoreHealthMark(coreUnit)
 
-      if percent > CORE_HEALTH_LOW_WARN_PERCENTAGE_REENABLE and percent < CORE_HEALTH_HIGH_WARN_PERCENTAGE_REENABLE then
-        coreUnit.healthWarning = false
-      elseif percent >= CORE_HEALTH_HIGH_WARN_PERCENTAGE and not coreUnit.healthWarning then
-        coreUnit.healthWarning = true
-        mod:AddMsg("CORE_HEALTH_HIGH_WARN", self.L["msg.core.health.high.warning"]:format(name), 5, "Info", "xkcdRed")
-      elseif percent <= CORE_HEALTH_LOW_WARN_PERCENTAGE and not coreUnit.healthWarning and mod:IsPlayerOnPlatform(coreId) then
-        coreUnit.healthWarning = true
-        mod:AddMsg("CORE_HEALTH_LOW_WARN", self.L["msg.core.health.low.warning"]:format(name), 5, "Inferno", "xkcdRed")
-      end
-    end,
-    [BUFFS.INSULATION] = {
-      [core.E.BUFF_ADD] = function(_, id, spellId, stack, timeRemaining, name)
-        local coreUnit = coreUnits[CORE_NAMES[name]]
-        coreUnit.enabled = false
-        mod:UpdateCoreHealthMark(coreUnit)
-      end,
-      [core.E.BUFF_REMOVE] = function(_, id, spellId, name)
-        local coreUnit = coreUnits[CORE_NAMES[name]]
-        coreUnit.enabled = true
-        mod:UpdateCoreHealthMark(coreUnit)
-        for engineerId, engineer in pairs(engineerUnits) do
-          local oldLocation = engineerUnits[engineerId].location
-          local newLocation = mod:GetUnitPlatform(engineer.unit)
-          if newLocation ~= oldLocation then
-            engineerUnits[engineerId].location = newLocation
-            mod:OnEngiChangeLocation(engineerId, oldLocation, newLocation)
-          end
-        end
-      end
-    },
-  }
-)
+  if percent > CORE_HEALTH_LOW_WARN_PERCENTAGE_REENABLE and percent < CORE_HEALTH_HIGH_WARN_PERCENTAGE_REENABLE then
+    coreUnit.healthWarning = false
+  elseif percent >= CORE_HEALTH_HIGH_WARN_PERCENTAGE and not coreUnit.healthWarning then
+    coreUnit.healthWarning = true
+    mod:AddMsg("CORE_HEALTH_HIGH_WARN", self.L["msg.core.health.high.warning"]:format(name), 5, "Info", "xkcdRed")
+  elseif percent <= CORE_HEALTH_LOW_WARN_PERCENTAGE and not coreUnit.healthWarning and mod:IsPlayerOnPlatform(coreId) then
+    coreUnit.healthWarning = true
+    mod:AddMsg("CORE_HEALTH_LOW_WARN", self.L["msg.core.health.low.warning"]:format(name), 5, "Inferno", "xkcdRed")
+  end
+end
+
+function mod:OnCoreInsulationAdd(id, spellId, stack, timeRemaining, name)
+  local coreUnit = coreUnits[CORE_NAMES[name]]
+  coreUnit.enabled = false
+  mod:UpdateCoreHealthMark(coreUnit)
+end
+
+function mod:OnCoreInsulationRemove(id, spellId, name)
+  local coreUnit = coreUnits[CORE_NAMES[name]]
+  coreUnit.enabled = true
+  mod:UpdateCoreHealthMark(coreUnit)
+  for engineerId, engineer in pairs(engineerUnits) do
+    local oldLocation = engineerUnits[engineerId].location
+    local newLocation = mod:GetUnitPlatform(engineer.unit)
+    if newLocation ~= oldLocation then
+      engineerUnits[engineerId].location = newLocation
+      mod:OnEngiChangeLocation(engineerId, oldLocation, newLocation)
+    end
+  end
+end
 
 function mod:OnWarriorLiquidateStart()
   if mod:IsPlayerOnPlatform(engineerUnits[WARRIOR].location) then
@@ -478,6 +468,20 @@ end
 ----------------------------------------------------------------------------------------------------
 -- Bind event handlers.
 ----------------------------------------------------------------------------------------------------
+mod:RegisterUnitEvents({
+    "unit.fusion_core",
+    "unit.cooling_turbine",
+    "unit.spark_plug",
+    "unit.lubricant_nozzle"
+    },{
+    [core.E.UNIT_CREATED] = mod.OnCoreCreated,
+    [core.E.HEALTH_CHANGED] = mod.OnCoreHealthChanged,
+    [BUFFS.INSULATION] = {
+      [core.E.BUFF_ADD] = mod.OnCoreInsulationAdd,
+      [core.E.BUFF_REMOVE] = mod.OnCoreInsulationRemove,
+    },
+  }
+)
 mod:RegisterUnitEvents({"unit.engineer", "unit.warrior"}, {
     [core.E.UNIT_CREATED] = mod.OnEngineerCreated,
     [core.E.UNIT_DESTROYED] = mod.OnEngineerDestroyed,
