@@ -148,14 +148,21 @@ local DEBUFFS = {
   SHOCKING_ATTRACTION = 86861,
 }
 
-local FIRST_SHURIKEN_TIMER = 11
-local SHURIKEN_TIMER = 22
-local FIRST_BARRAGE_TIMER = 19
-local BARRAGE_TIMER = 44
-
-local FIRST_ORB_TIMER = 22
-local FIRST_ORB_MIDPHASE_TIMER = 15
-local ORB_TIMER = 27
+local TIMERS = {
+  SHURIKEN = {
+    FIRST = 11,
+    NORMAL = 22,
+  },
+  BARRAGE = {
+    FIRST = 19,
+    NORMAL = 44,
+  },
+  ORB = {
+    FIRST = 22,
+    AFTER_MID = 15,
+    NORMAL = 27,
+  }
+}
 
 local ANCHOR_POSITIONS = {
   { x = 93.849998474121, y = 353.87435913086, z = 209.71000671387 },
@@ -188,7 +195,7 @@ function mod:OnBossEnable()
   numberOfAirPhases = 0
   isAirPhase = false
   mod:AddAnchorWorldMarkers()
-  mod:AddTimerBar("NEXT_ORB_TIMER", "msg.orb.next", FIRST_ORB_TIMER)
+  mod:AddTimerBar("NEXT_ORB_TIMER", "msg.orb.next", TIMERS.ORB.FIRST)
 end
 
 function mod:OnBossDisable()
@@ -203,7 +210,7 @@ function mod:OnTurretCreated(id, unit, name)
 end
 
 function mod:OnTurretCastOrbStart()
-  mod:AddTimerBar("NEXT_ORB_TIMER", "msg.orb.next", ORB_TIMER)
+  mod:AddTimerBar("NEXT_ORB_TIMER", "msg.orb.next", TIMERS.ORB.NORMAL)
 end
 
 function mod:OnMordechaiCreated(id, unit, name)
@@ -223,12 +230,12 @@ function mod:OnMordechaiHealthChanged(id, percent, name)
 end
 
 function mod:OnMordechaiShatterStart()
-  mod:AddTimerBar("NEXT_SHURIKEN_TIMER", "msg.mordechai.shuriken.next", SHURIKEN_TIMER, mod:GetSetting("SoundShurikenCountdown"))
+  mod:AddTimerBar("NEXT_SHURIKEN_TIMER", "msg.mordechai.shuriken.next", TIMERS.SHURIKEN.NORMAL, mod:GetSetting("SoundShurikenCountdown"))
   mod:RemoveCleaveLines()
 end
 
 function mod:OnMordechaiBarrageStart()
-  mod:AddTimerBar("NEXT_BARRAGE_TIMER", "msg.mordechai.barrage.next", BARRAGE_TIMER)
+  mod:AddTimerBar("NEXT_BARRAGE_TIMER", "msg.mordechai.barrage.next", TIMERS.BARRAGE.NORMAL)
   mod:RemoveCleaveLines()
 end
 
@@ -269,10 +276,10 @@ end
 function mod:OnAirlockClosed()
   isAirPhase = false
   mod:AddCleaveLines()
-  mod:AddTimerBar("NEXT_SHURIKEN_TIMER", "msg.mordechai.shuriken.next", FIRST_SHURIKEN_TIMER, mod:GetSetting("SoundShurikenCountdown"))
-  mod:AddTimerBar("NEXT_ORB_TIMER", "msg.orb.next", FIRST_ORB_MIDPHASE_TIMER)
+  mod:AddTimerBar("NEXT_SHURIKEN_TIMER", "msg.mordechai.shuriken.next", TIMERS.SHURIKEN.FIRST, mod:GetSetting("SoundShurikenCountdown"))
+  mod:AddTimerBar("NEXT_ORB_TIMER", "msg.orb.next", TIMERS.ORB.AFTER_MID)
   if numberOfAirPhases >= 2 then
-    mod:AddTimerBar("NEXT_BARRAGE_TIMER", "msg.mordechai.barrage.next", FIRST_BARRAGE_TIMER)
+    mod:AddTimerBar("NEXT_BARRAGE_TIMER", "msg.mordechai.barrage.next", TIMERS.BARRAGE.FIRST)
   end
   mod:AddAnchorWorldMarkers()
 end
