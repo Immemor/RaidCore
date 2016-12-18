@@ -120,6 +120,11 @@ local CORE_NAMES = {
   ["unit.spark_plug"] = SPARK_PLUG,
   ["unit.lubricant_nozzle"] = LUBRICANT_NOZZLE
 }
+local tempCores = CORE_NAMES
+CORE_NAMES = {}
+for locale, planet in next, tempCores do
+  CORE_NAMES[mod.L[locale]] = planet
+end
 local CORE_BAR_COLORS = {
   [FUSION_CORE] = "xkcdDarkRed",
   [COOLING_TURBINE] = "xkcdSkyBlue",
@@ -137,6 +142,11 @@ local ENGINEER_NAMES = {
   ["unit.warrior"] = WARRIOR,
   ["unit.engineer"] = ENGINEER,
 }
+local tempEngis = ENGINEER_NAMES
+ENGINEER_NAMES = {}
+for locale, planet in next, tempEngis do
+  ENGINEER_NAMES[mod.L[locale]] = planet
+end
 local ENGINEER_START_LOCATION = {
   [WARRIOR] = SPARK_PLUG,
   [ENGINEER] = COOLING_TURBINE,
@@ -211,13 +221,6 @@ function mod:OnBossEnable()
   coreMaxHealth = 0
   engineerUnits = {}
   coreUnits = {}
-  --locales
-  for name, id in pairs(CORE_NAMES) do
-    CORE_NAMES[self.L[name]] = id
-  end
-  for name, id in pairs(ENGINEER_NAMES) do
-    ENGINEER_NAMES[self.L[name]] = id
-  end
 
   if mod:GetSetting("BarsCoreHealth") then
     core:AddUnitSpacer("CORE_SPACER", nil, 2)
