@@ -200,11 +200,6 @@ for locale, planet in next, tempPlanets do
 end
 
 local ALPHA_CASSUS_POSITION = Vector3.New(-76.779495239258, -95, 356.81430053711)
-local PHASES_CLOSE = {
-  {UPPER = 76.5, LOWER = 75.5},
-  {UPPER = 46.5, LOWER = 45.5},
-  {UPPER = 13.5, LOWER = 12.5},
-}
 local CLEAVE_COLORS = {
   [0] = "xkcdGreen",
   [1] = "xkcdRed",
