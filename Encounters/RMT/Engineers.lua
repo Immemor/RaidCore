@@ -101,6 +101,7 @@ local TIMERS = {
   LIQUIDATE = {
     FIRST = 12,
     NORMAL = 22,
+    EXTEND = 4,
   }
 }
 
@@ -429,26 +430,19 @@ mod:RegisterUnitEvents({
   }
 )
 
--- Warrior
-mod:RegisterUnitEvents("unit.warrior",{
-    [core.E.CAST_START] = {
-      ["cast.warrior.liquidate"] = function(self)
-        if mod:IsPlayerOnPlatform(engineerUnits[WARRIOR].location) then
-          mod:AddMsg("LIQUIDATE_MSG", "msg.warrior.liquidate.stack", 5, "Info", "xkcdOrange")
-        end
-      end,
-      ["cast.rocket_jump"] = function()
-        mod:ExtendTimerBar("NEXT_LIQUIDATE_TIMER", 4)
-      end
-    },
-    [core.E.CAST_END] = {
-      ["cast.warrior.liquidate"] = function(self)
-        mod:RemoveTimerBar("NEXT_LIQUIDATE_TIMER")
-        mod:AddTimerBar("NEXT_LIQUIDATE_TIMER", "msg.warrior.liquidate.next", TIMERS.LIQUIDATE.NORMAL)
-      end
-    },
-  }
-)
+function mod:OnWarriorLiquidateStart()
+  if mod:IsPlayerOnPlatform(engineerUnits[WARRIOR].location) then
+    mod:AddMsg("LIQUIDATE_MSG", "msg.warrior.liquidate.stack", 5, "Info", "xkcdOrange")
+  end
+end
+
+function mod:OnWarriorLiquidateEnd()
+  mod:AddTimerBar("NEXT_LIQUIDATE_TIMER", "msg.warrior.liquidate.next", TIMERS.LIQUIDATE.NORMAL)
+end
+
+function mod:OnWarriorRocketJumpStart()
+  mod:ExtendTimerBar("NEXT_LIQUIDATE_TIMER", TIMERS.LIQUIDATE.EXTEND)
+end
 
 function mod:OnEngineerElectroshockStart()
   if mod:GetSetting("LineElectroshock") then
@@ -490,6 +484,16 @@ end
 ----------------------------------------------------------------------------------------------------
 -- Bind event handlers.
 ----------------------------------------------------------------------------------------------------
+mod:RegisterUnitEvents("unit.warrior",{
+    ["cast.warrior.liquidate"] = {
+      [core.E.CAST_START ]= mod.OnWarriorLiquidateStart,
+      [core.E.CAST_END] = mod.OnWarriorLiquidateEnd,
+    },
+    [core.E.CAST_START] = {
+      ["cast.rocket_jump"] = mod.OnWarriorRocketJumpStart,
+    },
+  }
+)
 mod:RegisterUnitEvents("unit.engineer",{
     ["cast.engineer.electroshock"] = {
       [core.E.CAST_START] = mod.OnEngineerElectroshockStart,
