@@ -332,27 +332,21 @@ function mod:OnShockingAttractionRemoved(id)
 end
 
 function mod:AddAnchorWorldMarkers()
-  if not mod:GetSetting("WorldMarkerAnchor") then
-    return
-  end
+  if not mod:GetSetting("WorldMarkerAnchor") then return end
   for i = 1, #ANCHOR_POSITIONS do
     mod:SetWorldMarker("ANCHOR_"..i, "mark.anchor_"..i, ANCHOR_POSITIONS[i])
   end
 end
 
 function mod:RemoveAnchorWorldMarkers()
-  if not mod:GetSetting("WorldMarkerAnchor") then
-    return
-  end
+  if not mod:GetSetting("WorldMarkerAnchor") then return end
   for i = 1, #ANCHOR_POSITIONS do
     mod:DropWorldMarker("ANCHOR_"..i)
   end
 end
 
 function mod:AddCleaveLines()
-  if not mod:GetSetting("LinesCleave") or isAirPhase then
-    return
-  end
+  if not mod:GetSetting("LinesCleave") or isAirPhase then return end
   local id = mordechai:GetId()
   core:AddSimpleLine("CLEAVE_FRONT_RIGHT", id, 3.5, 40, 24.5, 5, "white", nil, 3)
   core:AddSimpleLine("CLEAVE_BACK_RIGHT", id, 3.5, 40, 180-24.5, 5, "white", nil, 3)
@@ -366,9 +360,7 @@ function mod:AddCleaveLines()
 end
 
 function mod:RemoveCleaveLines()
-  if not mod:GetSetting("LinesCleave") then
-    return
-  end
+  if not mod:GetSetting("LinesCleave") then return end
   core:RemoveSimpleLine("CLEAVE_FRONT_RIGHT")
   core:RemoveSimpleLine("CLEAVE_BACK_RIGHT")
   core:RemoveSimpleLine("CLEAVE_FRONT_LEFT")
