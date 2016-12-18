@@ -78,10 +78,14 @@ mod:RegisterFrenchLocale({
 ----------------------------------------------------------------------------------------------------
 -- Constants.
 ----------------------------------------------------------------------------------------------------
-local DEBUFF_ELECTROSHOCK_VULNERABILITY = 83798
-local DEBUFF_ATOMIC_ATTRACTION = 84053
-local DEBUFF_ION_CLASH = 84051
-local BUFF_INSULATION = 83987
+local DEBUFFS = {
+  ELECTROSHOCK_VULNERABILITY = 83798,
+  ATOMIC_ATTRACTION = 84053,
+  ION_CLASH = 84051,
+}
+local BUFFS = {
+  INSULATION = 83987,
+}
 
 -- Timers
 local FIRST_ELECTROSHOCK_TIMER = 11
@@ -286,7 +290,7 @@ mod:RegisterUnitEvents(core.E.ALL_UNITS, {
     [core.E.UNIT_DESTROYED] = function (self, id)
       core:DropMark(id)
     end,
-    [DEBUFF_ELECTROSHOCK_VULNERABILITY] = {
+    [DEBUFFS.ELECTROSHOCK_VULNERABILITY] = {
       [core.E.DEBUFF_ADD] = function(self, id, spellId, stack, timeRemaining, targetName)
         local targetUnit
         if id == player.unit:GetId() then
@@ -309,7 +313,7 @@ mod:RegisterUnitEvents(core.E.ALL_UNITS, {
         core:DropMark(id)
       end,
     },
-    [DEBUFF_ION_CLASH] = {
+    [DEBUFFS.ION_CLASH] = {
       [core.E.DEBUFF_ADD] = function(_, id)
         if mod:GetSetting("VisualIonClashCircle") then
           core:AddPolygon("ION_CLASH", id, 9, 0, 10, "xkcdBlue", 64)
@@ -320,7 +324,7 @@ mod:RegisterUnitEvents(core.E.ALL_UNITS, {
       end,
     },
     [core.E.DEBUFF_ADD] = {
-      [DEBUFF_ATOMIC_ATTRACTION] = function(self, id, spellId, stack, timeRemaining, targetName)
+      [DEBUFFS.ATOMIC_ATTRACTION] = function(self, id, spellId, stack, timeRemaining, targetName)
         if id == player.unit:GetId() then
           mod:AddMsg("DISCHARGED_PLASMA_MSG", "msg.fire_orb.you", 5, "RunAway", "xkcdLightRed")
         elseif mod:IsPlayerOnPlatform(FUSION_CORE) then
@@ -395,7 +399,7 @@ mod:RegisterUnitEvents({
         mod:AddMsg("CORE_HEALTH_LOW_WARN", self.L["msg.core.health.low.warning"]:format(name), 5, "Inferno", "xkcdRed")
       end
     end,
-    [BUFF_INSULATION] = {
+    [BUFFS.INSULATION] = {
       [core.E.BUFF_ADD] = function(_, id, spellId, stack, timeRemaining, name)
         local coreUnit = coreUnits[CORE_NAMES[name]]
         coreUnit.enabled = false
