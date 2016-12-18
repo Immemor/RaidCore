@@ -299,61 +299,56 @@ mod:RegisterDatachronEvent("chron.airlock.closed", core.E.COMPARE_EQUAL, functio
   end
 )
 
-mod:RegisterUnitEvents(core.E.ALL_UNITS, {
-    [core.E.UNIT_DESTROYED] = function (self, id, unit, name)
-      --Drop mark in case the player dies with the debuff
-      core:DropMark(id)
-    end,
-    [DEBUFF_KINETIC_LINK] = {
-      [core.E.DEBUFF_ADD] = function (self, id, spellId, stack, timeRemaining, name, unitCaster)
-        if mod:GetSetting("MarkerPurple") then
-          core:MarkUnit(GetUnitById(id), core.E.LOCATION_STATIC_CHEST, "P", "xkcdPurplePink")
-        end
+function mod:OnAnyUnitDestroyed(id, unit, name)
+  core:DropMark(id)
+end
 
-        if id ~= playerUnit:GetId() then -- not on myself
-          return
-        end
+function mod:OnKineticLinkAdded(id, spellId, stack, timeRemaining, name, unitCaster)
+  if mod:GetSetting("MarkerPurple") then
+    core:MarkUnit(GetUnitById(id), core.E.LOCATION_STATIC_CHEST, "P", "xkcdPurplePink")
+  end
 
-        mod:AddMsg("KINETIC_LINK_MSG", "msg.orb.kinetic_link", 5, "Burn", "xkcdPurplePink")
+  if id ~= playerUnit:GetId() then -- not on myself
+    return
+  end
 
-        if mod:GetSetting("LinePurple") then
-          local casterId = unitCaster:GetId()
-          orbs[casterId] = unitCaster
-          core:AddLineBetweenUnits("PURPLE_LINE_"..casterId, id, casterId, 7, "xkcdLightMagenta")
-        end
-      end,
-      [core.E.DEBUFF_REMOVE] = function (self, id, spellId, name, unitCaster)
-        core:DropMark(id)
-        if unitCaster then
-          local casterId = unitCaster:GetId()
-          orbs[casterId] = nil
-          core:RemoveLineBetweenUnits("PURPLE_LINE_"..casterId)
-        else
-          for casterId, unit in next, orbs do
-            if not unit:IsValid() then
-              orbs[casterId] = nil
-              core:RemoveLineBetweenUnits("PURPLE_LINE_"..casterId)
-            end
-          end
-        end
+  mod:AddMsg("KINETIC_LINK_MSG", "msg.orb.kinetic_link", 5, "Burn", "xkcdPurplePink")
 
-      end,
-    },
-    [DEBUFF_SHOCKING_ATTRACTION] = {
-      [core.E.DEBUFF_ADD] = function (self, id)
-        if mod:GetSetting("CrosshairShockingAttraction") then
-          core:AddPicture("SHOCKING_ATTRACTION_TARGET_"..id, id, "Crosshair", 30, 0, 0, nil, "blue")
-        end
-        if id == playerUnit:GetId() then
-          mod:AddMsg("SHOCKING_ATTRACTION", "msg.mordechai.shuriken.you", 5, "RunAway", "xkcdBlue")
-        end
-      end,
-      [core.E.DEBUFF_REMOVE] = function (self, id)
-        core:RemovePicture("SHOCKING_ATTRACTION_TARGET_"..id)
-      end,
-    },
-  }
-)
+  if mod:GetSetting("LinePurple") then
+    local casterId = unitCaster:GetId()
+    orbs[casterId] = unitCaster
+    core:AddLineBetweenUnits("PURPLE_LINE_"..casterId, id, casterId, 7, "xkcdLightMagenta")
+  end
+end
+
+function mod:OnKineticLinkRemoved(id, spellId, name, unitCaster)
+  core:DropMark(id)
+  if unitCaster then
+    local casterId = unitCaster:GetId()
+    orbs[casterId] = nil
+    core:RemoveLineBetweenUnits("PURPLE_LINE_"..casterId)
+  else
+    for casterId, unit in next, orbs do
+      if not unit:IsValid() then
+        orbs[casterId] = nil
+        core:RemoveLineBetweenUnits("PURPLE_LINE_"..casterId)
+      end
+    end
+  end
+end
+
+function mod:OnShockingAttractionAdded(id)
+  if mod:GetSetting("CrosshairShockingAttraction") then
+    core:AddPicture("SHOCKING_ATTRACTION_TARGET_"..id, id, "Crosshair", 30, 0, 0, nil, "blue")
+  end
+  if id == playerUnit:GetId() then
+    mod:AddMsg("SHOCKING_ATTRACTION", "msg.mordechai.shuriken.you", 5, "RunAway", "xkcdBlue")
+  end
+end
+
+function mod:OnShockingAttractionRemoved(id)
+  core:RemovePicture("SHOCKING_ATTRACTION_TARGET_"..id)
+end
 
 function mod:AddAnchorWorldMarkers()
   if not mod:GetSetting("WorldMarkerAnchor") then
@@ -406,6 +401,18 @@ end
 ----------------------------------------------------------------------------------------------------
 -- Bind event handlers.
 ----------------------------------------------------------------------------------------------------
+mod:RegisterUnitEvents(core.E.ALL_UNITS, {
+    [core.E.UNIT_DESTROYED] = mod.OnAnyUnitDestroyed,
+    [DEBUFF_KINETIC_LINK] = {
+      [core.E.DEBUFF_ADD] = mod.OnKineticLinkAdded,
+      [core.E.DEBUFF_REMOVE] = mod.OnKineticLinkRemoved,
+    },
+    [DEBUFF_SHOCKING_ATTRACTION] = {
+      [core.E.DEBUFF_ADD] = mod.OnShockingAttractionAdded,
+      [core.E.DEBUFF_REMOVE] = mod.OnShockingAttractionRemoved,
+    },
+  }
+)
 mod:RegisterUnitEvents({
     "unit.mordechai",
     "unit.anchor",
