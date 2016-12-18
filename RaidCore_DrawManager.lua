@@ -867,25 +867,6 @@ end
 -- XXX: DEPRECATED FUNCTIONS, Keep for compatibility.
 -- If a 'Line' have the same key as a 'Pixie', we will have a problem to distinct them on erase.
 ----------------------------------------------------------------------------------------------------
-function RaidCore:AddLine(Key, nType, uStart, uTarget, nColor, nLength, nRotation, nDPL)
-  local nFromId = uStart and uStart:GetId()
-  local sColor = nil
-  if nColor == 1 then
-    sColor = "ff00ff00"
-  elseif nColor == 2 then
-    sColor = "ffff9933"
-  elseif nColor == 3 then
-    sColor = "ff0000ff"
-  end
-  nDPL = nDPL or 20
-  if nType == 1 then
-    local nToId = uTarget and uTarget:GetId()
-    LineBetween:AddDraw(Key, nFromId, nToId, nil, sColor, nDPL)
-  elseif nType == 2 then
-    SimpleLine:AddDraw(Key, nFromId, nil, nLength, nRotation, nil, sColor, nDPL)
-  end
-end
-
 function RaidCore:DropLine(Key)
   LineBetween:RemoveDraw(Key)
   SimpleLine:RemoveDraw(Key)
