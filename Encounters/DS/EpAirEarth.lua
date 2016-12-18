@@ -125,7 +125,7 @@ function mod:OnUnitCreated(nId, unit, sName)
     core:WatchUnit(unit, core.E.TRACK_CASTS)
   elseif sName == self.L["Air Column"] then
     if mod:GetSetting("LineTornado") then
-      core:AddLine(unit:GetId(), 2, unit, nil, 3, 30, 0, 10)
+      core:AddSimpleLine(unit:GetId(), unit, nil, 30, nil, nil, "xkcdBlue", 10)
     end
     if GetGameTime() > nStartTime + 10 then
       mod:AddTimerBar("TORNADO", "Next tornado", 17, mod:GetSetting("SoundTornadoCountDown"))
@@ -135,7 +135,7 @@ end
 
 function mod:OnUnitDestroyed(nId, tUnit, sName)
   if sName == self.L["Air Column"] then
-    core:DropLine(nId)
+    core:RemoveSimpleLine(nId)
   end
 end
 
