@@ -249,36 +249,35 @@ mod:RegisterUnitEvents("unit.mordechai",{
   }
 )
 
-mod:RegisterUnitEvents("unit.anchor",{
-    [core.E.UNIT_CREATED] = function(_, id, unit)
-      anchors[id] = unit
-      core:WatchUnit(unit, core.E.TRACK_HEALTH)
-      if mod:GetSetting("MarkerAnchorHP") then
-        core:MarkUnit(unit, 0, 100)
-      end
+function mod:OnAnchorCreated(id, unit, name)
+  anchors[id] = unit
+  core:WatchUnit(unit, core.E.TRACK_HEALTH)
+  if mod:GetSetting("MarkerAnchorHP") then
+    core:MarkUnit(unit, 0, 100)
+  end
 
-      anchorCount = anchorCount + 1
-      if anchorCount == 4 then
-        isAirPhase = true
-        numberOfAirPhases = numberOfAirPhases + 1
-        mod:RemoveAnchorWorldMarkers()
-        mod:RemoveCleaveLines()
-        mod:RemoveTimerBar("NEXT_ORB_TIMER")
-        mod:RemoveTimerBar("NEXT_BARRAGE_TIMER")
-        mod:RemoveTimerBar("NEXT_SHURIKEN_TIMER")
-        anchorCount = 0
-      end
-    end,
-    [core.E.UNIT_DESTROYED] = function(_, id)
-      anchors[id] = nil
-    end,
-    [core.E.HEALTH_CHANGED] = function(_, id, percent)
-      if mod:GetSetting("MarkerAnchorHP") then
-        core:MarkUnit(anchors[id], 0, percent)
-      end
-    end,
-  }
-)
+  anchorCount = anchorCount + 1
+  if anchorCount == 4 then
+    isAirPhase = true
+    numberOfAirPhases = numberOfAirPhases + 1
+    mod:RemoveAnchorWorldMarkers()
+    mod:RemoveCleaveLines()
+    mod:RemoveTimerBar("NEXT_ORB_TIMER")
+    mod:RemoveTimerBar("NEXT_BARRAGE_TIMER")
+    mod:RemoveTimerBar("NEXT_SHURIKEN_TIMER")
+    anchorCount = 0
+  end
+end
+
+function mod:OnAnchorDestroyed(id, unit, name)
+  anchors[id] = nil
+end
+
+function mod:OnAnchorHealthChanged(id, percent)
+  if mod:GetSetting("MarkerAnchorHP") then
+    core:MarkUnit(anchors[id], 0, percent)
+  end
+end
 
 function mod:OnOrbCreated()
   mod:AddMsg("ORB_SPAWNED", "msg.orb.spawned", 5, "Info", "xkcdWhite")
@@ -397,6 +396,12 @@ end
 ----------------------------------------------------------------------------------------------------
 -- Bind event handlers.
 ----------------------------------------------------------------------------------------------------
+mod:RegisterUnitEvents("unit.anchor",{
+    [core.E.UNIT_CREATED] = mod.OnAnchorCreated,
+    [core.E.UNIT_DESTROYED] = mod.OnAnchorDestroyed,
+    [core.E.HEALTH_CHANGED] = mod.OnAnchorHealthChanged,
+  }
+)
 mod:RegisterUnitEvent("unit.orb", core.E.UNIT_CREATED, mod.OnOrbCreated)
 mod:RegisterDatachronEvent("chron.airlock.closed", core.E.COMPARE_EQUAL, mod.OnAirlockClosed)
 mod:RegisterUnitEvents(core.E.ALL_UNITS, {
