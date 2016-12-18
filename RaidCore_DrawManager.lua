@@ -325,18 +325,14 @@ end
 local LineBetween = NewManager("LineBetween")
 
 function LineBetween:UpdateDraw(tDraw)
-  local tVectorFrom, tVectorTo = nil, nil
+  local tVectorFrom, tVectorTo
   if tDraw.tUnitFrom then
-    if tDraw.tUnitFrom:IsValid() then
-      tVectorFrom = NewVector3(tDraw.tUnitFrom:GetPosition())
-    end
+    tVectorFrom = NewVector3(tDraw.tUnitFrom:GetPosition())
   else
     tVectorFrom = tDraw.tVectorFrom
   end
   if tDraw.tUnitTo then
-    if tDraw.tUnitTo:IsValid() then
-      tVectorTo = NewVector3(tDraw.tUnitTo:GetPosition())
-    end
+    tVectorTo = NewVector3(tDraw.tUnitTo:GetPosition())
   else
     tVectorTo = tDraw.tVectorTo
   end
@@ -417,22 +413,20 @@ end
 local SimpleLine = NewManager("SimpleLine")
 
 function SimpleLine:UpdateDraw(tDraw)
-  local tVectorTo, tVectorFrom = nil, nil
+  local tVectorTo, tVectorFrom
   local tOriginUnit = tDraw.tOriginUnit
   if tOriginUnit then
-    if tOriginUnit:IsValid() then
-      local tOriginVector = NewVector3(tOriginUnit:GetPosition())
-      local tFacingVector = NewVector3(tOriginUnit:GetFacing())
-      if tDraw.nOffsetOrigin then
-        tOriginVector = tOriginVector + Rotation(tFacingVector, tDraw.RotationMatrix90) * tDraw.nOffsetOrigin
-      end
-      local tVectorA = tFacingVector * (tDraw.nOffset)
-      local tVectorB = tFacingVector * (tDraw.nLength + tDraw.nOffset)
-      tVectorA = Rotation(tVectorA, tDraw.RotationMatrix)
-      tVectorB = Rotation(tVectorB, tDraw.RotationMatrix)
-      tVectorFrom = tOriginVector + tVectorA
-      tVectorTo = tOriginVector + tVectorB
+    local tOriginVector = NewVector3(tOriginUnit:GetPosition())
+    local tFacingVector = NewVector3(tOriginUnit:GetFacing())
+    if tDraw.nOffsetOrigin then
+      tOriginVector = tOriginVector + Rotation(tFacingVector, tDraw.RotationMatrix90) * tDraw.nOffsetOrigin
     end
+    local tVectorA = tFacingVector * (tDraw.nOffset)
+    local tVectorB = tFacingVector * (tDraw.nLength + tDraw.nOffset)
+    tVectorA = Rotation(tVectorA, tDraw.RotationMatrix)
+    tVectorB = Rotation(tVectorB, tDraw.RotationMatrix)
+    tVectorFrom = tOriginVector + tVectorA
+    tVectorTo = tOriginVector + tVectorB
   else
     tVectorTo = tDraw.tToVector
     tVectorFrom = tDraw.tFromVector
@@ -507,18 +501,16 @@ end
 local Polygon = NewManager("Polygon")
 
 function Polygon:UpdateDraw(tDraw)
-  local tVectors = nil
+  local tVectors
   local tOriginUnit = tDraw.tOriginUnit
   if tOriginUnit then
-    if tOriginUnit:IsValid() then
-      local tOriginVector = NewVector3(tOriginUnit:GetPosition())
-      local tFacingVector = NewVector3(tOriginUnit:GetFacing())
-      local tRefVector = tFacingVector * tDraw.nRadius
-      tVectors = {}
-      for i = 1, tDraw.nSide do
-        local CornerRotate = CreateRotationMatrix(360 * i / tDraw.nSide + tDraw.nRotation)
-        tVectors[i] = tOriginVector + Rotation(tRefVector, CornerRotate)
-      end
+    local tOriginVector = NewVector3(tOriginUnit:GetPosition())
+    local tFacingVector = NewVector3(tOriginUnit:GetFacing())
+    local tRefVector = tFacingVector * tDraw.nRadius
+    tVectors = {}
+    for i = 1, tDraw.nSide do
+      local CornerRotate = CreateRotationMatrix(360 * i / tDraw.nSide + tDraw.nRotation)
+      tVectors[i] = tOriginVector + Rotation(tRefVector, CornerRotate)
     end
   else
     tVectors = tDraw.tVectors
@@ -633,17 +625,15 @@ end
 local Picture = NewManager("Picture")
 
 function Picture:UpdateDraw(tDraw)
-  local tVector = nil
+  local tVector
   local tOriginUnit = tDraw.tOriginUnit
   if tOriginUnit then
-    if tOriginUnit:IsValid() then
-      local tOriginVector = NewVector3(tOriginUnit:GetPosition())
-      local tFacingVector = NewVector3(tOriginUnit:GetFacing())
-      local tRefVector = tFacingVector * tDraw.nDistance
-      tRefVector = Rotation(tRefVector, tDraw.RotationMatrix)
-      tVector = tOriginVector + tRefVector
-      tVector.y = tVector.y + tDraw.nHeight
-    end
+    local tOriginVector = NewVector3(tOriginUnit:GetPosition())
+    local tFacingVector = NewVector3(tOriginUnit:GetFacing())
+    local tRefVector = tFacingVector * tDraw.nDistance
+    tRefVector = Rotation(tRefVector, tDraw.RotationMatrix)
+    tVector = tOriginVector + tRefVector
+    tVector.y = tVector.y + tDraw.nHeight
   else
     tVector = tDraw.tVector
   end
