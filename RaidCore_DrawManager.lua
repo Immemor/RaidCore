@@ -203,7 +203,7 @@ local function DestroyPixie(tDraw)
   end
 end
 
-local function UpdatePixieLine(tDraw, tScreenLocFrom, tScreenLocTo)
+local function UpdatePixie(tDraw, tScreenLocFrom, tScreenLocTo, nPixieIdFull)
   local tPixieAttributs = {
     bLine = true,
     fWidth = tDraw.nWidth,
@@ -218,11 +218,12 @@ local function UpdatePixieLine(tDraw, tScreenLocFrom, tScreenLocTo)
       },
     },
   }
-  if tDraw.nPixieIdFull then
-    _wndOverlay:UpdatePixie(tDraw.nPixieIdFull, tPixieAttributs)
+  if nPixieIdFull then
+    _wndOverlay:UpdatePixie(nPixieIdFull, tPixieAttributs)
   else
-    tDraw.nPixieIdFull = _wndOverlay:AddPixie(tPixieAttributs)
+    nPixieIdFull = _wndOverlay:AddPixie(tPixieAttributs)
   end
+  return nPixieIdFull
 end
 
 local function UpdatePixieDots(tDraw, tScreenLocFrom, tScreenLocTo, tVectorFrom, tVectorTo)
@@ -277,7 +278,7 @@ local function UpdateLine(tDraw, tVectorFrom, tVectorTo)
   end
 
   if tDraw.nNumberOfDot == DOT_IS_A_LINE then
-    UpdatePixieLine(tDraw, tScreenLocFrom, tScreenLocTo)
+    tDraw.nPixieIdFull = UpdatePixie(tDraw, tScreenLocFrom, tScreenLocTo, tDraw.nPixieIdFull)
   else
     UpdatePixieDots(tDraw, tScreenLocTo, tScreenLocFrom, tVectorFrom, tVectorTo)
   end
@@ -528,25 +529,7 @@ function Polygon:UpdateDraw(tDraw)
   for i = 1, tDraw.nSide do
     local j = i == tDraw.nSide and 1 or i + 1
     if tScreenLoc[i].z > 0 or tScreenLoc[j].z > 0 then
-      local tPixieAttributs = {
-        bLine = true,
-        fWidth = tDraw.nWidth,
-        cr = tDraw.sColor,
-        loc = {
-          fPoints = FPOINT_NULL,
-          nOffsets = {
-            tScreenLoc[i].x,
-            tScreenLoc[i].y,
-            tScreenLoc[j].x,
-            tScreenLoc[j].y,
-          },
-        },
-      }
-      if tDraw.nPixieIds[i] then
-        _wndOverlay:UpdatePixie(tDraw.nPixieIds[i], tPixieAttributs)
-      else
-        tDraw.nPixieIds[i] = _wndOverlay:AddPixie(tPixieAttributs)
-      end
+      tDraw.nPixieIds[i] = UpdatePixie(tDraw, tScreenLoc[i], tScreenLoc[j], tDraw.nPixieIds[i])
     else
       -- The Line is out of sight.
       if tDraw.nPixieIds[i] then
