@@ -194,9 +194,6 @@ function mod:OnBossEnable()
   mod:AddTimerBar("NEXT_ORB_TIMER", "msg.orb.next", TIMERS.ORB.FIRST)
 end
 
-function mod:OnBossDisable()
-end
-
 function mod:OnBarUnitCreated(id, unit, name)
   mod:AddUnit(unit)
 end
