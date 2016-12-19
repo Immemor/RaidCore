@@ -21,6 +21,7 @@ local Log = Apollo.GetPackage("Log-1.0").tPackage
 -- Because all local objects are faster.
 ----------------------------------------------------------------------------------------------------
 local GetPlayerUnit = GameLib.GetPlayerUnit
+local GetGameTime = GameLib.GetGameTime
 local GetCurrentZoneMap = GameLib.GetCurrentZoneMap
 local next, pcall = next, pcall
 
@@ -109,6 +110,7 @@ RaidCore.E = {
   EVENT_CHANGE_WORLD = "ChangeWorld",
   EVENT_SUB_ZONE_CHANGED = "SubZoneChanged",
   EVENT_NEXT_FRAME = "NextFrame",
+  EVENT_FRAME_COUNT = "FrameCount",
   EVENT_WINDOWS_MANAGEMENT_READY = "WindowManagementReady",
   EVENT_CHARACTER_CREATED = "CharacterCreated",
   EVENT_DISPLAY_RAIDCORE_WINDOW= "DisplayRaidCoreMainWindow",
@@ -469,6 +471,8 @@ function RaidCore:OnInitialize()
   -- Load every software block.
   self:CombatInterface_Init()
   -- Do additional initialization.
+  self.nextFrameSemaphore = 0
+  self.frameCountSemaphore = 0
   self.mark = {}
   self.worldmarker = {}
   _tWipeTimer = ApolloTimer.Create(0.5, true, "RUNNING_WipeCheck", self)
@@ -595,6 +599,43 @@ end
 ---------------------------------------------------------------------------------------------------
 ---- Some Functions
 -----------------------------------------------------------------------------------------------------
+function RaidCore:StartFrameCount()
+  self.frameCountSemaphore = self.frameCountSemaphore + 1
+  if self.frameCountSemaphore == 1 then
+    Apollo.RegisterEventHandler(RaidCore.E.EVENT_FRAME_COUNT, "OnFrameCount", RaidCore)
+  end
+end
+
+function RaidCore:StopFrameCount()
+  self.frameCountSemaphore = self.frameCountSemaphore - 1
+  if self.frameCountSemaphore == 0 then
+    Apollo.RemoveEventHandler(RaidCore.E.EVENT_FRAME_COUNT, RaidCore)
+  end
+end
+
+function RaidCore:OnFrameCount(frames)
+end
+
+function RaidCore:StartNextFrame()
+  self.nextFrameSemaphore = self.nextFrameSemaphore + 1
+  if self.nextFrameSemaphore == 1 then
+    Apollo.RegisterEventHandler(RaidCore.E.EVENT_NEXT_FRAME, "OnNextFrame", RaidCore)
+  end
+end
+
+function RaidCore:StopNextFrame()
+  self.nextFrameSemaphore = self.nextFrameSemaphore - 1
+  if self.nextFrameSemaphore == 0 then
+    Apollo.RemoveEventHandler(RaidCore.E.EVENT_NEXT_FRAME, RaidCore)
+  end
+end
+
+function RaidCore:OnNextFrame()
+  local nCurrentTime = GetGameTime()
+  self:OnDrawUpdate(nCurrentTime)
+  self:OnGUINextFrame(nCurrentTime)
+end
+
 function RaidCore:isPublicEventObjectiveActive(objectiveString)
   local activeEvents = PublicEvent:GetActiveEvents()
   if activeEvents == nil then

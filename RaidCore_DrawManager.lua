@@ -30,7 +30,6 @@ local Assert = Apollo.GetPackage("RaidCore:Assert-1.0").tPackage
 ----------------------------------------------------------------------------------------------------
 local next, pcall, assert = next, pcall, assert
 local GetPlayerUnit = GameLib.GetPlayerUnit
-local GetGameTime = GameLib.GetGameTime
 local GetUnitById = GameLib.GetUnitById
 local WorldLocToScreenPoint = GameLib.WorldLocToScreenPoint
 local Races = GameLib.CodeEnumRace
@@ -136,9 +135,16 @@ local function Rotation(tVector, tMatrixTeta)
 end
 
 local function StartDrawing()
-  if _bDrawManagerRunning ~= true then
+  if not _bDrawManagerRunning then
     _bDrawManagerRunning = true
-    Apollo.RegisterEventHandler(RaidCore.E.EVENT_NEXT_FRAME, "OnDrawUpdate", RaidCore)
+    RaidCore:StartNextFrame()
+  end
+end
+
+local function StopDrawing()
+  if _bDrawManagerRunning then
+    _bDrawManagerRunning = false
+    RaidCore:StopNextFrame()
   end
 end
 
@@ -168,13 +174,6 @@ local function ProcessOrigin(origin)
     originVector = origin
   end
   return originUnit, originVector
-end
-
-local function StopDrawing()
-  if _bDrawManagerRunning == true then
-    _bDrawManagerRunning = false
-    Apollo.RemoveEventHandler(RaidCore.E.EVENT_NEXT_FRAME, RaidCore)
-  end
 end
 
 local function ShouldDrawBeVisible(tDraw, tVectorFrom, tVectorTo)
@@ -713,8 +712,9 @@ function RaidCore:GetDrawDefaultSettings()
   return DEFAULT_SETTINGS
 end
 
-function RaidCore:OnDrawUpdate()
-  local nCurrentTime = GetGameTime()
+function RaidCore:OnDrawUpdate(nCurrentTime)
+  if not _bDrawManagerRunning then return end
+
   local nDeltaTime = nCurrentTime - _nPreviousTime
   local nRefreshPeriodMin = 1.0 / self.db.profile.DrawManagers.RefreshFrequencyMax
 
