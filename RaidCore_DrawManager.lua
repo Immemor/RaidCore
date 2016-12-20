@@ -728,15 +728,9 @@ function RaidCore:OnDrawUpdate(nCurrentTime)
     local bIsEmpty = true
     for i = 1, _nDrawManagers do
       local tDrawManager = _tDrawManagers[i]
-      local fHandler
-      if tDrawManager.tSettings.bEnabled then
-        fHandler = tDrawManager.UpdateDraw
-      else
-        fHandler = tDrawManager.RemoveDraw
-      end
+      local fHandler = tDrawManager.UpdateDraw
       for Key, tDraw in next, tDrawManager.tDraws do
-        local tArg = tDrawManager.tSettings.bEnabled and tDraw or Key
-        local s, e = pcall(fHandler, tDrawManager, tArg)
+        local s, e = pcall(fHandler, tDrawManager, tDraw)
         if not self:HandlePcallResult(s, e, " - DrawKey: "..Key) then
           tDrawManager:RemoveDraw(Key)
         end
