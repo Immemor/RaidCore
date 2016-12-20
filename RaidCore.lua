@@ -481,8 +481,11 @@ function RaidCore:OnInitialize()
   self:SEARCH_OnCheckMapZone()
 end
 
-function RaidCore:HandlePcallResult(success, error)
+function RaidCore:HandlePcallResult(success, error, output)
   if not success then
+    if output then
+      error = tostring(error) .. tostring(output)
+    end
     if self.db.profile.bLUAErrorMessage then
       self:Print(error)
     end
