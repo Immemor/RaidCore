@@ -718,30 +718,30 @@ function RaidCore:OnDrawUpdate(nCurrentTime)
   local nDeltaTime = nCurrentTime - _nPreviousTime
   local nRefreshPeriodMin = 1.0 / self.db.profile.DrawManagers.RefreshFrequencyMax
 
-  if nDeltaTime >= nRefreshPeriodMin then
-    if nRefreshPeriodMin > 0 then
-      _nPreviousTime = nCurrentTime - nDeltaTime % nRefreshPeriodMin
-    else
-      _nPreviousTime = nCurrentTime
-    end
+  if nDeltaTime < nRefreshPeriodMin then return end
 
-    local bIsEmpty = true
-    for i = 1, _nDrawManagers do
-      local tDrawManager = _tDrawManagers[i]
-      local fHandler = tDrawManager.UpdateDraw
-      for Key, tDraw in next, tDrawManager.tDraws do
-        local s, e = pcall(fHandler, tDrawManager, tDraw)
-        if not self:HandlePcallResult(s, e, " - DrawKey: "..Key) then
-          tDrawManager:RemoveDraw(Key)
-        end
-      end
-      if next(tDrawManager.tDraws) then
-        bIsEmpty = false
+  if nRefreshPeriodMin > 0 then
+    _nPreviousTime = nCurrentTime - nDeltaTime % nRefreshPeriodMin
+  else
+    _nPreviousTime = nCurrentTime
+  end
+
+  local bIsEmpty = true
+  for i = 1, _nDrawManagers do
+    local tDrawManager = _tDrawManagers[i]
+    local fHandler = tDrawManager.UpdateDraw
+    for Key, tDraw in next, tDrawManager.tDraws do
+      local s, e = pcall(fHandler, tDrawManager, tDraw)
+      if not self:HandlePcallResult(s, e, " - DrawKey: "..Key) then
+        tDrawManager:RemoveDraw(Key)
       end
     end
-    if bIsEmpty then
-      StopDrawing()
+    if next(tDrawManager.tDraws) then
+      bIsEmpty = false
     end
+  end
+  if bIsEmpty then
+    StopDrawing()
   end
 end
 
