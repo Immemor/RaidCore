@@ -813,32 +813,3 @@ end
 function RaidCore:RemovePicture(...)
   Picture:RemoveDraw(...)
 end
-
-----------------------------------------------------------------------------------------------------
--- XXX: DEPRECATED FUNCTIONS, Keep for compatibility.
--- If a 'Line' have the same key as a 'Pixie', we will have a problem to distinct them on erase.
-----------------------------------------------------------------------------------------------------
-function RaidCore:AddPixie(Key, nType, uStart, uTarget, sColor, nWidth, nLength, nRotation)
-  local nFromId = uStart and uStart:GetId()
-  if sColor == "Blue" then
-    sColor = "FF0000FF"
-  elseif sColor == "Green" then
-    sColor = "FF00FF00"
-  elseif sColor == "Yellow" then
-    sColor = "FFFF9933"
-  elseif sColor == "Red" then
-    sColor = "FFDC143C"
-  end
-
-  if nType == 1 then
-    local nToId = uTarget and uTarget:GetId()
-    LineBetween:AddDraw(Key, nFromId, nToId, nWidth, sColor)
-  elseif nType == 2 then
-    SimpleLine:AddDraw(Key, nFromId, nil, nLength, nRotation, nWidth, sColor)
-  end
-end
-
-function RaidCore:DropPixie(Key)
-  LineBetween:RemoveDraw(Key)
-  SimpleLine:RemoveDraw(Key)
-end
