@@ -737,7 +737,7 @@ function RaidCore:OnDrawUpdate(nCurrentTime)
       for Key, tDraw in next, tDrawManager.tDraws do
         local tArg = tDrawManager.tSettings.bEnabled and tDraw or Key
         local s, e = pcall(fHandler, tDrawManager, tArg)
-        self:HandlePcallResult(s, e)
+        self:HandlePcallResult(s, e, " - DrawKey: "..Key)
       end
       if next(tDrawManager.tDraws) then
         bIsEmpty = false
