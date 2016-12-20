@@ -233,7 +233,7 @@ function mod:OnUnitCreated(nId, tUnit, sName)
       core:AddSimpleLine(nId, nId, 0, 20, 0, 10, "red")
     end
   elseif sName == self.L["Life Force"] and mod:GetSetting("LineLifeOrbs") then
-    core:AddPixie(nId, 2, tUnit, nil, "Blue", 3, 15, 0)
+    core:AddSimpleLine(nId, tUnit, nil, 15, nil, 3, "Blue")
   elseif sName == self.L["Wild Brambles"] then
     if nLastThornsTime + 5 < nCurrentTime then
       nLastThornsTime = nCurrentTime
@@ -249,7 +249,7 @@ function mod:OnUnitDestroyed(nId, tUnit, sName)
   elseif sName == self.L["Alphanumeric Hash"] then
     core:RemoveSimpleLine(nId)
   elseif sName == self.L["Life Force"] then
-    core:DropPixie(nId)
+    core:RemoveSimpleLine(nId)
   end
 end
 

@@ -111,7 +111,7 @@ function mod:OnUnitCreated(nId, unit, sName)
     core:AddUnit(unit)
   elseif sName == self.L["Flame Wave"] then
     if mod:GetSetting("LineFlameWaves") then
-      core:AddPixie(nId, 2, unit, nil, "Green", 10, 20, 0)
+      core:AddSimpleLine(nId, unit, nil, 20, nil, 10, "Green")
     end
   elseif sName == self.L["Obsidian Outcropping"] then
     nObsidianPopCount = nObsidianPopCount + 1
@@ -124,7 +124,7 @@ end
 
 function mod:OnUnitDestroyed(nId, tUnit, sName)
   if sName == self.L["Flame Wave"] then
-    core:DropPixie(nId)
+    core:RemoveSimpleLine(nId)
   elseif sName == self.L["Lava Floor (invis unit)"] then
     if nLavaFloorCount < 3 then
       mod:AddTimerBar("LAVA_FLOOR", "Next lava floor phase", 89)
