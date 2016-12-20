@@ -727,18 +727,27 @@ function RaidCore:OnDrawUpdate(nCurrentTime)
   end
 
   local bIsEmpty = true
+  local tDrawsToRemove = {}
   for i = 1, _nDrawManagers do
     local tDrawManager = _tDrawManagers[i]
     local fHandler = tDrawManager.UpdateDraw
     for Key, tDraw in next, tDrawManager.tDraws do
       local s, e = pcall(fHandler, tDrawManager, tDraw)
       if not self:HandlePcallResult(s, e, " - DrawKey: "..Key) then
-        tDrawManager:RemoveDraw(Key)
+        table.insert(tDrawsToRemove, {
+            tDrawManager = tDrawManager,
+            Key = Key,
+          }
+        )
       end
     end
     if next(tDrawManager.tDraws) then
       bIsEmpty = false
     end
+  end
+  for i = 1, #tDrawsToRemove do
+    local tDrawToRemove = tDrawsToRemove[i]
+    tDrawToRemove.tDrawManager:RemoveDraw(tDrawToRemove.Key)
   end
   if bIsEmpty then
     StopDrawing()
