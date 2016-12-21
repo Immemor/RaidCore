@@ -203,24 +203,16 @@ local function DestroyPixie(tDraw)
 end
 
 local function UpdatePixie(tDraw, tScreenLocFrom, tScreenLocTo, nPixieIdFull)
-  local tPixieAttributs = {
-    bLine = true,
-    fWidth = tDraw.nWidth,
-    cr = tDraw.sColor,
-    loc = {
-      fPoints = FPOINT_NULL,
-      nOffsets = {
-        tScreenLocFrom.x,
-        tScreenLocFrom.y,
-        tScreenLocTo.x,
-        tScreenLocTo.y,
-      },
-    },
+  tDraw.tPixieAttributes.loc.nOffsets = {
+    tScreenLocFrom.x,
+    tScreenLocFrom.y,
+    tScreenLocTo.x,
+    tScreenLocTo.y
   }
   if nPixieIdFull then
-    _wndOverlay:UpdatePixie(nPixieIdFull, tPixieAttributs)
+    _wndOverlay:UpdatePixie(nPixieIdFull, tDraw.tPixieAttributes)
   else
-    nPixieIdFull = _wndOverlay:AddPixie(tPixieAttributs)
+    nPixieIdFull = _wndOverlay:AddPixie(tDraw.tPixieAttributes)
   end
   return nPixieIdFull
 end
@@ -236,25 +228,17 @@ local function UpdatePixieDots(tDraw, tScreenLocFrom, tScreenLocTo, tVectorFrom,
       local nScale = math.min(40 / nDistance2Player, 1)
       nScale = math.max(nScale, 0.5) * tDraw.nSpriteSize
       local tVector = tScreenLocTo - tScreenLocFrom
-      local tPixieAttributs = {
-        bLine = false,
-        strSprite = tDraw.sSprite,
-        cr = tDraw.sColor,
-        fRotation = math.deg(math.atan2(tVector.y, tVector.x)) + 90,
-        loc = {
-          fPoints = FPOINT_NULL,
-          nOffsets = {
-            tScreenLocDot.x - nScale,
-            tScreenLocDot.y - nScale ,
-            tScreenLocDot.x + nScale,
-            tScreenLocDot.y + nScale,
-          },
-        },
+      tDraw.tPixieAttributes.fRotation = math.deg(math.atan2(tVector.y, tVector.x)) + 90
+      tDraw.tPixieAttributes.loc.nOffsets = {
+        tScreenLocDot.x - nScale,
+        tScreenLocDot.y - nScale,
+        tScreenLocDot.x + nScale,
+        tScreenLocDot.y + nScale
       }
       if tDraw.nPixieIdDot[i] then
-        _wndOverlay:UpdatePixie(tDraw.nPixieIdDot[i], tPixieAttributs)
+        _wndOverlay:UpdatePixie(tDraw.nPixieIdDot[i], tDraw.tPixieAttributes)
       else
-        tDraw.nPixieIdDot[i] = _wndOverlay:AddPixie(tPixieAttributs)
+        tDraw.nPixieIdDot[i] = _wndOverlay:AddPixie(tDraw.tPixieAttributes)
       end
     else
       _wndOverlay:DestroyPixie(tDraw.nPixieIdDot[i])
@@ -311,12 +295,18 @@ end
 function TemplateDraw:SetColor(sColor)
   local mt = getmetatable(self)
   mt.__index.sColor = sColor or DEFAULT_LINE_COLOR
+  if mt.__index.tPixieAttributes then
+    mt.__index.tPixieAttributes.cr = mt.__index.sColor
+  end
 end
 
 function TemplateDraw:SetSprite(sSprite, nSize)
   local mt = getmetatable(self)
   mt.__index.sSprite = sSprite or mt.__index.sSprite or "BasicSprites:WhiteCircle"
   mt.__index.nSpriteSize = nSize or mt.__index.nSpriteSize or 4
+  if mt.__index.tPixieAttributes and mt.__index.tPixieAttributes.strSprite then
+    mt.__index.tPixieAttributes.strSprite = mt.__index.sSprite
+  end
 end
 
 function TemplateDraw:SetMaxLengthVisible(nMax)
@@ -380,6 +370,20 @@ function LineBetween:AddDraw(Key, FromOrigin, ToOrigin, nWidth, sColor, nNumberO
   tDraw.nPixieIdDot = tDraw.nPixieIdDot or {}
   tDraw.nOffset = nOffset or 0
   tDraw.nLength = nLength or 0
+  tDraw.tPixieAttributes = {
+    bLine = tDraw.nNumberOfDot == DOT_IS_A_LINE,
+    fWidth = tDraw.nWidth,
+    cr = tDraw.sColor,
+    loc = {
+      fPoints = FPOINT_NULL,
+      nOffsets = {}
+    }
+  }
+
+  if not tDraw.tPixieAttributes.bLine then
+    tDraw.tPixieAttributes.strSprite = tDraw.sSprite
+    tDraw.tPixieAttributes.fRotation = 0
+  end
 
   local tFromOriginUnit, tFromOriginVector = ProcessOrigin(FromOrigin)
   if tFromOriginVector then
@@ -463,6 +467,21 @@ function SimpleLine:AddDraw(Key, Origin, nOffset, nLength, nRotation, nWidth, sC
   tDraw.nNumberOfDot = nNumberOfDot or DOT_IS_A_LINE
   tDraw.nPixieIdDot = tDraw.nPixieIdDot or {}
   tDraw.nOffsetOrigin = nOffsetOrigin or nil
+  tDraw.tPixieAttributes = {
+    bLine = tDraw.nNumberOfDot == DOT_IS_A_LINE,
+    fWidth = tDraw.nWidth,
+    cr = tDraw.sColor,
+    loc = {
+      fPoints = FPOINT_NULL,
+      nOffsets = {}
+    }
+  }
+
+  if not tDraw.tPixieAttributes.bLine then
+    tDraw.tPixieAttributes.strSprite = tDraw.sSprite
+    tDraw.tPixieAttributes.fRotation = 0
+  end
+
   -- Preprocessing.
   tDraw.RotationMatrix = CreateRotationMatrixY(tDraw.nRotation)
   tDraw.RotationMatrix90 = CreateRotationMatrixY(90)
@@ -560,6 +579,15 @@ function Polygon:AddDraw(Key, Origin, nRadius, nRotation, nWidth, sColor, nSide)
   tDraw.nSide = nSide or 5
   tDraw.nPixieIds = tDraw.nPixieIds or {}
   tDraw.tVectors = tDraw.tVectors or {}
+  tDraw.tPixieAttributes = {
+    bLine = true,
+    fWidth = tDraw.nWidth,
+    cr = tDraw.sColor,
+    loc = {
+      fPoints = FPOINT_NULL,
+      nOffsets = {}
+    }
+  }
 
   local tOriginUnit, tOriginVector = ProcessOrigin(Origin)
   if tOriginVector then
@@ -620,24 +648,16 @@ function Picture:UpdateDraw(tDraw)
     local nDistance2Player = (tVectorPlayer - tVector):Length()
     local nScale = math.min(40 / nDistance2Player, 1)
     nScale = math.max(nScale, 0.5) * tDraw.nSpriteSize
-    local tPixieAttributs = {
-      bLine = false,
-      strSprite = tDraw.sSprite,
-      cr = tDraw.sColor,
-      loc = {
-        fPoints = FPOINT_NULL,
-        nOffsets = {
-          tScreenLoc.x - nScale,
-          tScreenLoc.y - nScale,
-          tScreenLoc.x + nScale,
-          tScreenLoc.y + nScale,
-        },
-      },
+    tDraw.tPixieAttributes.loc.nOffsets = {
+      tScreenLoc.x - nScale,
+      tScreenLoc.y - nScale,
+      tScreenLoc.x + nScale,
+      tScreenLoc.y + nScale
     }
     if tDraw.nPixieId then
-      _wndOverlay:UpdatePixie(tDraw.nPixieId, tPixieAttributs)
+      _wndOverlay:UpdatePixie(tDraw.nPixieId, tDraw.tPixieAttributes)
     else
-      tDraw.nPixieId = _wndOverlay:AddPixie(tPixieAttributs)
+      tDraw.nPixieId = _wndOverlay:AddPixie(tDraw.tPixieAttributes)
     end
   else
     -- The Line is out of sight.
@@ -656,6 +676,21 @@ function Picture:AddDraw(Key, Origin, sSprite, nSpriteSize, nRotation, nDistance
   tDraw.nHeight = nHeight or 0
   tDraw.nSpriteSize = nSpriteSize or 30
   tDraw.sColor = sColor or "white"
+  tDraw.tPixieAttributes = {
+    bLine = false,
+    strSprite = tDraw.sSprite,
+    cr = tDraw.sColor,
+    loc = {
+      fPoints = FPOINT_NULL,
+      nOffsets = {}
+    }
+  }
+
+  if not tDraw.tPixieAttributes.bLine then
+    tDraw.tPixieAttributes.strSprite = tDraw.sSprite
+    tDraw.tPixieAttributes.fRotation = 0
+  end
+
   -- Preprocessing.
   tDraw.RotationMatrix = CreateRotationMatrixY(tDraw.nRotation)
 
