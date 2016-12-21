@@ -112,7 +112,7 @@ local function NewManager(sText)
   return new
 end
 
-local function CreateRotationMatrix(nRotation)
+local function CreateRotationMatrixY(nRotation)
   if not nRotation or nRotation%360 == 0 then return nil end
 
   local nRad = math.rad(nRotation)
@@ -463,8 +463,8 @@ function SimpleLine:AddDraw(Key, Origin, nOffset, nLength, nRotation, nWidth, sC
   tDraw.nPixieIdDot = tDraw.nPixieIdDot or {}
   tDraw.nOffsetOrigin = nOffsetOrigin or nil
   -- Preprocessing.
-  tDraw.RotationMatrix = CreateRotationMatrix(tDraw.nRotation)
-  tDraw.RotationMatrix90 = CreateRotationMatrix(90)
+  tDraw.RotationMatrix = CreateRotationMatrixY(tDraw.nRotation)
+  tDraw.RotationMatrix90 = CreateRotationMatrixY(90)
 
   local tOriginUnit, tOriginVector = ProcessOrigin(Origin)
   if tOriginVector then
@@ -515,7 +515,7 @@ function Polygon:UpdateDraw(tDraw)
     local tRefVector = tFacingVector * tDraw.nRadius
     tVectors = {}
     for i = 1, tDraw.nSide do
-      local CornerRotate = CreateRotationMatrix(360 * i / tDraw.nSide + tDraw.nRotation)
+      local CornerRotate = CreateRotationMatrixY(360 * i / tDraw.nSide + tDraw.nRotation)
       tVectors[i] = tOriginVector + Rotation(tRefVector, CornerRotate)
     end
   end
@@ -567,7 +567,7 @@ function Polygon:AddDraw(Key, Origin, nRadius, nRotation, nWidth, sColor, nSide)
     local tFacingVector = NewVector3(DEFAULT_NORTH_FACING)
     local tRefVector = tFacingVector * tDraw.nRadius
     for i = 1, tDraw.nSide do
-      local CornerRotate = CreateRotationMatrix(360 * i / tDraw.nSide + tDraw.nRotation)
+      local CornerRotate = CreateRotationMatrixY(360 * i / tDraw.nSide + tDraw.nRotation)
       tDraw.tVectors[i] = tOriginVector + Rotation(tRefVector, CornerRotate)
     end
   elseif tOriginUnit then
@@ -656,7 +656,7 @@ function Picture:AddDraw(Key, Origin, sSprite, nSpriteSize, nRotation, nDistance
   tDraw.nSpriteSize = nSpriteSize or 30
   tDraw.sColor = sColor or "white"
   -- Preprocessing.
-  tDraw.RotationMatrix = CreateRotationMatrix(tDraw.nRotation)
+  tDraw.RotationMatrix = CreateRotationMatrixY(tDraw.nRotation)
 
   local tOriginUnit, tOriginVector = ProcessOrigin(Origin)
   if tOriginVector then
