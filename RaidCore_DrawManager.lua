@@ -125,7 +125,7 @@ local function CreateRotationMatrixY(nRotation)
   }
 end
 
-local function Rotation(tVector, tMatrixTeta)
+local function RotationY(tVector, tMatrixTeta)
   if not tMatrixTeta then return tVector end
   local r = {}
   for axis1, R in next, tMatrixTeta do
@@ -428,12 +428,12 @@ function SimpleLine:UpdateDraw(tDraw)
     local tOriginVector = NewVector3(tDraw.tOriginUnit:GetPosition())
     local tFacingVector = NewVector3(tDraw.tOriginUnit:GetFacing())
     if tDraw.nOffsetOrigin then
-      tOriginVector = tOriginVector + Rotation(tFacingVector, tDraw.RotationMatrix90) * tDraw.nOffsetOrigin
+      tOriginVector = tOriginVector + RotationY(tFacingVector, tDraw.RotationMatrix90) * tDraw.nOffsetOrigin
     end
     local tVectorA = tFacingVector * (tDraw.nOffset)
     local tVectorB = tFacingVector * (tDraw.nLength + tDraw.nOffset)
-    tVectorA = Rotation(tVectorA, tDraw.RotationMatrix)
-    tVectorB = Rotation(tVectorB, tDraw.RotationMatrix)
+    tVectorA = RotationY(tVectorA, tDraw.RotationMatrix)
+    tVectorB = RotationY(tVectorB, tDraw.RotationMatrix)
     tVectorFrom = tOriginVector + tVectorA
     tVectorTo = tOriginVector + tVectorB
   end
@@ -472,10 +472,10 @@ function SimpleLine:AddDraw(Key, Origin, nOffset, nLength, nRotation, nWidth, sC
     local tVectorA = tFacingVector * (tDraw.nOffset)
     local tVectorB = tFacingVector * (tDraw.nLength + tDraw.nOffset)
     if tDraw.nOffsetOrigin then
-      tOriginVector = tOriginVector + Rotation(tFacingVector, tDraw.RotationMatrix90) * tDraw.nOffsetOrigin
+      tOriginVector = tOriginVector + RotationY(tFacingVector, tDraw.RotationMatrix90) * tDraw.nOffsetOrigin
     end
-    tVectorA = Rotation(tVectorA, tDraw.RotationMatrix)
-    tVectorB = Rotation(tVectorB, tDraw.RotationMatrix)
+    tVectorA = RotationY(tVectorA, tDraw.RotationMatrix)
+    tVectorB = RotationY(tVectorB, tDraw.RotationMatrix)
     tDraw.tOriginUnit = nil
     tDraw.tFromVector = tOriginVector + tVectorA
     tDraw.tToVector = tOriginVector + tVectorB
@@ -516,7 +516,7 @@ function Polygon:UpdateDraw(tDraw)
     tVectors = {}
     for i = 1, tDraw.nSide do
       local CornerRotate = CreateRotationMatrixY(360 * i / tDraw.nSide + tDraw.nRotation)
-      tVectors[i] = tOriginVector + Rotation(tRefVector, CornerRotate)
+      tVectors[i] = tOriginVector + RotationY(tRefVector, CornerRotate)
     end
   end
 
@@ -568,7 +568,7 @@ function Polygon:AddDraw(Key, Origin, nRadius, nRotation, nWidth, sColor, nSide)
     local tRefVector = tFacingVector * tDraw.nRadius
     for i = 1, tDraw.nSide do
       local CornerRotate = CreateRotationMatrixY(360 * i / tDraw.nSide + tDraw.nRotation)
-      tDraw.tVectors[i] = tOriginVector + Rotation(tRefVector, CornerRotate)
+      tDraw.tVectors[i] = tOriginVector + RotationY(tRefVector, CornerRotate)
     end
   elseif tOriginUnit then
     tDraw.tOriginUnit = tOriginUnit
@@ -608,7 +608,7 @@ function Picture:UpdateDraw(tDraw)
     local tOriginVector = NewVector3(tOriginUnit:GetPosition())
     local tFacingVector = NewVector3(tOriginUnit:GetFacing())
     local tRefVector = tFacingVector * tDraw.nDistance
-    tRefVector = Rotation(tRefVector, tDraw.RotationMatrix)
+    tRefVector = RotationY(tRefVector, tDraw.RotationMatrix)
     tVector = tOriginVector + tRefVector
     tVector.y = tVector.y + tDraw.nHeight
   end
@@ -665,7 +665,7 @@ function Picture:AddDraw(Key, Origin, sSprite, nSpriteSize, nRotation, nDistance
     local tFacingVector = NewVector3(DEFAULT_NORTH_FACING)
     local tRefVector = tFacingVector * tDraw.nDistance
     if tDraw.RotationMatrix then
-      tRefVector = Rotation(tRefVector, tDraw.RotationMatrix)
+      tRefVector = RotationY(tRefVector, tDraw.RotationMatrix)
     end
     tDraw.tVector = tOriginVector + tRefVector
     tDraw.tVector.y = tDraw.tVector.y + tDraw.nHeight
