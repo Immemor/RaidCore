@@ -185,7 +185,7 @@ mod:RegisterMessageSetting("LIQUIDATE_MSG", core.E.COMPARE_EQUAL, "MessageLiquid
 mod:RegisterMessageSetting("DISCHARGED_PLASMA_MSG", core.E.COMPARE_EQUAL, "MessageFireOrb", "SoundFireOrb")
 mod:RegisterMessageSetting("DISCHARGED_PLASMA_MSG_SPAWN", core.E.COMPARE_EQUAL, "MessageFireOrbAlt", "SoundFireOrbAlt")
 mod:RegisterMessageSetting("FIRE_ORB_POP_MSG", core.E.COMPARE_EQUAL, "MessageFireOrbPop", "SoundFireOrbPop")
-mod:RegisterMessageSetting("CORE_HEALTH_%s+_WARN", core.E.COMPARE_MATCH, "MessageCoreHealthWarning", "SoundCoreHealthWarning")
+mod:RegisterMessageSetting("CORE_HEALTH_[^_]+_WARN", core.E.COMPARE_MATCH, "MessageCoreHealthWarning", "SoundCoreHealthWarning")
 -- Timer default configs.
 mod:RegisterDefaultTimerBarConfigs({
     ["NEXT_ELEKTROSHOCK_TIMER"] = { sColor = "xkcdGreen" },
