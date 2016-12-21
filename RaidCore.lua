@@ -551,6 +551,7 @@ function RaidCore:NewestVersionRequest(tMessage, nSenderId)
 end
 
 function RaidCore:LaunchPullRequest(tMessage, nSenderId)
+  if not self:isRaidManagement(tMessage.sender) then return false end
   if tMessage.cooldown then
     local tOptions = { bEmphasize = true }
     self:AddTimerBar("PULL", "PULL", tMessage.cooldown, nil, tOptions)
@@ -559,6 +560,7 @@ function RaidCore:LaunchPullRequest(tMessage, nSenderId)
 end
 
 function RaidCore:LaunchBreakRequest(tMessage, nSenderId)
+  if not self:isRaidManagement(tMessage.sender) then return false end
   if tMessage.cooldown and tMessage.cooldown > 0 then
     local tOptions = { bEmphasize = true }
     self:AddTimerBar("BREAK", "BREAK", tMessage.cooldown, nil, tOptions)
@@ -876,6 +878,11 @@ function RaidCore:VersionCheckResults()
 end
 
 function RaidCore:LaunchPull(tArgc)
+  if not self:isRaidManagement(GetPlayerUnit():GetName()) then
+    self:Print("You must be a raid leader or assistant to use this command!")
+    return
+  end
+
   local nTime = #tArgc >= 1 and tonumber(tArgc[1])
   nTime = nTime and nTime > 2 and nTime or 10
   local msg = {
@@ -887,31 +894,31 @@ function RaidCore:LaunchPull(tArgc)
 end
 
 function RaidCore:LaunchBreak(tArgc)
-  local sPlayerName = GetPlayerUnit():GetName()
-  if not self:isRaidManagement(sPlayerName) then
+  if not self:isRaidManagement(GetPlayerUnit():GetName()) then
     self:Print("You must be a raid leader or assistant to use this command!")
-  else
-    local nTime = #tArgc >= 1 and tonumber(tArgc[1])
-    nTime = nTime and nTime > 2 and nTime or 600
-    local msg = {
-      action = RaidCore.E.COMM_LAUNCH_BREAK,
-      cooldown = nTime
-    }
-    self:SendMessage(msg)
-    self:ProcessMessage(msg)
-    -- Cancel previous timer if started.
-    if self.LaunchBreakTimerId then
-      self:CancelTimer(self.LaunchBreakTimerId)
-    end
-    -- Start a timer for Ready Check call..
-    if nTime > 0 and self.db.profile.bReadyCheckOnBreakTimeout then
-      self.LaunchBreakTimerId = self:ScheduleTimer(function()
-          self.LaunchBreakTimerId = nil
-          GroupLib.ReadyCheck(self.db.profile.sReadyCheckMessage or "")
-        end,
-        nTime
-      )
-    end
+    return
+  end
+
+  local nTime = #tArgc >= 1 and tonumber(tArgc[1])
+  nTime = nTime and nTime > 2 and nTime or 600
+  local msg = {
+    action = RaidCore.E.COMM_LAUNCH_BREAK,
+    cooldown = nTime
+  }
+  self:SendMessage(msg)
+  self:ProcessMessage(msg)
+  -- Cancel previous timer if started.
+  if self.LaunchBreakTimerId then
+    self:CancelTimer(self.LaunchBreakTimerId)
+  end
+  -- Start a timer for Ready Check call..
+  if nTime > 0 and self.db.profile.bReadyCheckOnBreakTimeout then
+    self.LaunchBreakTimerId = self:ScheduleTimer(function()
+        self.LaunchBreakTimerId = nil
+        GroupLib.ReadyCheck(self.db.profile.sReadyCheckMessage or "")
+      end,
+      nTime
+    )
   end
 end
 
