@@ -127,11 +127,11 @@ end
 
 local function RotationY(tVector, tMatrixTeta)
   if not tMatrixTeta then return tVector end
-  local r = {}
-  for axis1, R in next, tMatrixTeta do
-    r[axis1] = tVector.x * R.x + tVector.y * R.y + tVector.z * R.z
-  end
-  return NewVector3(r)
+  return NewVector3(
+    tMatrixTeta.x.x * tVector.x + tMatrixTeta.x.z * tVector.z,
+    tVector.y,
+    tMatrixTeta.z.x * tVector.x + tMatrixTeta.z.z * tVector.z
+  )
 end
 
 local function StartDrawing()
