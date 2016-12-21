@@ -264,14 +264,10 @@ local function UpdatePixieDots(tDraw, tScreenLocFrom, tScreenLocTo, tVectorFrom,
 end
 
 local function UpdateLine(tDraw, tVectorFrom, tVectorTo)
-  local tScreenLocTo, tScreenLocFrom = nil, nil
-  local bShouldBeVisible = ShouldDrawBeVisible(tDraw, tVectorFrom, tVectorTo)
-  if bShouldBeVisible then
-    tScreenLocTo = WorldLocToScreenPoint(tVectorTo)
-    tScreenLocFrom = WorldLocToScreenPoint(tVectorFrom)
-  end
+  local tScreenLocTo = WorldLocToScreenPoint(tVectorTo)
+  local tScreenLocFrom = WorldLocToScreenPoint(tVectorFrom)
 
-  if not bShouldBeVisible or (tScreenLocFrom.z <= 0 and tScreenLocTo.z <= 0) then
+  if tScreenLocFrom.z <= 0 and tScreenLocTo.z <= 0 then
     DestroyPixie(tDraw)
     return
   end
@@ -355,7 +351,12 @@ function LineBetween:UpdateDraw(tDraw)
     end
     tVectorFrom = tVectorFrom + tVectorA
   end
-  UpdateLine(tDraw, tVectorFrom, tVectorTo)
+
+  if ShouldDrawBeVisible(tDraw, tVectorFrom, tVectorTo) then
+    UpdateLine(tDraw, tVectorFrom, tVectorTo)
+  else
+    DestroyPixie(tDraw)
+  end
 end
 
 function LineBetween:AddDraw(Key, FromOrigin, ToOrigin, nWidth, sColor, nNumberOfDot, nOffset, nLength)
