@@ -499,6 +499,10 @@ function mod:OnCriticalMassAdded(id)
   end
 end
 
+function mod:OnAnyUnitDestroyed(id)
+  mod:OnCriticalMassRemoved(id)
+end
+
 function mod:OnCriticalMassRemoved(id)
   if playerId == id then
     core:RemoveMsg("CRITICAL_MASS_MSG")
@@ -580,6 +584,7 @@ mod:RegisterUnitEvents("unit.debris",{
   }
 )
 mod:RegisterUnitEvents(core.E.ALL_UNITS,{
+    [core.E.UNIT_DESTROYED] = mod.OnAnyUnitDestroyed,
     [DEBUFFS.SOLAR_WINDS] = {
       [core.E.DEBUFF_ADD] = mod.OnSolarWindsAdded,
       [core.E.DEBUFF_UPDATE] = mod.OnSolarWindsUpdated,
