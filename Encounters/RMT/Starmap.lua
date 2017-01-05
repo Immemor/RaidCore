@@ -391,6 +391,7 @@ end
 
 function mod:OnAsteroidDestroyed(id, _)
   core:RemoveLineBetweenUnits("ASTEROID_LINE_" .. id)
+  core:RemoveSimpleLine(id)
 end
 
 function mod:OnWorldEnderCreated(id, unit)
