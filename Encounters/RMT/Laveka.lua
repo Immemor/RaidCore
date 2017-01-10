@@ -44,11 +44,12 @@ local DEBUFFS = {
 }
 
 local BUFFS = {
-  SPIRIT_OF_SOULFIRE = 75576
+  SPIRIT_OF_SOULFIRE = 75576,
 }
 
 local TIMERS = {
-  SPIRIT_OF_SOULFIRE = 6
+  SPIRIT_OF_SOULFIRE = 6,
+  ECHOES_OF_THE_AFTERLIFE = 10,
 }
 ----------------------------------------------------------------------------------------------------
 -- Locals.
@@ -108,6 +109,30 @@ function mod:OnExpulsionAdd(id, spellId, stack, timeRemaining, targetName)
   mod:AddMsg("EXPULSION", "msg.laveka.expulsion", 5, "Beware", "xkcdBabyPink")
 end
 
+function mod:OnEchoesAdd(id, spellId, stack, timeRemaining, targetName)
+  mod:StartEchoesTimer(id)
+end
+
+function mod:OnEchoesUpdate(id, spellId, stack, timeRemaining)
+  mod:StartEchoesTimer(id)
+end
+
+function mod:StartEchoesTimer(id)
+  if id == player.id then
+    mod:AddTimerBar("ECHOES_OF_THE_AFTERLIFE_TIMER", "msg.laveka.echoes_of_the_afterlife.timer", TIMERS.ECHOES_OF_THE_AFTERLIFE)
+  end
+end
+
+function mod:OnEchoesRemove(id, spellId, targetName)
+  if id == player.id then
+    mod:RemoveTimerBar("ECHOES_OF_THE_AFTERLIFE_TIMER")
+  end
+end
+
+function mod:OnRealmOfTheDeadAdd(id, spellId, stack, timeRemaining, targetName)
+  mod:StartEchoesTimer(id)
+end
+
 ----------------------------------------------------------------------------------------------------
 -- Bind event handlers.
 ----------------------------------------------------------------------------------------------------
@@ -136,6 +161,14 @@ mod:RegisterUnitEvents(core.E.ALL_UNITS,{
     },
     [DEBUFFS.EXPULSION_OF_SOULS] = {
       [core.E.DEBUFF_ADD] = mod.OnExpulsionAdd,
-    }
+    },
+    [DEBUFFS.ECHOES_OF_THE_AFTERLIFE] = {
+      [core.E.DEBUFF_ADD] = mod.OnEchoesAdd,
+      [core.E.DEBUFF_UPDATE] = mod.OnEchoesUpdate,
+      [core.E.DEBUFF_REMOVE] = mod.OnEchoesRemove,
+    },
+    [DEBUFFS.REALM_OF_THE_DEAD] = {
+      [core.E.DEBUFF_ADD] = mod.OnRealmOfTheDeadAdd,
+    },
   }
 )
