@@ -40,6 +40,14 @@ local DEBUFFS = {
   ECHOES_OF_THE_AFTERLIFE = 75525, -- stacking debuff
   SOULFIRE = 75574, -- Debuff to be cleansed
 }
+
+local BUFFS = {
+  SPIRIT_OF_SOULFIRE = 75576
+}
+
+local TIMERS = {
+  SPIRIT_OF_SOULFIRE = 6
+}
 ----------------------------------------------------------------------------------------------------
 -- Locals.
 ----------------------------------------------------------------------------------------------------
@@ -74,9 +82,15 @@ function mod:OnSoulfireAdd(id, spellId, stack, timeRemaining, targetName)
 end
 
 function mod:OnSoulfireRemove(id, spellId, targetName)
-  if id ~= player.unit:GetId() then
-    core:RemoveLineBetweenUnits("SOULFIRE_LINE_"..id)
-  end
+  core:RemoveLineBetweenUnits("SOULFIRE_LINE_"..id)
+end
+
+function mod:OnSpiritOfSoulfireAdd(id, spellId, stack, timeRemaining, targetName)
+  mod:AddTimerBar("SPIRIT_OF_SOULFIRE_TIMER", "msg.laveka.spirit_of_soulfire", TIMERS.SPIRIT_OF_SOULFIRE)
+end
+
+function mod:OnSpiritOfSoulfireRemove(id, spellId, targetName)
+  mod:RemoveTimerBar("SPIRIT_OF_SOULFIRE_TIMER")
 end
 
 ----------------------------------------------------------------------------------------------------
@@ -87,6 +101,14 @@ mod:RegisterUnitEvents({
     "unit.titan",
     },{
     [core.E.UNIT_CREATED] = mod.OnWatchedUnitCreated,
+  }
+)
+
+mod:RegisterUnitEvents("unit.laveka",{
+    [BUFFS.SPIRIT_OF_SOULFIRE] = {
+      [core.E.BUFF_ADD] = mod.OnSpiritOfSoulfireAdd,
+      [core.E.BUFF_REMOVE] = mod.OnSpiritOfSoulfireRemove,
+    }
   }
 )
 
