@@ -18,6 +18,12 @@ mod:RegisterTrigMob(core.E.TRIGGER_ALL, { "unit.laveka" })
 mod:RegisterEnglishLocale({
     -- Unit names.
     ["unit.laveka"] = "Laveka the Dark-Hearted",
+    ["unit.phantom"] = "Phantom",
+    ["unit.essence_void"] = "Essence Void",
+    ["unit.tortued_apparition"] = "Tortured Apparition",
+    ["unit.orb"] = "Soul Eater",
+    ["unit.boneclaw"] = "Risen Boneclaw",
+    ["unit.titan"] = "Risen Titan",
     -- Cast names.
     -- Messages.
     ["msg.laveka.soulfire.you"] = "SOULFIRE ON YOU",
@@ -54,7 +60,7 @@ function mod:OnAnyUnitDestroyed(id, unit, name)
   core:RemoveLineBetweenUnits("SOULFIRE_LINE_"..id)
 end
 
-function mod:OnLavekaCreated(id, unit, name)
+function mod:OnWatchedUnitCreated(id, unit, name)
   core:AddUnit(unit)
   core:WatchUnit(unit, core.E.TRACK_ALL)
 end
@@ -76,8 +82,11 @@ end
 ----------------------------------------------------------------------------------------------------
 -- Bind event handlers.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterUnitEvents("unit.laveka",{
-    [core.E.UNIT_CREATED] = mod.OnLavekaCreated,
+mod:RegisterUnitEvents({
+    "unit.laveka",
+    "unit.titan",
+    },{
+    [core.E.UNIT_CREATED] = mod.OnWatchedUnitCreated,
   }
 )
 
