@@ -20,6 +20,7 @@ mod:RegisterEnglishLocale({
     ["unit.laveka"] = "Laveka the Dark-Hearted",
     -- Cast names.
     -- Messages.
+    ["msg.laveka.soulfire.you"] = "SOULFIRE ON YOU",
   }
 )
 ----------------------------------------------------------------------------------------------------
@@ -34,15 +35,42 @@ local DEBUFFS = {
   SOULFIRE = 75574, -- Debuff to be cleansed
 }
 ----------------------------------------------------------------------------------------------------
+-- Locals.
+----------------------------------------------------------------------------------------------------
+local player
+----------------------------------------------------------------------------------------------------
 -- Settings.
 ----------------------------------------------------------------------------------------------------
 
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
+function mod:OnBossEnable()
+    player = {}
+    player.unit = GameLib.GetPlayerUnit()
+end
+
+function mod:OnAnyUnitDestroyed(id, unit, name)
+  core:RemoveLineBetweenUnits("SOULFIRE_LINE_"..id)
+end
+
 function mod:OnLavekaCreated(id, unit, name)
   core:AddUnit(unit)
   core:WatchUnit(unit, core.E.TRACK_ALL)
+end
+
+function mod:OnSoulfireAdd(id, spellId, stack, timeRemaining, targetName)
+  if id ~= player.unit:GetId() then
+    core:AddLineBetweenUnits("SOULFIRE_LINE_"..id, player.unit, id, 8)
+  else
+    mod:AddMsg("SOULFIRE_MSG_YOU", "msg.laveka.soulfire.you", 5, "Burn", "xkcdGreen")
+  end
+end
+
+function mod:OnSoulfireRemove(id, spellId, targetName)
+  if id ~= player.unit:GetId() then
+    core:RemoveLineBetweenUnits("SOULFIRE_LINE_"..id)
+  end
 end
 
 ----------------------------------------------------------------------------------------------------
@@ -50,5 +78,14 @@ end
 ----------------------------------------------------------------------------------------------------
 mod:RegisterUnitEvents("unit.laveka",{
     [core.E.UNIT_CREATED] = mod.OnLavekaCreated,
+  }
+)
+
+mod:RegisterUnitEvents(core.E.ALL_UNITS,{
+    [core.E.UNIT_DESTROYED] = mod.OnAnyUnitDestroyed,
+    [DEBUFFS.SOULFIRE] = {
+      [core.E.DEBUFF_ADD] = mod.OnSoulfireAdd,
+      [core.E.DEBUFF_REMOVE] = mod.OnSoulfireRemove,
+    }
   }
 )
