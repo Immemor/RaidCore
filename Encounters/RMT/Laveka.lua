@@ -26,11 +26,11 @@ mod:RegisterEnglishLocale({
 -- Constants.
 ----------------------------------------------------------------------------------------------------
 local DEBUFFS = {
-  EXPULSION_OF_SOULS = 87901,
+  EXPULSION_OF_SOULS = 87901, -- Runic circle debuff
   NECROTIC_EXPLOSION = 75610,
   SOUL_EATER = 87069,
-  REALM_OF_THE_DEAD = 75528,
-  ECHOES_OF_THE_AFTERLIFE = 75525,
+  REALM_OF_THE_DEAD = 75528, -- When in dead world
+  ECHOES_OF_THE_AFTERLIFE = 75525, -- stacking debuff
   SOULFIRE = 75574, -- Debuff to be cleansed
 }
 ----------------------------------------------------------------------------------------------------
