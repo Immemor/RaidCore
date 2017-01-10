@@ -89,7 +89,7 @@ function mod:OnSoulfireRemove(id, spellId, targetName)
 end
 
 function mod:AddSoulfireLine(id, name)
-  core:AddLineBetweenUnits("SOULFIRE_LINE_"..name, player.unit, id, 8, "xkcdBarneyPurple")
+  core:AddLineBetweenUnits("SOULFIRE_LINE_"..name, player.unit, id, 4, "xkcdBarneyPurple")
 end
 
 function mod:RemoveSoulfireLine(name)
