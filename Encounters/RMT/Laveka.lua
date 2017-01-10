@@ -60,8 +60,9 @@ local player
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    player = {}
-    player.unit = GameLib.GetPlayerUnit()
+  player = {}
+  player.unit = GameLib.GetPlayerUnit()
+  player.id = player.unit:GetId()
 end
 
 function mod:OnAnyUnitDestroyed(id, unit, name)
