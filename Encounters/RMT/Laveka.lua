@@ -66,7 +66,7 @@ function mod:OnBossEnable()
 end
 
 function mod:OnAnyUnitDestroyed(id, unit, name)
-  core:RemoveLineBetweenUnits("SOULFIRE_LINE_"..id)
+  mod:OnSoulfireRemove(id)
 end
 
 function mod:OnWatchedUnitCreated(id, unit, name)
@@ -75,7 +75,7 @@ function mod:OnWatchedUnitCreated(id, unit, name)
 end
 
 function mod:OnSoulfireAdd(id, spellId, stack, timeRemaining, targetName)
-  if id ~= player.unit:GetId() then
+  if id ~= player.id then
     core:AddLineBetweenUnits("SOULFIRE_LINE_"..id, player.unit, id, 8)
   else
     mod:AddMsg("SOULFIRE_MSG_YOU", "msg.laveka.soulfire.you", 5, "Burn", "xkcdGreen")
