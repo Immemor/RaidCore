@@ -27,6 +27,8 @@ mod:RegisterEnglishLocale({
     -- Cast names.
     -- Messages.
     ["msg.laveka.soulfire.you"] = "SOULFIRE ON YOU",
+    ["msg.laveka.spirit_of_soulfire"] = "Spirit of Soulfire timer",
+    ["msg.laveka.expulsion"] = "STACK!",
   }
 )
 ----------------------------------------------------------------------------------------------------
@@ -87,7 +89,7 @@ function mod:OnSoulfireRemove(id, spellId, targetName)
 end
 
 function mod:AddSoulfireLine(id, name)
-  core:AddLineBetweenUnits("SOULFIRE_LINE_"..name, player.unit, id, 8)
+  core:AddLineBetweenUnits("SOULFIRE_LINE_"..name, player.unit, id, 8, "xkcdBarneyPurple")
 end
 
 function mod:RemoveSoulfireLine(name)
@@ -100,6 +102,10 @@ end
 
 function mod:OnSpiritOfSoulfireRemove(id, spellId, targetName)
   mod:RemoveTimerBar("SPIRIT_OF_SOULFIRE_TIMER")
+end
+
+function mod:OnExpulsionAdd(id, spellId, stack, timeRemaining, targetName)
+  mod:AddMsg("EXPULSION", "msg.laveka.expulsion", 5, "Beware", "xkcdBabyPink")
 end
 
 ----------------------------------------------------------------------------------------------------
@@ -127,6 +133,9 @@ mod:RegisterUnitEvents(core.E.ALL_UNITS,{
     [DEBUFFS.SOULFIRE] = {
       [core.E.DEBUFF_ADD] = mod.OnSoulfireAdd,
       [core.E.DEBUFF_REMOVE] = mod.OnSoulfireRemove,
+    },
+    [DEBUFFS.EXPULSION_OF_SOULS] = {
+      [core.E.DEBUFF_ADD] = mod.OnExpulsionAdd,
     }
   }
 )
