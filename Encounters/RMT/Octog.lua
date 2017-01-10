@@ -356,6 +356,9 @@ function mod:OnPoolDestroyed(id, unit)
   inkPools[id] = nil
 end
 
+----------------------------------------------------------------------------------------------------
+-- Bind event handlers.
+----------------------------------------------------------------------------------------------------
 mod:RegisterUnitEvents("unit.octog",{
     [core.E.UNIT_CREATED] = mod.OnOctogCreated,
     [core.E.HEALTH_CHANGED] = mod.OnOctogHealthChanged,
@@ -384,7 +387,6 @@ mod:RegisterUnitEvents("unit.octog",{
     },
   }
 )
-
 mod:RegisterUnitEvents("unit.orb", {
     [core.E.UNIT_CREATED] = mod.OnOrbCreated,
     [core.E.UNIT_DESTROYED] = mod.OnOrbDestroyed,

@@ -142,34 +142,33 @@ local GetUnitById = GameLib.GetUnitById
 ----------------------------------------------------------------------------------------------------
 -- Constants.
 ----------------------------------------------------------------------------------------------------
-local DEBUFF_NULLIFIED = 85614 -- Green
-local DEBUFF_KINETIC_LINK = 86797 -- Purple
-local DEBUFF_SHOCKING_ATTRACTION = 86861
-
-local PHASES_CLOSE = {
-  {UPPER = 86.5, LOWER = 85.5},
-  {UPPER = 61.5, LOWER = 60.5},
-  {UPPER = 36.5, LOWER = 35.5},
-  {UPPER = 11.5, LOWER = 10.5},
+local DEBUFFS = {
+  NULLIFIED = 85614, -- Green
+  KINETIC_LINK = 86797, -- Purple
+  SHOCKING_ATTRACTION = 86861,
 }
-local FIRST_SHURIKEN_TIMER = 11
-local SHURIKEN_TIMER = 22
-local FIRST_BARRAGE_TIMER = 19
-local BARRAGE_TIMER = 44
 
-local FIRST_ORB_TIMER = 22
-local FIRST_ORB_MIDPHASE_TIMER = 15
-local ORB_TIMER = 27
+local TIMERS = {
+  SHURIKEN = {
+    FIRST = 11,
+    NORMAL = 22,
+  },
+  BARRAGE = {
+    FIRST = 19,
+    NORMAL = 44,
+  },
+  ORB = {
+    FIRST = 22,
+    AFTER_MID = 15,
+    NORMAL = 27,
+  }
+}
 
 local ANCHOR_POSITIONS = {
   { x = 93.849998474121, y = 353.87435913086, z = 209.71000671387 },
   { x = 93.849998474121, y = 353.87435913086, z = 179.71000671387 },
   { x = 123.849998474121, y = 353.87435913086, z = 209.71000671387 },
   { x = 123.849998474121, y = 353.87435913086, z = 179.71000671387 },
-}
-
-local MORDECHAI_POSITION = {
-  x = 108.84799957275, y = 353.87435913086, z = 194.70899963379
 }
 ----------------------------------------------------------------------------------------------------
 -- Locals.
@@ -192,207 +191,168 @@ function mod:OnBossEnable()
   numberOfAirPhases = 0
   isAirPhase = false
   mod:AddAnchorWorldMarkers()
-  mod:AddTimerBar("NEXT_ORB_TIMER", "msg.orb.next", FIRST_ORB_TIMER)
-end
-
-function mod:OnBossDisable()
+  mod:AddTimerBar("NEXT_ORB_TIMER", "msg.orb.next", TIMERS.ORB.FIRST)
 end
 
 function mod:OnBarUnitCreated(id, unit, name)
   mod:AddUnit(unit)
 end
 
-mod:RegisterUnitEvents("unit.turret",{
-    [core.E.UNIT_CREATED] = function(_, _, unit)
-      core:WatchUnit(unit, core.E.TRACK_CASTS)
-    end,
-    ["cast.turret.discharge"] = {
-      [core.E.CAST_START] = function()
-        mod:AddTimerBar("NEXT_ORB_TIMER", "msg.orb.next", ORB_TIMER)
-      end
-    }
-  }
-)
+function mod:OnTurretCreated(id, unit, name)
+  core:WatchUnit(unit, core.E.TRACK_CASTS)
+end
 
-mod:RegisterUnitEvents("unit.mordechai",{
-    [core.E.UNIT_CREATED] = function(_, _, unit)
-      mordechai = unit
-      core:WatchUnit(unit, core.E.TRACK_CASTS + core.E.TRACK_HEALTH)
-      mod:AddCleaveLines()
-    end,
-    [core.E.HEALTH_CHANGED] = function(_, _, percent)
-      for i = 1, #PHASES_CLOSE do
-        if percent >= PHASES_CLOSE[i].LOWER and percent <= PHASES_CLOSE[i].UPPER then
-          mod:AddMsg("SUCKY_PHASE", "msg.phase.start", 5, "Info", "xkcdWhite")
-          break
-        end
-      end
-    end,
-    ["cast.mordechai.shatter"] = {
-      [core.E.CAST_START] = function()
-        mod:AddTimerBar("NEXT_SHURIKEN_TIMER", "msg.mordechai.shuriken.next", SHURIKEN_TIMER, mod:GetSetting("SoundShurikenCountdown"))
-        mod:RemoveCleaveLines()
-      end,
-      [core.E.CAST_END] = function()
-        mod:AddCleaveLines()
-      end,
-    },
-    ["cast.mordechai.barrage"] = {
-      [core.E.CAST_START] = function()
-        mod:AddTimerBar("NEXT_BARRAGE_TIMER", "msg.mordechai.barrage.next", BARRAGE_TIMER)
-        mod:RemoveCleaveLines()
-      end,
-      [core.E.CAST_END] = function()
-        mod:AddCleaveLines()
-      end,
-    },
-  }
-)
+function mod:OnTurretCastOrbStart()
+  mod:AddTimerBar("NEXT_ORB_TIMER", "msg.orb.next", TIMERS.ORB.NORMAL)
+end
 
-mod:RegisterUnitEvents("unit.anchor",{
-    [core.E.UNIT_CREATED] = function(_, id, unit)
-      anchors[id] = unit
-      core:WatchUnit(unit, core.E.TRACK_HEALTH)
-      if mod:GetSetting("MarkerAnchorHP") then
-        core:MarkUnit(unit, 0, 100)
-      end
+function mod:OnMordechaiCreated(id, unit, name)
+  mordechai = unit
+  core:WatchUnit(unit, core.E.TRACK_CASTS + core.E.TRACK_HEALTH)
+  mod:AddCleaveLines()
+end
 
-      anchorCount = anchorCount + 1
-      if anchorCount == 4 then
-        isAirPhase = true
-        numberOfAirPhases = numberOfAirPhases + 1
-        mod:RemoveAnchorWorldMarkers()
-        mod:RemoveCleaveLines()
-        mod:RemoveTimerBar("NEXT_ORB_TIMER")
-        mod:RemoveTimerBar("NEXT_BARRAGE_TIMER")
-        mod:RemoveTimerBar("NEXT_SHURIKEN_TIMER")
-        anchorCount = 0
-      end
-    end,
-    [core.E.UNIT_DESTROYED] = function(_, id)
-      anchors[id] = nil
-    end,
-    [core.E.HEALTH_CHANGED] = function(_, id, percent)
-      if mod:GetSetting("MarkerAnchorHP") then
-        core:MarkUnit(anchors[id], 0, percent)
-      end
-    end,
-  }
-)
-
-mod:RegisterUnitEvents("unit.orb",{
-    [core.E.UNIT_CREATED] = function()
-      mod:AddMsg("ORB_SPAWNED", "msg.orb.spawned", 5, "Info", "xkcdWhite")
-    end
-  }
-)
-
-mod:RegisterDatachronEvent("chron.airlock.closed", core.E.COMPARE_EQUAL, function()
-    isAirPhase = false
-    mod:AddCleaveLines()
-    mod:AddTimerBar("NEXT_SHURIKEN_TIMER", "msg.mordechai.shuriken.next", FIRST_SHURIKEN_TIMER, mod:GetSetting("SoundShurikenCountdown"))
-    mod:AddTimerBar("NEXT_ORB_TIMER", "msg.orb.next", FIRST_ORB_MIDPHASE_TIMER)
-    if numberOfAirPhases >= 2 then
-      mod:AddTimerBar("NEXT_BARRAGE_TIMER", "msg.mordechai.barrage.next", FIRST_BARRAGE_TIMER)
-    end
-    mod:AddAnchorWorldMarkers()
+function mod:OnMordechaiHealthChanged(id, percent, name)
+  if mod:IsMidphaseClose(name, percent) then
+    mod:AddMsg("SUCKY_PHASE", "msg.phase.start", 5, "Info", "xkcdWhite")
   end
-)
+end
 
-mod:RegisterUnitEvents(core.E.ALL_UNITS, {
-    [core.E.UNIT_DESTROYED] = function (self, id, unit, name)
-      --Drop mark in case the player dies with the debuff
-      core:DropMark(id)
-    end,
-    [DEBUFF_KINETIC_LINK] = {
-      [core.E.DEBUFF_ADD] = function (self, id, spellId, stack, timeRemaining, name, unitCaster)
-        if mod:GetSetting("MarkerPurple") then
-          core:MarkUnit(GetUnitById(id), core.E.LOCATION_STATIC_CHEST, "P", "xkcdPurplePink")
-        end
+function mod:OnMordechaiShatterStart()
+  mod:AddTimerBar("NEXT_SHURIKEN_TIMER", "msg.mordechai.shuriken.next", TIMERS.SHURIKEN.NORMAL, mod:GetSetting("SoundShurikenCountdown"))
+  mod:RemoveCleaveLines()
+end
 
-        if id ~= playerUnit:GetId() then -- not on myself
-          return
-        end
+function mod:OnMordechaiBarrageStart()
+  mod:AddTimerBar("NEXT_BARRAGE_TIMER", "msg.mordechai.barrage.next", TIMERS.BARRAGE.NORMAL)
+  mod:RemoveCleaveLines()
+end
 
-        mod:AddMsg("KINETIC_LINK_MSG", "msg.orb.kinetic_link", 5, "Burn", "xkcdPurplePink")
+function mod:OnAnchorCreated(id, unit, name)
+  anchors[id] = unit
+  core:WatchUnit(unit, core.E.TRACK_HEALTH)
+  if mod:GetSetting("MarkerAnchorHP") then
+    core:MarkUnit(unit, 0, 100)
+  end
 
-        if mod:GetSetting("LinePurple") then
-          local casterId = unitCaster:GetId()
-          orbs[casterId] = unitCaster
-          core:AddLineBetweenUnits("PURPLE_LINE_"..casterId, id, casterId, 7, "xkcdLightMagenta")
-        end
-      end,
-      [core.E.DEBUFF_REMOVE] = function (self, id, spellId, name, unitCaster)
-        core:DropMark(id)
-        if unitCaster then
-          local casterId = unitCaster:GetId()
-          orbs[casterId] = nil
-          core:RemoveLineBetweenUnits("PURPLE_LINE_"..casterId)
-        else
-          for casterId, unit in next, orbs do
-            if not unit:IsValid() then
-              orbs[casterId] = nil
-              core:RemoveLineBetweenUnits("PURPLE_LINE_"..casterId)
-            end
-          end
-        end
+  anchorCount = anchorCount + 1
+  if anchorCount == 4 then
+    isAirPhase = true
+    numberOfAirPhases = numberOfAirPhases + 1
+    mod:RemoveAnchorWorldMarkers()
+    mod:RemoveCleaveLines()
+    mod:RemoveTimerBar("NEXT_ORB_TIMER")
+    mod:RemoveTimerBar("NEXT_BARRAGE_TIMER")
+    mod:RemoveTimerBar("NEXT_SHURIKEN_TIMER")
+    anchorCount = 0
+  end
+end
 
-      end,
-    },
-    [DEBUFF_SHOCKING_ATTRACTION] = {
-      [core.E.DEBUFF_ADD] = function (self, id)
-        if mod:GetSetting("CrosshairShockingAttraction") then
-          core:AddPicture("SHOCKING_ATTRACTION_TARGET_"..id, id, "Crosshair", 30, 0, 0, nil, "blue")
-        end
-        if id == playerUnit:GetId() then
-          mod:AddMsg("SHOCKING_ATTRACTION", "msg.mordechai.shuriken.you", 5, "RunAway", "xkcdBlue")
-        end
-      end,
-      [core.E.DEBUFF_REMOVE] = function (self, id)
-        core:RemovePicture("SHOCKING_ATTRACTION_TARGET_"..id)
-      end,
-    },
-  }
-)
+function mod:OnAnchorDestroyed(id, unit, name)
+  anchors[id] = nil
+end
 
-function mod:AddAnchorWorldMarkers()
-  if not mod:GetSetting("WorldMarkerAnchor") then
+function mod:OnAnchorHealthChanged(id, percent)
+  if mod:GetSetting("MarkerAnchorHP") then
+    core:MarkUnit(anchors[id], 0, percent)
+  end
+end
+
+function mod:OnOrbCreated()
+  mod:AddMsg("ORB_SPAWNED", "msg.orb.spawned", 5, "Info", "xkcdWhite")
+end
+
+function mod:OnAirlockClosed()
+  isAirPhase = false
+  mod:AddCleaveLines()
+  mod:AddTimerBar("NEXT_SHURIKEN_TIMER", "msg.mordechai.shuriken.next", TIMERS.SHURIKEN.FIRST, mod:GetSetting("SoundShurikenCountdown"))
+  mod:AddTimerBar("NEXT_ORB_TIMER", "msg.orb.next", TIMERS.ORB.AFTER_MID)
+  if numberOfAirPhases >= 2 then
+    mod:AddTimerBar("NEXT_BARRAGE_TIMER", "msg.mordechai.barrage.next", TIMERS.BARRAGE.FIRST)
+  end
+  mod:AddAnchorWorldMarkers()
+end
+
+function mod:OnAnyUnitDestroyed(id, unit, name)
+  core:DropMark(id)
+end
+
+function mod:OnKineticLinkAdded(id, spellId, stack, timeRemaining, name, unitCaster)
+  if mod:GetSetting("MarkerPurple") then
+    core:MarkUnit(GetUnitById(id), core.E.LOCATION_STATIC_CHEST, "P", "xkcdPurplePink")
+  end
+
+  if id ~= playerUnit:GetId() then -- not on myself
     return
   end
+
+  mod:AddMsg("KINETIC_LINK_MSG", "msg.orb.kinetic_link", 5, "Burn", "xkcdPurplePink")
+
+  if mod:GetSetting("LinePurple") then
+    local casterId = unitCaster:GetId()
+    orbs[casterId] = unitCaster
+    core:AddLineBetweenUnits("PURPLE_LINE_"..casterId, id, casterId, 7, "xkcdLightMagenta")
+  end
+end
+
+function mod:OnKineticLinkRemoved(id, spellId, name, unitCaster)
+  core:DropMark(id)
+  if unitCaster then
+    local casterId = unitCaster:GetId()
+    orbs[casterId] = nil
+    core:RemoveLineBetweenUnits("PURPLE_LINE_"..casterId)
+  else
+    for casterId, unit in next, orbs do
+      if not unit:IsValid() then
+        orbs[casterId] = nil
+        core:RemoveLineBetweenUnits("PURPLE_LINE_"..casterId)
+      end
+    end
+  end
+end
+
+function mod:OnShockingAttractionAdded(id)
+  if mod:GetSetting("CrosshairShockingAttraction") then
+    core:AddPicture("SHOCKING_ATTRACTION_TARGET_"..id, id, "Crosshair", 30, 0, 0, nil, "blue")
+  end
+  if id == playerUnit:GetId() then
+    mod:AddMsg("SHOCKING_ATTRACTION", "msg.mordechai.shuriken.you", 5, "RunAway", "xkcdBlue")
+  end
+end
+
+function mod:OnShockingAttractionRemoved(id)
+  core:RemovePicture("SHOCKING_ATTRACTION_TARGET_"..id)
+end
+
+function mod:AddAnchorWorldMarkers()
+  if not mod:GetSetting("WorldMarkerAnchor") then return end
   for i = 1, #ANCHOR_POSITIONS do
     mod:SetWorldMarker("ANCHOR_"..i, "mark.anchor_"..i, ANCHOR_POSITIONS[i])
   end
 end
 
 function mod:RemoveAnchorWorldMarkers()
-  if not mod:GetSetting("WorldMarkerAnchor") then
-    return
-  end
+  if not mod:GetSetting("WorldMarkerAnchor") then return end
   for i = 1, #ANCHOR_POSITIONS do
     mod:DropWorldMarker("ANCHOR_"..i)
   end
 end
 
 function mod:AddCleaveLines()
-  if not mod:GetSetting("LinesCleave") or isAirPhase then
-    return
-  end
-  local id = mordechai:GetId()
-  core:AddSimpleLine("CLEAVE_FRONT_RIGHT", id, 3.5, 40, 24.5, 5, "white", nil, 3)
-  core:AddSimpleLine("CLEAVE_BACK_RIGHT", id, 3.5, 40, 180-24.5, 5, "white", nil, 3)
-  core:AddSimpleLine("CLEAVE_FRONT_LEFT", id, 3.5, 40, -24.5, 5, "white", nil, -3)
-  core:AddSimpleLine("CLEAVE_BACK_LEFT", id, 3.5, 40, -(180-24.5), 5, "white", nil, -3)
+  if not mod:GetSetting("LinesCleave") or isAirPhase then return end
+  core:AddSimpleLine("CLEAVE_FRONT_RIGHT", mordechai, 3.5, 40, 24.5, 5, "white", nil, 3)
+  core:AddSimpleLine("CLEAVE_BACK_RIGHT", mordechai, 3.5, 40, 180-24.5, 5, "white", nil, 3)
+  core:AddSimpleLine("CLEAVE_FRONT_LEFT", mordechai, 3.5, 40, -24.5, 5, "white", nil, -3)
+  core:AddSimpleLine("CLEAVE_BACK_LEFT", mordechai, 3.5, 40, -(180-24.5), 5, "white", nil, -3)
 
-  core:AddSimpleLine("CLEAVE_FRONT_RIGHT2", id, 0, 3.5, 17.5, 5, "white", nil, -5.5)
-  core:AddSimpleLine("CLEAVE_BACK_RIGHT2", id, 0, 3.5, 180-17.5, 5, "white", nil, -5.5)
-  core:AddSimpleLine("CLEAVE_FRONT_LEFT2", id, 0, 3.5, -17.5, 5, "white", nil, 5.5)
-  core:AddSimpleLine("CLEAVE_BACK_LEFT2", id, 0, 3.5, -(180-17.5), 5, "white", nil, 5.5)
+  core:AddSimpleLine("CLEAVE_FRONT_RIGHT2", mordechai, 0, 3.5, 17.5, 5, "white", nil, -5.5)
+  core:AddSimpleLine("CLEAVE_BACK_RIGHT2", mordechai, 0, 3.5, 180-17.5, 5, "white", nil, -5.5)
+  core:AddSimpleLine("CLEAVE_FRONT_LEFT2", mordechai, 0, 3.5, -17.5, 5, "white", nil, 5.5)
+  core:AddSimpleLine("CLEAVE_BACK_LEFT2", mordechai, 0, 3.5, -(180-17.5), 5, "white", nil, 5.5)
 end
 
 function mod:RemoveCleaveLines()
-  if not mod:GetSetting("LinesCleave") then
-    return
-  end
+  if not mod:GetSetting("LinesCleave") then return end
   core:RemoveSimpleLine("CLEAVE_FRONT_RIGHT")
   core:RemoveSimpleLine("CLEAVE_BACK_RIGHT")
   core:RemoveSimpleLine("CLEAVE_FRONT_LEFT")
@@ -403,6 +363,50 @@ function mod:RemoveCleaveLines()
   core:RemoveSimpleLine("CLEAVE_BACK_LEFT2")
 end
 
+----------------------------------------------------------------------------------------------------
+-- Bind event handlers.
+----------------------------------------------------------------------------------------------------
+mod:RegisterUnitEvents("unit.mordechai",{
+    [core.E.UNIT_CREATED] = mod.OnMordechaiCreated,
+    [core.E.UNIT_DESTROYED] = mod.RemoveCleaveLines,
+    [core.E.HEALTH_CHANGED] = mod.OnMordechaiHealthChanged,
+    ["cast.mordechai.shatter"] = {
+      [core.E.CAST_START] = mod.OnMordechaiShatterStart,
+      [core.E.CAST_END] = mod.AddCleaveLines,
+    },
+    ["cast.mordechai.barrage"] = {
+      [core.E.CAST_START] = mod.OnMordechaiBarrageStart,
+      [core.E.CAST_END] = mod.AddCleaveLines,
+    },
+  }
+)
+mod:RegisterUnitEvents("unit.turret",{
+    [core.E.UNIT_CREATED] = mod.OnTurretCreated,
+    ["cast.turret.discharge"] = {
+      [core.E.CAST_START] = mod.OnTurretCastOrb,
+    }
+  }
+)
+mod:RegisterUnitEvents("unit.anchor",{
+    [core.E.UNIT_CREATED] = mod.OnAnchorCreated,
+    [core.E.UNIT_DESTROYED] = mod.OnAnchorDestroyed,
+    [core.E.HEALTH_CHANGED] = mod.OnAnchorHealthChanged,
+  }
+)
+mod:RegisterUnitEvent("unit.orb", core.E.UNIT_CREATED, mod.OnOrbCreated)
+mod:RegisterDatachronEvent("chron.airlock.closed", core.E.COMPARE_EQUAL, mod.OnAirlockClosed)
+mod:RegisterUnitEvents(core.E.ALL_UNITS, {
+    [core.E.UNIT_DESTROYED] = mod.OnAnyUnitDestroyed,
+    [DEBUFFS.KINETIC_LINK] = {
+      [core.E.DEBUFF_ADD] = mod.OnKineticLinkAdded,
+      [core.E.DEBUFF_REMOVE] = mod.OnKineticLinkRemoved,
+    },
+    [DEBUFFS.SHOCKING_ATTRACTION] = {
+      [core.E.DEBUFF_ADD] = mod.OnShockingAttractionAdded,
+      [core.E.DEBUFF_REMOVE] = mod.OnShockingAttractionRemoved,
+    },
+  }
+)
 mod:RegisterUnitEvents({
     "unit.mordechai",
     "unit.anchor",

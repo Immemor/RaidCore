@@ -78,21 +78,32 @@ mod:RegisterFrenchLocale({
 ----------------------------------------------------------------------------------------------------
 -- Constants.
 ----------------------------------------------------------------------------------------------------
-local DEBUFF_ELECTROSHOCK_VULNERABILITY = 83798
-local DEBUFF_ATOMIC_ATTRACTION = 84053
-local DEBUFF_ION_CLASH = 84051
-local BUFF_INSULATION = 83987
+local DEBUFFS = {
+  ELECTROSHOCK_VULNERABILITY = 83798,
+  ATOMIC_ATTRACTION = 84053,
+  ION_CLASH = 84051,
+}
+local BUFFS = {
+  INSULATION = 83987,
+}
 
--- Timers
-local FIRST_ELECTROSHOCK_TIMER = 11
-local ELECTROSHOCK_TIMER = 18
-local JUMP_ELECTROSHOCK_TIMER = 12
-local FIRST_FIRE_ORB_TIMER = 21
-local NEXT_FIRE_ORB_TIMER = 24
-local FIRE_ORB_SAFE_TIMER = 18
-
-local FIRST_LIQUIDATE_TIMER = 12
-local LIQUIDATE_TIMER = 22
+local TIMERS = {
+  ELECTROSHOCK = {
+    FIRST = 11,
+    JUMP = 12,
+    NORMAL = 18,
+  },
+  FIRE_ORB = {
+    FIRST = 21,
+    NORMAL = 24,
+    SAFE = 18,
+  },
+  LIQUIDATE = {
+    FIRST = 12,
+    NORMAL = 22,
+    EXTEND = 4,
+  }
+}
 
 local CORE_HEALTH_LOW_PERCENTAGE = 15
 local CORE_HEALTH_LOW_WARN_PERCENTAGE = 20
@@ -110,6 +121,11 @@ local CORE_NAMES = {
   ["unit.spark_plug"] = SPARK_PLUG,
   ["unit.lubricant_nozzle"] = LUBRICANT_NOZZLE
 }
+local tempCores = CORE_NAMES
+CORE_NAMES = {}
+for locale, planet in next, tempCores do
+  CORE_NAMES[mod.L[locale]] = planet
+end
 local CORE_BAR_COLORS = {
   [FUSION_CORE] = "xkcdDarkRed",
   [COOLING_TURBINE] = "xkcdSkyBlue",
@@ -127,6 +143,11 @@ local ENGINEER_NAMES = {
   ["unit.warrior"] = WARRIOR,
   ["unit.engineer"] = ENGINEER,
 }
+local tempEngis = ENGINEER_NAMES
+ENGINEER_NAMES = {}
+for locale, planet in next, tempEngis do
+  ENGINEER_NAMES[mod.L[locale]] = planet
+end
 local ENGINEER_START_LOCATION = {
   [WARRIOR] = SPARK_PLUG,
   [ENGINEER] = COOLING_TURBINE,
@@ -142,8 +163,6 @@ local coreUnits
 local engineerUnits
 local player
 local coreMaxHealth
-
-local fireOrbTargetTestTimer = ApolloTimer.Create(1, false, "RegisterOrbTarget", mod)
 ----------------------------------------------------------------------------------------------------
 -- Settings.
 ----------------------------------------------------------------------------------------------------
@@ -203,20 +222,13 @@ function mod:OnBossEnable()
   coreMaxHealth = 0
   engineerUnits = {}
   coreUnits = {}
-  --locales
-  for name, id in pairs(CORE_NAMES) do
-    CORE_NAMES[self.L[name]] = id
-  end
-  for name, id in pairs(ENGINEER_NAMES) do
-    ENGINEER_NAMES[self.L[name]] = id
-  end
 
   if mod:GetSetting("BarsCoreHealth") then
     core:AddUnitSpacer("CORE_SPACER", nil, 2)
   end
 
-  mod:AddTimerBar("NEXT_ELEKTROSHOCK_TIMER", "msg.engineer.electroshock.next", FIRST_ELECTROSHOCK_TIMER)
-  mod:AddTimerBar("NEXT_LIQUIDATE_TIMER", "msg.warrior.liquidate.next", FIRST_LIQUIDATE_TIMER)
+  mod:AddTimerBar("NEXT_ELEKTROSHOCK_TIMER", "msg.engineer.electroshock.next", TIMERS.ELECTROSHOCK.FIRST)
+  mod:AddTimerBar("NEXT_LIQUIDATE_TIMER", "msg.warrior.liquidate.next", TIMERS.LIQUIDATE.FIRST)
   mod:AddProgressBar("HEAT_GENERATIOn", "msg.heat.generation", mod.GetCoreTotalHealthPercentage, mod)
 end
 
@@ -260,7 +272,7 @@ function mod:OnEngiChangeLocation(engineerId, _, newLocation)
   end
   if newLocation == FUSION_CORE then
     mod:RemoveTimerBar("NEXT_FIRE_ORB_TIMER")
-    mod:AddTimerBar("NEXT_FIRE_ORB_TIMER", "msg.fire_orb.next", FIRST_FIRE_ORB_TIMER)
+    mod:AddTimerBar("NEXT_FIRE_ORB_TIMER", "msg.fire_orb.next", TIMERS.FIRE_ORB.FIRST)
   end
 end
 
@@ -282,54 +294,50 @@ function mod:UpdateCoreHealthMark(coreUnit)
   core:MarkUnit(coreUnit.unit, 0, percent, color)
 end
 
-mod:RegisterUnitEvents(core.E.ALL_UNITS, {
-    [core.E.UNIT_DESTROYED] = function (self, id)
-      core:DropMark(id)
-    end,
-    [DEBUFF_ELECTROSHOCK_VULNERABILITY] = {
-      [core.E.DEBUFF_ADD] = function(self, id, spellId, stack, timeRemaining, targetName)
-        local targetUnit
-        if id == player.unit:GetId() then
-          targetUnit = player.unit
-          mod:AddMsg("ELECTROSHOCK_MSG_YOU", "msg.engineer.electroshock.swap.you", 5, "Burn", "Red")
-        else
-          targetUnit = GetUnitById(id)
-          local messageId = string.format("ELECTROSHOCK_MSG_OTHER_%s", targetName)
-          local electroshockOnX = self.L["msg.engineer.electroshock.swap.other"]:format(targetName)
-          mod:AddMsg(messageId, electroshockOnX, 5, "Info", "xkcdBlue")
-        end
-        if mod:GetSetting("MarkerDebuff") then
-          core:MarkUnit(targetUnit, core.E.LOCATION_STATIC_CHEST, "E", "xkcdOrange")
-        end
-      end,
-      [core.E.DEBUFF_REMOVE] = function(self, id, spellId, targetName)
-        if id == player.unit:GetId() then
-          mod:AddMsg("ELECTROSHOCK_MSG_OVER", "msg.engineer.electroshock.swap.return", 5, "Burn", "xkcdGreen")
-        end
-        core:DropMark(id)
-      end,
-    },
-    [DEBUFF_ION_CLASH] = {
-      [core.E.DEBUFF_ADD] = function(_, id)
-        if mod:GetSetting("VisualIonClashCircle") then
-          core:AddPolygon("ION_CLASH", id, 9, 0, 10, "xkcdBlue", 64)
-        end
-      end,
-      [core.E.DEBUFF_REMOVE] = function()
-        core:RemovePolygon("ION_CLASH")
-      end,
-    },
-    [core.E.DEBUFF_ADD] = {
-      [DEBUFF_ATOMIC_ATTRACTION] = function(self, id, spellId, stack, timeRemaining, targetName)
-        if id == player.unit:GetId() then
-          mod:AddMsg("DISCHARGED_PLASMA_MSG", "msg.fire_orb.you", 5, "RunAway", "xkcdLightRed")
-        elseif mod:IsPlayerOnPlatform(FUSION_CORE) then
-          mod:AddMsg("DISCHARGED_PLASMA_MSG_SPAWN", "msg.fire_orb.spawned", 2, "Info", "xkcdWhite")
-        end
-      end,
-    },
-  }
-)
+function mod:OnAnyUnitDestroyed(id, unit, name)
+  core:DropMark(id)
+end
+
+function mod:OnElectroshockAdd(id, spellId, stack, timeRemaining, targetName)
+  local targetUnit
+  if id == player.unit:GetId() then
+    targetUnit = player.unit
+    mod:AddMsg("ELECTROSHOCK_MSG_YOU", "msg.engineer.electroshock.swap.you", 5, "Burn", "Red")
+  else
+    targetUnit = GetUnitById(id)
+    local messageId = string.format("ELECTROSHOCK_MSG_OTHER_%s", targetName)
+    local electroshockOnX = self.L["msg.engineer.electroshock.swap.other"]:format(targetName)
+    mod:AddMsg(messageId, electroshockOnX, 5, "Info", "xkcdBlue")
+  end
+  if mod:GetSetting("MarkerDebuff") then
+    core:MarkUnit(targetUnit, core.E.LOCATION_STATIC_CHEST, "E", "xkcdOrange")
+  end
+end
+
+function mod:OnElectroshockRemove(id, spellId, targetName)
+  if id == player.unit:GetId() then
+    mod:AddMsg("ELECTROSHOCK_MSG_OVER", "msg.engineer.electroshock.swap.return", 5, "Burn", "xkcdGreen")
+  end
+  core:DropMark(id)
+end
+
+function mod:OnIonClashAdd(id, spellId, stack, timeRemaining, name)
+  if mod:GetSetting("VisualIonClashCircle") then
+    core:AddPolygon("ION_CLASH", id, 9, 0, 10, "xkcdBlue", 64)
+  end
+end
+
+function mod:OnIonClashRemove(id, spellId, name)
+  core:RemovePolygon("ION_CLASH")
+end
+
+function mod:OnAtomicAttactionAdd(id, spellId, stack, timeRemaining, targetName)
+  if id == player.unit:GetId() then
+    mod:AddMsg("DISCHARGED_PLASMA_MSG", "msg.fire_orb.you", 5, "RunAway", "xkcdLightRed")
+  elseif mod:IsPlayerOnPlatform(FUSION_CORE) then
+    mod:AddMsg("DISCHARGED_PLASMA_MSG_SPAWN", "msg.fire_orb.spawned", 2, "Info", "xkcdWhite")
+  end
+end
 
 function mod:IsPlayerOnPlatform(coreId)
   player.location = mod:GetUnitPlatform(player.unit)
@@ -365,107 +373,76 @@ function mod:OnEngineerDestroyed(id, unit, name)
   engineerUnits[ENGINEER_NAMES[name]] = nil
 end
 
-mod:RegisterUnitEvents({"unit.engineer", "unit.warrior"}, {
-    [core.E.UNIT_CREATED] = mod.OnEngineerCreated,
-    [core.E.UNIT_DESTROYED] = mod.OnEngineerDestroyed,
-  }
-)
+function mod:OnCoreHealthChanged(id, percent, name)
+  local coreId = CORE_NAMES[name]
+  local coreUnit = coreUnits[coreId]
+  coreUnit.percent = percent
+  mod:UpdateCoreHealthMark(coreUnit)
 
--- Cores
-mod:RegisterUnitEvents({
-    "unit.fusion_core",
-    "unit.cooling_turbine",
-    "unit.spark_plug",
-    "unit.lubricant_nozzle"
-    },{
-    [core.E.UNIT_CREATED] = mod.OnCoreCreated,
-    [core.E.HEALTH_CHANGED] = function(self, _, percent, name)
-      local coreId = CORE_NAMES[name]
-      local coreUnit = coreUnits[coreId]
-      coreUnit.percent = percent
-      mod:UpdateCoreHealthMark(coreUnit)
+  if percent > CORE_HEALTH_LOW_WARN_PERCENTAGE_REENABLE and percent < CORE_HEALTH_HIGH_WARN_PERCENTAGE_REENABLE then
+    coreUnit.healthWarning = false
+  elseif percent >= CORE_HEALTH_HIGH_WARN_PERCENTAGE and not coreUnit.healthWarning then
+    coreUnit.healthWarning = true
+    mod:AddMsg("CORE_HEALTH_HIGH_WARN", self.L["msg.core.health.high.warning"]:format(name), 5, "Info", "xkcdRed")
+  elseif percent <= CORE_HEALTH_LOW_WARN_PERCENTAGE and not coreUnit.healthWarning and mod:IsPlayerOnPlatform(coreId) then
+    coreUnit.healthWarning = true
+    mod:AddMsg("CORE_HEALTH_LOW_WARN", self.L["msg.core.health.low.warning"]:format(name), 5, "Inferno", "xkcdRed")
+  end
+end
 
-      if percent > CORE_HEALTH_LOW_WARN_PERCENTAGE_REENABLE and percent < CORE_HEALTH_HIGH_WARN_PERCENTAGE_REENABLE then
-        coreUnit.healthWarning = false
-      elseif percent >= CORE_HEALTH_HIGH_WARN_PERCENTAGE and not coreUnit.healthWarning then
-        coreUnit.healthWarning = true
-        mod:AddMsg("CORE_HEALTH_HIGH_WARN", self.L["msg.core.health.high.warning"]:format(name), 5, "Info", "xkcdRed")
-      elseif percent <= CORE_HEALTH_LOW_WARN_PERCENTAGE and not coreUnit.healthWarning and mod:IsPlayerOnPlatform(coreId) then
-        coreUnit.healthWarning = true
-        mod:AddMsg("CORE_HEALTH_LOW_WARN", self.L["msg.core.health.low.warning"]:format(name), 5, "Inferno", "xkcdRed")
-      end
-    end,
-    [BUFF_INSULATION] = {
-      [core.E.BUFF_ADD] = function(_, id, spellId, stack, timeRemaining, name)
-        local coreUnit = coreUnits[CORE_NAMES[name]]
-        coreUnit.enabled = false
-        mod:UpdateCoreHealthMark(coreUnit)
-      end,
-      [core.E.BUFF_REMOVE] = function(_, id, spellId, name)
-        local coreUnit = coreUnits[CORE_NAMES[name]]
-        coreUnit.enabled = true
-        mod:UpdateCoreHealthMark(coreUnit)
-        for engineerId, engineer in pairs(engineerUnits) do
-          local oldLocation = engineerUnits[engineerId].location
-          local newLocation = mod:GetUnitPlatform(engineer.unit)
-          if newLocation ~= oldLocation then
-            engineerUnits[engineerId].location = newLocation
-            mod:OnEngiChangeLocation(engineerId, oldLocation, newLocation)
-          end
-        end
-      end
-    },
-  }
-)
+function mod:OnCoreInsulationAdd(id, spellId, stack, timeRemaining, name)
+  local coreUnit = coreUnits[CORE_NAMES[name]]
+  coreUnit.enabled = false
+  mod:UpdateCoreHealthMark(coreUnit)
+end
 
--- Warrior
-mod:RegisterUnitEvents("unit.warrior",{
-    [core.E.CAST_START] = {
-      ["cast.warrior.liquidate"] = function(self)
-        if mod:IsPlayerOnPlatform(engineerUnits[WARRIOR].location) then
-          mod:AddMsg("LIQUIDATE_MSG", "msg.warrior.liquidate.stack", 5, "Info", "xkcdOrange")
-        end
-      end,
-      ["cast.rocket_jump"] = function()
-        mod:ExtendTimerBar("NEXT_LIQUIDATE_TIMER", 4)
-      end
-    },
-    [core.E.CAST_END] = {
-      ["cast.warrior.liquidate"] = function(self)
-        mod:RemoveTimerBar("NEXT_LIQUIDATE_TIMER")
-        mod:AddTimerBar("NEXT_LIQUIDATE_TIMER", "msg.warrior.liquidate.next", LIQUIDATE_TIMER)
-      end
-    },
-  }
-)
+function mod:OnCoreInsulationRemove(id, spellId, name)
+  local coreUnit = coreUnits[CORE_NAMES[name]]
+  coreUnit.enabled = true
+  mod:UpdateCoreHealthMark(coreUnit)
+  for engineerId, engineer in pairs(engineerUnits) do
+    local oldLocation = engineerUnits[engineerId].location
+    local newLocation = mod:GetUnitPlatform(engineer.unit)
+    if newLocation ~= oldLocation then
+      engineerUnits[engineerId].location = newLocation
+      mod:OnEngiChangeLocation(engineerId, oldLocation, newLocation)
+    end
+  end
+end
 
--- Engineer
-mod:RegisterUnitEvents("unit.engineer",{
-    [core.E.CAST_START] = {
-      ["cast.engineer.electroshock"] = function(self)
-        if mod:GetSetting("LineElectroshock") then
-          core:AddPixie("ELECTROSHOCK_PIXIE", 2, engineerUnits[ENGINEER].unit, nil, "Red", 10, 80, 0)
-        end
-        if mod:IsPlayerOnPlatform(engineerUnits[ENGINEER].location) then
-          mod:AddMsg("ELECTROSHOCK_CAST_MSG", "cast.engineer.electroshock", 5, "Beware", "xkcdOrange")
-        end
-      end
-    },
-    [core.E.CAST_END] = {
-      ["cast.rocket_jump"] = function(self)
-        mod:RemoveTimerBar("NEXT_ELEKTROSHOCK_TIMER")
-        mod:AddTimerBar("NEXT_ELEKTROSHOCK_TIMER", "msg.engineer.electroshock.next", JUMP_ELECTROSHOCK_TIMER)
-      end,
-      ["cast.engineer.electroshock"] = function()
-        if mod:GetSetting("LineElectroshock") then
-          core:DropPixie("ELECTROSHOCK_PIXIE")
-        end
-        mod:RemoveTimerBar("NEXT_ELEKTROSHOCK_TIMER")
-        mod:AddTimerBar("NEXT_ELEKTROSHOCK_TIMER", "msg.engineer.electroshock.next", ELECTROSHOCK_TIMER)
-      end
-    },
-  }
-)
+function mod:OnWarriorLiquidateStart()
+  if mod:IsPlayerOnPlatform(engineerUnits[WARRIOR].location) then
+    mod:AddMsg("LIQUIDATE_MSG", "msg.warrior.liquidate.stack", 5, "Info", "xkcdOrange")
+  end
+end
+
+function mod:OnWarriorLiquidateEnd()
+  mod:AddTimerBar("NEXT_LIQUIDATE_TIMER", "msg.warrior.liquidate.next", TIMERS.LIQUIDATE.NORMAL)
+end
+
+function mod:OnWarriorRocketJumpStart()
+  mod:ExtendTimerBar("NEXT_LIQUIDATE_TIMER", TIMERS.LIQUIDATE.EXTEND)
+end
+
+function mod:OnEngineerElectroshockStart()
+  if mod:GetSetting("LineElectroshock") then
+    core:AddSimpleLine("ELECTROSHOCK", engineerUnits[ENGINEER].unit, nil, 80, nil, 10, "xkcdRed")
+  end
+  if mod:IsPlayerOnPlatform(engineerUnits[ENGINEER].location) then
+    mod:AddMsg("ELECTROSHOCK_CAST_MSG", "cast.engineer.electroshock", 5, "Beware", "xkcdOrange")
+  end
+end
+
+function mod:OnEngineerElectroshockEnd()
+  core:RemoveSimpleLine("ELECTROSHOCK")
+  mod:RemoveTimerBar("NEXT_ELEKTROSHOCK_TIMER")
+  mod:AddTimerBar("NEXT_ELEKTROSHOCK_TIMER", "msg.engineer.electroshock.next", TIMERS.ELECTROSHOCK.NORMAL)
+end
+
+function mod:OnEngineerRocketJumpEnd()
+  mod:RemoveTimerBar("NEXT_ELEKTROSHOCK_TIMER")
+  mod:AddTimerBar("NEXT_ELEKTROSHOCK_TIMER", "msg.engineer.electroshock.next", TIMERS.ELECTROSHOCK.JUMP)
+end
 
 function mod:PopFireOrb()
   if mod:IsPlayerOnPlatform(FUSION_CORE) then
@@ -473,15 +450,74 @@ function mod:PopFireOrb()
   end
 end
 
+function mod:OnFireOrbCreated(id, unit, name)
+  mod:AddTimerBar("NEXT_FIRE_ORB_TIMER", "msg.fire_orb.next", TIMERS.FIRE_ORB.NORMAL)
+  mod:AddTimerBar("FIRE_ORB_SAFE_TIMER_"..id, "msg.fire_orb.pop.timer", TIMERS.FIRE_ORB.SAFE, false, "Red", mod.PopFireOrb, mod)
+end
+
+function mod:OnFireOrbDestroyed(id, unit, name)
+  mod:RemoveTimerBar("FIRE_ORB_SAFE_TIMER_"..id)
+end
+
+----------------------------------------------------------------------------------------------------
+-- Bind event handlers.
+----------------------------------------------------------------------------------------------------
+mod:RegisterUnitEvents(core.E.ALL_UNITS, {
+    [core.E.UNIT_DESTROYED] = mod.OnAnyUnitDestroyed,
+    [DEBUFFS.ELECTROSHOCK_VULNERABILITY] = {
+      [core.E.DEBUFF_ADD] = mod.OnElectroshockAdd,
+      [core.E.DEBUFF_REMOVE] = mod.OnElectroshockRemove,
+    },
+    [DEBUFFS.ION_CLASH] = {
+      [core.E.DEBUFF_ADD] = mod.OnIonClashAdd,
+      [core.E.DEBUFF_REMOVE] = mod.OnIonClashRemove,
+    },
+    [core.E.DEBUFF_ADD] = {
+      [DEBUFFS.ATOMIC_ATTRACTION] = mod.OnAtomicAttactionAdd,
+    },
+  }
+)
+mod:RegisterUnitEvents({
+    "unit.fusion_core",
+    "unit.cooling_turbine",
+    "unit.spark_plug",
+    "unit.lubricant_nozzle"
+    },{
+    [core.E.UNIT_CREATED] = mod.OnCoreCreated,
+    [core.E.HEALTH_CHANGED] = mod.OnCoreHealthChanged,
+    [BUFFS.INSULATION] = {
+      [core.E.BUFF_ADD] = mod.OnCoreInsulationAdd,
+      [core.E.BUFF_REMOVE] = mod.OnCoreInsulationRemove,
+    },
+  }
+)
+mod:RegisterUnitEvents({"unit.engineer", "unit.warrior"}, {
+    [core.E.UNIT_CREATED] = mod.OnEngineerCreated,
+    [core.E.UNIT_DESTROYED] = mod.OnEngineerDestroyed,
+  }
+)
+mod:RegisterUnitEvents("unit.warrior",{
+    ["cast.warrior.liquidate"] = {
+      [core.E.CAST_START ]= mod.OnWarriorLiquidateStart,
+      [core.E.CAST_END] = mod.OnWarriorLiquidateEnd,
+    },
+    [core.E.CAST_START] = {
+      ["cast.rocket_jump"] = mod.OnWarriorRocketJumpStart,
+    },
+  }
+)
+mod:RegisterUnitEvents("unit.engineer",{
+    ["cast.engineer.electroshock"] = {
+      [core.E.CAST_START] = mod.OnEngineerElectroshockStart,
+      [core.E.CAST_END] = mod.OnEngineerElectroshockEnd,
+    },
+    ["cast.rocket_jump"] = {
+      [core.E.CAST_END] = mod.OnEngineerRocketJumpEnd,
+    },
+  }
+)
 mod:RegisterUnitEvents("unit.fire_orb",{
-    [core.E.UNIT_CREATED] = function(self, id, unit)
-      mod:RemoveTimerBar("NEXT_FIRE_ORB_TIMER")
-      mod:AddTimerBar("NEXT_FIRE_ORB_TIMER", "msg.fire_orb.next", NEXT_FIRE_ORB_TIMER)
-      mod:AddTimerBar(string.format("FIRE_ORB_SAFE_TIMER %d", id), "msg.fire_orb.pop.timer", FIRE_ORB_SAFE_TIMER, false, "Red", mod.PopFireOrb, mod)
-      fireOrbTargetTestTimer:Start()
-    end,
-    [core.E.UNIT_DESTROYED] = function(_, id)
-      mod:RemoveTimerBar(string.format("FIRE_ORB_SAFE_TIMER %d", id))
-    end,
+    [core.E.UNIT_CREATED] = mod.OnFireOrbCreated,
+    [core.E.UNIT_DESTROYED] = mod.OnFireOrbDestroyed,
   }
 )

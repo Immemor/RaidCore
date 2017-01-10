@@ -12,12 +12,6 @@ local mod = core:NewEncounter("Shredder", 104, 548, 549)
 if not mod then return end
 
 ----------------------------------------------------------------------------------------------------
--- TODO
-----------------------------------------------------------------------------------------------------
---make tether visible, probably have to add rectangles to raidcore
---add phases are different later on
-
-----------------------------------------------------------------------------------------------------
 -- Registering combat.
 ----------------------------------------------------------------------------------------------------
 mod:RegisterTrigMob(core.E.TRIGGER_ALL, { "unit.swabbie" })
@@ -181,7 +175,9 @@ local SHREDDER = 1
 local ADD_PHASES = circular{ 11, 45, 66, 0 }
 
 -- Spell ids.
-local DEBUFF_OOZING_BILE = 84321
+local DEBUFFS = {
+  OOZING_BILE = 84321,
+}
 
 -- Saw stuff.
 local WEST_POSITION = -42
@@ -196,10 +192,7 @@ local SAW_SAFESPOT = {
   [SAW_WEST + SAW_EAST] = "msg.saw.safe_spot.middle",
   [SAW_MID + SAW_EAST] = "msg.saw.safe_spot.right",
 }
-----------------------------------------------------------------------------------------------------
--- Functions.
-----------------------------------------------------------------------------------------------------
-local GetUnitById = GameLib.GetUnitById
+
 ----------------------------------------------------------------------------------------------------
 -- Locals.
 ----------------------------------------------------------------------------------------------------
@@ -212,6 +205,8 @@ local playerUnit
 local prevShredderProgress
 local startProgressBarTimer = ApolloTimer.Create(4, false, "StartProgressBar", mod)
 startProgressBarTimer:Stop() --thanks carbine
+local nabbers
+local lastOozingBileStack
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 -----------------------------------------------------------------------------------------------------
@@ -224,6 +219,8 @@ function mod:OnBossEnable()
   prevShredderProgress = 0
   firstShredderSaw = nil
   secondShredderSaw = nil
+  lastOozingBileStack = 0
+  nabbers = {}
   startProgressBarTimer:Start()
 end
 
@@ -232,16 +229,14 @@ function mod:OnBossDisable()
   mod:RemoveProgressBar("ADDS_PROGRESS")
 end
 
-mod:RegisterUnitEvents(core.E.ALL_UNITS, {
-    [DEBUFF_OOZING_BILE] = {
-      [core.E.DEBUFF_UPDATE] = function(self, id, _, stack)
-        if playerUnit:GetId() == id and stack == 8 then
-          mod:AddMsg("OOZE_MSG", string.format(self.L["msg.bile.stacks"], stack), 5, "Beware", "xkcdAcidGreen")
-        end
-      end
-    },
-  }
-)
+function mod:OnOozingBileUpdate(id, spellId, stack)
+  if playerUnit:GetId() == id then
+    if stack > lastOozingBileStack and stack == 8 then
+      mod:AddMsg("OOZE_MSG", string.format(self.L["msg.bile.stacks"], stack), 5, "Beware", "xkcdAcidGreen")
+    end
+    lastOozingBileStack = stack
+  end
+end
 
 function mod:GetWalkingProgress(oldProgress)
   local pos1
@@ -301,81 +296,46 @@ function mod:StartProgressBar()
   mod:NextAddWave()
 end
 
-mod:RegisterUnitEvents({
-    "unit.add.nabber",
-    "unit.miniboss.regor",
-    "unit.miniboss.braugh",
-    },{
-    [core.E.UNIT_CREATED] = function(_, _, unit)
-      core:WatchUnit(unit, core.E.TRACK_CASTS + core.E.TRACK_HEALTH)
-    end,
-  }
-)
+function mod:OnTrashWithCastsCreated(id, unit, name)
+  core:WatchUnit(unit, core.E.TRACK_CASTS + core.E.TRACK_HEALTH)
+end
 
-mod:RegisterUnitEvents({
-    "unit.add.grunt",
-    "unit.add.brute",
-    "unit.add.pouncer",
-    "unit.add.plunderer",
-    "unit.add.cadet"
-    },{
-    [core.E.UNIT_CREATED] = function(_, _, unit)
-      core:WatchUnit(unit, core.E.TRACK_HEALTH)
-    end,
-  }
-)
+function mod:OnTrashCreated(id, unit, name)
+  core:WatchUnit(unit, core.E.TRACK_HEALTH)
+end
 
-mod:RegisterUnitEvents({
-    "unit.add.nabber",
-    "unit.add.grunt",
-    "unit.miniboss.regor",
-    "unit.miniboss.braugh",
-    "unit.add.brute",
-    "unit.add.pouncer",
-    "unit.add.plunderer",
-    "unit.add.cadet"
-    },{
-    [core.E.UNIT_DESTROYED] = function(_, id)
-      core:RemovePicture(id)
-    end,
-    [core.E.HEALTH_CHANGED] = function(_, id, percent)
-      if percent <= 1 and mod:GetSetting("CrosshairAdds") then
-        core:AddPicture(id, id, "Crosshair", 20)
-      end
-    end,
-  }
-)
+function mod:OnTrashDestroyed(id, unit, name)
+  core:RemovePicture(id)
+end
 
-mod:RegisterUnitEvents({ "unit.add.brute", "unit.add.nabber" },{
-    [core.E.UNIT_CREATED] = function(_, id)
-      if mod:GetSetting("CrosshairPriority") then
-        core:AddPicture(id, id, "Crosshair", 30, 0, 0, nil, "red")
-      end
-    end,
-  }
-)
+function mod:OnTrashHealthChanged(id, percent)
+  if percent <= 1 and mod:GetSetting("CrosshairAdds") then
+    core:AddPicture(id, id, "Crosshair", 20)
+  end
+end
 
-mod:RegisterUnitEvents("unit.swabbie",{
-    [core.E.UNIT_CREATED] = function(self, _, unit)
-      -- filter out second unit that's there for some reason
-      if not unit:GetHealth() then
-        return
-      end
-      core:AddUnit(unit)
-      core:WatchUnit(unit, core.E.TRACK_CASTS)
-      self.swabbieUnit = unit
-    end,
-    [core.E.UNIT_DESTROYED] = function(self, _, unit)
-      self.swabbieUnit = nil
-      core:RemoveUnit(unit)
-    end,
-    [core.E.CAST_START] = {
-      ["cast.swabbie.knockback"] = function()
-        mod:AddMsg("KNOCKBACK", "msg.swabbie.knockback", 2, nil, "xkcdRed")
-      end
-    },
-  }
-)
+function mod:OnPriorityTrashCreated(id, unit, name)
+  if mod:GetSetting("CrosshairPriority") then
+    core:AddPicture(id, unit, "Crosshair", 30, 0, 0, nil, "red")
+  end
+end
+
+function mod:OnSwabbieCreated(id, unit, name)
+  -- filter out second unit that's there for some reason
+  if not unit:GetHealth() then return end
+  core:AddUnit(unit)
+  core:WatchUnit(unit, core.E.TRACK_CASTS)
+  self.swabbieUnit = unit
+end
+
+function mod:OnSwabbieDestroyed(id, unit, name)
+  self.swabbieUnit = nil
+  core:RemoveUnit(unit)
+end
+
+function mod:OnSwabbieKnockStart()
+  mod:AddMsg("KNOCKBACK", "msg.swabbie.knockback", 2, nil, "xkcdRed")
+end
 
 function mod:DetermineSawLocation(unit)
   local x = unit:GetPosition().x
@@ -388,7 +348,7 @@ function mod:DetermineSawLocation(unit)
   end
 end
 
-function mod:HandleShredderSaw(sawLocation)
+function mod:ProcessMidphaseSaw(sawLocation)
   if firstShredderSaw == nil then
     firstShredderSaw = sawLocation
     return
@@ -403,87 +363,159 @@ function mod:HandleShredderSaw(sawLocation)
   mod:AddMsg("SAW_MSG_SAFE", msg, 5, "Info", "xkcdGreen")
 end
 
-mod:RegisterUnitEvents("unit.saw.big",{
-    [core.E.UNIT_CREATED] = function(_, id, unit)
-      if mod:GetSetting("LineSawblade") then
-        core:AddPixie(id, 2, unit, nil, "Red", 10, 60, 0)
-      end
-      local sawLocation = mod:DetermineSawLocation(unit)
-      if phase == WALKING and sawLocation == SAW_MID then
-        mod:AddMsg("SAW_MSG_MID", "msg.saw.middle", 5, "Beware", "xkcdRed")
-      elseif phase == SHREDDER then
-        mod:HandleShredderSaw(sawLocation)
-      end
-    end,
-    [core.E.UNIT_DESTROYED] = function(_, id)
-      core:DropPixie(id)
-    end,
+function mod:OnBigSawCreated(id, unit, name)
+  if mod:GetSetting("LineSawblade") then
+    core:AddSimpleLine(id, unit, nil, 60, nil, 10, "Red")
+  end
+  local sawLocation = mod:DetermineSawLocation(unit)
+  if phase == WALKING and sawLocation == SAW_MID then
+    mod:AddMsg("SAW_MSG_MID", "msg.saw.middle", 5, "Beware", "xkcdRed")
+  elseif phase == SHREDDER then
+    mod:ProcessMidphaseSaw(sawLocation)
+  end
+end
+
+function mod:OnBigSawDestroyed(id, unit, name)
+  core:RemoveSimpleLine(id)
+end
+
+function mod:OnNabberCreated(id, unit, name)
+  nabbers[id] = unit
+  core:RemoveMsg("ADDS_MSG")
+  mod:AddMsg("ADDS_MSG", "msg.nabber.spawned", 5, "Info", "xkcdWhite")
+end
+
+function mod:OnNabberDestroyed(id, unit, name)
+  nabbers[id] = nil
+end
+
+function mod:OnNabberLashStart(id)
+  if mod:GetDistanceBetweenUnits(playerUnit, nabbers[id]) < 45 then
+    mod:AddMsg("NABBER", "msg.nabber.interrupt", 5, "Inferno", "xkcdOrange")
+  end
+end
+
+function mod:OnMinibossCreated(id, unit, name)
+  mod:AddMsg("MINIBOSS", "msg.miniboss.spawned", 5, "Info", "xkcdWhite")
+end
+
+function mod:OnMinibossCastStart()
+  core:RemoveMsg("MINIBOSS_SPAWN")
+  mod:AddMsg("MINIBOSS_CAST", "msg.miniboss.interrupt", 5, "Inferno", "xkcdOrange")
+end
+
+function mod:OnBubbleCreated(id, unit, name)
+  if mod:GetSetting("CircleBubble") then
+    core:AddPolygon(id, unit, 6.5, nil, 5, "white", 20)
+  end
+end
+
+function mod:OnBubbleDestroyed(id, unit, name)
+  core:RemovePolygon(id)
+end
+
+function mod:OnTetherCreated(id, unit, name)
+  if mod:GetSetting("CrosshairTether") then
+    core:AddPicture(id, unit, "Crosshair", 25, 0, 0, nil, "FFFFF569")
+  end
+end
+
+function mod:OnTetherDestroyed(id, unit, name)
+  core:RemovePicture(id)
+end
+
+function mod:OnJunkTrapCreated(id, unit, name)
+  if mod:GetSetting("SquareTethers") then
+    core:AddPolygon(id, unit, 5, 45, 6, nil, 4)
+  end
+end
+
+function mod:OnJunkTrapDestroyed(id, unit, name)
+  core:RemovePolygon(id)
+end
+
+----------------------------------------------------------------------------------------------------
+-- Bind event handlers.
+----------------------------------------------------------------------------------------------------
+mod:RegisterUnitSpellEvent(core.E.ALL_UNITS, core.E.DEBUFF_UPDATE, DEBUFFS.OOZING_BILE, mod.OnOozingBileUpdate)
+mod:RegisterUnitEvents({
+    "unit.add.nabber",
+    "unit.miniboss.regor",
+    "unit.miniboss.braugh",
+    },{
+    [core.E.UNIT_CREATED] = mod.OnTrashWithCastsCreated,
   }
 )
-
-mod:RegisterUnitEvents("unit.add.nabber",{
-    [core.E.UNIT_CREATED] = function()
-      core:RemoveMsg("ADDS_MSG")
-      mod:AddMsg("ADDS_MSG", "msg.nabber.spawned", 5, "Info", "xkcdWhite")
-    end,
+mod:RegisterUnitEvents({
+    "unit.add.grunt",
+    "unit.add.brute",
+    "unit.add.pouncer",
+    "unit.add.plunderer",
+    "unit.add.cadet"
+    },{
+    [core.E.UNIT_CREATED] = mod.OnTrashCreated,
+  }
+)
+mod:RegisterUnitEvents({
+    "unit.add.nabber",
+    "unit.add.grunt",
+    "unit.miniboss.regor",
+    "unit.miniboss.braugh",
+    "unit.add.brute",
+    "unit.add.pouncer",
+    "unit.add.plunderer",
+    "unit.add.cadet"
+    },{
+    [core.E.HEALTH_CHANGED] = mod.OnTrashHealthChanged,
+    [core.E.UNIT_DESTROYED] = mod.OnTrashDestroyed,
+  }
+)
+mod:RegisterUnitEvents({"unit.add.brute", "unit.add.nabber"},{
+    [core.E.UNIT_CREATED] = mod.OnPriorityTrashCreated,
+  }
+)
+mod:RegisterUnitEvents("unit.swabbie",{
+    [core.E.UNIT_CREATED] = mod.OnSwabbieCreated,
+    [core.E.UNIT_DESTROYED] = mod.OnSwabbieDestroyed,
     [core.E.CAST_START] = {
-      ["cast.nabber.lash"] = function(self, id)
-        local unit = GetUnitById(id)
-        if mod:GetDistanceBetweenUnits(playerUnit, unit) < 45 then
-          mod:AddMsg("NABBER", "msg.nabber.interrupt", 5, "Inferno", "xkcdOrange")
-        end
-      end
+      ["cast.swabbie.knockback"] = mod.OnSwabbieKnockStart,
     },
   }
 )
-
+mod:RegisterUnitEvents("unit.saw.big",{
+    [core.E.UNIT_CREATED] = mod.OnBigSawCreated,
+    [core.E.UNIT_DESTROYED] = mod.OnBigSawDestroyed,
+  }
+)
+mod:RegisterUnitEvents("unit.add.nabber",{
+    [core.E.UNIT_CREATED] = mod.OnNabberCreated,
+    [core.E.UNIT_DESTROYED] = mod.OnNabberDestroyed,
+    [core.E.CAST_START] = {
+      ["cast.nabber.lash"] = mod.OnNabberLashStart,
+    },
+  }
+)
 mod:RegisterUnitEvents({"unit.miniboss.regor", "unit.miniboss.braugh"},{
-    [core.E.UNIT_CREATED] = function()
-      mod:AddMsg("MINIBOSS", "msg.miniboss.spawned", 5, "Info", "xkcdWhite")
-    end,
-    [core.E.CAST_START] = function(self, _, castName)
-      if self.L["cast.miniboss.gravedigger"] == castName or
-      self.L["cast.miniboss.deathwail"] == castName or
-      self.L["cast.miniboss.crush"] == castName then
-        core:RemoveMsg("MINIBOSS_SPAWN")
-        mod:AddMsg("MINIBOSS_CAST", "msg.miniboss.interrupt", 5, "Inferno", "xkcdOrange")
-      end
-    end,
+    [core.E.UNIT_CREATED] = mod.OnMinibossCreated,
+    [core.E.CAST_START] = {
+      ["cast.miniboss.gravedigger"] = mod.OnMinibossCastStart,
+      ["cast.miniboss.deathwail"] = mod.OnMinibossCastStart,
+      ["cast.miniboss.crush"] = mod.OnMinibossCastStart,
+    },
   }
 )
-
 mod:RegisterUnitEvents("unit.bubble",{
-    [core.E.UNIT_CREATED] = function(_, id)
-      if mod:GetSetting("CircleBubble") then
-        core:AddPolygon(id, id, 6.5, nil, 5, "white", 20)
-      end
-    end,
-    [core.E.UNIT_DESTROYED] = function(_, id)
-      core:RemovePolygon(id)
-    end,
+    [core.E.UNIT_CREATED] = mod.OnBubbleCreated,
+    [core.E.UNIT_DESTROYED] = mod.OnBubbleDestroyed,
   }
 )
-
 mod:RegisterUnitEvents("unit.tether",{
-    [core.E.UNIT_CREATED] = function(_, id)
-      if mod:GetSetting("CrosshairTether") then
-        core:AddPicture(id, id, "Crosshair", 25, 0, 0, nil, "FFFFF569")
-      end
-    end,
-    [core.E.UNIT_DESTROYED] = function(_, id)
-      core:RemovePicture(id)
-    end,
+    [core.E.UNIT_CREATED] = mod.OnTetherCreated,
+    [core.E.UNIT_DESTROYED] = mod.OnTetherDestroyed,
   }
 )
-
 mod:RegisterUnitEvents("unit.junk_trap",{
-    [core.E.UNIT_CREATED] = function(_, id)
-      if mod:GetSetting("SquareTethers") then
-        core:AddPolygon(id, id, 5, 45, 6, nil, 4)
-      end
-    end,
-    [core.E.UNIT_DESTROYED] = function(_, id)
-      core:RemovePolygon(id)
-    end,
+    [core.E.UNIT_CREATED] = mod.OnJunkTrapCreated,
+    [core.E.UNIT_DESTROYED] = mod.OnJunkTrapDestroyed,
   }
 )
