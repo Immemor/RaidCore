@@ -100,6 +100,7 @@ end
 mod:RegisterUnitEvents({
     "unit.laveka",
     "unit.titan",
+    "unit.orb",
     },{
     [core.E.UNIT_CREATED] = mod.OnWatchedUnitCreated,
   }
