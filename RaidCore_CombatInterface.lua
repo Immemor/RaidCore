@@ -60,6 +60,9 @@ local SPELLID_BLACKLISTED = {
   [84397] = "Unbreakable", -- Engineer cheat death
   [82748] = "Unbreakable", -- Engineer cheat death cooldown
 }
+local SPELLID_WHITELIST = {
+  [82133] = "Realm of the Living", -- Laveka
+}
 
 local EXTRA_HANDLER_ALLOWED = {
   [RaidCore.E.EVENT_COMBAT_LOG_HEAL] = "CI_OnCombatLogHeal",
@@ -285,7 +288,7 @@ function RaidCore:CI_OnBuff(tUnit, tBuff, sMsgBuff, sMsgDebuff)
   local sName
 
   -- Track debuffs for players and buffs for enemies
-  if bProcessDebuffs and not bBeneficial then
+  if bProcessDebuffs and (not bBeneficial or SPELLID_WHITELIST[nSpellId]) then
     if not SPELLID_BLACKLISTED[nSpellId] and self:IsUnitInGroup(tUnit) then
       nUnitId = tUnit:GetId()
       sName = tUnit:GetName()
