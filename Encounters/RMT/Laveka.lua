@@ -56,6 +56,7 @@ local TIMERS = {
 ----------------------------------------------------------------------------------------------------
 local player
 local essenceNumber
+local isDeadRealm
 ----------------------------------------------------------------------------------------------------
 -- Settings.
 ----------------------------------------------------------------------------------------------------
@@ -65,6 +66,7 @@ local essenceNumber
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
   essenceNumber = 0
+  isDeadRealm = false
   player = {}
   player.unit = GameLib.GetPlayerUnit()
   player.id = player.unit:GetId()
@@ -131,8 +133,19 @@ function mod:OnEchoesRemove(id, spellId, targetName)
   end
 end
 
+function mod:ToggleDeadRealm(id)
+  if id == player.id then
+    isDeadRealm = not isDeadRealm
+  end
+end
+
 function mod:OnRealmOfTheDeadAdd(id, spellId, stack, timeRemaining, targetName)
   mod:StartEchoesTimer(id)
+  mod:ToggleDeadRealm(id)
+end
+
+function mod:OnRealmOfTheDeadRemove(id, spellId, stack, timeRemaining, targetName)
+  mod:ToggleDeadRealm(id)
 end
 
 function mod:OnEssenceCreated(id, unit, name)
@@ -187,6 +200,7 @@ mod:RegisterUnitEvents(core.E.ALL_UNITS,{
     },
     [DEBUFFS.REALM_OF_THE_DEAD] = {
       [core.E.DEBUFF_ADD] = mod.OnRealmOfTheDeadAdd,
+      [core.E.DEBUFF_REMOVE] = mod.OnRealmOfTheDeadRemove,
     },
   }
 )
