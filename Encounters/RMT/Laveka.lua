@@ -103,7 +103,7 @@ end
 
 function mod:AddSoulfireLine(id, name)
   if mod:GetSetting("LineCleanse") then
-    core:AddLineBetweenUnits("SOULFIRE_LINE_"..name, player.unit, id, 4, "xkcdBarneyPurple")
+    core:AddLineBetweenUnits("SOULFIRE_LINE_"..name, player.unit, id, 5, "xkcdOrange")
   end
 end
 
