@@ -29,6 +29,7 @@ mod:RegisterEnglishLocale({
     ["msg.laveka.soulfire.you"] = "SOULFIRE ON YOU",
     ["msg.laveka.spirit_of_soulfire"] = "Spirit of Soulfire timer",
     ["msg.laveka.expulsion"] = "STACK!",
+    ["msg.adds.next"] = "Next Titan in ...",
   }
 )
 ----------------------------------------------------------------------------------------------------
@@ -50,6 +51,10 @@ local BUFFS = {
 local TIMERS = {
   SPIRIT_OF_SOULFIRE = 6,
   ECHOES_OF_THE_AFTERLIFE = 10,
+  ADDS = {
+    FIRST = 35,
+    NORMAL = 90,
+  }
 }
 ----------------------------------------------------------------------------------------------------
 -- Locals.
@@ -70,6 +75,7 @@ function mod:OnBossEnable()
   player = {}
   player.unit = GameLib.GetPlayerUnit()
   player.id = player.unit:GetId()
+  mod:AddTimerBar("ADDS_TIMER", "msg.adds.next", TIMERS.ADDS.FIRST)
 end
 
 function mod:OnAnyUnitDestroyed(id, unit, name)
@@ -158,12 +164,23 @@ function mod:OnEssenceDestroyed(id, unit, name)
   core:RemoveLineBetweenUnits("ESSENCE_LINE"..id)
 end
 
+function mod:OnTitanCreated(id, unit, name)
+  if not isDeadRealm then
+    mod:AddTimerBar("ADDS_TIMER", "msg.adds.next", TIMERS.ADDS.NORMAL)
+  end
+end
+
 ----------------------------------------------------------------------------------------------------
 -- Bind event handlers.
 ----------------------------------------------------------------------------------------------------
 mod:RegisterUnitEvents("unit.essence",{
     [core.E.UNIT_CREATED] = mod.OnEssenceCreated,
     [core.E.UNIT_DESTROYED] = mod.OnEssenceDestroyed,
+  }
+)
+
+mod:RegisterUnitEvents("unit.titan",{
+    [core.E.UNIT_CREATED] = mod.OnTitanCreated,
   }
 )
 
