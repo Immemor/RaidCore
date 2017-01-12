@@ -156,6 +156,9 @@ end
 
 function mod:OnEssenceCreated(id, unit, name)
   essenceNumber = essenceNumber + 1
+  if essenceNumber % 6 == 0 then
+    essenceNumber = 1
+  end
   core:MarkUnit(unit, core.E.LOCATION_STATIC_FLOOR, essenceNumber)
   core:AddLineBetweenUnits("ESSENCE_LINE"..id, player.unit, id, 8, "xkcdPurple")
 end
