@@ -33,6 +33,12 @@ mod:RegisterEnglishLocale({
   }
 )
 ----------------------------------------------------------------------------------------------------
+-- Settings.
+----------------------------------------------------------------------------------------------------
+-- Visuals.
+mod:RegisterDefaultSetting("LineCleanse", false)
+mod:RegisterDefaultSetting("LineEssence")
+----------------------------------------------------------------------------------------------------
 -- Constants.
 ----------------------------------------------------------------------------------------------------
 local DEBUFFS = {
@@ -62,10 +68,6 @@ local TIMERS = {
 local player
 local essenceNumber
 local isDeadRealm
-----------------------------------------------------------------------------------------------------
--- Settings.
-----------------------------------------------------------------------------------------------------
-
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
@@ -100,7 +102,9 @@ function mod:OnSoulfireRemove(id, spellId, targetName)
 end
 
 function mod:AddSoulfireLine(id, name)
-  core:AddLineBetweenUnits("SOULFIRE_LINE_"..name, player.unit, id, 4, "xkcdBarneyPurple")
+  if mod:GetSetting("LineCleanse") then
+    core:AddLineBetweenUnits("SOULFIRE_LINE_"..name, player.unit, id, 4, "xkcdBarneyPurple")
+  end
 end
 
 function mod:RemoveSoulfireLine(name)
@@ -160,7 +164,9 @@ function mod:OnEssenceCreated(id, unit, name)
     essenceNumber = 1
   end
   core:MarkUnit(unit, core.E.LOCATION_STATIC_FLOOR, essenceNumber)
-  core:AddLineBetweenUnits("ESSENCE_LINE"..id, player.unit, id, 8, "xkcdPurple")
+  if mod:GetSetting("LineEssence") then
+    core:AddLineBetweenUnits("ESSENCE_LINE"..id, player.unit, id, 8, "xkcdPurple")
+  end
 end
 
 function mod:OnEssenceDestroyed(id, unit, name)
