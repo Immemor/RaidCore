@@ -55,6 +55,7 @@ local TIMERS = {
 -- Locals.
 ----------------------------------------------------------------------------------------------------
 local player
+local essenceNumber
 ----------------------------------------------------------------------------------------------------
 -- Settings.
 ----------------------------------------------------------------------------------------------------
@@ -63,6 +64,7 @@ local player
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
+  essenceNumber = 0
   player = {}
   player.unit = GameLib.GetPlayerUnit()
   player.id = player.unit:GetId()
@@ -133,9 +135,25 @@ function mod:OnRealmOfTheDeadAdd(id, spellId, stack, timeRemaining, targetName)
   mod:StartEchoesTimer(id)
 end
 
+function mod:OnEssenceCreated(id, unit, name)
+  essenceNumber = essenceNumber + 1
+  core:MarkUnit(unit, core.E.LOCATION_STATIC_FLOOR, essenceNumber)
+  core:AddLineBetweenUnits("ESSENCE_LINE"..id, player.unit, id, 8, "xkcdPurple")
+end
+
+function mod:OnEssenceDestroyed(id, unit, name)
+  core:RemoveLineBetweenUnits("ESSENCE_LINE"..id)
+end
+
 ----------------------------------------------------------------------------------------------------
 -- Bind event handlers.
 ----------------------------------------------------------------------------------------------------
+mod:RegisterUnitEvents("unit.essence",{
+    [core.E.UNIT_CREATED] = mod.OnEssenceCreated,
+    [core.E.UNIT_DESTROYED] = mod.OnEssenceDestroyed,
+  }
+)
+
 mod:RegisterUnitEvents({
     "unit.laveka",
     "unit.titan",
