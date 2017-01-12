@@ -19,7 +19,7 @@ mod:RegisterEnglishLocale({
     -- Unit names.
     ["unit.laveka"] = "Laveka the Dark-Hearted",
     ["unit.phantom"] = "Phantom",
-    ["unit.essence_void"] = "Essence Void",
+    ["unit.essence"] = "Essence Void",
     ["unit.tortued_apparition"] = "Tortured Apparition",
     ["unit.orb"] = "Soul Eater",
     ["unit.boneclaw"] = "Risen Boneclaw",
