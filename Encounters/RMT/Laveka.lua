@@ -25,6 +25,7 @@ mod:RegisterEnglishLocale({
     ["unit.boneclaw"] = "Risen Boneclaw",
     ["unit.titan"] = "Risen Titan",
     -- Cast names.
+    ["unit.essence.surge"] = "Essence Surge", -- Essence fully materialized
     -- Messages.
     ["msg.laveka.soulfire.you"] = "SOULFIRE ON YOU",
     ["msg.laveka.spirit_of_soulfire"] = "Spirit of Soulfire timer",
@@ -160,7 +161,7 @@ end
 
 function mod:OnEssenceCreated(id, unit, name)
   essenceNumber = essenceNumber + 1
-  if essenceNumber % 5 == 0 then
+  if essenceNumber % 6 == 0 then
     essenceNumber = 1
   end
   core:MarkUnit(unit, core.E.LOCATION_STATIC_FLOOR, essenceNumber)
