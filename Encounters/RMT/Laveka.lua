@@ -25,12 +25,14 @@ mod:RegisterEnglishLocale({
     ["unit.boneclaw"] = "Risen Boneclaw",
     ["unit.titan"] = "Risen Titan",
     -- Cast names.
-    ["unit.essence.surge"] = "Essence Surge", -- Essence fully materialized
+    ["cast.essence.surge"] = "Essence Surge", -- Essence fully materialized
     -- Messages.
     ["msg.laveka.soulfire.you"] = "SOULFIRE ON YOU",
     ["msg.laveka.spirit_of_soulfire"] = "Spirit of Soulfire",
     ["msg.laveka.expulsion"] = "STACK!",
     ["msg.adds.next"] = "Next Titan in ...",
+    ["msg.mid_phase.soon"] = "Mid phase soon",
+    ["msg.essence.interrupt"] = "Interrupt Essence %d",
   }
 )
 ----------------------------------------------------------------------------------------------------
@@ -38,12 +40,32 @@ mod:RegisterEnglishLocale({
 ----------------------------------------------------------------------------------------------------
 -- Visuals.
 mod:RegisterDefaultSetting("LineCleanse", false)
+-- Messages.
+mod:RegisterDefaultSetting("MessageMidphaseSoon")
+mod:RegisterDefaultSetting("MessageEssence", false)
+-- Sounds.
+mod:RegisterDefaultSetting("SoundMidphaseSoon")
 mod:RegisterDefaultSetting("SoundCleanse", false)
-mod:RegisterDefaultSetting("LineEssence")
--- Binds
+mod:RegisterDefaultSetting("SoundEssenceSpawn", false)
+-- Essences.
+for i = 1, 5 do
+  mod:RegisterDefaultSetting("SoundEssence"..i, false)
+  mod:RegisterDefaultSetting("LineEssence"..i, false)
+end
+-- Binds.
 mod:RegisterMessageSetting("SPIRIT_OF_SOULFIRE_EXPIRED_MSG", core.E.COMPARE_EQUAL, nil, "SoundCleanse")
+mod:RegisterMessageSetting("ESSENCE_SPAWN", core.E.COMPARE_EQUAL, "MessageEssence", "SoundEssenceSpawn")
 mod:RegisterDefaultTimerBarConfigs({
     ["SPIRIT_OF_SOULFIRE_TIMER"] = { sColor = "xkcdBarbiePink" },
+  }
+)
+mod:RegisterUnitBarConfig("unit.laveka", {
+    nPriority = 0,
+    tMidphases = {
+      {percent = 75},
+      {percent = 50},
+      {percent = 25},
+    }
   }
 )
 ----------------------------------------------------------------------------------------------------
@@ -63,6 +85,10 @@ local BUFFS = {
 }
 
 local TIMERS = {
+  SOUL_EATERS = {
+    FIRST = 76,
+    NORMAL = 74,
+  },
   ECHOES_OF_THE_AFTERLIFE = 10,
   ADDS = {
     FIRST = 35,
@@ -118,7 +144,9 @@ function mod:AddSoulfireLine(id, name)
 end
 
 function mod:RemoveSoulfireLine(id, name)
-  core:RemoveLineBetweenUnits("SOULFIRE_LINE_"..name)
+  if mod:GetSetting("LineCleanse") then
+    core:RemoveLineBetweenUnits("SOULFIRE_LINE_"..name)
+  end
   if id == player.id then
     core:DropMark(id)
   end
@@ -193,18 +221,36 @@ function mod:OnEssenceCreated(id, unit, name)
     essenceNumber = 1
   end
   core:MarkUnit(unit, core.E.LOCATION_STATIC_FLOOR, essenceNumber)
-  if mod:GetSetting("LineEssence") then
+  if mod:GetSetting("LineEssence"..essenceNumber) then
     core:AddLineBetweenUnits("ESSENCE_LINE"..id, player.unit, id, 8, "xkcdPurple")
   end
+  mod:AddMsg("ESSENCE_SPAWN", "Essence "..essenceNumber, 5, "Info", "xkcdWhite")
 end
 
 function mod:OnEssenceDestroyed(id, unit, name)
   core:RemoveLineBetweenUnits("ESSENCE_LINE"..id)
 end
 
+function mod:OnEssenceSurgeStart()
+  essenceNumber = essenceNumber + 1
+  if essenceNumber % 6 == 0 then
+    essenceNumber = 1
+  end
+  if mod:GetSetting("SoundEssence"..essenceNumber) then
+    local msg = self.L["msg.essence.interrupt"]:format(essenceNumber)
+    mod:AddMsg("ESSENCE_CAST", msg, 2, "Inferno", "xkcdRed")
+  end
+end
+
 function mod:OnTitanCreated(id, unit, name)
   if not isDeadRealm then
     mod:AddTimerBar("ADDS_TIMER", "msg.adds.next", TIMERS.ADDS.NORMAL)
+  end
+end
+
+function mod:OnLavekaHealthChanged(id, percent, name)
+  if mod:IsMidphaseClose(name, percent) then
+    mod:AddMsg("MID_PHASE", "msg.mid_phase.soon", 5, "Info", "xkcdWhite")
   end
 end
 
@@ -214,6 +260,9 @@ end
 mod:RegisterUnitEvents("unit.essence",{
     [core.E.UNIT_CREATED] = mod.OnEssenceCreated,
     [core.E.UNIT_DESTROYED] = mod.OnEssenceDestroyed,
+    ["cast.essence.surge"] = {
+      [core.E.CAST_START] = mod.OnEssenceSurgeStart,
+    },
   }
 )
 
@@ -233,6 +282,7 @@ mod:RegisterUnitEvents({
 )
 
 mod:RegisterUnitEvents("unit.laveka",{
+    [core.E.HEALTH_CHANGED] = mod.OnLavekaHealthChanged,
     [BUFFS.SPIRIT_OF_SOULFIRE] = {
       [core.E.BUFF_ADD] = mod.OnSpiritOfSoulfireAdd,
       [core.E.BUFF_UPDATE] = mod.OnSpiritOfSoulfireUpdate,
