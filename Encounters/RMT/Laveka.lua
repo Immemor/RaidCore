@@ -56,7 +56,6 @@ local BUFFS = {
 }
 
 local TIMERS = {
-  SPIRIT_OF_SOULFIRE = 6,
   ECHOES_OF_THE_AFTERLIFE = 10,
   ADDS = {
     FIRST = 35,
