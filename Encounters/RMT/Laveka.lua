@@ -69,12 +69,14 @@ local TIMERS = {
 local player
 local essenceNumber
 local isDeadRealm
+local lastSpiritOfSoulfireStack
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
   essenceNumber = 0
   isDeadRealm = false
+  lastSpiritOfSoulfireStack = 0
   player = {}
   player.unit = GameLib.GetPlayerUnit()
   player.id = player.unit:GetId()
@@ -113,10 +115,23 @@ function mod:RemoveSoulfireLine(name)
 end
 
 function mod:OnSpiritOfSoulfireAdd(id, spellId, stack, timeRemaining, targetName)
-  mod:AddTimerBar("SPIRIT_OF_SOULFIRE_TIMER", "msg.laveka.spirit_of_soulfire", TIMERS.SPIRIT_OF_SOULFIRE)
+  lastSpiritOfSoulfireStack = 0
+  mod:AddSpiritOfSoulfireTimer(stack, timeRemaining)
+end
+
+function mod:OnSpiritOfSoulfireUpdate(id, spellId, stack, timeRemaining)
+  mod:AddSpiritOfSoulfireTimer(stack, timeRemaining)
+end
+
+function mod:AddSpiritOfSoulfireTimer(stack, timeRemaining)
+  if stack > lastSpiritOfSoulfireStack then
+    mod:AddTimerBar("SPIRIT_OF_SOULFIRE_TIMER", "msg.laveka.spirit_of_soulfire", timeRemaining)
+  end
+  lastSpiritOfSoulfireStack = stack
 end
 
 function mod:OnSpiritOfSoulfireRemove(id, spellId, targetName)
+  lastSpiritOfSoulfireStack = 0
   mod:RemoveTimerBar("SPIRIT_OF_SOULFIRE_TIMER")
 end
 
@@ -209,6 +224,7 @@ mod:RegisterUnitEvents({
 mod:RegisterUnitEvents("unit.laveka",{
     [BUFFS.SPIRIT_OF_SOULFIRE] = {
       [core.E.BUFF_ADD] = mod.OnSpiritOfSoulfireAdd,
+      [core.E.BUFF_UPDATE] = mod.OnSpiritOfSoulfireUpdate,
       [core.E.BUFF_REMOVE] = mod.OnSpiritOfSoulfireRemove,
     }
   }
