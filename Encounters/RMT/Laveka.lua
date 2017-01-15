@@ -121,7 +121,9 @@ function mod:OnSpiritOfSoulfireRemove(id, spellId, targetName)
 end
 
 function mod:OnExpulsionAdd(id, spellId, stack, timeRemaining, targetName)
-  mod:AddMsg("EXPULSION", "msg.laveka.expulsion", 5, "Beware", "xkcdBabyPink")
+  if isDeadRealm then
+    mod:AddMsg("EXPULSION", "msg.laveka.expulsion", 5, "Beware", "xkcdRed")
+  end
 end
 
 function mod:OnEchoesAdd(id, spellId, stack, timeRemaining, targetName)
