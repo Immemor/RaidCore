@@ -28,7 +28,7 @@ mod:RegisterEnglishLocale({
     ["unit.essence.surge"] = "Essence Surge", -- Essence fully materialized
     -- Messages.
     ["msg.laveka.soulfire.you"] = "SOULFIRE ON YOU",
-    ["msg.laveka.spirit_of_soulfire"] = "Spirit of Soulfire timer",
+    ["msg.laveka.spirit_of_soulfire"] = "Spirit of Soulfire",
     ["msg.laveka.expulsion"] = "STACK!",
     ["msg.adds.next"] = "Next Titan in ...",
   }
@@ -40,6 +40,12 @@ mod:RegisterEnglishLocale({
 mod:RegisterDefaultSetting("LineCleanse", false)
 mod:RegisterDefaultSetting("SoundCleanse", false)
 mod:RegisterDefaultSetting("LineEssence")
+-- Binds
+mod:RegisterMessageSetting("SPIRIT_OF_SOULFIRE_EXPIRED_MSG", core.E.COMPARE_EQUAL, nil, "SoundCleanse")
+mod:RegisterDefaultTimerBarConfigs({
+    ["SPIRIT_OF_SOULFIRE_TIMER"] = { sColor = "xkcdBarbiePink" },
+  }
+)
 ----------------------------------------------------------------------------------------------------
 -- Constants.
 ----------------------------------------------------------------------------------------------------
@@ -96,7 +102,7 @@ function mod:OnSoulfireAdd(id, spellId, stack, timeRemaining, targetName)
   if id ~= player.id then
     mod:AddSoulfireLine(id, targetName)
   else
-    mod:AddMsg("SOULFIRE_MSG_YOU", "msg.laveka.soulfire.you", 5, "Burn", "xkcdGreen")
+    mod:AddMsg("SOULFIRE_MSG_YOU", "msg.laveka.soulfire.you", 5, "Burn", "xkcdBarbiePink")
   end
 end
 
@@ -125,13 +131,14 @@ end
 
 function mod:AddSpiritOfSoulfireTimer(stack, timeRemaining)
   if stack > lastSpiritOfSoulfireStack then
-    mod:AddTimerBar("SPIRIT_OF_SOULFIRE_TIMER", "msg.laveka.spirit_of_soulfire", timeRemaining)
+    mod:AddTimerBar("SPIRIT_OF_SOULFIRE_TIMER", self.L["msg.laveka.spirit_of_soulfire"].." "..tostring(stack), timeRemaining)
   end
   lastSpiritOfSoulfireStack = stack
 end
 
 function mod:OnSpiritOfSoulfireRemove(id, spellId, targetName)
   lastSpiritOfSoulfireStack = 0
+  mod:AddMsg("SPIRIT_OF_SOULFIRE_EXPIRED_MSG", nil, 1, "Inferno")
   mod:RemoveTimerBar("SPIRIT_OF_SOULFIRE_TIMER")
 end
 
