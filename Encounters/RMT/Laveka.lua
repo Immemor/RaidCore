@@ -102,12 +102,13 @@ function mod:OnSoulfireAdd(id, spellId, stack, timeRemaining, targetName)
   if id ~= player.id then
     mod:AddSoulfireLine(id, targetName)
   else
+    core:MarkUnit(player.unit, core.E.LOCATION_STATIC_CHEST, "S", "xkcdBarbiePink")
     mod:AddMsg("SOULFIRE_MSG_YOU", "msg.laveka.soulfire.you", 5, "Burn", "xkcdBarbiePink")
   end
 end
 
 function mod:OnSoulfireRemove(id, spellId, targetName)
-  core:RemoveLineBetweenUnits("SOULFIRE_LINE_"..targetName)
+  mod:RemoveSoulfireLine(targetName)
 end
 
 function mod:AddSoulfireLine(id, name)
@@ -116,8 +117,11 @@ function mod:AddSoulfireLine(id, name)
   end
 end
 
-function mod:RemoveSoulfireLine(name)
+function mod:RemoveSoulfireLine(id, name)
   core:RemoveLineBetweenUnits("SOULFIRE_LINE_"..name)
+  if id == player.id then
+    core:DropMark(id)
+  end
 end
 
 function mod:OnSpiritOfSoulfireAdd(id, spellId, stack, timeRemaining, targetName)
