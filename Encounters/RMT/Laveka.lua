@@ -38,6 +38,7 @@ mod:RegisterEnglishLocale({
 ----------------------------------------------------------------------------------------------------
 -- Visuals.
 mod:RegisterDefaultSetting("LineCleanse", false)
+mod:RegisterDefaultSetting("SoundCleanse", false)
 mod:RegisterDefaultSetting("LineEssence")
 ----------------------------------------------------------------------------------------------------
 -- Constants.
