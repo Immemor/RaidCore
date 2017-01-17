@@ -74,7 +74,6 @@ mod:RegisterUnitBarConfig("unit.laveka", {
 ----------------------------------------------------------------------------------------------------
 -- Functions.
 ----------------------------------------------------------------------------------------------------
-local next = next
 ----------------------------------------------------------------------------------------------------
 -- Constants.
 ----------------------------------------------------------------------------------------------------
@@ -279,7 +278,8 @@ function mod:OnDevourSoulsStop()
 end
 
 function mod:DrawSoulEaterOrbits()
-  for id, radius in next, SOUL_EATER_ORBITS do
+  for i = 1, #SOUL_EATER_ORBITS do
+    mod:DrawSoulEaterOrbit(i, i)
   end
 end
 
@@ -293,11 +293,15 @@ function mod:DrawSoulEaterOrbit(id, index)
 end
 
 function mod:RemoveSoulEaterOrbits()
-  for id, radius in next, SOUL_EATER_ORBITS do
-    core:RemovePolygon("ORBIT_"..id)
-    mod:DropWorldMarker("ORBIT_"..id.."up")
-    mod:DropWorldMarker("ORBIT_"..id.."down")
+  for i = 1, #SOUL_EATER_ORBITS do
+    mod:RemoveSoulEaterOrbit(i)
   end
+end
+
+function mod:RemoveSoulEaterOrbit(id)
+  core:RemovePolygon("ORBIT_"..id)
+  mod:DropWorldMarker("ORBIT_"..id.."up")
+  mod:DropWorldMarker("ORBIT_"..id.."down")
 end
 
 function mod:OnMidphaseEnd()
