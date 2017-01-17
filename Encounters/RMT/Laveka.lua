@@ -123,6 +123,7 @@ local essences
 local isDeadRealm
 local lastSpiritOfSoulfireStack
 local soulEatersActive
+local lastSoulfireName
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
@@ -134,13 +135,18 @@ function mod:OnBossEnable()
   player = {}
   player.unit = GameLib.GetPlayerUnit()
   player.id = player.unit:GetId()
+  player.name = player.unit:GetName()
   mod:AddTimerBar("ADDS_TIMER", "msg.adds.next", TIMERS.ADDS.FIRST)
   mod:AddTimerBar("SOULEATER_TIMER", "msg.souleaters.next", TIMERS.SOUL_EATERS.FIRST, true)
   --mod:DrawSoulEaterOrbits()
 end
 
 function mod:OnAnyUnitDestroyed(id, unit, name)
-  mod:RemoveSoulfireLine(id, name)
+  local forceClear = false
+  if name == player.name then
+    forceClear = true
+  else
+  mod:RemoveSoulfireLine(targetName, forceClear)
 end
 
 function mod:OnWatchedUnitCreated(id, unit, name)
@@ -149,7 +155,8 @@ function mod:OnWatchedUnitCreated(id, unit, name)
 end
 
 function mod:OnSoulfireAdd(id, spellId, stack, timeRemaining, targetName)
-  if id ~= player.id then
+  lastSoulfireName = targetName
+  if name ~= player.name then
     mod:AddSoulfireLine(id, targetName)
   else
     core:MarkUnit(player.unit, core.E.LOCATION_STATIC_CHEST, "S", "xkcdBarbiePink")
@@ -158,20 +165,22 @@ function mod:OnSoulfireAdd(id, spellId, stack, timeRemaining, targetName)
 end
 
 function mod:OnSoulfireRemove(id, spellId, targetName)
-  mod:RemoveSoulfireLine(id, targetName)
+  mod:RemoveSoulfireLine(targetName, false)
 end
 
 function mod:AddSoulfireLine(id, name)
   if mod:GetSetting("LineCleanse") then
-    core:AddLineBetweenUnits("SOULFIRE_LINE_"..name, player.unit, id, 7, "xkcdBarbiePink")
+    core:AddLineBetweenUnits("SOULFIRE_LINE", player.unit, id, 7, "xkcdBarbiePink")
   end
 end
 
-function mod:RemoveSoulfireLine(id, name)
-  if mod:GetSetting("LineCleanse") then
-    core:RemoveLineBetweenUnits("SOULFIRE_LINE_"..name)
+function mod:RemoveSoulfireLine(name, forceClear)
+  if forceClear or name == lastSoulfireName then
+    if mod:GetSetting("LineCleanse") then
+      core:RemoveLineBetweenUnits("SOULFIRE_LINE")
+    end
   end
-  if id == player.id then
+  if name == player.name then
     core:DropMark(id)
   end
 end
