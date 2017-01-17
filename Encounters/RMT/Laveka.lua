@@ -119,6 +119,7 @@ local SOUL_EATER_ORBITS = {
 ----------------------------------------------------------------------------------------------------
 local player
 local essenceNumber
+local essences
 local isDeadRealm
 local lastSpiritOfSoulfireStack
 local soulEatersActive
@@ -129,6 +130,7 @@ function mod:OnBossEnable()
   essenceNumber = 0
   isDeadRealm = false
   lastSpiritOfSoulfireStack = 0
+  essences = {}
   player = {}
   player.unit = GameLib.GetPlayerUnit()
   player.id = player.unit:GetId()
@@ -242,6 +244,9 @@ function mod:OnEssenceCreated(id, unit, name)
   if essenceNumber % 6 == 0 then
     essenceNumber = 1
   end
+  essences[id] = {
+    number = essenceNumber,
+  }
   core:MarkUnit(unit, core.E.LOCATION_STATIC_FLOOR, essenceNumber)
   if mod:GetSetting("LineEssence"..essenceNumber) then
     core:AddLineBetweenUnits("ESSENCE_LINE"..id, player.unit, id, 8, "xkcdPurple")
@@ -250,11 +255,12 @@ function mod:OnEssenceCreated(id, unit, name)
 end
 
 function mod:OnEssenceDestroyed(id, unit, name)
+  essences[id] = nil
   core:RemoveLineBetweenUnits("ESSENCE_LINE"..id)
 end
 
-function mod:OnEssenceSurgeStart()
-  if mod:GetSetting("SoundEssence"..essenceNumber) then
+function mod:OnEssenceSurgeStart(id)
+  if mod:GetSetting("SoundEssence"..essences[id].number) then
     mod:AddMsg("ESSENCE_CAST", "msg.essence.interrupt", 2, "Inferno", "xkcdRed")
   end
 end
