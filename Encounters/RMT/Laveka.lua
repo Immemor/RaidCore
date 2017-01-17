@@ -103,15 +103,15 @@ local TIMERS = {
   }
 }
 
-local ROOM_CENTER = { x = -724.16839599609, y = 186.84739685059, z = -264.67279052734 }
+local ROOM_CENTER = Vector3.New({ x = -724.16839599609, y = 186.84739685059, z = -264.67279052734 })
 
 local SOUL_EATER_ORBITS = {
-  [1] = 6,
-  [2] = 12,
-  [3] = 18,
-  [4] = 24,
-  [5] = 30,
-  [6] = 36
+  [1] = Vector3.New(0, 0, 6),
+  [2] = Vector3.New(0, 0, 12),
+  [3] = Vector3.New(0, 0, 18),
+  [4] = Vector3.New(0, 0, 24),
+  [5] = Vector3.New(0, 0, 30),
+  [6] = Vector3.New(0, 0, 36)
 }
 ----------------------------------------------------------------------------------------------------
 -- Locals.
@@ -285,11 +285,9 @@ end
 
 function mod:DrawSoulEaterOrbit(id, index)
   local radius = SOUL_EATER_ORBITS[index]
-  core:AddPolygon("ORBIT_"..id, ROOM_CENTER, radius, nil, 2, "xkcdRed", 40)
-  local coordinates_up = Vector3.New({x = ROOM_CENTER.x, y = ROOM_CENTER.y, z = (ROOM_CENTER.z + radius)})
-  local coordinates_down = Vector3.New({x = ROOM_CENTER.x, y = ROOM_CENTER.y, z = (ROOM_CENTER.z - radius)})
-  mod:SetWorldMarker("ORBIT_"..id.."up", id, coordinates_up)
-  mod:SetWorldMarker("ORBIT_"..id.."down", id, coordinates_down)
+  core:AddPolygon("ORBIT_"..id, ROOM_CENTER, radius.z, nil, 2, "xkcdRed", 40)
+  mod:SetWorldMarker("ORBIT_"..id.."up", id, ROOM_CENTER + radius)
+  mod:SetWorldMarker("ORBIT_"..id.."down", id, ROOM_CENTER - radius)
 end
 
 function mod:RemoveSoulEaterOrbits()
