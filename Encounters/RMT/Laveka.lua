@@ -135,7 +135,7 @@ function mod:OnBossEnable()
   player.unit = GameLib.GetPlayerUnit()
   player.id = player.unit:GetId()
   mod:AddTimerBar("ADDS_TIMER", "msg.adds.next", TIMERS.ADDS.FIRST)
-  mod:AddTimerBar("ADDS_TIMER", "msg.souleaters.next", TIMERS.SOUL_EATERS.FIRST, true)
+  mod:AddTimerBar("SOULEATER_TIMER", "msg.souleaters.next", TIMERS.SOUL_EATERS.FIRST, true)
   --mod:DrawSoulEaterOrbits()
 end
 
@@ -280,12 +280,16 @@ end
 
 function mod:DrawSoulEaterOrbits()
   for id, radius in next, SOUL_EATER_ORBITS do
-    core:AddPolygon("ORBIT_"..id, ROOM_CENTER, radius, nil, 2, "xkcdRed", 40)
-    local coordinates_up = Vector3.New({x = ROOM_CENTER.x, y = ROOM_CENTER.y, z = (ROOM_CENTER.z + radius)})
-    local coordinates_down = Vector3.New({x = ROOM_CENTER.x, y = ROOM_CENTER.y, z = (ROOM_CENTER.z - radius)})
-    mod:SetWorldMarker("ORBIT_"..id.."up", id, coordinates_up)
-    mod:SetWorldMarker("ORBIT_"..id.."down", id, coordinates_down)
   end
+end
+
+function mod:DrawSoulEaterOrbit(id, index)
+  local radius = SOUL_EATER_ORBITS[index]
+  core:AddPolygon("ORBIT_"..id, ROOM_CENTER, radius, nil, 2, "xkcdRed", 40)
+  local coordinates_up = Vector3.New({x = ROOM_CENTER.x, y = ROOM_CENTER.y, z = (ROOM_CENTER.z + radius)})
+  local coordinates_down = Vector3.New({x = ROOM_CENTER.x, y = ROOM_CENTER.y, z = (ROOM_CENTER.z - radius)})
+  mod:SetWorldMarker("ORBIT_"..id.."up", id, coordinates_up)
+  mod:SetWorldMarker("ORBIT_"..id.."down", id, coordinates_down)
 end
 
 function mod:RemoveSoulEaterOrbits()
