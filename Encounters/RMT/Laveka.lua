@@ -150,7 +150,7 @@ function mod:OnAnyUnitDestroyed(id, unit, name)
 end
 
 function mod:OnWatchedUnitCreated(id, unit, name)
-  core:AddUnit(unit)
+  mod:AddUnit(unit)
   core:WatchUnit(unit, core.E.TRACK_ALL)
 end
 
@@ -329,8 +329,9 @@ function mod:OnLavekaHealthChanged(id, percent, name)
 end
 
 function mod:OnSoulEaterCaught(id, spellId, stacks, timeRemaining, name, unitCaster)
+  local unit = GameLib.GetUnitById(id)
   if unitCaster and unitCaster:IsValid() then
-    local distance = (Vector3.New(unitCaster:GetPosition()) - ROOM_CENTER):Length()
+    local distance = (Vector3.New(unit:GetPosition()) - ROOM_CENTER):Length()
     Log:Add("ChannelCommStatus", "Id="..unitCaster:GetId().." DistanceToCenter="..distance)
   end
 end
