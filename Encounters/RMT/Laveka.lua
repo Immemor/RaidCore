@@ -124,6 +124,7 @@ local isDeadRealm
 local lastSpiritOfSoulfireStack
 local soulEatersActive
 local lastSoulfireName
+local orbitColor
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
@@ -295,7 +296,12 @@ end
 
 function mod:DrawSoulEaterOrbit(id, index)
   local radius = SOUL_EATER_ORBITS[index]
-  core:AddPolygon("ORBIT_"..id, ROOM_CENTER, radius.z, nil, 2, "xkcdRed", 40)
+  if math.mod(id, 2) == 0 then
+    orbitColor = "xkcdWhite"
+  else
+    orbitColor = "xkcdRed"
+  end
+  core:AddPolygon("ORBIT_"..id, ROOM_CENTER, radius.z, nil, 2, orbitColor, 40)
   mod:SetWorldMarker("ORBIT_"..id.."up", id, ROOM_CENTER + radius)
   mod:SetWorldMarker("ORBIT_"..id.."down", id, ROOM_CENTER - radius)
 end
