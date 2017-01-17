@@ -138,7 +138,7 @@ function mod:OnBossEnable()
 end
 
 function mod:OnAnyUnitDestroyed(id, unit, name)
-  mod:RemoveSoulfireLine(name)
+  mod:RemoveSoulfireLine(id, name)
 end
 
 function mod:OnWatchedUnitCreated(id, unit, name)
@@ -156,7 +156,7 @@ function mod:OnSoulfireAdd(id, spellId, stack, timeRemaining, targetName)
 end
 
 function mod:OnSoulfireRemove(id, spellId, targetName)
-  mod:RemoveSoulfireLine(targetName)
+  mod:RemoveSoulfireLine(id, targetName)
 end
 
 function mod:AddSoulfireLine(id, name)
