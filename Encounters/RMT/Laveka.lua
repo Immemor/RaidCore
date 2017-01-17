@@ -240,6 +240,7 @@ function mod:OnRealmOfTheDeadRemove(id, spellId, stack, timeRemaining, targetNam
 end
 
 function mod:OnEssenceCreated(id, unit, name)
+  core:WatchUnit(unit, core.E.TRACK_CASTS)
   essenceNumber = essenceNumber + 1
   if essenceNumber % 6 == 0 then
     essenceNumber = 1
@@ -337,7 +338,6 @@ mod:RegisterUnitEvents({
     "unit.laveka",
     "unit.titan",
     "unit.orb",
-    "unit.essence",
     },{
     [core.E.UNIT_CREATED] = mod.OnWatchedUnitCreated,
   }
