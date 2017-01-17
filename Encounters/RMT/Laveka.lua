@@ -31,10 +31,11 @@ mod:RegisterEnglishLocale({
     ["msg.laveka.soulfire.you"] = "SOULFIRE ON YOU",
     ["msg.laveka.spirit_of_soulfire"] = "Spirit of Soulfire",
     ["msg.laveka.expulsion"] = "STACK!",
+    ["msg.laveka.echoes_of_the_afterlife.timer"] = "Echoes of Afterlife",
     ["msg.adds.next"] = "Next Titan in ...",
     ["msg.souleaters.next"] = "Next Soul Eaters in ...",
     ["msg.mid_phase.soon"] = "Mid phase soon",
-    ["msg.essence.interrupt"] = "Interrupt Essence %d",
+    ["msg.essence.interrupt"] = "Interrupt Essence",
   }
 )
 ----------------------------------------------------------------------------------------------------
@@ -71,6 +72,10 @@ mod:RegisterUnitBarConfig("unit.laveka", {
   }
 )
 ----------------------------------------------------------------------------------------------------
+-- Functions.
+----------------------------------------------------------------------------------------------------
+local next = next
+----------------------------------------------------------------------------------------------------
 -- Constants.
 ----------------------------------------------------------------------------------------------------
 local DEBUFFS = {
@@ -98,6 +103,17 @@ local TIMERS = {
     NORMAL = 90,
   }
 }
+
+local ROOM_CENTER = { x = -724.16839599609, y = 186.84739685059, z = -264.67279052734 }
+
+local SOUL_EATER_ORBITS = {
+  [1] = 6,
+  [2] = 12,
+  [3] = 18,
+  [4] = 24,
+  [5] = 30,
+  [6] = 36
+}
 ----------------------------------------------------------------------------------------------------
 -- Locals.
 ----------------------------------------------------------------------------------------------------
@@ -118,6 +134,7 @@ function mod:OnBossEnable()
   player.id = player.unit:GetId()
   mod:AddTimerBar("ADDS_TIMER", "msg.adds.next", TIMERS.ADDS.FIRST)
   mod:AddTimerBar("ADDS_TIMER", "msg.souleaters.next", TIMERS.SOUL_EATERS.FIRST, true)
+  --mod:DrawSoulEaterOrbits()
 end
 
 function mod:OnAnyUnitDestroyed(id, unit, name)
@@ -237,13 +254,8 @@ function mod:OnEssenceDestroyed(id, unit, name)
 end
 
 function mod:OnEssenceSurgeStart()
-  essenceNumber = essenceNumber + 1
-  if essenceNumber % 6 == 0 then
-    essenceNumber = 1
-  end
   if mod:GetSetting("SoundEssence"..essenceNumber) then
-    local msg = self.L["msg.essence.interrupt"]:format(essenceNumber)
-    mod:AddMsg("ESSENCE_CAST", msg, 2, "Inferno", "xkcdRed")
+    mod:AddMsg("ESSENCE_CAST", "msg.essence.interrupt", 2, "Inferno", "xkcdRed")
   end
 end
 
@@ -260,11 +272,21 @@ function mod:OnDevourSoulsStop()
 end
 
 function mod:DrawSoulEaterOrbits()
-
+  for id, radius in next, SOUL_EATER_ORBITS do
+    core:AddPolygon("ORBIT_"..id, ROOM_CENTER, radius, nil, 2, "xkcdRed", 40)
+    local coordinates_up = Vector3.New({x = ROOM_CENTER.x, y = ROOM_CENTER.y, z = (ROOM_CENTER.z + radius)})
+    local coordinates_down = Vector3.New({x = ROOM_CENTER.x, y = ROOM_CENTER.y, z = (ROOM_CENTER.z - radius)})
+    mod:SetWorldMarker("ORBIT_"..id.."up", id, coordinates_up)
+    mod:SetWorldMarker("ORBIT_"..id.."down", id, coordinates_down)
+  end
 end
 
 function mod:RemoveSoulEaterOrbits()
-
+  for id, radius in next, SOUL_EATER_ORBITS do
+    core:RemovePolygon("ORBIT_"..id)
+    mod:DropWorldMarker("ORBIT_"..id.."up")
+    mod:DropWorldMarker("ORBIT_"..id.."down")
+  end
 end
 
 function mod:OnMidphaseEnd()
