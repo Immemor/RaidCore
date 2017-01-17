@@ -145,8 +145,8 @@ function mod:OnAnyUnitDestroyed(id, unit, name)
   local forceClear = false
   if name == player.name then
     forceClear = true
-  else
-  mod:RemoveSoulfireLine(targetName, forceClear)
+  end
+  mod:RemoveSoulfireLine(name, forceClear)
 end
 
 function mod:OnWatchedUnitCreated(id, unit, name)
@@ -156,7 +156,7 @@ end
 
 function mod:OnSoulfireAdd(id, spellId, stack, timeRemaining, targetName)
   lastSoulfireName = targetName
-  if name ~= player.name then
+  if targetName ~= player.name then
     mod:AddSoulfireLine(id, targetName)
   else
     core:MarkUnit(player.unit, core.E.LOCATION_STATIC_CHEST, "S", "xkcdBarbiePink")
@@ -181,7 +181,7 @@ function mod:RemoveSoulfireLine(name, forceClear)
     end
   end
   if name == player.name then
-    core:DropMark(id)
+    core:DropMark(player.id)
   end
 end
 
