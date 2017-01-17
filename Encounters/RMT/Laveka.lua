@@ -104,7 +104,7 @@ local TIMERS = {
   }
 }
 
-local ROOM_CENTER = Vector3.New({ x = -724.16839599609, y = 186.84739685059, z = -264.67279052734 })
+local ROOM_CENTER = Vector3.New({ x = -723.717773, y = 186.834915, z = -265.187195 })
 
 local SOUL_EATER_ORBITS = {
   [1] = Vector3.New(0, 0, 6),
