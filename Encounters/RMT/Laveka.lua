@@ -26,11 +26,13 @@ mod:RegisterEnglishLocale({
     ["unit.titan"] = "Risen Titan",
     -- Cast names.
     ["cast.essence.surge"] = "Essence Surge", -- Essence fully materialized
+    ["cast.laveka.devoursouls"] = "Devour Souls",
     -- Messages.
     ["msg.laveka.soulfire.you"] = "SOULFIRE ON YOU",
     ["msg.laveka.spirit_of_soulfire"] = "Spirit of Soulfire",
     ["msg.laveka.expulsion"] = "STACK!",
     ["msg.adds.next"] = "Next Titan in ...",
+    ["msg.souleaters.next"] = "Next Soul Eaters in ...",
     ["msg.mid_phase.soon"] = "Mid phase soon",
     ["msg.essence.interrupt"] = "Interrupt Essence %d",
   }
@@ -82,12 +84,13 @@ local DEBUFFS = {
 
 local BUFFS = {
   SPIRIT_OF_SOULFIRE = 75576,
+  MOMENT_OF_OPPORTUNITY = 54211,
 }
 
 local TIMERS = {
   SOUL_EATERS = {
     FIRST = 76,
-    NORMAL = 74,
+    NORMAL = 61,
   },
   ECHOES_OF_THE_AFTERLIFE = 10,
   ADDS = {
@@ -102,6 +105,7 @@ local player
 local essenceNumber
 local isDeadRealm
 local lastSpiritOfSoulfireStack
+local soulEatersActive
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
@@ -113,6 +117,7 @@ function mod:OnBossEnable()
   player.unit = GameLib.GetPlayerUnit()
   player.id = player.unit:GetId()
   mod:AddTimerBar("ADDS_TIMER", "msg.adds.next", TIMERS.ADDS.FIRST)
+  mod:AddTimerBar("ADDS_TIMER", "msg.souleaters.next", TIMERS.SOUL_EATERS.FIRST, true)
 end
 
 function mod:OnAnyUnitDestroyed(id, unit, name)
@@ -242,6 +247,30 @@ function mod:OnEssenceSurgeStart()
   end
 end
 
+function mod:OnSoulEaterCreated()
+  if not soulEatersActive then
+    soulEatersActive = true
+    mod:DrawSoulEaterOrbits()
+  end
+end
+
+function mod:OnDevourSoulsStop()
+  soulEatersActive = false
+  mod:RemoveSoulEaterOrbits()
+end
+
+function mod:DrawSoulEaterOrbits()
+
+end
+
+function mod:RemoveSoulEaterOrbits()
+
+end
+
+function mod:OnMidphaseEnd()
+  mod:AddTimerBar("SOULEATER_TIMER", "msg.souleaters.next", TIMERS.SOUL_EATERS.NORMAL, true)
+end
+
 function mod:OnTitanCreated(id, unit, name)
   if not isDeadRealm then
     mod:AddTimerBar("ADDS_TIMER", "msg.adds.next", TIMERS.ADDS.NORMAL)
@@ -271,6 +300,11 @@ mod:RegisterUnitEvents("unit.titan",{
   }
 )
 
+mod:RegisterUnitEvents("unit.titan",{
+    [core.E.UNIT_CREATED] = mod.OnSoulEaterCreated,
+  }
+)
+
 mod:RegisterUnitEvents({
     "unit.laveka",
     "unit.titan",
@@ -287,7 +321,13 @@ mod:RegisterUnitEvents("unit.laveka",{
       [core.E.BUFF_ADD] = mod.OnSpiritOfSoulfireAdd,
       [core.E.BUFF_UPDATE] = mod.OnSpiritOfSoulfireUpdate,
       [core.E.BUFF_REMOVE] = mod.OnSpiritOfSoulfireRemove,
-    }
+    },
+    [BUFFS.MOMENT_OF_OPPORTUNITY] = {
+      [core.E.BUFF_ADD] = mod.OnMidphaseEnd,
+    },
+    ["cast.laveka.devoursouls"] = {
+      [core.E.CAST_END] = mod.OnDevourSoulsStop,
+    },
   }
 )
 
