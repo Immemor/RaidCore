@@ -300,7 +300,7 @@ mod:RegisterUnitEvents("unit.titan",{
   }
 )
 
-mod:RegisterUnitEvents("unit.titan",{
+mod:RegisterUnitEvents("unit.orb",{
     [core.E.UNIT_CREATED] = mod.OnSoulEaterCreated,
   }
 )
