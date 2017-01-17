@@ -9,6 +9,7 @@
 ----------------------------------------------------------------------------------------------------
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local mod = core:NewEncounter("Laveka", 104, 548, 559)
+local Log = Apollo.GetPackage("Log-1.0").tPackage
 if not mod then return end
 
 ----------------------------------------------------------------------------------------------------
@@ -318,6 +319,13 @@ function mod:OnLavekaHealthChanged(id, percent, name)
   end
 end
 
+function mod:OnSoulEaterCaught(id, spellId, stacks, timeRemaining, name, unitCaster)
+  if unitCaster and unitCaster:IsValid() then
+    local distance = (Vector3.New(unitCaster:GetPosition()) - ROOM_CENTER):Length()
+    Log:Add("ChannelCommStatus", "Id="..unitCaster:GetId().." DistanceToCenter="..distance)
+  end
+end
+
 ----------------------------------------------------------------------------------------------------
 -- Bind event handlers.
 ----------------------------------------------------------------------------------------------------
@@ -382,5 +390,8 @@ mod:RegisterUnitEvents(core.E.ALL_UNITS,{
       [core.E.DEBUFF_ADD] = mod.OnRealmOfTheDeadAdd,
       [core.E.DEBUFF_REMOVE] = mod.OnRealmOfTheDeadRemove,
     },
+    [DEBUFFS.SOUL_EATER] = {
+      [core.E.DEBUFF_ADD] = mod.OnSoulEaterCaught,
+    }
   }
 )
