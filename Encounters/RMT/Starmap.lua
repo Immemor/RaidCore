@@ -63,6 +63,7 @@ mod:RegisterEnglishLocale({
     ["mark.cardinal.E"] = "E",
     ["mark.cardinal.W"] = "W",
     ["mark.world_ender.spawn_location"] = "W%d",
+    ["mark.world_ender.orbiting"] = "Orbiting",
   }
 )
 mod:RegisterFrenchLocale({
@@ -310,6 +311,7 @@ function mod:OnWorldEnderTargetDestroyed(targetName)
     if worldEnder.targetName == targetName then
       core:RemoveLineBetweenUnits("WORLD_ENDER_" .. id)
       worldEnder.targetDestroyed = true
+      mod:OnWorldEnderTarget(worldEnder, self.L["mark.world_ender.orbiting"])
     end
   end
 end
@@ -403,6 +405,7 @@ function mod:OnWorldEnderCreated(id, unit)
   }
   worldEnders[id] = lastWorldEnder
   mod:AddUnit(unit)
+  mod:OnWorldEnderTarget(worldEnders[id], worldEnders[id].targetName)
   core:WatchUnit(unit, core.E.TRACK_BUFFS)
   mod:AddTimerBar("NEXT_WORLD_ENDER_TIMER", "msg.world_ender.next", TIMERS.WORLD_ENDER.NORMAL, mod:GetSetting("CountdownWorldender"))
   if mod:GetSetting("LineWorldender") then
@@ -521,25 +524,32 @@ function mod:OnDebrisFieldDestroyed(id, unit)
   core:RemovePicture("DEBRIS_FIELD_MARKER"..id)
 end
 
-function mod:OnWorldEnderTarget(targetName)
-  worldEnders[lastWorldEnder.id].targetName = targetName
+function mod:OnLastWorldEnderTarget(targetName)
+  mod:OnWorldEnderTarget(worldEnders[lastWorldEnder.id], targetName)
+end
+
+function mod:OnWorldEnderTarget(worldEnder, targetName)
+  worldEnder.targetName = targetName
+  mod:MarkUnit(worldEnder.unit, core.E.LOCATION_STATIC_CHEST, worldEnder.targetName)
 end
 
 function mod:OnWorldEnderTargetAldinari()
-  mod:OnWorldEnderTarget(self.L["unit.aldinari"])
+  mod:OnLastWorldEnderTarget(self.L["unit.aldinari"])
 end
 
 function mod:OnWorldEnderTargetVulpesNix()
-  mod:OnWorldEnderTarget(self.L["unit.vulpes_nix"])
+  mod:OnLastWorldEnderTarget(self.L["unit.vulpes_nix"])
 end
 
 function mod:OnWorldEnderTargetCassus()
-  mod:OnWorldEnderTarget(self.L["unit.cassus"])
+  mod:OnLastWorldEnderTarget(self.L["unit.cassus"])
 end
 
 function mod:OnWorldEnderEnterWormhole(id)
-  if worldEnders[id].targetDestroyed then
+  local worldEnder = worldEnders[id]
+  if worldEnder.targetDestroyed then
     mod:AddMsg("WORLD_ENDER_FALLING", "msg.world_ender.falling", 5, "Beware", "xkcdOrange")
+    mod:OnWorldEnderTarget(worldEnder, self.L["unit.alpha"])
   end
 end
 
