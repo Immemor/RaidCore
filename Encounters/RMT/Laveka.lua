@@ -38,7 +38,7 @@ mod:RegisterEnglishLocale({
     ["msg.mid_phase.soon"] = "Mid phase soon",
     ["msg.essence.interrupt"] = "Interrupt Essence",
     ["msg.essence.number"] = "Essence ",
-    ["msg.necrotic_breath"] = "Necrotic Breath on ",
+    ["msg.titan.breath"] = "Necrotic Breath on ",
   }
 )
 ----------------------------------------------------------------------------------------------------
@@ -244,7 +244,7 @@ function mod:OnEchoesRemove(id, spellId, targetName)
 end
 
 function mod:OnNecroticBreathAdd(id, spellId, stack, timeRemaining, targetName)
-  mod:AddMsg("NECROTIC_BREATH_"..id, self.L["msg.necrotic_breath"]..targetName, 5, "Beware", "xkcdLightYellow")
+  mod:AddMsg("NECROTIC_BREATH_"..id, self.L["msg.titan.breath"]..targetName, 5, "Beware", "xkcdLightYellow")
   if mod:GetSetting("MarkHealingDebuff") then
     core:MarkUnit(id, core.E.LOCATION_STATIC_CHEST, "H", "xkcdLightYellow")
   end
