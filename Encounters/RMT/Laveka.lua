@@ -37,6 +37,8 @@ mod:RegisterEnglishLocale({
     ["msg.souleaters.next"] = "Next Soul Eaters in ...",
     ["msg.mid_phase.soon"] = "Mid phase soon",
     ["msg.essence.interrupt"] = "Interrupt Essence",
+    ["msg.essence.number"] = "Essence ",
+    ["msg.necrotic_breath"] = "Necrotic Breath on ",
   }
 )
 ----------------------------------------------------------------------------------------------------
@@ -44,13 +46,17 @@ mod:RegisterEnglishLocale({
 ----------------------------------------------------------------------------------------------------
 -- Visuals.
 mod:RegisterDefaultSetting("LineCleanse", false)
+mod:RegisterDefaultSetting("LineTitan", false)
+mod:RegisterDefaultSetting("MarkHealingDebuff", false)
 -- Messages.
 mod:RegisterDefaultSetting("MessageMidphaseSoon")
 mod:RegisterDefaultSetting("MessageEssence", false)
+mod:RegisterDefaultSetting("MessageHealingDebuff", false)
 -- Sounds.
 mod:RegisterDefaultSetting("SoundMidphaseSoon")
 mod:RegisterDefaultSetting("SoundCleanse", false)
 mod:RegisterDefaultSetting("SoundEssenceSpawn", false)
+mod:RegisterDefaultSetting("SoundHealingDebuff", false)
 -- Essences.
 for i = 1, 5 do
   mod:RegisterDefaultSetting("SoundEssence"..i, false)
@@ -59,6 +65,7 @@ end
 -- Binds.
 mod:RegisterMessageSetting("SPIRIT_OF_SOULFIRE_EXPIRED_MSG", core.E.COMPARE_EQUAL, nil, "SoundCleanse")
 mod:RegisterMessageSetting("ESSENCE_SPAWN", core.E.COMPARE_EQUAL, "MessageEssence", "SoundEssenceSpawn")
+mod:RegisterMessageSetting("NECROTIC_BREATH_", core.E.COMPARE_FIND, "MessageHealingDebuff", "SoundHealingDebuff")
 mod:RegisterDefaultTimerBarConfigs({
     ["SPIRIT_OF_SOULFIRE_TIMER"] = { sColor = "xkcdBarbiePink" },
   }
@@ -85,6 +92,7 @@ local DEBUFFS = {
   REALM_OF_THE_DEAD = 75528, -- When in dead world
   ECHOES_OF_THE_AFTERLIFE = 75525, -- stacking debuff
   SOULFIRE = 75574, -- Debuff to be cleansed
+  NECROTIC_BREATH = 75608, -- Debuff to be healed
 }
 
 local BUFFS = {
@@ -148,6 +156,7 @@ function mod:OnAnyUnitDestroyed(id, unit, name)
     forceClear = true
   end
   mod:RemoveSoulfireLine(name, forceClear)
+  mod:RemoveNecroticBreathMark(id)
 end
 
 function mod:OnWatchedUnitCreated(id, unit, name)
@@ -234,6 +243,23 @@ function mod:OnEchoesRemove(id, spellId, targetName)
   end
 end
 
+function mod:OnNecroticBreathAdd(id, spellId, stack, timeRemaining, targetName)
+  mod:AddMsg("NECROTIC_BREATH_"..id, self.L["msg.necrotic_breath"]..targetName, 5, "Beware", "xkcdLightYellow")
+  if mod:GetSetting("MarkHealingDebuff") then
+    core:MarkUnit(id, core.E.LOCATION_STATIC_CHEST, "H", "xkcdLightYellow")
+  end
+end
+
+function mod:OnNecroticBreathRemove(id, spellId, targetName)
+  mod:RemoveNecroticBreathMark(id)
+end
+
+function mod:RemoveNecroticBreathMark(id)
+  if mod:GetSetting("MarkHealingDebuff") then
+    core:DropMark(id)
+  end
+end
+
 function mod:ToggleDeadRealm(id)
   if id == player.id then
     isDeadRealm = not isDeadRealm
@@ -262,7 +288,7 @@ function mod:OnEssenceCreated(id, unit, name)
   if mod:GetSetting("LineEssence"..essenceNumber) then
     core:AddLineBetweenUnits("ESSENCE_LINE"..id, player.unit, id, 8, "xkcdPurple")
   end
-  mod:AddMsg("ESSENCE_SPAWN", "Essence "..essenceNumber, 5, "Info", "xkcdWhite")
+  mod:AddMsg("ESSENCE_SPAWN", self.L["msg.essence.number"]..essenceNumber, 5, "Info", "xkcdWhite")
 end
 
 function mod:OnEssenceDestroyed(id, unit, name)
@@ -323,8 +349,17 @@ function mod:OnMidphaseEnd()
 end
 
 function mod:OnTitanCreated(id, unit, name)
+  if mod:GetSetting("LineTitan") then
+    core:AddLineBetweenUnits("TITAN_LINE_"..id, player.unit, id, 7, "xkcdLightYellow")
+  end
   if not isDeadRealm then
     mod:AddTimerBar("ADDS_TIMER", "msg.adds.next", TIMERS.ADDS.NORMAL)
+  end
+end
+
+function mod:OnTitanDestroyed(id, unit, name)
+  if mod:GetSetting("LineTitan") then
+    core:RemoveLineBetweenUnits("TITAN_LINE_"..id)
   end
 end
 
@@ -356,6 +391,7 @@ mod:RegisterUnitEvents("unit.essence",{
 
 mod:RegisterUnitEvents("unit.titan",{
     [core.E.UNIT_CREATED] = mod.OnTitanCreated,
+    [core.E.UNIT_DESTROYED] = mod.OnTitanDestroyed,
   }
 )
 
@@ -408,6 +444,10 @@ mod:RegisterUnitEvents(core.E.ALL_UNITS,{
     },
     [DEBUFFS.SOUL_EATER] = {
       [core.E.DEBUFF_ADD] = mod.OnSoulEaterCaught,
-    }
+    },
+    [DEBUFFS.NECROTIC_BREATH] = {
+      [core.E.DEBUFF_ADD] = mod.OnNecroticBreathAdd,
+      [core.E.DEBUFF_REMOVE] = mod.OnNecroticBreathRemove,
+    },
   }
 )
