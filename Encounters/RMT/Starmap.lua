@@ -64,6 +64,7 @@ mod:RegisterEnglishLocale({
     ["mark.cardinal.W"] = "W",
     ["mark.world_ender.spawn_location"] = "W%d",
     ["mark.world_ender.orbiting"] = "Orbiting",
+    ["mark.worm.hole"] = "X",
   }
 )
 mod:RegisterFrenchLocale({
@@ -220,6 +221,10 @@ local CARDINAL_MARKERS = {
   ["E"] = Vector3.New(-30.00, -96.22, 357.03),
   ["W"] = Vector3.New(-124.81, -96.21, 356.96),
 }
+
+--Where the Wormhole needs to be places
+local WORM_HOLE_POSITION = Vector3.New(-47.13, -96.21, 356.96)
+
 ----------------------------------------------------------------------------------------------------
 -- Locals.
 ----------------------------------------------------------------------------------------------------
@@ -235,6 +240,7 @@ local lastWorldEnder
 local worldEnders
 local solarFlareCount
 local asteroidWaveCounter
+local wormHoleId
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
@@ -414,9 +420,18 @@ function mod:OnWorldEnderCreated(id, unit)
   mod:AddMsg("WORLD_ENDER_SPAWN_MSG", "msg.world_ender.spawned", 5, "Beware", "xkcdCyan")
   mod:StartAsteroidTimer()
   mod:DropWorldMarker("WORLD_ENDER_MARKER_" .. worldEnderCount)
+
+  if worldEnderCount == 4 then
+    wormHoleId = id
+    mod:SetWorldMarker("WORM_HOLE_"..id, "mark.worm.hole", WORM_HOLE_POSITION)
+  end
+
 end
 
 function mod:OnWorldEnderDestroyed(id, unit)
+  if wormHoleId == id then
+    mod:DropWorldMarker("WORM_HOLE_"..id)
+  end
   core:RemoveLineBetweenUnits("WORLD_ENDER_" .. id)
   worldEnders[id] = nil
 end
