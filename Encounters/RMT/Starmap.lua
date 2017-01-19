@@ -530,7 +530,7 @@ end
 
 function mod:OnWorldEnderTarget(worldEnder, targetName)
   worldEnder.targetName = targetName
-  mod:MarkUnit(worldEnder.unit, core.E.LOCATION_STATIC_CHEST, worldEnder.targetName)
+  core:MarkUnit(worldEnder.unit, core.E.LOCATION_STATIC_CHEST, worldEnder.targetName)
 end
 
 function mod:OnWorldEnderTargetAldinari()
