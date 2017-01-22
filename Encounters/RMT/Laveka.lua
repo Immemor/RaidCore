@@ -40,6 +40,11 @@ mod:RegisterEnglishLocale({
     ["msg.essence.interrupt"] = "Interrupt Essence",
     ["msg.essence.number"] = "Essence ",
     ["msg.titan.breath"] = "Necrotic Breath on ",
+    -- Markers
+    ["mark.cardinal.NE"] = "NE",
+    ["mark.cardinal.NW"] = "NW",
+    ["mark.cardinal.SE"] = "SE",
+    ["mark.cardinal.SW"] = "SW",
   }
 )
 ----------------------------------------------------------------------------------------------------
@@ -50,6 +55,7 @@ mod:RegisterDefaultSetting("LineCleanse", false)
 mod:RegisterDefaultSetting("LineTitan", false)
 mod:RegisterDefaultSetting("LineLostSoul")
 mod:RegisterDefaultSetting("MarkHealingDebuff", false)
+mod:RegisterDefaultSetting("MarkCardinal")
 -- Messages.
 mod:RegisterDefaultSetting("MessageMidphaseSoon")
 mod:RegisterDefaultSetting("MessageEssence", false)
@@ -116,6 +122,13 @@ local TIMERS = {
 
 local ROOM_CENTER = Vector3.New(-723.717773, 186.834915, -265.187195)
 
+local CARDINAL_MARKERS = {
+  ["NE"] = Vector3.New(-697.46, 189, -291),
+  ["NW"] = Vector3.New(-750.67, 189, -291),
+  ["SE"] = Vector3.New(-697.46, 189, -238.5),
+  ["SW"] = Vector3.New(-750.67, 189, -238.5),
+}
+
 local SOUL_EATER_ORBITS = {
   [1] = Vector3.New(0, 0, 6),
   [2] = Vector3.New(0, 0, 12),
@@ -149,7 +162,17 @@ function mod:OnBossEnable()
   player.name = player.unit:GetName()
   mod:AddTimerBar("ADDS_TIMER", "msg.adds.next", TIMERS.ADDS.FIRST)
   mod:AddTimerBar("SOULEATER_TIMER", "msg.souleaters.next", TIMERS.SOUL_EATERS.FIRST, true)
+  mod:SetCardinalMarkers()
   --mod:DrawSoulEaterOrbits()
+end
+
+function mod:SetCardinalMarkers()
+  if not mod:GetSetting("MarkCardinal") then
+    return
+  end
+  for direction, location in next, CARDINAL_MARKERS do
+    mod:SetWorldMarker("CARDINAL_"..direction, "mark.cardinal."..direction, location)
+  end
 end
 
 function mod:OnAnyUnitDestroyed(id, unit, name)
