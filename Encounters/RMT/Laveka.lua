@@ -246,7 +246,7 @@ end
 function mod:OnNecroticBreathAdd(id, spellId, stack, timeRemaining, targetName)
   mod:AddMsg("NECROTIC_BREATH_"..id, self.L["msg.titan.breath"]..targetName, 5, "Beware", "xkcdLightYellow")
   if mod:GetSetting("MarkHealingDebuff") then
-    core:MarkUnit(id, core.E.LOCATION_STATIC_CHEST, "H", "xkcdLightYellow")
+    core:MarkUnit(GameLib.GetUnitById(id), core.E.LOCATION_STATIC_CHEST, "H", "xkcdLightYellow")
   end
 end
 
