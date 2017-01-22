@@ -25,6 +25,7 @@ mod:RegisterEnglishLocale({
     ["unit.orb"] = "Soul Eater",
     ["unit.boneclaw"] = "Risen Boneclaw",
     ["unit.titan"] = "Risen Titan",
+    ["unit.lost_soul"] = "Lost Soul",
     -- Cast names.
     ["cast.essence.surge"] = "Essence Surge", -- Essence fully materialized
     ["cast.laveka.devoursouls"] = "Devour Souls",
@@ -47,6 +48,7 @@ mod:RegisterEnglishLocale({
 -- Visuals.
 mod:RegisterDefaultSetting("LineCleanse", false)
 mod:RegisterDefaultSetting("LineTitan", false)
+mod:RegisterDefaultSetting("LineLostSoul")
 mod:RegisterDefaultSetting("MarkHealingDebuff", false)
 -- Messages.
 mod:RegisterDefaultSetting("MessageMidphaseSoon")
@@ -363,6 +365,18 @@ function mod:OnTitanDestroyed(id, unit, name)
   end
 end
 
+function mod:OnLostSoulCreated(id, unit, name)
+  if mod:GetSetting("LineLostSoul") then
+    core:AddLineBetweenUnits("LOST_SOUL_LINE", player.unit, id, 10, "white")
+  end
+end
+
+function mod:OnLostSoulDestroyed(id, unit, name)
+  if mod:GetSetting("LineLostSoul") then
+    core:RemoveLineBetweenUnits("LOST_SOUL_LINE")
+  end
+end
+
 function mod:OnLavekaHealthChanged(id, percent, name)
   if mod:IsMidphaseClose(name, percent) then
     mod:AddMsg("MID_PHASE", "msg.mid_phase.soon", 5, "Info", "xkcdWhite")
@@ -394,6 +408,11 @@ mod:RegisterUnitEvents("unit.titan",{
     [core.E.UNIT_DESTROYED] = mod.OnTitanDestroyed,
   }
 )
+
+mod:RegisterUnitEvents("unit.lost_soul",{
+    [core.E.UNIT_CREATED] = mod.OnLostSoulCreated,
+    [core.E.UNIT_DESTROYED] = mod.OnLostSoulDestroyed,
+})
 
 mod:RegisterUnitEvents("unit.orb",{
     [core.E.UNIT_CREATED] = mod.OnSoulEaterCreated,
