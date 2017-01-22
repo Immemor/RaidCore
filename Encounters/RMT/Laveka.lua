@@ -53,7 +53,7 @@ mod:RegisterEnglishLocale({
 -- Visuals.
 mod:RegisterDefaultSetting("LineCleanse", false)
 mod:RegisterDefaultSetting("LineTitan", false)
-mod:RegisterDefaultSetting("LineLostSoul")
+mod:RegisterDefaultSetting("LineLostSouls")
 mod:RegisterDefaultSetting("MarkHealingDebuff", false)
 mod:RegisterDefaultSetting("MarkCardinal")
 -- Messages.
@@ -288,6 +288,11 @@ end
 function mod:ToggleDeadRealm(id)
   if id == player.id then
     isDeadRealm = not isDeadRealm
+    if not isDeadRealm then
+      if mod:GetSetting("LineLostSouls") then
+        core:RemoveLineBetweenUnits("LOST_SOUL_LINE")
+      end
+    end
   end
 end
 
@@ -389,14 +394,10 @@ function mod:OnTitanDestroyed(id, unit, name)
 end
 
 function mod:OnLostSoulCreated(id, unit, name)
-  if mod:GetSetting("LineLostSoul") then
-    core:AddLineBetweenUnits("LOST_SOUL_LINE", player.unit, id, 10, "white")
-  end
-end
-
-function mod:OnLostSoulDestroyed(id, unit, name)
-  if mod:GetSetting("LineLostSoul") then
-    core:RemoveLineBetweenUnits("LOST_SOUL_LINE")
+  if mod:GetSetting("LineLostSouls") then
+    if isDeadRealm then
+      core:AddLineBetweenUnits("LOST_SOUL_LINE", player.unit, id, 10, "white")
+    end
   end
 end
 
@@ -434,8 +435,7 @@ mod:RegisterUnitEvents("unit.titan",{
 
 mod:RegisterUnitEvents("unit.lost_soul",{
     [core.E.UNIT_CREATED] = mod.OnLostSoulCreated,
-    [core.E.UNIT_DESTROYED] = mod.OnLostSoulDestroyed,
-})
+  })
 
 mod:RegisterUnitEvents("unit.orb",{
     [core.E.UNIT_CREATED] = mod.OnSoulEaterCreated,
