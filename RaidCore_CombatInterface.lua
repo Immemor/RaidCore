@@ -61,7 +61,12 @@ local SPELLID_BLACKLISTED = {
   [82748] = "Unbreakable", -- Engineer cheat death cooldown
 }
 local SPELLID_WHITELIST = {
-  [82133] = "Realm of the Living", -- Laveka
+  [82133] = "Realm of the Living", -- Laveka Player Buff
+  [87767] = "Spirit Ire", -- Laveka Debuff
+  [87774] = "Barrier of Souls", -- Laveka Debuff
+  [87545] = "Catastrophic Solar Event", -- Starmap Debuff
+  [84322] = "Solar Surface", -- Starmap Debuff
+  [85458] = "Growing Singularity", -- Starmap Debuff
 }
 
 local EXTRA_HANDLER_ALLOWED = {
@@ -179,17 +184,10 @@ local function LogUnitSpawnLocation(nId, sName, tPosition)
   end
 end
 
-local function GetBuffs(tUnit)
-  local r = {}
-  if not tUnit then
-    return r
-  end
-
-  local tBuffs = tUnit:GetBuffs()
+local function GetAllBuffs(tBuffs, r)
   if not tBuffs then
     return r
   end
-  tBuffs = tBuffs.arBeneficial
   local nBuffs = #tBuffs
   for i = 1, nBuffs do
     local obj = tBuffs[i]
@@ -203,6 +201,38 @@ local function GetBuffs(tUnit)
       }
     end
   end
+  return r
+end
+
+local function GetWhitelistedDebuffs(tBuffs, r)
+  if not tBuffs then
+    return r
+  end
+  local nBuffs = #tBuffs
+  for i = 1, nBuffs do
+    local obj = tBuffs[i]
+    local nSpellId = obj.splEffect:GetId()
+    if nSpellId and SPELLID_WHITELIST[nSpellId] then
+      r[obj.idBuff] = {
+        nCount = obj.nCount,
+        nSpellId = nSpellId,
+        fTimeRemaining = obj.fTimeRemaining,
+        unitCaster = obj.unitCaster,
+      }
+    end
+  end
+  return r
+end
+
+local function GetBuffs(tUnit)
+  local r = {}
+  if not tUnit then
+    return r
+  end
+
+  local tBuffs = tUnit:GetBuffs()
+  r = GetAllBuffs(tBuffs.arBeneficial, r)
+  r = GetWhitelistedDebuffs(tBuffs.arHarmful, r)
   return r
 end
 
