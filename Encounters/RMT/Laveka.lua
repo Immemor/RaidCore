@@ -401,6 +401,12 @@ function mod:OnLostSoulCreated(id, unit, name)
   end
 end
 
+function mod:OnLostSoulDestroyed(id, unit, name)
+  if mod:GetSetting("LineLostSouls") then
+    core:RemoveLineBetweenUnits("LOST_SOUL_LINE")
+  end
+end
+
 function mod:OnLavekaHealthChanged(id, percent, name)
   if mod:IsMidphaseClose(name, percent) then
     mod:AddMsg("MID_PHASE", "msg.mid_phase.soon", 5, "Info", "xkcdWhite")
@@ -439,6 +445,7 @@ mod:RegisterUnitEvents("unit.lost_soul",{
 
 mod:RegisterUnitEvents("unit.orb",{
     [core.E.UNIT_CREATED] = mod.OnSoulEaterCreated,
+    [core.E.UNIT_DESTROYED] = mod.OnLostSoulDestroyed,
   }
 )
 
