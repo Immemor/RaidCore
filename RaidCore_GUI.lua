@@ -118,9 +118,9 @@ end
 ----------------------------------------------------------------------------------------------------
 -- ShowHide Class manager.
 ----------------------------------------------------------------------------------------------------
-function ShowHideClass:OnShowHideUpdate()
+function ShowHideClass:OnShowHideUpdate(nCurrentTime)
+  if not _bShowHidePanelActive then return end
   local left, right
-  local nCurrentTime = GetGameTime()
   local nEncounterDelta = RaidCore.nShowHideEncounterPanelTime - nCurrentTime
   local nLogDelta = RaidCore.nShowHideLogPanelTime - nCurrentTime
   local nSettingsDelta = RaidCore.nShowHideSettingsPanelTime - nCurrentTime
@@ -206,20 +206,24 @@ function ShowHideClass:OnShowHideUpdate()
 
   if nEncounterDelta == 0 and nLogDelta == 0 and nSettingsDelta == 0 then
     _bShowHidePanelActive = false
-    Apollo.RemoveEventHandler(RaidCore.E.EVENT_NEXT_FRAME, self)
+    RaidCore:StopNextFrame()
   end
 end
 
 function ShowHideClass:StartUpdate()
   if not _bShowHidePanelActive then
     _bShowHidePanelActive = true
-    Apollo.RegisterEventHandler(RaidCore.E.EVENT_NEXT_FRAME, "OnShowHideUpdate", self)
+    RaidCore:StartNextFrame()
   end
 end
 
 ----------------------------------------------------------------------------------------------------
 -- Public functions.
 ----------------------------------------------------------------------------------------------------
+function RaidCore:OnGUINextFrame(nCurrentTime)
+  ShowHideClass:OnShowHideUpdate(nCurrentTime)
+end
+
 function RaidCore:GUI_init(sVersion)
   self.wndMain = Apollo.LoadForm(self.xmlDoc, "ConfigMain", nil, self)
   self.wndMain:FindChild("Tag"):SetText(sVersion)

@@ -122,10 +122,10 @@ function mod:RemoveBombMarker(bomb_type, unit)
     core:RemoveUnit(nId)
     if bomb_type == "fire" then
       tFireBombPlayersList[sName] = nil
-      core:DropPixie(nId .. "_BOMB")
+      core:RemoveLineBetweenUnits(nId .. "_BOMB")
     elseif bomb_type == "frost" then
       tFrostBombPlayersList[sName] = nil
-      core:DropPixie(nId .. "_BOMB")
+      core:RemoveLineBetweenUnits(nId .. "_BOMB")
     end
   end
 end
@@ -135,14 +135,14 @@ function mod:ApplyBombLines(bomb_type)
     for key, value in pairs(tFrostBombPlayersList) do
       local unitId = value:GetId()
       if unitId then
-        core:AddPixie(unitId .. "_BOMB", 1, playerUnit, value, "Blue", 5, 10, 10)
+        core:AddLineBetweenUnits(unitId .. "_BOMB", playerUnit, value, 5, "Blue")
       end
     end
   elseif bomb_type == "frost" then
     for key, value in pairs(tFireBombPlayersList) do
       local unitId = value:GetId()
       if unitId then
-        core:AddPixie(unitId .. "_BOMB", 1, playerUnit, value, "Red", 5, 10, 10)
+        core:AddLineBetweenUnits(unitId .. "_BOMB", playerUnit, value, 5, "Red")
       end
     end
   end
@@ -152,8 +152,8 @@ function mod:OnUnitCreated(nId, unit, sName)
   if sName == self.L["Hydroflux"] then
     core:AddUnit(unit)
     if mod:GetSetting("LineCleaveHydroflux") then
-      core:AddPixie(nId .. "_1", 2, unit, nil, "Yellow", 3, 7, 0)
-      core:AddPixie(nId .. "_2", 2, unit, nil, "Yellow", 3, 7, 180)
+      core:AddSimpleLine(nId .. "_1", unit, nil, 7, 0, 3, "Yellow")
+      core:AddSimpleLine(nId .. "_2", unit, nil, 7, 180, 3, "Yellow")
     end
   elseif sName == self.L["Pyrobane"] then
     core:AddUnit(unit)
@@ -168,14 +168,19 @@ function mod:OnUnitCreated(nId, unit, sName)
   end
 end
 
+function mod:OnHydrofluxDestroyed(id, unit, name)
+  core:RemoveSimpleLine(id .. "_1")
+  core:RemoveSimpleLine(id .. "_2")
+end
+
 function mod:OnFlameWaveCreated(id, unit, name)
   if mod:GetSetting("LineFlameWaves") then
-    core:AddPixie(id, 2, unit, nil, "Green", 10, 20, 0)
+    core:AddSimpleLine(id, unit, nil, 20, nil, 10, "Green")
   end
 end
 
 function mod:OnFlameWaveDestroyed(id, unit, name)
-  core:DropPixie(id)
+  core:RemoveSimpleLine(id)
 end
 
 mod:RegisterUnitEvents("Flame Wave", {
@@ -216,7 +221,7 @@ function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
     self:ScheduleTimer("RemoveBombMarker", 10, "frost", tUnit)
   elseif nSpellId == DEBUFFID_ICE_TOMB then
     if mod:GetSetting("LineIceTomb") and self:GetDistanceBetweenUnits(playerUnit, tUnit) < 45 then
-      core:AddPixie(nId .. "_TOMB", 1, playerUnit, tUnit, "Blue", 5, 10, 10)
+      core:AddLineBetweenUnits(nId .. "_TOMB", playerUnit, tUnit, 5, "Blue")
     end
   end
 
@@ -256,6 +261,11 @@ function mod:OnDebuffRemove(nId, nSpellId)
   elseif nSpellId == DEBUFFID_FROSTBOMB then
     mod:RemoveBombMarker("frost", tUnit)
   elseif nSpellId == DEBUFFID_ICE_TOMB then
-    core:DropPixie(nId .. "_TOMB")
+    core:RemoveLineBetweenUnits(nId .. "_TOMB")
   end
 end
+
+mod:RegisterUnitEvents("Hydroflux",{
+    [core.E.UNIT_DESTROYED] = mod.OnHydrofluxDestroyed,
+  }
+)

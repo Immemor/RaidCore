@@ -183,7 +183,7 @@ function mod:OnUnitCreated(nId, tUnit, sName)
     end
   elseif sName == self.L["Life Force"] then
     if mod:GetSetting("LineLifeOrbs") then
-      core:AddPixie(nId, 2, tUnit, nil, "Blue", 10, 40, 0)
+      core:AddSimpleLine(nId, tUnit, nil, 40, nil, 10, "Blue")
     end
   elseif sName == self.L["Lifekeeper"] then
     nTreeKeeperCount = nTreeKeeperCount + 1
@@ -217,7 +217,7 @@ function mod:OnUnitCreated(nId, tUnit, sName)
   elseif sName == self.L["Aileron"] then
     core:AddUnit(tUnit)
     if mod:GetSetting("LineCleaveAileron") then
-      core:AddPixie(tUnit:GetId(), 2, tUnit, nil, "Red", 10, 30, 0)
+      core:AddSimpleLine(nId, tUnit, nil, 30, nil, 10, "Red")
     end
   elseif sName == self.L["Visceralus"] then
     core:AddUnit(tUnit)
@@ -236,8 +236,8 @@ function mod:OnUnitDestroyed(nId, tUnit, sName)
   if bIsMidPhase and sName == self.L["[DS] e395 - Air - Tornado"] then
     bIsMidPhase = false
     mod:AddTimerBar("MIDPHASE", "Next middle phase", 90, mod:GetSetting("SoundMidphaseCountDown"))
-  elseif sName == self.L["Life Force"] then
-    core:DropPixie(nId)
+  elseif sName == self.L["Life Force"] or sName == self.L["Aileron"] then
+    core:RemoveSimpleLine(nId)
   elseif sName == self.L["Lifekeeper"] then
     for i, nTreeId in next, tTreeKeeperList do
       if nTreeId == nId then
@@ -283,7 +283,7 @@ function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
     end
     if mod:GetSetting("LineHealingTrees") and #tTreeKeeperList > 0 then
       local sKey = ("LIGHTNING %d"):format(nId)
-      core:AddPixie(sKey, 1, tUnit, GetUnitById(tTreeKeeperList[1]), "xkcdBrightPurple", 5)
+      core:AddLineBetweenUnits(sKey, tUnit, tTreeKeeperList[1], 5, "xkcdBrightPurple")
     end
     if nId == nPlayerId then
       local sSound = mod:GetSetting("SoundLightning") and "RunAway"
@@ -302,7 +302,7 @@ function mod:OnDebuffRemove(nId, nSpellId)
     mod:RemoveSpell2Dispel(nId, DEBUFFID_LIFE_FORCE_SHACKLE)
   elseif nSpellId == DEBUFFID_LIGHTNING_STRIKE then
     local sKey = ("LIGHTNING %d"):format(nId)
-    core:DropPixie(sKey)
+    core:RemoveLineBetweenUnits(sKey)
     core:DropMark(nId)
   end
 end

@@ -22,6 +22,7 @@ require "GroupLib"
 require "Vector3"
 
 local RaidCore = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
+local Assert = Apollo.GetPackage("RaidCore:Assert-1.0").tPackage
 
 ----------------------------------------------------------------------------------------------------
 -- Copy of few objects to reduce the cpu load.
@@ -29,7 +30,6 @@ local RaidCore = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCo
 ----------------------------------------------------------------------------------------------------
 local next, pcall, assert = next, pcall, assert
 local GetPlayerUnit = GameLib.GetPlayerUnit
-local GetGameTime = GameLib.GetGameTime
 local GetUnitById = GameLib.GetUnitById
 local WorldLocToScreenPoint = GameLib.WorldLocToScreenPoint
 local Races = GameLib.CodeEnumRace
@@ -112,18 +112,39 @@ local function NewManager(sText)
   return new
 end
 
-local function Rotation(tVector, tMatrixTeta)
-  local r = {}
-  for axis1, R in next, tMatrixTeta do
-    r[axis1] = tVector.x * R.x + tVector.y * R.y + tVector.z * R.z
-  end
-  return NewVector3(r)
+local function CreateRotationMatrixY(nRotation)
+  if not nRotation or nRotation%360 == 0 then return nil end
+
+  local nRad = math.rad(nRotation)
+  local nCos = math.cos(nRad)
+  local nSin = math.sin(nRad)
+  return {
+    x = NewVector3({ nCos, 0, -nSin }),
+    y = NewVector3({ 0, 1, 0 }),
+    z = NewVector3({ nSin, 0, nCos }),
+  }
+end
+
+local function RotationY(tVector, tMatrixTeta)
+  if not tMatrixTeta then return tVector end
+  return NewVector3(
+    tMatrixTeta.x.x * tVector.x + tMatrixTeta.x.z * tVector.z,
+    tVector.y,
+    tMatrixTeta.z.x * tVector.x + tMatrixTeta.z.z * tVector.z
+  )
 end
 
 local function StartDrawing()
-  if _bDrawManagerRunning ~= true then
+  if not _bDrawManagerRunning then
     _bDrawManagerRunning = true
-    Apollo.RegisterEventHandler(RaidCore.E.EVENT_NEXT_FRAME, "OnDrawUpdate", RaidCore)
+    RaidCore:StartNextFrame()
+  end
+end
+
+local function StopDrawing()
+  if _bDrawManagerRunning then
+    _bDrawManagerRunning = false
+    RaidCore:StopNextFrame()
   end
 end
 
@@ -139,102 +160,106 @@ local function GetOriginType(origin)
   return originType
 end
 
-local function StopDrawing()
-  if _bDrawManagerRunning == true then
-    _bDrawManagerRunning = false
-    Apollo.RemoveEventHandler(RaidCore.E.EVENT_NEXT_FRAME, RaidCore)
+local function ProcessOrigin(origin)
+  local originType = GetOriginType(origin)
+  local originUnit = nil
+  local originVector = nil
+  if originType == "number" then
+    originUnit = GetUnitById(origin)
+  elseif originType == "unit" then
+    originUnit = origin
+  elseif originType == "table" then
+    originVector = NewVector3(origin)
+  elseif originType == "vector" then
+    originVector = origin
+  end
+  return originUnit, originVector
+end
+
+local function ShouldDrawBeVisible(tDraw, tVectorFrom, tVectorTo)
+  local bShouldBeVisible = true
+  if tDraw.nMaxLengthVisible or tDraw.nMinLengthVisible then
+    local len = (tVectorTo - tVectorFrom):Length()
+    if tDraw.nMaxLengthVisible and tDraw.nMaxLengthVisible < len then
+      bShouldBeVisible = false
+    elseif tDraw.nMinLengthVisible and tDraw.nMinLengthVisible > len then
+      bShouldBeVisible = false
+    end
+  end
+  return bShouldBeVisible
+end
+
+local function DestroyPixie(tDraw)
+  if tDraw.nPixieIdFull then
+    _wndOverlay:DestroyPixie(tDraw.nPixieIdFull)
+    tDraw.nPixieIdFull = nil
+  end
+  if next(tDraw.nPixieIdDot) then
+    for _, nPixieIdDot in next, tDraw.nPixieIdDot do
+      _wndOverlay:DestroyPixie(nPixieIdDot)
+    end
+    tDraw.nPixieIdDot = {}
+  end
+end
+
+local function UpdatePixie(tDraw, tScreenLocFrom, tScreenLocTo, nPixieIdFull)
+  tDraw.tPixieAttributes.loc.nOffsets = {
+    tScreenLocFrom.x,
+    tScreenLocFrom.y,
+    tScreenLocTo.x,
+    tScreenLocTo.y
+  }
+  if nPixieIdFull then
+    _wndOverlay:UpdatePixie(nPixieIdFull, tDraw.tPixieAttributes)
+  else
+    nPixieIdFull = _wndOverlay:AddPixie(tDraw.tPixieAttributes)
+  end
+  return nPixieIdFull
+end
+
+local function UpdatePixieDots(tDraw, tScreenLocFrom, tScreenLocTo, tVectorFrom, tVectorTo)
+  local tVectorPlayer = NewVector3(GetPlayerUnit():GetPosition())
+  for i = 1, tDraw.nNumberOfDot do
+    local nRatio = (i - 1) / (tDraw.nNumberOfDot - 1)
+    local tVectorDot = Vector3.InterpolateLinear(tVectorFrom, tVectorTo, nRatio)
+    local tScreenLocDot = WorldLocToScreenPoint(tVectorDot)
+    if tScreenLocDot.z > 0 then
+      local nDistance2Player = (tVectorPlayer - tVectorDot):Length()
+      local nScale = math.min(40 / nDistance2Player, 1)
+      nScale = math.max(nScale, 0.5) * tDraw.nSpriteSize
+      local tVector = tScreenLocTo - tScreenLocFrom
+      tDraw.tPixieAttributes.fRotation = math.deg(math.atan2(tVector.y, tVector.x)) + 90
+      tDraw.tPixieAttributes.loc.nOffsets = {
+        tScreenLocDot.x - nScale,
+        tScreenLocDot.y - nScale,
+        tScreenLocDot.x + nScale,
+        tScreenLocDot.y + nScale
+      }
+      if tDraw.nPixieIdDot[i] then
+        _wndOverlay:UpdatePixie(tDraw.nPixieIdDot[i], tDraw.tPixieAttributes)
+      else
+        tDraw.nPixieIdDot[i] = _wndOverlay:AddPixie(tDraw.tPixieAttributes)
+      end
+    else
+      _wndOverlay:DestroyPixie(tDraw.nPixieIdDot[i])
+      tDraw.nPixieIdDot[i] = nil
+    end
   end
 end
 
 local function UpdateLine(tDraw, tVectorFrom, tVectorTo)
-  local tScreenLocTo, tScreenLocFrom = nil, nil
-  if tVectorFrom and tVectorTo then
-    local bShouldBeVisible = true
-    if tDraw.nMaxLengthVisible or tDraw.nMinLengthVisible then
-      local len = (tVectorTo - tVectorFrom):Length()
-      if tDraw.nMaxLengthVisible and tDraw.nMaxLengthVisible < len then
-        bShouldBeVisible = false
-      elseif tDraw.nMinLengthVisible and tDraw.nMinLengthVisible > len then
-        bShouldBeVisible = false
-      end
-    end
-    if bShouldBeVisible then
-      tScreenLocTo = WorldLocToScreenPoint(tVectorTo)
-      tScreenLocFrom = WorldLocToScreenPoint(tVectorFrom)
-    end
+  local tScreenLocTo = WorldLocToScreenPoint(tVectorTo)
+  local tScreenLocFrom = WorldLocToScreenPoint(tVectorFrom)
+
+  if tScreenLocFrom.z <= 0 and tScreenLocTo.z <= 0 then
+    DestroyPixie(tDraw)
+    return
   end
-  if tScreenLocFrom and tScreenLocTo and (tScreenLocFrom.z > 0 or tScreenLocTo.z > 0) then
-    if tDraw.nNumberOfDot == DOT_IS_A_LINE then
-      local tPixieAttributs = {
-        bLine = true,
-        fWidth = tDraw.nWidth,
-        cr = tDraw.sColor,
-        loc = {
-          fPoints = FPOINT_NULL,
-          nOffsets = {
-            tScreenLocFrom.x,
-            tScreenLocFrom.y,
-            tScreenLocTo.x,
-            tScreenLocTo.y,
-          },
-        },
-      }
-      if tDraw.nPixieIdFull then
-        _wndOverlay:UpdatePixie(tDraw.nPixieIdFull, tPixieAttributs)
-      else
-        tDraw.nPixieIdFull = _wndOverlay:AddPixie(tPixieAttributs)
-      end
-    else
-      local tVectorPlayer = NewVector3(GetPlayerUnit():GetPosition())
-      for i = 1, tDraw.nNumberOfDot do
-        local nRatio = (i - 1) / (tDraw.nNumberOfDot - 1)
-        local tVectorDot = Vector3.InterpolateLinear(tVectorFrom, tVectorTo, nRatio)
-        local tScreenLocDot = WorldLocToScreenPoint(tVectorDot)
-        if tScreenLocDot.z > 0 then
-          local nDistance2Player = (tVectorPlayer - tVectorDot):Length()
-          local nScale = math.min(40 / nDistance2Player, 1)
-          nScale = math.max(nScale, 0.5) * tDraw.nSpriteSize
-          local tVector = tScreenLocTo - tScreenLocFrom
-          local tPixieAttributs = {
-            bLine = false,
-            strSprite = tDraw.sSprite,
-            cr = tDraw.sColor,
-            fRotation = math.deg(math.atan2(tVector.y, tVector.x)) + 90,
-            loc = {
-              fPoints = FPOINT_NULL,
-              nOffsets = {
-                tScreenLocDot.x - nScale,
-                tScreenLocDot.y - nScale ,
-                tScreenLocDot.x + nScale,
-                tScreenLocDot.y + nScale,
-              },
-            },
-          }
-          if tDraw.nPixieIdDot[i] then
-            _wndOverlay:UpdatePixie(tDraw.nPixieIdDot[i], tPixieAttributs)
-          else
-            tDraw.nPixieIdDot[i] = _wndOverlay:AddPixie(tPixieAttributs)
-          end
-        else
-          _wndOverlay:DestroyPixie(tDraw.nPixieIdDot[i])
-          tDraw.nPixieIdDot[i] = nil
-        end
-      end
-    end
+
+  if tDraw.nNumberOfDot == DOT_IS_A_LINE then
+    tDraw.nPixieIdFull = UpdatePixie(tDraw, tScreenLocFrom, tScreenLocTo, tDraw.nPixieIdFull)
   else
-    -- Remove the pixie if:
-    -- * At least one unit is not available.
-    -- * The Line is out of sight.
-    if tDraw.nPixieIdFull then
-      _wndOverlay:DestroyPixie(tDraw.nPixieIdFull)
-      tDraw.nPixieIdFull = nil
-    end
-    if next(tDraw.nPixieIdDot) then
-      for _, nPixieIdDot in next, tDraw.nPixieIdDot do
-        _wndOverlay:DestroyPixie(nPixieIdDot)
-      end
-      tDraw.nPixieIdDot = {}
-    end
+    UpdatePixieDots(tDraw, tScreenLocTo, tScreenLocFrom, tVectorFrom, tVectorTo)
   end
 end
 
@@ -270,12 +295,18 @@ end
 function TemplateDraw:SetColor(sColor)
   local mt = getmetatable(self)
   mt.__index.sColor = sColor or DEFAULT_LINE_COLOR
+  if mt.__index.tPixieAttributes then
+    mt.__index.tPixieAttributes.cr = mt.__index.sColor
+  end
 end
 
 function TemplateDraw:SetSprite(sSprite, nSize)
   local mt = getmetatable(self)
   mt.__index.sSprite = sSprite or mt.__index.sSprite or "BasicSprites:WhiteCircle"
   mt.__index.nSpriteSize = nSize or mt.__index.nSpriteSize or 4
+  if mt.__index.tPixieAttributes and mt.__index.tPixieAttributes.strSprite then
+    mt.__index.tPixieAttributes.strSprite = mt.__index.sSprite
+  end
 end
 
 function TemplateDraw:SetMaxLengthVisible(nMax)
@@ -294,22 +325,14 @@ end
 local LineBetween = NewManager("LineBetween")
 
 function LineBetween:UpdateDraw(tDraw)
-  local tVectorFrom, tVectorTo = nil, nil
+  local tVectorFrom, tVectorTo = tDraw.tVectorFrom, tDraw.tVectorTo
   if tDraw.tUnitFrom then
-    if tDraw.tUnitFrom:IsValid() then
-      tVectorFrom = NewVector3(tDraw.tUnitFrom:GetPosition())
-    end
-  else
-    tVectorFrom = tDraw.tVectorFrom
+    tVectorFrom = NewVector3(tDraw.tUnitFrom:GetPosition())
   end
   if tDraw.tUnitTo then
-    if tDraw.tUnitTo:IsValid() then
-      tVectorTo = NewVector3(tDraw.tUnitTo:GetPosition())
-    end
-  else
-    tVectorTo = tDraw.tVectorTo
+    tVectorTo = NewVector3(tDraw.tUnitTo:GetPosition())
   end
-  if tDraw.nOffset > 0 or tDraw.nLength > 0 and tVectorTo and tVectorFrom then
+  if tDraw.nOffset > 0 or tDraw.nLength > 0 then
     local tNormal = (tVectorTo - tVectorFrom):Normal()
     local tVectorA = tNormal * (tDraw.nOffset)
     if tDraw.nLength > 0 then
@@ -318,7 +341,12 @@ function LineBetween:UpdateDraw(tDraw)
     end
     tVectorFrom = tVectorFrom + tVectorA
   end
-  UpdateLine(tDraw, tVectorFrom, tVectorTo)
+
+  if ShouldDrawBeVisible(tDraw, tVectorFrom, tVectorTo) then
+    UpdateLine(tDraw, tVectorFrom, tVectorTo)
+  else
+    DestroyPixie(tDraw)
+  end
 end
 
 function LineBetween:AddDraw(Key, FromOrigin, ToOrigin, nWidth, sColor, nNumberOfDot, nOffset, nLength)
@@ -342,34 +370,43 @@ function LineBetween:AddDraw(Key, FromOrigin, ToOrigin, nWidth, sColor, nNumberO
   tDraw.nPixieIdDot = tDraw.nPixieIdDot or {}
   tDraw.nOffset = nOffset or 0
   tDraw.nLength = nLength or 0
-  -- Preprocessing of the 'From'.
-  if FromOriginType == "table" or FromOriginType == "vector" then
-    -- FromOrigin is the result of a GetPosition()
+  tDraw.tPixieAttributes = {
+    bLine = tDraw.nNumberOfDot == DOT_IS_A_LINE,
+    fWidth = tDraw.nWidth,
+    cr = tDraw.sColor,
+    loc = {
+      fPoints = FPOINT_NULL,
+      nOffsets = {}
+    }
+  }
+
+  if not tDraw.tPixieAttributes.bLine then
+    tDraw.tPixieAttributes.strSprite = tDraw.sSprite
+    tDraw.tPixieAttributes.fRotation = 0
+  end
+
+  local tFromOriginUnit, tFromOriginVector = ProcessOrigin(FromOrigin)
+  if tFromOriginVector then
     tDraw.tUnitFrom = nil
-    tDraw.tVectorFrom = NewVector3(FromOrigin)
-  else
-    local tUnit = FromOrigin
-    if FromOriginType == "number" then
-      tUnit = GetUnitById(FromOrigin)
-    end
-    -- FromOrigin is the Id of an unit.
-    tDraw.tUnitFrom = tUnit
+    tDraw.tVectorFrom = tFromOriginVector
+  elseif tFromOriginUnit then
+    tDraw.tUnitFrom = tFromOriginUnit
     tDraw.tVectorFrom = nil
-  end
-  -- Preprocessing of the 'To'.
-  if ToOriginType == "table" or ToOriginType == "vector" then
-    -- ToOrigin is the result of a GetPosition()
-    tDraw.tUnitTo = nil
-    tDraw.tVectorTo = NewVector3(ToOrigin)
   else
-    local tUnit = ToOrigin
-    if ToOriginType == "number" then
-      tUnit = GetUnitById(ToOrigin)
-    end
-    -- ToOrigin is the Id of an unit.
-    tDraw.tUnitTo = tUnit
-    tDraw.tVectorTo = nil
+    Assert:Assert(false, "No valid from origin found: %s", tostring(FromOrigin))
   end
+
+  local tToOriginUnit, tToOriginVector = ProcessOrigin(ToOrigin)
+  if tToOriginVector then
+    tDraw.tUnitTo = nil
+    tDraw.tVectorTo = tToOriginVector
+  elseif tToOriginUnit then
+    tDraw.tUnitTo = tToOriginUnit
+    tDraw.tVectorTo = nil
+  else
+    Assert:Assert(false, "No valid to origin found: %s", tostring(ToOrigin))
+  end
+
   -- Save this object (new or not).
   self.tDraws[Key] = tDraw
   -- Start the draw update service.
@@ -391,34 +428,25 @@ end
 local SimpleLine = NewManager("SimpleLine")
 
 function SimpleLine:UpdateDraw(tDraw)
-  local tVectorTo, tVectorFrom = nil, nil
-  local tOriginUnit = tDraw.tOriginUnit
-  if tOriginUnit then
-    if tOriginUnit:IsValid() then
-      local tOriginVector = NewVector3(tOriginUnit:GetPosition())
-      local tFacingVector = NewVector3(tOriginUnit:GetFacing())
-      if tDraw.nOffsetOrigin then
-        tOriginVector = tOriginVector + Rotation(tFacingVector, tDraw.RotationMatrix90) * tDraw.nOffsetOrigin
-      end
-      local tVectorA = tFacingVector * (tDraw.nOffset)
-      local tVectorB = tFacingVector * (tDraw.nLength + tDraw.nOffset)
-      tVectorA = Rotation(tVectorA, tDraw.RotationMatrix)
-      tVectorB = Rotation(tVectorB, tDraw.RotationMatrix)
-      tVectorFrom = tOriginVector + tVectorA
-      tVectorTo = tOriginVector + tVectorB
+  local tVectorTo, tVectorFrom = tDraw.tToVector, tDraw.tFromVector
+  if tDraw.tOriginUnit then
+    local tOriginVector = NewVector3(tDraw.tOriginUnit:GetPosition())
+    local tFacingVector = NewVector3(tDraw.tOriginUnit:GetFacing())
+    if tDraw.nOffsetOrigin then
+      tOriginVector = tOriginVector + RotationY(tFacingVector, tDraw.RotationMatrix90) * tDraw.nOffsetOrigin
     end
-  else
-    tVectorTo = tDraw.tToVector
-    tVectorFrom = tDraw.tFromVector
+    local tVectorA = tFacingVector * (tDraw.nOffset)
+    local tVectorB = tFacingVector * (tDraw.nLength + tDraw.nOffset)
+    tVectorA = RotationY(tVectorA, tDraw.RotationMatrix)
+    tVectorB = RotationY(tVectorB, tDraw.RotationMatrix)
+    tVectorFrom = tOriginVector + tVectorA
+    tVectorTo = tOriginVector + tVectorB
   end
 
   UpdateLine(tDraw, tVectorFrom, tVectorTo)
 end
 
 function SimpleLine:AddDraw(Key, Origin, nOffset, nLength, nRotation, nWidth, sColor, nNumberOfDot, nOffsetOrigin)
-  local OriginType = GetOriginType(Origin)
-  assert(OriginType == "number" or OriginType == "table" or OriginType == "unit" or OriginType == "vector")
-
   if self.tDraws[Key] then
     -- To complex to manage new definition with nNumberOfDot which change,
     -- simplest to remove previous.
@@ -434,47 +462,49 @@ function SimpleLine:AddDraw(Key, Origin, nOffset, nLength, nRotation, nWidth, sC
   tDraw.nOffset = nOffset or 0
   tDraw.nLength = nLength or 10
   tDraw.nWidth = nWidth or 4
+  tDraw.nRotation = nRotation or 0
   tDraw.sColor = sColor or tDraw.sColor
   tDraw.nNumberOfDot = nNumberOfDot or DOT_IS_A_LINE
   tDraw.nPixieIdDot = tDraw.nPixieIdDot or {}
   tDraw.nOffsetOrigin = nOffsetOrigin or nil
-  -- Preprocessing.
-  local nRad = math.rad(nRotation or 0)
-  local nCos = math.cos(nRad)
-  local nSin = math.sin(nRad)
-  tDraw.RotationMatrix = {
-    x = NewVector3({ nCos, 0, -nSin }),
-    y = NewVector3({ 0, 1, 0 }),
-    z = NewVector3({ nSin, 0, nCos }),
+  tDraw.tPixieAttributes = {
+    bLine = tDraw.nNumberOfDot == DOT_IS_A_LINE,
+    fWidth = tDraw.nWidth,
+    cr = tDraw.sColor,
+    loc = {
+      fPoints = FPOINT_NULL,
+      nOffsets = {}
+    }
   }
 
-  nRad = math.rad(90)
-  nCos = math.cos(nRad)
-  nSin = math.sin(nRad)
-  tDraw.RotationMatrix90 = {
-    x = NewVector3({ nCos, 0, -nSin }),
-    y = NewVector3({ 0, 1, 0 }),
-    z = NewVector3({ nSin, 0, nCos }),
-  }
-  if OriginType == "table" or OriginType == "vector" then
-    -- Origin is the result of a GetPosition()
-    local tOriginVector = NewVector3(Origin)
+  if not tDraw.tPixieAttributes.bLine then
+    tDraw.tPixieAttributes.strSprite = tDraw.sSprite
+    tDraw.tPixieAttributes.fRotation = 0
+  end
+
+  -- Preprocessing.
+  tDraw.RotationMatrix = CreateRotationMatrixY(tDraw.nRotation)
+  tDraw.RotationMatrix90 = CreateRotationMatrixY(90)
+
+  local tOriginUnit, tOriginVector = ProcessOrigin(Origin)
+  if tOriginVector then
     local tFacingVector = NewVector3(DEFAULT_NORTH_FACING)
     local tVectorA = tFacingVector * (tDraw.nOffset)
     local tVectorB = tFacingVector * (tDraw.nLength + tDraw.nOffset)
-    tVectorA = Rotation(tVectorA, tDraw.RotationMatrix)
-    tVectorB = Rotation(tVectorB, tDraw.RotationMatrix)
+    if tDraw.nOffsetOrigin then
+      tOriginVector = tOriginVector + RotationY(tFacingVector, tDraw.RotationMatrix90) * tDraw.nOffsetOrigin
+    end
+    tVectorA = RotationY(tVectorA, tDraw.RotationMatrix)
+    tVectorB = RotationY(tVectorB, tDraw.RotationMatrix)
     tDraw.tOriginUnit = nil
     tDraw.tFromVector = tOriginVector + tVectorA
     tDraw.tToVector = tOriginVector + tVectorB
-  else
-    local tUnit = Origin
-    if OriginType == "number" then
-      tUnit = GetUnitById(Origin)
-    end
-    tDraw.tOriginUnit = tUnit
+  elseif tOriginUnit then
+    tDraw.tOriginUnit = tOriginUnit
     tDraw.tFromVector = nil
     tDraw.tToVector = nil
+  else
+    Assert:Assert(false, "No valid origin found: %s", tostring(Origin))
   end
   -- Save this object (new or not).
   self.tDraws[Key] = tDraw
@@ -497,68 +527,30 @@ end
 local Polygon = NewManager("Polygon")
 
 function Polygon:UpdateDraw(tDraw)
-  local tVectors = nil
+  local tVectors = tDraw.tVectors
   local tOriginUnit = tDraw.tOriginUnit
   if tOriginUnit then
-    if tOriginUnit:IsValid() then
-      local tOriginVector = NewVector3(tOriginUnit:GetPosition())
-      local tFacingVector = NewVector3(tOriginUnit:GetFacing())
-      local tRefVector = tFacingVector * tDraw.nRadius
-      tVectors = {}
-      for i = 1, tDraw.nSide do
-        local nRad = math.rad(360 * i / tDraw.nSide + tDraw.nRotation)
-        local nCos = math.cos(nRad)
-        local nSin = math.sin(nRad)
-        local CornerRotate = {
-          x = NewVector3({ nCos, 0, -nSin }),
-          y = NewVector3({ 0, 1, 0 }),
-          z = NewVector3({ nSin, 0, nCos }),
-        }
-        tVectors[i] = tOriginVector + Rotation(tRefVector, CornerRotate)
-      end
+    local tOriginVector = NewVector3(tOriginUnit:GetPosition())
+    local tFacingVector = NewVector3(tOriginUnit:GetFacing())
+    local tRefVector = tFacingVector * tDraw.nRadius
+    tVectors = {}
+    for i = 1, tDraw.nSide do
+      local CornerRotate = CreateRotationMatrixY(360 * i / tDraw.nSide + tDraw.nRotation)
+      tVectors[i] = tOriginVector + RotationY(tRefVector, CornerRotate)
     end
-  else
-    tVectors = tDraw.tVectors
   end
-  if tVectors then
-    -- Convert all 3D coordonate of game in 2D coordonnate of screen
-    local tScreenLoc = {}
-    for i = 1, tDraw.nSide do
-      tScreenLoc[i] = WorldLocToScreenPoint(tVectors[i])
-    end
-    for i = 1, tDraw.nSide do
-      local j = i == tDraw.nSide and 1 or i + 1
-      if tScreenLoc[i].z > 0 or tScreenLoc[j].z > 0 then
-        local tPixieAttributs = {
-          bLine = true,
-          fWidth = tDraw.nWidth,
-          cr = tDraw.sColor,
-          loc = {
-            fPoints = FPOINT_NULL,
-            nOffsets = {
-              tScreenLoc[i].x,
-              tScreenLoc[i].y,
-              tScreenLoc[j].x,
-              tScreenLoc[j].y,
-            },
-          },
-        }
-        if tDraw.nPixieIds[i] then
-          _wndOverlay:UpdatePixie(tDraw.nPixieIds[i], tPixieAttributs)
-        else
-          tDraw.nPixieIds[i] = _wndOverlay:AddPixie(tPixieAttributs)
-        end
-      else
-        -- The Line is out of sight.
-        if tDraw.nPixieIds[i] then
-          _wndOverlay:DestroyPixie(tDraw.nPixieIds[i])
-          tDraw.nPixieIds[i] = nil
-        end
-      end
-    end
-  else
-    -- Unit is not valid.
-    for i = 1, tDraw.nSide do
+
+  -- Convert all 3D coordonate of game in 2D coordonnate of screen
+  local tScreenLoc = {}
+  for i = 1, tDraw.nSide do
+    tScreenLoc[i] = WorldLocToScreenPoint(tVectors[i])
+  end
+  for i = 1, tDraw.nSide do
+    local j = i == tDraw.nSide and 1 or i + 1
+    if tScreenLoc[i].z > 0 or tScreenLoc[j].z > 0 then
+      tDraw.nPixieIds[i] = UpdatePixie(tDraw, tScreenLoc[i], tScreenLoc[j], tDraw.nPixieIds[i])
+    else
+      -- The Line is out of sight.
       if tDraw.nPixieIds[i] then
         _wndOverlay:DestroyPixie(tDraw.nPixieIds[i])
         tDraw.nPixieIds[i] = nil
@@ -568,9 +560,6 @@ function Polygon:UpdateDraw(tDraw)
 end
 
 function Polygon:AddDraw(Key, Origin, nRadius, nRotation, nWidth, sColor, nSide)
-  local OriginType = GetOriginType(Origin)
-  assert(OriginType == "number" or OriginType == "table" or OriginType == "unit" or OriginType == "vector")
-
   if self.tDraws[Key] then
     -- To complex to manage new definition with nSide which change,
     -- simplest to remove previous.
@@ -590,31 +579,32 @@ function Polygon:AddDraw(Key, Origin, nRadius, nRotation, nWidth, sColor, nSide)
   tDraw.nSide = nSide or 5
   tDraw.nPixieIds = tDraw.nPixieIds or {}
   tDraw.tVectors = tDraw.tVectors or {}
+  tDraw.tPixieAttributes = {
+    bLine = true,
+    fWidth = tDraw.nWidth,
+    cr = tDraw.sColor,
+    loc = {
+      fPoints = FPOINT_NULL,
+      nOffsets = {}
+    }
+  }
 
-  if OriginType == "number" then
-    -- Origin is the Id of an unit.
-    tDraw.tOriginUnit = GetUnitById(Origin)
-  elseif OriginType == "unit" then
-    tDraw.tOriginUnit = Origin
-  else
-    -- Origin is the result of a GetPosition()
+  local tOriginUnit, tOriginVector = ProcessOrigin(Origin)
+  if tOriginVector then
     tDraw.tOriginUnit = nil
     -- Precomputing coordonate of the polygon with constant origin.
-    local tOriginVector = NewVector3(Origin)
     local tFacingVector = NewVector3(DEFAULT_NORTH_FACING)
     local tRefVector = tFacingVector * tDraw.nRadius
     for i = 1, tDraw.nSide do
-      local nRad = math.rad(360 * i / tDraw.nSide + tDraw.nRotation)
-      local nCos = math.cos(nRad)
-      local nSin = math.sin(nRad)
-      local CornerRotate = {
-        x = NewVector3({ nCos, 0, -nSin }),
-        y = NewVector3({ 0, 1, 0 }),
-        z = NewVector3({ nSin, 0, nCos }),
-      }
-      tDraw.tVectors[i] = tOriginVector + Rotation(tRefVector, CornerRotate)
+      local CornerRotate = CreateRotationMatrixY(360 * i / tDraw.nSide + tDraw.nRotation)
+      tDraw.tVectors[i] = tOriginVector + RotationY(tRefVector, CornerRotate)
     end
+  elseif tOriginUnit then
+    tDraw.tOriginUnit = tOriginUnit
+  else
+    Assert:Assert(false, "No valid origin found: %s", tostring(Origin))
   end
+
   -- Save this object (new or not).
   self.tDraws[Key] = tDraw
   -- Start the draw update service.
@@ -641,61 +631,44 @@ end
 local Picture = NewManager("Picture")
 
 function Picture:UpdateDraw(tDraw)
-  local tVector = nil
+  local tVector = tDraw.tVector
   local tOriginUnit = tDraw.tOriginUnit
   if tOriginUnit then
-    if tOriginUnit:IsValid() then
-      local tOriginVector = NewVector3(tOriginUnit:GetPosition())
-      local tFacingVector = NewVector3(tOriginUnit:GetFacing())
-      local tRefVector = tFacingVector * tDraw.nDistance
-      tVector = tOriginVector + Rotation(tRefVector, tDraw.RotationMatrix)
-      tVector.y = tVector.y + tDraw.nHeight
+    local tOriginVector = NewVector3(tOriginUnit:GetPosition())
+    local tFacingVector = NewVector3(tOriginUnit:GetFacing())
+    local tRefVector = tFacingVector * tDraw.nDistance
+    tRefVector = RotationY(tRefVector, tDraw.RotationMatrix)
+    tVector = tOriginVector + tRefVector
+    tVector.y = tVector.y + tDraw.nHeight
+  end
+
+  local tScreenLoc = WorldLocToScreenPoint(tVector)
+  if tScreenLoc.z > 0 then
+    local tVectorPlayer = NewVector3(GetPlayerUnit():GetPosition())
+    local nDistance2Player = (tVectorPlayer - tVector):Length()
+    local nScale = math.min(40 / nDistance2Player, 1)
+    nScale = math.max(nScale, 0.5) * tDraw.nSpriteSize
+    tDraw.tPixieAttributes.loc.nOffsets = {
+      tScreenLoc.x - nScale,
+      tScreenLoc.y - nScale,
+      tScreenLoc.x + nScale,
+      tScreenLoc.y + nScale
+    }
+    if tDraw.nPixieId then
+      _wndOverlay:UpdatePixie(tDraw.nPixieId, tDraw.tPixieAttributes)
+    else
+      tDraw.nPixieId = _wndOverlay:AddPixie(tDraw.tPixieAttributes)
     end
   else
-    tVector = tDraw.tVector
-  end
-  if tVector then
-    -- Convert the 3D coordonate of game in 2D coordonnate of screen
-    local tScreenLoc = WorldLocToScreenPoint(tVector)
-    if tScreenLoc.z > 0 then
-      local tVectorPlayer = NewVector3(GetPlayerUnit():GetPosition())
-      local nDistance2Player = (tVectorPlayer - tVector):Length()
-      local nScale = math.min(40 / nDistance2Player, 1)
-      nScale = math.max(nScale, 0.5) * tDraw.nSpriteSize
-      local tPixieAttributs = {
-        bLine = false,
-        strSprite = tDraw.sSprite,
-        cr = tDraw.sColor,
-        loc = {
-          fPoints = FPOINT_NULL,
-          nOffsets = {
-            tScreenLoc.x - nScale,
-            tScreenLoc.y - nScale,
-            tScreenLoc.x + nScale,
-            tScreenLoc.y + nScale,
-          },
-        },
-      }
-      if tDraw.nPixieId then
-        _wndOverlay:UpdatePixie(tDraw.nPixieId, tPixieAttributs)
-      else
-        tDraw.nPixieId = _wndOverlay:AddPixie(tPixieAttributs)
-      end
-    else
-      -- The Line is out of sight.
-      if tDraw.nPixieId then
-        _wndOverlay:DestroyPixie(tDraw.nPixieId)
-        tDraw.nPixieId = nil
-      end
+    -- The Line is out of sight.
+    if tDraw.nPixieId then
+      _wndOverlay:DestroyPixie(tDraw.nPixieId)
+      tDraw.nPixieId = nil
     end
   end
 end
 
 function Picture:AddDraw(Key, Origin, sSprite, nSpriteSize, nRotation, nDistance, nHeight, sColor)
-  local OriginType = GetOriginType(Origin)
-  assert(OriginType == "number" or OriginType == "table" or OriginType == "unit" or OriginType == "vector")
-
-  -- Register a new object to manage.
   local tDraw = self.tDraws[Key] or NewDraw()
   tDraw.sSprite = sSprite or tDraw.sSprite
   tDraw.nRotation = nRotation or 0
@@ -703,35 +676,43 @@ function Picture:AddDraw(Key, Origin, sSprite, nSpriteSize, nRotation, nDistance
   tDraw.nHeight = nHeight or 0
   tDraw.nSpriteSize = nSpriteSize or 30
   tDraw.sColor = sColor or "white"
-  -- Preprocessing.
-  local nRad = math.rad(tDraw.nRotation or 0)
-  local nCos = math.cos(nRad)
-  local nSin = math.sin(nRad)
-  tDraw.RotationMatrix = {
-    x = NewVector3({ nCos, 0, -nSin }),
-    y = NewVector3({ 0, 1, 0 }),
-    z = NewVector3({ nSin, 0, nCos }),
+  tDraw.tPixieAttributes = {
+    bLine = false,
+    strSprite = tDraw.sSprite,
+    cr = tDraw.sColor,
+    loc = {
+      fPoints = FPOINT_NULL,
+      nOffsets = {}
+    }
   }
 
-  if OriginType == "table" or OriginType == "vector" then
-    -- Origin is the result of a GetPosition()
+  if not tDraw.tPixieAttributes.bLine then
+    tDraw.tPixieAttributes.strSprite = tDraw.sSprite
+    tDraw.tPixieAttributes.fRotation = 0
+  end
+
+  -- Preprocessing.
+  tDraw.RotationMatrix = CreateRotationMatrixY(tDraw.nRotation)
+
+  local tOriginUnit, tOriginVector = ProcessOrigin(Origin)
+  if tOriginVector then
     tDraw.tOriginUnit = nil
     -- Precomputing coordonate of the polygon with constant origin.
-    local tOriginVector = NewVector3(Origin)
     local tFacingVector = NewVector3(DEFAULT_NORTH_FACING)
     local tRefVector = tFacingVector * tDraw.nDistance
-    tDraw.tVector = tOriginVector + Rotation(tRefVector, tDraw.RotationMatrix)
-    tDraw.tVector.y = tDraw.tVector.y + tDraw.nHeight
-  else
-    local tUnit = Origin
-    if OriginType == "number" then
-      tUnit = GetUnitById(Origin)
+    if tDraw.RotationMatrix then
+      tRefVector = RotationY(tRefVector, tDraw.RotationMatrix)
     end
-    tDraw.tOriginUnit = tUnit
-    local nRaceId = tUnit and tUnit:GetRaceId()
+    tDraw.tVector = tOriginVector + tRefVector
+    tDraw.tVector.y = tDraw.tVector.y + tDraw.nHeight
+  elseif tOriginUnit then
+    tDraw.tOriginUnit = tOriginUnit
+    local nRaceId = tOriginUnit and tOriginUnit:GetRaceId()
     if nRaceId and HEIGHT_PER_RACEID[nRaceId] then
       tDraw.nHeight = HEIGHT_PER_RACEID[nRaceId]
     end
+  else
+    Assert:Assert(false, "No valid origin found: %s", tostring(Origin))
   end
   -- Save this object (new or not).
   self.tDraws[Key] = tDraw
@@ -767,39 +748,45 @@ function RaidCore:GetDrawDefaultSettings()
   return DEFAULT_SETTINGS
 end
 
-function RaidCore:OnDrawUpdate()
-  local nCurrentTime = GetGameTime()
+function RaidCore:OnDrawUpdate(nCurrentTime)
+  if not _bDrawManagerRunning then return end
+
   local nDeltaTime = nCurrentTime - _nPreviousTime
   local nRefreshPeriodMin = 1.0 / self.db.profile.DrawManagers.RefreshFrequencyMax
 
-  if nDeltaTime >= nRefreshPeriodMin then
-    if nRefreshPeriodMin > 0 then
-      _nPreviousTime = nCurrentTime - nDeltaTime % nRefreshPeriodMin
-    else
-      _nPreviousTime = nCurrentTime
-    end
+  if nDeltaTime < nRefreshPeriodMin then return end
 
-    local bIsEmpty = true
-    for i = 1, _nDrawManagers do
-      local tDrawManager = _tDrawManagers[i]
-      local fHandler
-      if tDrawManager.tSettings.bEnabled then
-        fHandler = tDrawManager.UpdateDraw
-      else
-        fHandler = tDrawManager.RemoveDraw
-      end
-      for Key, tDraw in next, tDrawManager.tDraws do
-        local tArg = tDrawManager.tSettings.bEnabled and tDraw or Key
-        local s, e = pcall(fHandler, tDrawManager, tArg)
-        self:HandlePcallResult(s, e)
-      end
-      if next(tDrawManager.tDraws) then
-        bIsEmpty = false
+  if nRefreshPeriodMin > 0 then
+    _nPreviousTime = nCurrentTime - nDeltaTime % nRefreshPeriodMin
+  else
+    _nPreviousTime = nCurrentTime
+  end
+
+  local bIsEmpty = true
+  local tDrawsToRemove = {}
+  for i = 1, _nDrawManagers do
+    local tDrawManager = _tDrawManagers[i]
+    local fHandler = tDrawManager.UpdateDraw
+    for Key, tDraw in next, tDrawManager.tDraws do
+      local s, e = pcall(fHandler, tDrawManager, tDraw)
+      if not self:HandlePcallResult(s, e, " - DrawKey: "..Key) then
+        table.insert(tDrawsToRemove, {
+            tDrawManager = tDrawManager,
+            Key = Key,
+          }
+        )
       end
     end
-    if bIsEmpty then
-      StopDrawing()
+    if next(tDrawManager.tDraws) then
+      bIsEmpty = false
     end
+  end
+  for i = 1, #tDrawsToRemove do
+    local tDrawToRemove = tDrawsToRemove[i]
+    tDrawToRemove.tDrawManager:RemoveDraw(tDrawToRemove.Key)
+  end
+  if bIsEmpty then
+    StopDrawing()
   end
 end
 
@@ -861,57 +848,4 @@ end
 
 function RaidCore:RemovePicture(...)
   Picture:RemoveDraw(...)
-end
-
-----------------------------------------------------------------------------------------------------
--- XXX: DEPRECATED FUNCTIONS, Keep for compatibility.
--- If a 'Line' have the same key as a 'Pixie', we will have a problem to distinct them on erase.
-----------------------------------------------------------------------------------------------------
-function RaidCore:AddLine(Key, nType, uStart, uTarget, nColor, nLength, nRotation, nDPL)
-  local nFromId = uStart and uStart:GetId()
-  local sColor = nil
-  if nColor == 1 then
-    sColor = "ff00ff00"
-  elseif nColor == 2 then
-    sColor = "ffff9933"
-  elseif nColor == 3 then
-    sColor = "ff0000ff"
-  end
-  nDPL = nDPL or 20
-  if nType == 1 then
-    local nToId = uTarget and uTarget:GetId()
-    LineBetween:AddDraw(Key, nFromId, nToId, nil, sColor, nDPL)
-  elseif nType == 2 then
-    SimpleLine:AddDraw(Key, nFromId, nil, nLength, nRotation, nil, sColor, nDPL)
-  end
-end
-
-function RaidCore:DropLine(Key)
-  LineBetween:RemoveDraw(Key)
-  SimpleLine:RemoveDraw(Key)
-end
-
-function RaidCore:AddPixie(Key, nType, uStart, uTarget, sColor, nWidth, nLength, nRotation)
-  local nFromId = uStart and uStart:GetId()
-  if sColor == "Blue" then
-    sColor = "FF0000FF"
-  elseif sColor == "Green" then
-    sColor = "FF00FF00"
-  elseif sColor == "Yellow" then
-    sColor = "FFFF9933"
-  elseif sColor == "Red" then
-    sColor = "FFDC143C"
-  end
-
-  if nType == 1 then
-    local nToId = uTarget and uTarget:GetId()
-    LineBetween:AddDraw(Key, nFromId, nToId, nWidth, sColor)
-  elseif nType == 2 then
-    SimpleLine:AddDraw(Key, nFromId, nil, nLength, nRotation, nWidth, sColor)
-  end
-end
-
-function RaidCore:DropPixie(Key)
-  LineBetween:RemoveDraw(Key)
-  SimpleLine:RemoveDraw(Key)
 end

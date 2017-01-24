@@ -456,7 +456,7 @@ function mod:OnUnitCreated(nId, unit, sName)
     mod:AddUnit(unit)
     core:WatchUnit(unit)
     if mod:GetSetting("LineCleaveBoss") then
-      core:AddPixie(unit:GetId(), 2, unit, nil, "Green", 10, 22, 0)
+      core:AddSimpleLine(nId, unit, nil, 22, nil, 10, "Green")
     end
     nAvatusId = nId
     RefreshHoloHandPictures()
@@ -471,12 +471,12 @@ function mod:OnUnitCreated(nId, unit, sName)
       mod:AddUnit(unit)
       core:WatchUnit(unit)
       if mod:GetSetting("LineCleaveYellowRoomBoss") then
-        core:AddPixie(nId, 2, unit, nil, "Red", 5, 35, 0)
+        core:AddSimpleLine(nId, unit, nil, 35, nil, 5, "Red")
       end
     else
       -- Draw a line to the yellow portal.
       if mod:GetSetting("LinePortals") then
-        core:AddPixie(nId, 1, unit, GetPlayerUnit(), "xkcdBananaYellow")
+        core:AddLineBetweenUnits(nId, unit, GetPlayerUnit(), nil, "xkcdBananaYellow")
       end
     end
   elseif sName == self.L["Unstoppable Object Simulation"] then
@@ -488,7 +488,7 @@ function mod:OnUnitCreated(nId, unit, sName)
     else
       -- Draw a line to the green portal.
       if mod:GetSetting("LinePortals") then
-        core:AddPixie(nId, 1, unit, GetPlayerUnit(), "green")
+        core:AddLineBetweenUnits(nId, unit, GetPlayerUnit(), nil, "green")
       end
     end
   elseif sName == self.L["Infinite Logic Loop"] then
@@ -511,7 +511,7 @@ function mod:OnUnitCreated(nId, unit, sName)
     else
       -- Draw a line to the blue portal.
       if mod:GetSetting("LinePortals") then
-        core:AddPixie(nId, 1, unit, GetPlayerUnit(), "blue")
+        core:AddLineBetweenUnits(nId, unit, GetPlayerUnit(), nil, "blue")
       end
     end
   elseif sName == self.L["Holo Hand"] then
@@ -522,9 +522,9 @@ function mod:OnUnitCreated(nId, unit, sName)
     table.insert(tHoloHandsList, nId, { ["unit"] = unit} )
     mod:AddMsg("HHAND", "HOLO HAND SPAWNED", 5, "Info")
     if mod:GetSetting("LineCleaveHands") then
-      core:AddPixie(nId .. "_1", 2, unit, nil, "Blue", 7, 25, 0)
-      core:AddPixie(nId .. "_2", 2, unit, nil, "xkcdBluegrey", 3, 7, 60)
-      core:AddPixie(nId .. "_3", 2, unit, nil, "xkcdBluegrey", 3, 7, 300)
+      core:AddSimpleLine(nId .. "_1", unit, nil, 25, 0, 7, "Blue")
+      core:AddSimpleLine(nId .. "_2", unit, nil, 7, 60, 3, "xkcdBluegrey")
+      core:AddSimpleLine(nId .. "_3", unit, nil, 7, 300, 3, "xkcdBluegrey")
     end
   elseif self.L["Excessive Force Protocol"] == sName then
     if nHealth then
@@ -534,19 +534,19 @@ function mod:OnUnitCreated(nId, unit, sName)
       core:WatchUnit(unit)
     else
       -- Draw a line to the red portal.
-      core:AddPixie(nId, 1, unit, GetPlayerUnit(), "red")
+      core:AddLineBetweenUnits(nId, unit, GetPlayerUnit(), nil, "red")
     end
   elseif sName == self.L["Holo Cannon"] then
     if nHealth then
       mod:AddUnit(unit)
     end
     if mod:GetSetting("LineCannons") then
-      core:AddPixie(unit:GetId(), 2, unit, nil, "Blue", 5, 100, 0)
+      core:AddSimpleLine(nId, unit, nil, 100, nil, 5, "Blue")
     end
   elseif sName == self.L["Shock Sphere"] then
     if mod:GetSetting("LineOrbsYellowRoom") then
       -- Yellow room orbs.
-      core:AddPixie(unit:GetId(), 2, unit, nil, "Blue", 5, -7, 0)
+      core:AddSimpleLine(nId, unit, nil, -7, nil, 5, "Blue")
     end
   elseif sName == self.L["Support Cannon"] then
     mod:AddUnit(unit)
@@ -573,36 +573,37 @@ end
 
 function mod:OnUnitDestroyed(nId, tUnit, sName)
   if sName == self.L["Holo Hand"] then
-    core:DropPixie(nId .. "_1")
-    core:DropPixie(nId .. "_2")
-    core:DropPixie(nId .. "_3")
+    core:RemoveSimpleLine(nId .. "_1")
+    core:RemoveSimpleLine(nId .. "_2")
+    core:RemoveSimpleLine(nId .. "_3")
     if tHoloHandsList[nId] then
       tHoloHandsList[nId] = nil
     end
   elseif sName == self.L["Holo Cannon"] then
-    core:DropPixie(nId)
+    core:RemoveSimpleLine(nId)
   elseif sName == self.L["unit.avatus"] then
-    core:DropPixie(nId)
+    core:RemoveSimpleLine(nId)
     core:RemovePicture("HAND1")
     core:RemovePicture("HAND2")
   elseif sName == self.L["Shock Sphere"] then
-    core:DropPixie(nId)
+    core:RemoveSimpleLine(nId)
   elseif sName == self.L["Infinite Logic Loop"] then
-    core:DropPixie(nId)
+    core:RemoveLineBetweenUnits(nId)
     mod:RemoveTimerBar("PURGE_CYCLE")
     mod:RemoveTimerBar("PURGE_INCREASE")
     -- With the spellslinger's void slip spell, the purge sync is lost.
     bIsPurgeSync = false
   elseif sName == self.L["Mobius Physics Constructor"] then
-    core:DropPixie(nId)
+    core:RemoveSimpleLine(nId)
+    core:RemoveLineBetweenUnits(nId)
     if tUnit:GetHealth() == 0 then
       -- Send information about the miniboss, not the portal.
       mod:SendIndMessage("MOBIUS_DEATH")
     end
   elseif self.L["Unstoppable Object Simulation"] == sName then
-    core:DropPixie(nId)
+    core:RemoveLineBetweenUnits(nId)
   elseif self.L["Excessive Force Protocol"] == sName then
-    core:DropPixie(nId)
+    core:RemoveLineBetweenUnits(nId)
   elseif sName == self.L["Tower Platform"] then
     if bGreenRoomMarkerDisplayed then
       bGreenRoomMarkerDisplayed = false

@@ -303,8 +303,8 @@ function mod:OnUnitCreated(nId, unit, sName)
   elseif sName == self.L["Enhancement Module"] then
     mod:AddUnit(unit)
     if mod:GetSetting("LineOnModulesMidphase") then
-      core:AddLine(nId .. "_1", 2, unit, nil, 1, 25, 90)
-      core:AddLine(nId .. "_2", 2, unit, nil, 2, 25, -90)
+      core:AddSimpleLine(nId .. "_1", unit, nil, 25, 90, nil, "xkcdGreen")
+      core:AddSimpleLine(nId .. "_2", unit, nil, 25, -90, nil, "xkcdOrange")
     end
   elseif sName == self.L["unit.daemon.null"] then
     mod:AddUnit(unit)
@@ -323,8 +323,8 @@ end
 
 function mod:OnUnitDestroyed(nId, tUnit, sName)
   if sName == self.L["Enhancement Module"] then
-    core:DropLine(nId .. "_1")
-    core:DropLine(nId .. "_2")
+    core:RemoveSimpleLine(nId .. "_1")
+    core:RemoveSimpleLine(nId .. "_2")
   end
 end
 

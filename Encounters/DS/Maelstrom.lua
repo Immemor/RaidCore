@@ -124,17 +124,17 @@ function mod:OnUnitCreated(nId, unit, sName)
     core:AddUnit(unit)
     core:WatchUnit(unit, core.E.TRACK_CASTS)
     if mod:GetSetting("LineCleaveBoss") then
-      core:AddPixie(nId, 2, unit, nil, "Red", 10, 15, 0)
+      core:AddSimpleLine(nId, unit, nil, 20, nil, 10, "Red")
     end
   elseif sName == self.L["Weather Station"] then
     core:AddUnit(unit)
     if mod:GetSetting("LineWeatherStations") then
-      core:AddPixie(nId, 1, GetPlayerUnit(), unit, "Blue", 5, 10, 10)
+      core:AddLineBetweenUnits(nId, GetPlayerUnit(), unit, 5, "Blue")
     end
   elseif sName == self.L["Wind Wall"] then
     if mod:GetSetting("LineWindWalls") then
-      core:AddPixie(nId .. "_1", 2, unit, nil, "Green", 10, 20, 0)
-      core:AddPixie(nId .. "_2", 2, unit, nil, "Green", 10, 20, 180)
+      core:AddSimpleLine(nId .. "_1", unit, nil, 20, 0, 10, "Green")
+      core:AddSimpleLine(nId .. "_2", unit, nil, 20, 180, 10, "Green")
     end
   end
 end
@@ -159,11 +159,13 @@ function mod:OnEnteredCombat(nId, tUnit, sName, bInCombat)
 end
 
 function mod:OnUnitDestroyed(nId, tUnit, sName)
-  if sName == self.L["Wind Wall"] then
-    core:DropPixie(nId .. "_1")
-    core:DropPixie(nId .. "_2")
+  if sName == self.L["Maelstrom Authority"] then
+    core:RemoveSimpleLine(nId)
+  elseif sName == self.L["Wind Wall"] then
+    core:RemoveSimpleLine(nId .. "_1")
+    core:RemoveSimpleLine(nId .. "_2")
   elseif sName == self.L["Weather Station"] then
-    core:DropPixie(nId)
+    core:RemoveLineBetweenUnits(nId)
   end
 end
 

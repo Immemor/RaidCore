@@ -119,13 +119,13 @@ function mod:OnUnitCreated(nId, unit, sName)
     core:MarkUnit(unit, nil, self.L["EARTH"])
   elseif sName == self.L["Aileron"] then
     if mod:GetSetting("LineCleaveAileron") then
-      core:AddPixie(unit:GetId(), 2, unit, nil, "Green", 10, 15, 0)
+      core:AddSimpleLine(nId, unit, nil, 15, nil, 10, "Green")
     end
     core:AddUnit(unit)
     core:WatchUnit(unit, core.E.TRACK_CASTS)
   elseif sName == self.L["Air Column"] then
     if mod:GetSetting("LineTornado") then
-      core:AddLine(unit:GetId(), 2, unit, nil, 3, 30, 0, 10)
+      core:AddSimpleLine(unit:GetId(), unit, nil, 30, nil, nil, "xkcdBlue", 10)
     end
     if GetGameTime() > nStartTime + 10 then
       mod:AddTimerBar("TORNADO", "Next tornado", 17, mod:GetSetting("SoundTornadoCountDown"))
@@ -134,8 +134,8 @@ function mod:OnUnitCreated(nId, unit, sName)
 end
 
 function mod:OnUnitDestroyed(nId, tUnit, sName)
-  if sName == self.L["Air Column"] then
-    core:DropLine(nId)
+  if sName == self.L["Air Column"] or sName == self.L["Aileron"] then
+    core:RemoveSimpleLine(nId)
   end
 end
 
