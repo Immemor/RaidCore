@@ -289,9 +289,7 @@ function mod:ToggleDeadRealm(id)
   if id == player.id then
     isDeadRealm = not isDeadRealm
     if not isDeadRealm then
-      if mod:GetSetting("LineLostSouls") then
-        core:RemoveLineBetweenUnits("LOST_SOUL_LINE")
-      end
+      mod:RemoveLostSoulLine()
     end
   end
 end
@@ -394,17 +392,13 @@ function mod:OnTitanDestroyed(id, unit, name)
 end
 
 function mod:OnLostSoulCreated(id, unit, name)
-  if mod:GetSetting("LineLostSouls") then
-    if isDeadRealm then
-      core:AddLineBetweenUnits("LOST_SOUL_LINE", player.unit, id, 10, "white")
-    end
+  if mod:GetSetting("LineLostSouls") and isDeadRealm then
+    core:AddLineBetweenUnits("LOST_SOUL_LINE", player.unit, id, 10, "white")
   end
 end
 
 function mod:OnLostSoulDestroyed(id, unit, name)
-  if mod:GetSetting("LineLostSouls") then
-    core:RemoveLineBetweenUnits("LOST_SOUL_LINE")
-  end
+  mod:RemoveLostSoulLine()
 end
 
 function mod:OnLavekaHealthChanged(id, percent, name)
@@ -419,6 +413,10 @@ function mod:OnSoulEaterCaught(id, spellId, stacks, timeRemaining, name, unitCas
     local distance = (Vector3.New(unit:GetPosition()) - ROOM_CENTER):Length()
     Log:Add("ChannelCommStatus", "Id="..unitCaster:GetId().." DistanceToCenter="..distance)
   end
+end
+
+function mod:RemoveLostSoulLine()
+  core:RemoveLineBetweenUnits("LOST_SOUL_LINE")
 end
 
 ----------------------------------------------------------------------------------------------------
