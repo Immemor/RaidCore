@@ -112,7 +112,7 @@ mod:RegisterEnglishLocale({
     ["GUN GRID NOW!"] = "GUN GRID NOW!",
     ["MARKER North"] = "North",
     ["MARKER South"] = "South",
-    ["MARKER Est"] = "Est",
+    ["MARKER Est"] = "East",
     ["MARKER West"] = "West",
     ["%s. PURGE BLUE (%s)"] = "%s. PURGE BLUE (%s)",
     ["%s. PURGE RED (%s)"] = "%s. PURGE RED (%s)",
