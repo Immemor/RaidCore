@@ -360,8 +360,6 @@ function LineBetween:AddDraw(Key, FromOrigin, ToOrigin, nWidth, sColor, nNumberO
       self:RemoveDraw(Key)
     end
   end
-  local FromOriginType = GetOriginType(FromOrigin)
-  local ToOriginType = GetOriginType(ToOrigin)
   -- Get saved object or create a new table.
   local tDraw = self.tDraws[Key] or NewDraw()
   tDraw.nWidth = nWidth or 4.0
