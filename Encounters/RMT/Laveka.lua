@@ -29,6 +29,19 @@ mod:RegisterEnglishLocale({
     -- Cast names.
     ["cast.essence.surge"] = "Essence Surge", -- Essence fully materialized
     ["cast.laveka.devoursouls"] = "Devour Souls",
+    ["cast.laveka.animate_bones"] = "Animate Bones",
+    ["cast.laveka.essence"] = "Essence Void",
+    ["cast.laveka.cacophony"] = "Cacophony of Souls",
+    ["cast.laveka.expulsion"] = "Expulsion of Souls",
+    ["cast.titan.bulwark"] = "Necrotic Bulwark",
+    ["cast.titan.manifest"] = "Manifest",
+    ["cast.adds.explosion"] = "Spirit Ire",
+    -- Datachrons.
+    ["chron.laveka.mask"] = "You feel the Mask of Mog-Mog pulling at your spirit.",
+    ["chron.laveka.soul_fire"] = "Laveka sets ([^%s]+%s[^']+)'s soul ablaze!",
+    ["chron.laveka.death"] = "Death is only the beginning...",
+    ["chron.laveka.cacophony"] = "Laveka unleashes a Cacaphony of Souls, devastating the Realm of the Living",
+    ["chron.realm.living"] = "Your spirit has returned to the mortal realm.",
     -- Messages.
     ["msg.laveka.soulfire.you"] = "SOULFIRE ON YOU",
     ["msg.laveka.spirit_of_soulfire"] = "Spirit of Soulfire",
@@ -45,6 +58,20 @@ mod:RegisterEnglishLocale({
     ["mark.cardinal.NW"] = "NW",
     ["mark.cardinal.SE"] = "SE",
     ["mark.cardinal.SW"] = "SW",
+  }
+)
+mod:RegisterFrenchLocale({
+    -- Unit names.
+    ["unit.essence"] = "Vide d'essence",
+    ["unit.phantom"] = "Fantôme",
+    -- Cast names.
+    ["cast.laveka.cacophony"] = "Cacophonie des âmes",
+    ["cast.titan.manifest"] = "Manifeste",
+    ["cast.adds.explosion"] = "Courroux spirituel",
+    -- Datachrons.
+    ["chron.laveka.mask"] = "Vous sentez votre esprit attiré par le masque de Mog-Mog.",
+    ["chron.laveka.cacophony"] = "Laveka libère une Cacophonie d'âmes qui dévaste le royaume des vivants.",
+    ["chron.realm.living"] = "Votre esprit est revenu au royaume des mortels.",
   }
 )
 ----------------------------------------------------------------------------------------------------
@@ -172,6 +199,12 @@ function mod:SetCardinalMarkers()
   end
   for direction, location in next, CARDINAL_MARKERS do
     mod:SetWorldMarker("CARDINAL_"..direction, "mark.cardinal."..direction, location)
+  end
+end
+
+function mod:OnAnyUnitCreated(id, unit, name)
+  if name == player.name and unit:IsHostile() then
+    core:AddLineBetweenUnits("Bla", player.unit, unit, 7, "xkcdRed")
   end
 end
 
@@ -472,6 +505,7 @@ mod:RegisterUnitEvents("unit.laveka",{
 )
 
 mod:RegisterUnitEvents(core.E.ALL_UNITS,{
+    [core.E.UNIT_CREATED] = mod.OnAnyUnitCreated,
     [core.E.UNIT_DESTROYED] = mod.OnAnyUnitDestroyed,
     [DEBUFFS.SOULFIRE] = {
       [core.E.DEBUFF_ADD] = mod.OnSoulfireAdd,
