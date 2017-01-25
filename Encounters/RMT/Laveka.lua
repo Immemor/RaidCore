@@ -178,6 +178,7 @@ local lastSpiritOfSoulfireStack
 local soulEatersActive
 local lastSoulfireName
 local orbitColor
+local drawOrbitTimer
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
@@ -192,9 +193,27 @@ function mod:OnBossEnable()
   player.id = player.unit:GetId()
   player.name = player.unit:GetName()
   mod:AddTimerBar("ADDS_TIMER", "msg.adds.next", TIMERS.ADDS.FIRST)
-  mod:AddTimerBar("SOULEATER_TIMER", "msg.souleaters.next", TIMERS.SOUL_EATERS.FIRST, true)
+  mod:StartSoulEaterTimer(TIMERS.SOUL_EATERS.FIRST)
   mod:SetCardinalMarkers()
   --mod:DrawSoulEaterOrbits()
+end
+
+function mod:StartSoulEaterTimer(seconds)
+  if drawOrbitTimer ~= nil then
+    drawOrbitTimer:Stop()
+  end
+
+  mod:AddTimerBar("SOULEATER_TIMER", "msg.souleaters.next", seconds, true)
+  drawOrbitTimer = ApolloTimer.Create(seconds-5, false, "DrawSoulEaterOrbits", mod)
+end
+
+function mod:StopSoulEaterTimer()
+  if drawOrbitTimer ~= nil then
+    drawOrbitTimer:Stop()
+  end
+
+  drawOrbitTimer = nil
+  mod:RemoveTimerBar("SOULEATER_TIMER")
 end
 
 function mod:SetCardinalMarkers()
@@ -412,12 +431,13 @@ end
 function mod:OnMidphaseStart()
   isMidphase = true
   mod:RemoveTimerBar("ADDS_TIMER")
-  mod:RemoveTimerBar("SOULEATER_TIMER")
+  mod:StopSoulEaterTimer()
+  mod:RemoveSoulEaterOrbits()
 end
 
 function mod:OnMidphaseEnd()
   isMidphase = false
-  mod:AddTimerBar("SOULEATER_TIMER", "msg.souleaters.next", TIMERS.SOUL_EATERS.NORMAL, true)
+  mod:StartSoulEaterTimer(TIMERS.SOUL_EATERS.NORMAL)
 end
 
 function mod:OnTitanCreated(id, unit, name)
