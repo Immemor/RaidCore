@@ -410,6 +410,8 @@ end
 
 function mod:OnMidphaseStart()
   isMidphase = true
+  mod:RemoveTimerBar("ADDS_TIMER")
+  mod:RemoveTimerBar("SOULEATER_TIMER")
 end
 
 function mod:OnMidphaseEnd()
