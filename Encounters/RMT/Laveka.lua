@@ -144,6 +144,7 @@ local TIMERS = {
   ECHOES_OF_THE_AFTERLIFE = 10,
   ADDS = {
     FIRST = 35,
+    MIDPHASE = 75,
     NORMAL = 90,
   }
 }
@@ -424,7 +425,8 @@ function mod:OnTitanCreated(id, unit, name)
     core:AddLineBetweenUnits("TITAN_LINE_"..id, player.unit, id, 7, "xkcdLightYellow")
   end
   if not isDeadRealm then
-    mod:AddTimerBar("ADDS_TIMER", "msg.adds.next", TIMERS.ADDS.NORMAL)
+    local timer = isMidphase and TIMERS.ADDS.MIDPHASE or TIMERS.ADDS.NORMAL
+    mod:AddTimerBar("ADDS_TIMER", "msg.adds.next", timer)
   end
 end
 
