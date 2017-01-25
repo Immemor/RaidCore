@@ -195,7 +195,6 @@ function mod:OnBossEnable()
   mod:AddTimerBar("ADDS_TIMER", "msg.adds.next", TIMERS.ADDS.FIRST)
   mod:StartSoulEaterTimer(TIMERS.SOUL_EATERS.FIRST)
   mod:SetCardinalMarkers()
-  --mod:DrawSoulEaterOrbits()
 end
 
 function mod:StartSoulEaterTimer(seconds)
