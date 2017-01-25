@@ -133,6 +133,7 @@ local DEBUFFS = {
 local BUFFS = {
   SPIRIT_OF_SOULFIRE = 75576,
   MOMENT_OF_OPPORTUNITY = 54211,
+  BARRIER_OF_SOULS = 87774, -- Midphase buff
 }
 
 local TIMERS = {
@@ -495,7 +496,7 @@ mod:RegisterUnitEvents("unit.laveka",{
       [core.E.BUFF_UPDATE] = mod.OnSpiritOfSoulfireUpdate,
       [core.E.BUFF_REMOVE] = mod.OnSpiritOfSoulfireRemove,
     },
-    [BUFFS.MOMENT_OF_OPPORTUNITY] = {
+    [BUFFS.BARRIER_OF_SOULS] = {
       [core.E.BUFF_ADD] = mod.OnMidphaseEnd,
     },
     ["cast.laveka.devoursouls"] = {
