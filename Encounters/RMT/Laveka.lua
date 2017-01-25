@@ -172,6 +172,7 @@ local player
 local essenceNumber
 local essences
 local isDeadRealm
+local isMidphase
 local lastSpiritOfSoulfireStack
 local soulEatersActive
 local lastSoulfireName
@@ -182,6 +183,7 @@ local orbitColor
 function mod:OnBossEnable()
   essenceNumber = 0
   isDeadRealm = false
+  isMidphase = false
   lastSpiritOfSoulfireStack = 0
   essences = {}
   player = {}
@@ -406,7 +408,12 @@ function mod:RemoveSoulEaterOrbit(id)
   mod:DropWorldMarker("ORBIT_"..id.."down")
 end
 
+function mod:OnMidphaseStart()
+  isMidphase = true
+end
+
 function mod:OnMidphaseEnd()
+  isMidphase = false
   mod:AddTimerBar("SOULEATER_TIMER", "msg.souleaters.next", TIMERS.SOUL_EATERS.NORMAL, true)
 end
 
@@ -497,7 +504,8 @@ mod:RegisterUnitEvents("unit.laveka",{
       [core.E.BUFF_REMOVE] = mod.OnSpiritOfSoulfireRemove,
     },
     [BUFFS.BARRIER_OF_SOULS] = {
-      [core.E.BUFF_ADD] = mod.OnMidphaseEnd,
+      [core.E.BUFF_ADD] = mod.OnMidphaseStart,
+      [core.E.BUFF_REMOVE] = mod.OnMidphaseEnd,
     },
     ["cast.laveka.devoursouls"] = {
       [core.E.CAST_END] = mod.OnDevourSoulsStop,
