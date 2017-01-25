@@ -221,7 +221,7 @@ function mod:OnAnyUnitDestroyed(id, unit, name)
   mod:RemoveNecroticBreathMark(id)
 end
 
-function mod:OnWatchedUnitCreated(id, unit, name)
+function mod:OnLavekaCreated(id, unit, name)
   mod:AddUnit(unit)
   core:WatchUnit(unit, core.E.TRACK_ALL)
 end
@@ -421,6 +421,7 @@ function mod:OnMidphaseEnd()
 end
 
 function mod:OnTitanCreated(id, unit, name)
+  mod:AddUnit(unit)
   if mod:GetSetting("LineTitan") then
     core:AddLineBetweenUnits("TITAN_LINE_"..id, player.unit, id, 7, "xkcdLightYellow")
   end
@@ -492,15 +493,8 @@ mod:RegisterUnitEvents("unit.orb",{
   }
 )
 
-mod:RegisterUnitEvents({
-    "unit.laveka",
-    "unit.titan",
-    },{
-    [core.E.UNIT_CREATED] = mod.OnWatchedUnitCreated,
-  }
-)
-
 mod:RegisterUnitEvents("unit.laveka",{
+    [core.E.UNIT_CREATED] = mod.OnLavekaCreated,
     [core.E.HEALTH_CHANGED] = mod.OnLavekaHealthChanged,
     [BUFFS.SPIRIT_OF_SOULFIRE] = {
       [core.E.BUFF_ADD] = mod.OnSpiritOfSoulfireAdd,
