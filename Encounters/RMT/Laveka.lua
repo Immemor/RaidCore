@@ -440,6 +440,7 @@ end
 
 function mod:OnMidphaseEnd()
   isMidphase = false
+  mod:RemoveTimerBar("ADDS_TIMER")
   mod:StartSoulEaterTimer(TIMERS.SOUL_EATERS.NORMAL)
 end
 
