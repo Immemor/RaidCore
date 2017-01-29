@@ -197,6 +197,10 @@ function mod:OnBossEnable()
   mod:SetCardinalMarkers()
 end
 
+function mod:OnBossDisable()
+  mod:StopSoulEaterTimer()
+end
+
 function mod:StartSoulEaterTimer(seconds)
   if drawOrbitTimer ~= nil then
     drawOrbitTimer:Stop()
