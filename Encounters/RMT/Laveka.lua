@@ -462,7 +462,7 @@ end
 
 function mod:OnLostSoulCreated(id, unit, name)
   if mod:GetSetting("LineLostSouls") and isDeadRealm then
-    core:AddLineBetweenUnits("LOST_SOUL_LINE", player.unit, id, 10, "xkcdPurplePink")
+    core:AddLineBetweenUnits("LOST_SOUL_LINE", player.unit, id, 10, "xkcdGreen")
   end
 end
 
