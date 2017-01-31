@@ -443,6 +443,15 @@ function EncounterPrototype:RemoveProgressBar(sKey)
   RaidCore:RemoveProgressBar(sKey)
 end
 
+-- Marks a unit with text
+-- @param tUnit the unit
+-- @param nLocation location of the mark
+-- @param sEnglishText English text
+-- @param sColor Color of the text
+function EncounterPrototype:MarkUnit(tUnit, nLocation, sText, sColor)
+  RaidCore:MarkUnit(tUnit, nLocation, self.L[sText], sColor)
+end
+
 function EncounterPrototype:TranslateTriggerNames()
   local tmp = {}
   for _, EnglishKey in next, self.tTriggerNames do
