@@ -89,9 +89,9 @@ mod:RegisterFrenchLocale({
 mod:RegisterDefaultSetting("IndicatorPlanets")
 mod:RegisterDefaultSetting("IndicatorAsteroids")
 mod:RegisterDefaultSetting("MarkCardinal")
-mod:RegisterDefaultSetting("MarkWorldenderSpawn")
+mod:RegisterDefaultSetting("MarkWorldEnderSpawn")
 mod:RegisterDefaultSetting("MarkAsteroidCount")
-mod:RegisterDefaultSetting("LineWorldender")
+mod:RegisterDefaultSetting("LineWorldEnder")
 mod:RegisterDefaultSetting("LineAsteroids")
 mod:RegisterDefaultSetting("LineAlphaCassusCleave")
 mod:RegisterDefaultSetting("LineCosmicDebris", false)
@@ -103,20 +103,20 @@ mod:RegisterDefaultSetting("CrosshairCosmicDebris")
 mod:RegisterDefaultSetting("MarkWorldender")
 mod:RegisterDefaultSetting("MarkWormhole", false)
 -- Sounds.
-mod:RegisterDefaultSetting("CountdownWorldender")
-mod:RegisterDefaultSetting("SoundWorldenderSpawn")
+mod:RegisterDefaultSetting("CountdownWorldEnder")
+mod:RegisterDefaultSetting("SoundWorldEnderSpawn")
 mod:RegisterDefaultSetting("SoundMidphaseSoon")
 mod:RegisterDefaultSetting("SoundSolarWindStacksWarning")
 mod:RegisterDefaultSetting("SoundCriticalMassYouWarning")
 mod:RegisterDefaultSetting("SoundWorldEnderFalling")
 -- Messages.
-mod:RegisterDefaultSetting("MessageWorldenderSpawn")
+mod:RegisterDefaultSetting("MessageWorldEnderSpawn")
 mod:RegisterDefaultSetting("MessageMidphaseSoon")
 mod:RegisterDefaultSetting("MessageSolarWindStacksWarning")
 mod:RegisterDefaultSetting("MessageCriticalMassYouWarning")
 mod:RegisterDefaultSetting("MessageWorldEnderFalling")
 -- Binds.
-mod:RegisterMessageSetting("WORLD_ENDER_SPAWN_MSG", core.E.COMPARE_EQUAL, "MessageWorldenderSpawn", "SoundWorldenderSpawn")
+mod:RegisterMessageSetting("WORLD_ENDER_SPAWN_MSG", core.E.COMPARE_EQUAL, "MessageWorldEnderSpawn", "SoundWorldEnderSpawn")
 mod:RegisterMessageSetting("MID_PHASE", core.E.COMPARE_EQUAL, "MessageMidphaseSoon", "SoundMidphaseSoon")
 mod:RegisterMessageSetting("SOLAR_WINDS_MSG", core.E.COMPARE_EQUAL, "MessageSolarWindStacksWarning", "SoundSolarWindStacksWarning")
 mod:RegisterMessageSetting("CRITICAL_MASS_MSG", core.E.COMPARE_EQUAL, "MessageCriticalMassYouWarning", "SoundCriticalMassYouWarning")
@@ -258,7 +258,7 @@ function mod:OnBossEnable()
   asteroidWaveCounter = 0
   playerId = GameLib.GetPlayerUnit():GetId()
   mod:StartSecondAsteroidTimer()
-  mod:AddTimerBar("NEXT_WORLD_ENDER_TIMER", "msg.world_ender.next", TIMERS.WORLD_ENDER.FIRST, mod:GetSetting("CountdownWorldender"))
+  mod:AddTimerBar("NEXT_WORLD_ENDER_TIMER", "msg.world_ender.next", TIMERS.WORLD_ENDER.FIRST, mod:GetSetting("CountdownWorldEnder"))
   mod:SetCardinalMarkers()
   mod:DrawWorldEnderMarkers()
   core:AddUnitSpacer("WORLD_ENDER_SPACE", nil, 2)
@@ -272,7 +272,7 @@ function mod:OnBossDisable()
 end
 
 function mod:DrawWorldEnderMarkers()
-  if not mod:GetSetting("MarkWorldenderSpawn") then return end
+  if not mod:GetSetting("MarkWorldEnderSpawn") then return end
   for i = 1, #ENDER_SPAWN_MARKERS do
     local msg = self.L["mark.world_ender.spawn_location"]:format(i)
     mod:SetWorldMarker("WORLD_ENDER_MARKER_"..i, msg, ENDER_SPAWN_MARKERS[i], "xkcdCyan")
@@ -415,8 +415,8 @@ function mod:OnWorldEnderCreated(id, unit)
   mod:AddUnit(unit)
   mod:OnWorldEnderTarget(worldEnders[id], worldEnders[id].targetName)
   core:WatchUnit(unit, core.E.TRACK_BUFFS)
-  mod:AddTimerBar("NEXT_WORLD_ENDER_TIMER", "msg.world_ender.next", TIMERS.WORLD_ENDER.NORMAL, mod:GetSetting("CountdownWorldender"))
-  if mod:GetSetting("LineWorldender") then
+  mod:AddTimerBar("NEXT_WORLD_ENDER_TIMER", "msg.world_ender.next", TIMERS.WORLD_ENDER.NORMAL, mod:GetSetting("CountdownWorldEnder"))
+  if mod:GetSetting("LineWorldEnder") then
     core:AddLineBetweenUnits("WORLD_ENDER_" .. id, playerId, id, 6, "xkcdCyan")
   end
   mod:AddMsg("WORLD_ENDER_SPAWN_MSG", "msg.world_ender.spawned", 5, "Beware", "xkcdCyan")
