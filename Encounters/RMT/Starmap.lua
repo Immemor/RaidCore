@@ -63,6 +63,8 @@ mod:RegisterEnglishLocale({
     ["mark.cardinal.E"] = "E",
     ["mark.cardinal.W"] = "W",
     ["mark.world_ender.spawn_location"] = "W%d",
+    ["mark.world_ender.orbiting"] = "Orbiting",
+    ["mark.worm.hole"] = "X",
   }
 )
 mod:RegisterFrenchLocale({
@@ -87,9 +89,9 @@ mod:RegisterFrenchLocale({
 mod:RegisterDefaultSetting("IndicatorPlanets")
 mod:RegisterDefaultSetting("IndicatorAsteroids")
 mod:RegisterDefaultSetting("MarkCardinal")
-mod:RegisterDefaultSetting("MarkWorldenderSpawn")
+mod:RegisterDefaultSetting("MarkWorldEnderSpawn")
 mod:RegisterDefaultSetting("MarkAsteroidCount")
-mod:RegisterDefaultSetting("LineWorldender")
+mod:RegisterDefaultSetting("LineWorldEnder")
 mod:RegisterDefaultSetting("LineAsteroids")
 mod:RegisterDefaultSetting("LineAlphaCassusCleave")
 mod:RegisterDefaultSetting("LineCosmicDebris", false)
@@ -98,21 +100,23 @@ mod:RegisterDefaultSetting("CirclePermanentPlanetOrbits", false)
 mod:RegisterDefaultSetting("MarkDebrisField")
 mod:RegisterDefaultSetting("MarkSolarWindTimer")
 mod:RegisterDefaultSetting("CrosshairCosmicDebris")
+mod:RegisterDefaultSetting("MarkWorldEnder")
+mod:RegisterDefaultSetting("MarkWormhole", false)
 -- Sounds.
-mod:RegisterDefaultSetting("CountdownWorldender")
-mod:RegisterDefaultSetting("SoundWorldenderSpawn")
+mod:RegisterDefaultSetting("CountdownWorldEnder")
+mod:RegisterDefaultSetting("SoundWorldEnderSpawn")
 mod:RegisterDefaultSetting("SoundMidphaseSoon")
 mod:RegisterDefaultSetting("SoundSolarWindStacksWarning")
 mod:RegisterDefaultSetting("SoundCriticalMassYouWarning")
 mod:RegisterDefaultSetting("SoundWorldEnderFalling")
 -- Messages.
-mod:RegisterDefaultSetting("MessageWorldenderSpawn")
+mod:RegisterDefaultSetting("MessageWorldEnderSpawn")
 mod:RegisterDefaultSetting("MessageMidphaseSoon")
 mod:RegisterDefaultSetting("MessageSolarWindStacksWarning")
 mod:RegisterDefaultSetting("MessageCriticalMassYouWarning")
 mod:RegisterDefaultSetting("MessageWorldEnderFalling")
 -- Binds.
-mod:RegisterMessageSetting("WORLD_ENDER_SPAWN_MSG", core.E.COMPARE_EQUAL, "MessageWorldenderSpawn", "SoundWorldenderSpawn")
+mod:RegisterMessageSetting("WORLD_ENDER_SPAWN_MSG", core.E.COMPARE_EQUAL, "MessageWorldEnderSpawn", "SoundWorldEnderSpawn")
 mod:RegisterMessageSetting("MID_PHASE", core.E.COMPARE_EQUAL, "MessageMidphaseSoon", "SoundMidphaseSoon")
 mod:RegisterMessageSetting("SOLAR_WINDS_MSG", core.E.COMPARE_EQUAL, "MessageSolarWindStacksWarning", "SoundSolarWindStacksWarning")
 mod:RegisterMessageSetting("CRITICAL_MASS_MSG", core.E.COMPARE_EQUAL, "MessageCriticalMassYouWarning", "SoundCriticalMassYouWarning")
@@ -219,6 +223,10 @@ local CARDINAL_MARKERS = {
   ["E"] = Vector3.New(-30.00, -96.22, 357.03),
   ["W"] = Vector3.New(-124.81, -96.21, 356.96),
 }
+
+--Where the Wormhole needs to be places
+local WORM_HOLE_POSITION = Vector3.New(-47.13, -96.21, 356.96)
+
 ----------------------------------------------------------------------------------------------------
 -- Locals.
 ----------------------------------------------------------------------------------------------------
@@ -234,6 +242,7 @@ local lastWorldEnder
 local worldEnders
 local solarFlareCount
 local asteroidWaveCounter
+local wormHoleId
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
@@ -249,7 +258,7 @@ function mod:OnBossEnable()
   asteroidWaveCounter = 0
   playerId = GameLib.GetPlayerUnit():GetId()
   mod:StartSecondAsteroidTimer()
-  mod:AddTimerBar("NEXT_WORLD_ENDER_TIMER", "msg.world_ender.next", TIMERS.WORLD_ENDER.FIRST, mod:GetSetting("CountdownWorldender"))
+  mod:AddTimerBar("NEXT_WORLD_ENDER_TIMER", "msg.world_ender.next", TIMERS.WORLD_ENDER.FIRST, mod:GetSetting("CountdownWorldEnder"))
   mod:SetCardinalMarkers()
   mod:DrawWorldEnderMarkers()
   core:AddUnitSpacer("WORLD_ENDER_SPACE", nil, 2)
@@ -263,7 +272,7 @@ function mod:OnBossDisable()
 end
 
 function mod:DrawWorldEnderMarkers()
-  if not mod:GetSetting("MarkWorldenderSpawn") then return end
+  if not mod:GetSetting("MarkWorldEnderSpawn") then return end
   for i = 1, #ENDER_SPAWN_MARKERS do
     local msg = self.L["mark.world_ender.spawn_location"]:format(i)
     mod:SetWorldMarker("WORLD_ENDER_MARKER_"..i, msg, ENDER_SPAWN_MARKERS[i], "xkcdCyan")
@@ -310,6 +319,7 @@ function mod:OnWorldEnderTargetDestroyed(targetName)
     if worldEnder.targetName == targetName then
       core:RemoveLineBetweenUnits("WORLD_ENDER_" .. id)
       worldEnder.targetDestroyed = true
+      mod:OnWorldEnderTarget(worldEnder, self.L["mark.world_ender.orbiting"])
     end
   end
 end
@@ -403,17 +413,27 @@ function mod:OnWorldEnderCreated(id, unit)
   }
   worldEnders[id] = lastWorldEnder
   mod:AddUnit(unit)
+  mod:OnWorldEnderTarget(worldEnders[id], worldEnders[id].targetName)
   core:WatchUnit(unit, core.E.TRACK_BUFFS)
-  mod:AddTimerBar("NEXT_WORLD_ENDER_TIMER", "msg.world_ender.next", TIMERS.WORLD_ENDER.NORMAL, mod:GetSetting("CountdownWorldender"))
-  if mod:GetSetting("LineWorldender") then
+  mod:AddTimerBar("NEXT_WORLD_ENDER_TIMER", "msg.world_ender.next", TIMERS.WORLD_ENDER.NORMAL, mod:GetSetting("CountdownWorldEnder"))
+  if mod:GetSetting("LineWorldEnder") then
     core:AddLineBetweenUnits("WORLD_ENDER_" .. id, playerId, id, 6, "xkcdCyan")
   end
   mod:AddMsg("WORLD_ENDER_SPAWN_MSG", "msg.world_ender.spawned", 5, "Beware", "xkcdCyan")
   mod:StartAsteroidTimer()
   mod:DropWorldMarker("WORLD_ENDER_MARKER_" .. worldEnderCount)
+
+  if worldEnderCount == 4 and mod:GetSetting("MarkWormhole") then
+    wormHoleId = id
+    mod:SetWorldMarker("WORM_HOLE_"..id, "mark.worm.hole", WORM_HOLE_POSITION)
+  end
+
 end
 
 function mod:OnWorldEnderDestroyed(id, unit)
+  if wormHoleId == id then
+    mod:DropWorldMarker("WORM_HOLE_"..id)
+  end
   core:RemoveLineBetweenUnits("WORLD_ENDER_" .. id)
   worldEnders[id] = nil
 end
@@ -521,25 +541,34 @@ function mod:OnDebrisFieldDestroyed(id, unit)
   core:RemovePicture("DEBRIS_FIELD_MARKER"..id)
 end
 
-function mod:OnWorldEnderTarget(targetName)
-  worldEnders[lastWorldEnder.id].targetName = targetName
+function mod:OnLastWorldEnderTarget(targetName)
+  mod:OnWorldEnderTarget(worldEnders[lastWorldEnder.id], targetName)
+end
+
+function mod:OnWorldEnderTarget(worldEnder, targetName)
+  worldEnder.targetName = targetName
+  if mod:GetSetting("MarkWorldEnder") then
+    core:MarkUnit(worldEnder.unit, core.E.LOCATION_STATIC_CHEST, worldEnder.targetName)
+  end
 end
 
 function mod:OnWorldEnderTargetAldinari()
-  mod:OnWorldEnderTarget(self.L["unit.aldinari"])
+  mod:OnLastWorldEnderTarget(self.L["unit.aldinari"])
 end
 
 function mod:OnWorldEnderTargetVulpesNix()
-  mod:OnWorldEnderTarget(self.L["unit.vulpes_nix"])
+  mod:OnLastWorldEnderTarget(self.L["unit.vulpes_nix"])
 end
 
 function mod:OnWorldEnderTargetCassus()
-  mod:OnWorldEnderTarget(self.L["unit.cassus"])
+  mod:OnLastWorldEnderTarget(self.L["unit.cassus"])
 end
 
 function mod:OnWorldEnderEnterWormhole(id)
-  if worldEnders[id].targetDestroyed then
+  local worldEnder = worldEnders[id]
+  if worldEnder.targetDestroyed then
     mod:AddMsg("WORLD_ENDER_FALLING", "msg.world_ender.falling", 5, "Beware", "xkcdOrange")
+    mod:OnWorldEnderTarget(worldEnder, self.L["unit.alpha"])
   end
 end
 
