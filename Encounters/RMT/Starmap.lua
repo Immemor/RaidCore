@@ -100,7 +100,7 @@ mod:RegisterDefaultSetting("CirclePermanentPlanetOrbits", false)
 mod:RegisterDefaultSetting("MarkDebrisField")
 mod:RegisterDefaultSetting("MarkSolarWindTimer")
 mod:RegisterDefaultSetting("CrosshairCosmicDebris")
-mod:RegisterDefaultSetting("MarkWorldender")
+mod:RegisterDefaultSetting("MarkWorldEnder")
 mod:RegisterDefaultSetting("MarkWormhole", false)
 -- Sounds.
 mod:RegisterDefaultSetting("CountdownWorldEnder")
@@ -547,7 +547,7 @@ end
 
 function mod:OnWorldEnderTarget(worldEnder, targetName)
   worldEnder.targetName = targetName
-  if mod:GetSetting("MarkWorldender") then
+  if mod:GetSetting("MarkWorldEnder") then
     core:MarkUnit(worldEnder.unit, core.E.LOCATION_STATIC_CHEST, worldEnder.targetName)
   end
 end
