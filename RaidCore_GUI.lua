@@ -281,6 +281,7 @@ function RaidCore:GUI_init(sVersion)
     Mordechai = Apollo.LoadForm(self.xmlDoc, "ConfigForm_Mordechai", self.wndEncounterTarget, self),
     Octog = Apollo.LoadForm(self.xmlDoc, "ConfigForm_Octog", self.wndEncounterTarget, self),
     Starmap = Apollo.LoadForm(self.xmlDoc, "ConfigForm_Starmap", self.wndEncounterTarget, self),
+    Laveka = Apollo.LoadForm(self.xmlDoc, "ConfigForm_Laveka", self.wndEncounterTarget, self),
   }
   -- Initialize Left Menu in Main RaidCore window.
   local wndGeneralButton = self.wndMain:FindChild("Static"):FindChild("General")
