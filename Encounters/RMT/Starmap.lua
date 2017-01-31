@@ -193,7 +193,7 @@ local PLANETS = {
     ORBIT = {LOWER = 36, UPPER = 44}
   },
   ["unit.vulpes_nix"] = {
-    INDICATOR_COLOR = "xkcdBrown",
+    INDICATOR_COLOR = "xkcdOrange",
     ORBIT = {LOWER = 53, UPPER = 65}
   }
 }
