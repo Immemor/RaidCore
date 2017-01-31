@@ -100,6 +100,8 @@ mod:RegisterDefaultSetting("CirclePermanentPlanetOrbits", false)
 mod:RegisterDefaultSetting("MarkDebrisField")
 mod:RegisterDefaultSetting("MarkSolarWindTimer")
 mod:RegisterDefaultSetting("CrosshairCosmicDebris")
+mod:RegisterDefaultSetting("MarkWorldender")
+mod:RegisterDefaultSetting("MarkWormhole", false)
 -- Sounds.
 mod:RegisterDefaultSetting("CountdownWorldender")
 mod:RegisterDefaultSetting("SoundWorldenderSpawn")
@@ -421,7 +423,7 @@ function mod:OnWorldEnderCreated(id, unit)
   mod:StartAsteroidTimer()
   mod:DropWorldMarker("WORLD_ENDER_MARKER_" .. worldEnderCount)
 
-  if worldEnderCount == 4 then
+  if worldEnderCount == 4 and mod:GetSetting("MarkWormhole") then
     wormHoleId = id
     mod:SetWorldMarker("WORM_HOLE_"..id, "mark.worm.hole", WORM_HOLE_POSITION)
   end
@@ -545,7 +547,9 @@ end
 
 function mod:OnWorldEnderTarget(worldEnder, targetName)
   worldEnder.targetName = targetName
-  core:MarkUnit(worldEnder.unit, core.E.LOCATION_STATIC_CHEST, worldEnder.targetName)
+  if mod:GetSetting("MarkWorldender") then
+    core:MarkUnit(worldEnder.unit, core.E.LOCATION_STATIC_CHEST, worldEnder.targetName)
+  end
 end
 
 function mod:OnWorldEnderTargetAldinari()
