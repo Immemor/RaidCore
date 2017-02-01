@@ -93,7 +93,6 @@ mod:RegisterGermanLocale({
     -- Buffs.
     ["buff.alpha.wind"] = "Solarwinde",
     ["buff.alpha.irradiated"] = "Verstrahlte Rüstung",
-    ["buff.debris.mass.accumulating"] = "Accumulating Mass",
     -- Datachron.
     -- Bugged ["chron.world_ender.aldinari"] = "A World Ender is heading to the (rvl_target.name) orbit.", --
     -- Bugged ["chron.world_ender.vulpes_nix"] = "A World Ender is heading to the (rvl_target.name) orbit.",
