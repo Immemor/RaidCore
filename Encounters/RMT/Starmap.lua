@@ -82,6 +82,25 @@ mod:RegisterFrenchLocale({
     ["chron.world_ender.cassus"] = "A World Ender is heading to the de Cassus orbit.",
   }
 )
+mod:RegisterGermanLocale({
+    -- Unit names.
+    ["unit.alpha"] = "Alpha-Cassus",
+
+    ["unit.asteroid"] = "Abnormaler Asteroid",
+    ["unit.debris_field"] = "Trümmerfeld",
+    -- Cast names.
+    ["cast.alpha.catastrophic"] = "Katastrophales Sonnenereignis",
+    -- Buffs.
+    ["buff.alpha.wind"] = "Solarwinde",
+    ["buff.alpha.irradiated"] = "Verstrahlte Rüstung",
+    ["buff.debris.mass.accumulating"] = "Accumulating Mass",
+    -- Datachron.
+    -- Bugged ["chron.world_ender.aldinari"] = "A World Ender is heading to the (rvl_target.name) orbit.", --
+    -- Bugged ["chron.world_ender.vulpes_nix"] = "A World Ender is heading to the (rvl_target.name) orbit.",
+    -- Bugged ["chron.world_ender.cassus"] = "A World Ender is heading to the (rvl_target.name) orbit.",
+    ["chron.critical_mass"] = "([^%s]+%s[^%s]+) hat kritische Masse erreicht!",
+  }
+)
 ----------------------------------------------------------------------------------------------------
 -- Settings.
 ----------------------------------------------------------------------------------------------------
