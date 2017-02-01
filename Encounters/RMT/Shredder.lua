@@ -89,7 +89,7 @@ mod:RegisterGermanLocale({
 )
 mod:RegisterFrenchLocale({
     -- Unit names.
-    ["unit.saw.big"] = "Lamesciea",
+    ["unit.saw.big"] = "Lamescie",
     -- ["unit.miniboss.braugh"] = "TODO",
     ["unit.tether"] = "Ancre de Bride",
     ["unit.bubble"] = "Unité hostile invisible de terrain (zone d'effet 1,2)",
