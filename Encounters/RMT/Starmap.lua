@@ -101,7 +101,7 @@ mod:RegisterDefaultSetting("MarkDebrisField")
 mod:RegisterDefaultSetting("MarkSolarWindTimer")
 mod:RegisterDefaultSetting("CrosshairCosmicDebris")
 mod:RegisterDefaultSetting("MarkWorldEnder")
-mod:RegisterDefaultSetting("MarkWormhole", false)
+mod:RegisterDefaultSetting("MarkWormholePosition")
 -- Sounds.
 mod:RegisterDefaultSetting("CountdownWorldEnder")
 mod:RegisterDefaultSetting("SoundWorldEnderSpawn")
@@ -225,7 +225,7 @@ local CARDINAL_MARKERS = {
 }
 
 --Where the Wormhole needs to be places
-local WORM_HOLE_POSITION = Vector3.New(-47.13, -96.21, 356.96)
+local WORM_HOLE_POSITION = Vector3.New(-47.501198, -96.222008, 354.7)
 
 ----------------------------------------------------------------------------------------------------
 -- Locals.
@@ -423,7 +423,7 @@ function mod:OnWorldEnderCreated(id, unit)
   mod:StartAsteroidTimer()
   mod:DropWorldMarker("WORLD_ENDER_MARKER_" .. worldEnderCount)
 
-  if worldEnderCount == 4 and mod:GetSetting("MarkWormhole") then
+  if worldEnderCount == 4 and mod:GetSetting("MarkWormholePosition") then
     wormHoleId = id
     mod:SetWorldMarker("WORM_HOLE_"..id, "mark.worm.hole", WORM_HOLE_POSITION)
   end
