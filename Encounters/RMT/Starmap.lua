@@ -423,17 +423,21 @@ function mod:OnWorldEnderCreated(id, unit)
   mod:StartAsteroidTimer()
   mod:DropWorldMarker("WORLD_ENDER_MARKER_" .. worldEnderCount)
 
-  if worldEnderCount == 4 and mod:GetSetting("MarkWormholePosition") then
+  if worldEnderCount == 3 and mod:GetSetting("MarkWormholePosition") then
+    mod:SetWorldMarker("WORM_HOLE_POSITION", "mark.worm.hole", WORM_HOLE_POSITION)
+  elseif worldEnderCount == 4 then
     wormHoleId = id
-    mod:SetWorldMarker("WORM_HOLE_"..id, "mark.worm.hole", WORM_HOLE_POSITION)
   end
+end
 
+function mod:RemoveWormholePosition(id)
+  if wormHoleId == id then
+    mod:DropWorldMarker("WORM_HOLE_POSITION")
+  end
 end
 
 function mod:OnWorldEnderDestroyed(id, unit)
-  if wormHoleId == id then
-    mod:DropWorldMarker("WORM_HOLE_"..id)
-  end
+  mod:RemoveWormholePosition(id)
   core:RemoveLineBetweenUnits("WORLD_ENDER_" .. id)
   worldEnders[id] = nil
 end
@@ -570,6 +574,7 @@ function mod:OnWorldEnderEnterWormhole(id)
     mod:AddMsg("WORLD_ENDER_FALLING", "msg.world_ender.falling", 5, "Beware", "xkcdOrange")
     mod:OnWorldEnderTarget(worldEnder, self.L["unit.alpha"])
   end
+  mod:RemoveWormholePosition(id)
 end
 
 function mod:OnMidphaseStart()
