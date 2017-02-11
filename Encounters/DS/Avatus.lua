@@ -7,54 +7,54 @@
 -- Description:
 --
 -- Avatus fight is split in 3 major phases, they start on threshold healh pourcent of Avatus:
---  * From 100% to 75%: Avatus itself, with all players.
---  * At 75%, there is the small labyrinth and green and blue teleporter.
---  * From 75% to 50: Avatus itself, with all players.
---  * At 50%, again the labyrinth with red and yellow teleporter.
---  * From 50% to 25%: Avatus itself, with all players.
---  * From 25% to death: Enrage phase.
+-- * From 100% to 75%: Avatus itself, with all players.
+-- * At 75%, there is the small labyrinth and green and blue teleporter.
+-- * From 75% to 50: Avatus itself, with all players.
+-- * At 50%, again the labyrinth with red and yellow teleporter.
+-- * From 50% to 25%: Avatus itself, with all players.
+-- * From 25% to death: Enrage phase.
 --
 -- In "Green" phase, there are 24 pillars. An number will be add between two pillars.
 -- So 12 numbers will be displayed like this:
 --
---        9
---     A     8
---   B         7
---  .     +     6
---   1         5
---     2     4
---        3
+-- 9
+-- A 8
+-- B 7
+-- . + 6
+-- 1 5
+-- 2 4
+-- 3
 --
 -- The center is { x = 618.21, z =-174.2 }, and the unit called "Unstoppable Object Simulation"
 -- start on West, on the dot so. The dot Pillars are unusable.
 --
 -- With n from 1 to 12, coordonates are:
 -- {{{
---   Angle(n) = PI + (n - 1) * PI / 6
---   Position(n) = {
---       x = 618.21 + 70 * cos(Angle(n)),
---       z = -174.2 + 70 * sin(Angle(n))
---   }
+-- Angle(n) = PI + (n - 1) * PI / 6
+-- Position(n) = {
+-- x = 618.21 + 70 * cos(Angle(n)),
+-- z = -174.2 + 70 * sin(Angle(n))
+-- }
 -- }}}
 -- Results are stored in GREEN_ROOM_MARKERS constant.
 --
 -- Extra Informations. Few pillars positions collected:
 -- {
---     { x = 671.276489, z = -174.475327 },
---     { x = 565.161865, z = -174.289658 },
---     { x = 618.183533, z = -227.125458 },
---     { x = 661.742126, z = -249.719589 },
---     { x = 574.576834, z = -98.386374 },
---     { x = 530.910645, z = -174.166290 },
---     { x = 645.375183, z = -128.802170 },
---     { x = 663.878540, z = -201.568573 },
---     { x = 591.531921, z = -128.216736 },
---     { x = 693.861572, z = -218.121765 },
---     { x = 705.460144, z = -174.510483 },
---     { x = 618.322693, z = -86.674301 },
---     { x = 618.349182, z = -121.058273 },
---     { x = 644.759949, z = -220.22229 },
---     { x = 542.987549, z = -129.588684 },
+-- { x = 671.276489, z = -174.475327 },
+-- { x = 565.161865, z = -174.289658 },
+-- { x = 618.183533, z = -227.125458 },
+-- { x = 661.742126, z = -249.719589 },
+-- { x = 574.576834, z = -98.386374 },
+-- { x = 530.910645, z = -174.166290 },
+-- { x = 645.375183, z = -128.802170 },
+-- { x = 663.878540, z = -201.568573 },
+-- { x = 591.531921, z = -128.216736 },
+-- { x = 693.861572, z = -218.121765 },
+-- { x = 705.460144, z = -174.510483 },
+-- { x = 618.322693, z = -86.674301 },
+-- { x = 618.349182, z = -121.058273 },
+-- { x = 644.759949, z = -220.22229 },
+-- { x = 542.987549, z = -129.588684 },
 -- }
 ----------------------------------------------------------------------------------------------------
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
@@ -64,10 +64,10 @@ if not mod then return end
 ----------------------------------------------------------------------------------------------------
 -- Registering combat.
 ----------------------------------------------------------------------------------------------------
-mod:RegisterTrigMob("ANY", { "Avatus" })
+mod:RegisterTrigMob(core.E.TRIGGER_ANY, { "unit.avatus" })
 mod:RegisterEnglishLocale({
     -- Unit names.
-    ["Avatus"] = "Avatus",
+    ["unit.avatus"] = "Avatus",
     ["Holo Hand"] = "Holo Hand",
     ["Mobius Physics Constructor"] = "Mobius Physics Constructor",
     ["Unstoppable Object Simulation"] = "Unstoppable Object Simulation",
@@ -112,17 +112,17 @@ mod:RegisterEnglishLocale({
     ["GUN GRID NOW!"] = "GUN GRID NOW!",
     ["MARKER North"] = "North",
     ["MARKER South"] = "South",
-    ["MARKER Est"] = "Est",
+    ["MARKER Est"] = "East",
     ["MARKER West"] = "West",
     ["%s. PURGE BLUE (%s)"] = "%s. PURGE BLUE (%s)",
     ["%s. PURGE RED (%s)"] = "%s. PURGE RED (%s)",
     ["%s. PURGE GREEN (%s)"] = "%s. PURGE GREEN (%s)",
     ["Yellow Room: Combat started"] = "Yellow Room: Combat started",
     ["Mobius health: %d%%"] = "Mobius health: %d%%",
-})
+  })
 mod:RegisterFrenchLocale({
     -- Unit names.
-    ["Avatus"] = "Avatus",
+    ["unit.avatus"] = "Avatus",
     ["Holo Hand"] = "Holo-main",
     ["Mobius Physics Constructor"] = "Constructeur de physique de Möbius",
     ["Unstoppable Object Simulation"] = "Simulacre invincible",
@@ -174,10 +174,10 @@ mod:RegisterFrenchLocale({
     ["%s. PURGE GREEN (%s)"] = "%s. PURGE VERT (%s)",
     ["Yellow Room: Combat started"] = "Salle Jaune: Combat démarré",
     ["Mobius health: %d%%"] = "Mobius santé: %d%%",
-})
+  })
 mod:RegisterGermanLocale({
     -- Unit names.
-    ["Avatus"] = "Avatus",
+    ["unit.avatus"] = "Avatus",
     ["Holo Hand"] = "Holohand",
     ["Mobius Physics Constructor"] = "Mobius Physikkonstrukteur",
     ["Unstoppable Object Simulation"] = "Unaufhaltbare Objektsimulation",
@@ -196,7 +196,7 @@ mod:RegisterGermanLocale({
     ["MARKER South"] = "Süd",
     ["MARKER Est"] = "Ost",
     ["MARKER West"] = "West",
-})
+  })
 -- Default settings.
 mod:RegisterDefaultSetting("LineCleaveBoss")
 mod:RegisterDefaultSetting("LineCleaveHands")
@@ -226,12 +226,20 @@ mod:RegisterDefaultTimerBarConfigs({
     ["PURGE_CYCLE"] = { sColor = "xkcdBluishGreen" },
     ["PURGE_INCREASE"] = { sColor = "xkcdDeepOrange" },
     ["SUPPORT_CANNON"] = { sColor = "xkcdBrightLilac" },
-})
-
+  }
+)
+mod:RegisterUnitBarConfig("unit.avatus", {
+    nPriority = 0,
+    tMidphases = {
+      {percent = 75},
+      {percent = 50},
+      {percent = 25},
+    }
+  }
+)
 ----------------------------------------------------------------------------------------------------
 -- Constants.
 ----------------------------------------------------------------------------------------------------
-local NO_BREAK_SPACE = string.char(194, 160)
 local MAIN_PHASE = 1
 local LABYRINTH_PHASE = 2
 local GREEN_PHASE = 3
@@ -240,32 +248,32 @@ local RED_PHASE = 5
 local BLUE_PHASE = 6
 
 local CARDINAL_MARKERS = {
-    ["north"] = { x = 618, y = -198, z = -235 },
-    ["south"] = { x = 618, y = -198, z = -114 },
-    ["est"] = { x = 678, y = -198, z = -174 },
-    ["west"] = { x = 557, y = -198, z = -174 },
+  ["north"] = { x = 618, y = -198, z = -235 },
+  ["south"] = { x = 618, y = -198, z = -114 },
+  ["est"] = { x = 678, y = -198, z = -174 },
+  ["west"] = { x = 557, y = -198, z = -174 },
 }
 local GREEN_ROOM_MARKERS = {
-   ["1"] = { y = -198, x = 557.58, z = -139.2 },
-   ["2"] = { y = -198, x = 583.21, z = -113.5 },
-   ["3"] = { y = -198, x = 618.21, z = -104.2 },
-   ["4"] = { y = -198, x = 653.21, z = -113.5 },
-   ["5"] = { y = -198, x = 678.83, z = -139.2 },
-   ["6"] = { y = -198, x = 688.21, z = -174.2 },
-   ["7"] = { y = -198, x = 678.83, z = -209.2 },
-   ["8"] = { y = -198, x = 653.21, z = -234.8 },
-   ["9"] = { y = -198, x = 618.21, z = -244.2 },
-   ["10"] = { y = -198, x = 583.21, z = -234.8 },
+  ["1"] = { y = -198, x = 557.58, z = -139.2 },
+  ["2"] = { y = -198, x = 583.21, z = -113.5 },
+  ["3"] = { y = -198, x = 618.21, z = -104.2 },
+  ["4"] = { y = -198, x = 653.21, z = -113.5 },
+  ["5"] = { y = -198, x = 678.83, z = -139.2 },
+  ["6"] = { y = -198, x = 688.21, z = -174.2 },
+  ["7"] = { y = -198, x = 678.83, z = -209.2 },
+  ["8"] = { y = -198, x = 653.21, z = -234.8 },
+  ["9"] = { y = -198, x = 618.21, z = -244.2 },
+  ["10"] = { y = -198, x = 583.21, z = -234.8 },
 
-   ["11"] = { y = -198, x = 557.58, z = -209.2 },
+  ["11"] = { y = -198, x = 557.58, z = -209.2 },
 }
 local PURGE_BLUE = 1
 local PURGE_RED = 2
 local PURGE_GREEN = 3
 local PURGE_LIST_IN_BLUE_ROOM = {
-    ["Icon_SkillEnergy_UI_srcr_shckcntrp"] = PURGE_BLUE,
-    ["Icon_SkillFire_UI_ss_srngblst"] = PURGE_RED,
-    ["Icon_SkillEnergy_UI_srcr_surgeengine"] = PURGE_GREEN,
+  ["Icon_SkillEnergy_UI_srcr_shckcntrp"] = PURGE_BLUE,
+  ["Icon_SkillFire_UI_ss_srngblst"] = PURGE_RED,
+  ["Icon_SkillEnergy_UI_srcr_surgeengine"] = PURGE_GREEN,
 }
 local PURGE_COOLDOWNS = 15
 -- Protective Barrier win by Avatus on each end of main phase.
@@ -274,15 +282,15 @@ local BUFFID_PROTECTIVE_BARRIER = 45304
 local BUFFID_HOLO_CANNONS_ACTIVE = 44756
 -- Holo cannons duration per main phase.
 local HOLO_CANNONS_DURATION = {
-    [1] = 93,
-    [2] = 93,
-    [3] = 64,
+  [1] = 93,
+  [2] = 93,
+  [3] = 64,
 }
 -- Timer of the next gun per main phase.
 local GUN_INTERVAL = {
-    [1] = 112,
-    [2] = 112,
-    [3] = 81,
+  [1] = 112,
+  [2] = 112,
+  [3] = 81,
 }
 
 ----------------------------------------------------------------------------------------------------
@@ -316,516 +324,530 @@ local bIsPurgeSync
 local bIsProtectionBarrierEnable
 
 local function SetMarkersByPhase(nNewPhase)
-    -- Remove previous markers
-    core:DropWorldMarker("NORTH")
-    core:DropWorldMarker("SOUTH")
-    core:DropWorldMarker("EST")
-    core:DropWorldMarker("WEST")
+  -- Remove previous markers
+  core:DropWorldMarker("NORTH")
+  core:DropWorldMarker("SOUTH")
+  core:DropWorldMarker("EST")
+  core:DropWorldMarker("WEST")
 
-    -- Set markers
-    if MAIN_PHASE == nNewPhase or YELLOW_PHASE == nNewPhase or LABYRINTH_PHASE == nNewPhase then
-        if mod:GetSetting("OtherDirectionMarkers") then
-            core:SetWorldMarker("NORTH", mod.L["MARKER North"], CARDINAL_MARKERS["north"])
-            core:SetWorldMarker("SOUTH", mod.L["MARKER South"], CARDINAL_MARKERS["south"])
-            if YELLOW_PHASE == nNewPhase then
-                core:SetWorldMarker("EST", mod.L["MARKER Est"], CARDINAL_MARKERS["est"])
-                core:SetWorldMarker("WEST", mod.L["MARKER West"], CARDINAL_MARKERS["west"])
-            end
-        end
+  -- Set markers
+  if MAIN_PHASE == nNewPhase or YELLOW_PHASE == nNewPhase or LABYRINTH_PHASE == nNewPhase then
+    if mod:GetSetting("OtherDirectionMarkers") then
+      core:SetWorldMarker("NORTH", mod.L["MARKER North"], CARDINAL_MARKERS["north"])
+      core:SetWorldMarker("SOUTH", mod.L["MARKER South"], CARDINAL_MARKERS["south"])
+      if YELLOW_PHASE == nNewPhase then
+        core:SetWorldMarker("EST", mod.L["MARKER Est"], CARDINAL_MARKERS["est"])
+        core:SetWorldMarker("WEST", mod.L["MARKER West"], CARDINAL_MARKERS["west"])
+      end
     end
-    nCurrentPhase = nNewPhase
+  end
+  nCurrentPhase = nNewPhase
 end
 
 local function RefreshHoloHandPictures()
-    if mod:GetSetting("OtherHandSpawnMarkers") and bDisplayHandsPictures then
-        core:AddPicture("HAND1", nAvatusId, "RaidCore_Draw:AvatusLeftHand", 30, -60, 17)
-        core:AddPicture("HAND2", nAvatusId, "RaidCore_Draw:AvatusRightHand", 30, 60, 17)
-    else
-        core:RemovePicture("HAND1")
-        core:RemovePicture("HAND2")
-    end
+  if mod:GetSetting("OtherHandSpawnMarkers") and bDisplayHandsPictures then
+    core:AddPicture("HAND1", nAvatusId, "RaidCore_Draw:AvatusLeftHand", 30, -60, 17)
+    core:AddPicture("HAND2", nAvatusId, "RaidCore_Draw:AvatusRightHand", 30, 60, 17)
+  else
+    core:RemovePicture("HAND1")
+    core:RemovePicture("HAND2")
+  end
 end
 
 local function BuildBlueRoomPurgeOrderedList()
-    for ePurgeType = PURGE_BLUE, PURGE_GREEN do
-        if next(tBlueRoomPurgeList[ePurgeType]) then
-            local tCopy = {}
-            for k, v in next, tBlueRoomPurgeList[ePurgeType] do
-                tCopy[k] = v
-            end
+  for ePurgeType = PURGE_BLUE, PURGE_GREEN do
+    if next(tBlueRoomPurgeList[ePurgeType]) then
+      local tCopy = {}
+      for k, v in next, tBlueRoomPurgeList[ePurgeType] do
+        tCopy[k] = v
+      end
 
-            local tOrdered = {}
-            while next(tCopy) do
-                local f = nil
-                for key, val in next, tCopy do
-                    if f == nil or tCopy[f] > val then
-                        f = key
-                    end
-                end
-                table.insert(tOrdered, f:gmatch("%a+")())
-                tCopy[f] = nil
-            end
-            tBlueRoomPurgeOrderedList[ePurgeType] = tOrdered
+      local tOrdered = {}
+      while next(tCopy) do
+        local f = nil
+        for key, val in next, tCopy do
+          if f == nil or tCopy[f] > val then
+            f = key
+          end
         end
+        table.insert(tOrdered, f:gmatch("%a+")())
+        tCopy[f] = nil
+      end
+      tBlueRoomPurgeOrderedList[ePurgeType] = tOrdered
     end
+  end
 end
 
 local function DisplayPurgeList()
-    if mod:GetSetting("OtherPurgeList") then
-        core:Print("====== PURGE LIST ======")
-        for ePurgeType = PURGE_BLUE, PURGE_GREEN do
-            if next(tBlueRoomPurgeOrderedList[ePurgeType]) then
-                local sPlayers = table.concat(tBlueRoomPurgeOrderedList[ePurgeType], ", ")
-                if ePurgeType == PURGE_BLUE then
-                    core:Print(mod.L["%s. PURGE BLUE (%s)"]:format("a", sPlayers))
-                elseif ePurgeType == PURGE_RED then
-                    core:Print(mod.L["%s. PURGE RED (%s)"]:format("b", sPlayers))
-                elseif ePurgeType == PURGE_GREEN then
-                    core:Print(mod.L["%s. PURGE GREEN (%s)"]:format("c", sPlayers))
-                end
-            end
+  if mod:GetSetting("OtherPurgeList") then
+    core:Print("====== PURGE LIST ======")
+    for ePurgeType = PURGE_BLUE, PURGE_GREEN do
+      if next(tBlueRoomPurgeOrderedList[ePurgeType]) then
+        local sPlayers = table.concat(tBlueRoomPurgeOrderedList[ePurgeType], ", ")
+        if ePurgeType == PURGE_BLUE then
+          core:Print(mod.L["%s. PURGE BLUE (%s)"]:format("a", sPlayers))
+        elseif ePurgeType == PURGE_RED then
+          core:Print(mod.L["%s. PURGE RED (%s)"]:format("b", sPlayers))
+        elseif ePurgeType == PURGE_GREEN then
+          core:Print(mod.L["%s. PURGE GREEN (%s)"]:format("c", sPlayers))
         end
+      end
     end
+  end
 end
 
 local function Spell2PurgeType(nSpellId)
-    local sSpellName = GetSpell(nSpellId):GetName()
+  local sSpellName = GetSpell(nSpellId):GetName()
 
-    if sSpellName == mod.L["Green Reconstitution Matrix"] then
-        return PURGE_GREEN
-    elseif sSpellName == mod.L["Blue Disruption Matrix"] then
-        return PURGE_BLUE
-    elseif sSpellName == mod.L["Red Empowerment Matrix"] then
-        return PURGE_RED
-    end
-    return nil
+  if sSpellName == mod.L["Green Reconstitution Matrix"] then
+    return PURGE_GREEN
+  elseif sSpellName == mod.L["Blue Disruption Matrix"] then
+    return PURGE_BLUE
+  elseif sSpellName == mod.L["Red Empowerment Matrix"] then
+    return PURGE_RED
+  end
+  return nil
 end
 
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
-    SetMarkersByPhase(MAIN_PHASE)
-    bWarningSwitchPhaseDone = false
-    tBlueRoomPurgeList = {
-        [PURGE_BLUE] = {},
-        [PURGE_RED] = {},
-        [PURGE_GREEN] = {},
-    }
-    tBlueRoomPurgeOrderedList = {
-        [PURGE_BLUE] = {},
-        [PURGE_RED] = {},
-        [PURGE_GREEN] = {},
-    }
-    tHoloHandsList = {}
-    bGreenRoomMarkerDisplayed = false
-    bIsHoloHand = true
-    nPurgeCount = 0
-    nPurgeCycleCount = 0
-    nPurgeCycleCountPerColor = {
-        [PURGE_BLUE] = 0,
-        [PURGE_RED] = 0,
-        [PURGE_GREEN] = 0,
-    }
-    nMobiusId = nil
-    nMobiusHealthPourcent = 100
-    nAvatusId = nil
-    nMainPhaseCount = 1
-    nHoloCannonActivationTime = nil
-    bIsProtectionBarrierEnable = false
-    bDisplayHandsPictures = false
-    nLastSupportCannonPopTime = 0
-    nLastBuffPurgeTime = 0
+  SetMarkersByPhase(MAIN_PHASE)
+  bWarningSwitchPhaseDone = false
+  tBlueRoomPurgeList = {
+    [PURGE_BLUE] = {},
+    [PURGE_RED] = {},
+    [PURGE_GREEN] = {},
+  }
+  tBlueRoomPurgeOrderedList = {
+    [PURGE_BLUE] = {},
+    [PURGE_RED] = {},
+    [PURGE_GREEN] = {},
+  }
+  tHoloHandsList = {}
+  bGreenRoomMarkerDisplayed = false
+  bIsHoloHand = true
+  nPurgeCount = 0
+  nPurgeCycleCount = 0
+  nPurgeCycleCountPerColor = {
+    [PURGE_BLUE] = 0,
+    [PURGE_RED] = 0,
+    [PURGE_GREEN] = 0,
+  }
+  nMobiusId = nil
+  nMobiusHealthPourcent = 100
+  nAvatusId = nil
+  nMainPhaseCount = 1
+  nHoloCannonActivationTime = nil
+  bIsProtectionBarrierEnable = false
+  bDisplayHandsPictures = false
+  nLastSupportCannonPopTime = 0
+  nLastBuffPurgeTime = 0
 
-    mod:AddTimerBar("GGRID", "Next gun grid", 21, mod:GetSetting("SoundGunGrid"))
+  mod:AddTimerBar("GGRID", "Next gun grid", 21, mod:GetSetting("SoundGunGrid"))
 end
 
 function mod:OnUnitCreated(nId, unit, sName)
-    local nHealth = unit:GetHealth()
+  local nHealth = unit:GetHealth()
 
-    if self.L["Avatus"] == sName then
-        SetMarkersByPhase(MAIN_PHASE)
-        core:AddUnit(unit)
-        core:WatchUnit(unit)
-        if mod:GetSetting("LineCleaveBoss") then
-            core:AddPixie(unit:GetId(), 2, unit, nil, "Green", 10, 22, 0)
-        end
-        nAvatusId = nId
-        RefreshHoloHandPictures()
-    elseif self.L["Augmented Rowsdower"] == sName then
-        SetMarkersByPhase(LABYRINTH_PHASE)
-        mod:AddMsg("Rowsdower", "Augmented Rowsdower", 3)
-        SetTargetUnit(unit)
-    elseif sName == self.L["Mobius Physics Constructor"] then
-        -- Portals have same name, actual boss has HP, portals have nil value.
-        if nHealth then
-            SetMarkersByPhase(YELLOW_PHASE)
-            core:AddUnit(unit)
-            core:WatchUnit(unit)
-            if mod:GetSetting("LineCleaveYellowRoomBoss") then
-                core:AddPixie(nId, 2, unit, nil, "Red", 5, 35, 0)
-            end
-        else
-            -- Draw a line to the yellow portal.
-            if mod:GetSetting("LinePortals") then
-                core:AddPixie(nId, 1, unit, GetPlayerUnit(), "xkcdBananaYellow")
-            end
-        end
-    elseif sName == self.L["Unstoppable Object Simulation"] then
-        -- Portals have same name, actual boss has HP, portals have nil value.
-        if nHealth then
-            SetMarkersByPhase(GREEN_PHASE)
-            core:AddUnit(unit)
-            core:WatchUnit(unit)
-        else
-            -- Draw a line to the green portal.
-            if mod:GetSetting("LinePortals") then
-                core:AddPixie(nId, 1, unit, GetPlayerUnit(), "green")
-            end
-        end
-    elseif sName == self.L["Infinite Logic Loop"] then
-        if nHealth then
-            -- Blue room.
-            local bDisplayPurgeList = RED_PHASE == nCurrentPhase
-            SetMarkersByPhase(BLUE_PHASE)
-            nInfiniteLogicLoopId = nId
-            core:AddUnit(unit)
-            core:WatchUnit(unit)
-            -- Cheat on the last purge date, to avoid some troubles with:
-            --  * players who come from red phase.
-            --  * spellslinger who use their void slip spell.
-            nLastBuffPurgeTime = GetGameTime()
-            -- When player from red room come to blue room, the event EnteringInCombat is not
-            -- received.
-            if bDisplayPurgeList then
-                DisplayPurgeList()
-            end
-        else
-            -- Draw a line to the blue portal.
-            if mod:GetSetting("LinePortals") then
-                core:AddPixie(nId, 1, unit, GetPlayerUnit(), "blue")
-            end
-        end
-    elseif sName == self.L["Holo Hand"] then
-        bDisplayHandsPictures = false
-        RefreshHoloHandPictures()
-        core:AddUnit(unit)
-        core:WatchUnit(unit)
-        table.insert(tHoloHandsList, nId, { ["unit"] = unit} )
-        mod:AddMsg("HHAND", "HOLO HAND SPAWNED", 5, "Info")
-        if mod:GetSetting("LineCleaveHands") then
-            core:AddPixie(nId .. "_1", 2, unit, nil, "Blue", 7, 25, 0)
-            core:AddPixie(nId .. "_2", 2, unit, nil, "xkcdBluegrey", 3, 7, 60)
-            core:AddPixie(nId .. "_3", 2, unit, nil, "xkcdBluegrey", 3, 7, 300)
-        end
-    elseif self.L["Excessive Force Protocol"] == sName then
-        if nHealth then
-            -- Red room.
-            SetMarkersByPhase(RED_PHASE)
-            core:AddUnit(unit)
-            core:WatchUnit(unit)
-        else
-            -- Draw a line to the red portal.
-            core:AddPixie(nId, 1, unit, GetPlayerUnit(), "red")
-        end
-    elseif sName == self.L["Holo Cannon"] then
-        if nHealth then
-            core:AddUnit(unit)
-        end
-        if mod:GetSetting("LineCannons") then
-            core:AddPixie(unit:GetId(), 2, unit, nil, "Blue", 5, 100, 0)
-        end
-    elseif sName == self.L["Shock Sphere"] then
-        if mod:GetSetting("LineOrbsYellowRoom") then
-            -- Yellow room orbs.
-            core:AddPixie(unit:GetId(), 2, unit, nil, "Blue", 5, -7, 0)
-        end
-    elseif sName == self.L["Support Cannon"] then
-        core:AddUnit(unit)
-        local nCurrentTime = GetGameTime()
-        if nLastSupportCannonPopTime + 20 < nCurrentTime then
-            nLastSupportCannonPopTime = nCurrentTime
-            mod:AddTimerBar("SUPPORT_CANNON", "Next support cannon", 23)
-        end
-    elseif sName == self.L["Tower Platform"] then
-        if not bGreenRoomMarkerDisplayed and mod:GetSetting("OtherGreenRoomMarkers") then
-            bGreenRoomMarkerDisplayed = true
-            for k, tPosition in next, GREEN_ROOM_MARKERS do
-                core:SetWorldMarker("GREEN_ROOM_MARKERS_" .. k, k, tPosition)
-            end
-        end
-    elseif self.L["Fragmented Data Chunk"] == sName then
-        if mod:GetSetting("LineCleaveFragments") then
-            core:AddSimpleLine(nId .. "_1", nId, 0, 25, 0, 5, "Blue")
-            core:AddSimpleLine(nId .. "_2", nId, 0, 7, 60, 3, "xkcdBluegrey")
-            core:AddSimpleLine(nId .. "_3", nId, 0, 7, -60, 3,  "xkcdBluegrey")
-        end
+  if self.L["unit.avatus"] == sName then
+    SetMarkersByPhase(MAIN_PHASE)
+    mod:AddUnit(unit)
+    core:WatchUnit(unit)
+    if mod:GetSetting("LineCleaveBoss") then
+      core:AddSimpleLine(nId, unit, nil, 22, nil, 10, "Green")
     end
+    nAvatusId = nId
+    RefreshHoloHandPictures()
+  elseif self.L["Augmented Rowsdower"] == sName then
+    SetMarkersByPhase(LABYRINTH_PHASE)
+    mod:AddMsg("Rowsdower", "Augmented Rowsdower", 3)
+    SetTargetUnit(unit)
+  elseif sName == self.L["Mobius Physics Constructor"] then
+    -- Portals have same name, actual boss has HP, portals have nil value.
+    if nHealth then
+      SetMarkersByPhase(YELLOW_PHASE)
+      mod:AddUnit(unit)
+      core:WatchUnit(unit)
+      if mod:GetSetting("LineCleaveYellowRoomBoss") then
+        core:AddSimpleLine(nId, unit, nil, 35, nil, 5, "Red")
+      end
+    else
+      -- Draw a line to the yellow portal.
+      if mod:GetSetting("LinePortals") then
+        core:AddLineBetweenUnits(nId, unit, GetPlayerUnit(), nil, "xkcdBananaYellow")
+      end
+    end
+  elseif sName == self.L["Unstoppable Object Simulation"] then
+    -- Portals have same name, actual boss has HP, portals have nil value.
+    if nHealth then
+      SetMarkersByPhase(GREEN_PHASE)
+      mod:AddUnit(unit)
+      core:WatchUnit(unit)
+    else
+      -- Draw a line to the green portal.
+      if mod:GetSetting("LinePortals") then
+        core:AddLineBetweenUnits(nId, unit, GetPlayerUnit(), nil, "green")
+      end
+    end
+  elseif sName == self.L["Infinite Logic Loop"] then
+    if nHealth then
+      -- Blue room.
+      local bDisplayPurgeList = RED_PHASE == nCurrentPhase
+      SetMarkersByPhase(BLUE_PHASE)
+      nInfiniteLogicLoopId = nId
+      mod:AddUnit(unit)
+      core:WatchUnit(unit)
+      -- Cheat on the last purge date, to avoid some troubles with:
+      -- * players who come from red phase.
+      -- * spellslinger who use their void slip spell.
+      nLastBuffPurgeTime = GetGameTime()
+      -- When player from red room come to blue room, the event EnteringInCombat is not
+      -- received.
+      if bDisplayPurgeList then
+        DisplayPurgeList()
+      end
+    else
+      -- Draw a line to the blue portal.
+      if mod:GetSetting("LinePortals") then
+        core:AddLineBetweenUnits(nId, unit, GetPlayerUnit(), nil, "blue")
+      end
+    end
+  elseif sName == self.L["Holo Hand"] then
+    bDisplayHandsPictures = false
+    RefreshHoloHandPictures()
+    mod:AddUnit(unit)
+    core:WatchUnit(unit)
+    table.insert(tHoloHandsList, nId, { ["unit"] = unit} )
+    mod:AddMsg("HHAND", "HOLO HAND SPAWNED", 5, "Info")
+    if mod:GetSetting("LineCleaveHands") then
+      core:AddSimpleLine(nId .. "_1", unit, nil, 25, 0, 7, "Blue")
+      core:AddSimpleLine(nId .. "_2", unit, nil, 7, 60, 3, "xkcdBluegrey")
+      core:AddSimpleLine(nId .. "_3", unit, nil, 7, 300, 3, "xkcdBluegrey")
+    end
+  elseif self.L["Excessive Force Protocol"] == sName then
+    if nHealth then
+      -- Red room.
+      SetMarkersByPhase(RED_PHASE)
+      mod:AddUnit(unit)
+      core:WatchUnit(unit)
+    else
+      -- Draw a line to the red portal.
+      core:AddLineBetweenUnits(nId, unit, GetPlayerUnit(), nil, "red")
+    end
+  elseif sName == self.L["Holo Cannon"] then
+    if nHealth then
+      mod:AddUnit(unit)
+    end
+    if mod:GetSetting("LineCannons") then
+      core:AddSimpleLine(nId, unit, nil, 100, nil, 5, "Blue")
+    end
+  elseif sName == self.L["Shock Sphere"] then
+    if mod:GetSetting("LineOrbsYellowRoom") then
+      -- Yellow room orbs.
+      core:AddSimpleLine(nId, unit, nil, -7, nil, 5, "Blue")
+    end
+  elseif sName == self.L["Support Cannon"] then
+    mod:AddUnit(unit)
+    local nCurrentTime = GetGameTime()
+    if nLastSupportCannonPopTime + 20 < nCurrentTime then
+      nLastSupportCannonPopTime = nCurrentTime
+      mod:AddTimerBar("SUPPORT_CANNON", "Next support cannon", 23)
+    end
+  elseif sName == self.L["Tower Platform"] then
+    if not bGreenRoomMarkerDisplayed and mod:GetSetting("OtherGreenRoomMarkers") then
+      bGreenRoomMarkerDisplayed = true
+      for k, tPosition in next, GREEN_ROOM_MARKERS do
+        core:SetWorldMarker("GREEN_ROOM_MARKERS_" .. k, k, tPosition)
+      end
+    end
+  elseif self.L["Fragmented Data Chunk"] == sName then
+    if mod:GetSetting("LineCleaveFragments") then
+      core:AddSimpleLine(nId .. "_1", nId, 0, 25, 0, 5, "Blue")
+      core:AddSimpleLine(nId .. "_2", nId, 0, 7, 60, 3, "xkcdBluegrey")
+      core:AddSimpleLine(nId .. "_3", nId, 0, 7, -60, 3, "xkcdBluegrey")
+    end
+  end
 end
 
 function mod:OnUnitDestroyed(nId, tUnit, sName)
-    if sName == self.L["Holo Hand"] then
-        core:DropPixie(nId .. "_1")
-        core:DropPixie(nId .. "_2")
-        core:DropPixie(nId .. "_3")
-        if tHoloHandsList[nId] then
-            tHoloHandsList[nId] = nil
-        end
-    elseif sName == self.L["Holo Cannon"] then
-        core:DropPixie(nId)
-    elseif sName == self.L["Avatus"] then
-        core:DropPixie(nId)
-        core:RemovePicture("HAND1")
-        core:RemovePicture("HAND2")
-    elseif sName == self.L["Shock Sphere"] then
-        core:DropPixie(nId)
-    elseif sName == self.L["Infinite Logic Loop"] then
-        core:DropPixie(nId)
-        mod:RemoveTimerBar("PURGE_CYCLE")
-        mod:RemoveTimerBar("PURGE_INCREASE")
-        -- With the spellslinger's void slip spell, the purge sync is lost.
-        bIsPurgeSync = false
-    elseif sName == self.L["Mobius Physics Constructor"] then
-        core:DropPixie(nId)
-        if tUnit:GetHealth() == 0 then
-            -- Send information about the miniboss, not the portal.
-            mod:SendIndMessage("MOBIUS_DEATH")
-        end
-    elseif self.L["Unstoppable Object Simulation"] == sName then
-        core:DropPixie(nId)
-    elseif self.L["Excessive Force Protocol"] == sName then
-        core:DropPixie(nId)
-    elseif sName == self.L["Tower Platform"] then
-        if bGreenRoomMarkerDisplayed then
-            bGreenRoomMarkerDisplayed = false
-            for k, tPosition in next, GREEN_ROOM_MARKERS do
-                core:DropWorldMarker("GREEN_ROOM_MARKERS_" .. k)
-            end
-        end
-    elseif self.L["Fragmented Data Chunk"] == sName then
-        core:RemoveSimpleLine(nId .. "_1")
-        core:RemoveSimpleLine(nId .. "_2")
-        core:RemoveSimpleLine(nId .. "_3")
+  if sName == self.L["Holo Hand"] then
+    core:RemoveSimpleLine(nId .. "_1")
+    core:RemoveSimpleLine(nId .. "_2")
+    core:RemoveSimpleLine(nId .. "_3")
+    if tHoloHandsList[nId] then
+      tHoloHandsList[nId] = nil
     end
+  elseif sName == self.L["Holo Cannon"] then
+    core:RemoveSimpleLine(nId)
+  elseif sName == self.L["unit.avatus"] then
+    core:RemoveSimpleLine(nId)
+    core:RemovePicture("HAND1")
+    core:RemovePicture("HAND2")
+  elseif sName == self.L["Shock Sphere"] then
+    core:RemoveSimpleLine(nId)
+  elseif sName == self.L["Infinite Logic Loop"] then
+    core:RemoveLineBetweenUnits(nId)
+    mod:RemoveTimerBar("PURGE_CYCLE")
+    mod:RemoveTimerBar("PURGE_INCREASE")
+    -- With the spellslinger's void slip spell, the purge sync is lost.
+    bIsPurgeSync = false
+  elseif sName == self.L["Mobius Physics Constructor"] then
+    core:RemoveSimpleLine(nId)
+    core:RemoveLineBetweenUnits(nId)
+    if tUnit:GetHealth() == 0 then
+      -- Send information about the miniboss, not the portal.
+      mod:SendIndMessage("MOBIUS_DEATH")
+    end
+  elseif self.L["Unstoppable Object Simulation"] == sName then
+    core:RemoveLineBetweenUnits(nId)
+  elseif self.L["Excessive Force Protocol"] == sName then
+    core:RemoveLineBetweenUnits(nId)
+  elseif sName == self.L["Tower Platform"] then
+    if bGreenRoomMarkerDisplayed then
+      bGreenRoomMarkerDisplayed = false
+      for k, tPosition in next, GREEN_ROOM_MARKERS do
+        core:DropWorldMarker("GREEN_ROOM_MARKERS_" .. k)
+      end
+    end
+  elseif self.L["Fragmented Data Chunk"] == sName then
+    core:RemoveSimpleLine(nId .. "_1")
+    core:RemoveSimpleLine(nId .. "_2")
+    core:RemoveSimpleLine(nId .. "_3")
+  end
 end
 
 function mod:OnEnteredCombat(nId, tUnit, sName, bInCombat)
-    if sName == self.L["Infinite Logic Loop"] then
-        if bInCombat then
-            DisplayPurgeList()
-        end
-    elseif sName == self.L["Mobius Physics Constructor"] then
-        mod:SendIndMessage("MOBIUS_IN_COMBAT", tUnit:GetId())
+  if sName == self.L["Infinite Logic Loop"] then
+    if bInCombat then
+      DisplayPurgeList()
     end
+  elseif sName == self.L["Mobius Physics Constructor"] then
+    mod:SendIndMessage("MOBIUS_IN_COMBAT", tUnit:GetId())
+  end
 end
 
 function mod:OnBuffAdd(nId, nSpellId, nStack, fTimeRemaining)
-    if nInfiniteLogicLoopId == nId then
-        local ePurgeType = Spell2PurgeType(nSpellId)
+  if nInfiniteLogicLoopId == nId then
+    local ePurgeType = Spell2PurgeType(nSpellId)
 
-        if ePurgeType then
-            nPurgeCount = nPurgeCount + 1
-            -- 1 second without debuff is requested to sync with new cycle.
-            if nLastBuffPurgeTime + 1 <= GetGameTime() then
-                bIsPurgeSync = true
-                nPurgeCycleCount = 0
-                nPurgeCycleCountPerColor[PURGE_BLUE] = 0
-                nPurgeCycleCountPerColor[PURGE_RED] = 0
-                nPurgeCycleCountPerColor[PURGE_GREEN] = 0
-            end
-            if bIsPurgeSync then
-                nPurgeCycleCount = nPurgeCycleCount + 1
-                nPurgeCycleCountPerColor[ePurgeType] = nPurgeCycleCountPerColor[ePurgeType] + 1
-                if nPurgeCycleCount == 1 then
-                    mod:AddTimerBar("PURGE_CYCLE", "Next purge cycle", 20)
-                    DisplayPurgeList()
-                end
-            end
-            if nCurrentPhase == BLUE_PHASE and mod:GetSetting("OtherPurgeMessages") then
-                local a = bIsPurgeSync and nPurgeCycleCount or nPurgeCount
-                local b = nil
-                if bIsPurgeSync then
-                    if mod:GetSetting("OtherPurgeNames") then
-                        local index = nPurgeCycleCountPerColor[ePurgeType]
-                        b = tBlueRoomPurgeOrderedList[ePurgeType][index]
-                    end
-                    if not b then
-                        b = nPurgeCycleCountPerColor[ePurgeType]
-                    end
-                end
-                if not b then
-                    b = "NA"
-                end
-                a = tostring(a)
-                b = tostring(b)
-                if ePurgeType == PURGE_GREEN then
-                    mod:AddMsg("PURGE", self.L["%s. PURGE GREEN (%s)"]:format(a, b), 3, nil, "green")
-                elseif ePurgeType == PURGE_BLUE then
-                    mod:AddMsg("PURGE", self.L["%s. PURGE BLUE (%s)"]:format(a, b), 3, nil, "blue")
-                elseif ePurgeType == PURGE_RED then
-                    mod:AddMsg("PURGE", self.L["%s. PURGE RED (%s)"]:format(a, b), 3, nil, "red")
-                end
-            end
+    if ePurgeType then
+      nPurgeCount = nPurgeCount + 1
+      -- 1 second without debuff is requested to sync with new cycle.
+      if nLastBuffPurgeTime + 1 <= GetGameTime() then
+        bIsPurgeSync = true
+        nPurgeCycleCount = 0
+        nPurgeCycleCountPerColor[PURGE_BLUE] = 0
+        nPurgeCycleCountPerColor[PURGE_RED] = 0
+        nPurgeCycleCountPerColor[PURGE_GREEN] = 0
+      end
+      if bIsPurgeSync then
+        nPurgeCycleCount = nPurgeCycleCount + 1
+        nPurgeCycleCountPerColor[ePurgeType] = nPurgeCycleCountPerColor[ePurgeType] + 1
+        if nPurgeCycleCount == 1 then
+          mod:AddTimerBar("PURGE_CYCLE", "Next purge cycle", 20)
+          DisplayPurgeList()
         end
-    elseif nAvatusId == nId then
-        if BUFFID_HOLO_CANNONS_ACTIVE == nSpellId then
-            if not nHoloCannonActivationTime and not bIsProtectionBarrierEnable then
-                nHoloCannonActivationTime = GetGameTime()
-                mod:AddTimerBar("OBBEAM", "Next obliteration beam", 26, mod:GetSetting("SoundObliterationBeam"))
-            end
-        elseif BUFFID_PROTECTIVE_BARRIER == nSpellId then
-            bIsProtectionBarrierEnable = true
-            -- End of one main phase.
-            nHoloCannonActivationTime = nil
-            bWarningSwitchPhaseDone = false
-            bDisplayHandsPictures = false
-            mod:RemoveTimerBar("GGRID")
-            mod:RemoveTimerBar("OBBEAM")
-            mod:RemoveTimerBar("HOLO")
-            RefreshHoloHandPictures()
+      end
+      if nCurrentPhase == BLUE_PHASE and mod:GetSetting("OtherPurgeMessages") then
+        local a = bIsPurgeSync and nPurgeCycleCount or nPurgeCount
+        local b = nil
+        if bIsPurgeSync then
+          if mod:GetSetting("OtherPurgeNames") then
+            local index = nPurgeCycleCountPerColor[ePurgeType]
+            b = tBlueRoomPurgeOrderedList[ePurgeType][index]
+          end
+          if not b then
+            b = nPurgeCycleCountPerColor[ePurgeType]
+          end
         end
+        if not b then
+          b = "NA"
+        end
+        a = tostring(a)
+        b = tostring(b)
+        if ePurgeType == PURGE_GREEN then
+          mod:AddMsg("PURGE", self.L["%s. PURGE GREEN (%s)"]:format(a, b), 3, nil, "green")
+        elseif ePurgeType == PURGE_BLUE then
+          mod:AddMsg("PURGE", self.L["%s. PURGE BLUE (%s)"]:format(a, b), 3, nil, "blue")
+        elseif ePurgeType == PURGE_RED then
+          mod:AddMsg("PURGE", self.L["%s. PURGE RED (%s)"]:format(a, b), 3, nil, "red")
+        end
+      end
     end
+  elseif nAvatusId == nId then
+    if BUFFID_HOLO_CANNONS_ACTIVE == nSpellId then
+      if not nHoloCannonActivationTime and not bIsProtectionBarrierEnable then
+        nHoloCannonActivationTime = GetGameTime()
+        mod:AddTimerBar("OBBEAM", "Next obliteration beam", 26, mod:GetSetting("SoundObliterationBeam"))
+      end
+    elseif BUFFID_PROTECTIVE_BARRIER == nSpellId then
+      bIsProtectionBarrierEnable = true
+      -- End of one main phase.
+      nHoloCannonActivationTime = nil
+      bWarningSwitchPhaseDone = false
+      bDisplayHandsPictures = false
+      mod:RemoveTimerBar("GGRID")
+      mod:RemoveTimerBar("OBBEAM")
+      mod:RemoveTimerBar("HOLO")
+      RefreshHoloHandPictures()
+    end
+  end
 end
 
 function mod:OnBuffRemove(nId, nSpellId)
-    if nAvatusId == nId then
-        if BUFFID_PROTECTIVE_BARRIER == nSpellId then
-            bIsProtectionBarrierEnable = false
-            -- New main phase.
-            if nMainPhaseCount < 3 then
-                nMainPhaseCount = nMainPhaseCount + 1
-            else
-                mod:RemoveTimerBar("SUPPORT_CANNON")
-                mod:AddMsg("KILL", "KILL AVATUS !!!", 4, "Info")
-            end
-        end
-    elseif nInfiniteLogicLoopId == nId then
-        local ePurgeType = Spell2PurgeType(nSpellId)
-        if ePurgeType then
-            nLastBuffPurgeTime = GetGameTime()
-        end
+  if nAvatusId == nId then
+    if BUFFID_PROTECTIVE_BARRIER == nSpellId then
+      bIsProtectionBarrierEnable = false
+      -- New main phase.
+      if nMainPhaseCount < 3 then
+        nMainPhaseCount = nMainPhaseCount + 1
+      else
+        mod:RemoveTimerBar("SUPPORT_CANNON")
+        mod:AddMsg("KILL", "KILL AVATUS !!!", 4, "Info")
+      end
     end
+  elseif nInfiniteLogicLoopId == nId then
+    local ePurgeType = Spell2PurgeType(nSpellId)
+    if ePurgeType then
+      nLastBuffPurgeTime = GetGameTime()
+    end
+  end
 end
 
 function mod:OnHealthChanged(nId, nPourcent, sName)
-    if sName == self.L["Avatus"] then
-        if not bWarningSwitchPhaseDone then
-            if nPourcent >= 75 and nPourcent <= 76 then
-                bWarningSwitchPhaseDone = true
-                mod:AddMsg("AVAP2", "P2 SOON !", 5, mod:GetSetting("SoundPortalPhase") and "Info")
-            elseif nPourcent >= 50 and nPourcent <= 52 then
-                bWarningSwitchPhaseDone = true
-                mod:AddMsg("AVAP2", "P2 SOON!", 5, mod:GetSetting("SoundPortalPhase") and "Info")
-            elseif nPourcent >= 25 and nPourcent <= 27 then
-                bWarningSwitchPhaseDone = true
-                mod:AddMsg("AVAP2", "P3 SOON!", 5, mod:GetSetting("SoundPortalPhase") and "Info")
-            end
-        end
-    elseif self.L["Mobius Physics Constructor"] == sName then
-        if nPourcent % 10 == 0 and nPourcent < 100 then
-            mod:SendIndMessage("MOBIUS_HEALTH_UPDATE", nPourcent)
-        end
+  if sName == self.L["unit.avatus"] then
+    if not bWarningSwitchPhaseDone then
+      if nPourcent >= 75 and nPourcent <= 76 then
+        bWarningSwitchPhaseDone = true
+        mod:AddMsg("AVAP2", "P2 SOON !", 5, mod:GetSetting("SoundPortalPhase") and "Info")
+      elseif nPourcent >= 50 and nPourcent <= 52 then
+        bWarningSwitchPhaseDone = true
+        mod:AddMsg("AVAP2", "P2 SOON!", 5, mod:GetSetting("SoundPortalPhase") and "Info")
+      elseif nPourcent >= 25 and nPourcent <= 27 then
+        bWarningSwitchPhaseDone = true
+        mod:AddMsg("AVAP2", "P3 SOON!", 5, mod:GetSetting("SoundPortalPhase") and "Info")
+      end
     end
+  elseif self.L["Mobius Physics Constructor"] == sName then
+    if nPourcent % 10 == 0 and nPourcent < 100 then
+      mod:SendIndMessage("MOBIUS_HEALTH_UPDATE", nPourcent)
+    end
+  end
 end
 
 function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
-    if self.L["Avatus"] == sName then
-        if self.L["Obliteration Beam"] == sCastName then
-            local EndOfCannon = nHoloCannonActivationTime + HOLO_CANNONS_DURATION[nMainPhaseCount]
-            local NextBeam = GetGameTime() + 37
-            if EndOfCannon > NextBeam and nMainPhaseCount < 3 then
-                mod:AddTimerBar("OBBEAM", "Next obliteration beam", 37, mod:GetSetting("SoundObliterationBeam"))
-            else
-                mod:RemoveTimerBar("OBBEAM")
-            end
-        end
-    elseif self.L["Holo Hand"] == sName then
-        if self.L["Crushing Blow"] == sCastName then
-            local playerUnit = GetPlayerUnit()
-            for _, hand in pairs(tHoloHandsList) do
-                local distance_to_hand = self:GetDistanceBetweenUnits(playerUnit, hand["unit"])
-                hand["distance"] = distance_to_hand
-            end
-
-            local closest_holo_hand = tHoloHandsList[next(tHoloHandsList)]
-            for _, hand in pairs(tHoloHandsList) do
-                if hand["distance"] < closest_holo_hand["distance"] then
-                    closest_holo_hand = hand
-                end
-            end
-            local sSpellName = closest_holo_hand["unit"]:GetCastName():gsub(NO_BREAK_SPACE, " ")
-            if sSpellName == self.L["Crushing Blow"] then
-                mod:AddMsg("CRBLOW", "INTERRUPT CRUSHING BLOW!", 5, mod:GetSetting("SoundHandInterrupt") and "Inferno")
-            end
-        end
-    elseif self.L["Mobius Physics Constructor"] == sName then
-        if self.L["Data Flare"] == sCastName then
-            mod:AddTimerBar("BLIND", "Next blind", 29, mod:GetSetting("SoundBlindYellowRoom"))
-            mod:AddMsg("BLIND", "BLIND! TURN AWAY FROM BOSS", 5, mod:GetSetting("SoundBlindYellowRoom") and "Inferno")
-        end
+  if self.L["unit.avatus"] == sName then
+    if self.L["Obliteration Beam"] == sCastName then
+      local EndOfCannon = nHoloCannonActivationTime + HOLO_CANNONS_DURATION[nMainPhaseCount]
+      local NextBeam = GetGameTime() + 37
+      if EndOfCannon > NextBeam and nMainPhaseCount < 3 then
+        mod:AddTimerBar("OBBEAM", "Next obliteration beam", 37, mod:GetSetting("SoundObliterationBeam"))
+      else
+        mod:RemoveTimerBar("OBBEAM")
+      end
     end
+  elseif self.L["Holo Hand"] == sName then
+    if self.L["Crushing Blow"] == sCastName then
+      local playerUnit = GetPlayerUnit()
+      for _, hand in pairs(tHoloHandsList) do
+        local distance_to_hand = self:GetDistanceBetweenUnits(playerUnit, hand["unit"])
+        hand["distance"] = distance_to_hand
+      end
+
+      local closest_holo_hand = tHoloHandsList[next(tHoloHandsList)]
+      for _, hand in pairs(tHoloHandsList) do
+        if hand["distance"] < closest_holo_hand["distance"] then
+          closest_holo_hand = hand
+        end
+      end
+      local sSpellName = closest_holo_hand["unit"]:GetCastName():gsub(core.E.NO_BREAK_SPACE, " ")
+      if sSpellName == self.L["Crushing Blow"] then
+        mod:AddMsg("CRBLOW", "INTERRUPT CRUSHING BLOW!", 5, mod:GetSetting("SoundHandInterrupt") and "Inferno")
+      end
+    end
+  elseif self.L["Mobius Physics Constructor"] == sName then
+    if self.L["Data Flare"] == sCastName then
+      mod:AddTimerBar("BLIND", "Next blind", 29, mod:GetSetting("SoundBlindYellowRoom"))
+      mod:AddMsg("BLIND", "BLIND! TURN AWAY FROM BOSS", 5, mod:GetSetting("SoundBlindYellowRoom") and "Inferno")
+    end
+  end
 end
 
 function mod:OnDatachron(sMessage)
-    local nEscalatingFound = sMessage:match(self.L["Escalating defense matrix system"])
-    if sMessage:find(self.L["Gun Grid Activated"]) then
-        mod:AddMsg("GGRIDMSG", "GUN GRID NOW!", 5, mod:GetSetting("SoundGunGrid") and "Beware")
-        mod:AddTimerBar("GGRID", "Next gun grid", GUN_INTERVAL[nMainPhaseCount], mod:GetSetting("SoundGunGrid"))
-        if bIsHoloHand then
-            mod:AddTimerBar("HOLO", "Next holo: Hands", 22)
-            bDisplayHandsPictures = true
-            RefreshHoloHandPictures()
-        else
-            mod:AddTimerBar("HOLO", "Next holo: Cannons", 22)
-        end
-        bIsHoloHand = not bIsHoloHand
-    elseif sMessage:find(self.L["Portals have opened!"]) then
-        mod:RemoveTimerBar("GGRID")
-        mod:RemoveTimerBar("OBBEAM")
-        mod:RemoveTimerBar("HOLO")
-    elseif nEscalatingFound then
-        mod:AddTimerBar("PURGE_INCREASE", "Next increase of number of purge", 30)
+  local nEscalatingFound = sMessage:match(self.L["Escalating defense matrix system"])
+  if sMessage:find(self.L["Gun Grid Activated"]) then
+    mod:AddMsg("GGRIDMSG", "GUN GRID NOW!", 5, mod:GetSetting("SoundGunGrid") and "Beware")
+    mod:AddTimerBar("GGRID", "Next gun grid", GUN_INTERVAL[nMainPhaseCount], mod:GetSetting("SoundGunGrid"))
+    if bIsHoloHand then
+      mod:AddTimerBar("HOLO", "Next holo: Hands", 22)
+      bDisplayHandsPictures = true
+      RefreshHoloHandPictures()
+    else
+      mod:AddTimerBar("HOLO", "Next holo: Cannons", 22)
     end
+    bIsHoloHand = not bIsHoloHand
+  elseif sMessage:find(self.L["Portals have opened!"]) then
+    mod:RemoveTimerBar("GGRID")
+    mod:RemoveTimerBar("OBBEAM")
+    mod:RemoveTimerBar("HOLO")
+  elseif nEscalatingFound then
+    mod:AddTimerBar("PURGE_INCREASE", "Next increase of number of purge", 30)
+  end
 end
 
 function mod:OnShowShortcutBar(tIconFloatingSpellBar)
-    if #tIconFloatingSpellBar > 0 then
-        local sIcon1 = tIconFloatingSpellBar[1]
-        local ePurgeType = PURGE_LIST_IN_BLUE_ROOM[sIcon1]
-        if ePurgeType then
-            tBlueRoomPurgeList[ePurgeType][GetPlayerUnit():GetName()] = GetGameTime()
-            BuildBlueRoomPurgeOrderedList()
-            mod:SendIndMessage("PURGE_TYPE", ePurgeType)
-        end
+  if #tIconFloatingSpellBar > 0 then
+    local sIcon1 = tIconFloatingSpellBar[1]
+    local ePurgeType = PURGE_LIST_IN_BLUE_ROOM[sIcon1]
+    if ePurgeType then
+      tBlueRoomPurgeList[ePurgeType][GetPlayerUnit():GetName()] = GetGameTime()
+      BuildBlueRoomPurgeOrderedList()
+      mod:SendIndMessage("PURGE_TYPE", ePurgeType)
     end
+  end
 end
 
 function mod:ReceiveIndMessage(sFrom, sReason, data)
-    if "MOBIUS_IN_COMBAT" == sReason then
-        -- Drop this message for player in Yellow phase.
-        if (nCurrentPhase == LABYRINTH_PHASE or nCurrentPhase == GREEN_PHASE) and nMobiusId == nil then
-            nMobiusId = data
-            nMobiusHealthPourcent = 100
-            if mod:GetSetting("OtherMobiusHealthMessages") then
-                mod:AddMsg("MOBIUS_INFO", "Yellow Room: Combat started", 3, nil, "blue")
-            end
-        end
-    elseif "MOBIUS_HEALTH_UPDATE" == sReason then
-        if nCurrentPhase == GREEN_PHASE and nMobiusHealthPourcent > data then
-            nMobiusHealthPourcent = data
-            if mod:GetSetting("OtherMobiusHealthMessages") then
-                mod:AddMsg("MOBIUS_INFO", self.L["Mobius health: %d%%"]:format(nMobiusHealthPourcent), 2, nil, "blue")
-            end
-        end
-    elseif "MOBIUS_DEATH" == sReason then
-        if nCurrentPhase == GREEN_PHASE and nMobiusHealthPourcent ~= 0 then
-            nMobiusHealthPourcent = 0
-            if mod:GetSetting("OtherMobiusHealthMessages") then
-                mod:AddMsg("MOBIUS_INFO", self.L["Mobius health: %d%%"]:format(0), 2, nil, "blue")
-            end
-        end
-    elseif "PURGE_TYPE" == sReason then
-        tBlueRoomPurgeList[data][sFrom] = GetGameTime()
-        BuildBlueRoomPurgeOrderedList()
+  if "MOBIUS_IN_COMBAT" == sReason then
+    -- Drop this message for player in Yellow phase.
+    if (nCurrentPhase == LABYRINTH_PHASE or nCurrentPhase == GREEN_PHASE) and nMobiusId == nil then
+      nMobiusId = data
+      nMobiusHealthPourcent = 100
+      if mod:GetSetting("OtherMobiusHealthMessages") then
+        mod:AddMsg("MOBIUS_INFO", "Yellow Room: Combat started", 3, nil, "blue")
+      end
     end
+  elseif "MOBIUS_HEALTH_UPDATE" == sReason then
+    if nCurrentPhase == GREEN_PHASE and nMobiusHealthPourcent > data then
+      nMobiusHealthPourcent = data
+      if mod:GetSetting("OtherMobiusHealthMessages") then
+        mod:AddMsg("MOBIUS_INFO", self.L["Mobius health: %d%%"]:format(nMobiusHealthPourcent), 2, nil, "blue")
+      end
+    end
+  elseif "MOBIUS_DEATH" == sReason then
+    if nCurrentPhase == GREEN_PHASE and nMobiusHealthPourcent ~= 0 then
+      nMobiusHealthPourcent = 0
+      if mod:GetSetting("OtherMobiusHealthMessages") then
+        mod:AddMsg("MOBIUS_INFO", self.L["Mobius health: %d%%"]:format(0), 2, nil, "blue")
+      end
+    end
+  elseif "PURGE_TYPE" == sReason then
+    tBlueRoomPurgeList[data][sFrom] = GetGameTime()
+    BuildBlueRoomPurgeOrderedList()
+  end
 end
+
+function mod:OnAvatusHealthChanged(id, percent, name)
+  if bWarningSwitchPhaseDone then return end
+  if mod:IsMidphaseClose(name, percent) then
+    bWarningSwitchPhaseDone = true
+    mod:AddMsg("AVAP2", "P2 SOON!", 5, mod:GetSetting("SoundPortalPhase") and "Info")
+  end
+end
+
+mod:RegisterUnitEvents("unit.avatus",{
+    [core.E.HEALTH_CHANGED] = mod.OnAvatusHealthChanged,
+  }
+)
