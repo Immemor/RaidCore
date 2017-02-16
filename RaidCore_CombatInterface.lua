@@ -318,7 +318,7 @@ end
 
 local function DelayFireTrackedDebuff(tTrackedBuff)
   local sEvent = RaidCore.E.DEBUFF_REMOVE
-  if tTrackedBuff.sEvent == RaidCore.E.BUFF_ADD or tTrackedBuff.sEvent == RaidCore.E.BUFF_ADD then
+  if tTrackedBuff.sEvent == RaidCore.E.BUFF_ADD then
     sEvent = RaidCore.E.BUFF_REMOVE
   end
   ManagerCall(sEvent, tTrackedBuff.nUnitId, tTrackedBuff.nSpellId, tTrackedBuff.sName, tTrackedBuff.tBuff.unitCaster)
