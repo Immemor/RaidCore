@@ -185,7 +185,7 @@ end
 function mod:OnOperantCreated(id, unit, name)
   core:AddUnit(unit)
   core:WatchUnit(unit)
-  core:AddSimpleLine(("Cleave%d"):format(id), id, 0, 15, 0, 5, "green")
+  core:AddSimpleLine("Cleave"..id, id, 0, 15, 0, 5, "green")
   local tPosition = unit:GetPosition()
   if tPosition.x < ORGANIC_INCINERATOR.x then
     core:MarkUnit(unit, 51, "L")
@@ -197,14 +197,14 @@ function mod:OnOperantCreated(id, unit, name)
 end
 
 function mod:OnAugmentorDestroyed(id, unit, name)
-  core:RemoveSimpleLine(("Cleave%d"):format(id))
+  core:RemoveSimpleLine("Cleave"..id)
 end
 
 function mod:OnDistributorCreated(id, unit, name)
   core:AddUnit(unit)
   core:WatchUnit(unit)
   core:MarkUnit(unit, 51, "M")
-  core:AddSimpleLine(("Cleave%d"):format(id), id, 0, 15, 0, 5, "green")
+  core:AddSimpleLine("Cleave"..id, id, 0, 15, 0, 5, "green")
   tPrimeOperant2ZoneIndex[id] = INCUBATION_ZONE_NORTH
   nPrimeDistributorId = id
 end
