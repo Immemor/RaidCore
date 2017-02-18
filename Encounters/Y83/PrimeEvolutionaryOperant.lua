@@ -280,8 +280,8 @@ function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
         local line = core:GetSimpleLine("Orga.Inc. beam")
         if line then
           line:SetColor("6000ff00")
-          self:ScheduleTimer(function(line) line:SetColor("A0ff8000") end, 4, line)
-          self:ScheduleTimer(function(line) line:SetColor("red") end, 5, line)
+          self:ScheduleTimer(function(l) l:SetColor("A0ff8000") end, 4, line)
+          self:ScheduleTimer(function(l) l:SetColor("red") end, 5, line)
         end
       end
     end
