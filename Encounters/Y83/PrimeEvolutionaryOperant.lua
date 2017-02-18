@@ -281,7 +281,7 @@ function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
     -- during 7s. The Organic Incinerator beam is without danger during 5s.
     if nPainSuppressorsFadeTime < nCurrentTime then
       nPainSuppressorsFadeTime = nCurrentTime + fTimeRemaining
-      local line = core:GetSimpleLine("Orga.Inc. beam")
+      local line = core:GetSimpleLine("Orga.Inc.beam")
       if line then
         line:SetColor("6000ff00")
         self:ScheduleTimer(function(l) l:SetColor("A0ff8000") end, 4, line)
@@ -326,12 +326,10 @@ function mod:OnBuffUpdate(nId, nSpellId, nStack, fTimeRemaining)
   end
 end
 
-function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
-  if self.L["Organic Incinerator"] == sName then
-    local line = core:GetSimpleLine("Orga.Inc. beam")
-    if not line and mod:GetSetting("OrganicIncineratorBeam") then
-      core:AddSimpleLine("Orga.Inc. beam", nId, 0, 65, 0, 10, "red")
-    end
+function mod:OnDisintegrateStart(id, castName, endTime, name)
+  local line = core:GetSimpleLine("Orga.Inc.beam")
+  if not line and mod:GetSetting("OrganicIncineratorBeam") then
+    core:AddSimpleLine("Orga.Inc.beam", id, 0, 65, 0, 10, "red")
   end
 end
 ----------------------------------------------------------------------------------------------------
@@ -356,5 +354,8 @@ mod:RegisterUnitEvents("Prime Phage Distributor", {
 )
 mod:RegisterUnitEvents("Organic Incinerator", {
     [core.E.UNIT_CREATED] = mod.OnIncineratorCreated,
+    ["Disintegrate"] = {
+      [core.E.CAST_START] = mod.OnDisintegrateStart,
+    }
   }
 )
