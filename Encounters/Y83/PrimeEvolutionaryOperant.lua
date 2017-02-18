@@ -26,8 +26,11 @@ if not mod then return end
 -- Registering combat.
 ----------------------------------------------------------------------------------------------------
 mod:RegisterTrigMob(core.E.TRIGGER_ANY, {
-    "Prime Evolutionary Operant", "Prime Phage Distributor", "Organic Incinerator"
-  })
+    "Prime Evolutionary Operant",
+    "Prime Phage Distributor",
+    "Organic Incinerator"
+  }
+)
 mod:RegisterEnglishLocale({
     -- Unit names.
     ["Prime Evolutionary Operant"] = "Prime Evolutionary Operant",
@@ -47,7 +50,8 @@ mod:RegisterEnglishLocale({
     -- Bars messages.
     ["~Next irradiate"] = "~Next irradiate",
     ["%u STACKS BEFORE CORRUPTION"] = "%u STACKS BEFORE CORRUPTION",
-  })
+  }
+)
 mod:RegisterFrenchLocale({
     -- Unit names.
     ["Prime Evolutionary Operant"] = "Opérateur de la Primo Évolution",
@@ -60,9 +64,11 @@ mod:RegisterFrenchLocale({
     -- Bars messages.
     ["~Next irradiate"] = "~Prochaine irradiation",
     ["%u STACKS BEFORE CORRUPTION"] = "%u STACKS AVANT CORRUPTION",
-  })
+  }
+)
 mod:RegisterGermanLocale({
-  })
+  }
+)
 -- Default settings.
 mod:RegisterDefaultSetting("SoundNextIrradiateCountDown")
 mod:RegisterDefaultSetting("SoundSwitch")
@@ -74,7 +80,8 @@ mod:RegisterDefaultSetting("OrganicIncineratorBeam")
 -- Timers default configs.
 mod:RegisterDefaultTimerBarConfigs({
     ["NEXT_IRRADIATE"] = { sColor = "xkcdLightRed" },
-  })
+  }
+)
 
 ----------------------------------------------------------------------------------------------------
 -- Copy of few objects to reduce the cpu load.
@@ -265,88 +272,89 @@ function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
         o:SetMinLengthVisible(10)
         mod:ScheduleTimer(function()
             core:RemoveLineBetweenUnits("RADIATION")
-            end, 10)
-        end
-      end
-    elseif DEBUFFS.PAIN_SUPPRESSORS == nSpellId then
-      -- When the Organic Incinerator is interrupt, all alive players will have this debuff
-      -- during 7s. The Organic Incinerator beam is without danger during 5s.
-      if nPainSuppressorsFadeTime < nCurrentTime then
-        nPainSuppressorsFadeTime = nCurrentTime + fTimeRemaining
-        local line = core:GetSimpleLine("Orga.Inc. beam")
-        if line then
-          line:SetColor("6000ff00")
-          self:ScheduleTimer(function(l) l:SetColor("A0ff8000") end, 4, line)
-          self:ScheduleTimer(function(l) l:SetColor("red") end, 5, line)
-        end
+          end,
+          10)
       end
     end
-  end
-
-  function mod:OnDebuffRemove(nId, nSpellId)
-    if DEBUFFS.STRAIN_INCUBATION == nSpellId then
-      core:RemovePicture(("INCUBATION %d"):format(nId))
-      core:RemoveLineBetweenUnits("SafeZoneGO" .. nId)
-    end
-  end
-
-  function mod:OnBuffAdd(nId, nSpellId, nStack, fTimeRemaining)
-    if BUFFS.COMPROMISED_CIRCUITRY == nSpellId then
-      for i, Vector in next, INCUBATION_REGROUP_ZONE do
-        core:RemovePicture("IZ" .. i)
-      end
-      if not bIsPhaseUnder20Poucent then
-        nPrimeDistributorId = nId
-        if mod:GetSetting("IncubationRegroupZone") then
-          local nIndex = tPrimeOperant2ZoneIndex[nId]
-          if nIndex then
-            local Vector = INCUBATION_REGROUP_ZONE[nIndex]
-            core:AddPicture("IZ" .. nIndex, Vector, "ClientSprites:LootCloseBox_Holo", 30)
-          end
-        end
-      end
-    end
-  end
-
-  function mod:OnBuffUpdate(nId, nSpellId, nStack, fTimeRemaining)
-    if BUFFS.NANOSTRAIN_INFUSION == nSpellId then
-      local nRemain = NANOSTRAIN_2_CORRUPTION_THRESHOLD - nStack
-      if nRemain == 2 or nRemain == 1 then
-        local sColor = nRemain == 2 and "blue" or "red"
-        core:AddMsg("WARNING", self.L["%u STACKS BEFORE CORRUPTION"]:format(nRemain), 4, nil, sColor)
-      end
-    end
-  end
-
-  function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
-    if self.L["Organic Incinerator"] == sName then
+  elseif DEBUFFS.PAIN_SUPPRESSORS == nSpellId then
+    -- When the Organic Incinerator is interrupt, all alive players will have this debuff
+    -- during 7s. The Organic Incinerator beam is without danger during 5s.
+    if nPainSuppressorsFadeTime < nCurrentTime then
+      nPainSuppressorsFadeTime = nCurrentTime + fTimeRemaining
       local line = core:GetSimpleLine("Orga.Inc. beam")
-      if not line and mod:GetSetting("OrganicIncineratorBeam") then
-        core:AddSimpleLine("Orga.Inc. beam", nId, 0, 65, 0, 10, "red")
+      if line then
+        line:SetColor("6000ff00")
+        self:ScheduleTimer(function(l) l:SetColor("A0ff8000") end, 4, line)
+        self:ScheduleTimer(function(l) l:SetColor("red") end, 5, line)
       end
     end
   end
-  ----------------------------------------------------------------------------------------------------
-  -- Bind event handlers.
-  ----------------------------------------------------------------------------------------------------
-  mod:RegisterUnitEvents({
-      "Prime Evolutionary Operant",
-      "Prime Phage Distributor",
-      }, {
-      [core.E.UNIT_DESTROYED] = mod.OnAugmentorDestroyed,
-    }
-  )
-  mod:RegisterUnitEvents("Prime Evolutionary Operant", {
-      [core.E.UNIT_CREATED] = mod.OnOperantCreated,
-      [core.E.UNIT_DESTROYED] = mod.OnAugmentorDestroyed,
-    }
-  )
-  mod:RegisterUnitEvents("Prime Phage Distributor", {
-      [core.E.UNIT_CREATED] = mod.OnDistributorCreated,
-      [core.E.UNIT_DESTROYED] = mod.OnAugmentorDestroyed,
-    }
-  )
-  mod:RegisterUnitEvents("Organic Incinerator", {
-      [core.E.UNIT_CREATED] = mod.OnIncineratorCreated,
-    }
-  )
+end
+
+function mod:OnDebuffRemove(nId, nSpellId)
+  if DEBUFFS.STRAIN_INCUBATION == nSpellId then
+    core:RemovePicture(("INCUBATION %d"):format(nId))
+    core:RemoveLineBetweenUnits("SafeZoneGO" .. nId)
+  end
+end
+
+function mod:OnBuffAdd(nId, nSpellId, nStack, fTimeRemaining)
+  if BUFFS.COMPROMISED_CIRCUITRY == nSpellId then
+    for i, Vector in next, INCUBATION_REGROUP_ZONE do
+      core:RemovePicture("IZ" .. i)
+    end
+    if not bIsPhaseUnder20Poucent then
+      nPrimeDistributorId = nId
+      if mod:GetSetting("IncubationRegroupZone") then
+        local nIndex = tPrimeOperant2ZoneIndex[nId]
+        if nIndex then
+          local Vector = INCUBATION_REGROUP_ZONE[nIndex]
+          core:AddPicture("IZ" .. nIndex, Vector, "ClientSprites:LootCloseBox_Holo", 30)
+        end
+      end
+    end
+  end
+end
+
+function mod:OnBuffUpdate(nId, nSpellId, nStack, fTimeRemaining)
+  if BUFFS.NANOSTRAIN_INFUSION == nSpellId then
+    local nRemain = NANOSTRAIN_2_CORRUPTION_THRESHOLD - nStack
+    if nRemain == 2 or nRemain == 1 then
+      local sColor = nRemain == 2 and "blue" or "red"
+      core:AddMsg("WARNING", self.L["%u STACKS BEFORE CORRUPTION"]:format(nRemain), 4, nil, sColor)
+    end
+  end
+end
+
+function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
+  if self.L["Organic Incinerator"] == sName then
+    local line = core:GetSimpleLine("Orga.Inc. beam")
+    if not line and mod:GetSetting("OrganicIncineratorBeam") then
+      core:AddSimpleLine("Orga.Inc. beam", nId, 0, 65, 0, 10, "red")
+    end
+  end
+end
+----------------------------------------------------------------------------------------------------
+-- Bind event handlers.
+----------------------------------------------------------------------------------------------------
+mod:RegisterUnitEvents({
+    "Prime Evolutionary Operant",
+    "Prime Phage Distributor",
+    }, {
+    [core.E.UNIT_DESTROYED] = mod.OnAugmentorDestroyed,
+  }
+)
+mod:RegisterUnitEvents("Prime Evolutionary Operant", {
+    [core.E.UNIT_CREATED] = mod.OnOperantCreated,
+    [core.E.UNIT_DESTROYED] = mod.OnAugmentorDestroyed,
+  }
+)
+mod:RegisterUnitEvents("Prime Phage Distributor", {
+    [core.E.UNIT_CREATED] = mod.OnDistributorCreated,
+    [core.E.UNIT_DESTROYED] = mod.OnAugmentorDestroyed,
+  }
+)
+mod:RegisterUnitEvents("Organic Incinerator", {
+    [core.E.UNIT_CREATED] = mod.OnIncineratorCreated,
+  }
+)
