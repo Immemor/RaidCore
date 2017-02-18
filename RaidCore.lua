@@ -300,7 +300,7 @@ end
 
 local function CheckDelayedUnit(nId, tUnit, sName)
   local tMap = GetCurrentZoneMap()
-  sName = sName:gsub(RaidCore.E.NO_BREAK_SPACE, " ")
+  sName = RaidCore:ReplaceNoBreakSpace(sName)
   if tMap then
     local tTrig = _tTrigPerZone[tMap.continentId]
     tTrig = tTrig and tTrig[tMap.parentZoneId]
@@ -317,7 +317,7 @@ local function UpdateDelayedUnitNames()
   for nDelayedName, tDelayedList in next, _tDelayedUnits do
     for nDelayedId, tUnit in next, tDelayedList do
       if tUnit:IsValid() then
-        local sNewName = tUnit:GetName():gsub(RaidCore.E.NO_BREAK_SPACE, " ")
+        local sNewName = RaidCore:ReplaceNoBreakSpace(tUnit:GetName())
         if nDelayedName ~= sNewName then
           table.insert(tUnitsToUpdate, {sName = nDelayedName, sNewName = sNewName, nId = nDelayedId, tUnit = tUnit})
         end
@@ -518,6 +518,10 @@ function RaidCore:HandlePcallResult(success, error, output)
     Log:Add(RaidCore.E.ERROR, error)
   end
   return success
+end
+
+function RaidCore:ReplaceNoBreakSpace(str)
+  return str:gsub(RaidCore.E.NO_BREAK_SPACE, " ")
 end
 
 ----------------------------------------------------------------------------------------------------
