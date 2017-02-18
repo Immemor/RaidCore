@@ -91,23 +91,19 @@ local NewVector3 = Vector3.New
 ----------------------------------------------------------------------------------------------------
 -- Center of the room, where is the Organic Incinerator button.
 local ORGANIC_INCINERATOR = { x = 1268, y = -800, z = 876 }
--- It's when the player enter in "nuclear" green zone. If this last have some STRAIN INCUBATION,
--- he will lost it, and an small mob will pop.
-local DEBUFF_RADIATION_BATH = 71188
--- DOT taken by one or more players, which is dispel with RADIATION_BATH or ENGAGING datachron
--- event.
-local DEBUFF_STRAIN_INCUBATION = 49303
--- Debuff get only in Hard Mode.
-local DEBUFF_DEGENERATION = 79892
--- DoT taken by everyone when the laser is interrupted. Hardmode only
-local DEBUFF_PAIN_SUPPRESSORS = 81783
--- Buff stackable on bosses. The beam from the wall buff the boss when they are not hit by the boss
--- itself. At 15 stacks, the datachron message "A Prime Purifier has been corrupted!" will trig.
--- Note: the datachron event is raised before the buff update event.
-local BUFF_NANOSTRAIN_INFUSION = 50075
+
+local DEBUFFS = {
+  RADIATION_BATH = 71188, -- Cleansing debuff in bath
+  STRAIN_INCUBATION = 49303, -- DOT from active boss, cleanse with bath/phase push
+  DEGENERATION = 79892, -- HM debuff
+  PAIN_SUPPRESSORS = 81783, -- HM debuff, Laser interrupt
+}
+local BUFFS = {
+  NANOSTRAIN_INFUSION = 50075, -- Wall buff on boss
+  COMPROMISED_CIRCUITRY = 48735, -- Active boss
+}
+
 local NANOSTRAIN_2_CORRUPTION_THRESHOLD = 15
--- Buff on bosses. The boss called "Prime Phage Distributor" have this buff, others not.
-local BUFF_COMPROMISED_CIRCUITRY = 48735
 -- On the axe Y, where is the ground.
 local GROUND_Y = -800.51
 -- Lines on bosses.
@@ -246,7 +242,7 @@ function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
   local tUnit = GetUnitById(nId)
   local nCurrentTime = GetGameTime()
 
-  if DEBUFF_STRAIN_INCUBATION == nSpellId then
+  if DEBUFFS.STRAIN_INCUBATION == nSpellId then
     if mod:GetSetting("PictureIncubation") then
       core:AddPicture(("INCUBATION %d"):format(nId), nId, "Crosshair", 20)
     end
@@ -261,7 +257,7 @@ function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
         o:SetMaxLengthVisible(50)
       end
     end
-  elseif DEBUFF_RADIATION_BATH == nSpellId then
+  elseif DEBUFFS.RADIATION_BATH == nSpellId then
     if nRadiationEndTime < nCurrentTime then
       nRadiationEndTime = nCurrentTime + 12
       if mod:GetSetting("LineRadiation") then
@@ -272,7 +268,7 @@ function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
             end, 10)
         end
       end
-    elseif DEBUFF_PAIN_SUPPRESSORS == nSpellId then
+    elseif DEBUFFS.PAIN_SUPPRESSORS == nSpellId then
       -- When the Organic Incinerator is interrupt, all alive players will have this debuff
       -- during 7s. The Organic Incinerator beam is without danger during 5s.
       if nPainSuppressorsFadeTime < nCurrentTime then
@@ -288,14 +284,14 @@ function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
   end
 
   function mod:OnDebuffRemove(nId, nSpellId)
-    if DEBUFF_STRAIN_INCUBATION == nSpellId then
+    if DEBUFFS.STRAIN_INCUBATION == nSpellId then
       core:RemovePicture(("INCUBATION %d"):format(nId))
       core:RemoveLineBetweenUnits("SafeZoneGO" .. nId)
     end
   end
 
   function mod:OnBuffAdd(nId, nSpellId, nStack, fTimeRemaining)
-    if BUFF_COMPROMISED_CIRCUITRY == nSpellId then
+    if BUFFS.COMPROMISED_CIRCUITRY == nSpellId then
       for i, Vector in next, INCUBATION_REGROUP_ZONE do
         core:RemovePicture("IZ" .. i)
       end
@@ -313,7 +309,7 @@ function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
   end
 
   function mod:OnBuffUpdate(nId, nSpellId, nStack, fTimeRemaining)
-    if BUFF_NANOSTRAIN_INFUSION == nSpellId then
+    if BUFFS.NANOSTRAIN_INFUSION == nSpellId then
       local nRemain = NANOSTRAIN_2_CORRUPTION_THRESHOLD - nStack
       if nRemain == 2 or nRemain == 1 then
         local sColor = nRemain == 2 and "blue" or "red"
