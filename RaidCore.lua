@@ -292,17 +292,22 @@ local function RemoveDelayedUnit(nId, sName)
 end
 
 local function AddDelayedUnit(nId, tUnit, sName)
+  if not _tDelayedUnits[sName] then
+    _tDelayedUnits[sName] = {}
+  end
+  _tDelayedUnits[sName][nId] = tUnit
+end
+
+local function CheckDelayedUnit(nId, tUnit, sName)
   local tMap = GetCurrentZoneMap()
+  sName = sName:gsub(RaidCore.E.NO_BREAK_SPACE, " ")
   if tMap then
     local tTrig = _tTrigPerZone[tMap.continentId]
     tTrig = tTrig and tTrig[tMap.parentZoneId]
     tTrig = tTrig and tTrig[tMap.id]
     tTrig = tTrig and tTrig[sName]
     if tTrig then
-      if not _tDelayedUnits[sName] then
-        _tDelayedUnits[sName] = {}
-      end
-      _tDelayedUnits[sName][nId] = tUnit
+      AddDelayedUnit(nId, tUnit, sName)
     end
   end
 end
@@ -995,7 +1000,7 @@ function RaidCore:GlobalEventHandler(sMethod, ...)
 end
 
 function RaidCore:SEARCH_OnUnitCreated(nId, tUnit, sName)
-  AddDelayedUnit(nId, tUnit, sName)
+  CheckDelayedUnit(nId, tUnit, sName)
 end
 
 function RaidCore:SEARCH_OnCheckMapZone()
@@ -1038,7 +1043,7 @@ function RaidCore:SEARCH_OnEnteredCombat(nId, tUnit, sName, bInCombat)
     end
   elseif not tUnit:IsInYourGroup() then
     if not _tCurrentEncounter then
-      AddDelayedUnit(nId, tUnit, sName)
+      CheckDelayedUnit(nId, tUnit, sName)
       if _bIsEncounterInProgress then
         SearchEncounter()
         if _tCurrentEncounter and not _tCurrentEncounter:IsEnabled() then
