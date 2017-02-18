@@ -175,35 +175,35 @@ function mod:OnBossEnable()
   end
 end
 
-function mod:OnUnitCreated(nId, tUnit, sName)
-  if self.L["Prime Evolutionary Operant"] == sName then
-    core:AddUnit(tUnit)
-    core:WatchUnit(tUnit)
-    core:AddSimpleLine(("Cleave%d"):format(nId), nId, 0, 15, 0, 5, "green")
-    local tPosition = tUnit:GetPosition()
-    if tPosition.x < ORGANIC_INCINERATOR.x then
-      core:MarkUnit(tUnit, 51, "L")
-      tPrimeOperant2ZoneIndex[nId] = INCUBATION_ZONE_WEST
-    else
-      core:MarkUnit(tUnit, 51, "R")
-      tPrimeOperant2ZoneIndex[nId] = INCUBATION_ZONE_EST
-    end
-  elseif self.L["Prime Phage Distributor"] == sName then
-    core:AddUnit(tUnit)
-    core:WatchUnit(tUnit)
-    core:MarkUnit(tUnit, 51, "M")
-    core:AddSimpleLine(("Cleave%d"):format(nId), nId, 0, 15, 0, 5, "green")
-    tPrimeOperant2ZoneIndex[nId] = INCUBATION_ZONE_NORTH
-    nPrimeDistributorId = nId
-  elseif self.L["Organic Incinerator"] == sName then
-    core:WatchUnit(tUnit)
+function mod:OnOperantCreated(id, unit, name)
+  core:AddUnit(unit)
+  core:WatchUnit(unit)
+  core:AddSimpleLine(("Cleave%d"):format(id), id, 0, 15, 0, 5, "green")
+  local tPosition = unit:GetPosition()
+  if tPosition.x < ORGANIC_INCINERATOR.x then
+    core:MarkUnit(unit, 51, "L")
+    tPrimeOperant2ZoneIndex[id] = INCUBATION_ZONE_WEST
+  else
+    core:MarkUnit(unit, 51, "R")
+    tPrimeOperant2ZoneIndex[id] = INCUBATION_ZONE_EST
   end
 end
 
-function mod:OnUnitDestroyed(nId, tUnit, sName)
-  if self.L["Prime Evolutionary Operant"] == sName and self.L["Prime Phage Distributor"] == sName then
-    core:RemoveSimpleLine(("Cleave%d"):format(nId))
-  end
+function mod:OnAugmentorDestroyed(id, unit, name)
+  core:RemoveSimpleLine(("Cleave%d"):format(id))
+end
+
+function mod:OnDistributorCreated(id, unit, name)
+  core:AddUnit(unit)
+  core:WatchUnit(unit)
+  core:MarkUnit(unit, 51, "M")
+  core:AddSimpleLine(("Cleave%d"):format(id), id, 0, 15, 0, 5, "green")
+  tPrimeOperant2ZoneIndex[id] = INCUBATION_ZONE_NORTH
+  nPrimeDistributorId = id
+end
+
+function mod:OnIncineratorCreated(id, unit, name)
+  core:WatchUnit(unit)
 end
 
 function mod:OnDatachron(sMessage)
@@ -326,3 +326,27 @@ function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
       end
     end
   end
+  ----------------------------------------------------------------------------------------------------
+  -- Bind event handlers.
+  ----------------------------------------------------------------------------------------------------
+  mod:RegisterUnitEvents({
+      "Prime Evolutionary Operant",
+      "Prime Phage Distributor",
+      }, {
+      [core.E.UNIT_DESTROYED] = mod.OnAugmentorDestroyed,
+    }
+  )
+  mod:RegisterUnitEvents("Prime Evolutionary Operant", {
+      [core.E.UNIT_CREATED] = mod.OnOperantCreated,
+      [core.E.UNIT_DESTROYED] = mod.OnAugmentorDestroyed,
+    }
+  )
+  mod:RegisterUnitEvents("Prime Phage Distributor", {
+      [core.E.UNIT_CREATED] = mod.OnDistributorCreated,
+      [core.E.UNIT_DESTROYED] = mod.OnAugmentorDestroyed,
+    }
+  )
+  mod:RegisterUnitEvents("Organic Incinerator", {
+      [core.E.UNIT_CREATED] = mod.OnIncineratorCreated,
+    }
+  )
