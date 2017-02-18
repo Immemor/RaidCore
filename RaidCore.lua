@@ -312,7 +312,28 @@ local function CheckDelayedUnit(nId, tUnit, sName)
   end
 end
 
+local function UpdateDelayedUnitNames()
+  local tUnitsToUpdate = {}
+  for nDelayedName, tDelayedList in next, _tDelayedUnits do
+    for nDelayedId, tUnit in next, tDelayedList do
+      if tUnit:IsValid() then
+        local sNewName = tUnit:GetName():gsub(RaidCore.E.NO_BREAK_SPACE, " ")
+        if nDelayedName ~= sNewName then
+          table.insert(tUnitsToUpdate, {sName = nDelayedName, sNewName = sNewName, nId = nDelayedId, tUnit = tUnit})
+        end
+      end
+    end
+  end
+
+  for i = 1, #tUnitsToUpdate do
+    local tUnitToUpdate = tUnitsToUpdate[i]
+    RemoveDelayedUnit(tUnitToUpdate.nId, tUnitToUpdate.sName)
+    AddDelayedUnit(tUnitToUpdate.nId, tUnitToUpdate.tUnit, tUnitToUpdate.sNewName)
+  end
+end
+
 local function SearchEncounter()
+  UpdateDelayedUnitNames()
   local tMap = GetCurrentZoneMap()
   if tMap then
     local tEncounters = _tEncountersPerZone[tMap.continentId]
