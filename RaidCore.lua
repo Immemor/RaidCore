@@ -1024,7 +1024,7 @@ end
 
 function RaidCore:SEARCH_OnEnteredCombat(nId, tUnit, sName, bInCombat)
   -- Manage the lower layer.
-  if tUnit == GetPlayerUnit() then
+  if tUnit:IsThePlayer() then
     if bInCombat then
       -- Player entering in combat.
       _bIsEncounterInProgress = true
