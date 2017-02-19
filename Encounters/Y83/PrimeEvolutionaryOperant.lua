@@ -185,7 +185,7 @@ end
 function mod:OnOperantCreated(id, unit, name)
   core:AddUnit(unit)
   core:WatchUnit(unit)
-  core:AddSimpleLine("Cleave"..id, id, 0, 15, 0, 5, "green")
+  core:AddSimpleLine("CLEAVE_"..id, id, 0, 15, 0, 5, "green")
   local tPosition = unit:GetPosition()
   if tPosition.x < ORGANIC_INCINERATOR.x then
     core:MarkUnit(unit, 51, "L")
@@ -197,14 +197,14 @@ function mod:OnOperantCreated(id, unit, name)
 end
 
 function mod:OnAugmentorDestroyed(id, unit, name)
-  core:RemoveSimpleLine("Cleave"..id)
+  core:RemoveSimpleLine("CLEAVE_"..id)
 end
 
 function mod:OnDistributorCreated(id, unit, name)
   core:AddUnit(unit)
   core:WatchUnit(unit)
   core:MarkUnit(unit, 51, "M")
-  core:AddSimpleLine("Cleave"..id, id, 0, 15, 0, 5, "green")
+  core:AddSimpleLine("CLEAVE_"..id, id, 0, 15, 0, 5, "green")
   tPrimeOperant2ZoneIndex[id] = INCUBATION_ZONE_NORTH
   nPrimeDistributorId = id
 end
@@ -251,14 +251,14 @@ function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
 
   if DEBUFFS.STRAIN_INCUBATION == nSpellId then
     if mod:GetSetting("PictureIncubation") then
-      core:AddPicture(("INCUBATION %d"):format(nId), nId, "Crosshair", 20)
+      core:AddPicture("INCUBATION_"..nId, nId, "Crosshair", 20)
     end
     if mod:GetSetting("IncubationRegroupZone") and nPrimeDistributorId then
       local nIndex = tPrimeOperant2ZoneIndex[nPrimeDistributorId]
       if nIndex then
         local sColor = nPlayerId == nId and "ffff00ff" or "60ff00ff"
         local Vector = INCUBATION_REGROUP_ZONE[nIndex]
-        local o = core:AddLineBetweenUnits("SafeZoneGO" .. nId, nId, Vector, 5, sColor, 10)
+        local o = core:AddLineBetweenUnits("SAFE_ZONE_GO_"..nId, nId, Vector, 5, sColor, 10)
         o:SetSprite("CRB_MegamapSprites:sprMap_PlayerArrowNoRing", 20)
         o:SetMinLengthVisible(5)
         o:SetMaxLengthVisible(50)
@@ -281,7 +281,7 @@ function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
     -- during 7s. The Organic Incinerator beam is without danger during 5s.
     if nPainSuppressorsFadeTime < nCurrentTime then
       nPainSuppressorsFadeTime = nCurrentTime + fTimeRemaining
-      local line = core:GetSimpleLine("Orga.Inc.beam")
+      local line = core:GetSimpleLine("INCINERATOR_BEAM")
       if line then
         line:SetColor("6000ff00")
         self:ScheduleTimer(function(l) l:SetColor("A0ff8000") end, 4, line)
@@ -292,8 +292,8 @@ function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
 end
 
 function mod:OnStrainIncubationRemove(id, spellId)
-  core:RemovePicture(("INCUBATION %d"):format(id))
-  core:RemoveLineBetweenUnits("SafeZoneGO" .. id)
+  core:RemovePicture("INCUBATION_"..id)
+  core:RemoveLineBetweenUnits("SAFE_ZONE_GO_"..id)
 end
 
 function mod:OnCompromisedCircuitryAdd(id, spellId, stack, timeRemaining)
@@ -323,9 +323,9 @@ function mod:OnBuffUpdate(nId, nSpellId, nStack, fTimeRemaining)
 end
 
 function mod:OnDisintegrateStart(id, castName, endTime, name)
-  local line = core:GetSimpleLine("Orga.Inc.beam")
+  local line = core:GetSimpleLine("INCINERATOR_BEAM")
   if not line and mod:GetSetting("OrganicIncineratorBeam") then
-    core:AddSimpleLine("Orga.Inc.beam", id, 0, 65, 0, 10, "red")
+    core:AddSimpleLine("INCINERATOR_BEAM", id, 0, 65, 0, 10, "red")
   end
 end
 ----------------------------------------------------------------------------------------------------
