@@ -298,19 +298,17 @@ function mod:OnDebuffRemove(nId, nSpellId)
   end
 end
 
-function mod:OnBuffAdd(nId, nSpellId, nStack, fTimeRemaining)
-  if BUFFS.COMPROMISED_CIRCUITRY == nSpellId then
-    for i, Vector in next, INCUBATION_REGROUP_ZONE do
-      core:RemovePicture("IZ" .. i)
-    end
-    if not bIsPhaseUnder20Poucent then
-      nPrimeDistributorId = nId
-      if mod:GetSetting("IncubationRegroupZone") then
-        local nIndex = tPrimeOperant2ZoneIndex[nId]
-        if nIndex then
-          local Vector = INCUBATION_REGROUP_ZONE[nIndex]
-          core:AddPicture("IZ" .. nIndex, Vector, "ClientSprites:LootCloseBox_Holo", 30)
-        end
+function mod:OnCompromisedCircuitryAdd(id, spellId, stack, timeRemaining)
+  for i, Vector in next, INCUBATION_REGROUP_ZONE do
+    core:RemovePicture("IZ" .. i)
+  end
+  if not bIsPhaseUnder20Poucent then
+    nPrimeDistributorId = id
+    if mod:GetSetting("IncubationRegroupZone") then
+      local nIndex = tPrimeOperant2ZoneIndex[id]
+      if nIndex then
+        local Vector = INCUBATION_REGROUP_ZONE[nIndex]
+        core:AddPicture("IZ" .. nIndex, Vector, "ClientSprites:LootCloseBox_Holo", 30)
       end
     end
   end
@@ -340,6 +338,9 @@ mod:RegisterUnitEvents({
     "Prime Phage Distributor",
     }, {
     [core.E.UNIT_DESTROYED] = mod.OnAugmentorDestroyed,
+    [DEBUFFS.COMPROMISED_CIRCUITRY] = {
+      [core.E.BUFF_ADD] = mod.OnCompromisedCircuitryAdd,
+    },
   }
 )
 mod:RegisterUnitEvents("Prime Evolutionary Operant", {
