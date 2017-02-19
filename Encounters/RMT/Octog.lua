@@ -64,6 +64,17 @@ mod:RegisterFrenchLocale({
     ["buff.octog.flamethrower"] = "Feu spatial",
   }
 )
+mod:RegisterGermanLocale({
+    -- Unit names.
+    ["unit.octog"] = "Sternenschlinger der Gefräßige",
+    -- NPC says.
+    ["say.octog.orb"] = "Bleibt schön in der Nähe! Gleich gibt’s was zu futtern!",
+    ["say.octog.supernova"] = "Bald wirst du aufhören zu zappeln ... und mein Bauch aufhören zu grummeln!",
+    -- Buffs.
+    ["buff.orb.energies"] = "Chaotische Energien",
+    ["buff.octog.flamethrower"] = "Weltraumfeuer",
+  }
+)
 ----------------------------------------------------------------------------------------------------
 -- Settings.
 ----------------------------------------------------------------------------------------------------
