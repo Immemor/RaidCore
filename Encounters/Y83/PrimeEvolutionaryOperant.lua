@@ -291,11 +291,9 @@ function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
   end
 end
 
-function mod:OnDebuffRemove(nId, nSpellId)
-  if DEBUFFS.STRAIN_INCUBATION == nSpellId then
-    core:RemovePicture(("INCUBATION %d"):format(nId))
-    core:RemoveLineBetweenUnits("SafeZoneGO" .. nId)
-  end
+function mod:OnStrainIncubationRemove(id, spellId)
+  core:RemovePicture(("INCUBATION %d"):format(id))
+  core:RemoveLineBetweenUnits("SafeZoneGO" .. id)
 end
 
 function mod:OnCompromisedCircuitryAdd(id, spellId, stack, timeRemaining)
@@ -333,6 +331,12 @@ end
 ----------------------------------------------------------------------------------------------------
 -- Bind event handlers.
 ----------------------------------------------------------------------------------------------------
+mod:RegisterUnitEvents(core.E.ALL_UNITS, {
+    [DEBUFFS.STRAIN_INCUBATION] = {
+      [core.E.DEBUFF_REMOVE] = mod.OnStrainIncubationRemove,
+    },
+  }
+)
 mod:RegisterUnitEvents({
     "Prime Evolutionary Operant",
     "Prime Phage Distributor",
