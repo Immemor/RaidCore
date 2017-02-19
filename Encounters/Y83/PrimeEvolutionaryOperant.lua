@@ -291,9 +291,13 @@ function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
   end
 end
 
-function mod:OnStrainIncubationRemove(id, spellId)
+function mod:OnStrainIncubationRemove(id)
   core:RemovePicture("INCUBATION_"..id)
   core:RemoveLineBetweenUnits("SAFE_ZONE_GO_"..id)
+end
+
+function mod:OnAnyUnitDestroyed(id, unit, name)
+  mod:OnStrainIncubationRemove(id)
 end
 
 function mod:OnCompromisedCircuitryAdd(id, spellId, stack, timeRemaining)
@@ -331,6 +335,7 @@ end
 -- Bind event handlers.
 ----------------------------------------------------------------------------------------------------
 mod:RegisterUnitEvents(core.E.ALL_UNITS, {
+    [core.E.UNIT_DESTROYED] = mod.OnAnyUnitDestroyed,
     [DEBUFFS.STRAIN_INCUBATION] = {
       [core.E.DEBUFF_REMOVE] = mod.OnStrainIncubationRemove,
     },
