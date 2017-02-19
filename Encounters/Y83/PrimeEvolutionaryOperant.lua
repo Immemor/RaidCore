@@ -338,7 +338,7 @@ mod:RegisterUnitEvents({
     "Prime Phage Distributor",
     }, {
     [core.E.UNIT_DESTROYED] = mod.OnAugmentorDestroyed,
-    [DEBUFFS.COMPROMISED_CIRCUITRY] = {
+    [BUFFS.COMPROMISED_CIRCUITRY] = {
       [core.E.BUFF_ADD] = mod.OnCompromisedCircuitryAdd,
     },
   }
