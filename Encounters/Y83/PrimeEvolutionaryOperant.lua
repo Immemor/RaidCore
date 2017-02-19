@@ -312,13 +312,12 @@ function mod:OnCompromisedCircuitryAdd(id, spellId, stack, timeRemaining)
   end
 end
 
-function mod:OnBuffUpdate(nId, nSpellId, nStack, fTimeRemaining)
-  if BUFFS.NANOSTRAIN_INFUSION == nSpellId then
-    local nRemain = NANOSTRAIN_2_CORRUPTION_THRESHOLD - nStack
-    if nRemain == 2 or nRemain == 1 then
-      local sColor = nRemain == 2 and "blue" or "red"
-      core:AddMsg("WARNING", self.L["%u STACKS BEFORE CORRUPTION"]:format(nRemain), 4, nil, sColor)
-    end
+--TODO: Filter out dropping stacks
+function mod:OnNanostrainInfusionUpdate(id, spellId, stack, timeRemaining)
+  local nRemain = NANOSTRAIN_2_CORRUPTION_THRESHOLD - stack
+  if nRemain == 2 or nRemain == 1 then
+    local sColor = nRemain == 2 and "blue" or "red"
+    core:AddMsg("WARNING", self.L["%u STACKS BEFORE CORRUPTION"]:format(nRemain), 4, nil, sColor)
   end
 end
 
@@ -344,6 +343,9 @@ mod:RegisterUnitEvents({
     [core.E.UNIT_DESTROYED] = mod.OnAugmentorDestroyed,
     [BUFFS.COMPROMISED_CIRCUITRY] = {
       [core.E.BUFF_ADD] = mod.OnCompromisedCircuitryAdd,
+    },
+    [BUFFS.NANOSTRAIN_INFUSION] = {
+      [core.E.BUFF_UPDATE] = mod.OnNanostrainInfusionUpdate,
     },
   }
 )
