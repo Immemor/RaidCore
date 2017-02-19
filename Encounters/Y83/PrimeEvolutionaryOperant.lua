@@ -210,7 +210,7 @@ function mod:OnDistributorCreated(id, unit, name)
 end
 
 function mod:OnIncineratorCreated(id, unit, name)
-  core:WatchUnit(unit)
+  core:WatchUnit(unit, core.E.TRACK_CASTS)
 end
 
 function mod:OnDatachron(sMessage)
