@@ -213,6 +213,10 @@ function mod:OnIncineratorCreated(id, unit, name)
   core:WatchUnit(unit, core.E.TRACK_CASTS)
 end
 
+function mod:OnIncineratorDestroyed(id, unit, name)
+  core:RemoveSimpleLine("INCINERATOR_BEAM")
+end
+
 function mod:OnDatachron(sMessage)
   local sPlayerNameIrradiate = sMessage:match(self.L["(.*) is being irradiated"])
   if sPlayerNameIrradiate then
@@ -366,6 +370,7 @@ mod:RegisterUnitEvents("Prime Phage Distributor", {
 )
 mod:RegisterUnitEvents("Organic Incinerator", {
     [core.E.UNIT_CREATED] = mod.OnIncineratorCreated,
+    [core.E.UNIT_DESTROYED] = mod.OnIncineratorDestroyed,
     ["Disintegrate"] = {
       [core.E.CAST_START] = mod.OnDisintegrateStart,
     }
