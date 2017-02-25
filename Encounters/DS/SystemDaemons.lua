@@ -193,11 +193,7 @@ local DEBUFFID_PURGE = 79399
 local DEBUFFID_OVERLOAD = 43012
 local probesouth = { x = 95.89, y = -337.19, z = 211.26 }
 local PILLARS_POSITIONS = {
-  [0] = {
-    DPS = {},
-    TANK = {},
-  },
-  [1] = {
+  ["mid1"] = {
     DPS = {
       ["N1"] = { x = 133.217, y = -225.94, z = -207.71 },
       ["N2"] = { x = 156.79, y = -225.94, z = -198.126 },
@@ -215,7 +211,7 @@ local PILLARS_POSITIONS = {
       ["S3"] = { x = 156.80, y = -225.94, z = -150.82 },
     },
   },
-  [2] = {
+  ["mid2"] = {
     DPS = {
       ["N1"] = { x = 109.23, y = -225.94, z = -198.12 },
       ["N2"] = { x = 156.79, y = -225.94, z = -198.12 },
@@ -468,10 +464,15 @@ function mod:OnDatachron(sMessage)
       mod:AddTimerBar("DISCONNECT", "Next disconnect", 85)
     end
     if mod:GetSetting("OtherPillarMarkers") then
-      if phase2count ~= 1 and phase2count ~= 2 then phase2count = 0 end
       local role = mod:GetSetting("TankPillarMarkers") and "TANK" or "DPS"
-      for key, value in pairs(PILLARS_POSITIONS[phase2count][role]) do
-        core:SetWorldMarker(key, key, value)
+      if phase2count == 1 then
+        for key, value in pairs(PILLARS_POSITIONS["mid1"][role]) do
+          core:SetWorldMarker(key, key, value)
+        end
+      elseif phase2count == 2 then
+        for key, value in pairs(PILLARS_POSITIONS["mid2"][role]) do
+          core:SetWorldMarker(key, key, value)
+        end
       end
     end
     self:ScheduleTimer("NextWave", 5)
