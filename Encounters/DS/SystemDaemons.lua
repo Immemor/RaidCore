@@ -489,22 +489,3 @@ mod:RegisterUnitEvents({"unit.daemon.binary", "unit.daemon.null"},{
     [core.E.HEALTH_CHANGED] = mod.OnDaemonsHealthChanged,
   }
 )
-
-core.DebugShowSDPillarMarks = function(ref, phase, role)
-  core:ResetWorldMarkers()
-  local bValid = true
-  bValid = bValid and (phase == 0 or phase == 1 or phase == 2)
-  bValid = bValid and (role == "DPS" or role == "TANK")
-  if not bValid then
-    Print("(1/2, \"DPS\"/\"TANK\")")
-    return
-  end
-  for key, value in pairs(PILLARS_POSITIONS[phase][role]) do
-    core:SetWorldMarker(key, key, value)
-  end
-end
-
-core.DebugPlaceWorldMarker = function(ref, dX, dY, dZ, strText)
-  core:ResetWorldMarkers()
-  core:SetWorldMarker(strText, strText, {x=dX, y=dY, z=dZ})
-end
