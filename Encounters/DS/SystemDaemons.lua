@@ -159,6 +159,7 @@ mod:RegisterDefaultSetting("OtherOverloadMarkers")
 mod:RegisterDefaultSetting("OtherPurgePlayerMarkers")
 mod:RegisterDefaultSetting("OtherDisconnectTimer")
 mod:RegisterDefaultSetting("OtherPillarMarkers")
+mod:RegisterDefaultSetting("TankPillarMarkers", false)
 -- Timers default configs.
 mod:RegisterDefaultTimerBarConfigs({
     ["SDWAVE"] = { sColor = "xkcdOrangeYellow" },
@@ -193,22 +194,44 @@ local DEBUFFID_OVERLOAD = 43012
 local probesouth = { x = 95.89, y = -337.19, z = 211.26 }
 local PILLARS_POSITIONS = {
   ["mid1"] = {
-    ["N1"] = { x = 133.217, y = -225.94, z = -207.71 },
-    ["N2"] = { x = 109.22, y = -225.94, z = -150.85 },
-    ["N3"] = { x = 109.23, y = -225.94, z = -198.13 },
-    ["S1"] = { x = 133.17, y = -225.94, z = -140.96 },
-    ["S2"] = { x = 156.79, y = -225.94, z = -198.126 },
-    ["S3"] = { x = 156.80, y = -225.94, z = -150.82 },
+    DPS = {
+      ["N1"] = { x = 133.217, y = -225.94, z = -207.71 },
+      ["N2"] = { x = 156.79, y = -225.94, z = -198.126 },
+      ["N3"] = { x = 109.23, y = -225.94, z = -198.13 },
+      ["S1"] = { x = 133.17, y = -225.94, z = -140.96 },
+      ["S2"] = { x = 109.22, y = -225.94, z = -150.85 },
+      ["S3"] = { x = 156.80, y = -225.94, z = -150.82 },
+    },
+    TANK = {
+      ["N1"] = { x = 133.217, y = -225.94, z = -207.71 },
+      ["N2"] = { x = 109.22, y = -225.94, z = -150.85 },
+      ["N3"] = { x = 109.23, y = -225.94, z = -198.13 },
+      ["S1"] = { x = 133.17, y = -225.94, z = -140.96 },
+      ["S2"] = { x = 156.79, y = -225.94, z = -198.126 },
+      ["S3"] = { x = 156.80, y = -225.94, z = -150.82 },
+    },
   },
   ["mid2"] = {
-    ["N1"] = { x = 109.23, y = -225.94, z = -198.12 },
-    ["N2"] = { x = 156.79, y = -225.94, z = -198.12 },
-    ["N3"] = { x = 99.91, y = -225.99, z = -174.35 },
-    ["N4"] = { x = 133.21, y = -225.94, z = -207.71 },
-    ["S1"] = { x = 109.22, y = -225.94, z = -150.85 },
-    ["S2"] = { x = 156.80, y = -225.94, z = -150.82 },
-    ["S3"] = { x = 133.17, y = -225.94, z = -140.93 },
-    ["S4"] = { x = 166.56, y = -225.94, z = -174.30 },
+    DPS = {
+      ["N1"] = { x = 109.23, y = -225.94, z = -198.12 },
+      ["N2"] = { x = 156.79, y = -225.94, z = -198.12 },
+      ["N3"] = { x = 99.91, y = -225.99, z = -174.35 },
+      ["N4"] = { x = 133.21, y = -225.94, z = -207.71 },
+      ["S1"] = { x = 109.22, y = -225.94, z = -150.85 },
+      ["S2"] = { x = 156.80, y = -225.94, z = -150.82 },
+      ["S3"] = { x = 133.17, y = -225.94, z = -140.93 },
+      ["S4"] = { x = 166.56, y = -225.94, z = -174.30 },
+    },
+    TANK = {
+      ["N1"] = { x = 109.23, y = -225.94, z = -198.12 },
+      ["N2"] = { x = 78.21, y = -225.99, z = -174.35 },
+      ["N3"] = { x = 99.91, y = -225.99, z = -174.35 },
+      ["N4"] = { x = 166.56, y = -225.94, z = -174.30 },
+      ["S1"] = { x = 109.22, y = -225.94, z = -150.85 },
+      ["S2"] = { x = 156.79, y = -225.94, z = -198.12 },
+      ["S3"] = { x = 133.17, y = -225.94, z = -140.93 },
+      ["S4"] = { x = 133.21, y = -225.94, z = -207.71 },
+    },
   },
 }
 local THRESHOLD_SD_TOO_CLOSE_NOTICE = 67
@@ -441,12 +464,13 @@ function mod:OnDatachron(sMessage)
       mod:AddTimerBar("DISCONNECT", "Next disconnect", 85)
     end
     if mod:GetSetting("OtherPillarMarkers") then
+      local role = mod:GetSetting("TankPillarMarkers") and "TANK" or "DPS"
       if phase2count == 1 then
-        for key, value in pairs(PILLARS_POSITIONS["mid1"]) do
+        for key, value in pairs(PILLARS_POSITIONS["mid1"][role]) do
           core:SetWorldMarker(key, key, value)
         end
       elseif phase2count == 2 then
-        for key, value in pairs(PILLARS_POSITIONS["mid2"]) do
+        for key, value in pairs(PILLARS_POSITIONS["mid2"][role]) do
           core:SetWorldMarker(key, key, value)
         end
       end
