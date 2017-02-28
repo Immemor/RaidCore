@@ -335,6 +335,9 @@ function RaidCore:CI_OnBuff(tUnit, tBuff, sMsgBuff, sMsgDebuff)
 end
 
 local function UpdateTrackedBuff(sEvent, nUnitId, nSpellId, sName, tBuff)
+  if tBuff.fTimeRemaining == 0 then
+    return
+  end
   _tTrackedBuffs[nUnitId..nSpellId] = {
     sEvent = sEvent,
     nUnitId = nUnitId,
