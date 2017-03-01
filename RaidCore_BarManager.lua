@@ -506,7 +506,7 @@ function UnitManager:UpdateBar(tBar)
   if tUnit and tUnit:IsValid() then
     local MaxHealth = tUnit:GetMaxHealth()
     local Health = tUnit:GetHealth()
-    local sName = tUnit:GetName():gsub(RaidCore.E.NO_BREAK_SPACE, " ")
+    local sName = RaidCore:ReplaceNoBreakSpace(tUnit:GetName())
     local bVunerable = tUnit:IsInCCState(VULNERABILITY)
     if Health and MaxHealth then
       local nPourcent = 100.0 * Health / MaxHealth
