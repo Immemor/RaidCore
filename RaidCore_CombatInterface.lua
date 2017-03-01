@@ -336,7 +336,7 @@ end
 
 local function UpdateTrackedBuff(sEvent, nUnitId, nSpellId, sName, tBuff)
   if tBuff.fTimeRemaining == 0 then
-    return
+    return -- Filter out permanent buffs
   end
   _tTrackedBuffs[nUnitId..nSpellId] = {
     sEvent = sEvent,
