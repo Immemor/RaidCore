@@ -82,6 +82,24 @@ mod:RegisterFrenchLocale({
     ["chron.world_ender.cassus"] = "A World Ender is heading to the de Cassus orbit.",
   }
 )
+mod:RegisterGermanLocale({
+    -- Unit names.
+    ["unit.alpha"] = "Alpha-Cassus",
+
+    ["unit.asteroid"] = "Abnormaler Asteroid",
+    ["unit.debris_field"] = "Trümmerfeld",
+    -- Cast names.
+    ["cast.alpha.catastrophic"] = "Katastrophales Sonnenereignis",
+    -- Buffs.
+    ["buff.alpha.wind"] = "Solarwinde",
+    ["buff.alpha.irradiated"] = "Verstrahlte Rüstung",
+    -- Datachron.
+    -- Bugged ["chron.world_ender.aldinari"] = "A World Ender is heading to the (rvl_target.name) orbit.", --
+    -- Bugged ["chron.world_ender.vulpes_nix"] = "A World Ender is heading to the (rvl_target.name) orbit.",
+    -- Bugged ["chron.world_ender.cassus"] = "A World Ender is heading to the (rvl_target.name) orbit.",
+    ["chron.critical_mass"] = "([^%s]+%s[^%s]+) hat kritische Masse erreicht!",
+  }
+)
 ----------------------------------------------------------------------------------------------------
 -- Settings.
 ----------------------------------------------------------------------------------------------------
@@ -101,7 +119,7 @@ mod:RegisterDefaultSetting("MarkDebrisField")
 mod:RegisterDefaultSetting("MarkSolarWindTimer")
 mod:RegisterDefaultSetting("CrosshairCosmicDebris")
 mod:RegisterDefaultSetting("MarkWorldEnder")
-mod:RegisterDefaultSetting("MarkWormhole", false)
+mod:RegisterDefaultSetting("MarkWormholePosition")
 -- Sounds.
 mod:RegisterDefaultSetting("CountdownWorldEnder")
 mod:RegisterDefaultSetting("SoundWorldEnderSpawn")
@@ -225,7 +243,7 @@ local CARDINAL_MARKERS = {
 }
 
 --Where the Wormhole needs to be places
-local WORM_HOLE_POSITION = Vector3.New(-47.13, -96.21, 356.96)
+local WORM_HOLE_POSITION = Vector3.New(-47.501198, -96.222008, 354.7)
 
 ----------------------------------------------------------------------------------------------------
 -- Locals.
@@ -423,17 +441,21 @@ function mod:OnWorldEnderCreated(id, unit)
   mod:StartAsteroidTimer()
   mod:DropWorldMarker("WORLD_ENDER_MARKER_" .. worldEnderCount)
 
-  if worldEnderCount == 4 and mod:GetSetting("MarkWormhole") then
+  if worldEnderCount == 3 and mod:GetSetting("MarkWormholePosition") then
+    mod:SetWorldMarker("WORM_HOLE_POSITION", "mark.worm.hole", WORM_HOLE_POSITION)
+  elseif worldEnderCount == 4 then
     wormHoleId = id
-    mod:SetWorldMarker("WORM_HOLE_"..id, "mark.worm.hole", WORM_HOLE_POSITION)
   end
+end
 
+function mod:RemoveWormholePosition(id)
+  if wormHoleId == id then
+    mod:DropWorldMarker("WORM_HOLE_POSITION")
+  end
 end
 
 function mod:OnWorldEnderDestroyed(id, unit)
-  if wormHoleId == id then
-    mod:DropWorldMarker("WORM_HOLE_"..id)
-  end
+  mod:RemoveWormholePosition(id)
   core:RemoveLineBetweenUnits("WORLD_ENDER_" .. id)
   worldEnders[id] = nil
 end
@@ -570,6 +592,7 @@ function mod:OnWorldEnderEnterWormhole(id)
     mod:AddMsg("WORLD_ENDER_FALLING", "msg.world_ender.falling", 5, "Beware", "xkcdOrange")
     mod:OnWorldEnderTarget(worldEnder, self.L["unit.alpha"])
   end
+  mod:RemoveWormholePosition(id)
 end
 
 function mod:OnMidphaseStart()

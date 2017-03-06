@@ -762,7 +762,7 @@ function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
           closest_holo_hand = hand
         end
       end
-      local sSpellName = closest_holo_hand["unit"]:GetCastName():gsub(core.E.NO_BREAK_SPACE, " ")
+      local sSpellName = core:ReplaceNoBreakSpace(closest_holo_hand["unit"]:GetCastName())
       if sSpellName == self.L["Crushing Blow"] then
         mod:AddMsg("CRBLOW", "INTERRUPT CRUSHING BLOW!", 5, mod:GetSetting("SoundHandInterrupt") and "Inferno")
       end

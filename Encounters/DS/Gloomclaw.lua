@@ -269,7 +269,7 @@ function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
 
   function mod:OnCombatLogHeal(tArgs)
     if tArgs.unitTarget then
-      local targetName = tArgs.unitTarget:GetName():gsub(core.E.NO_BREAK_SPACE, " ")
+      local targetName = core:ReplaceNoBreakSpace(tArgs.unitTarget:GetName())
       local targetId = tArgs.unitTarget:GetId()
       if targetName == self.L["Essence of Logic"] then
         if not essenceUp[targetId] then
