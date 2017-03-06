@@ -173,6 +173,7 @@ local player
 local essenceNumber
 local essences
 local isDeadRealm
+local expulsionInThisRealm
 local isMidphase
 local lastSpiritOfSoulfireStack
 local soulEatersActive
@@ -186,6 +187,7 @@ function mod:OnBossEnable()
   essenceNumber = 0
   isDeadRealm = false
   isMidphase = false
+  expulsionInThisRealm = false
   lastSpiritOfSoulfireStack = 0
   essences = {}
   player = {}
@@ -302,7 +304,20 @@ function mod:OnSpiritOfSoulfireRemove(id, spellId, targetName)
 end
 
 function mod:OnExpulsionAdd(id, spellId, stack, timeRemaining, targetName)
-  if isDeadRealm then
+  expulsionInThisRealm = true
+  mod:ShowExpulsionStackMessage()
+end
+
+function mod:OnExpulsionStart()
+  mod:ShowExpulsionStackMessage()
+end
+
+function mod:OnExpulsionEnd()
+  expulsionInThisRealm = false
+end
+
+function mod:ShowExpulsionStackMessage()
+  if expulsionInThisRealm == isDeadRealm then -- downstairs and buff or upstairs and no buff
     mod:AddMsg("EXPULSION", "msg.laveka.expulsion", 5, "Beware", "xkcdRed")
   end
 end
@@ -347,6 +362,7 @@ end
 function mod:ToggleDeadRealm(id)
   if id == player.id then
     isDeadRealm = not isDeadRealm
+    expulsionInThisRealm = false -- just incase the player switches to other realm in the 100ms frame between DEBUFF_ADD and CAST_START
     if not isDeadRealm then
       mod:RemoveLostSoulLine()
     end
@@ -538,6 +554,10 @@ mod:RegisterUnitEvents("unit.laveka",{
     },
     ["cast.laveka.cacophony"] = {
       [core.E.CAST_START] = mod.OnCacophonyStart,
+    }
+    ["cast.laveka.expulsion"] = {
+      [core.E.CAST_START] = mod.OnExpulsionStart,
+      [core.E.CAST_END] = mod.OnExpulsionEnd,
     },
   }
 )
