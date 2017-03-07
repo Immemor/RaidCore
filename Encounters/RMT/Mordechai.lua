@@ -383,7 +383,7 @@ mod:RegisterUnitEvents("unit.mordechai",{
 mod:RegisterUnitEvents("unit.turret",{
     [core.E.UNIT_CREATED] = mod.OnTurretCreated,
     ["cast.turret.discharge"] = {
-      [core.E.CAST_START] = mod.OnTurretCastOrb,
+      [core.E.CAST_START] = mod.OnTurretCastOrbStart,
     }
   }
 )
