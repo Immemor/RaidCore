@@ -214,6 +214,7 @@ function EncounterPrototype:RegisterUnitEvents(tUnitNames, tEventsHandlers)
   tUnitNames = type(tUnitNames) == "string" and {tUnitNames} or tUnitNames
   Assert:Table(tUnitNames, "Unit names not a table: %s, %s", self.name, tostring(tUnitNames))
   Assert:Table(tEventsHandlers, "Event handlers not a table: %s, %s", self.name, tostring(tEventsHandlers))
+  Assert:EmptyTable(tEventsHandlers, "Event handlers table empty: %s, %s", self.name, tostring(tEventsHandlers))
 
   local nSize = #tUnitNames
   for i = 1, nSize do
@@ -249,6 +250,7 @@ function EncounterPrototype:RegisterUnitSpellEvents(tUnitNames, primaryKey, tEve
   tUnitNames = type(tUnitNames) == "string" and {tUnitNames} or tUnitNames
   Assert:Table(tUnitNames, "Unit names not a table: %s, %s", self.name, tostring(tUnitNames))
   Assert:Table(tEventHandlers, "Event handlers not a table: %s, %s", self.name, tostring(tEventHandlers))
+  Assert:EmptyTable(tEventHandlers, "Event handlers table empty: %s, %s", self.name, tostring(tEventHandlers))
   Assert:TypeOr(primaryKey, {Assert.TYPES.STRING, Assert.TYPES.NUMBER},
     "Invalid type for primary key: %s, %s", self.name, tostring(primaryKey)
   )
