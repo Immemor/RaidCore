@@ -489,6 +489,10 @@ function mod:RemoveLostSoulLine()
   core:RemoveLineBetweenUnits("LOST_SOUL_LINE")
 end
 
+function mod:OnCacophonyStart()
+  essenceNumber = 0
+end
+
 ----------------------------------------------------------------------------------------------------
 -- Bind event handlers.
 ----------------------------------------------------------------------------------------------------
@@ -531,6 +535,9 @@ mod:RegisterUnitEvents("unit.laveka",{
     },
     ["cast.laveka.devoursouls"] = {
       [core.E.CAST_END] = mod.OnDevourSoulsStop,
+    },
+    ["cast.laveka.cacophony"] = {
+      [core.E.CAST_START] = mod.OnCacophonyStart,
     },
   }
 )
