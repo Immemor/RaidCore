@@ -554,7 +554,7 @@ mod:RegisterUnitEvents("unit.laveka",{
     },
     ["cast.laveka.cacophony"] = {
       [core.E.CAST_START] = mod.OnCacophonyStart,
-    }
+    },
     ["cast.laveka.expulsion"] = {
       [core.E.CAST_START] = mod.OnExpulsionStart,
       [core.E.CAST_END] = mod.OnExpulsionEnd,
