@@ -305,11 +305,15 @@ end
 
 function mod:OnExpulsionAdd(id, spellId, stack, timeRemaining, targetName)
   expulsionInThisRealm = true
-  mod:ShowExpulsionStackMessage()
+  if isDeadRealm then
+    mod:ShowExpulsionStackMessage()
+  end
 end
 
 function mod:OnExpulsionStart()
-  mod:ShowExpulsionStackMessage()
+  if not isDeadRealm and not expulsionInThisRealm then
+    mod:ShowExpulsionStackMessage()
+  end
 end
 
 function mod:OnExpulsionEnd()
@@ -317,9 +321,7 @@ function mod:OnExpulsionEnd()
 end
 
 function mod:ShowExpulsionStackMessage()
-  if expulsionInThisRealm == isDeadRealm then -- downstairs and buff or upstairs and no buff
-    mod:AddMsg("EXPULSION", "msg.laveka.expulsion", 5, "Beware", "xkcdRed")
-  end
+  mod:AddMsg("EXPULSION", "msg.laveka.expulsion", 5, "Beware", "xkcdRed")
 end
 
 function mod:OnEchoesAdd(id, spellId, stack, timeRemaining, targetName)
