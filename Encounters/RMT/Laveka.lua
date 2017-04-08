@@ -140,7 +140,8 @@ local BUFFS = {
 local TIMERS = {
   SOUL_EATERS = {
     FIRST = 76,
-    NORMAL = 61,
+    MIDPHASE = 61,
+    NORMAL = 85,
   },
   ECHOES_OF_THE_AFTERLIFE = 10,
   ADDS = {
@@ -418,6 +419,7 @@ end
 function mod:OnDevourSoulsStop()
   soulEatersActive = false
   mod:RemoveSoulEaterOrbits()
+  mod:StartSoulEaterTimer(TIMERS.SOUL_EATERS.NORMAL)
 end
 
 function mod:DrawSoulEaterOrbits()
@@ -460,7 +462,7 @@ end
 function mod:OnMidphaseEnd()
   isMidphase = false
   mod:RemoveTimerBar("ADDS_TIMER")
-  mod:StartSoulEaterTimer(TIMERS.SOUL_EATERS.NORMAL)
+  mod:StartSoulEaterTimer(TIMERS.SOUL_EATERS.MIDPHASE)
 end
 
 function mod:OnTitanCreated(id, unit, name)
