@@ -8,7 +8,7 @@
 -- TODO
 ----------------------------------------------------------------------------------------------------
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
-local mod = core:NewEncounter("Bio_Enhanced_Broodmother", 52, 98, 108)
+local mod = core:NewEncounter("BioEnhancedBroodmother", 52, 98, 108)
 if not mod then return end
 
 ----------------------------------------------------------------------------------------------------
