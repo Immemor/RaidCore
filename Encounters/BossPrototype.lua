@@ -613,9 +613,8 @@ end
 -- @param tNames Names of units without break space.
 -- @return Any unit registered can start the encounter.
 function EncounterPrototype:OnTrig(tNames)
-  if not self:IsTestEncounterEnabled() and self:IsTestEncounter() then
-    return false
-  end
+  if not self:IsTestEncounterEnabled() and self:IsTestEncounter() then return false end
+  if not self:IsEncounterEnabled() then return false end
   return self:OnTrigCheck(tNames)
 end
 
@@ -625,6 +624,10 @@ end
 
 function EncounterPrototype:IsTestEncounterEnabled()
   return RaidCore.db.profile.bEnableTestEncounters
+end
+
+function EncounterPrototype:IsEncounterEnabled()
+  return RaidCore.db.profile.Encounters[self:GetName()].Enabled
 end
 
 -- Create a world marker.
@@ -687,7 +690,7 @@ function RaidCore:NewEncounter(name, continentId, parentMapId, mapId, isTestEnco
   local GeminiLocale = Apollo.GetPackage("Gemini:Locale-1.0").tPackage
   new.L = GeminiLocale:GetLocale("RaidCore_" .. name)
   -- Create a empty array for settings.
-  new.tDefaultSettings = {}
+  new.tDefaultSettings = {Enabled = true}
   new.tUnitEvents = {}
   new.tDatachronEvents = {}
   new.tDatachronEventsEqual = {}
