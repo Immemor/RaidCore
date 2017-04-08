@@ -102,6 +102,8 @@ mod:RegisterMessageSetting("SPIRIT_OF_SOULFIRE_EXPIRED_MSG", core.E.COMPARE_EQUA
 mod:RegisterMessageSetting("ESSENCE_SPAWN", core.E.COMPARE_EQUAL, "MessageEssence", "SoundEssenceSpawn")
 mod:RegisterMessageSetting("NECROTIC_BREATH_", core.E.COMPARE_FIND, "MessageHealingDebuff", "SoundHealingDebuff")
 mod:RegisterDefaultTimerBarConfigs({
+    ["ADDS_TIMER"] = { sColor = "xkcdBrown" },
+    ["SOULEATER_TIMER"] = { sColor = "xkcdPurple" },
     ["SPIRIT_OF_SOULFIRE_TIMER"] = { sColor = "xkcdBarbiePink" },
   }
 )
