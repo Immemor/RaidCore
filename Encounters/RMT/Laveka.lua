@@ -9,7 +9,6 @@
 ----------------------------------------------------------------------------------------------------
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local mod = core:NewEncounter("Laveka", 104, 548, 559)
-local Log = Apollo.GetPackage("Log-1.0").tPackage
 if not mod then return end
 
 ----------------------------------------------------------------------------------------------------
@@ -102,6 +101,8 @@ mod:RegisterMessageSetting("SPIRIT_OF_SOULFIRE_EXPIRED_MSG", core.E.COMPARE_EQUA
 mod:RegisterMessageSetting("ESSENCE_SPAWN", core.E.COMPARE_EQUAL, "MessageEssence", "SoundEssenceSpawn")
 mod:RegisterMessageSetting("NECROTIC_BREATH_", core.E.COMPARE_FIND, "MessageHealingDebuff", "SoundHealingDebuff")
 mod:RegisterDefaultTimerBarConfigs({
+    ["ADDS_TIMER"] = { sColor = "xkcdBrown" },
+    ["SOULEATER_TIMER"] = { sColor = "xkcdPurple" },
     ["SPIRIT_OF_SOULFIRE_TIMER"] = { sColor = "xkcdBarbiePink" },
   }
 )
@@ -139,7 +140,8 @@ local BUFFS = {
 local TIMERS = {
   SOUL_EATERS = {
     FIRST = 76,
-    NORMAL = 61,
+    MIDPHASE = 61,
+    NORMAL = 85,
   },
   ECHOES_OF_THE_AFTERLIFE = 10,
   ADDS = {
@@ -417,6 +419,7 @@ end
 function mod:OnDevourSoulsStop()
   soulEatersActive = false
   mod:RemoveSoulEaterOrbits()
+  mod:StartSoulEaterTimer(TIMERS.SOUL_EATERS.NORMAL)
 end
 
 function mod:DrawSoulEaterOrbits()
@@ -459,7 +462,7 @@ end
 function mod:OnMidphaseEnd()
   isMidphase = false
   mod:RemoveTimerBar("ADDS_TIMER")
-  mod:StartSoulEaterTimer(TIMERS.SOUL_EATERS.NORMAL)
+  mod:StartSoulEaterTimer(TIMERS.SOUL_EATERS.MIDPHASE)
 end
 
 function mod:OnTitanCreated(id, unit, name)
@@ -492,14 +495,6 @@ end
 function mod:OnLavekaHealthChanged(id, percent, name)
   if mod:IsMidphaseClose(name, percent) then
     mod:AddMsg("MID_PHASE", "msg.mid_phase.soon", 5, "Info", "xkcdWhite")
-  end
-end
-
-function mod:OnSoulEaterCaught(id, spellId, stacks, timeRemaining, name, unitCaster)
-  local unit = GameLib.GetUnitById(id)
-  if unitCaster and unitCaster:IsValid() then
-    local distance = (Vector3.New(unit:GetPosition()) - ROOM_CENTER):Length()
-    Log:Add("ChannelCommStatus", "Id="..unitCaster:GetId().." DistanceToCenter="..distance)
   end
 end
 
@@ -582,9 +577,6 @@ mod:RegisterUnitEvents(core.E.ALL_UNITS,{
     [DEBUFFS.REALM_OF_THE_DEAD] = {
       [core.E.DEBUFF_ADD] = mod.OnRealmOfTheDeadAdd,
       [core.E.DEBUFF_REMOVE] = mod.OnRealmOfTheDeadRemove,
-    },
-    [DEBUFFS.SOUL_EATER] = {
-      [core.E.DEBUFF_ADD] = mod.OnSoulEaterCaught,
     },
     [DEBUFFS.NECROTIC_BREATH] = {
       [core.E.DEBUFF_ADD] = mod.OnNecroticBreathAdd,
