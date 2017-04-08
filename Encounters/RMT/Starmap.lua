@@ -111,6 +111,7 @@ mod:RegisterDefaultSetting("MarkWorldEnderSpawn")
 mod:RegisterDefaultSetting("MarkAsteroidCount")
 mod:RegisterDefaultSetting("LineWorldEnder")
 mod:RegisterDefaultSetting("LineAsteroids")
+mod:RegisterDefaultSetting("LinePlayerAsteroids", false)
 mod:RegisterDefaultSetting("LineAlphaCassusCleave")
 mod:RegisterDefaultSetting("LineCosmicDebris", false)
 mod:RegisterDefaultSetting("CirclePlanetOrbits")
@@ -248,7 +249,7 @@ local WORM_HOLE_POSITION = Vector3.New(-47.501198, -96.222008, 354.7)
 ----------------------------------------------------------------------------------------------------
 -- Locals.
 ----------------------------------------------------------------------------------------------------
-local playerId
+local player
 local solarWindsStack
 local solarWindStartTick
 local solarWindTimer = ApolloTimer.Create(TIMERS.SOLAR_WIND.UPDATE, true, "OnUpdateSolarWindTimer", mod)
@@ -261,6 +262,7 @@ local worldEnders
 local solarFlareCount
 local asteroidWaveCounter
 local wormHoleId
+local asteroids
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
@@ -271,10 +273,15 @@ function mod:OnBossEnable()
   solarWindStartTick = 0
   worldEnders = {}
   planets = {}
+  asteroids = {}
   alphaCassus = nil
   solarFlareCount = 0
   asteroidWaveCounter = 0
-  playerId = GameLib.GetPlayerUnit():GetId()
+  player = {
+    unit = GameLib.GetPlayerUnit()
+  }
+  player.id = player.unit:GetId()
+  player.name = player.name:GetName()
   mod:StartSecondAsteroidTimer()
   mod:AddTimerBar("NEXT_WORLD_ENDER_TIMER", "msg.world_ender.next", TIMERS.WORLD_ENDER.FIRST, mod:GetSetting("CountdownWorldEnder"))
   mod:SetCardinalMarkers()
@@ -405,9 +412,16 @@ function mod:GetAsteroidMark(unit)
   return mark
 end
 
-function mod:OnAsteroidCreated(id, unit)
+function mod:OnAsteroidCreated(id, unit, name)
+  asteroids[id] = {
+    id = id,
+    unit = unit
+  }
   if mod:GetSetting("IndicatorAsteroids") then
     core:AddLineBetweenUnits("ASTEROID_LINE_" .. id, alphaCassus.id, id, 10, "xkcdBrown", nil, 8, 3.5)
+  end
+  if mod:GetSetting("LinePlayerAsteroids") then
+    core:AddLineBetweenUnits("ASTEROID_PLAYER_LINE_" .. id, player.unit, unit, 8, "xkcdPink")
   end
   if mod:GetSetting("LineAsteroids") then
     core:AddSimpleLine(id, unit, 0, 16, nil, 6, "xkcdBananaYellow")
@@ -417,9 +431,15 @@ function mod:OnAsteroidCreated(id, unit)
   end
 end
 
-function mod:OnAsteroidDestroyed(id, _)
+function mod:OnAsteroidDestroyed(id, unit, name)
+  mod:RemoveAsteroidPlayerLine(id)
   core:RemoveLineBetweenUnits("ASTEROID_LINE_" .. id)
   core:RemoveSimpleLine(id)
+  asteroids[id] = nil
+end
+
+function mod:RemoveAsteroidPlayerLine(id)
+  core:RemoveLineBetweenUnits("ASTEROID_PLAYER_LINE_" .. id)
 end
 
 function mod:OnWorldEnderCreated(id, unit)
@@ -435,7 +455,7 @@ function mod:OnWorldEnderCreated(id, unit)
   core:WatchUnit(unit, core.E.TRACK_BUFFS)
   mod:AddTimerBar("NEXT_WORLD_ENDER_TIMER", "msg.world_ender.next", TIMERS.WORLD_ENDER.NORMAL, mod:GetSetting("CountdownWorldEnder"))
   if mod:GetSetting("LineWorldEnder") then
-    core:AddLineBetweenUnits("WORLD_ENDER_" .. id, playerId, id, 6, "xkcdCyan")
+    core:AddLineBetweenUnits("WORLD_ENDER_" .. id, player.unit, unit, 6, "xkcdCyan")
   end
   mod:AddMsg("WORLD_ENDER_SPAWN_MSG", "msg.world_ender.spawned", 5, "Beware", "xkcdCyan")
   mod:StartAsteroidTimer()
@@ -465,7 +485,7 @@ function mod:OnDebrisCreated(id, unit)
     core:AddPicture("DEBRIS_PICTURE_" .. id, id, "Crosshair", 40, nil, nil, nil, "xkcdRed")
   end
   if mod:GetSetting("LineCosmicDebris") then
-    core:AddLineBetweenUnits("DEBRIS_LINE" .. id, playerId, id, 4, "xkcdOrange")
+    core:AddLineBetweenUnits("DEBRIS_LINE" .. id, player.unit, unit, 4, "xkcdOrange")
   end
 end
 
@@ -504,12 +524,12 @@ function mod:StartSolarWindTimer()
 end
 
 function mod:OnSolarWindsAdded(id, spellId, stack, timeRemaining)
-  if playerId ~= id then return end
+  if player.id ~= id then return end
   mod:StartSolarWindTimer()
 end
 
 function mod:OnSolarWindsUpdated(id, spellId, stack, timeRemaining)
-  if playerId ~= id then return end
+  if player.id ~= id then return end
   if solarWindsStack < stack then
     mod:StartSolarWindTimer()
     if stack == 5 then
@@ -536,7 +556,7 @@ function mod:RemovePlanetOrbits()
 end
 
 function mod:OnCriticalMassAdded(id)
-  if playerId == id then
+  if player.id == id then
     mod:AddMsg("CRITICAL_MASS_MSG", "msg.critical_mass.you", 5, "Inferno", "white")
     mod:DrawPlanetOrbits()
   end
@@ -544,10 +564,15 @@ end
 
 function mod:OnAnyUnitDestroyed(id)
   mod:OnCriticalMassRemoved(id)
+  if player.id == id then
+    for asteroidId, asteroid in next, asteroids do
+      mod:RemoveAsteroidPlayerLine(id)
+    end
+  end
 end
 
 function mod:OnCriticalMassRemoved(id)
-  if playerId == id then
+  if player.id == id then
     core:RemoveMsg("CRITICAL_MASS_MSG")
     mod:RemovePlanetOrbits()
   end
