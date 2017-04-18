@@ -281,7 +281,7 @@ function mod:OnBossEnable()
     unit = GameLib.GetPlayerUnit()
   }
   player.id = player.unit:GetId()
-  player.name = player.name:GetName()
+  player.name = player.unit:GetName()
   mod:StartSecondAsteroidTimer()
   mod:AddTimerBar("NEXT_WORLD_ENDER_TIMER", "msg.world_ender.next", TIMERS.WORLD_ENDER.FIRST, mod:GetSetting("CountdownWorldEnder"))
   mod:SetCardinalMarkers()
