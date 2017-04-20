@@ -164,9 +164,6 @@ function mod:OnDataDevourerCreated(id, unit, name)
   end
 end
 
-function mod:OnDataDevourerDestroyed(id, unit, name)
-  core:RemoveLineBetweenUnits(id)
-end
 function mod:OnWallCreated(id, unit, name)
   mod:RemoveTimerBar("PILLAR_TIMEOUT")
   core:AddUnit(unit)
@@ -232,7 +229,6 @@ end
 mod:RegisterUnitEvent("unit.wall", core.E.UNIT_CREATED, mod.OnWallCreated)
 mod:RegisterUnitEvents("unit.devourer",{
     [core.E.UNIT_CREATED] = mod.OnDataDevourerCreated,
-    [core.E.UNIT_DESTROYED] = mod.OnDataDevourerDestroyed,
   }
 )
 mod:RegisterUnitEvents(core.E.ALL_UNITS, {

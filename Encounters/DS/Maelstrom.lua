@@ -160,17 +160,6 @@ function mod:OnEnteredCombat(nId, tUnit, sName, bInCombat)
   end
 end
 
-function mod:OnUnitDestroyed(nId, tUnit, sName)
-  if sName == self.L["Maelstrom Authority"] then
-    core:RemoveSimpleLine(nId)
-  elseif sName == self.L["Wind Wall"] then
-    core:RemoveSimpleLine(nId .. "_1")
-    core:RemoveSimpleLine(nId .. "_2")
-  elseif sName == self.L["Weather Station"] then
-    core:RemoveLineBetweenUnits(nId)
-  end
-end
-
 function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
   if sName == self.L["Maelstrom Authority"] then
     if sCastName == self.L["Activate Weather Cycle"] then

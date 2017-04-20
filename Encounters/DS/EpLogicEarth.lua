@@ -170,7 +170,6 @@ end
 
 function mod:OnUnitDestroyed(nId, tUnit, sName)
   if sName == self.L["Obsidian Outcropping"] then
-    core:RemoveLineBetweenUnits("OBSIDIAN" .. nId)
     for i, nIdSaved in ipairs(tObsidianList) do
       if nIdSaved == nId then
         table.remove(tObsidianList, i)

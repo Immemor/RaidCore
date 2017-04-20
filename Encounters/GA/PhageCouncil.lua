@@ -166,9 +166,6 @@ function mod:OnUnitCreated(nId, tUnit, sName)
 end
 
 function mod:OnUnitDestroyed(nId, tUnit, sName)
-  if sName == self.L["Noxmind the Insidious"] then
-    core:RemoveSimpleLine("Wave" .. nId)
-  end
   tBossesId[sName] = nil
 end
 

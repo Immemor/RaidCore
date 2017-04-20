@@ -306,10 +306,6 @@ function mod:OnOrbCreated(id, unit)
   mod:MarkOrbWithNumber(unit)
 end
 
-function mod:OnOrbDestroyed(id, unit)
-  core:RemovePolygon(id)
-end
-
 function mod:OnChaosTetherAdd(id, spellId, stacks, timeRemaining, sName, unitCaster)
   if id == playerId and unitCaster and unitCaster:IsValid() then
     mod:DrawOrbCircle(unitCaster:GetId(), unitCaster, "xkcdRed")
@@ -367,7 +363,6 @@ function mod:OnPoolCreated(id, unit)
 end
 
 function mod:OnPoolDestroyed(id, unit)
-  mod:RemovePool(inkPools[id])
   inkPools[id] = nil
 end
 
@@ -404,7 +399,6 @@ mod:RegisterUnitEvents("unit.octog",{
 )
 mod:RegisterUnitEvents("unit.orb", {
     [core.E.UNIT_CREATED] = mod.OnOrbCreated,
-    [core.E.UNIT_DESTROYED] = mod.OnOrbDestroyed,
   }
 )
 mod:RegisterUnitSpellEvent(core.E.ALL_UNITS, core.E.DEBUFF_ADD, DEBUFFS.CHAOS_TETHER, mod.OnChaosTetherAdd)

@@ -200,10 +200,6 @@ function mod:OnOperantCreated(id, unit, name)
   end
 end
 
-function mod:OnAugmentorDestroyed(id, unit, name)
-  core:RemoveSimpleLine("CLEAVE_"..id)
-end
-
 function mod:OnDistributorCreated(id, unit, name)
   core:AddUnit(unit)
   core:WatchUnit(unit)
@@ -215,10 +211,6 @@ end
 
 function mod:OnIncineratorCreated(id, unit, name)
   core:WatchUnit(unit, core.E.TRACK_CASTS)
-end
-
-function mod:OnIncineratorDestroyed(id, unit, name)
-  core:RemoveSimpleLine("INCINERATOR_BEAM")
 end
 
 function mod:OnDatachron(sMessage)
@@ -304,10 +296,6 @@ function mod:OnStrainIncubationRemove(id)
   core:RemoveLineBetweenUnits("SAFE_ZONE_GO_"..id)
 end
 
-function mod:OnAnyUnitDestroyed(id, unit, name)
-  mod:OnStrainIncubationRemove(id)
-end
-
 function mod:OnCompromisedCircuitryAdd(id, spellId, stack, timeRemaining)
   for i, Vector in next, INCUBATION_REGROUP_ZONE do
     core:RemovePicture("IZ" .. i)
@@ -353,7 +341,6 @@ mod:RegisterUnitEvents({
     "Prime Evolutionary Operant",
     "Prime Phage Distributor",
     }, {
-    [core.E.UNIT_DESTROYED] = mod.OnAugmentorDestroyed,
     [BUFFS.COMPROMISED_CIRCUITRY] = {
       [core.E.BUFF_ADD] = mod.OnCompromisedCircuitryAdd,
     },
@@ -374,7 +361,6 @@ mod:RegisterUnitEvents("Prime Phage Distributor", {
 )
 mod:RegisterUnitEvents("Organic Incinerator", {
     [core.E.UNIT_CREATED] = mod.OnIncineratorCreated,
-    [core.E.UNIT_DESTROYED] = mod.OnIncineratorDestroyed,
     ["Disintegrate"] = {
       [core.E.CAST_START] = mod.OnDisintegrateStart,
     }

@@ -136,12 +136,6 @@ function mod:OnUnitCreated(nId, unit, sName)
   end
 end
 
-function mod:OnUnitDestroyed(nId, tUnit, sName)
-  if sName == self.L["Air Column"] or sName == self.L["Aileron"] then
-    core:RemoveSimpleLine(nId)
-  end
-end
-
 function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
   if self.L["Megalith"] == sName then
     if self.L["Raw Power"] == sCastName then

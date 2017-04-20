@@ -267,7 +267,6 @@ local worldEnders
 local solarFlareCount
 local asteroidWaveCounter
 local wormHoleId
-local asteroids
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
@@ -278,7 +277,6 @@ function mod:OnBossEnable()
   solarWindStartTick = 0
   worldEnders = {}
   planets = {}
-  asteroids = {}
   alphaCassus = nil
   solarFlareCount = 0
   asteroidWaveCounter = 0
@@ -357,7 +355,6 @@ end
 function mod:OnPlanetDestroyed(id, unit, name)
   core:DropMark(id)
   planets[id] = nil
-  core:RemoveLineBetweenUnits(id)
   mod:OnWorldEnderTargetDestroyed(name)
 end
 
@@ -401,7 +398,6 @@ function mod:OnAlphaCassusHealthChanged(id, percent, name)
 end
 
 function mod:OnAlphaCassusDestroyed(id, unit)
-  core:RemoveSimpleLine(id)
   alphaCassus = nil
 end
 
@@ -418,10 +414,6 @@ function mod:GetAsteroidMark(unit)
 end
 
 function mod:OnAsteroidCreated(id, unit, name)
-  asteroids[id] = {
-    id = id,
-    unit = unit
-  }
   if mod:GetSetting("IndicatorAsteroids") then
     core:AddLineBetweenUnits("ASTEROID_LINE_" .. id, alphaCassus.id, id, 10, "xkcdBrown", nil, 8, 3.5)
   end
@@ -434,17 +426,6 @@ function mod:OnAsteroidCreated(id, unit, name)
   if mod:GetSetting("MarkAsteroidCount") then
     core:MarkUnit(unit, core.E.LOCATION_STATIC_CHEST, mod:GetAsteroidMark(unit))
   end
-end
-
-function mod:OnAsteroidDestroyed(id, unit, name)
-  mod:RemoveAsteroidPlayerLine(id)
-  core:RemoveLineBetweenUnits("ASTEROID_LINE_" .. id)
-  core:RemoveSimpleLine(id)
-  asteroids[id] = nil
-end
-
-function mod:RemoveAsteroidPlayerLine(id)
-  core:RemoveLineBetweenUnits("ASTEROID_PLAYER_LINE_" .. id)
 end
 
 function mod:OnWorldEnderCreated(id, unit)
@@ -481,7 +462,6 @@ end
 
 function mod:OnWorldEnderDestroyed(id, unit)
   mod:RemoveWormholePosition(id)
-  core:RemoveLineBetweenUnits("WORLD_ENDER_" .. id)
   worldEnders[id] = nil
 end
 
@@ -492,11 +472,6 @@ function mod:OnDebrisCreated(id, unit)
   if mod:GetSetting("LineCosmicDebris") then
     core:AddLineBetweenUnits("DEBRIS_LINE" .. id, player.unit, unit, 4, "xkcdOrange")
   end
-end
-
-function mod:OnDebrisDestroyed(id, unit)
-  core:RemovePicture("DEBRIS_PICTURE_" .. id)
-  core:RemoveLineBetweenUnits("DEBRIS_LINE" .. id)
 end
 
 function mod:MarkPlanetsWithSolarWindTime(remainingTime)
@@ -569,11 +544,6 @@ end
 
 function mod:OnAnyUnitDestroyed(id)
   mod:OnCriticalMassRemoved(id)
-  if player.id == id then
-    for asteroidId, asteroid in next, asteroids do
-      mod:RemoveAsteroidPlayerLine(id)
-    end
-  end
 end
 
 function mod:OnCriticalMassRemoved(id)
@@ -587,10 +557,6 @@ function mod:OnDebrisFieldCreated(id, unit)
   if mod:GetSetting("MarkDebrisField") then
     core:AddPicture("DEBRIS_FIELD_MARKER"..id, unit, "IconSprites:Icon_Windows_UI_SabotageBomb_Red", 40)
   end
-end
-
-function mod:OnDebrisFieldDestroyed(id, unit)
-  core:RemovePicture("DEBRIS_FIELD_MARKER"..id)
 end
 
 function mod:OnLastWorldEnderTarget(targetName)
@@ -650,7 +616,6 @@ mod:RegisterUnitEvents("unit.alpha",{
 )
 mod:RegisterUnitEvents("unit.asteroid",{
     [core.E.UNIT_CREATED] = mod.OnAsteroidCreated,
-    [core.E.UNIT_DESTROYED] = mod.OnAsteroidDestroyed,
   }
 )
 mod:RegisterUnitEvents("unit.world_ender",{
@@ -663,7 +628,6 @@ mod:RegisterUnitEvents("unit.world_ender",{
 )
 mod:RegisterUnitEvents("unit.debris",{
     [core.E.UNIT_CREATED] = mod.OnDebrisCreated,
-    [core.E.UNIT_DESTROYED] = mod.OnDebrisDestroyed,
   }
 )
 mod:RegisterUnitEvents(core.E.ALL_UNITS,{

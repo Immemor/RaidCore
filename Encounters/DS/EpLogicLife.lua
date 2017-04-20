@@ -250,10 +250,6 @@ function mod:OnUnitDestroyed(nId, tUnit, sName)
   if sName == self.L["Essence of Logic"] then
     bIsMidPhase = false
     core:ResetWorldMarkers()
-  elseif sName == self.L["Alphanumeric Hash"] then
-    core:RemoveSimpleLine(nId)
-  elseif sName == self.L["Life Force"] then
-    core:RemoveSimpleLine(nId)
   end
 end
 

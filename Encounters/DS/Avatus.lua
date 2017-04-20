@@ -575,37 +575,19 @@ end
 
 function mod:OnUnitDestroyed(nId, tUnit, sName)
   if sName == self.L["Holo Hand"] then
-    core:RemoveSimpleLine(nId .. "_1")
-    core:RemoveSimpleLine(nId .. "_2")
-    core:RemoveSimpleLine(nId .. "_3")
     if tHoloHandsList[nId] then
       tHoloHandsList[nId] = nil
     end
-  elseif sName == self.L["Holo Cannon"] then
-    core:RemoveSimpleLine(nId)
-  elseif sName == self.L["unit.avatus"] then
-    core:RemoveSimpleLine(nId)
-    core:RemovePicture("HAND1")
-    core:RemovePicture("HAND2")
-  elseif sName == self.L["Shock Sphere"] then
-    core:RemoveSimpleLine(nId)
   elseif sName == self.L["Infinite Logic Loop"] then
-    core:RemoveLineBetweenUnits(nId)
     mod:RemoveTimerBar("PURGE_CYCLE")
     mod:RemoveTimerBar("PURGE_INCREASE")
     -- With the spellslinger's void slip spell, the purge sync is lost.
     bIsPurgeSync = false
   elseif sName == self.L["Mobius Physics Constructor"] then
-    core:RemoveSimpleLine(nId)
-    core:RemoveLineBetweenUnits(nId)
     if tUnit:GetHealth() == 0 then
       -- Send information about the miniboss, not the portal.
       mod:SendIndMessage("MOBIUS_DEATH")
     end
-  elseif self.L["Unstoppable Object Simulation"] == sName then
-    core:RemoveLineBetweenUnits(nId)
-  elseif self.L["Excessive Force Protocol"] == sName then
-    core:RemoveLineBetweenUnits(nId)
   elseif sName == self.L["Tower Platform"] then
     if bGreenRoomMarkerDisplayed then
       bGreenRoomMarkerDisplayed = false
@@ -613,10 +595,6 @@ function mod:OnUnitDestroyed(nId, tUnit, sName)
         core:DropWorldMarker("GREEN_ROOM_MARKERS_" .. k)
       end
     end
-  elseif self.L["Fragmented Data Chunk"] == sName then
-    core:RemoveSimpleLine(nId .. "_1")
-    core:RemoveSimpleLine(nId .. "_2")
-    core:RemoveSimpleLine(nId .. "_3")
   end
 end
 

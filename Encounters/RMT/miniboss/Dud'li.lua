@@ -134,10 +134,6 @@ function mod:OnBombCreated(id, unit, name)
   end
 end
 
-function mod:OnBombDestroyed(id, unit, name)
-  core:RemovePicture(id)
-end
-
 function mod:IsBombCloseToExplosion(id, percent)
   return not explosionMessagesSent[id] and percent <= 10
 end
@@ -163,7 +159,6 @@ end
 ----------------------------------------------------------------------------------------------------
 mod:RegisterUnitEvents({"unit.warhead.radioactive", "unit.warhead.flashbang"},{
     [core.E.UNIT_CREATED] = mod.OnBombCreated,
-    [core.E.UNIT_DESTROYED] = mod.OnBombDestroyed,
   }
 )
 mod:RegisterUnitEvents("unit.warhead.flashbang",{

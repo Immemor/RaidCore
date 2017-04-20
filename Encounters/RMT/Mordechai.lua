@@ -371,7 +371,6 @@ end
 ----------------------------------------------------------------------------------------------------
 mod:RegisterUnitEvents("unit.mordechai",{
     [core.E.UNIT_CREATED] = mod.OnMordechaiCreated,
-    [core.E.UNIT_DESTROYED] = mod.RemoveCleaveLines,
     [core.E.HEALTH_CHANGED] = mod.OnMordechaiHealthChanged,
     ["cast.mordechai.shatter"] = {
       [core.E.CAST_START] = mod.OnMordechaiShatterStart,

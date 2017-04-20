@@ -223,13 +223,3 @@ function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
       end
     end
   end
-
-  function mod:OnUnitDestroyed(nId, tUnit, sName)
-    if sName == self.L["Alphanumeric Hash"] then
-      core:RemoveSimpleLine(nId)
-    elseif sName == self.L["Hydroflux"] then
-      core:RemoveSimpleLine("HydroCleave")
-    elseif sName == self.L["Hydro Disrupter - DNT"] then
-      core:RemoveLineBetweenUnits("Disrupter" .. nId)
-    end
-  end

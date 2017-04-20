@@ -103,16 +103,11 @@ function mod:OnJumpstartCreated(id, unit, name)
   end
 end
 
-function mod:OnJumpstartDestroyed(id, unit, name)
-  core:RemoveLineBetweenUnits("JUMP_START_LINE_"..id)
-end
-
 ----------------------------------------------------------------------------------------------------
 -- Bind event handlers.
 ----------------------------------------------------------------------------------------------------
 mod:RegisterUnitEvents("unit.jumpstart",{
     [core.E.UNIT_CREATED] = mod.OnJumpstartCreated,
-    [core.E.UNIT_DESTROYED] = mod.OnJumpstartDestroyed,
   }
 )
 mod:RegisterUnitEvents("unit.skooty",{

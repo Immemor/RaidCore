@@ -345,13 +345,6 @@ function mod:OnUnitCreated(nId, unit, sName)
   end
 end
 
-function mod:OnUnitDestroyed(nId, tUnit, sName)
-  if sName == self.L["Enhancement Module"] then
-    core:RemoveSimpleLine(nId .. "_1")
-    core:RemoveSimpleLine(nId .. "_2")
-  end
-end
-
 function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
   local tUnit = GetUnitById(nId)
 

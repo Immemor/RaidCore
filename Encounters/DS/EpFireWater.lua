@@ -171,24 +171,14 @@ function mod:OnUnitCreated(nId, unit, sName)
   end
 end
 
-function mod:OnHydrofluxDestroyed(id, unit, name)
-  core:RemoveSimpleLine(id .. "_1")
-  core:RemoveSimpleLine(id .. "_2")
-end
-
 function mod:OnFlameWaveCreated(id, unit, name)
   if mod:GetSetting("LineFlameWaves") then
     core:AddSimpleLine(id, unit, nil, 20, nil, 10, "Green")
   end
 end
 
-function mod:OnFlameWaveDestroyed(id, unit, name)
-  core:RemoveSimpleLine(id)
-end
-
 mod:RegisterUnitEvents("Flame Wave", {
     [core.E.UNIT_CREATED] = mod.OnFlameWaveCreated,
-    [core.E.UNIT_DESTROYED] = mod.OnFlameWaveDestroyed,
   }
 )
 
@@ -267,8 +257,3 @@ function mod:OnDebuffRemove(nId, nSpellId)
     core:RemoveLineBetweenUnits(nId .. "_TOMB")
   end
 end
-
-mod:RegisterUnitEvents("Hydroflux",{
-    [core.E.UNIT_DESTROYED] = mod.OnHydrofluxDestroyed,
-  }
-)

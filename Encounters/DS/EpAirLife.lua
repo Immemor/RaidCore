@@ -239,8 +239,6 @@ function mod:OnUnitDestroyed(nId, tUnit, sName)
   if bIsMidPhase and sName == self.L["[DS] e395 - Air - Tornado"] then
     bIsMidPhase = false
     mod:AddTimerBar("MIDPHASE", "Next middle phase", 90, mod:GetSetting("SoundMidphaseCountDown"))
-  elseif sName == self.L["Life Force"] or sName == self.L["Aileron"] then
-    core:RemoveSimpleLine(nId)
   elseif sName == self.L["Lifekeeper"] then
     for i, nTreeId in next, tTreeKeeperList do
       if nTreeId == nId then
