@@ -842,7 +842,6 @@ function RaidCore:CleanDrawsOnUnitDestroyed(nDestroyedId)
   for i = 1, #tDrawsToRemove do
     local tDrawToRemove = tDrawsToRemove[i]
     tDrawToRemove.tDrawManager:RemoveDraw(tDrawToRemove.Key)
-    self:Print(tDrawToRemove.Key)
   end
 end
 
