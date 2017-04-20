@@ -7,6 +7,9 @@
 -- Description:
 -- TODO
 ----------------------------------------------------------------------------------------------------
+local Apollo = require "Apollo"
+local GameLib = require "GameLib"
+
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local mod = core:NewEncounter("EpFireLife", 52, 98, 119)
 if not mod then return end
@@ -142,8 +145,6 @@ function mod:OnUnitDestroyed(nId, tUnit, sName)
 end
 
 function mod:OnDebuffAdd(nId, nSpellId, nStack, fTimeRemaining)
-  local tUnit = GetUnitById(nId)
-
   if nSpellId == DEBUFFID_PRIMAL_ENTANGLEMENT1 then
     if mod:GetSetting("PictureRoot") then
       core:AddPicture("ROOT" .. nId, nId, "Crosshair", 40, nil, nil, nil, "red")

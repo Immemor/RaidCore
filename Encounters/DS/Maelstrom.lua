@@ -7,6 +7,9 @@
 -- Description:
 -- TODO
 ----------------------------------------------------------------------------------------------------
+local Apollo = require "Apollo"
+local GameLib = require "GameLib"
+
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local mod = core:NewEncounter("Maelstrom", 52, 98, 120)
 if not mod then return end
@@ -108,7 +111,6 @@ mod:RegisterDefaultTimerBarConfigs({
 ----------------------------------------------------------------------------------------------------
 local GetPlayerUnit = GameLib.GetPlayerUnit
 local GetUnitById = GameLib.GetUnitById
-local prev = 0
 local nStationCount = 0
 local bossPos
 

@@ -3,6 +3,7 @@
 --
 -- Copyright (C) 2015 RaidCore
 ------------------------------------------------------------------------------
+local Apollo = require "Apollo"
 
 local GeminiLocale = Apollo.GetPackage("Gemini:Locale-1.0").tPackage
 local L = GeminiLocale:NewLocale("RaidCore", "frFR", false, true)

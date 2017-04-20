@@ -9,6 +9,8 @@
 --
 -- This last should be declared only in alpha version or with git database.
 ----------------------------------------------------------------------------------------------------
+local Apollo = require "Apollo"
+
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 --@alpha@
 local mod = core:NewEncounter("GalerasTest", 6, 0, 16, true)

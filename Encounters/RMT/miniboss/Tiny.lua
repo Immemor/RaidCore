@@ -7,6 +7,8 @@
 -- Description:
 -- TODO
 ----------------------------------------------------------------------------------------------------
+local Apollo = require "Apollo"
+
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local mod = core:NewEncounter("Tiny", 104, 548, 558)
 if not mod then return end

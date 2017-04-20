@@ -8,6 +8,9 @@
 -- EncounterPrototype contains all services useable by encounters itself.
 --
 ------------------------------------------------------------------------------
+local Apollo = require "Apollo"
+local GroupLib = require "GroupLib"
+local Vector3 = require "Vector3"
 
 local RaidCore = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local Assert = Apollo.GetPackage("RaidCore:Assert-1.0").tPackage

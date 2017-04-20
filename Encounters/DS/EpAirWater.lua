@@ -7,6 +7,9 @@
 -- Description:
 -- TODO
 ----------------------------------------------------------------------------------------------------
+local Apollo = require "Apollo"
+local GameLib = require "GameLib"
+
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local mod = core:NewEncounter("EpAirWater", 52, 98, 118)
 if not mod then return end
@@ -82,7 +85,6 @@ local DEBUFFID_TWIRL = 70440
 -- Locals.
 ----------------------------------------------------------------------------------------------------
 local GetUnitById = GameLib.GetUnitById
-local GetGameTime = GameLib.GetGameTime
 local GetPlayerUnit= GameLib.GetPlayerUnit
 
 local nMOOCount = 0

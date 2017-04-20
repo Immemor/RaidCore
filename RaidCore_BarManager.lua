@@ -11,10 +11,11 @@
 -- They are updated slowly, if at least one bar exist.
 --
 ----------------------------------------------------------------------------------------------------
-require "Apollo"
-require "GameLib"
-require "ApolloTimer"
-require "Window"
+local Apollo = require "Apollo"
+local ApolloTimer = require "ApolloTimer"
+local GameLib = require "GameLib"
+local Window = require "Window"
+local Unit = require "Unit"
 
 local RaidCore = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 

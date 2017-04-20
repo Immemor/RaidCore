@@ -7,6 +7,9 @@
 -- Description:
 -- TODO
 ----------------------------------------------------------------------------------------------------
+local Apollo = require "Apollo"
+local GameLib = require "GameLib"
+
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local mod = core:NewEncounter("LogicGuidedRockslide", 52, 98, 108)
 if not mod then return end

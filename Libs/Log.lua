@@ -13,6 +13,10 @@
 --  By default, there is 2 buffers, one which record current events. A second, which have been
 --  filled previously.
 ----------------------------------------------------------------------------------------------------
+local Apollo = require "Apollo"
+local GameLib = require "GameLib"
+local table = require "table"
+
 local MAJOR, MINOR = "Log-1.0", 1
 local APkg = Apollo.GetPackage(MAJOR)
 if APkg and (APkg.nVersion or 0) >= MINOR then
@@ -20,15 +24,11 @@ if APkg and (APkg.nVersion or 0) >= MINOR then
 end
 local Lib = APkg and APkg.tPackage or {}
 
-require "Apollo"
-require "GameLib"
-
 ----------------------------------------------------------------------------------------------------
 -- Copy of few objects to reduce the CPU load.
 -- Because all local objects are faster in LUA.
 ----------------------------------------------------------------------------------------------------
 local next = next
-local tinsert = table.insert
 local GetGameTime = GameLib.GetGameTime
 
 ----------------------------------------------------------------------------------------------------
@@ -80,7 +80,7 @@ function Lib:Add(sText, ...)
         local tBuffer = _tBuffers[_nBufferIdx]
         local tExtraInfo = { ... }
         -- Add an entry in current buffer.
-        tinsert(tBuffer, {
+        table.insert(tBuffer, {
             [LOG_ENTRY__TIME] = GetGameTime(),
             [LOG_ENTRY__TEXT] = sText,
             [LOG_ENTRY__EXTRAINFO] = tExtraInfo,
@@ -106,7 +106,7 @@ function Lib:CurrentDump()
                 tEntry[LOG_ENTRY__TEXT],
                 fExtra2String(tEntry[LOG_ENTRY__TEXT], nRefTime, tEntry[LOG_ENTRY__EXTRAINFO]),
             }
-            tinsert(tDump, o)
+            table.insert(tDump, o)
         end
     end
     return tDump
@@ -126,7 +126,7 @@ function Lib:PreviousDump()
                 tEntry[LOG_ENTRY__TEXT],
                 fExtra2String(tEntry[LOG_ENTRY__TEXT], nRefTime, tEntry[LOG_ENTRY__EXTRAINFO]),
             }
-            tinsert(tDump, o)
+            table.insert(tDump, o)
         end
     end
     return tDump

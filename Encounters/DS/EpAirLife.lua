@@ -17,6 +17,9 @@
 -- - At the end of this phase, all light not destroyed will do some global dommage.
 --
 ----------------------------------------------------------------------------------------------------
+local Apollo = require "Apollo"
+local GameLib = require "GameLib"
+
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local mod = core:NewEncounter("EpAirLife", 52, 98, 119)
 if not mod then return end

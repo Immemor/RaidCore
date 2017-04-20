@@ -9,6 +9,9 @@
 --
 -- Note: Binary is the north boss, Null the south boss.
 ----------------------------------------------------------------------------------------------------
+local Apollo = require "Apollo"
+local GameLib = require "GameLib"
+
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local mod = core:NewEncounter("SystemDaemons", 52, 98, 105)
 if not mod then return end
@@ -247,7 +250,6 @@ local sdwaveCount, probeCount = 0, 0
 local phase2warn, phase2 = false, false
 local phase2count = 0
 local prev = 0
-local playerName
 local nLastPurgeTime
 local nNullSystemDaemonId
 local nBinarySystemDaemonId
@@ -272,7 +274,6 @@ function mod:OnBossEnable()
   nLastPurgeTime = 0
   nNullSystemDaemonId = nil
   nBinarySystemDaemonId = nil
-  playerName = GameLib.GetPlayerUnit():GetName()
 
   if mod:GetSetting("OtherDisconnectTimer") then
     mod:AddTimerBar("DISCONNECT", "Next disconnect", 41)

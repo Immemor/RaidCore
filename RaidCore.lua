@@ -6,10 +6,15 @@
 ----------------------------------------------------------------------------------------------------
 -- Description: TODO
 ----------------------------------------------------------------------------------------------------
-require "Apollo"
-require "Window"
-require "GameLib"
-require "ChatSystemLib"
+local Apollo = require "Apollo"
+local GameLib = require "GameLib"
+local ChatSystemLib = require "ChatSystemLib"
+local XmlDoc = require "XmlDoc"
+local ApolloTimer = require "ApolloTimer"
+local CSIsLib = require "CSIsLib"
+local PublicEvent = require "PublicEvent"
+local Sound = require "Sound"
+local GroupLib = require "GroupLib"
 
 local GeminiAddon = Apollo.GetPackage("Gemini:Addon-1.1").tPackage
 local JSON = Apollo.GetPackage("Lib:dkJSON-2.5").tPackage

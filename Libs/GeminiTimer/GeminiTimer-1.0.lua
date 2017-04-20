@@ -8,7 +8,7 @@
 -- All `:Schedule` functions will return a handle to the current timer, which you will need to store if you
 -- need to cancel or reschedule the timer you just registered.
 --
--- **Gemini:Timer-1.0** can be embeded into your addon, either explicitly by calling GeminiTimer:Embed(MyAddon) or by 
+-- **Gemini:Timer-1.0** can be embeded into your addon, either explicitly by calling GeminiTimer:Embed(MyAddon) or by
 -- specifying it as an embeded library in your AceAddon. All functions will be available on your addon object
 -- and can be accessed directly, without having to explicitly call GeminiTimer itself.\\
 -- It is recommended to embed GeminiTimer, otherwise you'll have to specify a custom `self` on all calls you
@@ -28,12 +28,15 @@
 		CON: Algorithms depending on a timer firing "N times per minute" will fail
 		PRO: (Re-)scheduling is O(1) with a VERY small constant. It's a simple linked list insertion in a hash bucket.
 		CAUTION: The BUCKETS constant constrains how many timers can be efficiently handled. With too many hash collisions, performance will decrease.
-		
+
 	Major assumptions upheld:
 	- ALLOWS scheduling multiple timers with the same funcref/method
 	- ALLOWS scheduling more timers during OnUpdate processing
 	- ALLOWS unscheduling ANY timer (including the current running one) at any time, including during OnUpdate processing
 ]]
+local Apollo = require "Apollo"
+local math = require "math"
+local GameLib = require "GameLib"
 
 local MAJOR, MINOR = "Gemini:Timer-1.0", 3
 -- Get a reference to the package information if any
@@ -58,13 +61,13 @@ local GetTime = os.clock
 
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
 -- List them here for Mikk's FindGlobals script
--- GLOBALS: 
+-- GLOBALS:
 
 -- Simple ONE-SHOT timer cache. Much more efficient than a full compost for our purposes.
 local timerCache = nil
 
 --[[
-	Timers will not be fired more often than HZ-1 times per second. 
+	Timers will not be fired more often than HZ-1 times per second.
 	Keep at intended speed PLUS ONE or we get bitten by floating point rounding errors (n.5 + 0.1 can be n.599999)
 	If this is ever LOWERED, all existing timers need to be enforced to have a delay >= 1/HZ on lib upgrade.
 	If this number is ever changed, all entries need to be rehashed on lib upgrade.
@@ -96,17 +99,17 @@ local function CreateDispatcher(argCount)
 		local xpcall, eh = ...	-- our arguments are received as unnamed values in "..." since we don't have a proper function declaration
 		local method, ARGS
 		local function call() return method(ARGS) end
-	
+
 		local function dispatch(func, ...)
 			 method = func
 			 if not method then return end
 			 ARGS = ...
 			 return xpcall(call, eh)
 		end
-	
+
 		return dispatch
 	]]
-	
+
 	local ARGS = {}
 	for i = 1, argCount do ARGS[i] = "arg"..i end
 	code = code:gsub("ARGS", tconcat(ARGS, ", "))
@@ -123,7 +126,7 @@ local Dispatchers = setmetatable({}, {
 Dispatchers[0] = function(func)
 	return xpcall(func, fnErrorHandler)
 end
- 
+
 local function safecall(func, ...)
 	return Dispatchers[select('#', ...)](func, ...)
 end
@@ -138,12 +141,12 @@ local lastint = floor(GetTime() * HZ)
 local function OnUpdate()
 	local now = GetTime()
 	local nowint = floor(now * HZ)
-	
+
 	-- Have we passed into a new hash bucket?
 	if nowint == lastint then return end
-	
+
 	local soon = now + 1 -- +1 is safe as long as 1 < HZ < BUCKETS/2
-	
+
 	-- Pass through each bucket at most once
 	-- Happens on e.g. instance loads, but COULD happen on high local load situations also
 	for curint = (max(lastint, nowint - BUCKETS) + 1), nowint do -- loop until we catch up with "now", usually only 1 iteration
@@ -156,7 +159,7 @@ local function OnUpdate()
 			local timer = nexttimer
 			nexttimer = timer.next
 			local when = timer.when
-			
+
 			if when < soon then
 				-- Call the timer func, either as a method on given object, or a straight function ref
 				local callback = timer.func
@@ -170,7 +173,7 @@ local function OnUpdate()
 				end
 
 				local delay = timer.delay	-- NOW make a local copy, can't do it earlier in case the timer cancelled itself in the callback
-				
+
 				if not delay then
 					-- single-shot timer (or cancelled)
 					GeminiTimer.selfs[timer.object][tostring(timer)] = nil
@@ -182,20 +185,20 @@ local function OnUpdate()
 						newtime = now + delay
 					end
 					timer.when = newtime
-					
+
 					-- add next timer execution to the correct bucket
 					local bucket = (floor(newtime * HZ) % BUCKETS) + 1
 					timer.next = hash[bucket]
 					hash[bucket] = timer
 				end
-			else -- if when>=soon 
+			else -- if when>=soon
 				-- reinsert (yeah, somewhat expensive, but shouldn't be happening too often either due to hash distribution)
 				timer.next = hash[curbucket]
 				hash[curbucket] = timer
 			end -- if when<soon ... else
 		end -- while nexttimer do
 	end -- for curint=lastint,nowint
-	
+
 	lastint = nowint
 end
 
@@ -212,12 +215,12 @@ local function new(self, repeating, func, delay, ...)
 	if delay < (1 / (HZ - 1)) then
 		delay = 1 / (HZ - 1)
 	end
-	
+
 	-- Create and stuff timer in the correct hash bucket
 	local now = GetTime()
 	local timer = timerCache or {}	-- Get new timer object (from cache if available)
 	timerCache = nil
-	
+
 	timer.object = self
 	timer.func = func
 	timer.delay = (repeating and delay)
@@ -231,7 +234,7 @@ local function new(self, repeating, func, delay, ...)
 
 	-- Insert timer in our self->handle->timer registry
 	local handle = tostring(timer)
-	
+
 	local selftimers = GeminiTimer.selfs[self]
 	if not selftimers then
 		selftimers = {}
@@ -250,7 +253,7 @@ end
 -- @param args Optional arguments to be passed to the callback function.
 -- @usage
 -- MyAddon = Apollo.GetPackage("Gemini:Addon-1.0").tPackage:NewAddon("TimerTest", false, {}, "Gemini:Timer-1.0")
--- 
+--
 -- function MyAddon:OnEnable()
 --   local strConfirm = ", really!"
 --   self:ScheduleTimer("TimerFeedback", 5, strConfirm)
@@ -280,7 +283,7 @@ end
 -- @param args Optional arguments to be passed to the callback function.
 -- @usage
 -- MyAddon = Apollo.GetPackage("Gemini:Addon-1.0").tPackage:NewAddon("TimerTest", false, {}, "Gemini:Timer-1.0")
--- 
+--
 -- function MyAddon:OnEnable()
 --   self.timerCount = 0
 --   self.testTimer = self:ScheduleRepeatingTimer("TimerFeedback", 5)
@@ -324,7 +327,7 @@ function GeminiTimer:CancelTimer(handle, silent)
 	if silent then
 		if timer then
 			timer.func = nil	-- don't run it again
-			timer.delay = nil	-- if this is the currently-executing one: don't even reschedule 
+			timer.delay = nil	-- if this is the currently-executing one: don't even reschedule
 			-- The timer object is removed in the OnUpdate loop
 		end
 		return not not timer	-- might return "true" even if we double-cancel. we'll live.
@@ -333,12 +336,12 @@ function GeminiTimer:CancelTimer(handle, silent)
 			error(MAJOR..": CancelTimer(handle[, silent]): '"..tostring(handle).."' - no such timer registered")
 			return false
 		end
-		if not timer.func then 
+		if not timer.func then
 			error(MAJOR..": CancelTimer(handle[, silent]): '"..tostring(handle).."' - timer already cancelled or expired")
 			return false
 		end
 		timer.func = nil		-- don't run it again
-		timer.delay = nil		-- if this is the currently-executing one: don't even reschedule 
+		timer.delay = nil		-- if this is the currently-executing one: don't even reschedule
 		return true
 	end
 end
@@ -351,7 +354,7 @@ function GeminiTimer:CancelAllTimers()
 	if self == GeminiTimer then
 		error(MAJOR..": CancelAllTimers(): supply a meaningful 'self'", 2)
 	end
-	
+
 	local selftimers = GeminiTimer.selfs[self]
 	if selftimers then
 		for handle,v in pairs(selftimers) do
@@ -400,13 +403,13 @@ local function OnExitCombat()
 	if not self then	-- should only happen if .selfs[] is empty
 		return
 	end
-	
+
 	-- Time to clean it out?
 	local list = selfs[self]
 	if (list.__ops or 0) < 250 then	-- 250 slosh indices = ~10KB wasted (worst case!). For one 'self'.
 		return
 	end
-	
+
 	-- Create a new table and copy all members over
 	local newlist = {}
 	local n=0
@@ -417,12 +420,12 @@ local function OnExitCombat()
 		end
 	end
 	newlist.__ops = 0	-- Reset operation count
-	
+
 	-- And since we now have a count of the number of live timers, check that it's reasonable. Emit a warning if not.
 	if n>BUCKETS then
 		Print(MAJOR..": Warning: The addon/module '"..tostring(self).."' has "..n.." live timers. Surely that's not intended?")
 	end
-	
+
 	selfs[self] = newlist
 end
 
@@ -432,7 +435,7 @@ end
 GeminiTimer.embeds = GeminiTimer.embeds or {}
 
 local mixins = {
-	"ScheduleTimer", "ScheduleRepeatingTimer", 
+	"ScheduleTimer", "ScheduleRepeatingTimer",
 	"CancelTimer", "CancelAllTimers",
 	"TimeLeft"
 }

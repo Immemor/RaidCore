@@ -7,13 +7,15 @@
 -- Description:
 -- This library adds different types of asserts
 ----------------------------------------------------------------------------------------------------
+local Apollo = require "Apollo"
+local string = require "string"
+
 local MAJOR, MINOR = "RaidCore:Assert-1.0", 1
 local APkg = Apollo.GetPackage(MAJOR)
 if APkg and (APkg.nVersion or 0) >= MINOR then
   return -- no upgrade is needed
 end
 local assert, next, type = assert, next, type
-local strformat = string.format
 local Assert = APkg and APkg.tPackage or {}
 Assert.TYPES = {
   STRING = "string",
@@ -27,7 +29,7 @@ Assert.TYPES = {
 
 function Assert:Assert(condition, errorMessage, ...)
   if type(errorMessage) == "string" then
-    errorMessage = strformat(errorMessage, ...)
+    errorMessage = string.format(errorMessage, ...)
   end
   assert(condition, errorMessage)
 end

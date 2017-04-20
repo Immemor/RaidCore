@@ -21,6 +21,9 @@ Explode caustic warhead first, use dmg reduction abilities like dGrid. Heal up
 after it explodes and let incindiary die by itself and then heal up again.
 --]]
 ----------------------------------------------------------------------------------------------------
+local Apollo = require "Apollo"
+local GameLib = require "GameLib"
+
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local mod = core:NewEncounter("Luk'ki", 104, 548, 555)
 if not mod then return end

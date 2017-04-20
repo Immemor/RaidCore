@@ -8,6 +8,9 @@
 --
 -- The elemental Pair Megalith and Mnemesis juste after Maelstrom fight.
 ----------------------------------------------------------------------------------------------------
+local Apollo = require "Apollo"
+local GameLib = require "GameLib"
+
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local mod = core:NewEncounter("EpLogicEarth", 52, 98, 117)
 if not mod then return end
@@ -100,7 +103,6 @@ local COLOR_SNAKE_UNFOCUS_PLAYER = "xkcdBabyPink"
 local ipairs = ipairs
 local GetUnitById = GameLib.GetUnitById
 local GetPlayerUnit = GameLib.GetPlayerUnit
-local GetGameTime = GameLib.GetGameTime
 local nLastSnakePieceId
 local nMemberIdTargetedBySnake
 local tObsidianList
