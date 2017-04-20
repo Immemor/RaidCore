@@ -119,7 +119,7 @@ local function CreateRotationMatrixY(nRotation)
   local nCos = math.cos(nRad)
   local nSin = math.sin(nRad)
   return {
-    x = NewVector3({ nCos, 0, -nSin }),
+    x = NewVector3({ nCos, 0, - nSin }),
     y = NewVector3({ 0, 1, 0 }),
     z = NewVector3({ nSin, 0, nCos }),
   }
@@ -798,102 +798,102 @@ function RaidCore:OnDrawUpdate(nCurrentTime)
       local s, e = pcall(fHandler, tDrawManager, tDraw)
       if not self:HandlePcallResult(s, e, " - DrawKey: "..Key) then
         table.insert(tDrawsToRemove, {
-            tDrawManager = tDrawManager,
-            Key = Key,
-          }
-        )
-      end
-    end
-    if next(tDrawManager.tDraws) then
-      bIsEmpty = false
+          tDrawManager = tDrawManager,
+          Key = Key,
+        }
+      )
     end
   end
-  for i = 1, #tDrawsToRemove do
-    local tDrawToRemove = tDrawsToRemove[i]
-    tDrawToRemove.tDrawManager:RemoveDraw(tDrawToRemove.Key)
+  if next(tDrawManager.tDraws) then
+    bIsEmpty = false
   end
-  if bIsEmpty then
-    StopDrawing()
-  end
+end
+for i = 1, #tDrawsToRemove do
+  local tDrawToRemove = tDrawsToRemove[i]
+  tDrawToRemove.tDrawManager:RemoveDraw(tDrawToRemove.Key)
+end
+if bIsEmpty then
+  StopDrawing()
+end
 end
 
 function RaidCore:ResetLines()
-  for i = 1, _nDrawManagers do
-    local tDrawManager = _tDrawManagers[i]
-    for Key, _ in next, tDrawManager.tDraws do
-      tDrawManager:RemoveDraw(Key)
-    end
+for i = 1, _nDrawManagers do
+  local tDrawManager = _tDrawManagers[i]
+  for Key, _ in next, tDrawManager.tDraws do
+    tDrawManager:RemoveDraw(Key)
   end
+end
 end
 
 function RaidCore:CleanDrawsOnUnitDestroyed(nDestroyedId)
-  local tDrawsToRemove = {}
-  for i = 1, _nDrawManagers do
-    local tDrawManager = _tDrawManagers[i]
-    local tDraws = tDrawManager.tDrawsPerUnit[nDestroyedId]
-    if tDraws and next(tDraws) ~= nil then
-      for Key, _ in next, tDraws do
-        table.insert(tDrawsToRemove, {
-            tDrawManager = tDrawManager,
-            Key = Key,
-          }
-        )
-      end
-    end
+local tDrawsToRemove = {}
+for i = 1, _nDrawManagers do
+  local tDrawManager = _tDrawManagers[i]
+  local tDraws = tDrawManager.tDrawsPerUnit[nDestroyedId]
+  if tDraws and next(tDraws) ~= nil then
+    for Key, _ in next, tDraws do
+      table.insert(tDrawsToRemove, {
+        tDrawManager = tDrawManager,
+        Key = Key,
+      }
+    )
   end
-  for i = 1, #tDrawsToRemove do
-    local tDrawToRemove = tDrawsToRemove[i]
-    tDrawToRemove.tDrawManager:RemoveDraw(tDrawToRemove.Key)
-  end
+end
+end
+for i = 1, #tDrawsToRemove do
+local tDrawToRemove = tDrawsToRemove[i]
+tDrawToRemove.tDrawManager:RemoveDraw(tDrawToRemove.Key)
+end
 end
 
 ----------------------------------------------------------------------------------------------------
 -- API to use in encounters.
 ----------------------------------------------------------------------------------------------------
 function RaidCore:AddLineBetweenUnits(...)
-  return LineBetween:_AddDraw(...)
+return LineBetween:_AddDraw(...)
 end
 
 function RaidCore:GetLineBetweenUnits(...)
-  return LineBetween:GetDraw(...)
+return LineBetween:GetDraw(...)
 end
 
 function RaidCore:RemoveLineBetweenUnits(...)
-  LineBetween:RemoveDraw(...)
+LineBetween:RemoveDraw(...)
 end
 
 function RaidCore:AddSimpleLine(...)
-  return SimpleLine:_AddDraw(...)
+return SimpleLine:_AddDraw(...)
 end
 
 function RaidCore:GetSimpleLine(...)
-  return SimpleLine:GetDraw(...)
+return SimpleLine:GetDraw(...)
 end
 
 function RaidCore:RemoveSimpleLine(...)
-  SimpleLine:RemoveDraw(...)
+SimpleLine:RemoveDraw(...)
 end
 
 function RaidCore:AddPolygon(...)
-  return Polygon:_AddDraw(...)
+return Polygon:_AddDraw(...)
 end
 
 function RaidCore:GetPolygon(...)
-  return Polygon:GetDraw(...)
+return Polygon:GetDraw(...)
 end
 
 function RaidCore:RemovePolygon(...)
-  Polygon:RemoveDraw(...)
+Polygon:RemoveDraw(...)
 end
 
 function RaidCore:AddPicture(...)
-  return Picture:_AddDraw(...)
+return Picture:_AddDraw(...)
 end
 
 function RaidCore:GetPicture(...)
-  return Picture:GetDraw(...)
+return Picture:GetDraw(...)
 end
 
 function RaidCore:RemovePicture(...)
-  Picture:RemoveDraw(...)
+Picture:RemoveDraw(...)
 end
