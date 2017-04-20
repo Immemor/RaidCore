@@ -308,9 +308,11 @@ end
 function TemplateManager:RemoveDrawsPerUnit(tDraw, key)
   for i = 1, #tDraw.tUnitIds do
     local nId = tDraw.tUnitIds[i]
-    self.tDrawsPerUnit[nId][key] = nil
-    if next(self.tDrawsPerUnit[nId]) == nil then
-      self.tDrawsPerUnit[nId] = nil
+    if self.tDrawsPerUnit[nId] then
+      self.tDrawsPerUnit[nId][key] = nil
+      if next(self.tDrawsPerUnit[nId]) == nil then
+        self.tDrawsPerUnit[nId] = nil
+      end
     end
   end
 end
