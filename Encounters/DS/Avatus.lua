@@ -57,6 +57,9 @@
 -- { x = 542.987549, z = -129.588684 },
 -- }
 ----------------------------------------------------------------------------------------------------
+local Apollo = require "Apollo"
+local GameLib = require "GameLib"
+
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local mod = core:NewEncounter("Avatus", 52, 98, 104)
 if not mod then return end
@@ -275,7 +278,6 @@ local PURGE_LIST_IN_BLUE_ROOM = {
   ["Icon_SkillFire_UI_ss_srngblst"] = PURGE_RED,
   ["Icon_SkillEnergy_UI_srcr_surgeengine"] = PURGE_GREEN,
 }
-local PURGE_COOLDOWNS = 15
 -- Protective Barrier win by Avatus on each end of main phase.
 local BUFFID_PROTECTIVE_BARRIER = 45304
 -- Buff win by Avatus, which will enable obliteration beam.
@@ -301,7 +303,6 @@ local GetGameTime = GameLib.GetGameTime
 local GetSpell = GameLib.GetSpell
 local GetPlayerUnit = GameLib.GetPlayerUnit
 local SetTargetUnit = GameLib.SetTargetUnit
-local GetPlayerUnitByName = GameLib.GetPlayerUnitByName
 local nCurrentPhase
 local tBlueRoomPurgeList
 local tBlueRoomPurgeOrderedList
@@ -322,6 +323,7 @@ local nLastSupportCannonPopTime
 local nLastBuffPurgeTime
 local bIsPurgeSync
 local bIsProtectionBarrierEnable
+local bGreenRoomMarkerDisplayed
 
 local function SetMarkersByPhase(nNewPhase)
   -- Remove previous markers

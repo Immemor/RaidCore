@@ -16,10 +16,10 @@
 -- The GameLib.GetUnitScreenPosition API function return wrong values when Unit is out of screen.
 --
 ----------------------------------------------------------------------------------------------------
-require "Window"
-require "GameLib"
-require "GroupLib"
-require "Vector3"
+local Apollo = require "Apollo"
+local GameLib = require "GameLib"
+local Vector3 = require "Vector3"
+local math = require "math"
 
 local RaidCore = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local Assert = Apollo.GetPackage("RaidCore:Assert-1.0").tPackage
@@ -33,9 +33,7 @@ local GetPlayerUnit = GameLib.GetPlayerUnit
 local GetUnitById = GameLib.GetUnitById
 local WorldLocToScreenPoint = GameLib.WorldLocToScreenPoint
 local Races = GameLib.CodeEnumRace
-local Vector3 = Vector3
 local NewVector3 = Vector3.New
-local math = math
 
 ----------------------------------------------------------------------------------------------------
 -- local data.

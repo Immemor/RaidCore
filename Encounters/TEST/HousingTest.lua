@@ -20,6 +20,10 @@
 -- to use the easy mode since there are 2 mobs there that will apply debuffs
 -- on the player.
 ----------------------------------------------------------------------------------------------------
+local Apollo = require "Apollo"
+local ChatSystemLib = require "ChatSystemLib"
+local GameLib = require "GameLib"
+
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 --@alpha@
 local mod = core:NewEncounter("HousingTest", 36, 0, 60, true)

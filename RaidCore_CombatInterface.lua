@@ -9,15 +9,14 @@
 -- Thus result will be send to upper layer, trough ManagerCall function. Every events are logged.
 --
 ----------------------------------------------------------------------------------------------------
-require "Apollo"
-require "GameLib"
-require "ApolloTimer"
-require "ChatSystemLib"
-require "ActionSetLib"
-require "Spell"
-require "GroupLib"
-require "ICCommLib"
-require "ICComm"
+local Apollo = require "Apollo"
+local ApolloTimer = require "ApolloTimer"
+local GameLib = require "GameLib"
+local ChatSystemLib = require "ChatSystemLib"
+local ActionSetLib = require "ActionSetLib"
+local ICCommLib = require "ICCommLib"
+local bit32 = require "bit32"
+local table = require "table"
 
 local RaidCore = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local Log = Apollo.GetPackage("Log-1.0").tPackage
@@ -33,8 +32,6 @@ local GetUnitById = GameLib.GetUnitById
 local GetSpell = GameLib.GetSpell
 local GetPlayerUnitByName = GameLib.GetPlayerUnitByName
 local next, pcall = next, pcall
-local tinsert = table.insert
-local binaryAnd = bit32.band
 ----------------------------------------------------------------------------------------------------
 -- Constants.
 ----------------------------------------------------------------------------------------------------
@@ -267,9 +264,9 @@ local function TrackThisUnit(tUnit, nTrackingType)
         bSuccess = false,
       },
       nPreviousHealthPercent = nPercent,
-      bTrackBuffs = binaryAnd(nTrackingType, RaidCore.E.TRACK_BUFFS) ~= 0,
-      bTrackCasts = binaryAnd(nTrackingType, RaidCore.E.TRACK_CASTS) ~= 0,
-      bTrackHealth = binaryAnd(nTrackingType, RaidCore.E.TRACK_HEALTH) ~= 0,
+      bTrackBuffs = bit32.band(nTrackingType, RaidCore.E.TRACK_BUFFS) ~= 0,
+      bTrackCasts = bit32.band(nTrackingType, RaidCore.E.TRACK_CASTS) ~= 0,
+      bTrackHealth = bit32.band(nTrackingType, RaidCore.E.TRACK_HEALTH) ~= 0,
     }
   end
 end
@@ -818,7 +815,7 @@ function RaidCore:CI_ShowShortcutBarDelayed()
     if strIcon == nil or strIcon == "" then
       break
     end
-    tinsert(tIconFloatingSpellBar, strIcon)
+    table.insert(tIconFloatingSpellBar, strIcon)
   end
   ManagerCall(RaidCore.E.SHOW_SHORTCUT_BAR, tIconFloatingSpellBar)
 end

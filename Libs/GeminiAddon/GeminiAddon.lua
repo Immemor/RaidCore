@@ -8,12 +8,17 @@
 --
 -- The core callbacks have been "renamed" for consumption that are used when creating an addon:
 -- OnLoad    -> OnInitialize
--- 
+--
 -- New callback:
 -- OnEnable   - Called when the character has been loaded and is in the world. Called after OnInitialize and after Restore would have occured
 --
 -- General flow should be:
--- OnInitialize -> OnEnable 
+-- OnInitialize -> OnEnable
+local Apollo = require "Apollo"
+local GameLib = require "GameLib"
+local ApolloTimer = require "ApolloTimer"
+local string = require "string"
+local table = require "table"
 
 local MAJOR, MINOR = "Gemini:Addon-1.1", 5
 local APkg = Apollo.GetPackage(MAJOR)
@@ -28,9 +33,6 @@ local setmetatable, getmetatable, xpcall = setmetatable, getmetatable, xpcall
 local assert, loadstring, rawset, next, unpack = assert, loadstring, rawset, next, unpack
 local tconcat, tinsert, tremove, ostime = table.concat, table.insert, table.remove, os.time
 local strformat = string.format
-
--- Wildstar APIs
-local Apollo, ApolloTimer, GameLib = Apollo, ApolloTimer, GameLib
 
 -- Package tables
 GeminiAddon.Addons          = GeminiAddon.Addons or {}          -- addon collection
@@ -57,17 +59,17 @@ local function CreateDispatcher(argCount)
 		local xpcall, eh = ...
 		local method, ARGS
 		local function call() return method(ARGS) end
-	
+
 		local function dispatch(func, ...)
-		 	method = func
+			method = func
 			if not method then return end
 			ARGS = ...
 			return xpcall(call, eh)
 		end
-	
+
 		return dispatch
 	]]
-	
+
 	local ARGS = {}
 	for i = 1, argCount do ARGS[i] = "arg"..i end
 	code = code:gsub("ARGS", tconcat(ARGS, ", "))
@@ -153,7 +155,7 @@ local function NewAddonProto(strInitAddon, oAddonOrName, oNilOrName)
 
 	-- Embed any packages that are needed
 	Embed( oAddon )
-	
+
 	-- Add to Queue of Addons to be Initialized during OnLoad
 	tinsert(GeminiAddon.InitializeQueue[strInitAddon], oAddon)
 	return oAddon
@@ -171,17 +173,17 @@ end
 -- @usage
 -- -- Create a simple addon
 -- local MyAddon = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:NewAddon("MyAddon", false)
--- 
+--
 -- -- Create a simple addon with a configure button with custom text
 -- local MyAddon = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:NewAddon("MyAddon", "Addon Options Button")
--- 
+--
 -- -- Create a simple addon with a configure button and a dependency on ChatLog / ChatLogEx
 -- local MyAddon = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:NewAddon("MyAddon", true, { "ChatLog", "ChatLogEx" })
--- 
+--
 -- -- Create an addon with a base object
 -- local tAddonBase = { config = { ... some default settings ... }, ... }
 -- local MyAddon = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:NewAddon(tAddonBase, "MyAddon", false)
--- 
+--
 -- -- Create an addon with a base object with a dependency on ChatLog / ChatLogEx
 -- local tAddonBase = { config = { ... some default settings ... }, ... }
 -- local MyAddon = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:NewAddon(tAddonBase, "MyAddon", false, { "ChatLog", "ChatLogEx" })
@@ -270,12 +272,12 @@ end
 
 --- Enable the addon
 -- Used internally when the player has entered the world
--- 
+--
 -- **Note:** do not call this manually
 -- @param oAddon addon object to enable
 function GeminiAddon:EnableAddon(oAddon)
-	if type(oAddon) == "string" then 
-		oAddon = self:GetAddon(oAddon) 
+	if type(oAddon) == "string" then
+		oAddon = self:GetAddon(oAddon)
 	end
 
 	local strAddonName = AddonToString(oAddon)
@@ -402,7 +404,7 @@ end
 -- @paramsig strModuleName[, bSilent]
 -- @param strModuleName unique name of the module
 -- @param bSilent if true, the module is optional, silently return nil if its not found (optional)
--- @usage 
+-- @usage
 -- local MyModule = MyAddon:GetModule("MyModule")
 function GetModule(self, strModuleName, bSilent)
 	if not self.Modules[strModuleName] and not bSilent then
@@ -420,10 +422,10 @@ local function IsModuleTrue(self) return true end
 -- @param strName unique name of the module
 -- @param oPrototype object to derive this module from, methods and values from this table will be mixed into the module (optional)
 -- @param strPkgName List of packages to embed into the module
--- @usage 
+-- @usage
 -- -- Create a module with some embeded packages
 -- local MyModule = MyAddon:NewModule("MyModule", "PkgWithEmbed-1.0", "PkgWithEmbed2-1.0")
--- 
+--
 -- -- Create a module with a prototype
 -- local oPrototype = { OnEnable = function(self) Print("OnEnable called!") end }
 -- local MyModule = MyAddon:NewModule("MyModule", oPrototype, "PkgWithEmbed-1.0", "PkgWithEmbed2-1.0")
@@ -467,8 +469,8 @@ function NewModule(self, strName, oPrototype, ...)
 	safecall(self.OnModuleCreated, self, oModule)
 	self.Modules[strName] = oModule
 	tinsert(self.OrderedModules, oModule)
-	
-	return oModule  
+
+	return oModule
 end
 
 --- returns the name of the addon or module without any prefix
@@ -518,7 +520,7 @@ end
 -- Short-hand function that retrieves the module via `:GetModule` and calls `:Enable` on the module object.
 -- @name //addon//:EnableModule
 -- @paramsig name
--- @usage 
+-- @usage
 -- -- Enable MyModule using :GetModule
 -- local MyModule = MyAddon:GetModule("MyModule")
 -- MyModule:Enable()
@@ -534,7 +536,7 @@ end
 -- Short-hand function that retrieves the module via `:GetModule` and calls `:Disable` on the module object.
 -- @name //addon//:DisableModule
 -- @paramsig name
--- @usage 
+-- @usage
 -- -- Disable MyModule using :GetModule
 -- local MyModule = MyAddon:GetModule("MyModule")
 -- MyModule:Disable()
@@ -551,7 +553,7 @@ end
 -- @name //addon//:SetDefaultModulePackages
 -- @paramsig strPkgName[, strPkgName, ...]
 -- @param strPkgName List of Packages to embed into the addon
--- @usage 
+-- @usage
 -- -- Create the addon object
 -- local MyAddon = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:NewAddon("MyAddon")
 -- -- Configure default packages for modules
@@ -570,7 +572,7 @@ end
 -- @name //addon//:SetDefaultModuleState
 -- @paramsig state
 -- @param state Default state for new modules, true for enabled, false for disabled
--- @usage 
+-- @usage
 -- -- Create the addon object
 -- local MyAddon = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:NewAddon("MyAddon")
 -- -- Set the default state to "disabled"
@@ -590,7 +592,7 @@ end
 -- @name //addon//:SetDefaultModulePrototype
 -- @paramsig prototype
 -- @param prototype Default prototype for the new modules (table)
--- @usage 
+-- @usage
 -- -- Define a prototype
 -- local prototype = { OnEnable = function(self) Print("OnEnable called!") end }
 -- -- Set the default prototype
@@ -621,8 +623,8 @@ end
 
 --- Return an iterator of all modules associated to the addon.
 -- @name //addon//:IterateModules
--- @paramsig 
--- @usage 
+-- @paramsig
+-- @usage
 -- -- Enable all modules
 -- for strModuleName, oModule in MyAddon:IterateModules() do
 --    oModule:Enable()
@@ -631,13 +633,13 @@ local function IterateModules(self) return pairs(self.Modules) end
 
 -- Returns an iterator of all embeds in the addon
 -- @name //addon//:IterateEmbeds
--- @paramsig 
+-- @paramsig
 local function IterateEmbeds(self) return pairs(GeminiAddon.Embeds[self]) end
 
 --- Query the enabledState of an addon.
 -- @name //addon//:IsEnabled
--- @paramsig 
--- @usage 
+-- @paramsig
+-- @usage
 -- if MyAddon:IsEnabled() then
 --     MyAddon:Disable()
 -- end
@@ -682,7 +684,7 @@ function Embed(target)
 end
 
 --- Get an iterator over all registered addons.
--- @usage 
+-- @usage
 -- -- Print a list of all registered GeminiAddons
 -- for name, addon in GeminiAddon:IterateAddons() do
 --   Print("Addon: " .. name)
@@ -690,7 +692,7 @@ end
 function GeminiAddon:IterateAddons() return pairs(self.Addons) end
 
 --- Get an iterator over the internal status registry.
--- @usage 
+-- @usage
 -- -- Print a list of all enabled addons
 -- for name, status in GeminiAddon:IterateAddonStatus() do
 --   if status then

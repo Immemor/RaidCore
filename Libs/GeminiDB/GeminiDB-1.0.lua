@@ -32,6 +32,10 @@
 -- end
 -- @class file
 -- @name GeminiDB-1.0.lua
+local Apollo = require "Apollo"
+local GameLib = require "GameLib"
+local table = require "table"
+
 local MAJOR, MINOR = "Gemini:DB-1.0", 7
 local APkg = Apollo.GetPackage(MAJOR)
 if APkg and (APkg.nVersion or 0) >= MINOR then
@@ -42,9 +46,6 @@ local GeminiDB = APkg and APkg.tPackage or {}
 -- Lua APIs
 local type, pairs, next, error, tinsert, tremove = type, pairs, next, error, table.insert, table.remove
 local setmetatable, getmetatable, rawset, rawget = setmetatable, getmetatable, rawset, rawget
-
--- Wildstar APIs
-local Apollo, GameLib = Apollo, GameLib
 
 -- Global vars/functions that we don't upvalue since they might get hooked, or upgraded
 --GLOBALS:
@@ -232,7 +233,7 @@ local dbmt = {
 						error("Attempt to access character-specific field " .. section .. " before character loaded.")
 					end
 					-- the key has changed so we need to obtain it again.
-					key = keys[section]	
+					key = keys[section]
 				end
 				local defaultTbl = rawget(t, "defaults")
 				local defaults = defaultTbl and defaultTbl[section]

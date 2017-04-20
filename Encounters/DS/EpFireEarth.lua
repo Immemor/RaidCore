@@ -7,7 +7,7 @@
 -- Description:
 -- TODO
 ----------------------------------------------------------------------------------------------------
-require "ChatSystemLib"
+local Apollo = require "Apollo"
 
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local mod = core:NewEncounter("EpFireEarth", 52, 98, 117)
@@ -79,7 +79,6 @@ local LAVA_MINE_POP_INTERVAL = 11.2
 ----------------------------------------------------------------------------------------------------
 -- Locals.
 ----------------------------------------------------------------------------------------------------
-local GetPlayerUnit = GameLib.GetPlayerUnit
 local nObsidianPopMax, nObsidianPopCount
 local nLavaFloorCount
 

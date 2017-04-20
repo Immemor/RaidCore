@@ -7,6 +7,9 @@
 -- Description:
 -- TODO
 ----------------------------------------------------------------------------------------------------
+local Apollo = require "Apollo"
+local GameLib = require "GameLib"
+
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local mod = core:NewEncounter("EpLogicWater", 52, 98, 118)
 if not mod then return end
@@ -109,7 +112,6 @@ local DEBUFFID_DATA_DISRUPTOR = 78407
 -- Locals.
 ----------------------------------------------------------------------------------------------------
 local GetPlayerUnit = GameLib.GetPlayerUnit
-local GetGameTime = GameLib.GetGameTime
 local GetUnitById = GameLib.GetUnitById
 local midphase = false
 

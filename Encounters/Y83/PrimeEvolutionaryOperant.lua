@@ -18,6 +18,10 @@
 -- So be careful, with code based on name, as bosses are renamed many times during the combat.
 --
 ----------------------------------------------------------------------------------------------------
+local Apollo = require "Apollo"
+local GameLib = require "GameLib"
+local Vector3 = require "Vector3"
+
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local mod = core:NewEncounter("PrimeEvolutionaryOperant", 91, 0, 475)
 if not mod then return end
