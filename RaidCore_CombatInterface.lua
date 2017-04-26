@@ -15,6 +15,7 @@ local GameLib = require "GameLib"
 local ChatSystemLib = require "ChatSystemLib"
 local ActionSetLib = require "ActionSetLib"
 local ICCommLib = require "ICCommLib"
+local ICComm = require "ICComm" -- luacheck: ignore
 local bit32 = require "bit32"
 local table = require "table"
 
