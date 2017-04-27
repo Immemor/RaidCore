@@ -26,7 +26,7 @@ mod:RegisterEnglishLocale({
     ["unit.phantom"] = "Phantom",
     ["unit.essence"] = "Essence Void",
     ["unit.tortued_apparition"] = "Tortured Apparition",
-    ["unit.orb"] = "Soul Eater",
+    ["unit.soul_eater"] = "Soul Eater",
     ["unit.boneclaw"] = "Risen Boneclaw",
     ["unit.titan"] = "Risen Titan",
     ["unit.lost_soul"] = "Lost Soul",
@@ -539,7 +539,7 @@ mod:RegisterUnitEvents("unit.lost_soul",{
     [core.E.UNIT_CREATED] = mod.OnLostSoulCreated,
   }
 )
-mod:RegisterUnitEvents("unit.orb",{
+mod:RegisterUnitEvents("unit.soul_eater",{
     [core.E.UNIT_CREATED] = mod.OnSoulEaterCreated,
     [core.E.UNIT_DESTROYED] = mod.OnSoulEaterDestroyed,
   }
