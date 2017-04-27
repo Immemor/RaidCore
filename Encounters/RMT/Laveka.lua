@@ -156,6 +156,10 @@ local TIMERS = {
   }
 }
 
+local IND_REASONS = {
+  SOUL_EATER_CAUGHT = 1,
+}
+
 local ROOM_CENTER = Vector3.New(-723.717773, 186.834915, -265.187195)
 
 local CARDINAL_MARKERS = {
@@ -420,7 +424,7 @@ end
 function mod:OnSoulEaterCreated(id, unit, name)
   soulEaters[id] = {
     id = id,
-    orbit = currentSoulEater,
+    index = currentSoulEater,
     unit = unit
   }
 
@@ -436,8 +440,21 @@ function mod:OnSoulEaterCreated(id, unit, name)
 end
 
 function mod:OnSoulEaterDestroyed(id, unit, name)
-  mod:RemoveSoulEaterOrbit(soulEaters[id].orbit)
   soulEaters[id] = nil
+end
+
+function mod:OnSoulEaterCaught(id, spellId, stacks, timeRemaining, name, unitCaster)
+  if unitCaster and unitCaster:IsValid() then
+    local index = soulEaters[unitCaster:GetId()].index
+    mod:RemoveSoulEaterOrbit(index)
+    mod:SendIndMessage(IND_REASONS.SOUL_EATER_CAUGHT, index)
+  end
+end
+
+function mod:ReceiveIndMessage(from, reason, data)
+  if reason == IND_REASONS.SOUL_EATER_CAUGHT then
+    mod:RemoveSoulEaterOrbit(data)
+  end
 end
 
 function mod:OnDevourSoulsStop()
@@ -574,6 +591,9 @@ mod:RegisterUnitEvents(core.E.ALL_UNITS,{
     [DEBUFFS.SOULFIRE] = {
       [core.E.DEBUFF_ADD] = mod.OnSoulfireAdd,
       [core.E.DEBUFF_REMOVE] = mod.OnSoulfireRemove,
+    },
+    [DEBUFFS.SOUL_EATER] = {
+      [core.E.DEBUFF_ADD] = mod.OnSoulEaterCaught,
     },
     [DEBUFFS.EXPULSION_OF_SOULS] = {
       [core.E.DEBUFF_ADD] = mod.OnExpulsionAdd,
