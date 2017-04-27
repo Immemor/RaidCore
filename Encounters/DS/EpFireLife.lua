@@ -132,11 +132,7 @@ function mod:OnUnitCreated(nId, tUnit, sName)
 end
 
 function mod:OnUnitDestroyed(nId, tUnit, sName)
-  if sName == self.L["Life Force"] then
-    core:RemoveSimpleLine(nId)
-  elseif sName == self.L["Flame Wave"] then
-    core:RemoveSimpleLine(nId)
-  elseif self.L["Essence of Life"] == sName then
+  if self.L["Essence of Life"] == sName then
     nEssenceofLifeCount = nEssenceofLifeCount - 1
     if nEssenceofLifeCount == 0 then
       mod:AddTimerBar("MID", "Next middle phase", 90, mod:GetSetting("SoundCountDownMidPhase"))

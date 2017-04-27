@@ -169,20 +169,12 @@ function mod:OnBarUnitCreated(id, unit, name)
   core:AddUnit(unit)
 end
 
-function mod:OnIncindiaryDestroyed(id, unit, name)
-  core:RemoveLineBetweenUnits("PRIORITY_BOMB")
-end
-
 function mod:OnBombCreated(id, unit, name)
   core:WatchUnit(unit, core.E.TRACK_HEALTH)
   explosionMessagesSent[id] = false
   if mod:GetSetting("CrosshairBombs") then
     core:AddPicture(id, id, "Crosshair", 30, 0, 0, nil, "red")
   end
-end
-
-function mod:OnBombDestroyed(id, unit, name)
-  core:RemovePicture(id)
 end
 
 function mod:IsBombCloseToExplosion(id, percent)
@@ -210,12 +202,10 @@ end
 ----------------------------------------------------------------------------------------------------
 mod:RegisterUnitEvents({"unit.warhead.incindiary", "unit.warhead.caustic"},{
     [core.E.UNIT_CREATED] = mod.OnBombCreated,
-    [core.E.UNIT_DESTROYED] = mod.OnBombDestroyed,
   }
 )
 mod:RegisterUnitEvents("unit.warhead.incindiary",{
     [core.E.UNIT_CREATED] = mod.OnIncindiaryCreated,
-    [core.E.UNIT_DESTROYED] = mod.OnIncindiaryDestroyed,
     [core.E.HEALTH_CHANGED] = mod.OnIncindiaryHealthChanged,
   }
 )

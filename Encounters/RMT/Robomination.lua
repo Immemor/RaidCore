@@ -380,7 +380,6 @@ end
 
 function mod:OnCannonArmDestroyed(id, unit, name)
   cannonArms[id] = nil
-  core:RemoveLineBetweenUnits("CANNON_ARM_LINE_"..id)
 end
 
 function mod:OnCannonFireStart(id)

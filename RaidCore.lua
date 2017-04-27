@@ -862,6 +862,7 @@ end
 function RaidCore:AutoCleanUnitDestroyed(nId, tUnit, sName)
   self:RemoveUnit(nId)
   self:DropMark(nId)
+  self:CleanDrawsOnUnitDestroyed(nId)
 end
 
 ----------------------------------------------------------------------------------------------------
@@ -1142,7 +1143,7 @@ end
 ----------------------------------------------------------------------------------------------------
 -- TEST features functions
 ----------------------------------------------------------------------------------------------------
-local targetId = 0
+local targetId
 function RaidCore:OnStartTestScenario()
   local tPlayerUnit = GetPlayerUnit()
   local nPlayerId = tPlayerUnit:GetId()
@@ -1169,7 +1170,7 @@ function RaidCore:OnStartTestScenario()
   for i = 1, 36 do
     local nForce = 1 - i / 36.0
     local tColor = { a = 1.0, r = 1 - nForce, g = nRandomGreen, b = nForce }
-    self:AddSimpleLine(("TEST%d"):format(i), nPlayerId, i / 6, i / 8 + 2, nForce * 360, i / 4 + 1, tColor)
+    self:AddSimpleLine(("TEST%d"):format(i), targetId or nPlayerId, i / 6, i / 8 + 2, nForce * 360, i / 4 + 1, tColor)
   end
   self.tScenarioTestTimers = {}
   self.tScenarioTestTimers[1] = self:ScheduleTimer(function()

@@ -69,10 +69,6 @@ function mod:OnShackleCreated(id, unit, name)
   end
 end
 
-function mod:OnShackleDestroyed(id, unit, name)
-  core:RemovePicture(id)
-end
-
 ----------------------------------------------------------------------------------------------------
 -- Bind event handlers.
 ----------------------------------------------------------------------------------------------------
@@ -85,6 +81,5 @@ mod:RegisterUnitEvents("unit.lockjaw",{
 )
 mod:RegisterUnitEvents("unit.shackle",{
     [core.E.UNIT_CREATED] = mod.OnShackleCreated,
-    [core.E.UNIT_DESTROYED] = mod.OnShackleDestroyed,
   }
 )

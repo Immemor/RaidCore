@@ -404,7 +404,6 @@ end
 
 function mod:OnEssenceDestroyed(id, unit, name)
   essences[id] = nil
-  core:RemoveLineBetweenUnits("ESSENCE_LINE"..id)
 end
 
 function mod:OnEssenceSurgeStart(id)
@@ -480,20 +479,10 @@ function mod:OnTitanCreated(id, unit, name)
   end
 end
 
-function mod:OnTitanDestroyed(id, unit, name)
-  if mod:GetSetting("LineTitan") then
-    core:RemoveLineBetweenUnits("TITAN_LINE_"..id)
-  end
-end
-
 function mod:OnLostSoulCreated(id, unit, name)
   if mod:GetSetting("LineLostSouls") and isDeadRealm then
     core:AddLineBetweenUnits("LOST_SOUL_LINE", player.unit, id, 10, "xkcdGreen")
   end
-end
-
-function mod:OnLostSoulDestroyed(id, unit, name)
-  mod:RemoveLostSoulLine()
 end
 
 function mod:OnLavekaHealthChanged(id, percent, name)
@@ -524,7 +513,6 @@ mod:RegisterUnitEvents("unit.essence",{
 
 mod:RegisterUnitEvents("unit.titan",{
     [core.E.UNIT_CREATED] = mod.OnTitanCreated,
-    [core.E.UNIT_DESTROYED] = mod.OnTitanDestroyed,
   }
 )
 
@@ -534,7 +522,6 @@ mod:RegisterUnitEvents("unit.lost_soul",{
 
 mod:RegisterUnitEvents("unit.orb",{
     [core.E.UNIT_CREATED] = mod.OnSoulEaterCreated,
-    [core.E.UNIT_DESTROYED] = mod.OnLostSoulDestroyed,
   }
 )
 
