@@ -187,15 +187,19 @@ local soulEatersActive
 local lastSoulfireName
 local orbitColor
 local drawOrbitTimer
+local currentSoulEater
+local soulEaters
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
   essenceNumber = 0
+  currentSoulEater = 6
   isDeadRealm = false
   isMidphase = false
   expulsionInThisRealm = false
   lastSpiritOfSoulfireStack = 0
+  soulEaters = {}
   essences = {}
   player = {}
   player.unit = GameLib.GetPlayerUnit()
@@ -413,11 +417,27 @@ function mod:OnEssenceSurgeStart(id)
   end
 end
 
-function mod:OnSoulEaterCreated()
+function mod:OnSoulEaterCreated(id, unit, name)
+  soulEaters[id] = {
+    id = id,
+    orbit = currentSoulEater,
+    unit = unit
+  }
+
+  currentSoulEater = currentSoulEater - 1
+  if currentSoulEater == 0 then
+    currentSoulEater = 6
+  end
+
   if not soulEatersActive then
     soulEatersActive = true
     mod:DrawSoulEaterOrbits()
   end
+end
+
+function mod:OnSoulEaterDestroyed(id, unit, name)
+  mod:RemoveSoulEaterOrbit(soulEaters[id].orbit)
+  soulEaters[id] = nil
 end
 
 function mod:OnDevourSoulsStop()
@@ -521,6 +541,7 @@ mod:RegisterUnitEvents("unit.lost_soul",{
 )
 mod:RegisterUnitEvents("unit.orb",{
     [core.E.UNIT_CREATED] = mod.OnSoulEaterCreated,
+    [core.E.UNIT_DESTROYED] = mod.OnSoulEaterDestroyed,
   }
 )
 mod:RegisterUnitEvents("unit.laveka",{
