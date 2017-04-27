@@ -8,6 +8,7 @@
 -- TODO
 ----------------------------------------------------------------------------------------------------
 local Apollo = require "Apollo"
+local ApolloTimer = require "ApolloTimer"
 local GameLib = require "GameLib"
 local Vector3 = require "Vector3"
 
