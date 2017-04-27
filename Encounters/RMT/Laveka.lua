@@ -511,21 +511,18 @@ mod:RegisterUnitEvents("unit.essence",{
     },
   }
 )
-
 mod:RegisterUnitEvents("unit.titan",{
     [core.E.UNIT_CREATED] = mod.OnTitanCreated,
   }
 )
-
 mod:RegisterUnitEvents("unit.lost_soul",{
     [core.E.UNIT_CREATED] = mod.OnLostSoulCreated,
-  })
-
+  }
+)
 mod:RegisterUnitEvents("unit.orb",{
     [core.E.UNIT_CREATED] = mod.OnSoulEaterCreated,
   }
 )
-
 mod:RegisterUnitEvents("unit.laveka",{
     [core.E.UNIT_CREATED] = mod.OnLavekaCreated,
     [core.E.HEALTH_CHANGED] = mod.OnLavekaHealthChanged,
@@ -550,7 +547,6 @@ mod:RegisterUnitEvents("unit.laveka",{
     },
   }
 )
-
 mod:RegisterUnitEvents(core.E.ALL_UNITS,{
     [core.E.UNIT_CREATED] = mod.OnAnyUnitCreated,
     [core.E.UNIT_DESTROYED] = mod.OnAnyUnitDestroyed,
