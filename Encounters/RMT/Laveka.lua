@@ -428,20 +428,20 @@ end
 
 function mod:DrawSoulEaterOrbits()
   for i = 1, #SOUL_EATER_ORBITS do
-    mod:DrawSoulEaterOrbit(i, i)
+    mod:DrawSoulEaterOrbit(i)
   end
 end
 
-function mod:DrawSoulEaterOrbit(id, index)
+function mod:DrawSoulEaterOrbit(index)
   local radius = SOUL_EATER_ORBITS[index]
-  if math.mod(id, 2) == 0 then
+  if math.mod(index, 2) == 0 then
     orbitColor = "xkcdWhite"
   else
     orbitColor = "xkcdRed"
   end
-  core:AddPolygon("ORBIT_"..id, ROOM_CENTER, radius.z, nil, 2, orbitColor, 40)
-  mod:SetWorldMarker("ORBIT_"..id.."up", id, ROOM_CENTER + radius)
-  mod:SetWorldMarker("ORBIT_"..id.."down", id, ROOM_CENTER - radius)
+  core:AddPolygon("ORBIT_"..index, ROOM_CENTER, radius.z, nil, 2, orbitColor, 40)
+  mod:SetWorldMarker("ORBIT_"..index.."up", index, ROOM_CENTER + radius)
+  mod:SetWorldMarker("ORBIT_"..index.."down", index, ROOM_CENTER - radius)
 end
 
 function mod:RemoveSoulEaterOrbits()
@@ -450,10 +450,10 @@ function mod:RemoveSoulEaterOrbits()
   end
 end
 
-function mod:RemoveSoulEaterOrbit(id)
-  core:RemovePolygon("ORBIT_"..id)
-  mod:DropWorldMarker("ORBIT_"..id.."up")
-  mod:DropWorldMarker("ORBIT_"..id.."down")
+function mod:RemoveSoulEaterOrbit(index)
+  core:RemovePolygon("ORBIT_"..index)
+  mod:DropWorldMarker("ORBIT_"..index.."up")
+  mod:DropWorldMarker("ORBIT_"..index.."down")
 end
 
 function mod:OnMidphaseStart()
