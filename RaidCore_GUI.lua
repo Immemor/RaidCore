@@ -9,8 +9,8 @@
 -- TODO
 --
 ----------------------------------------------------------------------------------------------------
-require "Window"
-require "GameLib"
+local Apollo = require "Apollo"
+local GameLib = require "GameLib"
 
 local GeminiLocale = Apollo.GetPackage("Gemini:Locale-1.0").tPackage
 local Log = Apollo.GetPackage("Log-1.0").tPackage

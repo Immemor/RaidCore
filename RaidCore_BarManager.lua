@@ -11,10 +11,11 @@
 -- They are updated slowly, if at least one bar exist.
 --
 ----------------------------------------------------------------------------------------------------
-require "Apollo"
-require "GameLib"
-require "ApolloTimer"
-require "Window"
+local Apollo = require "Apollo"
+local ApolloTimer = require "ApolloTimer"
+local GameLib = require "GameLib"
+local Window = require "Window"
+local Unit = require "Unit"
 
 local RaidCore = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 
@@ -506,7 +507,7 @@ function UnitManager:UpdateBar(tBar)
   if tUnit and tUnit:IsValid() then
     local MaxHealth = tUnit:GetMaxHealth()
     local Health = tUnit:GetHealth()
-    local sName = tUnit:GetName():gsub(RaidCore.E.NO_BREAK_SPACE, " ")
+    local sName = RaidCore:ReplaceNoBreakSpace(tUnit:GetName())
     local bVunerable = tUnit:IsInCCState(VULNERABILITY)
     if Health and MaxHealth then
       local nPourcent = 100.0 * Health / MaxHealth

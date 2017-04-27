@@ -21,6 +21,9 @@ Explode caustic warhead first, use dmg reduction abilities like dGrid. Heal up
 after it explodes and let incindiary die by itself and then heal up again.
 --]]
 ----------------------------------------------------------------------------------------------------
+local Apollo = require "Apollo"
+local GameLib = require "GameLib"
+
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local mod = core:NewEncounter("Luk'ki", 104, 548, 555)
 if not mod then return end
@@ -166,20 +169,12 @@ function mod:OnBarUnitCreated(id, unit, name)
   core:AddUnit(unit)
 end
 
-function mod:OnIncindiaryDestroyed(id, unit, name)
-  core:RemoveLineBetweenUnits("PRIORITY_BOMB")
-end
-
 function mod:OnBombCreated(id, unit, name)
   core:WatchUnit(unit, core.E.TRACK_HEALTH)
   explosionMessagesSent[id] = false
   if mod:GetSetting("CrosshairBombs") then
     core:AddPicture(id, id, "Crosshair", 30, 0, 0, nil, "red")
   end
-end
-
-function mod:OnBombDestroyed(id, unit, name)
-  core:RemovePicture(id)
 end
 
 function mod:IsBombCloseToExplosion(id, percent)
@@ -207,12 +202,10 @@ end
 ----------------------------------------------------------------------------------------------------
 mod:RegisterUnitEvents({"unit.warhead.incindiary", "unit.warhead.caustic"},{
     [core.E.UNIT_CREATED] = mod.OnBombCreated,
-    [core.E.UNIT_DESTROYED] = mod.OnBombDestroyed,
   }
 )
 mod:RegisterUnitEvents("unit.warhead.incindiary",{
     [core.E.UNIT_CREATED] = mod.OnIncindiaryCreated,
-    [core.E.UNIT_DESTROYED] = mod.OnIncindiaryDestroyed,
     [core.E.HEALTH_CHANGED] = mod.OnIncindiaryHealthChanged,
   }
 )

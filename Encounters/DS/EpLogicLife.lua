@@ -7,6 +7,10 @@
 -- Description:
 -- Elemental Pair after the Logic wings.
 ---------------------------------------------------------------------------------------------------
+local Apollo = require "Apollo"
+local GameLib = require "GameLib"
+local Unit = require "Unit"
+
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local mod = core:NewEncounter("EpLogicLife", 52, 98, 119)
 if not mod then return end
@@ -246,10 +250,6 @@ function mod:OnUnitDestroyed(nId, tUnit, sName)
   if sName == self.L["Essence of Logic"] then
     bIsMidPhase = false
     core:ResetWorldMarkers()
-  elseif sName == self.L["Alphanumeric Hash"] then
-    core:RemoveSimpleLine(nId)
-  elseif sName == self.L["Life Force"] then
-    core:RemoveSimpleLine(nId)
   end
 end
 

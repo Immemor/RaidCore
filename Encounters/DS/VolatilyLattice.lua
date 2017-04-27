@@ -7,6 +7,9 @@
 -- Description:
 -- TODO
 ----------------------------------------------------------------------------------------------------
+local Apollo = require "Apollo"
+local GameLib = require "GameLib"
+
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local mod = core:NewEncounter("Lattice", 52, 98, 116)
 if not mod then return end
@@ -124,7 +127,14 @@ mod:RegisterMessageSetting("PILLAR_TIMEOUT", core.E.COMPARE_EQUAL, "MessageBigCa
 ----------------------------------------------------------------------------------------------------
 local GetPlayerUnitByName = GameLib.GetPlayerUnitByName
 local GetGameTime = GameLib.GetGameTime
-
+----------------------------------------------------------------------------------------------------
+-- Constants.
+----------------------------------------------------------------------------------------------------
+local DEBUFFS = {
+  DISINTEGRATION_SEQUENCE = 46727, --??
+  DISINTEGRATION_SECTOR = 69579, --??
+  LASER_TARGET = 47160,
+}
 ----------------------------------------------------------------------------------------------------
 -- Locals.
 ----------------------------------------------------------------------------------------------------
@@ -154,9 +164,6 @@ function mod:OnDataDevourerCreated(id, unit, name)
   end
 end
 
-function mod:OnDataDevourerDestroyed(id, unit, name)
-  core:RemoveLineBetweenUnits(id)
-end
 function mod:OnWallCreated(id, unit, name)
   mod:RemoveTimerBar("PILLAR_TIMEOUT")
   core:AddUnit(unit)
@@ -166,9 +173,7 @@ function mod:OnWallCreated(id, unit, name)
 end
 
 function mod:DropLaserMark(id)
-  if id then
-    core:DropMark(id)
-  end
+  core:DropMark(id)
 end
 
 function mod:MarkOtherLaserTargets(isMyself, unit)
@@ -188,11 +193,9 @@ end
 function mod:OnLaserDatachron(message, laserTargetName)
   local targetUnit = GetPlayerUnitByName(laserTargetName)
   local isMyself = targetUnit and targetUnit:IsThePlayer() or false
-  local laserMarkId = targetUnit and targetUnit:GetId() or nil
   local text = self.L["msg.beam.x"]:format(laserTargetName)
   mod:ShowBeamMessages(isMyself, text)
   mod:MarkOtherLaserTargets(isMyself, targetUnit)
-  mod:AddTimerBar("BEAM_DROP", text, 15, nil, nil, mod.DropLaserMark, mod, laserMarkId)
 end
 
 function mod:OnDeleteDatachron(message)
@@ -216,13 +219,23 @@ function mod:OnJumpDatachron(message)
   mod:AddTimerBar("NEXT_PILLAR", "msg.pillar.next", 75)
 end
 
+function mod:OnAnyUnitDestroyed(id, unit, name)
+  mod:DropLaserMark(id)
+end
+
 ----------------------------------------------------------------------------------------------------
 -- Bind event handlers.
 ----------------------------------------------------------------------------------------------------
 mod:RegisterUnitEvent("unit.wall", core.E.UNIT_CREATED, mod.OnWallCreated)
 mod:RegisterUnitEvents("unit.devourer",{
     [core.E.UNIT_CREATED] = mod.OnDataDevourerCreated,
-    [core.E.UNIT_DESTROYED] = mod.OnDataDevourerDestroyed,
+  }
+)
+mod:RegisterUnitEvents(core.E.ALL_UNITS, {
+    [core.E.UNIT_DESTROYED] = mod.OnAnyUnitDestroyed,
+    [DEBUFFS.LASER_TARGET] = {
+      [core.E.DEBUFF_REMOVE] = mod.DropLaserMark,
+    },
   }
 )
 mod:RegisterDatachronEvent("chron.station.secure", core.E.COMPARE_EQUAL, mod.OnSecureDatachron)

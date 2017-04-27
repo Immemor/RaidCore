@@ -4,6 +4,9 @@
 -- @author daihenka
 -- GUI Widget Creation Library for WildStar.
 -----------------------------------------------------------------------------------------------------------------------
+local Apollo = require "Apollo"
+local XmlDoc = require "XmlDoc"
+
 local MAJOR, MINOR = "Gemini:GUI-1.0", 3
 local Lib = Apollo.GetPackage("Gemini:GUI-1.0") and Apollo.GetPackage("Gemini:GUI-1.0").tPackage or {}
 if Lib and (Lib._VERSION or 0) >= MINOR then
@@ -17,21 +20,21 @@ local type, next = type, next
 Lib._VERSION = MINOR
 Lib.WidgetRegistry = Lib.WidgetRegistry or {}
 Lib.WidgetVersions = Lib.WidgetVersions or {}
- 
+
 -- local upvalues
 local WidgetRegistry = Lib.WidgetRegistry
 local WidgetVersions = Lib.WidgetVersions
 
 -- Create a widget prototype object
--- @param strType (Optional) Widget type.  If not provided it will look at tOptions for 
+-- @param strType (Optional) Widget type.  If not provided it will look at tOptions for
 --                a WidgetType value.  If no widget type is found, defaults to "Window".
 -- @param tOptions Options table for the widget (see below usages)
 -- @returns (table) Widget Prototype Object
 --
--- @usage 
--- local btnProto = GeminiGUI:Create("PushButton", { 
---   AnchorCenter = { 100, 30 }, 
---   Text   = "Push Me", 
+-- @usage
+-- local btnProto = GeminiGUI:Create("PushButton", {
+--   AnchorCenter = { 100, 30 },
+--   Text   = "Push Me",
 --   Events = { ButtonSignal = function() Print("You pushed me!") end },
 -- })
 -- local wndBtn = btnProto:GetInstance()
@@ -39,10 +42,10 @@ local WidgetVersions = Lib.WidgetVersions
 -- @usage #2
 -- local myEventHandler = { OnClick = function() Print("You pushed me!") end }
 --
--- local btnProto = GeminiGUI:Create({ 
---   WidgetType   = "PushButton", 
---   AnchorCenter = { 100, 30 }, 
---   Text   = "Push Me", 
+-- local btnProto = GeminiGUI:Create({
+--   WidgetType   = "PushButton",
+--   AnchorCenter = { 100, 30 },
+--   Text   = "Push Me",
 --   Events = { ButtonSignal = "OnClick" },
 -- })
 -- local wndBtn = btnProto:GetInstance(myEventHandler)
@@ -51,31 +54,31 @@ function Lib:Create(strType, tOptions)
   if type(strType) == "function" then
     tOptions = strType()
     strType = tOptions.WidgetType or "Window"
-    
+
   elseif type(strType) == "string" and type(tOptions) == "function" then
     tOptions = tOptions()
     strType = strType or tOptions.WidgetType or "Window"
-  
+
   -- check if passed a table without a strType
   elseif type(strType) == "table" then
     tOptions = strType
     strType = tOptions.WidgetType or "Window"
   end
-  
+
   if type(strType) ~= "string" then
     error(("Usage: Create([strType,] tOptions): 'strType' - string expected got '%s'."):format(type(strType)), 2)
   end
   if type(tOptions) ~= "table" then
     error(("Usage: Create([strType,] tOptions): 'tOptions' - table expected got '%s'."):format(type(tOptions)), 2)
   end
-  
+
   -- check if tOptions is already a widget prototype
-  if tOptions.__IsGeminiGuiPrototype == true then 
-    return tOptions 
+  if tOptions.__IsGeminiGuiPrototype == true then
+    return tOptions
   end
-  
+
   strType = strType or "Window"
-  
+
   -- if not, check if the widget type is valid
   if WidgetRegistry[strType] then
     -- create the widget
@@ -98,10 +101,10 @@ end
 function Lib:RegisterWidgetType(strType, fnConstructor, nVersion)
   assert(type(fnConstructor) == "function")
   assert(type(nVersion) == "number")
-  
+
   local oldVersion = WidgetVersions[strType]
   if oldVersion and oldVersion >= nVersion then return end
-  
+
   WidgetVersions[strType] = nVersion
   WidgetRegistry[strType] = fnConstructor
 end
@@ -172,10 +175,10 @@ local kSpecialFields = {
   AnchorOffsets = function(s, tOptions, v)
     tOptions.LAnchorOffset, tOptions.TAnchorOffset, tOptions.RAnchorOffset, tOptions.BAnchorOffset = unpack(v)
   end,
-  
+
   AnchorPoints = TranslateAnchorPoint,
   Anchor = TranslateAnchorPoint,
-  
+
   IncludeEdgeAnchors = function(s, tOptions, v)
     if type(v) ~= "string" and (s.options.Name == nil or string.len(s.options.Name) == 0) then
       error("IncludeEdgeAnchors requires a string or the control name to be set", 2)
@@ -183,33 +186,33 @@ local kSpecialFields = {
     local strPrefix = ((type(v) == "string") and v or s.options.Name)
     tOptions.LeftEdgeControlsAnchor, tOptions.TopEdgeControlsAnchor, tOptions.RightEdgeControlsAnchor, tOptions.BottomEdgeControlsAnchor = strPrefix .. "_Left", strPrefix .. "_Top", strPrefix .. "_Right", strPrefix .. "_Bottom"
   end,
-    
+
   AnchorCenter = function(s, tOptions, v)
     if type(v) ~= "table" or #v ~= 2 then return end
     local nWidth, nHeight = unpack(v)
     tOptions.LAnchorPoint,  tOptions.TAnchorPoint,  tOptions.RAnchorPoint,  tOptions.BAnchorPoint = unpack(ktAnchorPoints["CENTER"])
     tOptions.LAnchorOffset, tOptions.TAnchorOffset, tOptions.RAnchorOffset, tOptions.BAnchorOffset = nWidth / 2 * -1, nHeight / 2 * -1, nWidth / 2, nHeight / 2
   end,
-  
+
   AnchorFill = function(s, tOptions, v)
     local nPadding = (type(v) == "number") and v or 0
     tOptions.LAnchorPoint, tOptions.TAnchorPoint, tOptions.RAnchorPoint, tOptions.BAnchorPoint = unpack(ktAnchorPoints["FILL"])
     tOptions.LAnchorOffset, tOptions.TAnchorOffset, tOptions.RAnchorOffset, tOptions.BAnchorOffset = nPadding, nPadding, -nPadding, -nPadding
   end,
-  
+
   PosSize = function(s, tOptions, v)
     if type(v) ~= "table" or #v ~= 4 then return end
     local nLeft, nTop, nWidth, nHeight = unpack(v)
     tOptions.LAnchorPoint, tOptions.TAnchorPoint, tOptions.RAnchorPoint, tOptions.BAnchorPoint = unpack(ktAnchorPoints["TOPLEFT"])
     tOptions.LAnchorOffset, tOptions.TAnchorOffset, tOptions.RAnchorOffset, tOptions.BAnchorOffset = nLeft, nTop, nLeft + nWidth, nTop + nHeight
   end,
-  
+
   UserData = function(s, tOptions, v)
     s:SetData(v)
   end,
   LuaData = function(s, tOptions, v)
     s:SetData(v)
-  end,  
+  end,
   Events = function(s, tOptions, v)
     if type(v) == "table" then
       for strEventName, oHandler in pairs(v) do
@@ -221,7 +224,7 @@ local kSpecialFields = {
       end
     end
   end,
-  
+
   Pixies = function(s, tOptions, v)
     if type(v) == "table" then
       for _, tPixie in ipairs(v) do
@@ -229,7 +232,7 @@ local kSpecialFields = {
       end
     end
   end,
-  
+
   Children = function(s, tOptions, v)
     if type(v) == "table" then
       for _, tChild in ipairs(v) do
@@ -246,15 +249,15 @@ local kSpecialFields = {
 
 function Control:new(o)
   o = o or {}
-  
+
   o.events = {}
   o.children = {}
   o.pixies = {}
   o.options = {}
-  
+
   setmetatable(o, self)
   self.__index = self
-  
+
   return o
 end
 
@@ -286,7 +289,7 @@ local ktPixieMapping = {
   strTextId = "TextId",
   nTextId   = "TextId",
   loc       = { fPoints = "AnchorPoints", nOffsets = "AnchorOffsets" },
-  flagsText = { DT_CENTER = "DT_CENTER", DT_VCENTER = "DT_VCENTER", DT_RIGHT = "DT_RIGHT", DT_BOTTOM = "DT_BOTTOM", 
+  flagsText = { DT_CENTER = "DT_CENTER", DT_VCENTER = "DT_VCENTER", DT_RIGHT = "DT_RIGHT", DT_BOTTOM = "DT_BOTTOM",
                 DT_WORDBREAK = "DT_WORDBREAK", DT_SINGLELINE = "DT_SINGLELINE" },
 }
 
@@ -294,7 +297,7 @@ local ktPixieMapping = {
 -- @param tPixie a table with pixie options
 function Control:AddPixie(tPixie)
   if tPixie == nil then return end
-  
+
   -- in case someone uses the C++ Window:AddPixie() format.  Preference to the XML format over the C++ Window:AddPixie() format.
   for oldKey, newKey in pairs(ktPixieMapping) do
     if tPixie[oldKey] ~= nil then
@@ -309,8 +312,8 @@ function Control:AddPixie(tPixie)
       end
     end
   end
-  
-  
+
+
   if type(tPixie.AnchorOffsets) == "table" then
     tPixie.LAnchorOffset, tPixie.TAnchorOffset, tPixie.RAnchorOffset, tPixie.BAnchorOffset = unpack(tPixie.AnchorOffsets)
     tPixie.AnchorOffsets = nil
@@ -347,7 +350,7 @@ function Control:AddPixie(tPixie)
     tPixie.LAnchorOffset, tPixie.TAnchorOffset, tPixie.RAnchorOffset, tPixie.BAnchorOffset = nLeft, nTop, nLeft + nWidth, nTop + nHeight
     tPixie.PosSize = nil
   end
-  
+
   tPixie.LAnchorOffset = tPixie.LAnchorOffset or 0
   tPixie.RAnchorOffset = tPixie.RAnchorOffset or 0
   tPixie.TAnchorOffset = tPixie.TAnchorOffset or 0
@@ -356,14 +359,14 @@ function Control:AddPixie(tPixie)
   tPixie.RAnchorPoint  = tPixie.RAnchorPoint  or 0
   tPixie.TAnchorPoint  = tPixie.TAnchorPoint  or 0
   tPixie.BAnchorPoint  = tPixie.BAnchorPoint  or 0
-  
+
   -- ensure that pixie booleans are properly converted to 1/0
   for k,v in pairs(tPixie) do
     if type(v) == "boolean" then
       tPixie[k] = v and "1" or "0"
     end
   end
-  
+
   table.insert(self.pixies, tPixie)
 end
 
@@ -386,7 +389,7 @@ function Control:AddEvent(strName, strFunction, fnInline)
     fnInline = strFunction
     strFunction = "On" .. strName .. tostring(fnInline):gsub("function: ", "_")
   end
-  
+
   table.insert(self.events, {strName = strName, strFunction = strFunction, fnInline = fnInline })
 end
 
@@ -400,70 +403,70 @@ end
 -- Internal use only
 function Control:ParseOptions()
   local tOptions = {}
-  
+
   for k, fn in pairs(kSpecialFields) do
     if self.options[k] ~= nil then
       fn(self, tOptions, self.options[k])
     end
   end
-  
+
   for k,v in pairs(self.options) do
     if not kSpecialFields[k] or k == "WhiteFillMe" then
       tOptions[k] = v
     end
   end
-  
+
   SetupWhiteFillMe(self, tOptions, self.options.WhiteFillMe) -- for debug purposes ;)
 
   -- if picture hasn't been set but a sprite has been, enable picture
   if tOptions.Sprite ~= nil and tOptions.Picture == nil then
     tOptions.Picture = true
   end
-  
+
   for k,v in pairs(tOptions) do
     if type(v) == "boolean" then
       tOptions[k] = v and "1" or "0"
     end
   end
-  
+
   return tOptions
 end
 
 -- Creates an XmlDoc Table of the widget prototype
 function Control:ToXmlDocTable(bIsForm)
   local tInlineFunctions = {}
-  
+
   local tForm = self:ParseOptions()
-  
+
   -- setup defaults and necessary values
   tForm.__XmlNode            = bIsForm and "Form" or "Control"
   tForm.Font                 = tForm.Font or "Default"
   tForm.Template             = tForm.Template or "Default"
   tForm.TooltipType          = tForm.TooltipType or "OnCursor"
-  
+
   if not tForm.PosX or not tForm.PosY or not tForm.Height or not tForm.Width then
     tForm.TAnchorOffset        = tForm.TAnchorOffset or 0
     tForm.LAnchorOffset        = tForm.LAnchorOffset or 0
     tForm.BAnchorOffset        = tForm.BAnchorOffset or 0
     tForm.RAnchorOffset        = tForm.RAnchorOffset or 0
-    
+
     tForm.BAnchorPoint         = tForm.BAnchorPoint  or 0
     tForm.RAnchorPoint         = tForm.RAnchorPoint  or 0
     tForm.TAnchorPoint         = tForm.TAnchorPoint  or 0
     tForm.LAnchorPoint         = tForm.LAnchorPoint  or 0
   end
- 
+
   if self.AddSubclassFields ~= nil and type(self.AddSubclassFields) == "function" then
     self:AddSubclassFields(tForm)
-  end 
-  
+  end
+
   tForm.Name                 = tForm.Name or kstrDefaultName
   tForm.Class                = tForm.Class or "Window"
-  
+
   local tAliasEvents = {}
   local tInlineLookup = {}
   for _, tEvent in ipairs(self.events) do
-    if tEvent.strName and tEvent.strFunction and tEvent.strName ~= "" then 
+    if tEvent.strName and tEvent.strFunction and tEvent.strName ~= "" then
       if tEvent.strFunction:match("^Event::") then
         table.insert(tAliasEvents, tEvent)
       elseif tEvent.strFunction ~= "" then
@@ -475,7 +478,7 @@ function Control:ToXmlDocTable(bIsForm)
       end
     end
   end
-  
+
   -- check if an event would like to reference an another event handler's inline function
   for _, tEvent in ipairs(tAliasEvents) do
     local strFunctionName = tInlineLookup[tEvent.strFunction:gsub("^Event::", "")]
@@ -483,7 +486,7 @@ function Control:ToXmlDocTable(bIsForm)
       table.insert(tForm, { __XmlNode = "Event", Function = strFunctionName, Name = tEvent.strName })
     end
   end
-  
+
   for _, tPixie in ipairs(self.pixies) do
     local tPixieNode = { __XmlNode = "Pixie",  }
     for k,v in pairs(tPixie) do
@@ -491,8 +494,8 @@ function Control:ToXmlDocTable(bIsForm)
     end
     table.insert(tForm, tPixieNode)
   end
-  
-  for _, tChild in ipairs(self.children) do 
+
+  for _, tChild in ipairs(self.children) do
     if tChild.ToXmlDocTable and type(tChild.ToXmlDocTable) == "function" then
       local tXd, tIf = tChild:ToXmlDocTable()
       table.insert(tForm, tXd)
@@ -501,15 +504,15 @@ function Control:ToXmlDocTable(bIsForm)
       end
     end
   end
-  
+
   if self.oData ~= nil then
     tForm.__GEMINIGUI_LUADATA = self.oData
   end
-    
+
   if bIsForm then
     tForm = { __XmlNode = "Forms", tForm }
   end
-  
+
   return tForm, tInlineFunctions
 end
 
@@ -518,11 +521,11 @@ end
 local kstrTempName = "GeminiGUIWindow."
 local function CollectNameData(tXml, tData, strNamespace)
   if type(tXml) ~= "table" then return end
-  
+
   local nCount = 0
   tData = tData or {}
   strNamespace = strNamespace or ""
-  
+
   for i, t in ipairs(tXml) do
     if t.__XmlNode == "Control" then -- only process controls (aka children)
       local strName = t.Name
@@ -533,18 +536,18 @@ local function CollectNameData(tXml, tData, strNamespace)
         strName = "GeminiGUIWindow." .. nCount
         strNS = string.format("%s%s%s", strNamespace, strNamespace:len() > 0 and ":" or "", strName)
       end
-      
+
       local strFinalName = t.Name or strName
-      
+
       -- collect the info for the window/control
       tData[strNS] = { strNS = strNS, strName = strName, strFinalName = strFinalName, luaData = t.__GEMINIGUI_LUADATA, strText = t.Text, bIsMLWindow = t.Class == "MLWindow" }
-      
+
       -- rename the window to the unique layered name
       t.Name = strName
-      
+
       -- clean up XmlDoc table by removing unnecessary elements
       t.__GEMINIGUI_LUADATA = nil
-      
+
       CollectNameData(t, tData, strNS)
     elseif t.__XmlNode == "Form" or t.__XmlNode == "Forms" then
       CollectNameData(t, tData, "")
@@ -553,7 +556,7 @@ local function CollectNameData(tXml, tData, strNamespace)
   return tData
 end
 
--- Process each window and it's children and assign data, AML 
+-- Process each window and it's children and assign data, AML
 -- and rename the window back to what the consumer wants.
 local function FinalizeWindow(wnd, tData)
   -- collect a list of keys and sort them in order
@@ -564,7 +567,7 @@ local function FinalizeWindow(wnd, tData)
     table.insert(tChildOrder, { strNS, nCount })
   end
   table.sort(tChildOrder, function(a,b) return a[2] > b[2] end)
-  
+
   -- process child windows in depth order, setting their data, AML and
   -- renaming them back to what they are intended to be
   for i = 1, #tChildOrder do
@@ -595,31 +598,31 @@ function Control:GetInstance(eventHandler, wndParent)
     error("Usage: EventHandler is not valid.  Must be a table.")
   end
   local xdt, tInlines = self:ToXmlDocTable(true)
-  
+
   for k,v in pairs(tInlines) do
     eventHandler[k] = eventHandler[k] or v
   end
-  
+
   -- collect names and reassign them to something generic
   -- collect any lua data and if AML needs to be set
   local tChildData = CollectNameData(xdt)
-  
+
   -- create the XmlDoc and C++ window
   local xd = XmlDoc.CreateFromTable(xdt)
   local strFormName = self.options.Name or kstrDefaultName
   local wnd = Apollo.LoadForm(xd, strFormName, wndParent, eventHandler)
-  
+
   if wnd then
     -- set the lua data and aml followed by name for all child widgets
     FinalizeWindow(wnd, tChildData)
-    
+
     if self.oData then
       wnd:SetData(self.oData)
     end
   else
 --    Print("GeminiGUI failed to create window")
   end
-  
+
   return wnd
 end
 end
@@ -707,7 +710,7 @@ local function Constructor()
     ButtonType    = "PushButton",
     RadioGroup    = "",
     Font          = "Thick",
-    DT_VCENTER    = true, 
+    DT_VCENTER    = true,
     DT_CENTER     = true,
   }
   return ctrl
@@ -844,7 +847,7 @@ local function Constructor()
     UseTemplateBG    = true,
     Picture          = true,
     Border           = true,
-    
+
     RelativeToClient = true,
   }
   return wnd
@@ -863,10 +866,10 @@ local ComboBox = GeminiGUI.ControlBase:new()
 function ComboBox:AddSubclassFields(tForm)
   if self.options.UseTheme == true then
     -- if windowload is set, it will respect that
-    -- apply the theme then call the windowload set 
+    -- apply the theme then call the windowload set
     -- by the consumer.  Otherwise it will setup
     -- its own windowload event
-    
+
     -- todo: probably needs a refactor
     local windowLoadEvent
     for k,v in pairs(self.events) do
@@ -875,43 +878,43 @@ function ComboBox:AddSubclassFields(tForm)
         break
       end
     end
-  
+
     if windowLoadEvent ~= nil then
       local strFont = self.options.Font or "CRB_InterfaceMedium"
       local strBtnBase = self.options.DropdownBtnBase or "Collections_TEMP:sprCollections_TEMP_RightAlignDropdown"
       local nBtnWidth = self.options.DropdownBtnWidth
-      
+
       local fOldWindowLoad = windowLoadEvent.fnInline
       local strOldWindowLoad = windowLoadEvent.strFunction
       if windowLoadEvent.fnInline == nil then
         fOldWindowLoad = windowLoadEvent.strFunction
       end
-      
+
       local fNewWindowLoad = function(self, wndHandler, wndControl)
-        if wndHandler == wndControl then 
-          
+        if wndHandler == wndControl then
+
           local cbBtnSkin = GeminiGUI:Create({ Class="Button", Base=strBtnBase }):GetInstance()
           if nBtnWidth then
             wndControl:GetButton():SetAnchorOffsets(-nBtnWidth,0,0,0)
           end
-          
+
           wndControl:GetButton():ChangeArt(cbBtnSkin)
           wndControl:GetGrid():SetStyle("AutoHideScroll",     true)
           wndControl:GetGrid():SetStyle("TransitionShowHide", true)
           wndControl:GetGrid():SetFont(strFont)
         end
-        
+
         if type(fOldWindowLoad) == "function" then
           fOldWindowLoad(self, wndHandler, wndControl)
         elseif type(fOldWindowLoad) == "string" and type(self[fOldWindowLoad]) == "function" then
           self[fOldWindowLoad](self, wndHandler, wndControl)
         end
       end
-      
+
       windowLoadEvent.fnInline = fNewWindowLoad
       windowLoadEvent.strFunction = "OnWindowLoad_" .. tostring(windowLoadEvent.fnInline):gsub("function: ", "_")
     end
-    
+
     if tForm.UseTheme ~= nil then
       tForm.UseTheme = nil
     end
@@ -1034,12 +1037,12 @@ local Grid = GeminiGUI.ControlBase:new()
 
 function Grid:AddColumn(tColumn)
   self.columns = self.columns or {}
-  
+
   tColumn.TextColor = tColumn.TextColor or "White"
   if tColumn.SimpleSort == nil then
     tColumn.SimpleSort = true
   end
-  
+
   table.insert(self.columns, tColumn)
 end
 
@@ -1052,7 +1055,7 @@ function Grid:AddSubclassFields(tForm)
       tForm.Columns = nil
     end
   end
-  
+
   if self.columns ~= nil then
     for i = #self.columns, 1, -1 do
       local tColumn = self.columns[i]
@@ -1078,24 +1081,24 @@ local function Constructor()
     HeaderFont             = "CRB_Pixel",
     HeaderBG               = "CRB_Basekit:kitBtn_List_HoloDisabled",
     HeaderHeight           = 26,
-    
+
     Font                   = "CRB_Pixel",
     CellBGBase             = "CRB_Basekit:kitBtn_List_HoloNormal",
     RowHeight              = 26,
-    
+
     MultiColumn            = true,
     FocusOnMouseOver       = true,
     SelectWholeRow         = true,
     RelativeToClient       = true,
     VariableHeight         = true,
     HeaderRow              = true,
-    
+
     TextNormalColor        = "white",
     TextSelectedColor      = "ff31fcf6",
     TextNormalFocusColor   = "white",
     TextSelectedFocusColor = "ff31fcf6",
     TextDisabledColor      = "9d666666",
-    
+
     DT_VCENTER             = true,
     VScroll                = true,
     AutoHideScroll         = true,
@@ -1111,7 +1114,7 @@ end
 --[[ File: widgets/MLWindow.lua ]]--
 do
 local WidgetType, Version = "MLWindow", 1
- 
+
 local function Constructor()
   local ctrl = GeminiGUI:Create("Window", {
     Class         = "MLWindow",

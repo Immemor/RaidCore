@@ -57,6 +57,9 @@
 -- { x = 542.987549, z = -129.588684 },
 -- }
 ----------------------------------------------------------------------------------------------------
+local Apollo = require "Apollo"
+local GameLib = require "GameLib"
+
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local mod = core:NewEncounter("Avatus", 52, 98, 104)
 if not mod then return end
@@ -275,7 +278,6 @@ local PURGE_LIST_IN_BLUE_ROOM = {
   ["Icon_SkillFire_UI_ss_srngblst"] = PURGE_RED,
   ["Icon_SkillEnergy_UI_srcr_surgeengine"] = PURGE_GREEN,
 }
-local PURGE_COOLDOWNS = 15
 -- Protective Barrier win by Avatus on each end of main phase.
 local BUFFID_PROTECTIVE_BARRIER = 45304
 -- Buff win by Avatus, which will enable obliteration beam.
@@ -301,7 +303,6 @@ local GetGameTime = GameLib.GetGameTime
 local GetSpell = GameLib.GetSpell
 local GetPlayerUnit = GameLib.GetPlayerUnit
 local SetTargetUnit = GameLib.SetTargetUnit
-local GetPlayerUnitByName = GameLib.GetPlayerUnitByName
 local nCurrentPhase
 local tBlueRoomPurgeList
 local tBlueRoomPurgeOrderedList
@@ -322,6 +323,7 @@ local nLastSupportCannonPopTime
 local nLastBuffPurgeTime
 local bIsPurgeSync
 local bIsProtectionBarrierEnable
+local bGreenRoomMarkerDisplayed
 
 local function SetMarkersByPhase(nNewPhase)
   -- Remove previous markers
@@ -573,37 +575,19 @@ end
 
 function mod:OnUnitDestroyed(nId, tUnit, sName)
   if sName == self.L["Holo Hand"] then
-    core:RemoveSimpleLine(nId .. "_1")
-    core:RemoveSimpleLine(nId .. "_2")
-    core:RemoveSimpleLine(nId .. "_3")
     if tHoloHandsList[nId] then
       tHoloHandsList[nId] = nil
     end
-  elseif sName == self.L["Holo Cannon"] then
-    core:RemoveSimpleLine(nId)
-  elseif sName == self.L["unit.avatus"] then
-    core:RemoveSimpleLine(nId)
-    core:RemovePicture("HAND1")
-    core:RemovePicture("HAND2")
-  elseif sName == self.L["Shock Sphere"] then
-    core:RemoveSimpleLine(nId)
   elseif sName == self.L["Infinite Logic Loop"] then
-    core:RemoveLineBetweenUnits(nId)
     mod:RemoveTimerBar("PURGE_CYCLE")
     mod:RemoveTimerBar("PURGE_INCREASE")
     -- With the spellslinger's void slip spell, the purge sync is lost.
     bIsPurgeSync = false
   elseif sName == self.L["Mobius Physics Constructor"] then
-    core:RemoveSimpleLine(nId)
-    core:RemoveLineBetweenUnits(nId)
     if tUnit:GetHealth() == 0 then
       -- Send information about the miniboss, not the portal.
       mod:SendIndMessage("MOBIUS_DEATH")
     end
-  elseif self.L["Unstoppable Object Simulation"] == sName then
-    core:RemoveLineBetweenUnits(nId)
-  elseif self.L["Excessive Force Protocol"] == sName then
-    core:RemoveLineBetweenUnits(nId)
   elseif sName == self.L["Tower Platform"] then
     if bGreenRoomMarkerDisplayed then
       bGreenRoomMarkerDisplayed = false
@@ -611,10 +595,6 @@ function mod:OnUnitDestroyed(nId, tUnit, sName)
         core:DropWorldMarker("GREEN_ROOM_MARKERS_" .. k)
       end
     end
-  elseif self.L["Fragmented Data Chunk"] == sName then
-    core:RemoveSimpleLine(nId .. "_1")
-    core:RemoveSimpleLine(nId .. "_2")
-    core:RemoveSimpleLine(nId .. "_3")
   end
 end
 
@@ -762,7 +742,7 @@ function mod:OnCastStart(nId, sCastName, nCastEndTime, sName)
           closest_holo_hand = hand
         end
       end
-      local sSpellName = closest_holo_hand["unit"]:GetCastName():gsub(core.E.NO_BREAK_SPACE, " ")
+      local sSpellName = core:ReplaceNoBreakSpace(closest_holo_hand["unit"]:GetCastName())
       if sSpellName == self.L["Crushing Blow"] then
         mod:AddMsg("CRBLOW", "INTERRUPT CRUSHING BLOW!", 5, mod:GetSetting("SoundHandInterrupt") and "Inferno")
       end

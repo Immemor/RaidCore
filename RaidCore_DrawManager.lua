@@ -16,10 +16,10 @@
 -- The GameLib.GetUnitScreenPosition API function return wrong values when Unit is out of screen.
 --
 ----------------------------------------------------------------------------------------------------
-require "Window"
-require "GameLib"
-require "GroupLib"
-require "Vector3"
+local Apollo = require "Apollo"
+local GameLib = require "GameLib"
+local Vector3 = require "Vector3"
+local math = require "math"
 
 local RaidCore = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local Assert = Apollo.GetPackage("RaidCore:Assert-1.0").tPackage
@@ -33,9 +33,7 @@ local GetPlayerUnit = GameLib.GetPlayerUnit
 local GetUnitById = GameLib.GetUnitById
 local WorldLocToScreenPoint = GameLib.WorldLocToScreenPoint
 local Races = GameLib.CodeEnumRace
-local Vector3 = Vector3
 local NewVector3 = Vector3.New
-local math = math
 
 ----------------------------------------------------------------------------------------------------
 -- local data.
@@ -86,6 +84,7 @@ local function NewDraw()
     nSpriteSize = 4,
     sSprite = "BasicSprites:WhiteCircle",
     sColor = DEFAULT_LINE_COLOR,
+    tUnitIds = {},
   }
   return setmetatable(new, TEMPLATE_DRAW_META)
 end
@@ -107,6 +106,7 @@ local function NewManager(sText)
   local new = setmetatable({}, TEMPLATE_MANAGER_META)
   new.sManagerName = sText
   new.tDraws = {}
+  new.tDrawsPerUnit = {}
   table.insert(_tDrawManagers, new)
   _nDrawManagers = #_tDrawManagers
   return new
@@ -119,7 +119,7 @@ local function CreateRotationMatrixY(nRotation)
   local nCos = math.cos(nRad)
   local nSin = math.sin(nRad)
   return {
-    x = NewVector3({ nCos, 0, -nSin }),
+    x = NewVector3({ nCos, 0, - nSin }),
     y = NewVector3({ 0, 1, 0 }),
     z = NewVector3({ nSin, 0, nCos }),
   }
@@ -292,6 +292,31 @@ function TemplateManager:_AddDraw(...)
   end
 end
 
+function TemplateManager:SaveDraw(tDraw, key, tUnits)
+  self.tDraws[key] = tDraw
+
+  if next(tUnits) == nil then return end
+  for i = 1, #tUnits do
+    local tUnit = tUnits[i]
+    local nId = tUnit:GetId()
+    table.insert(tDraw.tUnitIds, nId)
+    self.tDrawsPerUnit[nId] = self.tDrawsPerUnit[nId] or {}
+    self.tDrawsPerUnit[nId][key] = true
+  end
+end
+
+function TemplateManager:RemoveDrawsPerUnit(tDraw, key)
+  for i = 1, #tDraw.tUnitIds do
+    local nId = tDraw.tUnitIds[i]
+    if self.tDrawsPerUnit[nId] then
+      self.tDrawsPerUnit[nId][key] = nil
+      if next(self.tDrawsPerUnit[nId]) == nil then
+        self.tDrawsPerUnit[nId] = nil
+      end
+    end
+  end
+end
+
 function TemplateDraw:SetColor(sColor)
   local mt = getmetatable(self)
   mt.__index.sColor = sColor or DEFAULT_LINE_COLOR
@@ -406,7 +431,7 @@ function LineBetween:AddDraw(Key, FromOrigin, ToOrigin, nWidth, sColor, nNumberO
   end
 
   -- Save this object (new or not).
-  self.tDraws[Key] = tDraw
+  self:SaveDraw(tDraw, Key, {tFromOriginUnit, tToOriginUnit})
   -- Start the draw update service.
   StartDrawing()
   return BuildPublicDraw(tDraw)
@@ -415,6 +440,7 @@ end
 function LineBetween:RemoveDraw(Key)
   local tDraw = self.tDraws[Key]
   if tDraw then
+    self:RemoveDrawsPerUnit(tDraw, Key)
     RemoveDraw(tDraw)
     self.tDraws[Key] = nil
   end
@@ -505,7 +531,7 @@ function SimpleLine:AddDraw(Key, Origin, nOffset, nLength, nRotation, nWidth, sC
     Assert:Assert(false, "No valid origin found: %s", tostring(Origin))
   end
   -- Save this object (new or not).
-  self.tDraws[Key] = tDraw
+  self:SaveDraw(tDraw, Key, {tOriginUnit})
   -- Start the draw update service.
   StartDrawing()
   return BuildPublicDraw(tDraw)
@@ -514,6 +540,7 @@ end
 function SimpleLine:RemoveDraw(Key)
   local tDraw = self.tDraws[Key]
   if tDraw then
+    self:RemoveDrawsPerUnit(tDraw, Key)
     RemoveDraw(tDraw)
     self.tDraws[Key] = nil
   end
@@ -604,7 +631,7 @@ function Polygon:AddDraw(Key, Origin, nRadius, nRotation, nWidth, sColor, nSide)
   end
 
   -- Save this object (new or not).
-  self.tDraws[Key] = tDraw
+  self:SaveDraw(tDraw, Key, {tOriginUnit})
   -- Start the draw update service.
   StartDrawing()
   return BuildPublicDraw(tDraw)
@@ -613,6 +640,7 @@ end
 function Polygon:RemoveDraw(Key)
   local tDraw = self.tDraws[Key]
   if tDraw then
+    self:RemoveDrawsPerUnit(tDraw, Key)
     for i = 1, tDraw.nSide do
       if tDraw.nPixieIds[i] then
         _wndOverlay:DestroyPixie(tDraw.nPixieIds[i])
@@ -713,7 +741,7 @@ function Picture:AddDraw(Key, Origin, sSprite, nSpriteSize, nRotation, nDistance
     Assert:Assert(false, "No valid origin found: %s", tostring(Origin))
   end
   -- Save this object (new or not).
-  self.tDraws[Key] = tDraw
+  self:SaveDraw(tDraw, Key, {tOriginUnit})
   -- Start the draw update service.
   StartDrawing()
   return BuildPublicDraw(tDraw)
@@ -722,6 +750,7 @@ end
 function Picture:RemoveDraw(Key)
   local tDraw = self.tDraws[Key]
   if tDraw then
+    self:RemoveDrawsPerUnit(tDraw, Key)
     if tDraw.nPixieId then
       _wndOverlay:DestroyPixie(tDraw.nPixieId)
       tDraw.nPixieId = nil
@@ -769,10 +798,9 @@ function RaidCore:OnDrawUpdate(nCurrentTime)
       local s, e = pcall(fHandler, tDrawManager, tDraw)
       if not self:HandlePcallResult(s, e, " - DrawKey: "..Key) then
         table.insert(tDrawsToRemove, {
-            tDrawManager = tDrawManager,
-            Key = Key,
-          }
-        )
+          tDrawManager = tDrawManager,
+          Key = Key,
+        })
       end
     end
     if next(tDrawManager.tDraws) then
@@ -794,6 +822,26 @@ function RaidCore:ResetLines()
     for Key, _ in next, tDrawManager.tDraws do
       tDrawManager:RemoveDraw(Key)
     end
+  end
+end
+
+function RaidCore:CleanDrawsOnUnitDestroyed(nDestroyedId)
+  local tDrawsToRemove = {}
+  for i = 1, _nDrawManagers do
+    local tDrawManager = _tDrawManagers[i]
+    local tDraws = tDrawManager.tDrawsPerUnit[nDestroyedId]
+    if tDraws and next(tDraws) ~= nil then
+      for Key, _ in next, tDraws do
+        table.insert(tDrawsToRemove, {
+          tDrawManager = tDrawManager,
+          Key = Key,
+        })
+      end
+    end
+  end
+  for i = 1, #tDrawsToRemove do
+    local tDrawToRemove = tDrawsToRemove[i]
+    tDrawToRemove.tDrawManager:RemoveDraw(tDrawToRemove.Key)
   end
 end
 

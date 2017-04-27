@@ -7,6 +7,9 @@
 -- Description:
 -- TODO
 ----------------------------------------------------------------------------------------------------
+local Apollo = require "Apollo"
+local GameLib = require "GameLib"
+
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local mod = core:NewEncounter("EpAirEarth", 52, 98, 117)
 if not mod then return end
@@ -130,12 +133,6 @@ function mod:OnUnitCreated(nId, unit, sName)
     if GetGameTime() > nStartTime + 10 then
       mod:AddTimerBar("TORNADO", "Next tornado", 17, mod:GetSetting("SoundTornadoCountDown"))
     end
-  end
-end
-
-function mod:OnUnitDestroyed(nId, tUnit, sName)
-  if sName == self.L["Air Column"] or sName == self.L["Aileron"] then
-    core:RemoveSimpleLine(nId)
   end
 end
 

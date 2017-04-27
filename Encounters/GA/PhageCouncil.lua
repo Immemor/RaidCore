@@ -7,6 +7,9 @@
 -- Description:
 -- TODO
 ----------------------------------------------------------------------------------------------------
+local Apollo = require "Apollo"
+local GameLib = require "GameLib"
+
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local mod = core:NewEncounter("PhageCouncil", 67, 147, 149)
 if not mod then return end
@@ -163,9 +166,6 @@ function mod:OnUnitCreated(nId, tUnit, sName)
 end
 
 function mod:OnUnitDestroyed(nId, tUnit, sName)
-  if sName == self.L["Noxmind the Insidious"] then
-    core:RemoveSimpleLine("Wave" .. nId)
-  end
   tBossesId[sName] = nil
 end
 

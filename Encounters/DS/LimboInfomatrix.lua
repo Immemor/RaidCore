@@ -7,6 +7,9 @@
 -- Description:
 -- TODO
 ----------------------------------------------------------------------------------------------------
+local Apollo = require "Apollo"
+local GameLib = require "GameLib"
+
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local mod = core:NewEncounter("LimboInfomatrix", 52, 98, 114)
 if not mod then return end
@@ -56,7 +59,6 @@ mod:RegisterDefaultSetting("OtherMarkerAntlion")
 ----------------------------------------------------------------------------------------------------
 local GetPlayerUnit = GameLib.GetPlayerUnit
 local GetUnitById = GameLib.GetUnitById
-local GetGameTime = GameLib.GetGameTime
 local tKoS_Position
 local bKoS_bInCombat
 

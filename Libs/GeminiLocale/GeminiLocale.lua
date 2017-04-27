@@ -2,9 +2,10 @@
 -- GeminiLocale
 -- Author: daihenka
 -- Localization library based on AceLocale.
--- Parts of this library was inspired and/or contains snippets from 
+-- Parts of this library was inspired and/or contains snippets from
 -- AceLocale-3.0.lua by Kaelten
 -------------------------------------------------------------------------------
+local Apollo = require "Apollo"
 
 local MAJOR, MINOR = "Gemini:Locale-1.0", 4
 local APkg = Apollo.GetPackage(MAJOR)
@@ -25,21 +26,21 @@ local ktLocales = {
 }
 
 -- access to read the locale.languageId console variable has been disabled
--- check what the Apollo.GetString(1) (aka "Cancel") is translated into and 
+-- check what the Apollo.GetString(1) (aka "Cancel") is translated into and
 -- return the language locale
 local function GetLocale()
 	local strCancel = Apollo.GetString(1)
-	
+
 	-- German
-	if strCancel == "Abbrechen" then 
+	if strCancel == "Abbrechen" then
 		return ktLocales[2]
 	end
-	
+
 	-- French
 	if strCancel == "Annuler" then
 		return ktLocales[3]
 	end
-	
+
 	-- Other
 	return ktLocales[1]
 --	return ktLocales[(Apollo.GetConsoleVariable("locale.languageId") or 1)]
@@ -114,11 +115,11 @@ local writedefaultproxy = setmetatable({}, {
 
 function Lib:NewLocale(application, locale, isDefault, silent)
 	local app = Lib.apps[application]
-	
+
 	if silent and app and getmetatable(app) ~= readmetasilent then
 		error("Usage: NewLocale(application, locale[, isDefault[, silent]]): 'silent' must be specified for the first locale registered")
 	end
-	
+
 	if not app then
 		if silent == "raw" then
 			app = {}
@@ -128,17 +129,17 @@ function Lib:NewLocale(application, locale, isDefault, silent)
 		Lib.apps[application] = app
 		Lib.appnames[app] = application
 	end
-	
+
 	if locale ~= GetLocale() and not isDefault then
 		return -- translations are not needed
 	end
-	
+
 	registering = app -- remember globally for writeproxy and writedefaultproxy
-	
+
 	if isDefault then
 		return writedefaultproxy
 	end
-	
+
 	return writeproxy
 end
 
@@ -163,8 +164,8 @@ function Lib:TranslateWindow(tLocale, wndParent)
 	if wndParent == nil or tLocale == nil then
 		return
 	end
-  
-  
+
+
 	do -- text fields
 		-- ignore any errors thrown due to the control not having a GetText method
 		local _, strText = pcall(function() return wndParent:GetText() end)
@@ -176,7 +177,7 @@ function Lib:TranslateWindow(tLocale, wndParent)
 			end
 		end
 	end
-  
+
   -- This code block will probably not do anything except loop through each pixie as strText is never(?) returned
   -- Once GetPixieInfo returns a complete table, this should spring to life (and hopefully not bug out).
 	local nPixieId = 1
@@ -197,7 +198,7 @@ function Lib:TranslateWindow(tLocale, wndParent)
 		end
 		nPixieId = nPixieId + 1
 	end
-	
+
 	-- recursively translate the controls
   local _, tChildren = pcall(function() return wndParent:GetChildren() end)
   if tChildren ~= nil then

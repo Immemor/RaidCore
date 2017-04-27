@@ -7,6 +7,10 @@
 -- Description:
 -- TODO
 ----------------------------------------------------------------------------------------------------
+local Apollo = require "Apollo"
+local GameLib = require "GameLib"
+local GroupLib = require "GroupLib"
+
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local mod = core:NewEncounter("AbstractAugmentationAlgorithm", 52, 98, 112)
 if not mod then return end

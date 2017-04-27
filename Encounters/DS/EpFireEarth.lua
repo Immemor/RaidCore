@@ -7,7 +7,7 @@
 -- Description:
 -- TODO
 ----------------------------------------------------------------------------------------------------
-require "ChatSystemLib"
+local Apollo = require "Apollo"
 
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local mod = core:NewEncounter("EpFireEarth", 52, 98, 117)
@@ -79,7 +79,6 @@ local LAVA_MINE_POP_INTERVAL = 11.2
 ----------------------------------------------------------------------------------------------------
 -- Locals.
 ----------------------------------------------------------------------------------------------------
-local GetPlayerUnit = GameLib.GetPlayerUnit
 local nObsidianPopMax, nObsidianPopCount
 local nLavaFloorCount
 
@@ -123,9 +122,7 @@ function mod:OnUnitCreated(nId, unit, sName)
 end
 
 function mod:OnUnitDestroyed(nId, tUnit, sName)
-  if sName == self.L["Flame Wave"] then
-    core:RemoveSimpleLine(nId)
-  elseif sName == self.L["Lava Floor (invis unit)"] then
+  if sName == self.L["Lava Floor (invis unit)"] then
     if nLavaFloorCount < 3 then
       mod:AddTimerBar("LAVA_FLOOR", "Next lava floor phase", 89)
     end

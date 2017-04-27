@@ -7,6 +7,11 @@
 -- Description:
 -- TODO
 ----------------------------------------------------------------------------------------------------
+local Apollo = require "Apollo"
+local ApolloTimer = require "ApolloTimer"
+local GameLib = require "GameLib"
+local Vector3 = require "Vector3"
+
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local mod = core:NewEncounter("Shredder", 104, 548, 549)
 if not mod then return end
@@ -304,10 +309,6 @@ function mod:OnTrashCreated(id, unit, name)
   core:WatchUnit(unit, core.E.TRACK_HEALTH)
 end
 
-function mod:OnTrashDestroyed(id, unit, name)
-  core:RemovePicture(id)
-end
-
 function mod:OnTrashHealthChanged(id, percent)
   if percent <= 1 and mod:GetSetting("CrosshairAdds") then
     core:AddPicture(id, id, "Crosshair", 20)
@@ -375,10 +376,6 @@ function mod:OnBigSawCreated(id, unit, name)
   end
 end
 
-function mod:OnBigSawDestroyed(id, unit, name)
-  core:RemoveSimpleLine(id)
-end
-
 function mod:OnNabberCreated(id, unit, name)
   nabbers[id] = unit
   core:RemoveMsg("ADDS_MSG")
@@ -410,28 +407,16 @@ function mod:OnBubbleCreated(id, unit, name)
   end
 end
 
-function mod:OnBubbleDestroyed(id, unit, name)
-  core:RemovePolygon(id)
-end
-
 function mod:OnTetherCreated(id, unit, name)
   if mod:GetSetting("CrosshairTether") then
     core:AddPicture(id, unit, "Crosshair", 25, 0, 0, nil, "FFFFF569")
   end
 end
 
-function mod:OnTetherDestroyed(id, unit, name)
-  core:RemovePicture(id)
-end
-
 function mod:OnJunkTrapCreated(id, unit, name)
   if mod:GetSetting("SquareTethers") then
     core:AddPolygon(id, unit, 5, 45, 6, nil, 4)
   end
-end
-
-function mod:OnJunkTrapDestroyed(id, unit, name)
-  core:RemovePolygon(id)
 end
 
 ----------------------------------------------------------------------------------------------------
@@ -467,7 +452,6 @@ mod:RegisterUnitEvents({
     "unit.add.cadet"
     },{
     [core.E.HEALTH_CHANGED] = mod.OnTrashHealthChanged,
-    [core.E.UNIT_DESTROYED] = mod.OnTrashDestroyed,
   }
 )
 mod:RegisterUnitEvents({"unit.add.brute", "unit.add.nabber"},{
@@ -484,7 +468,6 @@ mod:RegisterUnitEvents("unit.swabbie",{
 )
 mod:RegisterUnitEvents("unit.saw.big",{
     [core.E.UNIT_CREATED] = mod.OnBigSawCreated,
-    [core.E.UNIT_DESTROYED] = mod.OnBigSawDestroyed,
   }
 )
 mod:RegisterUnitEvents("unit.add.nabber",{
@@ -506,16 +489,13 @@ mod:RegisterUnitEvents({"unit.miniboss.regor", "unit.miniboss.braugh"},{
 )
 mod:RegisterUnitEvents("unit.bubble",{
     [core.E.UNIT_CREATED] = mod.OnBubbleCreated,
-    [core.E.UNIT_DESTROYED] = mod.OnBubbleDestroyed,
   }
 )
 mod:RegisterUnitEvents("unit.tether",{
     [core.E.UNIT_CREATED] = mod.OnTetherCreated,
-    [core.E.UNIT_DESTROYED] = mod.OnTetherDestroyed,
   }
 )
 mod:RegisterUnitEvents("unit.junk_trap",{
     [core.E.UNIT_CREATED] = mod.OnJunkTrapCreated,
-    [core.E.UNIT_DESTROYED] = mod.OnJunkTrapDestroyed,
   }
 )

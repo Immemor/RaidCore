@@ -6,10 +6,15 @@
 ----------------------------------------------------------------------------------------------------
 -- Description: TODO
 ----------------------------------------------------------------------------------------------------
-require "Apollo"
-require "Window"
-require "GameLib"
-require "ChatSystemLib"
+local Apollo = require "Apollo"
+local GameLib = require "GameLib"
+local ChatSystemLib = require "ChatSystemLib"
+local XmlDoc = require "XmlDoc"
+local ApolloTimer = require "ApolloTimer"
+local CSIsLib = require "CSIsLib"
+local PublicEvent = require "PublicEvent"
+local Sound = require "Sound"
+local GroupLib = require "GroupLib"
 
 local GeminiAddon = Apollo.GetPackage("Gemini:Addon-1.1").tPackage
 local JSON = Apollo.GetPackage("Lib:dkJSON-2.5").tPackage
@@ -29,9 +34,9 @@ local next, pcall = next, pcall
 -- Constants.
 ----------------------------------------------------------------------------------------------------
 -- Should be 5.23 when replacement tokens will works (see #88 issue).
-local RAIDCORE_CURRENT_VERSION = "6.4.1"
+local RAIDCORE_CURRENT_VERSION = "6.4.6"
 -- Should be deleted.
-local ADDON_DATE_VERSION = 17020118
+local ADDON_DATE_VERSION = 17031415
 
 -- State Machine.
 local MAIN_FSM__SEARCH = 1
@@ -292,22 +297,48 @@ local function RemoveDelayedUnit(nId, sName)
 end
 
 local function AddDelayedUnit(nId, tUnit, sName)
+  if not _tDelayedUnits[sName] then
+    _tDelayedUnits[sName] = {}
+  end
+  _tDelayedUnits[sName][nId] = tUnit
+end
+
+local function CheckDelayedUnit(nId, tUnit, sName)
   local tMap = GetCurrentZoneMap()
+  sName = RaidCore:ReplaceNoBreakSpace(sName)
   if tMap then
     local tTrig = _tTrigPerZone[tMap.continentId]
     tTrig = tTrig and tTrig[tMap.parentZoneId]
     tTrig = tTrig and tTrig[tMap.id]
     tTrig = tTrig and tTrig[sName]
     if tTrig then
-      if not _tDelayedUnits[sName] then
-        _tDelayedUnits[sName] = {}
-      end
-      _tDelayedUnits[sName][nId] = tUnit
+      AddDelayedUnit(nId, tUnit, sName)
     end
   end
 end
 
+local function UpdateDelayedUnitNames()
+  local tUnitsToUpdate = {}
+  for nDelayedName, tDelayedList in next, _tDelayedUnits do
+    for nDelayedId, tUnit in next, tDelayedList do
+      if tUnit:IsValid() then
+        local sNewName = RaidCore:ReplaceNoBreakSpace(tUnit:GetName())
+        if nDelayedName ~= sNewName then
+          table.insert(tUnitsToUpdate, {sName = nDelayedName, sNewName = sNewName, nId = nDelayedId, tUnit = tUnit})
+        end
+      end
+    end
+  end
+
+  for i = 1, #tUnitsToUpdate do
+    local tUnitToUpdate = tUnitsToUpdate[i]
+    RemoveDelayedUnit(tUnitToUpdate.nId, tUnitToUpdate.sName)
+    AddDelayedUnit(tUnitToUpdate.nId, tUnitToUpdate.tUnit, tUnitToUpdate.sNewName)
+  end
+end
+
 local function SearchEncounter()
+  UpdateDelayedUnitNames()
   local tMap = GetCurrentZoneMap()
   if tMap then
     local tEncounters = _tEncountersPerZone[tMap.continentId]
@@ -492,6 +523,10 @@ function RaidCore:HandlePcallResult(success, error, output)
     Log:Add(RaidCore.E.ERROR, error)
   end
   return success
+end
+
+function RaidCore:ReplaceNoBreakSpace(str)
+  return str:gsub(RaidCore.E.NO_BREAK_SPACE, " ")
 end
 
 ----------------------------------------------------------------------------------------------------
@@ -827,6 +862,7 @@ end
 function RaidCore:AutoCleanUnitDestroyed(nId, tUnit, sName)
   self:RemoveUnit(nId)
   self:DropMark(nId)
+  self:CleanDrawsOnUnitDestroyed(nId)
 end
 
 ----------------------------------------------------------------------------------------------------
@@ -995,7 +1031,7 @@ function RaidCore:GlobalEventHandler(sMethod, ...)
 end
 
 function RaidCore:SEARCH_OnUnitCreated(nId, tUnit, sName)
-  AddDelayedUnit(nId, tUnit, sName)
+  CheckDelayedUnit(nId, tUnit, sName)
 end
 
 function RaidCore:SEARCH_OnCheckMapZone()
@@ -1019,7 +1055,7 @@ end
 
 function RaidCore:SEARCH_OnEnteredCombat(nId, tUnit, sName, bInCombat)
   -- Manage the lower layer.
-  if tUnit == GetPlayerUnit() then
+  if tUnit:IsThePlayer() then
     if bInCombat then
       -- Player entering in combat.
       _bIsEncounterInProgress = true
@@ -1038,7 +1074,7 @@ function RaidCore:SEARCH_OnEnteredCombat(nId, tUnit, sName, bInCombat)
     end
   elseif not tUnit:IsInYourGroup() then
     if not _tCurrentEncounter then
-      AddDelayedUnit(nId, tUnit, sName)
+      CheckDelayedUnit(nId, tUnit, sName)
       if _bIsEncounterInProgress then
         SearchEncounter()
         if _tCurrentEncounter and not _tCurrentEncounter:IsEnabled() then
@@ -1107,7 +1143,7 @@ end
 ----------------------------------------------------------------------------------------------------
 -- TEST features functions
 ----------------------------------------------------------------------------------------------------
-local targetId = 0
+local targetId
 function RaidCore:OnStartTestScenario()
   local tPlayerUnit = GetPlayerUnit()
   local nPlayerId = tPlayerUnit:GetId()
@@ -1134,7 +1170,7 @@ function RaidCore:OnStartTestScenario()
   for i = 1, 36 do
     local nForce = 1 - i / 36.0
     local tColor = { a = 1.0, r = 1 - nForce, g = nRandomGreen, b = nForce }
-    self:AddSimpleLine(("TEST%d"):format(i), nPlayerId, i / 6, i / 8 + 2, nForce * 360, i / 4 + 1, tColor)
+    self:AddSimpleLine(("TEST%d"):format(i), targetId or nPlayerId, i / 6, i / 8 + 2, nForce * 360, i / 4 + 1, tColor)
   end
   self.tScenarioTestTimers = {}
   self.tScenarioTestTimers[1] = self:ScheduleTimer(function()

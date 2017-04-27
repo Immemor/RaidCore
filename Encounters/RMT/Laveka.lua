@@ -7,9 +7,13 @@
 -- Description:
 -- TODO
 ----------------------------------------------------------------------------------------------------
+local Apollo = require "Apollo"
+local ApolloTimer = require "ApolloTimer"
+local GameLib = require "GameLib"
+local Vector3 = require "Vector3"
+
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local mod = core:NewEncounter("Laveka", 104, 548, 559)
-local Log = Apollo.GetPackage("Log-1.0").tPackage
 if not mod then return end
 
 ----------------------------------------------------------------------------------------------------
@@ -22,7 +26,7 @@ mod:RegisterEnglishLocale({
     ["unit.phantom"] = "Phantom",
     ["unit.essence"] = "Essence Void",
     ["unit.tortued_apparition"] = "Tortured Apparition",
-    ["unit.orb"] = "Soul Eater",
+    ["unit.soul_eater"] = "Soul Eater",
     ["unit.boneclaw"] = "Risen Boneclaw",
     ["unit.titan"] = "Risen Titan",
     ["unit.lost_soul"] = "Lost Soul",
@@ -102,6 +106,8 @@ mod:RegisterMessageSetting("SPIRIT_OF_SOULFIRE_EXPIRED_MSG", core.E.COMPARE_EQUA
 mod:RegisterMessageSetting("ESSENCE_SPAWN", core.E.COMPARE_EQUAL, "MessageEssence", "SoundEssenceSpawn")
 mod:RegisterMessageSetting("NECROTIC_BREATH_", core.E.COMPARE_FIND, "MessageHealingDebuff", "SoundHealingDebuff")
 mod:RegisterDefaultTimerBarConfigs({
+    ["ADDS_TIMER"] = { sColor = "xkcdBrown" },
+    ["SOULEATER_TIMER"] = { sColor = "xkcdPurple" },
     ["SPIRIT_OF_SOULFIRE_TIMER"] = { sColor = "xkcdBarbiePink" },
   }
 )
@@ -139,7 +145,8 @@ local BUFFS = {
 local TIMERS = {
   SOUL_EATERS = {
     FIRST = 76,
-    NORMAL = 61,
+    MIDPHASE = 61,
+    NORMAL = 85,
   },
   ECHOES_OF_THE_AFTERLIFE = 10,
   ADDS = {
@@ -147,6 +154,10 @@ local TIMERS = {
     MIDPHASE = 75,
     NORMAL = 90,
   }
+}
+
+local IND_REASONS = {
+  SOUL_EATER_CAUGHT = 1,
 }
 
 local ROOM_CENTER = Vector3.New(-723.717773, 186.834915, -265.187195)
@@ -173,20 +184,26 @@ local player
 local essenceNumber
 local essences
 local isDeadRealm
+local expulsionInThisRealm
 local isMidphase
 local lastSpiritOfSoulfireStack
 local soulEatersActive
 local lastSoulfireName
 local orbitColor
 local drawOrbitTimer
+local currentSoulEater
+local soulEaters
 ----------------------------------------------------------------------------------------------------
 -- Encounter description.
 ----------------------------------------------------------------------------------------------------
 function mod:OnBossEnable()
   essenceNumber = 0
+  currentSoulEater = 6
   isDeadRealm = false
   isMidphase = false
+  expulsionInThisRealm = false
   lastSpiritOfSoulfireStack = 0
+  soulEaters = {}
   essences = {}
   player = {}
   player.unit = GameLib.GetPlayerUnit()
@@ -302,9 +319,24 @@ function mod:OnSpiritOfSoulfireRemove(id, spellId, targetName)
 end
 
 function mod:OnExpulsionAdd(id, spellId, stack, timeRemaining, targetName)
+  expulsionInThisRealm = true
   if isDeadRealm then
-    mod:AddMsg("EXPULSION", "msg.laveka.expulsion", 5, "Beware", "xkcdRed")
+    mod:ShowExpulsionStackMessage()
   end
+end
+
+function mod:OnExpulsionStart()
+  if not isDeadRealm and not expulsionInThisRealm then
+    mod:ShowExpulsionStackMessage()
+  end
+end
+
+function mod:OnExpulsionEnd()
+  expulsionInThisRealm = false
+end
+
+function mod:ShowExpulsionStackMessage()
+  mod:AddMsg("EXPULSION", "msg.laveka.expulsion", 5, "Beware", "xkcdRed")
 end
 
 function mod:OnEchoesAdd(id, spellId, stack, timeRemaining, targetName)
@@ -347,6 +379,7 @@ end
 function mod:ToggleDeadRealm(id)
   if id == player.id then
     isDeadRealm = not isDeadRealm
+    expulsionInThisRealm = false -- just incase the player switches to other realm in the 100ms frame between DEBUFF_ADD and CAST_START
     if not isDeadRealm then
       mod:RemoveLostSoulLine()
     end
@@ -380,7 +413,6 @@ end
 
 function mod:OnEssenceDestroyed(id, unit, name)
   essences[id] = nil
-  core:RemoveLineBetweenUnits("ESSENCE_LINE"..id)
 end
 
 function mod:OnEssenceSurgeStart(id)
@@ -389,34 +421,64 @@ function mod:OnEssenceSurgeStart(id)
   end
 end
 
-function mod:OnSoulEaterCreated()
+function mod:OnSoulEaterCreated(id, unit, name)
+  soulEaters[id] = {
+    id = id,
+    index = currentSoulEater,
+    unit = unit
+  }
+
+  currentSoulEater = currentSoulEater - 1
+  if currentSoulEater == 0 then
+    currentSoulEater = 6
+  end
+
   if not soulEatersActive then
     soulEatersActive = true
     mod:DrawSoulEaterOrbits()
   end
 end
 
+function mod:OnSoulEaterDestroyed(id, unit, name)
+  soulEaters[id] = nil
+end
+
+function mod:OnSoulEaterCaught(id, spellId, stacks, timeRemaining, name, unitCaster)
+  if unitCaster and unitCaster:IsValid() then
+    local index = soulEaters[unitCaster:GetId()].index
+    mod:RemoveSoulEaterOrbit(index)
+    mod:SendIndMessage(IND_REASONS.SOUL_EATER_CAUGHT, index)
+  end
+end
+
+function mod:ReceiveIndMessage(from, reason, data)
+  if reason == IND_REASONS.SOUL_EATER_CAUGHT then
+    mod:RemoveSoulEaterOrbit(data)
+  end
+end
+
 function mod:OnDevourSoulsStop()
   soulEatersActive = false
   mod:RemoveSoulEaterOrbits()
+  mod:StartSoulEaterTimer(TIMERS.SOUL_EATERS.NORMAL)
 end
 
 function mod:DrawSoulEaterOrbits()
   for i = 1, #SOUL_EATER_ORBITS do
-    mod:DrawSoulEaterOrbit(i, i)
+    mod:DrawSoulEaterOrbit(i)
   end
 end
 
-function mod:DrawSoulEaterOrbit(id, index)
+function mod:DrawSoulEaterOrbit(index)
   local radius = SOUL_EATER_ORBITS[index]
-  if math.mod(id, 2) == 0 then
+  if math.mod(index, 2) == 0 then
     orbitColor = "xkcdWhite"
   else
     orbitColor = "xkcdRed"
   end
-  core:AddPolygon("ORBIT_"..id, ROOM_CENTER, radius.z, nil, 2, orbitColor, 40)
-  mod:SetWorldMarker("ORBIT_"..id.."up", id, ROOM_CENTER + radius)
-  mod:SetWorldMarker("ORBIT_"..id.."down", id, ROOM_CENTER - radius)
+  core:AddPolygon("ORBIT_"..index, ROOM_CENTER, radius.z, nil, 2, orbitColor, 40)
+  mod:SetWorldMarker("ORBIT_"..index.."up", index, ROOM_CENTER + radius)
+  mod:SetWorldMarker("ORBIT_"..index.."down", index, ROOM_CENTER - radius)
 end
 
 function mod:RemoveSoulEaterOrbits()
@@ -425,10 +487,10 @@ function mod:RemoveSoulEaterOrbits()
   end
 end
 
-function mod:RemoveSoulEaterOrbit(id)
-  core:RemovePolygon("ORBIT_"..id)
-  mod:DropWorldMarker("ORBIT_"..id.."up")
-  mod:DropWorldMarker("ORBIT_"..id.."down")
+function mod:RemoveSoulEaterOrbit(index)
+  core:RemovePolygon("ORBIT_"..index)
+  mod:DropWorldMarker("ORBIT_"..index.."up")
+  mod:DropWorldMarker("ORBIT_"..index.."down")
 end
 
 function mod:OnMidphaseStart()
@@ -441,7 +503,7 @@ end
 function mod:OnMidphaseEnd()
   isMidphase = false
   mod:RemoveTimerBar("ADDS_TIMER")
-  mod:StartSoulEaterTimer(TIMERS.SOUL_EATERS.NORMAL)
+  mod:StartSoulEaterTimer(TIMERS.SOUL_EATERS.MIDPHASE)
 end
 
 function mod:OnTitanCreated(id, unit, name)
@@ -455,20 +517,10 @@ function mod:OnTitanCreated(id, unit, name)
   end
 end
 
-function mod:OnTitanDestroyed(id, unit, name)
-  if mod:GetSetting("LineTitan") then
-    core:RemoveLineBetweenUnits("TITAN_LINE_"..id)
-  end
-end
-
 function mod:OnLostSoulCreated(id, unit, name)
   if mod:GetSetting("LineLostSouls") and isDeadRealm then
     core:AddLineBetweenUnits("LOST_SOUL_LINE", player.unit, id, 10, "xkcdGreen")
   end
-end
-
-function mod:OnLostSoulDestroyed(id, unit, name)
-  mod:RemoveLostSoulLine()
 end
 
 function mod:OnLavekaHealthChanged(id, percent, name)
@@ -477,16 +529,12 @@ function mod:OnLavekaHealthChanged(id, percent, name)
   end
 end
 
-function mod:OnSoulEaterCaught(id, spellId, stacks, timeRemaining, name, unitCaster)
-  local unit = GameLib.GetUnitById(id)
-  if unitCaster and unitCaster:IsValid() then
-    local distance = (Vector3.New(unit:GetPosition()) - ROOM_CENTER):Length()
-    Log:Add("ChannelCommStatus", "Id="..unitCaster:GetId().." DistanceToCenter="..distance)
-  end
-end
-
 function mod:RemoveLostSoulLine()
   core:RemoveLineBetweenUnits("LOST_SOUL_LINE")
+end
+
+function mod:OnCacophonyStart()
+  essenceNumber = 0
 end
 
 ----------------------------------------------------------------------------------------------------
@@ -500,23 +548,19 @@ mod:RegisterUnitEvents("unit.essence",{
     },
   }
 )
-
 mod:RegisterUnitEvents("unit.titan",{
     [core.E.UNIT_CREATED] = mod.OnTitanCreated,
-    [core.E.UNIT_DESTROYED] = mod.OnTitanDestroyed,
   }
 )
-
 mod:RegisterUnitEvents("unit.lost_soul",{
     [core.E.UNIT_CREATED] = mod.OnLostSoulCreated,
-  })
-
-mod:RegisterUnitEvents("unit.orb",{
-    [core.E.UNIT_CREATED] = mod.OnSoulEaterCreated,
-    [core.E.UNIT_DESTROYED] = mod.OnLostSoulDestroyed,
   }
 )
-
+mod:RegisterUnitEvents("unit.soul_eater",{
+    [core.E.UNIT_CREATED] = mod.OnSoulEaterCreated,
+    [core.E.UNIT_DESTROYED] = mod.OnSoulEaterDestroyed,
+  }
+)
 mod:RegisterUnitEvents("unit.laveka",{
     [core.E.UNIT_CREATED] = mod.OnLavekaCreated,
     [core.E.HEALTH_CHANGED] = mod.OnLavekaHealthChanged,
@@ -532,15 +576,24 @@ mod:RegisterUnitEvents("unit.laveka",{
     ["cast.laveka.devoursouls"] = {
       [core.E.CAST_END] = mod.OnDevourSoulsStop,
     },
+    ["cast.laveka.cacophony"] = {
+      [core.E.CAST_START] = mod.OnCacophonyStart,
+    },
+    ["cast.laveka.expulsion"] = {
+      [core.E.CAST_START] = mod.OnExpulsionStart,
+      [core.E.CAST_END] = mod.OnExpulsionEnd,
+    },
   }
 )
-
 mod:RegisterUnitEvents(core.E.ALL_UNITS,{
     [core.E.UNIT_CREATED] = mod.OnAnyUnitCreated,
     [core.E.UNIT_DESTROYED] = mod.OnAnyUnitDestroyed,
     [DEBUFFS.SOULFIRE] = {
       [core.E.DEBUFF_ADD] = mod.OnSoulfireAdd,
       [core.E.DEBUFF_REMOVE] = mod.OnSoulfireRemove,
+    },
+    [DEBUFFS.SOUL_EATER] = {
+      [core.E.DEBUFF_ADD] = mod.OnSoulEaterCaught,
     },
     [DEBUFFS.EXPULSION_OF_SOULS] = {
       [core.E.DEBUFF_ADD] = mod.OnExpulsionAdd,
@@ -553,9 +606,6 @@ mod:RegisterUnitEvents(core.E.ALL_UNITS,{
     [DEBUFFS.REALM_OF_THE_DEAD] = {
       [core.E.DEBUFF_ADD] = mod.OnRealmOfTheDeadAdd,
       [core.E.DEBUFF_REMOVE] = mod.OnRealmOfTheDeadRemove,
-    },
-    [DEBUFFS.SOUL_EATER] = {
-      [core.E.DEBUFF_ADD] = mod.OnSoulEaterCaught,
     },
     [DEBUFFS.NECROTIC_BREATH] = {
       [core.E.DEBUFF_ADD] = mod.OnNecroticBreathAdd,

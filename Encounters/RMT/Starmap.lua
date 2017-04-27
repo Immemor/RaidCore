@@ -7,6 +7,11 @@
 -- Description:
 -- TODO
 ----------------------------------------------------------------------------------------------------
+local Apollo = require "Apollo"
+local ApolloTimer = require "ApolloTimer"
+local GameLib = require "GameLib"
+local Vector3 = require "Vector3"
+
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local mod = core:NewEncounter("Starmap", 104, 548, 556)
 if not mod then return end
@@ -82,6 +87,24 @@ mod:RegisterFrenchLocale({
     ["chron.world_ender.cassus"] = "A World Ender is heading to the de Cassus orbit.",
   }
 )
+mod:RegisterGermanLocale({
+    -- Unit names.
+    ["unit.alpha"] = "Alpha-Cassus",
+
+    ["unit.asteroid"] = "Abnormaler Asteroid",
+    ["unit.debris_field"] = "Trümmerfeld",
+    -- Cast names.
+    ["cast.alpha.catastrophic"] = "Katastrophales Sonnenereignis",
+    -- Buffs.
+    ["buff.alpha.wind"] = "Solarwinde",
+    ["buff.alpha.irradiated"] = "Verstrahlte Rüstung",
+    -- Datachron.
+    -- Bugged ["chron.world_ender.aldinari"] = "A World Ender is heading to the (rvl_target.name) orbit.", --
+    -- Bugged ["chron.world_ender.vulpes_nix"] = "A World Ender is heading to the (rvl_target.name) orbit.",
+    -- Bugged ["chron.world_ender.cassus"] = "A World Ender is heading to the (rvl_target.name) orbit.",
+    ["chron.critical_mass"] = "([^%s]+%s[^%s]+) hat kritische Masse erreicht!",
+  }
+)
 ----------------------------------------------------------------------------------------------------
 -- Settings.
 ----------------------------------------------------------------------------------------------------
@@ -93,6 +116,7 @@ mod:RegisterDefaultSetting("MarkWorldEnderSpawn")
 mod:RegisterDefaultSetting("MarkAsteroidCount")
 mod:RegisterDefaultSetting("LineWorldEnder")
 mod:RegisterDefaultSetting("LineAsteroids")
+mod:RegisterDefaultSetting("LinePlayerAsteroids", false)
 mod:RegisterDefaultSetting("LineAlphaCassusCleave")
 mod:RegisterDefaultSetting("LineCosmicDebris", false)
 mod:RegisterDefaultSetting("CirclePlanetOrbits")
@@ -101,7 +125,7 @@ mod:RegisterDefaultSetting("MarkDebrisField")
 mod:RegisterDefaultSetting("MarkSolarWindTimer")
 mod:RegisterDefaultSetting("CrosshairCosmicDebris")
 mod:RegisterDefaultSetting("MarkWorldEnder")
-mod:RegisterDefaultSetting("MarkWormhole", false)
+mod:RegisterDefaultSetting("MarkWormholePosition")
 -- Sounds.
 mod:RegisterDefaultSetting("CountdownWorldEnder")
 mod:RegisterDefaultSetting("SoundWorldEnderSpawn")
@@ -225,12 +249,12 @@ local CARDINAL_MARKERS = {
 }
 
 --Where the Wormhole needs to be places
-local WORM_HOLE_POSITION = Vector3.New(-47.13, -96.21, 356.96)
+local WORM_HOLE_POSITION = Vector3.New(-47.501198, -96.222008, 354.7)
 
 ----------------------------------------------------------------------------------------------------
 -- Locals.
 ----------------------------------------------------------------------------------------------------
-local playerId
+local player
 local solarWindsStack
 local solarWindStartTick
 local solarWindTimer = ApolloTimer.Create(TIMERS.SOLAR_WIND.UPDATE, true, "OnUpdateSolarWindTimer", mod)
@@ -256,7 +280,11 @@ function mod:OnBossEnable()
   alphaCassus = nil
   solarFlareCount = 0
   asteroidWaveCounter = 0
-  playerId = GameLib.GetPlayerUnit():GetId()
+  player = {
+    unit = GameLib.GetPlayerUnit()
+  }
+  player.id = player.unit:GetId()
+  player.name = player.unit:GetName()
   mod:StartSecondAsteroidTimer()
   mod:AddTimerBar("NEXT_WORLD_ENDER_TIMER", "msg.world_ender.next", TIMERS.WORLD_ENDER.FIRST, mod:GetSetting("CountdownWorldEnder"))
   mod:SetCardinalMarkers()
@@ -327,7 +355,6 @@ end
 function mod:OnPlanetDestroyed(id, unit, name)
   core:DropMark(id)
   planets[id] = nil
-  core:RemoveLineBetweenUnits(id)
   mod:OnWorldEnderTargetDestroyed(name)
 end
 
@@ -371,7 +398,6 @@ function mod:OnAlphaCassusHealthChanged(id, percent, name)
 end
 
 function mod:OnAlphaCassusDestroyed(id, unit)
-  core:RemoveSimpleLine(id)
   alphaCassus = nil
 end
 
@@ -387,9 +413,12 @@ function mod:GetAsteroidMark(unit)
   return mark
 end
 
-function mod:OnAsteroidCreated(id, unit)
+function mod:OnAsteroidCreated(id, unit, name)
   if mod:GetSetting("IndicatorAsteroids") then
     core:AddLineBetweenUnits("ASTEROID_LINE_" .. id, alphaCassus.id, id, 10, "xkcdBrown", nil, 8, 3.5)
+  end
+  if mod:GetSetting("LinePlayerAsteroids") then
+    core:AddLineBetweenUnits("ASTEROID_PLAYER_LINE_" .. id, player.unit, unit, 8, "xkcdPink")
   end
   if mod:GetSetting("LineAsteroids") then
     core:AddSimpleLine(id, unit, 0, 16, nil, 6, "xkcdBananaYellow")
@@ -397,11 +426,6 @@ function mod:OnAsteroidCreated(id, unit)
   if mod:GetSetting("MarkAsteroidCount") then
     core:MarkUnit(unit, core.E.LOCATION_STATIC_CHEST, mod:GetAsteroidMark(unit))
   end
-end
-
-function mod:OnAsteroidDestroyed(id, _)
-  core:RemoveLineBetweenUnits("ASTEROID_LINE_" .. id)
-  core:RemoveSimpleLine(id)
 end
 
 function mod:OnWorldEnderCreated(id, unit)
@@ -417,24 +441,27 @@ function mod:OnWorldEnderCreated(id, unit)
   core:WatchUnit(unit, core.E.TRACK_BUFFS)
   mod:AddTimerBar("NEXT_WORLD_ENDER_TIMER", "msg.world_ender.next", TIMERS.WORLD_ENDER.NORMAL, mod:GetSetting("CountdownWorldEnder"))
   if mod:GetSetting("LineWorldEnder") then
-    core:AddLineBetweenUnits("WORLD_ENDER_" .. id, playerId, id, 6, "xkcdCyan")
+    core:AddLineBetweenUnits("WORLD_ENDER_" .. id, player.unit, unit, 6, "xkcdCyan")
   end
   mod:AddMsg("WORLD_ENDER_SPAWN_MSG", "msg.world_ender.spawned", 5, "Beware", "xkcdCyan")
   mod:StartAsteroidTimer()
   mod:DropWorldMarker("WORLD_ENDER_MARKER_" .. worldEnderCount)
 
-  if worldEnderCount == 4 and mod:GetSetting("MarkWormhole") then
+  if worldEnderCount == 3 and mod:GetSetting("MarkWormholePosition") then
+    mod:SetWorldMarker("WORM_HOLE_POSITION", "mark.worm.hole", WORM_HOLE_POSITION)
+  elseif worldEnderCount == 4 then
     wormHoleId = id
-    mod:SetWorldMarker("WORM_HOLE_"..id, "mark.worm.hole", WORM_HOLE_POSITION)
   end
+end
 
+function mod:RemoveWormholePosition(id)
+  if wormHoleId == id then
+    mod:DropWorldMarker("WORM_HOLE_POSITION")
+  end
 end
 
 function mod:OnWorldEnderDestroyed(id, unit)
-  if wormHoleId == id then
-    mod:DropWorldMarker("WORM_HOLE_"..id)
-  end
-  core:RemoveLineBetweenUnits("WORLD_ENDER_" .. id)
+  mod:RemoveWormholePosition(id)
   worldEnders[id] = nil
 end
 
@@ -443,13 +470,8 @@ function mod:OnDebrisCreated(id, unit)
     core:AddPicture("DEBRIS_PICTURE_" .. id, id, "Crosshair", 40, nil, nil, nil, "xkcdRed")
   end
   if mod:GetSetting("LineCosmicDebris") then
-    core:AddLineBetweenUnits("DEBRIS_LINE" .. id, playerId, id, 4, "xkcdOrange")
+    core:AddLineBetweenUnits("DEBRIS_LINE" .. id, player.unit, unit, 4, "xkcdOrange")
   end
-end
-
-function mod:OnDebrisDestroyed(id, unit)
-  core:RemovePicture("DEBRIS_PICTURE_" .. id)
-  core:RemoveLineBetweenUnits("DEBRIS_LINE" .. id)
 end
 
 function mod:MarkPlanetsWithSolarWindTime(remainingTime)
@@ -482,12 +504,12 @@ function mod:StartSolarWindTimer()
 end
 
 function mod:OnSolarWindsAdded(id, spellId, stack, timeRemaining)
-  if playerId ~= id then return end
+  if player.id ~= id then return end
   mod:StartSolarWindTimer()
 end
 
 function mod:OnSolarWindsUpdated(id, spellId, stack, timeRemaining)
-  if playerId ~= id then return end
+  if player.id ~= id then return end
   if solarWindsStack < stack then
     mod:StartSolarWindTimer()
     if stack == 5 then
@@ -514,7 +536,7 @@ function mod:RemovePlanetOrbits()
 end
 
 function mod:OnCriticalMassAdded(id)
-  if playerId == id then
+  if player.id == id then
     mod:AddMsg("CRITICAL_MASS_MSG", "msg.critical_mass.you", 5, "Inferno", "white")
     mod:DrawPlanetOrbits()
   end
@@ -525,7 +547,7 @@ function mod:OnAnyUnitDestroyed(id)
 end
 
 function mod:OnCriticalMassRemoved(id)
-  if playerId == id then
+  if player.id == id then
     core:RemoveMsg("CRITICAL_MASS_MSG")
     mod:RemovePlanetOrbits()
   end
@@ -535,10 +557,6 @@ function mod:OnDebrisFieldCreated(id, unit)
   if mod:GetSetting("MarkDebrisField") then
     core:AddPicture("DEBRIS_FIELD_MARKER"..id, unit, "IconSprites:Icon_Windows_UI_SabotageBomb_Red", 40)
   end
-end
-
-function mod:OnDebrisFieldDestroyed(id, unit)
-  core:RemovePicture("DEBRIS_FIELD_MARKER"..id)
 end
 
 function mod:OnLastWorldEnderTarget(targetName)
@@ -570,6 +588,7 @@ function mod:OnWorldEnderEnterWormhole(id)
     mod:AddMsg("WORLD_ENDER_FALLING", "msg.world_ender.falling", 5, "Beware", "xkcdOrange")
     mod:OnWorldEnderTarget(worldEnder, self.L["unit.alpha"])
   end
+  mod:RemoveWormholePosition(id)
 end
 
 function mod:OnMidphaseStart()
@@ -597,7 +616,6 @@ mod:RegisterUnitEvents("unit.alpha",{
 )
 mod:RegisterUnitEvents("unit.asteroid",{
     [core.E.UNIT_CREATED] = mod.OnAsteroidCreated,
-    [core.E.UNIT_DESTROYED] = mod.OnAsteroidDestroyed,
   }
 )
 mod:RegisterUnitEvents("unit.world_ender",{
@@ -610,7 +628,6 @@ mod:RegisterUnitEvents("unit.world_ender",{
 )
 mod:RegisterUnitEvents("unit.debris",{
     [core.E.UNIT_CREATED] = mod.OnDebrisCreated,
-    [core.E.UNIT_DESTROYED] = mod.OnDebrisDestroyed,
   }
 )
 mod:RegisterUnitEvents(core.E.ALL_UNITS,{

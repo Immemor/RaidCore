@@ -7,6 +7,8 @@
 -- Description:
 -- TODO
 ----------------------------------------------------------------------------------------------------
+local Apollo = require "Apollo"
+
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local mod = core:NewEncounter("Dud'li", 104, 548, 555)
 if not mod then return end
@@ -132,10 +134,6 @@ function mod:OnBombCreated(id, unit, name)
   end
 end
 
-function mod:OnBombDestroyed(id, unit, name)
-  core:RemovePicture(id)
-end
-
 function mod:IsBombCloseToExplosion(id, percent)
   return not explosionMessagesSent[id] and percent <= 10
 end
@@ -161,7 +159,6 @@ end
 ----------------------------------------------------------------------------------------------------
 mod:RegisterUnitEvents({"unit.warhead.radioactive", "unit.warhead.flashbang"},{
     [core.E.UNIT_CREATED] = mod.OnBombCreated,
-    [core.E.UNIT_DESTROYED] = mod.OnBombDestroyed,
   }
 )
 mod:RegisterUnitEvents("unit.warhead.flashbang",{

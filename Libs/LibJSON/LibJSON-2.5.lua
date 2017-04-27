@@ -35,6 +35,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 --]==]
+local Apollo = require "Apollo"
+
 local MAJOR, MINOR = "Lib:dkJSON-2.5", 2
 -- Get a reference to the package information if any
 local APkg = Apollo.GetPackage(MAJOR)

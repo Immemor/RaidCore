@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Addon Author="RaidCore Team" APIVersion="14" Name="RaidCore" Description="Boss Encounters" Version="1.0">
+<Addon Author="RaidCore Team" APIVersion="15" Name="RaidCore" Description="Boss Encounters" Version="1.0">
     <!-- Libraries -->
     <Script Name="Libs/GeminiLocale/GeminiLocale.lua"/>
     <Script Name="Libs/GeminiDB/GeminiDB-1.0.lua"/>

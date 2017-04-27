@@ -7,6 +7,9 @@
 -- Description:
 -- TODO
 ----------------------------------------------------------------------------------------------------
+local Apollo = require "Apollo"
+local GameLib = require "GameLib"
+
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local mod = core:NewEncounter("Maelstrom", 52, 98, 120)
 if not mod then return end
@@ -108,7 +111,6 @@ mod:RegisterDefaultTimerBarConfigs({
 ----------------------------------------------------------------------------------------------------
 local GetPlayerUnit = GameLib.GetPlayerUnit
 local GetUnitById = GameLib.GetUnitById
-local prev = 0
 local nStationCount = 0
 local bossPos
 
@@ -155,17 +157,6 @@ function mod:OnEnteredCombat(nId, tUnit, sName, bInCombat)
       local sSoundFile = mod:GetSetting("SoundWeatherStationSwitch") and "Info"
       mod:AddMsg(sKey, sMessage, 5, sSoundFile, "Blue")
     end
-  end
-end
-
-function mod:OnUnitDestroyed(nId, tUnit, sName)
-  if sName == self.L["Maelstrom Authority"] then
-    core:RemoveSimpleLine(nId)
-  elseif sName == self.L["Wind Wall"] then
-    core:RemoveSimpleLine(nId .. "_1")
-    core:RemoveSimpleLine(nId .. "_2")
-  elseif sName == self.L["Weather Station"] then
-    core:RemoveLineBetweenUnits(nId)
   end
 end
 

@@ -7,6 +7,9 @@
 -- Description:
 -- TODO
 ----------------------------------------------------------------------------------------------------
+local Apollo = require "Apollo"
+local GameLib = require "GameLib"
+
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local mod = core:NewEncounter("Mordechai", 104, 0, 548)
 if not mod then return end
@@ -368,7 +371,6 @@ end
 ----------------------------------------------------------------------------------------------------
 mod:RegisterUnitEvents("unit.mordechai",{
     [core.E.UNIT_CREATED] = mod.OnMordechaiCreated,
-    [core.E.UNIT_DESTROYED] = mod.RemoveCleaveLines,
     [core.E.HEALTH_CHANGED] = mod.OnMordechaiHealthChanged,
     ["cast.mordechai.shatter"] = {
       [core.E.CAST_START] = mod.OnMordechaiShatterStart,
@@ -383,7 +385,7 @@ mod:RegisterUnitEvents("unit.mordechai",{
 mod:RegisterUnitEvents("unit.turret",{
     [core.E.UNIT_CREATED] = mod.OnTurretCreated,
     ["cast.turret.discharge"] = {
-      [core.E.CAST_START] = mod.OnTurretCastOrb,
+      [core.E.CAST_START] = mod.OnTurretCastOrbStart,
     }
   }
 )

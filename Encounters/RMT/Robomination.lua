@@ -7,6 +7,9 @@
 -- Description:
 -- TODO
 ----------------------------------------------------------------------------------------------------
+local Apollo = require "Apollo"
+local GameLib = require "GameLib"
+
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local mod = core:NewEncounter("Robomination", 104, {548, 0}, {551, 548})
 if not mod then return end
@@ -377,7 +380,6 @@ end
 
 function mod:OnCannonArmDestroyed(id, unit, name)
   cannonArms[id] = nil
-  core:RemoveLineBetweenUnits("CANNON_ARM_LINE_"..id)
 end
 
 function mod:OnCannonFireStart(id)

@@ -7,6 +7,10 @@
 -- Description:
 -- TODO
 ----------------------------------------------------------------------------------------------------
+local Apollo = require "Apollo"
+local ApolloTimer = require "ApolloTimer"
+local GameLib = require "GameLib"
+
 local core = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local mod = core:NewEncounter("Octog", 104, 0, 548)
 if not mod then return end
@@ -62,6 +66,17 @@ mod:RegisterFrenchLocale({
     -- Buffs.
     ["buff.orb.energies"] = "Énergies chaotiques",
     ["buff.octog.flamethrower"] = "Feu spatial",
+  }
+)
+mod:RegisterGermanLocale({
+    -- Unit names.
+    ["unit.octog"] = "Sternenschlinger der Gefräßige",
+    -- NPC says.
+    ["say.octog.orb"] = "Bleibt schön in der Nähe! Gleich gibt’s was zu futtern!",
+    ["say.octog.supernova"] = "Bald wirst du aufhören zu zappeln ... und mein Bauch aufhören zu grummeln!",
+    -- Buffs.
+    ["buff.orb.energies"] = "Chaotische Energien",
+    ["buff.octog.flamethrower"] = "Weltraumfeuer",
   }
 )
 ----------------------------------------------------------------------------------------------------
@@ -291,10 +306,6 @@ function mod:OnOrbCreated(id, unit)
   mod:MarkOrbWithNumber(unit)
 end
 
-function mod:OnOrbDestroyed(id, unit)
-  core:RemovePolygon(id)
-end
-
 function mod:OnChaosTetherAdd(id, spellId, stacks, timeRemaining, sName, unitCaster)
   if id == playerId and unitCaster and unitCaster:IsValid() then
     mod:DrawOrbCircle(unitCaster:GetId(), unitCaster, "xkcdRed")
@@ -352,7 +363,6 @@ function mod:OnPoolCreated(id, unit)
 end
 
 function mod:OnPoolDestroyed(id, unit)
-  mod:RemovePool(inkPools[id])
   inkPools[id] = nil
 end
 
@@ -389,7 +399,6 @@ mod:RegisterUnitEvents("unit.octog",{
 )
 mod:RegisterUnitEvents("unit.orb", {
     [core.E.UNIT_CREATED] = mod.OnOrbCreated,
-    [core.E.UNIT_DESTROYED] = mod.OnOrbDestroyed,
   }
 )
 mod:RegisterUnitSpellEvent(core.E.ALL_UNITS, core.E.DEBUFF_ADD, DEBUFFS.CHAOS_TETHER, mod.OnChaosTetherAdd)

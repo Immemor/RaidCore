@@ -8,6 +8,9 @@
 -- EncounterPrototype contains all services useable by encounters itself.
 --
 ------------------------------------------------------------------------------
+local Apollo = require "Apollo"
+local GroupLib = require "GroupLib"
+local Vector3 = require "Vector3"
 
 local RaidCore = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("RaidCore")
 local Assert = Apollo.GetPackage("RaidCore:Assert-1.0").tPackage
@@ -214,6 +217,7 @@ function EncounterPrototype:RegisterUnitEvents(tUnitNames, tEventsHandlers)
   tUnitNames = type(tUnitNames) == "string" and {tUnitNames} or tUnitNames
   Assert:Table(tUnitNames, "Unit names not a table: %s, %s", self.name, tostring(tUnitNames))
   Assert:Table(tEventsHandlers, "Event handlers not a table: %s, %s", self.name, tostring(tEventsHandlers))
+  Assert:EmptyTable(tEventsHandlers, "Event handlers table empty: %s, %s", self.name, tostring(tEventsHandlers))
 
   local nSize = #tUnitNames
   for i = 1, nSize do
@@ -249,6 +253,7 @@ function EncounterPrototype:RegisterUnitSpellEvents(tUnitNames, primaryKey, tEve
   tUnitNames = type(tUnitNames) == "string" and {tUnitNames} or tUnitNames
   Assert:Table(tUnitNames, "Unit names not a table: %s, %s", self.name, tostring(tUnitNames))
   Assert:Table(tEventHandlers, "Event handlers not a table: %s, %s", self.name, tostring(tEventHandlers))
+  Assert:EmptyTable(tEventHandlers, "Event handlers table empty: %s, %s", self.name, tostring(tEventHandlers))
   Assert:TypeOr(primaryKey, {Assert.TYPES.STRING, Assert.TYPES.NUMBER},
     "Invalid type for primary key: %s, %s", self.name, tostring(primaryKey)
   )
@@ -611,9 +616,8 @@ end
 -- @param tNames Names of units without break space.
 -- @return Any unit registered can start the encounter.
 function EncounterPrototype:OnTrig(tNames)
-  if not self:IsTestEncounterEnabled() and self:IsTestEncounter() then
-    return false
-  end
+  if not self:IsTestEncounterEnabled() and self:IsTestEncounter() then return false end
+  if not self:IsEncounterEnabled() then return false end
   return self:OnTrigCheck(tNames)
 end
 
@@ -623,6 +627,10 @@ end
 
 function EncounterPrototype:IsTestEncounterEnabled()
   return RaidCore.db.profile.bEnableTestEncounters
+end
+
+function EncounterPrototype:IsEncounterEnabled()
+  return RaidCore.db.profile.Encounters[self:GetName()].Enabled
 end
 
 -- Create a world marker.
@@ -685,7 +693,7 @@ function RaidCore:NewEncounter(name, continentId, parentMapId, mapId, isTestEnco
   local GeminiLocale = Apollo.GetPackage("Gemini:Locale-1.0").tPackage
   new.L = GeminiLocale:GetLocale("RaidCore_" .. name)
   -- Create a empty array for settings.
-  new.tDefaultSettings = {}
+  new.tDefaultSettings = {Enabled = true}
   new.tUnitEvents = {}
   new.tDatachronEvents = {}
   new.tDatachronEventsEqual = {}
